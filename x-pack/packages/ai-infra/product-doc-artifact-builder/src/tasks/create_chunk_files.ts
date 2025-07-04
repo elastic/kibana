@@ -10,7 +10,7 @@ import Fs from 'fs/promises';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-const fileSizeLimit = 250_000;
+const fileSizeLimit = 500_000;
 
 export const createChunkFiles = async ({
   index,
@@ -30,6 +30,8 @@ export const createChunkFiles = async ({
   const searchRes = await client.search({
     index,
     size: 10000,
+    // includes inference field meta info in source
+    fields: ['_inference_fields'],
     query: {
       bool: {
         must: [{ term: { product_name: productName } }],

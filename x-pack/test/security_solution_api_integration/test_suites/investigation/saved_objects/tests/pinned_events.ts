@@ -6,21 +6,21 @@
  */
 
 import expect from '@kbn/expect';
+import { PINNED_EVENT_URL } from '@kbn/security-solution-plugin/common/constants';
+import TestAgent from 'supertest/lib/agent';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 
-import { FtrProviderContext } from '../../../../../api_integration/ftr_provider_context';
-
-export default function ({ getService }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
-  const supertest = getService('supertest');
+export default function ({ getService }: FtrProviderContextWithSpaces) {
+  const utils = getService('securitySolutionUtils');
+  let supertest: TestAgent;
 
   describe('Pinned Events - Saved Objects', () => {
-    before(() => kibanaServer.savedObjects.cleanStandardList());
-    after(() => kibanaServer.savedObjects.cleanStandardList());
+    before(async () => (supertest = await utils.createSuperTest()));
 
-    describe('Pinned an event', () => {
+    describe('pin an event', () => {
       it('return a timelineId, pinnedEventId and version', async () => {
         const response = await supertest
-          .patch('/api/pinned_event')
+          .patch(PINNED_EVENT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -28,8 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
             timelineId: 'testId',
             eventId: 'bv4QSGsB9v5HJNSH-7fi',
           });
-        const { eventId, pinnedEventId, timelineId, version } =
-          response.body.data && response.body.data.persistPinnedEventOnTimeline;
+        const { eventId, pinnedEventId, timelineId, version } = response.body;
 
         expect(eventId).to.be('bv4QSGsB9v5HJNSH-7fi');
         expect(pinnedEventId).to.not.be.empty();
@@ -38,10 +37,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Unpinned an event', () => {
-      it('returns null', async () => {
+    describe('unpin an event', () => {
+      it('returns { unpinned: true }', async () => {
         const response = await supertest
-          .patch('/api/pinned_event')
+          .patch(PINNED_EVENT_URL)
           .set('elastic-api-version', '2023-10-31')
           .set('kbn-xsrf', 'true')
           .send({
@@ -49,11 +48,10 @@ export default function ({ getService }: FtrProviderContext) {
             eventId: 'bv4QSGsB9v5HJNSH-7fi',
             timelineId: 'testId',
           });
-        const { eventId, pinnedEventId, timelineId } =
-          response.body.data && response.body.data.persistPinnedEventOnTimeline;
+        const { eventId, pinnedEventId, timelineId } = response.body;
 
         const responseToTest = await supertest
-          .patch('/api/pinned_event')
+          .patch(PINNED_EVENT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -61,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
             eventId,
             timelineId,
           });
-        expect(responseToTest.body.data!.persistPinnedEventOnTimeline).to.be(null);
+        expect(responseToTest.body).to.eql({ unpinned: true });
       });
     });
   });

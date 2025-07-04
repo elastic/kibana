@@ -1,0 +1,53 @@
+{
+  "journeyName": "POST /internal/telemetry/clusters/_stats - no cache - 1600 dataviews",
+  "scalabilitySetup": {
+    "responseTimeThreshold": {
+      "threshold1": 1000,
+      "threshold2": 3000,
+      "threshold3": 5000
+    },
+    "warmup": [
+      {
+        "action": "constantUsersPerSec",
+        "userCount": 1,
+        "duration": "30s"
+      }
+    ],
+    "test": [
+      {
+        "action": "rampUsersPerSec",
+        "minUsersCount": 1,
+        "maxUsersCount": 10,
+        "duration": "120s"
+      }
+    ],
+    "maxDuration": "5m"
+  },
+  "testData": {
+    "esArchives": [],
+    "kbnArchives": ["x-pack/platform/test/scalability/fixtures/kbn_archiver/1600-dataviews.json"]
+  },
+  "streams": [
+    {
+      "requests": [
+        {
+          "http": {
+            "method": "POST",
+            "path": "/internal/telemetry/clusters/_stats",
+            "body": "{ \"refreshCache\": true }",
+            "headers": {
+              "Cookie": "",
+              "Kbn-Version": "",
+              "Accept-Encoding": "gzip, deflate, br",
+              "Content-Type": "application/json",
+              "elastic-api-version": "2",
+              "x-elastic-internal-origin": "kibana"
+            },
+            "timeout": 240000,
+            "statusCode": 200
+          }
+        }
+      ]
+    }
+  ]
+}

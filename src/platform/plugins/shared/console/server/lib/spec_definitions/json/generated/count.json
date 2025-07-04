@@ -1,0 +1,46 @@
+{
+  "count": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_indices": "__flag__",
+      "analyzer": "",
+      "analyze_wildcard": "__flag__",
+      "default_operator": [
+        "and",
+        "or"
+      ],
+      "df": "",
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "ignore_throttled": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "lenient": "__flag__",
+      "min_score": "",
+      "preference": "",
+      "routing": "",
+      "terminate_after": "",
+      "q": ""
+    },
+    "methods": [
+      "POST",
+      "GET"
+    ],
+    "patterns": [
+      "_count",
+      "{index}/_count"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-count",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

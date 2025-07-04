@@ -1,0 +1,355 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getAlertsHistogramLensAttributes should render with extra options - filters 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "adHocDataViews": Object {},
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "layer-id-generated-uuid": Object {
+            "columnOrder": Array [
+              "column-top-values-id-generated-uuid",
+              "column-timestamp-id-generated-uuid",
+              "column-count-of-records-id-generated-uuid",
+            ],
+            "columns": Object {
+              "column-count-of-records-id-generated-uuid": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "column-timestamp-id-generated-uuid": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "includeEmptyRows": true,
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+              "column-top-values-id-generated-uuid": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of event.category",
+                "operationType": "terms",
+                "params": Object {
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "column-count-of-records-id-generated-uuid",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "secondaryFields": Array [],
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.category",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            ".alerts-security.alerts-default",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": ".alerts-security.alerts-default",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "signal-index",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "signal-index",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "column-count-of-records-id-generated-uuid",
+          ],
+          "layerId": "layer-id-generated-uuid",
+          "layerType": "data",
+          "position": "top",
+          "seriesType": "bar_stacked",
+          "showGridlines": false,
+          "splitAccessor": "column-top-values-id-generated-uuid",
+          "xAccessor": "column-timestamp-id-generated-uuid",
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "legendSize": "xlarge",
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
+        "position": "right",
+      },
+      "preferredSeriesType": "bar_stacked",
+      "title": "Empty XY chart",
+      "valueLabels": "hide",
+      "yLeftExtent": Object {
+        "mode": "full",
+      },
+      "yRightExtent": Object {
+        "mode": "full",
+      },
+    },
+  },
+  "title": "Alerts",
+  "visualizationType": "lnsXY",
+}
+`;
+
+exports[`getAlertsHistogramLensAttributes should render without extra options 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "adHocDataViews": Object {},
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "layer-id-generated-uuid": Object {
+            "columnOrder": Array [
+              "column-top-values-id-generated-uuid",
+              "column-timestamp-id-generated-uuid",
+              "column-count-of-records-id-generated-uuid",
+            ],
+            "columns": Object {
+              "column-count-of-records-id-generated-uuid": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "column-timestamp-id-generated-uuid": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "includeEmptyRows": true,
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+              "column-top-values-id-generated-uuid": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of event.category",
+                "operationType": "terms",
+                "params": Object {
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "column-count-of-records-id-generated-uuid",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "secondaryFields": Array [],
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.category",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "signal-index",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "signal-index",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "column-count-of-records-id-generated-uuid",
+          ],
+          "layerId": "layer-id-generated-uuid",
+          "layerType": "data",
+          "position": "top",
+          "seriesType": "bar_stacked",
+          "showGridlines": false,
+          "splitAccessor": "column-top-values-id-generated-uuid",
+          "xAccessor": "column-timestamp-id-generated-uuid",
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "legendSize": "xlarge",
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
+        "position": "right",
+      },
+      "preferredSeriesType": "bar_stacked",
+      "title": "Empty XY chart",
+      "valueLabels": "hide",
+      "yLeftExtent": Object {
+        "mode": "full",
+      },
+      "yRightExtent": Object {
+        "mode": "full",
+      },
+    },
+  },
+  "title": "Alerts",
+  "visualizationType": "lnsXY",
+}
+`;

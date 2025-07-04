@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { ProductName } from '@kbn/product-doc-common';
+
 export interface TaskConfig {
-  productNames: string[];
+  productNames: ProductName[];
   stackVersion: string;
   buildFolder: string;
   targetFolder: string;
@@ -16,4 +18,5 @@ export interface TaskConfig {
   embeddingClusterUrl: string;
   embeddingClusterUsername: string;
   embeddingClusterPassword: string;
+  inferenceId?: string;
 }

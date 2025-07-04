@@ -1,0 +1,959 @@
+{
+  "type": "_doc",
+  "value": {
+    "id": "space:space_1",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the first test space",
+        "disabledFeatures": [],
+        "name": "Space 1"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0",
+      "managed": false,
+      "references": []
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space:space_2",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the second test space",
+        "disabledFeatures": [],
+        "name": "Space 2"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0",
+      "managed": false,
+      "references": []
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "space:space_3",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the third test space",
+        "solution": "es",
+        "disabledFeatures": [],
+        "name": "Space 3"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0",
+      "managed": false,
+      "references": []
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "url:my_isolated_object",
+    "index": ".kibana",
+    "source": {
+      "namespace": "space_2",
+      "type": "url",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "url:my_isolated_object",
+    "index": ".kibana",
+    "source": {
+      "namespace": "space_1",
+      "type": "url",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "url:my_isolated_object",
+    "index": ".kibana",
+    "source": {
+      "type": "url",
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "dashboard:cts_dashboard_default",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "cts_dashboard",
+      "dashboard": {
+        "description": "Copy to Space Dashboard from the default space",
+        "title": "This is the default test space CTS dashboard"
+      },
+      "references": [{
+        "type": "visualization",
+        "id": "cts_vis_1_default",
+        "name": "CTS Vis 1"
+      }, {
+        "type": "visualization",
+        "id": "cts_vis_2_default",
+        "name": "CTS Vis 2"
+      }, {
+        "type": "visualization",
+        "id": "cts_vis_3_default",
+        "name": "CTS Vis 3"
+      }],
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["default"],
+      "typeMigrationVersion": "8.7.0",
+      "coreMigrationVersion": "8.8.0"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "visualization:cts_vis_1_default",
+    "index": ".kibana_analytics",
+    "source": {
+      "visualization": {
+        "title": "CTS vis 1 from default space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1_default",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["default"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "visualization:cts_vis_2_default",
+    "index": ".kibana_analytics",
+    "source": {
+      "visualization": {
+        "title": "CTS vis 2 from default space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1_default",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["default"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "visualization:cts_vis_3_default",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "cts_vis_3",
+      "visualization": {
+        "title": "CTS vis 3 from default space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1_default",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["default"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "dashboard:cts_dashboard_space_1",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "cts_dashboard",
+      "dashboard": {
+        "description": "Copy to Space Dashboard from space_1 space",
+        "title": "This is the space_1 test space CTS dashboard"
+      },
+      "references": [
+        {
+          "type": "visualization",
+          "id": "cts_vis_1_space_1",
+          "name": "CTS Vis 1"
+        },
+        {
+          "type": "visualization",
+          "id": "cts_vis_2_space_1",
+          "name": "CTS Vis 2"
+        },
+        {
+          "type": "visualization",
+          "id": "cts_vis_3_space_1",
+          "name": "CTS Vis 3"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["space_1"],
+      "typeMigrationVersion": "8.7.0",
+      "coreMigrationVersion": "8.8.0"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "visualization:cts_vis_1_space_1",
+    "index": ".kibana_analytics",
+    "source": {
+      "visualization": {
+        "title": "CTS vis 1 from space_1 space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1_space_1",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["space_1"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "visualization:cts_vis_2_space_1",
+    "index": ".kibana_analytics",
+    "source": {
+      "visualization": {
+        "title": "CTS vis 2 from space_1 space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1_space_1",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["space_1"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "visualization:cts_vis_3_space_1",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "cts_vis_3",
+      "visualization": {
+        "title": "CTS vis 3 from space_1 space",
+        "description": "AreaChart",
+        "kibanaSavedObjectMeta": {"searchSourceJSON": "{}"},
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{}},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+      },
+      "references": [
+        {
+          "type": "index-pattern",
+          "id": "cts_ip_1_space_1",
+          "name": "CTS IP 1"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["space_1"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "index-pattern:cts_ip_1_default",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "cts_ip_1",
+      "index-pattern": {
+        "title": "Copy to Space index pattern 1 from default space"
+      },
+      "references": [],
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["default"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "id": "index-pattern:cts_ip_1_space_1",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "cts_ip_1",
+      "index-pattern": {
+        "title": "Copy to Space index pattern 1 from space_1 space"
+      },
+      "references": [],
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "namespaces": ["space_1"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:default_only",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "A shared saved-object in one space"
+      },
+      "type": "index-pattern",
+      "namespaces": ["default"],
+      "references": [
+        { "type": "index-pattern", "id": "each_space", "name": "refname" }
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:default:index-pattern:space_1_only",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "space_1_only",
+        "targetNamespace": "default",
+        "targetType": "index-pattern",
+        "targetId": "default_only"
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:space_1_only",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "A shared saved-object in one space"
+      },
+      "type": "index-pattern",
+      "namespaces": ["space_1"],
+      "references": [
+        { "type": "index-pattern", "id": "each_space", "name": "refname" }
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:space_1_only_matching_origin",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "space_1_only",
+      "index-pattern": {
+        "title": "This object only exists to test the second assertion for spacesWithMatchingOrigins in get_shareable_references"
+      },
+      "type": "index-pattern",
+      "namespaces": ["other_space"],
+      "references": [],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:space_2_only",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "A shared saved-object in one space"
+      },
+      "type": "index-pattern",
+      "namespaces": ["space_2"],
+      "references": [
+        { "type": "index-pattern", "id": "each_space", "name": "refname" }
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:space_2_only_matching_origin",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "space_2_only",
+      "index-pattern": {
+        "title": "This object only exists to test the third assertion for spacesWithMatchingOrigins in get_shareable_references"
+      },
+      "type": "index-pattern",
+      "namespaces": ["*"],
+      "references": [],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:space_2:index-pattern:space_1_only",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "space_1_only",
+        "targetNamespace": "space_2",
+        "targetType": "index-pattern",
+        "targetId": "space_2_only"
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:other_space:index-pattern:default_only",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "default_only",
+        "targetNamespace": "other_space",
+        "targetType": "index-pattern",
+        "targetId": "other_id",
+        "disabled": true
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:default_and_space_1",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "A shared saved-object in the default and space_1 spaces"
+      },
+      "type": "index-pattern",
+      "namespaces": ["default", "space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:default_and_space_2",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "A shared saved-object in the default and space_2 spaces"
+      },
+      "type": "index-pattern",
+      "namespaces": ["default", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:space_1_and_space_2",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "A shared saved-object in the space_1 and space_2 spaces"
+      },
+      "type": "index-pattern",
+      "namespaces": ["space_1", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:each_space",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "A shared saved-object in the default, space_1, and space_2 spaces"
+      },
+      "type": "index-pattern",
+      "namespaces": ["default", "space_1", "space_2"],
+      "references": [
+        { "type": "index-pattern", "id": "default_only", "name": "refname" },
+        { "type": "index-pattern", "id": "space_1_only", "name": "refname" },
+        { "type": "index-pattern", "id": "space_2_only", "name": "refname" },
+        { "type": "index-pattern", "id": "all_spaces", "name": "refname" }
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:all_spaces",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "index-pattern",
+      "namespaces": ["*"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:alias_delete_inclusive",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "This is used to test that when an object is unshared from a space, inbound aliases for just those spaces are removed"
+      },
+      "type": "index-pattern",
+      "namespaces": ["default", "space_1", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:default:index-pattern:doesnt-matter",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "doesnt-matter",
+        "targetNamespace": "default",
+        "targetType": "index-pattern",
+        "targetId": "alias_delete_inclusive"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:space_2:index-pattern:doesnt-matter",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "doesnt-matter",
+        "targetNamespace": "space_2",
+        "targetType": "index-pattern",
+        "targetId": "alias_delete_inclusive"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:alias_delete_exclusive",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "This is used to test that when an object is unshared from all space, inbound aliases for all spaces are removed"
+      },
+      "type": "index-pattern",
+      "namespaces": ["*"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:other_space:index-pattern:doesnt-matter",
+    "index": ".kibana",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "doesnt-matter",
+        "targetNamespace": "other_space",
+        "targetType": "index-pattern",
+        "targetId": "alias_delete_exclusive"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_1a_default",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "conflict_1a",
+      "index-pattern": {
+        "title": "This is used to test an inexact match conflict for an originId -> originId match"
+      },
+      "type": "index-pattern",
+      "namespaces": ["default"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_1a_space_1",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "conflict_1a",
+      "index-pattern": {
+        "title": "This is used to test an inexact match conflict for an originId -> originId match"
+      },
+      "type": "index-pattern",
+      "namespaces": ["space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_1a_space_2",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "conflict_1a",
+      "index-pattern": {
+        "title": "This is used to test an inexact match conflict for an originId -> originId match"
+      },
+      "type": "index-pattern",
+      "namespaces": ["space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_1b_default",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "conflict_1b_space_2",
+      "index-pattern": {
+        "title": "This is used to test an inexact match conflict for an originId -> id match"
+      },
+      "type": "index-pattern",
+      "namespaces": ["default"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_1b_space_1",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "conflict_1b_space_2",
+      "index-pattern": {
+        "title": "This is used to test an inexact match conflict for an originId -> id match"
+      },
+      "type": "index-pattern",
+      "namespaces": ["space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_1b_space_2",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "This is used to test an inexact match conflict for an originId -> id match"
+      },
+      "type": "index-pattern",
+      "namespaces": ["space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_1c_default_and_space_1",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "title": "This is used to test an inexact match conflict for an id -> originId match"
+      },
+      "type": "index-pattern",
+      "namespaces": ["default", "space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_1c_space_2",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "conflict_1c_default_and_space_1",
+      "index-pattern": {
+        "title": "This is used to test an inexact match conflict for an id -> originId match"
+      },
+      "type": "index-pattern",
+      "namespaces": ["space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_2_default",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "conflict_2",
+      "index-pattern": {
+        "title": "A shared saved-object in one space"
+      },
+      "type": "index-pattern",
+      "namespaces": ["default"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_2_space_1",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "conflict_2",
+      "index-pattern": {
+        "title": "A shared saved-object in one space"
+      },
+      "type": "index-pattern",
+      "namespaces": ["space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_2_space_2",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "conflict_2",
+      "index-pattern": {
+        "title": "A shared saved-object in one space"
+      },
+      "type": "index-pattern",
+      "namespaces": ["space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:conflict_2_all",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "conflict_2",
+      "index-pattern": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "index-pattern",
+      "namespaces": ["default", "space_1", "space_2"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}

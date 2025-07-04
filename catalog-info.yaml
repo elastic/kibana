@@ -11,6 +11,7 @@ metadata:
     github.com/team-slug: elastic/kibana-tech-leads
     buildkite.com/project-slug: elastic/kibana
     sonarqube.org/project-key: elastic_kibana_AYvOkAHeQZlFqhqWIr9
+    pagerduty.com/service-id: PC4TBJY
 
   tags:
     - typescript
@@ -50,6 +51,7 @@ metadata:
     github.com/project-slug: elastic/kibana
     github.com/team-slug: elastic/kibana-tech-leads
     buildkite.com/project-slug: elastic/kibana
+    pagerduty.com/service-id: PC4TBJY
   tags:
     - typescript
     - javascript
@@ -77,6 +79,7 @@ metadata:
     github.com/project-slug: elastic/kibana
     github.com/team-slug: elastic/kibana-tech-leads
     buildkite.com/project-slug: elastic/kibana
+    pagerduty.com/service-id: PC4TBJY
   tags:
     - typescript
     - javascript

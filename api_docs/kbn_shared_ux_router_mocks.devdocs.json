@@ -29,7 +29,7 @@
         "signature": [
           "() => string"
         ],
-        "path": "packages/shared-ux/router/mocks/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/router/mocks/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

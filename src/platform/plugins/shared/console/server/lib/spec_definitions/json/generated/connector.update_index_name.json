@@ -1,0 +1,21 @@
+{
+  "connector.update_index_name": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_connector/{connector_id}/_index_name"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-index-name",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

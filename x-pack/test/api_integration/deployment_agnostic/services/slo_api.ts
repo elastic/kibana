@@ -5,155 +5,168 @@
  * 2.0.
  */
 
-import {
-  fetchHistoricalSummaryParamsSchema,
-  FetchHistoricalSummaryResponse,
-} from '@kbn/slo-schema';
-import * as t from 'io-ts';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
+import {
+  BulkDeleteInput,
+  CreateSLOInput,
+  FindSLODefinitionsResponse,
+  UpdateSLOInput,
+} from '@kbn/slo-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
-interface SloParams {
-  id?: string;
-  name: string;
-  description: string;
-  indicator: {
-    type: 'sli.kql.custom';
-    params: {
-      index: string;
-      good: string;
-      total: string;
-      timestampField: string;
-    };
-  };
-  timeWindow: {
-    duration: string;
-    type: string;
-  };
-  budgetingMethod: string;
-  objective: {
-    target: number;
-  };
-  groupBy: string;
-}
-
-type FetchHistoricalSummaryParams = t.OutputOf<
-  typeof fetchHistoricalSummaryParamsSchema.props.body
->;
-
-interface SloRequestParams {
+interface SavedObject<Attributes extends Record<string, any>> {
+  attributes: Attributes;
   id: string;
-  roleAuthc: RoleCredentials;
+  type: string;
+  updated_at?: string;
+  version?: string;
+}
+interface SavedObjectResponse {
+  page: number;
+  per_page: number;
+  total: number;
+  saved_objects: Array<SavedObject<StoredSLODefinition>>;
 }
 
 export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
-  const retry = getService('retry');
-  const config = getService('config');
-  const retryTimeout = config.get('timeouts.try');
-  const requestTimeout = 30 * 1000;
 
   return {
-    async create(slo: SloParams, roleAuthc: RoleCredentials) {
+    async create(slo: CreateSLOInput, roleAuthc: RoleCredentials) {
       const { body } = await supertestWithoutAuth
         .post(`/api/observability/slos`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(slo);
+        .send(slo)
+        .expect(200);
       return body;
     },
 
-    async delete({ id, roleAuthc }: SloRequestParams) {
-      const response = await supertestWithoutAuth
-        .delete(`/api/observability/slos/${id}`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader());
-      return response;
-    },
-
-    async fetchHistoricalSummary(
-      params: FetchHistoricalSummaryParams,
-      roleAuthc: RoleCredentials
-    ): Promise<FetchHistoricalSummaryResponse> {
+    async createWithSpace(
+      slo: CreateSLOInput & { id?: string },
+      spaceId: string,
+      roleAuthc: RoleCredentials,
+      expectedStatus: 200 | 409
+    ) {
       const { body } = await supertestWithoutAuth
-        .post(`/internal/observability/slos/_historical_summary`)
+        .post(`/s/${spaceId}/api/observability/slos`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(params);
+        .send(slo)
+        .expect(expectedStatus);
       return body;
     },
 
-    async waitForSloToBeDeleted({ id, roleAuthc }: SloRequestParams) {
-      return await retry.tryForTime(retryTimeout, async () => {
-        const response = await supertestWithoutAuth
-          .delete(`/api/observability/slos/${id}`)
-          .set(roleAuthc.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .timeout(requestTimeout);
-        if (!response.ok) {
-          throw new Error(`SLO with id '${id}' was not deleted`);
-        }
-        return response;
-      });
+    async reset(id: string, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/${id}/_reset`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
     },
 
-    async waitForSloCreated({ id, roleAuthc }: SloRequestParams) {
-      return await retry.tryForTime(retryTimeout, async () => {
-        const response = await supertestWithoutAuth
-          .get(`/api/observability/slos/${id}`)
-          .set(roleAuthc.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .timeout(requestTimeout);
-        if (response.body.id === undefined) {
-          throw new Error(`No SLO with id '${id}' found`);
-        }
-        return response.body;
-      });
+    async update(
+      { sloId, slo }: { sloId: string; slo: UpdateSLOInput },
+      roleAuthc: RoleCredentials
+    ) {
+      const { body } = await supertestWithoutAuth
+        .put(`/api/observability/slos/${sloId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(slo)
+        .expect(200);
+
+      return body;
     },
 
-    async waitForSloSummaryTempIndexToExist(index: string) {
-      return await retry.tryForTime(retryTimeout, async () => {
-        const indexExists = await es.indices.exists({ index, allow_no_indices: false });
-        if (!indexExists) {
-          throw new Error(`SLO summary index '${index}' should exist`);
-        }
-        return indexExists;
-      });
+    async delete(id: string, roleAuthc: RoleCredentials) {
+      return await supertestWithoutAuth
+        .delete(`/api/observability/slos/${id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(204);
     },
 
-    async getSloData({ sloId, indexName }: { sloId: string; indexName: string }) {
-      const response = await es.search({
-        index: indexName,
-        body: {
-          query: {
-            bool: {
-              filter: [{ term: { 'slo.id': sloId } }],
-            },
-          },
-        },
-      });
+    async bulkDelete(params: BulkDeleteInput, roleAuthc: RoleCredentials) {
+      const { body: response } = await supertestWithoutAuth
+        .post(`/api/observability/slos/_bulk_delete`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(params)
+        .expect(200);
+
       return response;
     },
-    async waitForSloData({ id, indexName }: { id: string; indexName: string }) {
-      return await retry.tryForTime(retryTimeout, async () => {
-        const response = await es.search({
-          index: indexName,
-          body: {
-            query: {
-              bool: {
-                filter: [{ term: { 'slo.id': id } }],
-              },
-            },
-          },
-        });
-        if (response.hits.hits.length === 0) {
-          throw new Error(`No hits found at index '${indexName}' for slo id='${id}'`);
-        }
-        return response;
-      });
+
+    async bulkDeleteStatus(taskId: string, roleAuthc: RoleCredentials) {
+      const { body: response } = await supertestWithoutAuth
+        .get(`/api/observability/slos/_bulk_delete/${taskId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return response;
     },
+
+    async get(id: string, roleAuthc: RoleCredentials) {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slos/${id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
+    },
+
+    async findDefinitions(
+      roleAuthc: RoleCredentials,
+      params?: Record<string, string>
+    ): Promise<FindSLODefinitionsResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/observability/slos/_definitions`)
+        .query(params || {})
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send();
+
+      return body;
+    },
+
+    async getSavedObject(roleAuthc: RoleCredentials, sloId: string): Promise<SavedObjectResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/saved_objects/_find?type=slo&filter=slo.attributes.id:(${sloId})`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return body;
+    },
+
+    async updateSavedObject(
+      roleAuthc: RoleCredentials,
+      slo: StoredSLODefinition,
+      id: string
+    ): Promise<SavedObjectResponse> {
+      const { body } = await supertestWithoutAuth
+        .put(`/api/saved_objects/slo/${id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          attributes: slo,
+        })
+        .expect(200);
+      return body;
+    },
+
     async deleteAllSLOs(roleAuthc: RoleCredentials) {
       const response = await supertestWithoutAuth
         .get(`/api/observability/slos/_definitions`)
@@ -171,6 +184,26 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
             .expect(204);
         })
       );
+    },
+
+    async purgeRollupData(
+      ids: string[],
+      purgePolicy: { purgeType: 'fixed_age' | 'fixed_time'; age?: string; timestamp?: Date },
+      roleAuthc: RoleCredentials,
+      expectedStatus: number,
+      force: boolean = false
+    ) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/_bulk_purge_rollup${force ? '?force=true' : ''}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          ids,
+          purgePolicy,
+        })
+        .expect(expectedStatus);
+
+      return body;
     },
   };
 }

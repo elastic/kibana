@@ -83,6 +83,11 @@ if is_pr; then
     export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=true
   fi
 
+  # value for security genai prompts evals
+  if is_pr_with_label "ci:security-genai-run-evals-local-prompts"; then
+    export IS_SECURITY_AI_PROMPT_TEST=true
+  fi
+
   # These can be removed once we're not supporting Jenkins and Buildkite at the same time
   # These are primarily used by github checks reporter and can be configured via /github_checks_api.json
   export ghprbGhRepository="elastic/kibana"
@@ -146,7 +151,7 @@ if [[ "${KBN_ENABLE_FIPS:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-ag
   fi
 
   if [[ -f "$KIBANA_DIR/config/kibana.yml" ]]; then
-    echo -e '\nxpack.security.experimental.fipsMode.enabled: true' >>"$KIBANA_DIR/config/kibana.yml"
+    echo -e '\nxpack.security.fipsMode.enabled: true' >>"$KIBANA_DIR/config/kibana.yml"
   fi
 fi
 

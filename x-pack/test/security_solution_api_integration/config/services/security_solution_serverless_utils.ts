@@ -10,9 +10,10 @@ import { format as formatUrl } from 'url';
 import { IEsSearchResponse } from '@kbn/search-types';
 import { RoleCredentials } from '@kbn/test-suites-serverless/shared/services';
 import type { SendOptions } from '@kbn/ftr-common-functional-services';
-import type { SendOptions as SecureBsearchSendOptions } from '@kbn/test-suites-serverless/shared/services/bsearch_secure';
+import type { SendOptions as SecureSearchSendOptions } from '@kbn/test-suites-serverless/shared/services/search_secure';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { SecuritySolutionUtilsInterface } from './types';
+import type { SecuritySolutionUtilsInterface, User } from './types';
+import { roles } from '../privileges/roles';
 
 export function SecuritySolutionServerlessUtils({
   getService,
@@ -22,7 +23,7 @@ export function SecuritySolutionServerlessUtils({
   const svlCommonApi = getService('svlCommonApi');
   const config = getService('config');
   const log = getService('log');
-  const SecureBsearch = getService('secureBsearch');
+  const SecureSearch = getService('secureSearch');
 
   const rolesCredentials = new Map<string, RoleCredentials>();
   const commonRequestHeader = svlCommonApi.getCommonRequestHeader();
@@ -71,16 +72,42 @@ export function SecuritySolutionServerlessUtils({
      */
     createSuperTest,
 
-    createBsearch: async (role = 'admin') => {
+    createSuperTestWithUser: async (user: User) => {
+      if (user.roles.length > 1) {
+        throw new Error(
+          `This test service only supports authentication for users with a single role. Error for ${
+            user.username
+          } with roles ${user.roles.join(',')}.`
+        );
+      }
+      const userRoleName = user.roles[0];
+      const roleDefinition = roles.find((role) => role.name === userRoleName);
+      if (!roleDefinition) {
+        throw new Error(`Could not find a role definition for ${userRoleName}`);
+      }
+      await svlUserManager.setCustomRole(roleDefinition.privileges);
+      const roleAuthc = await svlUserManager.createM2mApiKeyWithCustomRoleScope();
+      const superTest = supertest
+        .agent(kbnUrl)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader);
+      return superTest;
+    },
+
+    cleanUpCustomRole: async () => {
+      await svlUserManager.deleteCustomRole();
+    },
+
+    createSearch: async (role = 'admin') => {
       const apiKeyHeader = rolesCredentials.get(role)?.apiKeyHeader;
 
       if (!apiKeyHeader) {
-        log.error(`API key for role [${role}] is not available, SecureBsearch cannot be created`);
+        log.error(`API key for role [${role}] is not available, SecureSearch cannot be created`);
       }
 
       const send = <T extends IEsSearchResponse>(sendOptions: SendOptions): Promise<T> => {
         const { supertest: _, ...rest } = sendOptions;
-        const serverlessSendOptions: SecureBsearchSendOptions = {
+        const serverlessSendOptions: SecureSearchSendOptions = {
           ...rest,
           // We need super test WITHOUT auth to make the request here, as we are setting the auth header in bsearch `apiKeyHeader`
           supertestWithoutAuth: supertest.agent(kbnUrl),
@@ -89,12 +116,12 @@ export function SecuritySolutionServerlessUtils({
         };
 
         log.debug(
-          `Sending request to SecureBsearch with options: ${JSON.stringify(serverlessSendOptions)}`
+          `Sending request to SecureSearch with options: ${JSON.stringify(serverlessSendOptions)}`
         );
-        return SecureBsearch.send(serverlessSendOptions);
+        return SecureSearch.send(serverlessSendOptions);
       };
 
-      return { ...SecureBsearch, send };
+      return { ...SecureSearch, send };
     },
   };
 }

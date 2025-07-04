@@ -23,7 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--env.name=development',
         `--plugin-path=${path.resolve(
           KIBANA_ROOT,
-          'test/plugin_functional/plugins/core_provider_plugin'
+          'src/platform/test/plugin_functional/plugins/core_provider_plugin'
         )}`,
         `--plugin-path=${path.resolve(__dirname, 'plugins/test_feature_usage')}`,
       ],

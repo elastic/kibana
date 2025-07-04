@@ -7,8 +7,13 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 3
     retry:
       automatic:
         - exit_status: '-1'
@@ -22,6 +27,11 @@ steps:
     depends_on:
       - build
       - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 2
     retry:

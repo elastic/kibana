@@ -1,0 +1,38 @@
+{
+  "type": "plugin",
+  "id": "@kbn/alerting-plugin",
+  "owner": ["@elastic/response-ops"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "alerting",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "alerting"],
+    "requiredPlugins": [
+      "actions",
+      "data",
+      "dataViews",
+      "share",
+      "encryptedSavedObjects",
+      "eventLog",
+      "features",
+      "kibanaUtils",
+      "licensing",
+      "taskManager",
+      "kibanaReact",
+      "management",
+      "esUiShared",
+      "unifiedSearch",
+      "embeddable"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "security",
+      "monitoringCollection",
+      "spaces",
+      "serverless"
+    ],
+    "extraPublicDirs": ["common", "common/parse_duration"]
+  }
+}

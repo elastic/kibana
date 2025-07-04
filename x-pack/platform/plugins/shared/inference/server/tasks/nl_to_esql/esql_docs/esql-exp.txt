@@ -1,0 +1,22 @@
+# EXP
+
+Returns the value of e raised to the power of the given number.
+
+## Syntax
+
+`EXP(number)`
+
+### Parameters
+
+#### `number`
+
+Numeric expression. If `null`, the function returns `null`.
+
+## Examples
+
+```esql
+ROW d = 5.0
+| EVAL s = EXP(d)
+```
+
+Calculate e raised to the power of 5.0.

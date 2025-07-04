@@ -17,7 +17,388 @@
     "objects": []
   },
   "common": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/observability-synthetics-test-data",
+        "id": "def-common.SyntheticsRunner",
+        "type": "Class",
+        "tags": [],
+        "label": "SyntheticsRunner",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.getService",
+            "type": "Any",
+            "tags": [],
+            "label": "getService",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.kibanaUrl",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaUrl",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.testFilesLoaded",
+            "type": "boolean",
+            "tags": [],
+            "label": "testFilesLoaded",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "ArgParams"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-synthetics-test-data",
+                "id": "def-common.SyntheticsRunner.Unnamed.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "getService",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/observability-synthetics-test-data",
+                "id": "def-common.SyntheticsRunner.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "ArgParams"
+                ],
+                "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.createTestUsers",
+            "type": "Function",
+            "tags": [],
+            "label": "createTestUsers",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.loadTestFiles",
+            "type": "Function",
+            "tags": [],
+            "label": "loadTestFiles",
+            "description": [],
+            "signature": [
+              "(callback: (reload?: boolean | undefined) => Promise<void>, reload?: boolean) => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-synthetics-test-data",
+                "id": "def-common.SyntheticsRunner.loadTestFiles.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "(reload?: boolean | undefined) => Promise<void>"
+                ],
+                "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/observability-synthetics-test-data",
+                "id": "def-common.SyntheticsRunner.loadTestFiles.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "reload",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.reloadTestFiles",
+            "type": "Function",
+            "tags": [],
+            "label": "reloadTestFiles",
+            "description": [],
+            "signature": [
+              "(results: JourneyResults, onlyOnFailure?: boolean) => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-synthetics-test-data",
+                "id": "def-common.SyntheticsRunner.reloadTestFiles.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "results",
+                "description": [],
+                "signature": [
+                  "JourneyResults"
+                ],
+                "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/observability-synthetics-test-data",
+                "id": "def-common.SyntheticsRunner.reloadTestFiles.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "onlyOnFailure",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.loadTestData",
+            "type": "Function",
+            "tags": [],
+            "label": "loadTestData",
+            "description": [],
+            "signature": [
+              "(e2eDir: string, dataArchives: string[]) => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-synthetics-test-data",
+                "id": "def-common.SyntheticsRunner.loadTestData.$1",
+                "type": "string",
+                "tags": [],
+                "label": "e2eDir",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/observability-synthetics-test-data",
+                "id": "def-common.SyntheticsRunner.loadTestData.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "dataArchives",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.getKibanaUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaUrl",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.getElasticsearchUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getElasticsearchUrl",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.run",
+            "type": "Function",
+            "tags": [],
+            "label": "run",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.assertResults",
+            "type": "Function",
+            "tags": [],
+            "label": "assertResults",
+            "description": [],
+            "signature": [
+              "(results: JourneyResults) => void"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-synthetics-test-data",
+                "id": "def-common.SyntheticsRunner.assertResults.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "results",
+                "description": [],
+                "signature": [
+                  "JourneyResults"
+                ],
+                "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.cleanUp",
+            "type": "Function",
+            "tags": [],
+            "label": "cleanUp",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "@kbn/observability-synthetics-test-data",
@@ -29,9 +410,9 @@
         "signature": [
           "({ name, timestamp, monitorId, location, configId, }?: ",
           "DocOverrides",
-          ") => { summary: { up: number; down: number; final_attempt: boolean; }; monitor: { duration: { us: number; }; origin: string; ip: string; name: string; fleet_managed: boolean; check_group: string; timespan: { lt: string; gte: string | moment.Moment; }; id: string; type: string; status: \"up\" | \"down\"; }; error: { message: string; type: string; }; '@timestamp': string; config_id: string; state: { duration_ms: number; checks: number; ends: null; started_at: string; id: string; up: number; down: number; flap_history: never[]; status: string; }; url: { scheme: string; port: number; domain: string; full: string; }; ecs: { version: string; }; tcp: { rtt: { connect: { us: number; }; }; }; event: { agent_id_status: string; ingested: string; dataset: string; }; agent: { name: string; id: string; type: string; ephemeral_id: string; version: string; }; elastic_agent: { id: string; version: string; snapshot: boolean; }; data_stream: { namespace: string; type: string; dataset: string; }; resolve: { rtt: { us: number; }; ip: string; }; tls: { established: boolean; cipher: string; certificate_not_valid_before: string; server: { x509: { not_after: string; subject: { distinguished_name: string; common_name: string; }; not_before: string; public_key_algorithm: string; public_key_curve: string; signature_algorithm: string; serial_number: string; issuer: { distinguished_name: string; common_name: string; }; }; hash: { sha1: string; sha256: string; }; }; rtt: { handshake: { us: number; }; }; version: string; certificate_not_valid_after: string; version_protocol: string; }; http: { rtt: { response_header: { us: number; }; total: { us: number; }; write_request: { us: number; }; content: { us: number; }; validate: { us: number; }; }; response: { headers: { Server: string; P3p: string; Date: string; 'X-Frame-Options': string; 'Accept-Ranges': string; 'Cache-Control': string; 'X-Xss-Protection': string; 'Cross-Origin-Opener-Policy-Report-Only': string; Vary: string; Expires: string; 'Content-Type': string; }; status_code: number; mime_type: string; body: { bytes: number; hash: string; }; }; }; observer: { geo: { name: string; location: string; }; name: string; }; }"
+          ") => { summary: { up: number; down: number; final_attempt: boolean; }; monitor: { duration: { us: number; }; origin: string; ip: string; name: string; fleet_managed: boolean; check_group: string; timespan: { lt: string; gte: string | moment.Moment; }; id: string; type: string; status: \"up\" | \"down\"; }; error: { message: string; type: string; }; '@timestamp': string; config_id: string; state: { duration_ms: number; checks: number; ends: null; started_at: string; id: string; up: number; down: number; flap_history: never[]; status: string; }; url: { scheme: string; port: number; domain: string; full: string; }; ecs: { version: string; }; tcp: { rtt: { connect: { us: number; }; }; }; event: { agent_id_status: string; ingested: string; dataset: string; }; agent: { name: string; id: string; type: string; ephemeral_id: string; version: string; }; elastic_agent: { id: string; version: string; snapshot: boolean; }; data_stream: { namespace: string; type: string; dataset: string; }; resolve: { rtt: { us: number; }; ip: string; }; tls: { established: boolean; cipher: string; server: { x509: { not_after: string; subject: { distinguished_name: string; common_name: string; }; not_before: string; public_key_algorithm: string; public_key_curve: string; signature_algorithm: string; serial_number: string; issuer: { distinguished_name: string; common_name: string; }; }; hash: { sha1: string; sha256: string; }; }; rtt: { handshake: { us: number; }; }; version: string; version_protocol: string; }; http: { rtt: { response_header: { us: number; }; total: { us: number; }; write_request: { us: number; }; content: { us: number; }; validate: { us: number; }; }; response: { headers: { Server: string; P3p: string; Date: string; 'X-Frame-Options': string; 'Accept-Ranges': string; 'Cache-Control': string; 'X-Xss-Protection': string; 'Cross-Origin-Opener-Policy-Report-Only': string; Vary: string; Expires: string; 'Content-Type': string; }; status_code: number; mime_type: string; body: { bytes: number; hash: string; }; }; }; meta: { space_id: string; }; observer: { geo: { name: string; location: string; }; name: string; }; }"
         ],
-        "path": "x-pack/packages/observability/synthetics_test_data/src/make_summaries.ts",
+        "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/make_summaries.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +426,7 @@
             "signature": [
               "DocOverrides"
             ],
-            "path": "x-pack/packages/observability/synthetics_test_data/src/make_summaries.ts",
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/make_summaries.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,11 +443,11 @@
         "label": "makeUpSummary",
         "description": [],
         "signature": [
-          "({ name, timestamp, monitorId, configId, testRunId, location, }?: ",
+          "({ name, timestamp, monitorId, configId, testRunId, location, tlsNotBefore, tlsNotAfter, }?: ",
           "DocOverrides",
-          ") => { test_run_id?: string | undefined; summary: { up: number; down: number; final_attempt: boolean; }; monitor: { duration: { us: number; }; origin: string; ip: string; name: string; fleet_managed: boolean; check_group: string; timespan: { lt: string; gte: string | moment.Moment; }; id: string; type: string; status: \"up\" | \"down\"; }; '@timestamp': string; config_id: string; state: { duration_ms: number; checks: number; ends: null; started_at: string; up: number; id: string; down: number; flap_history: never[]; status: string; }; url: { scheme: string; port: number; domain: string; full: string; }; ecs: { version: string; }; tcp: { rtt: { connect: { us: number; }; }; }; event: { agent_id_status: string; ingested: string; dataset: string; }; agent: { name: string; id: string; type: string; ephemeral_id: string; version: string; }; elastic_agent: { id: string; version: string; snapshot: boolean; }; data_stream: { namespace: string; type: string; dataset: string; }; resolve: { rtt: { us: number; }; ip: string; }; tls: { established: boolean; cipher: string; certificate_not_valid_before: string; server: { x509: { not_after: string; subject: { distinguished_name: string; common_name: string; }; not_before: string; public_key_algorithm: string; public_key_curve: string; signature_algorithm: string; serial_number: string; issuer: { distinguished_name: string; common_name: string; }; }; hash: { sha1: string; sha256: string; }; }; rtt: { handshake: { us: number; }; }; version: string; certificate_not_valid_after: string; version_protocol: string; }; http: { rtt: { response_header: { us: number; }; total: { us: number; }; write_request: { us: number; }; content: { us: number; }; validate: { us: number; }; }; response: { headers: { Server: string; P3p: string; Date: string; 'X-Frame-Options': string; 'Accept-Ranges': string; 'Cache-Control': string; 'X-Xss-Protection': string; 'Cross-Origin-Opener-Policy-Report-Only': string; Vary: string; Expires: string; 'Content-Type': string; }; status_code: number; mime_type: string; body: { bytes: number; hash: string; }; }; }; observer: { geo: { name: string; location: string; }; name: string; }; }"
+          ") => { test_run_id?: string | undefined; summary: { up: number; down: number; final_attempt: boolean; }; monitor: { duration: { us: number; }; origin: string; ip: string; name: string; fleet_managed: boolean; check_group: string; timespan: { lt: string; gte: string | moment.Moment; }; id: string; type: string; status: \"up\" | \"down\"; }; '@timestamp': string; config_id: string; state: { duration_ms: number; checks: number; ends: null; started_at: string; up: number; id: string; down: number; flap_history: never[]; status: string; }; url: { scheme: string; port: number; domain: string; full: string; }; ecs: { version: string; }; tcp: { rtt: { connect: { us: number; }; }; }; event: { agent_id_status: string; ingested: string; dataset: string; }; agent: { name: string; id: string; type: string; ephemeral_id: string; version: string; }; elastic_agent: { id: string; version: string; snapshot: boolean; }; data_stream: { namespace: string; type: string; dataset: string; }; resolve: { rtt: { us: number; }; ip: string; }; tls: { established: boolean; cipher: string; server: { x509: { not_after: string; subject: { distinguished_name: string; common_name: string; }; not_before: string; public_key_algorithm: string; public_key_curve: string; signature_algorithm: string; serial_number: string; issuer: { distinguished_name: string; common_name: string; }; }; hash: { sha1: string; sha256: string; }; }; rtt: { handshake: { us: number; }; }; version: string; version_protocol: string; }; http: { rtt: { response_header: { us: number; }; total: { us: number; }; write_request: { us: number; }; content: { us: number; }; validate: { us: number; }; }; response: { headers: { Server: string; P3p: string; Date: string; 'X-Frame-Options': string; 'Accept-Ranges': string; 'Cache-Control': string; 'X-Xss-Protection': string; 'Cross-Origin-Opener-Policy-Report-Only': string; Vary: string; Expires: string; 'Content-Type': string; }; status_code: number; mime_type: string; body: { bytes: number; hash: string; }; }; }; meta: { space_id: string; }; observer: { geo: { name: string; location: string; }; name: string; }; }"
         ],
-        "path": "x-pack/packages/observability/synthetics_test_data/src/make_summaries.ts",
+        "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/make_summaries.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -75,12 +456,79 @@
             "id": "def-common.makeUpSummary.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  name,\n  timestamp,\n  monitorId,\n  configId,\n  testRunId,\n  location,\n}",
+            "label": "{\n  name,\n  timestamp,\n  monitorId,\n  configId,\n  testRunId,\n  location,\n  tlsNotBefore,\n  tlsNotAfter,\n}",
             "description": [],
             "signature": [
               "DocOverrides"
             ],
-            "path": "x-pack/packages/observability/synthetics_test_data/src/make_summaries.ts",
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/make_summaries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-synthetics-test-data",
+        "id": "def-common.readKibanaConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "readKibanaConfig",
+        "description": [],
+        "signature": [
+          "() => Record<string, string>"
+        ],
+        "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/tasks/read_kibana_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-synthetics-test-data",
+        "id": "def-common.recordVideo",
+        "type": "Function",
+        "tags": [],
+        "label": "recordVideo",
+        "description": [],
+        "signature": [
+          "(page: ",
+          "Page",
+          ", postfix?: string) => void"
+        ],
+        "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/record_video.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.recordVideo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "Page"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/record_video.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.recordVideo.$2",
+            "type": "string",
+            "tags": [],
+            "label": "postfix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/record_video.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,6 +541,22 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/observability-synthetics-test-data",
+        "id": "def-common.argv",
+        "type": "Object",
+        "tags": [],
+        "label": "argv",
+        "description": [],
+        "signature": [
+          "{ [x: string]: unknown; headless: boolean; bail: boolean; grep: undefined; _: string[]; $0: string; }"
+        ],
+        "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/parse_args_params.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

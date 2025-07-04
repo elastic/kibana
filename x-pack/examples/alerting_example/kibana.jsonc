@@ -14,10 +14,11 @@
       "actions",
       "kibanaReact",
       "features",
-      "developerExamples"
+      "developerExamples",
+      "unifiedSearch",
+      "dataViews",
+      "fieldsMetadata"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": ["kibanaReact"]
   }
 }

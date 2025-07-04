@@ -37,7 +37,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+        "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +57,7 @@
                 "text": "FieldButtonProps"
               }
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -86,7 +86,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+        "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -106,7 +106,54 @@
                 "text": "FieldIconProps"
               }
             ],
-            "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-field",
+        "id": "def-common.FieldNameWithIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldNameWithIcon",
+        "description": [],
+        "signature": [
+          "({ name, type }: ",
+          {
+            "pluginId": "@kbn/react-field",
+            "scope": "common",
+            "docId": "kibKbnReactFieldPluginApi",
+            "section": "def-common.FieldNameWithIconProps",
+            "text": "FieldNameWithIconProps"
+          },
+          ") => string | React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-field/src/field_name_with_icon/field_name_with_icon.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldNameWithIcon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ name, type }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/react-field",
+                "scope": "common",
+                "docId": "kibKbnReactFieldPluginApi",
+                "section": "def-common.FieldNameWithIconProps",
+                "text": "FieldNameWithIconProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_name_with_icon/field_name_with_icon.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -134,7 +181,7 @@
           },
           " extends React.HTMLAttributes<HTMLDivElement>"
         ],
-        "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+        "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,7 +197,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -166,7 +213,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -182,7 +229,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -198,7 +245,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -214,7 +261,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -230,7 +277,7 @@
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -246,7 +293,7 @@
             "signature": [
               "\"s\" | \"xs\""
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -262,7 +309,7 @@
             "signature": [
               "\"both\" | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -278,7 +325,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -294,7 +341,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -312,7 +359,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -330,7 +377,7 @@
               "CommonProps",
               ") | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -356,18 +403,21 @@
           "EuiTokenProps",
           ", \"iconType\">"
         ],
-        "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+        "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/react-field",
             "id": "def-common.FieldIconProps.type",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+            "signature": [
+              "\"string\" | \"number\" | \"boolean\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"version\" | \"murmur3\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"date_range\" | \"ip_range\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"conflict\" | \"point\" | \"unsigned_long\" | \"_source\" | (string & {}) | \"gauge\" | \"counter\" | \"number_range\""
+            ],
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -381,7 +431,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -395,7 +445,46 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-field",
+        "id": "def-common.FieldNameWithIconProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldNameWithIconProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-react-field/src/field_name_with_icon/field_name_with_icon.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldNameWithIconProps.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_name_with_icon/field_name_with_icon.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldNameWithIconProps.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"string\" | \"number\" | \"boolean\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"version\" | \"murmur3\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"date_range\" | \"ip_range\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"conflict\" | \"point\" | \"unsigned_long\" | \"_source\" | (string & {}) | \"gauge\" | \"counter\" | \"number_range\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-field/src/field_name_with_icon/field_name_with_icon.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -415,7 +504,7 @@
         "signature": [
           "\"s\" | \"xs\""
         ],
-        "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+        "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

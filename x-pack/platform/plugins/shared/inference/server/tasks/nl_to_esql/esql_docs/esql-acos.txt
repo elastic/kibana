@@ -1,0 +1,23 @@
+# ACOS
+
+Returns the arccosine of a number as an angle, expressed in radians.
+
+## Syntax
+
+`ACOS(number)`
+
+### Parameters
+
+#### `number`
+
+- A number between -1 and 1.  
+- If `null`, the function returns `null`.
+
+## Examples
+
+```esql
+ROW a = .9
+| EVAL acos = ACOS(a)
+```
+
+Calculate the arccosine of the value `0.9` and store the result in a new column named `acos`.

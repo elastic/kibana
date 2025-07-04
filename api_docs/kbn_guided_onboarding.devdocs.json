@@ -27,7 +27,7 @@
         "tags": [],
         "label": "GuideConfig",
         "description": [],
-        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -49,7 +49,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,7 +60,7 @@
             "tags": [],
             "label": "guideName",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -71,7 +71,7 @@
             "tags": [],
             "label": "telemetryId",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -85,7 +85,7 @@
             "signature": [
               "{ text: string; url: string; } | undefined"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -99,7 +99,7 @@
             "signature": [
               "{ appID: string; path: string; } | undefined"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -120,7 +120,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -134,7 +134,7 @@
         "tags": [],
         "label": "GuideState",
         "description": [],
-        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,9 +146,9 @@
             "label": "guideId",
             "description": [],
             "signature": [
-              "\"siem\" | \"kubernetes\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
+              "\"siem\" | \"kubernetes\" | \"databaseSearch\" | \"testGuide\""
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -162,7 +162,7 @@
             "signature": [
               "\"complete\" | \"not_started\" | \"in_progress\" | \"ready_to_complete\""
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -176,7 +176,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -197,7 +197,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -218,7 +218,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -232,7 +232,7 @@
         "tags": [],
         "label": "GuideStep",
         "description": [],
-        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -246,7 +246,7 @@
             "signature": [
               "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\" | \"step4\""
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -260,7 +260,7 @@
             "signature": [
               "\"complete\" | \"active\" | \"inactive\" | \"in_progress\" | \"ready_to_complete\""
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -274,7 +274,7 @@
         "tags": [],
         "label": "StepConfig",
         "description": [],
-        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -288,7 +288,7 @@
             "signature": [
               "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\" | \"step4\""
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -299,7 +299,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -321,7 +321,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -343,7 +343,7 @@
               },
               ")[] | undefined"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -357,7 +357,7 @@
             "signature": [
               "{ appID: string; path: string; } | undefined"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -378,7 +378,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -392,7 +392,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -406,7 +406,7 @@
             "signature": [
               "{ title: string; description: string; readyToCompleteOnNavigation?: boolean | undefined; } | undefined"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -420,7 +420,7 @@
         "tags": [],
         "label": "StepDescriptionWithLink",
         "description": [],
-        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -431,7 +431,7 @@
             "tags": [],
             "label": "descriptionText",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -442,7 +442,7 @@
             "tags": [],
             "label": "linkText",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -453,7 +453,7 @@
             "tags": [],
             "label": "linkUrl",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -467,7 +467,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-guided-onboarding/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -485,9 +485,9 @@
         "label": "GuideId",
         "description": [],
         "signature": [
-          "\"siem\" | \"kubernetes\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
+          "\"siem\" | \"kubernetes\" | \"databaseSearch\" | \"testGuide\""
         ],
-        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -502,7 +502,7 @@
         "signature": [
           "{ [x: string]: string; }"
         ],
-        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -519,7 +519,7 @@
         "signature": [
           "\"complete\" | \"not_started\" | \"in_progress\" | \"ready_to_complete\""
         ],
-        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -534,7 +534,7 @@
         "signature": [
           "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\" | \"step4\""
         ],
-        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -551,7 +551,7 @@
         "signature": [
           "\"complete\" | \"active\" | \"inactive\" | \"in_progress\" | \"ready_to_complete\""
         ],
-        "path": "packages/kbn-guided-onboarding/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -564,9 +564,9 @@
         "label": "testGuideId",
         "description": [],
         "signature": [
-          "\"siem\" | \"kubernetes\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
+          "\"siem\" | \"kubernetes\" | \"databaseSearch\" | \"testGuide\""
         ],
-        "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -580,7 +580,7 @@
         "tags": [],
         "label": "testGuideConfig",
         "description": [],
-        "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+        "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -591,7 +591,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -602,7 +602,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -613,7 +613,7 @@
             "tags": [],
             "label": "guideName",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -624,7 +624,7 @@
             "tags": [],
             "label": "telemetryId",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -635,7 +635,7 @@
             "tags": [],
             "label": "completedGuideRedirectLocation",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -646,7 +646,7 @@
                 "tags": [],
                 "label": "appID",
                 "description": [],
-                "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+                "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -657,7 +657,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+                "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -670,7 +670,7 @@
             "tags": [],
             "label": "docs",
             "description": [],
-            "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -681,7 +681,7 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+                "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -692,7 +692,7 @@
                 "tags": [],
                 "label": "url",
                 "description": [],
-                "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+                "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -708,7 +708,7 @@
             "signature": [
               "({ id: \"step1\"; title: string; descriptionList: string[]; location: { appID: string; path: string; }; integration: string; } | { id: \"step2\"; title: string; descriptionList: (string | { descriptionText: string; linkText: string; linkUrl: string; isLinkExternal: true; })[]; location: { appID: string; path: string; }; manualCompletion: { title: string; description: string; readyToCompleteOnNavigation: true; }; } | { id: \"step3\"; title: string; description: string; manualCompletion: { title: string; description: string; }; location: { appID: string; path: string; }; } | { id: \"step4\"; title: string; description: string; location: { appID: string; path: string; }; })[]"
             ],
-            "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
+            "path": "src/platform/packages/shared/kbn-guided-onboarding/src/common/test_guide_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }

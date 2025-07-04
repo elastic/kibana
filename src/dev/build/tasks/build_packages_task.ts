@@ -12,6 +12,7 @@ import * as Fsp from 'fs/promises';
 
 import { runBazel } from '@kbn/bazel-runner';
 import * as Peggy from '@kbn/peggy';
+import * as DotText from '@kbn/dot-text';
 import { asyncForEach } from '@kbn/std';
 import { withFastAsyncTransform, TransformConfig } from '@kbn/babel-transform';
 import { makeMatcher } from '@kbn/picomatcher';
@@ -109,9 +110,9 @@ export const BuildPackages: Task = {
     await runBazel(
       [
         'build',
-        '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
-        '//packages/kbn-ui-shared-deps-src:shared_built_assets',
-        '//packages/kbn-monaco:target_workers',
+        '//src/platform/packages/private/kbn-ui-shared-deps-npm:shared_built_assets',
+        '//src/platform/packages/private/kbn-ui-shared-deps-src:shared_built_assets',
+        '//src/platform/packages/shared/kbn-monaco:target_workers',
         '--show_result=1',
         '--define=dist=true',
       ],
@@ -196,6 +197,18 @@ export const BuildPackages: Task = {
                       Path.resolve(pkgDistPath, Path.relative(pkgSrcPath, result.config.path))
                     );
                   }
+
+                  return {
+                    ...rec,
+                    dest: rec.dest.withName(rec.dest.name + '.js'),
+                    content: result.source,
+                  };
+                }
+
+                case '.text': {
+                  const result = await DotText.getJsSource({
+                    path: rec.source.abs,
+                  });
 
                   return {
                     ...rec,

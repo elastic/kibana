@@ -20,9 +20,9 @@ import { indent } from './indent.mjs';
 const BAZEL_RUNNER_SRC = '../../../packages/kbn-bazel-runner/index.js';
 
 const BAZEL_TARGETS = [
-  '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
-  '//packages/kbn-ui-shared-deps-src:shared_built_assets',
-  '//packages/kbn-monaco:target_workers',
+  '//src/platform/packages/private/kbn-ui-shared-deps-npm:shared_built_assets',
+  '//src/platform/packages/private/kbn-ui-shared-deps-src:shared_built_assets',
+  '//src/platform/packages/shared/kbn-monaco:target_workers',
 ];
 
 async function getBazelRunner() {
@@ -58,15 +58,24 @@ function throwBazelError(log, name, code, output) {
 /**
  * @param {import('./log.mjs').Log} log
  * @param {string[]} inputArgs
- * @param {{ quiet?: boolean; offline?: boolean, env?: Record<string, string> } | undefined} opts
+ * @param {{ quiet?: boolean; offline?: boolean, reactVersion?: string, euiAmsterdam?: boolean, env?: Record<string, string> } | undefined} opts
  */
 async function runBazel(log, inputArgs, opts = undefined) {
   const bazel = (await getBazelRunner()).runBazel;
 
-  const args = [...inputArgs, ...(opts?.offline ? ['--config=offline'] : [])];
+  const args = [
+    ...inputArgs,
+    `--define=REACT_18=${opts?.reactVersion === '18' ? 'true' : 'false'}`,
+    `--define=EUI_AMSTERDAM=${opts?.euiAmsterdam ? 'true' : 'false'}`,
+    ...(opts?.offline ? ['--config=offline'] : []),
+  ];
   log.debug(`> bazel ${args.join(' ')}`);
   await bazel(args, {
-    env: opts?.env,
+    env: {
+      ...opts?.env,
+      REACT_18: opts?.reactVersion === '18' ? 'true' : 'false',
+      EUI_AMSTERDAM: opts?.euiAmsterdam ? 'true' : 'false',
+    },
     cwd: REPO_ROOT,
     quiet: opts?.quiet,
     logPrefix: Color.info('[bazel]'),
@@ -79,7 +88,7 @@ async function runBazel(log, inputArgs, opts = undefined) {
 /**
  *
  * @param {import('./log.mjs').Log} log
- * @param {{ offline: boolean } | undefined} opts
+ * @param {{ offline: boolean, reactVersion?: string, euiAmsterdam?: boolean } | undefined} opts
  */
 export async function watch(log, opts = undefined) {
   const ibazel = (await getBazelRunner()).runIBazel;
@@ -93,10 +102,17 @@ export async function watch(log, opts = undefined) {
     ...BAZEL_TARGETS,
     '--show_result=1',
     ...(opts?.offline ? ['--config=offline'] : []),
+    `--define=REACT_18=${opts?.reactVersion === '18' ? 'true' : 'false'}`,
+    `--define=EUI_AMSTERDAM=${opts?.euiAmsterdam ? 'true' : 'false'}`,
   ];
   log.debug(`> ibazel ${args.join(' ')}`);
   await ibazel(args, {
     cwd: REPO_ROOT,
+    env: {
+      ...process.env,
+      REACT_18: opts?.reactVersion === '18' ? 'true' : 'false',
+      EUI_AMSTERDAM: opts?.euiAmsterdam ? 'true' : 'false',
+    },
     logPrefix: Color.info('[ibazel]'),
     onErrorExit(code, output) {
       throwBazelError(log, 'ibazel', code, output);
@@ -161,12 +177,14 @@ export async function installYarnDeps(log, opts = undefined) {
 
 /**
  * @param {import('./log.mjs').Log} log
- * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
+ * @param {{ offline?: boolean, quiet?: boolean, reactVersion?: string, euiAmsterdam?: boolean } | undefined} opts
  */
 export async function buildWebpackBundles(log, opts = undefined) {
   await runBazel(log, ['build', ...BAZEL_TARGETS, '--show_result=1'], {
     offline: opts?.offline,
     quiet: opts?.quiet,
+    reactVersion: opts?.reactVersion,
+    euiAmsterdam: opts?.euiAmsterdam,
   });
 
   log.success('shared bundles built');

@@ -1,0 +1,42 @@
+{
+  "type": "plugin",
+  "id": "@kbn/aiops-plugin",
+  "owner": [
+    "@elastic/ml-ui"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "AIOps plugin maintained by ML team.",
+  "plugin": {
+    "id": "aiops",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "aiops"],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "lens",
+      "licensing",
+      "uiActions",
+      "embeddable",
+      "presentationUtil",
+      "dashboard",
+      "fieldFormats",
+      "unifiedSearch",
+      "share"
+    ],
+    "optionalPlugins": [
+      "cases",
+      "observabilityAIAssistant",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "dataViews",
+      "fieldFormats",
+      "kibanaReact",
+      "kibanaUtils",
+      "embeddable",
+      "cases"
+    ]
+  }
+}

@@ -23,10 +23,13 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
         expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/index_details');
       });
     },
+    async expectToBeOnDiscoverPage() {
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
+    },
     async expectToBeOnIndexListPage() {
       await retry.tryForTime(60 * 1000, async () => {
         expect(await browser.getCurrentUrl()).contain(
-          '/app/management/data/index_management/indices'
+          '/app/elasticsearch/index_management/indices'
         );
       });
     },
@@ -41,6 +44,21 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     async setIndexNameValue(value: string) {
       await testSubjects.existOrFail('indexNameField');
       await testSubjects.setValue('indexNameField', value);
+    },
+    async expectCloseCreateIndexButtonExists() {
+      await testSubjects.existOrFail('closeCreateIndex');
+    },
+    async clickCloseCreateIndexButton() {
+      await testSubjects.existOrFail('closeCreateIndex');
+      await testSubjects.click('closeCreateIndex');
+    },
+    async expectSkipButtonExists() {
+      await testSubjects.existOrFail('createIndexSkipBtn');
+    },
+    async clickSkipButton() {
+      await testSubjects.existOrFail('createIndexSkipBtn');
+      await testSubjects.scrollIntoView('createIndexSkipBtn');
+      await testSubjects.click('createIndexSkipBtn');
     },
     async expectCreateIndexButtonToExist() {
       await testSubjects.existOrFail('createIndexBtn');
@@ -79,14 +97,14 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     async expectAnalyzeLogsLink() {
       await testSubjects.existOrFail('analyzeLogsBtn');
       expect(await testSubjects.getAttribute('analyzeLogsBtn', 'href')).equal(
-        'https://docs.elastic.co/serverless/elasticsearch/ingest-your-data'
+        'https://www.elastic.co/docs/manage-data/ingest'
       );
       expect(await testSubjects.getAttribute('analyzeLogsBtn', 'target')).equal('_blank');
     },
     async expectO11yTrialLink() {
       await testSubjects.existOrFail('startO11yTrialBtn');
-      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'href')).equal(
-        'https://fake-cloud.elastic.co/projects/create/observability/start'
+      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'href')).match(
+        /^https?\:\/\/.*\/projects\/create\/observability\/start/
       );
       expect(await testSubjects.getAttribute('startO11yTrialBtn', 'target')).equal('_blank');
     },

@@ -42,7 +42,7 @@ export function App() {
   }, [expressions]);
 
   return (
-    <EuiProvider>
+    <EuiProvider highContrastMode={false}>
       <EuiPageTemplate offset={0}>
         <EuiPageTemplate.Header pageTitle="Partial Results Demo" />
         <EuiPageTemplate.Section>

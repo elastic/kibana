@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/screenshotting-server",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

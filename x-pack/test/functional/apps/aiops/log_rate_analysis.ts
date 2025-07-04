@@ -167,6 +167,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         testData.dataGenerator
       );
 
+      if (testData.editedQuery && testData.query) {
+        await aiops.logRateAnalysisPage.setQueryInput(testData.editedQuery);
+        await aiops.logRateAnalysisPage.assertRerunAnalysisButtonExists(true);
+        await aiops.logRateAnalysisPage.setQueryInput(testData.query);
+      }
+
       // At this stage the baseline and deviation brush position should be stored in
       // the url state and a full browser refresh should restore the analysis.
       await browser.refresh();
@@ -315,8 +321,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/176387
-  describe.skip('log rate analysis', function () {
+  describe('log rate analysis', function () {
     for (const testData of logRateAnalysisTestData) {
       describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {
@@ -341,6 +346,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // Start navigation from the base of the ML app.
           await ml.navigation.navigateToMl();
           await elasticChart.setNewChartUiDebugFlag(true);
+        });
+
+        it(`${testData.suiteTitle} attaches log rate analysis to a dashboard`, async () => {
+          await aiops.logRateAnalysisPage.navigateToDataViewSelection();
+
+          await ml.testExecution.logTestStep(
+            `${testData.suiteTitle} loads the log rate analysis page with selected data source`
+          );
+          await ml.jobSourceSelection.selectSourceForLogRateAnalysis(
+            testData.sourceIndexOrSavedSearch
+          );
+
+          await ml.testExecution.logTestStep(
+            `${testData.suiteTitle} starting dashboard attachment process`
+          );
+          await aiops.logRateAnalysisPage.attachToDashboard();
+
+          await ml.navigation.navigateToMl();
         });
 
         runTests(testData);

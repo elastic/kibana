@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'svlCommonPage',
     'common',
@@ -29,26 +30,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
     'timePicker',
     'unifiedFieldList',
+    'unifiedSearch',
   ]);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/194305
-  describe.skip('discover esql view', function () {
-    // see details: https://github.com/elastic/kibana/issues/188816
-    this.tags(['failsOnMKI']);
-
+  describe('discover esql view', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       log.debug('load kibana index with default index pattern');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      // and load a set of makelogs data
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
@@ -89,8 +93,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.missingOrFail('showQueryBarMenu');
         await testSubjects.missingOrFail('addFilter');
-        await testSubjects.existOrFail('dscViewModeToggle');
-        await testSubjects.existOrFail('dscViewModeDocumentButton');
+        await testSubjects.missingOrFail('dscViewModeToggle');
+        await testSubjects.missingOrFail('dscViewModeDocumentButton');
         // when Lens suggests a table, we render an ESQL based histogram
         await testSubjects.existOrFail('unifiedHistogramChart');
         await testSubjects.existOrFail('discoverQueryHits');
@@ -140,8 +144,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should perform test query correctly', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.selectTextBaseLang();
-        const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        const testQuery = `from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -156,7 +164,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render when switching to a time range with no data, then back to a time range with data', async () => {
         await PageObjects.discover.selectTextBaseLang();
-        const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        const testQuery = `from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -182,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        const testQuery = `from logstash* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
+        const testQuery = `from logstash* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -194,6 +205,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render correctly if there are empty fields', async function () {
         await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const testQuery = `from logstash-* | limit 10 | keep machine.ram_range, bytes`;
 
         await monacoEditor.setCodeEditorValue(testQuery);
@@ -202,11 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await cell.getVisibleText()).to.be(' - ');
-        expect(await dataGrid.getHeaders()).to.eql([
-          'Select column',
-          'Control column',
-          'Access to degraded docs',
-          'Access to available stacktraces',
+        expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',
         ]);
@@ -275,6 +284,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should not show switch modal when switching to a data view while a saved search is open', async () => {
         await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -300,6 +311,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.saveSearch('esql_test2');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const testQuery = 'from logstash-* | limit 100 | drop @timestamp';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -309,6 +322,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
+      });
+
+      it('should show available data views and search results after switching to classic mode', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedSearch.switchToDataViewMode();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.assertHitCount('14,004');
+        const availableDataViews = await PageObjects.unifiedSearch.getDataViewList(
+          'discover-dataView-switch-link'
+        );
+        if (await testSubjects.exists('~nav-item-observability_project_nav')) {
+          expect(availableDataViews).to.eql([
+            'All logs',
+            'kibana_sample_data_flights',
+            'logstash-*',
+          ]);
+        } else {
+          expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        }
+        await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
 
@@ -337,6 +377,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const requestNames = await inspector.getRequestNames();
           expect(requestNames).to.contain('Table');
           expect(requestNames).to.contain('Visualization');
+          const request = await inspector.getRequest(1);
+          expect(request.command).to.be('POST /_query/async?drop_null_columns');
         });
       });
     });
@@ -355,12 +397,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'FROM logstash-* | LIMIT 10';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable('FROM logstash-* | LIMIT 10', historyItems);
       });
 
       it('updating the query should add this to the history', async () => {
@@ -377,12 +414,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable(
+          'from logstash-* | limit 100 | drop @timestamp',
+          historyItems
+        );
       });
 
       it('should select a query from the history and submit it', async () => {
@@ -396,12 +431,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esql.clickHistoryItem(1);
 
         const historyItems = await esql.getHistoryItems();
-        log.debug(historyItems);
-        const queryAdded = historyItems.some((item) => {
-          return item[1] === 'from logstash-* | limit 100 | drop @timestamp';
-        });
-
-        expect(queryAdded).to.be(true);
+        await esql.isQueryPresentInTable(
+          'from logstash-* | limit 100 | drop @timestamp',
+          historyItems
+        );
       });
 
       it('should add a failed query to the history', async () => {
@@ -417,7 +450,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
-        await testSubjects.click('ESQLEditor-queryHistory-runQuery-button');
+        await testSubjects.click('ESQLEditor-history-starred-queries-run-button');
         const historyItem = await esql.getHistoryItem(0);
         await historyItem.findByTestSubject('ESQLEditor-queryHistory-error');
       });

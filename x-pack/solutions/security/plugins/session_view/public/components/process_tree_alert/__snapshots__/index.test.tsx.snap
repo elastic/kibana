@@ -1,0 +1,98 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProcessTreeAlerts component When ProcessTreeAlert is mounted should render alert row correctly 1`] = `
+<div>
+  <div
+    class="css-7urdeb-ProcessTreeAlert"
+    data-id="6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
+      data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <button
+          aria-label="expand"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+          data-test-subj="sessionView:sessionViewAlertDetailExpand-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="expand"
+          />
+        </button>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        >
+          <span
+            color="danger"
+            data-euiicon-type="gear"
+          />
+        </span>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <div
+          class="css-4xrfms-ProcessTreeAlert"
+        >
+          <div
+            class="euiText emotion-euiText-s-ProcessTreeAlert"
+            data-test-subj="sessionView:sessionViewAlertDetailRuleName-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38-text"
+          >
+            cmd test alert
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          class="euiBadge emotion-euiBadge-primary-ProcessTreeAlert"
+          title="open"
+        >
+          <span
+            class="euiBadge__content emotion-euiBadge__content"
+          >
+            <span
+              class="euiBadge__text emotion-euiBadge__text"
+            >
+              open
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <span
+          class="euiBadge emotion-euiBadge-default-ProcessTreeAlert"
+          title="exec"
+        >
+          <span
+            class="euiBadge__content emotion-euiBadge__content"
+          >
+            <span
+              class="euiBadge__text emotion-euiBadge__text"
+            >
+              exec
+            </span>
+          </span>
+        </span>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      />
+    </div>
+  </div>
+</div>
+`;

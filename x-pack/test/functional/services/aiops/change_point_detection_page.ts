@@ -8,11 +8,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlTableService } from '../ml/common_table_service';
+import { CreateCaseParams } from '../cases/create';
 
 export interface DashboardAttachmentOptions {
   applyTimeRange: boolean;
   maxSeries: number;
 }
+
+type AttachAs = 'charts' | 'table';
 
 export function ChangePointDetectionPageProvider(
   { getService, getPageObject }: FtrProviderContext,
@@ -24,6 +27,7 @@ export function ChangePointDetectionPageProvider(
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const dashboardPage = getPageObject('dashboard');
+  const cases = getService('cases');
 
   return {
     async navigateToDataViewSelection() {
@@ -131,6 +135,12 @@ export function ChangePointDetectionPageProvider(
     },
 
     async openPanelContextMenu(panelIndex: number) {
+      // Check if already open
+      const isOpen = await testSubjects.exists('aiopsChangePointDetectionAttachButton');
+      if (isOpen) {
+        return;
+      }
+
       await testSubjects.click(
         `aiopsChangePointPanel_${panelIndex} > aiopsChangePointDetectionContextMenuButton`
       );
@@ -152,6 +162,18 @@ export function ChangePointDetectionPageProvider(
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail(`aiopsChangePointDetectionDashboardAttachmentForm`);
       });
+    },
+
+    async clickAttachCasesButton(attachAs: AttachAs) {
+      await testSubjects.click('aiopsChangePointDetectionAttachToCaseButton');
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('aiopsChangePointDetectionCaseAttachmentForm');
+      });
+      await testSubjects.click(attachAs);
+    },
+
+    async clickSubmitCaseAttachButton() {
+      await testSubjects.click('aiopsChangePointDetectionSubmitCaseAttachButton');
     },
 
     async assertApplyTimeRangeControl(expectedValue: boolean) {
@@ -274,6 +296,40 @@ export function ChangePointDetectionPageProvider(
         '',
         `aiopsChangePointPanel_${index}`
       );
+    },
+
+    async attachChangePointToCases(
+      panelIndex: number,
+      attachAs: AttachAs,
+      params: CreateCaseParams
+    ) {
+      await this.assertPanelExist(panelIndex);
+      await this.openPanelContextMenu(panelIndex);
+      await this.clickAttachChartsButton();
+      await this.clickAttachCasesButton(attachAs);
+      await this.clickSubmitCaseAttachButton();
+
+      await cases.create.createCaseFromModal(params);
+    },
+
+    async assertNoDataFoundScreen() {
+      await testSubjects.existOrFail('aiopsNoDataFoundWarning');
+    },
+
+    async assertNoChangePointFoundCalloutWarning(expectedText?: string) {
+      // First check that the callout exists
+      await testSubjects.existOrFail('aiopsNoChangePointsWarningCallout');
+
+      // If expected text is provided, also check the text content
+      if (expectedText) {
+        const actualText = await testSubjects.getVisibleText(
+          'aiopsNoChangePointsWarningCalloutText'
+        );
+        expect(actualText).to.contain(
+          expectedText,
+          `Expected warning text to contain: "${expectedText}" but got: "${actualText}"`
+        );
+      }
     },
   };
 }

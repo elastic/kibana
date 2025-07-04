@@ -52,15 +52,16 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
     });
 
-    describe('should set status to partial failure when user has no access', () => {
+    context('when all indices exist but user cannot read host_alias', () => {
       const indexTestCases = [
         ['host_alias'],
         ['host_alias', 'auditbeat-8.0.0'],
         ['host_alias*'],
         ['host_alias*', 'auditbeat-*'],
       ];
+
       indexTestCases.forEach((index) => {
-        it(`for KQL rule with index param: ${index}`, async () => {
+        it(`sets rule status to partial failure for KQL rule with index param: ${index}`, async () => {
           const rule = {
             ...getRuleForAlertTesting(index),
             query: 'process.executable: "/usr/bin/sudo"',
@@ -84,19 +85,64 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.contain(
-            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
+            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/`
+          );
+          expect(body?.execution_summary?.last_execution.message).to.contain(
+            '/alerting-setup.html#alerting-authorization.'
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
         });
       });
+    });
 
+    context('when some specified indices do not exist, but user can read all others', () => {});
+
+    describe('when no specified indices exist', () => {
+      describe('for a query rule', () => {
+        it('sets rule status to partial failure and does not execute', async () => {
+          const rule = getRuleForAlertTesting(['non-existent-index']);
+          await createUserAndRole(getService, ROLES.detections_admin);
+          const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
+            user: ROLES.detections_admin,
+            pass: 'changeme',
+          });
+
+          await waitForRulePartialFailure({
+            supertest,
+            log,
+            id,
+          });
+          const { body } = await supertest
+            .get(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .query({ id })
+            .expect(200);
+
+          // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+          const lastExecution = body?.execution_summary?.last_execution;
+
+          expect(lastExecution.message).to.contain(
+            'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["non-existent-index"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
+          );
+
+          // no metrics == no work performed, presumably
+          expect(lastExecution.metrics).to.eql({});
+
+          await deleteUserAndRole(getService, ROLES.detections_admin);
+        });
+      });
+    });
+
+    context('for threshold rules', () => {
       const thresholdIndexTestCases = [
         ['host_alias', 'auditbeat-8.0.0'],
         ['host_alias*', 'auditbeat-*'],
       ];
+
       thresholdIndexTestCases.forEach((index) => {
-        it(`for threshold rule with index param: ${index}`, async () => {
+        it(`with index param: ${index}`, async () => {
           const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForAlertTesting(index),
             threshold: {
@@ -122,8 +168,11 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
-          expect(body?.execution_summary?.last_execution.message).to.eql(
-            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
+          expect(body?.execution_summary?.last_execution.message).to.contain(
+            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/`
+          );
+          expect(body?.execution_summary?.last_execution.message).to.contain(
+            '/alerting-setup.html#alerting-authorization.'
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);

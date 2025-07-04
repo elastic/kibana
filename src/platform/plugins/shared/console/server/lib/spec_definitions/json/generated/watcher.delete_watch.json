@@ -1,0 +1,21 @@
+{
+  "watcher.delete_watch": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_watcher/watch/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-delete-watch",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

@@ -21,6 +21,7 @@ export function initRoutes(router: IRouter) {
         ),
       },
       options: { authRequired: false },
+      security: { authz: { enabled: false, reason: '' } },
     },
     async (context, request, response) => {
       nonce = request.query.nonce;
@@ -36,6 +37,7 @@ export function initRoutes(router: IRouter) {
   router.get(
     {
       path: '/oidc_provider/endsession',
+      security: { authz: { enabled: false, reason: '' } },
       validate: {
         query: schema.object({ post_logout_redirect_uri: schema.string() }, { unknowns: 'ignore' }),
       },
@@ -51,6 +53,7 @@ export function initRoutes(router: IRouter) {
   router.post(
     {
       path: '/api/oidc_provider/setup',
+      security: { authz: { enabled: false, reason: '' } },
       validate: { body: (value) => ({ value }) },
       options: { authRequired: false },
     },
@@ -63,6 +66,7 @@ export function initRoutes(router: IRouter) {
   router.post(
     {
       path: '/api/oidc_provider/token_endpoint',
+      security: { authz: { enabled: false, reason: '' } },
       validate: { body: (value) => ({ value }) },
       // Token endpoint needs authentication (with the client credentials) but we don't attempt to
       // validate this OIDC behavior here
@@ -86,6 +90,7 @@ export function initRoutes(router: IRouter) {
   router.get(
     {
       path: '/api/oidc_provider/userinfo_endpoint',
+      security: { authz: { enabled: false, reason: '' } },
       validate: false,
       options: { authRequired: false },
     },

@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<CodeEditor /> hint element should be tabable 1`] = `
+<div
+  aria-label="Code Editor, activate edit mode"
+  class="css-139h7n7-keyboardHint-renderPrompt"
+  data-test-subj="codeEditorHint codeEditorHint--active"
+  id="1234"
+  role="button"
+  tabindex="0"
+/>
+`;

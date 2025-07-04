@@ -1,0 +1,23 @@
+# TRIM
+
+Removes leading and trailing whitespaces from a string.
+
+## Syntax
+
+`TRIM(string)`
+
+### Parameters
+
+#### `string`
+
+String expression. If `null`, the function returns `null`.
+
+## Examples
+
+```esql
+ROW message = "   some text  ", color = " red "
+| EVAL message = TRIM(message)
+| EVAL color = TRIM(color)
+```
+
+This example removes leading and trailing whitespaces from the `message` and `color` columns.

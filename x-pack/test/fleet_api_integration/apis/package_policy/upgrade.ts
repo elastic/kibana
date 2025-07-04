@@ -12,6 +12,7 @@ import {
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { getInstallationInfo } from './helper';
 
 const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
   expect(sortBy(arr1, 'id')).to.eql(sortBy(arr2, 'id'));
@@ -35,11 +36,6 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.delete(pkgRoute).set('kbn-xsrf', 'xxxx').send({ force: true }).expect(200);
     });
   }
-
-  const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
-    return res.body.item.savedObject.attributes;
-  };
 
   const getComponentTemplate = async (name: string) => {
     try {
@@ -161,7 +157,8 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      describe('upgrade', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/214862
+      describe.skip('upgrade', function () {
         withTestPackage('package_policy_upgrade', '0.2.0-add-non-required-test-var');
         it('should respond with an error', async function () {
           // upgrade policy to 0.2.0
@@ -1319,6 +1316,7 @@ export default function (providerContext: FtrProviderContext) {
         }
 
         expectedAssets.push({ id: 'logs@custom', type: 'component_template' });
+        expectedAssets.push({ id: 'integration_to_input@custom', type: 'component_template' });
       });
 
       afterEach(async function () {
@@ -1358,7 +1356,11 @@ export default function (providerContext: FtrProviderContext) {
             })
             .expect(200);
 
-          const installation = await getInstallationSavedObject('integration_to_input', '3.0.0');
+          const installation = await getInstallationInfo(
+            supertest,
+            'integration_to_input',
+            '3.0.0'
+          );
           expectIdArraysEqual(installation.installed_es, expectedAssets);
 
           const expectedComponentTemplates = expectedAssets.filter(

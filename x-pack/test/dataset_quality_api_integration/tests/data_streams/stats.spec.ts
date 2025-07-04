@@ -21,13 +21,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApiAs(
     user: DatasetQualityApiClientKey,
-    types: Array<'logs' | 'metrics' | 'traces' | 'synthetics'> = ['logs']
+    types: Array<'logs' | 'metrics' | 'traces' | 'synthetics'> = ['logs'],
+    includeCreationDate = false
   ) {
     return await datasetQualityApiClient[user]({
       endpoint: 'GET /internal/dataset_quality/data_streams/stats',
       params: {
         query: {
           types: rison.encodeArray(types),
+          includeCreationDate,
         },
       },
     });
@@ -58,7 +60,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Api Key privileges check', { config: 'basic' }, () => {
-    describe('index privileges', () => {
+    describe('index privileges', function () {
+      // This disables the forward-compatibility test for Kibana 8.19 with ES upgraded to 9.0.
+      // These versions are not expected to work together.
+      // The tests raise "unknown index privilege [read_failure_store]" error in ES 9.0.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it('returns user authorization as false for noAccessUser', async () => {
         const resp = await callApiAs('noAccessUser');
 
@@ -74,6 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.body.datasetUserPrivileges).to.eql({
           canRead: true,
           canMonitor: true,
+          canReadFailureStore: true,
           canViewIntegrations: true,
         });
       });
@@ -122,7 +130,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when required privileges are set', () => {
+    describe('when required privileges are set', function () {
+      // This disables the forward-compatibility test for Kibana 8.19 with ES upgraded to 9.0.
+      // These versions are not expected to work together.
+      // The tests raise "unknown index privilege [read_failure_store]" error in ES 9.0.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       describe('and categorized datastreams', () => {
         const integration = 'my-custom-integration';
 
@@ -150,6 +163,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
           expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
           expect(stats.body.dataStreamsStats[0].totalDocs).greaterThan(0);
+        });
+
+        it('does not return creation date by default', async () => {
+          const stats = await callApiAs('datasetQualityMonitorUser');
+          expect(stats.body.dataStreamsStats[0].size).not.empty();
+          expect(stats.body.dataStreamsStats[0].creationDate).to.be(undefined);
+        });
+
+        it('returns creation date when specified', async () => {
+          const stats = await callApiAs('datasetQualityMonitorUser', ['logs'], true);
+          expect(stats.body.dataStreamsStats[0].size).not.empty();
+          expect(stats.body.dataStreamsStats[0].creationDate).greaterThan(0);
         });
 
         after(async () => {

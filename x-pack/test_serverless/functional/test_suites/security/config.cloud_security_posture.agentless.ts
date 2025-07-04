@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from './constants';
 import { createTestConfig } from '../../config.base';
+import { kbnServerArgs as fleetKbnServerArgs } from '../../../api_integration/test_suites/common/fleet/default_setup';
 
 // TODO: Remove the agentless default config once Serverless API is merged  and default policy is deleted
 export default createTestConfig({
@@ -16,21 +17,21 @@ export default createTestConfig({
     reportName: 'Serverless Security Cloud Security Agentless Onboarding Functional Tests',
   },
   kbnServerArgs: [
+    ...fleetKbnServerArgs, // Needed for correct serverless default Fleet Server and ES output
+
     `--xpack.fleet.packages.0.name=cloud_security_posture`,
-    `--xpack.fleet.packages.0.version=${CLOUD_CREDENTIALS_PACKAGE_VERSION}`,
+    `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`,
     `--xpack.fleet.agentless.enabled=true`,
-    `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
     `--xpack.fleet.internal.fleetServerStandalone=true`,
 
     // Agentless Configuration based on Serverless Default policy`,
     `--xpack.fleet.agentPolicies.0.id=agentless`,
     `--xpack.fleet.agentPolicies.0.name=agentless`,
     `--xpack.fleet.agentPolicies.0.package_policies=[]`,
-    `--xpack.cloud.serverless.project_id=some_fake_project_id`,
     `--xpack.fleet.agentPolicies.0.is_default=true`,
     `--xpack.fleet.agentPolicies.0.is_default_fleet_server=true`,
 
-    // Serverless Agentless API
+    `--xpack.fleet.agentless.enabled=true`,
     `--xpack.fleet.agentless.api.url=http://localhost:8089`,
     `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,
     `--xpack.fleet.agentless.api.tls.key=${KBN_KEY_PATH}`,

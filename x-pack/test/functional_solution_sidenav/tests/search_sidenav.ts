@@ -42,37 +42,39 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // check side nav links
         await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'enterpriseSearch',
-        });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'enterpriseSearch',
+          deepLinkId: 'searchHomepage',
         });
 
-        // check the Content > Indices section
+        // check the Data > Indices section
         await solutionNavigation.sidenav.clickLink({
-          deepLinkId: 'enterpriseSearchContent:searchIndices',
+          deepLinkId: 'elasticsearchIndexManagement',
         });
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'enterpriseSearchContent:searchIndices',
+          deepLinkId: 'elasticsearchIndexManagement',
         });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Indices' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'enterpriseSearchContent:searchIndices',
+          text: 'Indices',
         });
 
         // navigate to a different section
-        await solutionNavigation.sidenav.openSection('project_settings_project_nav');
-        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-        await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'management' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
+        await solutionNavigation.sidenav.openSection(
+          'search_project_nav_footer.project_settings_project_nav'
+        );
+        await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
+        await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'enterpriseSearch',
+          deepLinkId: 'searchHomepage',
         });
+
+        // Redirected to Onboarding Page to Create Index
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'enterpriseSearch',
+          text: 'Create your first index',
         });
 
         await expectNoPageReload();

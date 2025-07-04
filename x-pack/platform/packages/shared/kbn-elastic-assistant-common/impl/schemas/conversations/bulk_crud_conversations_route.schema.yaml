@@ -1,0 +1,198 @@
+openapi: 3.0.0
+info:
+  title: Bulk Conversations Actions API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/current_user/conversations/_bulk_action:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: PerformBulkAction
+      summary: Applies a bulk action to multiple conversations
+      description: The bulk action is applied to all conversations that match the filter or to the list of conversations by their IDs.
+      tags:
+        - Bulk API
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delete:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/BulkActionBase'
+                  description: Details of the bulk delete action to apply.
+                create:
+                  type: array
+                  items:
+                    $ref: './common_attributes.schema.yaml#/components/schemas/ConversationCreateProps'
+                  description: List of conversations to create in bulk.
+                update:
+                  type: array
+                  items:
+                    $ref: './common_attributes.schema.yaml#/components/schemas/ConversationUpdateProps'
+                  description: List of conversations to update in bulk.
+              example:
+                delete:
+                  query: "status: 'inactive'"
+                create:
+                  - title: "New Security Issue"
+                    description: "A description of the new issue"
+                update:
+                  - id: "1234"
+                    title: "Updated Security Issue"
+                    description: "Updated description"
+      responses:
+        200:
+          description: Indicates a successful bulk action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationsBulkCrudActionResponse'
+        400:
+          description: Generic Error indicating a problem with the bulk action request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 400
+                  error:
+                    type: string
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    example: "Invalid query or missing conversation IDs."
+
+components:
+  schemas:
+    ConversationsBulkActionSkipReason:
+      type: string
+      enum:
+        - CONVERSATION_NOT_MODIFIED
+      description: Reason for skipping a conversation during bulk action.
+      example: "CONVERSATION_NOT_MODIFIED"
+
+    ConversationsBulkActionSkipResult:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the conversation that was skipped.
+          example: "abcd1234"
+        name:
+          type: string
+          description: The name of the conversation that was skipped.
+          example: "Security Issue"
+        skip_reason:
+          $ref: '#/components/schemas/ConversationsBulkActionSkipReason'
+          description: The reason the conversation was skipped.
+          example: "CONVERSATION_NOT_MODIFIED"
+      required:
+        - id
+        - skip_reason
+
+    ConversationDetailsInError:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The ID of the conversation that encountered an error.
+          example: "xyz9876"
+        name:
+          type: string
+          description: The name of the conversation in error.
+          example: "Database Issue"
+      required:
+        - id
+
+    NormalizedConversationError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message.
+          example: "Unable to update conversation due to missing fields."
+        status_code:
+          type: integer
+          description: HTTP status code for the error.
+          example: 400
+        err_code:
+          type: string
+          description: A specific error code identifying the error.
+          example: "BAD_REQUEST"
+        conversations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationDetailsInError'
+          description: A list of conversations that caused errors.
+      required:
+        - message
+        - status_code
+        - conversations
+
+    ConversationsBulkCrudActionResults:
+      type: object
+      properties:
+        updated:
+          type: array
+          items:
+            $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+          description: List of conversations that were successfully updated.
+        created:
+          type: array
+          items:
+            $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
+          description: List of conversations that were successfully created.
+        deleted:
+          type: array
+          items:
+            type: string
+          description: List of conversation IDs that were successfully deleted.
+        skipped:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationsBulkActionSkipResult'
+          description: List of conversations that were skipped during the bulk action.
+      required:
+        - updated
+        - created
+        - deleted
+        - skipped
+
+    ConversationsBulkCrudActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates whether the bulk action was successful.
+          example: true
+        status_code:
+          type: integer
+          description: The HTTP status code returned for the bulk action.
+          example: 200
+        message:
+          type: string
+          description: A message providing additional details about the bulk action result.
+          example: "Bulk action successfully completed."
+        conversations_count:
+          type: integer
+          description: The total number of conversations involved in the bulk action.
+          example: 12
+        attributes:
+          type: object
+          properties:
+            results:
+              $ref: '#/components/schemas/ConversationsBulkCrudActionResults'
+            summary:
+              $ref: '../common_attributes.schema.yaml#/components/schemas/BulkCrudActionSummary'
+            errors:
+              type: array
+              items:
+                $ref: '#/components/schemas/NormalizedConversationError'
+          required:
+            - results
+            - summary
+      required:
+        - attributes

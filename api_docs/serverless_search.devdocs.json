@@ -14,7 +14,7 @@
       "tags": [],
       "label": "ServerlessSearchPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless_search/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/serverless_search/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "ServerlessSearchPluginStart",
       "description": [],
-      "path": "x-pack/plugins/serverless_search/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/serverless_search/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -50,7 +50,7 @@
       "tags": [],
       "label": "ServerlessSearchPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless_search/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/serverless_search/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -64,7 +64,7 @@
       "tags": [],
       "label": "ServerlessSearchPluginStart",
       "description": [],
-      "path": "x-pack/plugins/serverless_search/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/serverless_search/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -88,7 +88,7 @@
         "signature": [
           "\"search-default-ingestion\""
         ],
-        "path": "x-pack/plugins/serverless_search/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/serverless_search/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,7 +103,7 @@
         "signature": [
           "\"serverlessSearch\""
         ],
-        "path": "x-pack/plugins/serverless_search/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/serverless_search/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -118,7 +118,7 @@
         "signature": [
           "\"serverlessSearch\""
         ],
-        "path": "x-pack/plugins/serverless_search/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/serverless_search/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,0 +1,200 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RiskScoreDataClient init success should initialize risk engine resources in the appropriate space 1`] = `
+Object {
+  "mappings": Object {
+    "dynamic": "strict",
+    "properties": Object {
+      "@timestamp": Object {
+        "ignore_malformed": false,
+        "type": "date",
+      },
+      "event": Object {
+        "properties": Object {
+          "ingested": Object {
+            "type": "date",
+          },
+        },
+      },
+      "host": Object {
+        "properties": Object {
+          "name": Object {
+            "type": "keyword",
+          },
+          "risk": Object {
+            "properties": Object {
+              "calculated_level": Object {
+                "type": "keyword",
+              },
+              "calculated_score": Object {
+                "type": "float",
+              },
+              "calculated_score_norm": Object {
+                "type": "float",
+              },
+              "category_1_count": Object {
+                "type": "long",
+              },
+              "category_1_score": Object {
+                "type": "float",
+              },
+              "id_field": Object {
+                "type": "keyword",
+              },
+              "id_value": Object {
+                "type": "keyword",
+              },
+              "inputs": Object {
+                "properties": Object {
+                  "category": Object {
+                    "type": "keyword",
+                  },
+                  "description": Object {
+                    "type": "keyword",
+                  },
+                  "id": Object {
+                    "type": "keyword",
+                  },
+                  "index": Object {
+                    "type": "keyword",
+                  },
+                  "risk_score": Object {
+                    "type": "float",
+                  },
+                  "timestamp": Object {
+                    "type": "date",
+                  },
+                },
+                "type": "object",
+              },
+              "notes": Object {
+                "type": "keyword",
+              },
+            },
+            "type": "object",
+          },
+        },
+      },
+      "service": Object {
+        "properties": Object {
+          "name": Object {
+            "type": "keyword",
+          },
+          "risk": Object {
+            "properties": Object {
+              "calculated_level": Object {
+                "type": "keyword",
+              },
+              "calculated_score": Object {
+                "type": "float",
+              },
+              "calculated_score_norm": Object {
+                "type": "float",
+              },
+              "category_1_count": Object {
+                "type": "long",
+              },
+              "category_1_score": Object {
+                "type": "float",
+              },
+              "id_field": Object {
+                "type": "keyword",
+              },
+              "id_value": Object {
+                "type": "keyword",
+              },
+              "inputs": Object {
+                "properties": Object {
+                  "category": Object {
+                    "type": "keyword",
+                  },
+                  "description": Object {
+                    "type": "keyword",
+                  },
+                  "id": Object {
+                    "type": "keyword",
+                  },
+                  "index": Object {
+                    "type": "keyword",
+                  },
+                  "risk_score": Object {
+                    "type": "float",
+                  },
+                  "timestamp": Object {
+                    "type": "date",
+                  },
+                },
+                "type": "object",
+              },
+              "notes": Object {
+                "type": "keyword",
+              },
+            },
+            "type": "object",
+          },
+        },
+      },
+      "user": Object {
+        "properties": Object {
+          "name": Object {
+            "type": "keyword",
+          },
+          "risk": Object {
+            "properties": Object {
+              "calculated_level": Object {
+                "type": "keyword",
+              },
+              "calculated_score": Object {
+                "type": "float",
+              },
+              "calculated_score_norm": Object {
+                "type": "float",
+              },
+              "category_1_count": Object {
+                "type": "long",
+              },
+              "category_1_score": Object {
+                "type": "float",
+              },
+              "id_field": Object {
+                "type": "keyword",
+              },
+              "id_value": Object {
+                "type": "keyword",
+              },
+              "inputs": Object {
+                "properties": Object {
+                  "category": Object {
+                    "type": "keyword",
+                  },
+                  "description": Object {
+                    "type": "keyword",
+                  },
+                  "id": Object {
+                    "type": "keyword",
+                  },
+                  "index": Object {
+                    "type": "keyword",
+                  },
+                  "risk_score": Object {
+                    "type": "float",
+                  },
+                  "timestamp": Object {
+                    "type": "date",
+                  },
+                },
+                "type": "object",
+              },
+              "notes": Object {
+                "type": "keyword",
+              },
+            },
+            "type": "object",
+          },
+        },
+      },
+    },
+  },
+  "settings": Object {},
+}
+`;

@@ -14,16 +14,19 @@ import { AppPluginStartDependencies } from './types';
 import { GuidedOnboardingExampleApp } from './components/app';
 
 export const renderApp = (
-  { notifications }: CoreStart,
+  coreStart: CoreStart,
   { guidedOnboarding }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {
+  const { notifications, rendering } = coreStart;
   ReactDOM.render(
-    <GuidedOnboardingExampleApp
-      notifications={notifications}
-      guidedOnboarding={guidedOnboarding}
-      history={history}
-    />,
+    rendering.addContext(
+      <GuidedOnboardingExampleApp
+        notifications={notifications}
+        guidedOnboarding={guidedOnboarding}
+        history={history}
+      />
+    ),
     element
   );
 

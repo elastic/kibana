@@ -30,7 +30,7 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
-    baseImage: 'none' | 'wolfi' | 'ubi' | 'ubuntu';
+    baseImage: 'none' | 'wolfi' | 'ubi';
     context: boolean;
     image: boolean;
     ironbank?: boolean;
@@ -41,25 +41,27 @@ export async function runDockerGenerator(
   }
 ) {
   let baseImageName = '';
-  if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
-  if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
+  if (flags.baseImage === 'ubi') baseImageName = 'redhat/ubi9-minimal:latest';
   /**
-   * Renovate config contains a regex manager to automatically updates this Chainguard reference
+   * Renovate config contains a regex manager to automatically update both Chainguard references
    *
    * If this logic moves to another file or under another name, then the Renovate regex manager
    * for automatic Chainguard updates will break.
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:90888b190da54062f67f3fef1372eb0ae7d81ea55f5a1f56d748b13e4853d984';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:a02075b9fd57b4c0ad04232054569eccbcab254159deba01cc4c9fcbeb800411';
 
   let imageFlavor = '';
-  if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
-  if (flags.fips) imageFlavor += '-fips';
+  if (flags.fips) {
+    imageFlavor += '-fips';
+    baseImageName =
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:7f2cebdfa7fd6dff440bfe56e9806bb75c474bf5b7de0906f1ccde4839fac1d3';
+  }
 
   // General docker var config
   const license = 'Elastic License';
@@ -72,13 +74,18 @@ export async function runDockerGenerator(
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
+  build.setBuildArch(artifactArchitecture);
   let artifactVariant = '';
   if (flags.serverless) artifactVariant = '-serverless';
   const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
-  const metricbeatTarball = `metricbeat-${version}-linux-${beatsArchitecture}.tar.gz`;
-  const filebeatTarball = `filebeat-${version}-linux-${beatsArchitecture}.tar.gz`;
+  const metricbeatTarball = `metricbeat${
+    flags.fips ? '-fips' : ''
+  }-${version}-linux-${beatsArchitecture}.tar.gz`;
+  const filebeatTarball = `filebeat${
+    flags.fips ? '-fips' : ''
+  }-${version}-linux-${beatsArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const beatsDir = config.resolveFromRepo('.beats');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
@@ -198,6 +205,7 @@ export async function runDockerGenerator(
     await exec(log, `./build_docker.sh`, [], {
       cwd: dockerBuildDir,
       level: 'info',
+      build,
     });
   }
 

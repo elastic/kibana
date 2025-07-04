@@ -45,7 +45,7 @@
           },
           "<T>[]"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -76,7 +76,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-utility-types/src/serializable/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -89,7 +89,7 @@
         "tags": [],
         "label": "JsonObject",
         "description": [],
-        "path": "packages/kbn-utility-types/src/serializable/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -110,7 +110,7 @@
                 "text": "JsonValue"
               }
             ],
-            "path": "packages/kbn-utility-types/src/serializable/index.ts",
+            "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -136,7 +136,7 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,7 +150,7 @@
             "signature": [
               "(observer: (value: T) => void) => void"
             ],
-            "path": "packages/kbn-utility-types/index.ts",
+            "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -164,7 +164,7 @@
                 "signature": [
                   "(value: T) => void"
                 ],
-                "path": "packages/kbn-utility-types/index.ts",
+                "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -200,7 +200,7 @@
           },
           "<T>[]"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -231,7 +231,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-utility-types/src/serializable/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -270,7 +270,7 @@
         "signature": [
           "A extends readonly (infer T)[] ? T : never"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -326,7 +326,7 @@
         "signature": [
           "{ [K in keyof T]: Awaited<T[K]>; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -361,15 +361,15 @@
         "signature": [
           "(Exclude<",
           "ValuesType",
-          "<{ [TKey in keyof TObject]: {} extends Pick<TObject, TKey> ? ",
+          "<{ [TKey in keyof TObject as string]: string extends TKey ? Record<TKey, TObject[TKey]> : {} extends Pick<TObject, TKey> ? ",
           "DeepPartial",
           "<DedotKey<TObject, TKey, Exclude<TObject[TKey], undefined>>> : DedotKey<TObject, TKey, TObject[TKey]>; }>, undefined> extends any ? (k: Exclude<",
           "ValuesType",
-          "<{ [TKey in keyof TObject]: {} extends Pick<TObject, TKey> ? ",
+          "<{ [TKey in keyof TObject as string]: string extends TKey ? Record<TKey, TObject[TKey]> : {} extends Pick<TObject, TKey> ? ",
           "DeepPartial",
           "<DedotKey<TObject, TKey, Exclude<TObject[TKey], undefined>>> : DedotKey<TObject, TKey, TObject[TKey]>; }>, undefined>) => void : never) extends (k: infer I) => void ? I : never"
         ],
-        "path": "packages/kbn-utility-types/src/dot.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/dot.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -402,7 +402,7 @@
           },
           "<T> : T"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -425,7 +425,7 @@
           },
           "<T[P]> | undefined; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -444,7 +444,7 @@
           "ValuesType",
           "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, TPrefix>> : DotKey<TObject, TKey, TPrefix>; }>) => void : never) extends (k: infer I) => void ? I : never"
         ],
-        "path": "packages/kbn-utility-types/src/dot.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/dot.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -461,7 +461,7 @@
         "signature": [
           "T extends X ? T : never"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -492,7 +492,7 @@
           },
           " | null"
         ],
-        "path": "packages/kbn-utility-types/src/serializable/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -509,7 +509,7 @@
         "signature": [
           "T | Promise<T>"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -526,7 +526,7 @@
         "signature": [
           "{ [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never; }[keyof T]"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -543,7 +543,7 @@
         "signature": [
           "Omit<T, K> & { [k in K]: Pick<Required<T>, k> & { [k1 in Exclude<K, k>]?: undefined; }; }[K]"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -580,7 +580,7 @@
         "signature": [
           "{ [P in keyof T]: T[P]; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -597,7 +597,7 @@
         "signature": [
           "keyof T"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -622,7 +622,7 @@
           },
           "<T>]: T[P]; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -677,7 +677,7 @@
           },
           "<T[P]>) | undefined; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -708,7 +708,7 @@
           },
           "<T[K]>; }> : T"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -733,7 +733,7 @@
           "SerializableArray",
           " | null | undefined"
         ],
-        "path": "packages/kbn-utility-types/src/serializable/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -750,7 +750,7 @@
         "signature": [
           "T extends Promise<infer U> ? Promise<U> : Promise<T>"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -767,7 +767,7 @@
         "signature": [
           "(U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -792,7 +792,7 @@
           },
           "<infer U> ? U : never"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -809,7 +809,7 @@
         "signature": [
           "T extends any[] ? T[number] : T extends object ? T[keyof T] : never"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -826,7 +826,7 @@
         "signature": [
           "Omit<Type, Key> & { [Property in Key]-?: Type[Property]; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -843,7 +843,7 @@
         "signature": [
           "{ -readonly [K in keyof T]: T[K]; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

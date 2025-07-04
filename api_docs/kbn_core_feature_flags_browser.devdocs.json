@@ -13,10 +13,28 @@
         "description": [
           "\nSetup contract of the Feature Flags Service"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+        "path": "src/core/packages/feature-flags/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/core-feature-flags-browser",
+            "id": "def-public.FeatureFlagsSetup.getInitialFeatureFlags",
+            "type": "Function",
+            "tags": [],
+            "label": "getInitialFeatureFlags",
+            "description": [
+              "\nUsed for bootstrapping the browser-side client with a seed of the feature flags for faster load-times."
+            ],
+            "signature": [
+              "() => Record<string, unknown>"
+            ],
+            "path": "src/core/packages/feature-flags/browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
           {
             "parentPluginId": "@kbn/core-feature-flags-browser",
             "id": "def-public.FeatureFlagsSetup.setProvider",
@@ -31,7 +49,7 @@
               "Provider",
               ") => void"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "path": "src/core/packages/feature-flags/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -47,7 +65,7 @@
                 "signature": [
                   "Provider"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -66,16 +84,10 @@
             ],
             "signature": [
               "(contextToAppend: ",
-              {
-                "pluginId": "@kbn/core-feature-flags-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-                "section": "def-public.EvaluationContext",
-                "text": "EvaluationContext"
-              },
+              "EvaluationContext",
               ") => Promise<void>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "path": "src/core/packages/feature-flags/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -89,15 +101,9 @@
                   "The additional keys that should be appended/modified in the evaluation context."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-feature-flags-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-                    "section": "def-public.EvaluationContext",
-                    "text": "EvaluationContext"
-                  }
+                  "EvaluationContext"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -117,7 +123,7 @@
         "description": [
           "\nSetup contract of the Feature Flags Service"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+        "path": "src/core/packages/feature-flags/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -132,16 +138,10 @@
             ],
             "signature": [
               "(contextToAppend: ",
-              {
-                "pluginId": "@kbn/core-feature-flags-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-                "section": "def-public.EvaluationContext",
-                "text": "EvaluationContext"
-              },
+              "EvaluationContext",
               ") => Promise<void>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "path": "src/core/packages/feature-flags/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -155,15 +155,9 @@
                   "The additional keys that should be appended/modified in the evaluation context."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-feature-flags-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-                    "section": "def-public.EvaluationContext",
-                    "text": "EvaluationContext"
-                  }
+                  "EvaluationContext"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -183,7 +177,7 @@
             "signature": [
               "(flagName: string, fallbackValue: boolean) => boolean"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "path": "src/core/packages/feature-flags/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -199,7 +193,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -216,7 +210,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -236,7 +230,7 @@
             "signature": [
               "<Value extends string>(flagName: string, fallbackValue: Value) => Value"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "path": "src/core/packages/feature-flags/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -252,7 +246,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -269,7 +263,7 @@
                 "signature": [
                   "Value"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -289,7 +283,7 @@
             "signature": [
               "<Value extends number>(flagName: string, fallbackValue: Value) => Value"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "path": "src/core/packages/feature-flags/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -305,7 +299,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -322,7 +316,7 @@
                 "signature": [
                   "Value"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -344,7 +338,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "path": "src/core/packages/feature-flags/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -360,7 +354,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -377,7 +371,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -399,7 +393,7 @@
               "Observable",
               "<Value>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "path": "src/core/packages/feature-flags/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -415,7 +409,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -432,7 +426,7 @@
                 "signature": [
                   "Value"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -454,7 +448,7 @@
               "Observable",
               "<Value>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+            "path": "src/core/packages/feature-flags/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -470,7 +464,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -487,7 +481,7 @@
                 "signature": [
                   "Value"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+                "path": "src/core/packages/feature-flags/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -511,23 +505,11 @@
           "\nThe evaluation context to use when retrieving the flags.\n\nWe use multi-context so that we can apply segmentation rules at different levels (`organization`/`kibana`).\n* `organization` includes any information that is common to all the projects/deployments in an organization. An example is the in_trial status.\n* The `kibana` context includes all the information that identifies a project/deployment. Examples are version, offering, and has_data.\nKind helps us specify which sub-context should receive the new attributes.\nIf no `kind` is provided, it defaults to `kibana`.\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-feature-flags-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-            "section": "def-public.MultiContextEvaluationContext",
-            "text": "MultiContextEvaluationContext"
-          },
+          "MultiContextEvaluationContext",
           " | ",
-          {
-            "pluginId": "@kbn/core-feature-flags-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-            "section": "def-public.SingleContextEvaluationContext",
-            "text": "SingleContextEvaluationContext"
-          }
+          "SingleContextEvaluationContext"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+        "path": "src/core/packages/feature-flags/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -550,7 +532,7 @@
           "EvaluationContext",
           " | undefined; }"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+        "path": "src/core/packages/feature-flags/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -569,7 +551,7 @@
           "EvaluationContextValue",
           "> & { kind?: \"kibana\" | \"organization\" | undefined; }"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-browser/src/types.ts",
+        "path": "src/core/packages/feature-flags/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

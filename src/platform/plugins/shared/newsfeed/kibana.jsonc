@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/newsfeed-plugin",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "newsfeed",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "screenshotMode"
+    ],
+    "requiredBundles": []
+  }
+}

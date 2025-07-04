@@ -8,6 +8,7 @@
 import Fs from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
 
@@ -31,6 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   };
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     testFiles: [require.resolve('./tests')],
     servers,
     services: kibanaFunctionalConfig.get('services'),

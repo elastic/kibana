@@ -19,7 +19,7 @@
         "tags": [],
         "label": "InternalNodeServiceStart",
         "description": [],
-        "path": "packages/core/node/core-node-server-internal/src/node_service.ts",
+        "path": "src/core/packages/node/server-internal/src/node_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,15 +33,9 @@
               "\nThe Kibana process can take on specialised roles via the `node.roles` config.\n\nThe roles can be used by plugins to adjust their behavior based\non the way the Kibana process has been configured."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-node-server",
-                "scope": "server",
-                "docId": "kibKbnCoreNodeServerPluginApi",
-                "section": "def-server.NodeRoles",
-                "text": "NodeRoles"
-              }
+              "NodeRoles"
             ],
-            "path": "packages/core/node/core-node-server-internal/src/node_service.ts",
+            "path": "src/core/packages/node/server-internal/src/node_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -55,7 +49,7 @@
         "tags": [],
         "label": "PrebootDeps",
         "description": [],
-        "path": "packages/core/node/core-node-server-internal/src/node_service.ts",
+        "path": "src/core/packages/node/server-internal/src/node_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -69,7 +63,7 @@
             "signature": [
               "ILoggingSystem"
             ],
-            "path": "packages/core/node/core-node-server-internal/src/node_service.ts",
+            "path": "src/core/packages/node/server-internal/src/node_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }

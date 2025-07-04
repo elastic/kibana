@@ -51,8 +51,8 @@ export const FromCommand: React.FC = () => {
           color="text"
           onClick={() => {
             const length = from.args.length;
-            const source = Builder.expression.source({
-              name: `source${length + 1}`,
+            const source = Builder.expression.source.node({
+              index: `source${length + 1}`,
               sourceType: 'index',
             });
             from.args.push(source);

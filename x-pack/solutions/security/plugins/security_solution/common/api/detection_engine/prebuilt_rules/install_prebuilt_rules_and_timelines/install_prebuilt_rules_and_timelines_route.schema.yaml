@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Install Prebuilt Rules API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/prepackaged:
+    put:
+      x-labels: [ess]
+      x-codegen-enabled: true
+      operationId: InstallPrebuiltRulesAndTimelines
+      summary: Install prebuilt detection rules and Timelines
+      description: |
+        Install and update all Elastic prebuilt detection rules and Timelines.
+
+        This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic. 
+        When you call this endpoint, it will:
+        - Install any new prebuilt detection rules that are not currently installed in your system.
+        - Update any existing prebuilt detection rules that have been modified or improved by Elastic.
+        - Install any new prebuilt Timelines that are not currently installed in your system.
+        - Update any existing prebuilt Timelines that have been modified or improved by Elastic.
+
+        This ensures that your detection engine is always up-to-date with the latest rules and Timelines, 
+        providing you with the most current and effective threat detection capabilities.
+      tags:
+        - Prebuilt Rules API
+      responses:
+        200:
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  rules_installed:
+                    type: integer
+                    description: The number of rules installed
+                    minimum: 0
+                  rules_updated:
+                    type: integer
+                    description: The number of rules updated
+                    minimum: 0
+                  timelines_installed:
+                    type: integer
+                    description: The number of timelines installed
+                    minimum: 0
+                  timelines_updated:
+                    type: integer
+                    description: The number of timelines updated
+                    minimum: 0
+                required:
+                  - rules_installed
+                  - rules_updated
+                  - timelines_installed
+                  - timelines_updated
+              examples:
+                example1:
+                  value: 
+                    rules_installed: 112
+                    rules_updated: 0
+                    timelines_installed: 5
+                    timelines_updated: 2

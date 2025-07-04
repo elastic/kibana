@@ -6,12 +6,7 @@
  */
 
 import { getNewRule } from '../../../objects/rule';
-import {
-  ANALYZER_GRAPH_TAB_BUTTON,
-  PROVIDER_BADGE,
-  QUERY_TAB_BUTTON,
-  TIMELINE_TITLE,
-} from '../../../screens/timeline';
+import { PROVIDER_BADGE, QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../../screens/timeline';
 import { closeTimeline } from '../../../tasks/timeline';
 import { investigateFirstAlertInTimeline } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -22,7 +17,7 @@ import { ALERTS_URL } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { expandAlertAtIndexExpandableFlyout } from '../../../tasks/expandable_flyout/common';
 import {
-  clickAnalyzerPreviewTitleToOpenTimeline,
+  clickAnalyzerPreviewTitle,
   toggleOverviewTabAboutSection,
   toggleOverviewTabInvestigationSection,
   toggleOverviewTabVisualizationsSection,
@@ -33,6 +28,11 @@ import {
   selectTakeActionItem,
 } from '../../../tasks/expandable_flyout/alert_details_right_panel';
 import { DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE } from '../../../screens/expandable_flyout/alert_details_right_panel';
+import { DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB } from '../../../screens/expandable_flyout/alert_details_left_panel';
+import {
+  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT,
+} from '../../../screens/expandable_flyout/alert_details_left_panel_analyzer_graph_tab';
 import {
   openTimelineFromPrevalenceTableCell,
   openPrevalenceTab,
@@ -43,6 +43,7 @@ import {
   openTimelineFromRelatedBySession,
   openTimelineFromRelatedSourceEvent,
 } from '../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
+import { openInsightsTab } from '../../../tasks/expandable_flyout/alert_details_left_panel';
 
 describe(
   'Investigate in timeline',
@@ -83,18 +84,25 @@ describe(
         cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
       });
 
-      it('should open a new timeline from analyzer graph preview', () => {
+      it('should navigate to analyzer graph tab', () => {
         toggleOverviewTabAboutSection();
         toggleOverviewTabInvestigationSection();
         toggleOverviewTabVisualizationsSection();
-        clickAnalyzerPreviewTitleToOpenTimeline();
+        clickAnalyzerPreviewTitle();
 
-        cy.get(TIMELINE_TITLE).should('have.text', 'Untitled timeline');
-        cy.get(ANALYZER_GRAPH_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
+          .should('have.text', 'Visualize')
+          .and('have.class', 'euiTab-isSelected');
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON)
+          .should('have.text', 'Analyzer Graph')
+          .and('have.class', 'euiButtonGroupButton-isSelected');
+
+        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT).should('exist');
       });
 
       it('should open a new timeline from the prevalence detail table', () => {
         expandDocumentDetailsExpandableFlyoutLeftSection();
+        openInsightsTab();
         openPrevalenceTab();
         openTimelineFromPrevalenceTableCell();
 
@@ -104,6 +112,7 @@ describe(
 
       it('should open a new timeline from the correlations tab', () => {
         expandDocumentDetailsExpandableFlyoutLeftSection();
+        openInsightsTab();
         openCorrelationsTab();
         openTimelineFromRelatedSourceEvent();
 

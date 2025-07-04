@@ -31,7 +31,7 @@
           "NoDataCardServices",
           ", PropArguments, {}>"
         ],
-        "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
             "tags": [],
             "label": "propArguments",
             "description": [],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -56,7 +56,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -70,7 +70,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -83,7 +83,7 @@
             "tags": [],
             "label": "serviceArguments",
             "description": [],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -105,7 +105,7 @@
               },
               "[]"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -128,7 +128,7 @@
               " | undefined) => ",
               "KibanaPageTemplateProps"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -149,7 +149,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -176,7 +176,7 @@
               ") => ",
               "NoDataCardServices"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -196,7 +196,7 @@
                     "text": "Params"
                   }
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -238,7 +238,7 @@
           "NoDataConfigArguments",
           ", {}>"
         ],
-        "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -249,7 +249,7 @@
             "tags": [],
             "label": "propArguments",
             "description": [],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -263,7 +263,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -276,7 +276,7 @@
             "tags": [],
             "label": "serviceArguments",
             "description": [],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -298,7 +298,7 @@
               },
               "[]"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -321,7 +321,7 @@
               " | undefined) => ",
               "KibanaPageTemplateProps"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -342,7 +342,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -369,7 +369,7 @@
               ") => ",
               "NoDataCardServices"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -389,7 +389,7 @@
                     "text": "Params"
                   }
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -431,7 +431,7 @@
           "SolutionNavArguments",
           ", {}>"
         ],
-        "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -442,7 +442,7 @@
             "tags": [],
             "label": "propArguments",
             "description": [],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -456,7 +456,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -469,7 +469,7 @@
             "tags": [],
             "label": "serviceArguments",
             "description": [],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -491,7 +491,7 @@
               },
               "[]"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -514,7 +514,7 @@
               " | undefined) => ",
               "KibanaPageTemplateProps"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -535,7 +535,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -562,7 +562,7 @@
               ") => ",
               "NoDataCardServices"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -582,7 +582,7 @@
                     "text": "Params"
                   }
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -622,7 +622,7 @@
           "NoDataCardServices",
           ", PropArguments, {}>"
         ],
-        "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -633,7 +633,7 @@
             "tags": [],
             "label": "propArguments",
             "description": [],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -647,7 +647,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -660,7 +660,7 @@
             "tags": [],
             "label": "serviceArguments",
             "description": [],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -675,7 +675,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -698,7 +698,7 @@
               " | undefined) => ",
               "KibanaPageTemplateProps"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -719,7 +719,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -746,7 +746,7 @@
               ") => ",
               "NoDataCardServices"
             ],
-            "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -766,7 +766,7 @@
                     "text": "Params"
                   }
                 ],
-                "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
+                "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -790,7 +790,7 @@
           "() => ",
           "NoDataCardKibanaDependencies"
         ],
-        "path": "packages/shared-ux/page/kibana_template/mocks/src/jest.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -808,7 +808,7 @@
           "() => ",
           "NoDataCardServices"
         ],
-        "path": "packages/shared-ux/page/kibana_template/mocks/src/jest.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -859,7 +859,7 @@
             "text": "Params"
           }
         ],
-        "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -906,7 +906,7 @@
             "text": "Params"
           }
         ],
-        "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -953,7 +953,7 @@
             "text": "Params"
           }
         ],
-        "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -998,7 +998,7 @@
             "text": "Params"
           }
         ],
-        "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

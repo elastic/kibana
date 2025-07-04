@@ -28,12 +28,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       try {
         await es.indices.create({
           index: ENRICH_INDEX_NAME,
-          body: {
-            mappings: {
-              properties: {
-                name: {
-                  type: 'text',
-                },
+          mappings: {
+            properties: {
+              name: {
+                type: 'text',
               },
             },
           },

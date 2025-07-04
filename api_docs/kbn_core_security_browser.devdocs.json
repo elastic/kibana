@@ -13,7 +13,7 @@
         "description": [
           "\nCore's authentication service\n"
         ],
-        "path": "packages/core/security/core-security-browser/src/authc.ts",
+        "path": "src/core/packages/security/browser/src/authc.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,16 +28,10 @@
             ],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               ">"
             ],
-            "path": "packages/core/security/core-security-browser/src/authc.ts",
+            "path": "src/core/packages/security/browser/src/authc.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -55,7 +49,7 @@
         "description": [
           "\nThe contract exposed by the security provider for Core to\nconsume and re-expose via its security service.\n"
         ],
-        "path": "packages/core/security/core-security-browser/src/api_provider.ts",
+        "path": "src/core/packages/security/browser/src/api_provider.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,15 +61,9 @@
             "label": "authc",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-security-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-public.CoreAuthenticationService",
-                "text": "CoreAuthenticationService"
-              }
+              "CoreAuthenticationService"
             ],
-            "path": "packages/core/security/core-security-browser/src/api_provider.ts",
+            "path": "src/core/packages/security/browser/src/api_provider.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -91,7 +79,7 @@
         "description": [
           "\nSetup contract for Core's security service.\n"
         ],
-        "path": "packages/core/security/core-security-browser/src/contracts.ts",
+        "path": "src/core/packages/security/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -106,16 +94,10 @@
             ],
             "signature": [
               "(api: ",
-              {
-                "pluginId": "@kbn/core-security-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-public.CoreSecurityDelegateContract",
-                "text": "CoreSecurityDelegateContract"
-              },
+              "CoreSecurityDelegateContract",
               ") => void"
             ],
-            "path": "packages/core/security/core-security-browser/src/contracts.ts",
+            "path": "src/core/packages/security/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -127,15 +109,9 @@
                 "label": "api",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-security-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                    "section": "def-public.CoreSecurityDelegateContract",
-                    "text": "CoreSecurityDelegateContract"
-                  }
+                  "CoreSecurityDelegateContract"
                 ],
-                "path": "packages/core/security/core-security-browser/src/contracts.ts",
+                "path": "src/core/packages/security/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -155,7 +131,7 @@
         "description": [
           "\nStart contract for Core's security service.\n"
         ],
-        "path": "packages/core/security/core-security-browser/src/contracts.ts",
+        "path": "src/core/packages/security/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -169,15 +145,9 @@
               "\nThe {@link CoreAuthenticationService | authentication service}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-security-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-public.CoreAuthenticationService",
-                "text": "CoreAuthenticationService"
-              }
+              "CoreAuthenticationService"
             ],
-            "path": "packages/core/security/core-security-browser/src/contracts.ts",
+            "path": "src/core/packages/security/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -195,15 +165,9 @@
         "label": "AuthenticationServiceContract",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-security-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreSecurityBrowserPluginApi",
-            "section": "def-public.CoreAuthenticationService",
-            "text": "CoreAuthenticationService"
-          }
+          "CoreAuthenticationService"
         ],
-        "path": "packages/core/security/core-security-browser/src/api_provider.ts",
+        "path": "src/core/packages/security/browser/src/api_provider.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -285,11 +285,11 @@ export class Plugin {
 
 #### Usage Collection
 
-For creating and registering a Usage Collector. Collectors should be defined in a separate directory `server/collectors/`. You can read more about usage collectors on `src/plugins/usage_collection/README.mdx`.
+For creating and registering a Usage Collector. Collectors should be defined in a separate directory `server/collectors/`. You can read more about usage collectors on `src/platform/plugins/shared/usage_collection/README.mdx`.
 
 ```ts
 // server/collectors/register.ts
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from 'src/platform/plugins/shared/usage_collection/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
 export function registerMyPluginUsageCollector(usageCollection?: UsageCollectionSetup): void {

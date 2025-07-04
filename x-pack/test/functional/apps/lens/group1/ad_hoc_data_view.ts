@@ -54,9 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   const checkDiscoverNavigationResult = async () => {
-    await dashboardPanelActions.clickContextMenuItem(
-      'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER'
-    );
+    await dashboardPanelActions.clickPanelAction('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
 
     const [, discoverHandle] = await browser.getAllWindowHandles();
     await browser.switchToWindow(discoverHandle);
@@ -192,7 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be possible to download a visualization with adhoc dataViews', async () => {
       await lens.setCSVDownloadDebugFlag(true);
-      await lens.openCSVDownloadShare();
+      await lens.triggerCSVDownloadExport();
 
       const csv = await lens.getCSVContent();
       expect(csv).to.be.ok();

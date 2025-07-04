@@ -14,7 +14,8 @@ import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common/d
 import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
-import { rootRequest } from './common';
+import { IS_SERVERLESS } from '../../env_var_names_constants';
+import { refreshSavedObjectIndices, rootRequest } from './common';
 
 export const getPrebuiltRulesStatus = () => {
   return rootRequest<PrePackagedRulesStatusResponse>({
@@ -122,7 +123,6 @@ export const createNewRuleAsset = ({
           headers: {
             'Content-Type': 'application/json',
           },
-          failOnStatusCode: false,
           body: rule,
         })
         .then((response) => response.status === 200);
@@ -142,52 +142,24 @@ export const bulkCreateRuleAssets = ({
     'Bulk Install prebuilt rules',
     rules?.map((rule) => rule['security-rule'].rule_id).join(', ')
   );
-  const url = `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_bulk?refresh`;
 
   const bulkIndexRequestBody = rules.reduce((body, rule) => {
     const document = JSON.stringify(rule);
     const documentId = `security-rule:${rule['security-rule'].rule_id}`;
-    const historicalDocumentId = `${documentId}_${rule['security-rule'].version}`;
+    const documentIdWithVersion = `${documentId}_${rule['security-rule'].version}`;
 
-    const indexRuleAsset = `${JSON.stringify({
-      index: {
-        _index: index,
-        _id: documentId,
-      },
-    })}\n${document}\n`;
     const indexHistoricalRuleAsset = `${JSON.stringify({
       index: {
         _index: index,
-        _id: historicalDocumentId,
+        _id: documentIdWithVersion,
       },
     })}\n${document}\n`;
 
-    return body.concat(indexRuleAsset, indexHistoricalRuleAsset);
+    return body.concat(indexHistoricalRuleAsset);
   }, '');
 
-  rootRequest({
-    method: 'PUT',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_mapping`,
-    body: {
-      dynamic: true,
-    },
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  cy.waitUntil(
-    () => {
-      return rootRequest({
-        method: 'POST',
-        url,
-        headers: { 'Content-Type': 'application/json' },
-        failOnStatusCode: false,
-        body: bulkIndexRequestBody,
-      }).then((response) => response.status === 200);
-    },
-    { interval: 500, timeout: 12000 }
-  );
+  cy.task('putMapping', index);
+  cy.task('bulkInsert', bulkIndexRequestBody);
 };
 
 export const getRuleAssets = (index: string | undefined = '.kibana_security_solution') => {
@@ -198,7 +170,6 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
     headers: {
       'Content-Type': 'application/json',
     },
-    failOnStatusCode: false,
     body: {
       query: {
         term: { type: { value: 'security-rule' } },
@@ -213,7 +184,36 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
 /* during e2e tests, and allow for manual installation of mock rules instead. */
 export const preventPrebuiltRulesPackageInstallation = () => {
   cy.log('Prevent prebuilt rules package installation');
-  cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL, {});
+  cy.intercept('POST', BOOTSTRAP_PREBUILT_RULES_URL, { packages: [] });
+};
+
+/**
+ * Installs a prepared mock prebuilt rules package `security_detection_engine`.
+ * Installing it up front prevents installing the real package when making API requests.
+ */
+export const installMockPrebuiltRulesPackage = (): void => {
+  cy.fixture(
+    'security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip',
+    'binary'
+  )
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((blob) => {
+      rootRequest({
+        method: 'POST',
+        url: '/api/fleet/epm/packages',
+        headers: {
+          'Content-Type': 'application/zip',
+          'elastic-api-version': '2023-10-31',
+          'kbn-xsrf': 'xxxx',
+        },
+        body: blob,
+        encoding: 'binary',
+      });
+    });
+
+  if (!Cypress.env(IS_SERVERLESS)) {
+    refreshSavedObjectIndices();
+  }
 };
 
 /**

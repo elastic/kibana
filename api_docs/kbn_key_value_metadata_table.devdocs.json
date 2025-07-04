@@ -1,0 +1,202 @@
+{
+  "id": "@kbn/key-value-metadata-table",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/key-value-metadata-table",
+        "id": "def-common.getFlattenedKeyValuePairs",
+        "type": "Function",
+        "tags": [],
+        "label": "getFlattenedKeyValuePairs",
+        "description": [],
+        "signature": [
+          "(item: Maybe<Record<string, any>>, parentKey?: string | undefined) => ",
+          {
+            "pluginId": "@kbn/key-value-metadata-table",
+            "scope": "common",
+            "docId": "kibKbnKeyValueMetadataTablePluginApi",
+            "section": "def-common.KeyValuePair",
+            "text": "KeyValuePair"
+          },
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/key-value-metadata-table",
+            "id": "def-common.getFlattenedKeyValuePairs.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "item",
+            "description": [],
+            "signature": [
+              "Maybe<Record<string, any>>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/key-value-metadata-table",
+            "id": "def-common.getFlattenedKeyValuePairs.$2",
+            "type": "string",
+            "tags": [],
+            "label": "parentKey",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/key-value-metadata-table",
+        "id": "def-common.KeyValueTable",
+        "type": "Function",
+        "tags": [],
+        "label": "KeyValueTable",
+        "description": [],
+        "signature": [
+          "({\n  keyValuePairs,\n  tableProps = {},\n}: { keyValuePairs: ",
+          {
+            "pluginId": "@kbn/key-value-metadata-table",
+            "scope": "common",
+            "docId": "kibKbnKeyValueMetadataTablePluginApi",
+            "section": "def-common.KeyValuePair",
+            "text": "KeyValuePair"
+          },
+          "[]; tableProps?: (",
+          "EuiTableProps",
+          " & React.TableHTMLAttributes<HTMLTableElement>) | undefined; }) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/key-value-metadata-table",
+            "id": "def-common.KeyValueTable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  keyValuePairs,\n  tableProps = {},\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/key-value-metadata-table",
+                "id": "def-common.KeyValueTable.$1.keyValuePairs",
+                "type": "Array",
+                "tags": [],
+                "label": "keyValuePairs",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/key-value-metadata-table",
+                    "scope": "common",
+                    "docId": "kibKbnKeyValueMetadataTablePluginApi",
+                    "section": "def-common.KeyValuePair",
+                    "text": "KeyValuePair"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/key-value-metadata-table",
+                "id": "def-common.KeyValueTable.$1.tableProps",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "tableProps",
+                "description": [],
+                "signature": [
+                  "(",
+                  "EuiTableProps",
+                  " & React.TableHTMLAttributes<HTMLTableElement>) | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/key-value-metadata-table",
+        "id": "def-common.KeyValuePair",
+        "type": "Interface",
+        "tags": [],
+        "label": "KeyValuePair",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/key-value-metadata-table",
+            "id": "def-common.KeyValuePair.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/key-value-metadata-table",
+            "id": "def-common.KeyValuePair.value",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

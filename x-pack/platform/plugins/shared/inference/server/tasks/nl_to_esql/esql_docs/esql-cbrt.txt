@@ -1,0 +1,22 @@
+# CBRT
+
+Returns the cube root of a number. The input can be any numeric value, and the return value is always a double. Cube roots of infinities are `null`.
+
+## Syntax
+
+`CBRT(number)`
+
+### Parameters
+
+#### `number`
+
+Numeric expression. If `null`, the function returns `null`.
+
+## Examples
+
+```esql
+ROW d = 1000.0
+| EVAL c = cbrt(d)
+```
+
+Calculate the cube root of the value `1000.0`.

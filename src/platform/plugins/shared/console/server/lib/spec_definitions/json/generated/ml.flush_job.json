@@ -1,0 +1,26 @@
+{
+  "ml.flush_job": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "advance_time": [],
+      "calc_interim": "__flag__",
+      "end": [],
+      "skip_time": [],
+      "start": []
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/_flush"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-flush-job",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

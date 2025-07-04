@@ -1,0 +1,24 @@
+{
+  "ml.get_jobs": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
+      "exclude_generated": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}",
+      "_ml/anomaly_detectors"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-jobs",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

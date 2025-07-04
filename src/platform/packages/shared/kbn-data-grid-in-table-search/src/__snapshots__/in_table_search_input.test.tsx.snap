@@ -1,0 +1,184 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`InTableSearchInput renders input 1`] = `
+<div>
+  <div
+    class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-compressed-group"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+      style="--euiFormControlLeftIconsCount: 1;"
+    >
+      <div
+        class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-compressed-absolute-left"
+      >
+        <span
+          class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="search"
+          />
+        </span>
+      </div>
+      <input
+        class="euiFieldSearch dataGridInTableSearch__input emotion-euiFieldSearch-compressed-inGroup"
+        data-test-subj="inTableSearchInput"
+        placeholder="Find in table"
+        type="search"
+        value=""
+      />
+    </div>
+    <div
+      class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append-compressed"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+      >
+        <div
+          class="euiFlexItem dataGridInTableSearch__matchesCounter emotion-euiFlexItem-growZero"
+          data-test-subj="inTableSearchMatchesCounter"
+        >
+          <div
+            class="euiText emotion-euiText-s-euiTextColor-subdued"
+          >
+            5/10
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <button
+            aria-label="Previous"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+            data-test-subj="inTableSearchButtonPrev"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowUp"
+            />
+          </button>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <button
+            aria-label="Next"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+            data-test-subj="inTableSearchButtonNext"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`InTableSearchInput renders input when loading 1`] = `
+<div>
+  <div
+    class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-compressed-group"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+      style="--euiFormControlLeftIconsCount: 1; --euiFormControlRightIconsCount: 1;"
+    >
+      <div
+        class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-compressed-absolute-left"
+      >
+        <span
+          class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="search"
+          />
+        </span>
+      </div>
+      <input
+        class="euiFieldSearch euiFieldSearch-isLoading dataGridInTableSearch__input emotion-euiFieldSearch-compressed-inGroup"
+        data-test-subj="inTableSearchInput"
+        placeholder="Find in table"
+        type="search"
+        value=""
+      />
+      <div
+        class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-compressed-absolute-right"
+      >
+        <span
+          aria-label="Loading"
+          class="euiLoadingSpinner emotion-euiLoadingSpinner-s"
+          role="progressbar"
+        />
+      </div>
+    </div>
+    <div
+      class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append-compressed"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+      >
+        <div
+          class="euiFlexItem dataGridInTableSearch__matchesCounter emotion-euiFlexItem-growZero"
+          data-test-subj="inTableSearchMatchesCounter"
+        >
+          <div
+            class="euiText emotion-euiText-s-euiTextColor-subdued"
+          >
+            0/0
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <button
+            aria-label="Previous"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+            data-test-subj="inTableSearchButtonPrev"
+            disabled=""
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowUp"
+            />
+          </button>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <button
+            aria-label="Next"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+            data-test-subj="inTableSearchButtonNext"
+            disabled=""
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

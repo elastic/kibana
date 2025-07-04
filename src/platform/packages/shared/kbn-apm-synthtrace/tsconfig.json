@@ -1,0 +1,21 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["node", "jest"]
+  },
+  "include": ["**/*.ts"],
+  "kbn_references": [
+    "@kbn/datemath",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/dev-utils",
+    "@kbn/elastic-agent-utils",
+    "@kbn/zod",
+    "@kbn/sample-log-parser",
+    "@kbn/tooling-log",
+    "@kbn/streams-schema",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

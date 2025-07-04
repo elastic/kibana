@@ -43,8 +43,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('adhoc data views', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
@@ -185,7 +189,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await addSearchToDashboard('logst*-ss-_bytes-runtimefield');
       await addSearchToDashboard('logst*-ss-_bytes-runtimefield-updated');
 
-      const [firstSearchCell, secondSearchCell] = await dataGrid.getAllCellElements(0, 3);
+      const [firstSearchCell, secondSearchCell] = await dataGrid.getAllCellElementsByColumnName(
+        0,
+        '_bytes-runtimefield'
+      );
       const first = await firstSearchCell.getVisibleText();
       const second = await secondSearchCell.getVisibleText();
 

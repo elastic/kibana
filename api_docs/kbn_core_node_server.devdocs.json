@@ -21,7 +21,7 @@
         "description": [
           "\nContains information about how this Kibana process has been configured.\n"
         ],
-        "path": "packages/core/node/core-node-server/src/types.ts",
+        "path": "src/core/packages/node/server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,15 +35,9 @@
               "A list of roles this node has been configured with."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-node-server",
-                "scope": "server",
-                "docId": "kibKbnCoreNodeServerPluginApi",
-                "section": "def-server.NodeRoles",
-                "text": "NodeRoles"
-              }
+              "NodeRoles"
             ],
-            "path": "packages/core/node/core-node-server/src/types.ts",
+            "path": "src/core/packages/node/server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -59,7 +53,7 @@
         "description": [
           "\nThe Kibana process can be run in dedicated \"modes\" via `node.roles`.\nThis configuration is then exposed to plugins via `NodeRoles`,\nwhich is available on the `PluginInitializerContext`.\n\nThe node roles can be used by plugins to adjust their behavior based\non the way the Kibana process has been configured.\n"
         ],
-        "path": "packages/core/node/core-node-server/src/types.ts",
+        "path": "src/core/packages/node/server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -72,7 +66,7 @@
             "description": [
               "\nThe backgroundTasks role includes operations which don't involve\nresponding to incoming http traffic from the UI."
             ],
-            "path": "packages/core/node/core-node-server/src/types.ts",
+            "path": "src/core/packages/node/server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -85,7 +79,7 @@
             "description": [
               "\nThe ui role covers any operations that need to occur in order\nto handle http traffic from the browser."
             ],
-            "path": "packages/core/node/core-node-server/src/types.ts",
+            "path": "src/core/packages/node/server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,7 +92,7 @@
             "description": [
               "\nStart Kibana with the specific purpose of completing the migrations phase then shutting down."
             ],
-            "path": "packages/core/node/core-node-server/src/types.ts",
+            "path": "src/core/packages/node/server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

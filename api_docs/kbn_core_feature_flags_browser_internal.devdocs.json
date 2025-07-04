@@ -13,7 +13,7 @@
         "description": [
           "\nThe browser-side Feature Flags Service"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+        "path": "src/core/packages/feature-flags/browser-internal/src/feature_flags_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+            "path": "src/core/packages/feature-flags/browser-internal/src/feature_flags_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -45,7 +45,7 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+                "path": "src/core/packages/feature-flags/browser-internal/src/feature_flags_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -64,23 +64,11 @@
             ],
             "signature": [
               "(deps: ",
-              {
-                "pluginId": "@kbn/core-feature-flags-browser-internal",
-                "scope": "public",
-                "docId": "kibKbnCoreFeatureFlagsBrowserInternalPluginApi",
-                "section": "def-public.FeatureFlagsSetupDeps",
-                "text": "FeatureFlagsSetupDeps"
-              },
+              "FeatureFlagsSetupDeps",
               ") => ",
-              {
-                "pluginId": "@kbn/core-feature-flags-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-                "section": "def-public.FeatureFlagsSetup",
-                "text": "FeatureFlagsSetup"
-              }
+              "FeatureFlagsSetup"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+            "path": "src/core/packages/feature-flags/browser-internal/src/feature_flags_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -94,15 +82,9 @@
                   "{@link FeatureFlagsSetup } including the {@link InternalInjectedMetadataSetup } used to retrieve the feature flags."
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-feature-flags-browser-internal",
-                    "scope": "public",
-                    "docId": "kibKbnCoreFeatureFlagsBrowserInternalPluginApi",
-                    "section": "def-public.FeatureFlagsSetupDeps",
-                    "text": "FeatureFlagsSetupDeps"
-                  }
+                  "FeatureFlagsSetupDeps"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+                "path": "src/core/packages/feature-flags/browser-internal/src/feature_flags_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -121,16 +103,10 @@
             ],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-feature-flags-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-                "section": "def-public.FeatureFlagsStart",
-                "text": "FeatureFlagsStart"
-              },
+              "FeatureFlagsStart",
               ">"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+            "path": "src/core/packages/feature-flags/browser-internal/src/feature_flags_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -148,7 +124,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+            "path": "src/core/packages/feature-flags/browser-internal/src/feature_flags_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -171,7 +147,7 @@
         "description": [
           "\nsetup method dependencies"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+        "path": "src/core/packages/feature-flags/browser-internal/src/feature_flags_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -187,7 +163,7 @@
             "signature": [
               "InternalInjectedMetadataSetup"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-browser-internal/src/feature_flags_service.ts",
+            "path": "src/core/packages/feature-flags/browser-internal/src/feature_flags_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }

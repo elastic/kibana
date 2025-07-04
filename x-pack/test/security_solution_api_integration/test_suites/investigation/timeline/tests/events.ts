@@ -14,7 +14,7 @@ import {
   TimelineEventsAllStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { BsearchService } from '@kbn/ftr-common-functional-services';
+import { SearchService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 
 import { getFieldsToRequest, getFilterValue } from '../../../utils';
@@ -62,11 +62,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
   describe('@skipInServerless Timeline', () => {
     let supertest: TestAgent;
-    let bsearch: BsearchService;
+    let search: SearchService;
 
     before(async () => {
       supertest = await utils.createSuperTest();
-      bsearch = await utils.createBsearch();
+      search = await utils.createSearch();
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
     after(async () => {
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     it('returns Timeline data', async () => {
-      const timeline = await bsearch.send<TimelineEventsAllStrategyResponse>({
+      const timeline = await search.send<TimelineEventsAllStrategyResponse>({
         supertest,
         options: {
           ...getPostBody(),
@@ -89,7 +89,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     it('returns paginated Timeline query', async () => {
-      const timeline = await bsearch.send<TimelineEventsAllStrategyResponse>({
+      const timeline = await search.send<TimelineEventsAllStrategyResponse>({
         supertest,
         options: {
           ...getPostBody(),

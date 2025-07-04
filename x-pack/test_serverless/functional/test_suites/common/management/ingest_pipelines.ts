@@ -47,7 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Create a test pipeline
         await es.ingest.putPipeline({
           id: TEST_PIPELINE_NAME,
-          body: { processors: [] },
+          processors: [],
         } as IngestPutPipelineRequest);
       });
 

@@ -1,0 +1,23 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/mock/*.json", ".storybook/**/*.ts", ".storybook/**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/cloud-security-posture-common",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ui-theme",
+    "@kbn/utility-types",
+    "@kbn/unified-search-plugin",
+    "@kbn/es-query",
+    "@kbn/data-service",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/storybook",
+    "@kbn/data-plugin",
+    "@kbn/core-application-browser-mocks"
+  ]
+}

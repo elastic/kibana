@@ -54,6 +54,8 @@ export const command = {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
+    const reactVersion = process.env.REACT_18 ? '18' : '17';
+    const euiAmsterdam = process.env.EUI_AMSTERDAM === 'true';
     const vscodeConfig =
       args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
 
@@ -114,7 +116,7 @@ export const command = {
     }
 
     await time('pre-build webpack bundles for packages', async () => {
-      await Bazel.buildWebpackBundles(log, { offline, quiet });
+      await Bazel.buildWebpackBundles(log, { offline, quiet, reactVersion, euiAmsterdam });
     });
 
     await Promise.all([

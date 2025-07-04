@@ -44,7 +44,7 @@
             "text": "EventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +58,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -73,7 +73,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -95,7 +95,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -121,7 +121,7 @@
             "text": "EventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,7 +135,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -150,7 +150,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -176,7 +176,7 @@
             "text": "EventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -190,7 +190,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -205,7 +205,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -220,7 +220,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -254,7 +254,7 @@
             "text": "PointInTimeEventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -275,7 +275,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -309,7 +309,7 @@
             "text": "QueryPointEventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -330,7 +330,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -364,7 +364,7 @@
             "text": "RangeEventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -385,7 +385,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/util.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -403,7 +403,7 @@
         "tags": [],
         "label": "EventAnnotationGroupConfig",
         "description": [],
-        "path": "packages/kbn-event-annotation-common/types.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -424,7 +424,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-event-annotation-common/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -435,7 +435,7 @@
             "tags": [],
             "label": "indexPatternId",
             "description": [],
-            "path": "packages/kbn-event-annotation-common/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -446,7 +446,7 @@
             "tags": [],
             "label": "ignoreGlobalFilters",
             "description": [],
-            "path": "packages/kbn-event-annotation-common/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -457,7 +457,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-event-annotation-common/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -468,7 +468,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-event-annotation-common/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -482,7 +482,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-event-annotation-common/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -503,7 +503,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-event-annotation-common/types.ts",
+            "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -523,7 +523,7 @@
         "signature": [
           "\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\""
         ],
-        "path": "packages/kbn-event-annotation-common/types.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -535,7 +535,7 @@
         "tags": [],
         "label": "defaultAnnotationColor",
         "description": [],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -547,7 +547,7 @@
         "tags": [],
         "label": "defaultAnnotationLabel",
         "description": [],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -562,7 +562,7 @@
         "signature": [
           "\"#F04E981A\""
         ],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -574,7 +574,7 @@
         "tags": [],
         "label": "defaultRangeAnnotationLabel",
         "description": [],
-        "path": "packages/kbn-event-annotation-common/util.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -589,7 +589,7 @@
         "signature": [
           "\"event-annotation-group\""
         ],
-        "path": "packages/kbn-event-annotation-common/index.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -626,7 +626,7 @@
             "text": "QueryPointEventAnnotationConfig"
           }
         ],
-        "path": "packages/kbn-event-annotation-common/types.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -656,7 +656,7 @@
           },
           " | undefined; }; }"
         ],
-        "path": "packages/kbn-event-annotation-common/types.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -671,7 +671,7 @@
         "signature": [
           "\"manual\""
         ],
-        "path": "packages/kbn-event-annotation-common/types.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -702,7 +702,7 @@
           },
           " | undefined; textVisibility?: boolean | undefined; }"
         ],
-        "path": "packages/kbn-event-annotation-common/types.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -733,7 +733,7 @@
           },
           " | undefined; textVisibility?: boolean | undefined; }"
         ],
-        "path": "packages/kbn-event-annotation-common/types.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -772,7 +772,7 @@
           },
           " | undefined; textVisibility?: boolean | undefined; }"
         ],
-        "path": "packages/kbn-event-annotation-common/types.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -787,7 +787,7 @@
         "signature": [
           "{ type: \"manual\"; id: string; key: { type: \"range\"; timestamp: string; endTimestamp: string; }; } & StyleSharedProps & { outside?: boolean | undefined; }"
         ],
-        "path": "packages/kbn-event-annotation-common/types.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -802,7 +802,7 @@
         "signature": [
           "StyleSharedProps & { outside?: boolean | undefined; }"
         ],
-        "path": "packages/kbn-event-annotation-common/types.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -819,7 +819,7 @@
         "signature": [
           "{ readonly ASTERISK: \"asterisk\"; readonly ALERT: \"alert\"; readonly BELL: \"bell\"; readonly BOLT: \"bolt\"; readonly BUG: \"bug\"; readonly CIRCLE: \"circle\"; readonly EDITOR_COMMENT: \"editorComment\"; readonly FLAG: \"flag\"; readonly HEART: \"heart\"; readonly MAP_MARKER: \"mapMarker\"; readonly PIN_FILLED: \"pinFilled\"; readonly STAR_EMPTY: \"starEmpty\"; readonly STAR_FILLED: \"starFilled\"; readonly TAG: \"tag\"; readonly TRIANGLE: \"triangle\"; }"
         ],
-        "path": "packages/kbn-event-annotation-common/index.ts",
+        "path": "src/platform/packages/shared/kbn-event-annotation-common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

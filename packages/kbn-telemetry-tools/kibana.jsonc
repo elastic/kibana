@@ -1,6 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/telemetry-tools",
-  "devOnly": true,
-  "owner": "@elastic/kibana-core"
-}

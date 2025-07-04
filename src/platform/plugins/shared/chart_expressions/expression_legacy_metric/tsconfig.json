@@ -1,0 +1,34 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "isolatedModules": true
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../../../typings/emotion.d.ts"
+  ],
+  "kbn_references": [
+    { "path": "../tsconfig.json" },
+    "@kbn/core",
+    "@kbn/expressions-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/i18n",
+    "@kbn/coloring",
+    "@kbn/utility-types",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/analytics",
+    "@kbn/ui-theme",
+    "@kbn/chart-expressions-common",
+    "@kbn/react-kibana-context-render",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

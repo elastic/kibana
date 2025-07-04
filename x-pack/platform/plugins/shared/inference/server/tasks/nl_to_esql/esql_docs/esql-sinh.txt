@@ -1,0 +1,22 @@
+# SINH
+
+Returns the hyperbolic sine of a number.
+
+## Syntax
+
+`SINH(number)`
+
+### Parameters
+
+#### number
+
+A numeric expression. If `null`, the function returns `null`.
+
+## Examples
+
+```esql
+ROW a=1.8
+| EVAL sinh = SINH(a)
+```
+
+Calculate the hyperbolic sine of the value `1.8`.

@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BytesFormatEditor should render normally 1`] = `
+<Fragment>
+  <EuiFormRow
+    helpText={
+      <span>
+        <EuiLink
+          href="https://www.elastic.co/docs/explore-analyze/numeral-formatting"
+          target="_blank"
+        >
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Documentation"
+            id="indexPatternFieldEditor.number.documentationLabel"
+          />
+           
+          <EuiIcon
+            type="link"
+          />
+        </EuiLink>
+      </span>
+    }
+    isInvalid={false}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
+        id="indexPatternFieldEditor.number.numeralLabel"
+        values={
+          Object {
+            "defaultPattern": <EuiCode>
+              0,0.[000]b
+            </EuiCode>,
+          }
+        }
+      />
+    }
+  >
+    <EuiFieldText
+      data-test-subj="numberEditorFormatPattern"
+      isInvalid={false}
+      onChange={[Function]}
+      placeholder="0,0.[000]b"
+      value=""
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={
+      Array [
+        Object {
+          "input": 256,
+          "output": 512,
+        },
+        Object {
+          "input": 1024,
+          "output": 2048,
+        },
+        Object {
+          "input": 5150000,
+          "output": 10300000,
+        },
+        Object {
+          "input": 1990000000,
+          "output": 3980000000,
+        },
+      ]
+    }
+  />
+</Fragment>
+`;

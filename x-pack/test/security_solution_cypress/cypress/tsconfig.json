@@ -14,7 +14,7 @@
     // in a way that can't be auto-matically deteceted at this time
     // so we have to force the inclusion of this reference
     {
-      "path": "../../../plugins/security_solution/tsconfig.json",
+      "path": "../../../solutions/security/plugins/security_solution/tsconfig.json",
       "force": true
     },
     "@kbn/rison",
@@ -45,5 +45,7 @@
     "@kbn/repo-info",
     "@kbn/elastic-assistant-common",
     "@kbn/cloud-security-posture-common",
+    "@kbn/security-plugin-types-common",
+    "@kbn/securitysolution-utils"
   ]
 }

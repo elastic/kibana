@@ -1,0 +1,46 @@
+name: Evaluate Dependency Health Score
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+    branches:
+      - 'main'
+    paths:
+      - 'package.json'
+
+jobs:
+  analyze:
+    name: Analyze new dependencies
+    runs-on: ubuntu-latest
+    if: |
+      github.repository == 'elastic/kibana' &&
+      github.actor != 'elastic-renovate-prod[bot]' &&
+      github.event.pull_request.draft == false
+    steps:
+      - name: Checkout kibana-operations
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
+        with:
+          repository: 'elastic/kibana-operations'
+          ref: main
+          path: ./kibana-operations
+          token: ${{secrets.KIBANAMACHINE_TOKEN}}
+
+      - name: Run dependency health score script
+        working-directory: ./kibana-operations/triage
+        env:
+          GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+          SLACK_TOKEN: ${{secrets.CODE_SCANNING_SLACK_TOKEN}}
+          SLACK_CHANNEL: ${{ secrets.CODE_SCANNING_SLACK_CHANNEL_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          npm ci --omit=dev
+          node dependency-health-score.js

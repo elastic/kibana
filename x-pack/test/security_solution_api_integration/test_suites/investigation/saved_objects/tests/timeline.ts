@@ -6,28 +6,24 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  TimelineResponse,
-  TimelineTypeEnum,
-} from '@kbn/security-solution-plugin/common/api/timeline';
-import { FtrProviderContext } from '../../../../../api_integration/ftr_provider_context';
+import { TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
+import { TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
+import TestAgent from 'supertest/lib/agent';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import { createBasicTimeline } from '../../utils/timelines';
 
-import { createBasicTimeline } from './helpers';
-
-export default function ({ getService }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
-  const supertest = getService('supertest');
+export default function ({ getService }: FtrProviderContextWithSpaces) {
+  const utils = getService('securitySolutionUtils');
+  let supertest: TestAgent;
 
   describe('Timeline - Saved Objects', () => {
-    beforeEach(() => kibanaServer.savedObjects.cleanStandardList());
-    afterEach(() => kibanaServer.savedObjects.cleanStandardList());
+    before(async () => (supertest = await utils.createSuperTest()));
 
     describe('Persist a timeline', () => {
       it('Create a timeline just with a title', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId, title, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, title, version } = response.body;
 
         expect(title).to.be(titleToSaved);
         expect(savedObjectId).to.not.be.empty();
@@ -136,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
           sort: { columnId: '@timestamp', sortDirection: 'desc' },
         };
 
-        const response = await supertest.post('/api/timeline').set('kbn-xsrf', 'true').send({
+        const response = await supertest.post(TIMELINE_URL).set('kbn-xsrf', 'true').send({
           timelineId: null,
           version: null,
           timeline: timelineObject,
@@ -152,8 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
           sort,
           title,
           version,
-        } =
-          response.body.data && omitTypenameInTimeline(response.body.data.persistTimeline.timeline);
+        } = response.body;
 
         expect(columns.map((col: { id: string }) => col.id)).to.eql(
           timelineObject.columns.map((col) => col.id)
@@ -172,13 +167,12 @@ export default function ({ getService }: FtrProviderContext) {
       it('Update a timeline with a new title', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body;
 
         const newTitle = 'new title';
 
         const responseToTest = await supertest
-          .patch('/api/timeline')
+          .patch(TIMELINE_URL)
           .set('kbn-xsrf', 'true')
           .send({
             timelineId: savedObjectId,
@@ -187,11 +181,9 @@ export default function ({ getService }: FtrProviderContext) {
               title: newTitle,
             },
           });
-        expect(responseToTest.body.data!.persistTimeline.timeline.savedObjectId).to.eql(
-          savedObjectId
-        );
-        expect(responseToTest.body.data!.persistTimeline.timeline.title).to.be(newTitle);
-        expect(responseToTest.body.data!.persistTimeline.timeline.version).to.not.be.eql(version);
+        expect(responseToTest.body.savedObjectId).to.eql(savedObjectId);
+        expect(responseToTest.body.title).to.be(newTitle);
+        expect(responseToTest.body.version).to.not.be.eql(version);
       });
     });
 
@@ -200,8 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
 
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body;
 
         const responseToTest = await supertest
           .patch('/api/timeline/_favorite')
@@ -213,14 +204,12 @@ export default function ({ getService }: FtrProviderContext) {
             timelineType: TimelineTypeEnum.default,
           });
 
-        expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
-        expect(responseToTest.body.data!.persistFavorite.favorite.length).to.be(1);
-        expect(responseToTest.body.data!.persistFavorite.version).to.not.be.eql(version);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineId).to.be.eql(null);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(null);
-        expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.default
-        );
+        expect(responseToTest.body.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.body.favorite.length).to.be(1);
+        expect(responseToTest.body.version).to.not.be.eql(version);
+        expect(responseToTest.body.templateTimelineId).to.be.eql(null);
+        expect(responseToTest.body.templateTimelineVersion).to.be.eql(null);
+        expect(responseToTest.body.timelineType).to.be.eql(TimelineTypeEnum.default);
       });
 
       it('to an existing timeline template', async () => {
@@ -228,8 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
         const templateTimelineIdFromStore = 'f4a90a2d-365c-407b-9fef-c1dcb33a6ab3';
         const templateTimelineVersionFromStore = 1;
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body;
 
         const responseToTest = await supertest
           .patch('/api/timeline/_favorite')
@@ -240,25 +228,20 @@ export default function ({ getService }: FtrProviderContext) {
             templateTimelineVersion: templateTimelineVersionFromStore,
             timelineType: TimelineTypeEnum.template,
           });
-        expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
-        expect(responseToTest.body.data!.persistFavorite.favorite.length).to.be(1);
-        expect(responseToTest.body.data!.persistFavorite.version).to.not.be.eql(version);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineId).to.be.eql(
-          templateTimelineIdFromStore
-        );
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(
+        expect(responseToTest.body.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.body.favorite.length).to.be(1);
+        expect(responseToTest.body.version).to.not.be.eql(version);
+        expect(responseToTest.body.templateTimelineId).to.be.eql(templateTimelineIdFromStore);
+        expect(responseToTest.body.templateTimelineVersion).to.be.eql(
           templateTimelineVersionFromStore
         );
-        expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.template
-        );
+        expect(responseToTest.body.timelineType).to.be.eql(TimelineTypeEnum.template);
       });
 
       it('to Unfavorite an existing timeline', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body;
 
         await supertest.patch('/api/timeline/_favorite').set('kbn-xsrf', 'true').send({
           timelineId: savedObjectId,
@@ -277,14 +260,12 @@ export default function ({ getService }: FtrProviderContext) {
             timelineType: TimelineTypeEnum.default,
           });
 
-        expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
-        expect(responseToTest.body.data!.persistFavorite.favorite).to.be.empty();
-        expect(responseToTest.body.data!.persistFavorite.version).to.not.be.eql(version);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineId).to.be.eql(null);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(null);
-        expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.default
-        );
+        expect(responseToTest.body.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.body.favorite).to.be.empty();
+        expect(responseToTest.body.version).to.not.be.eql(version);
+        expect(responseToTest.body.templateTimelineId).to.be.eql(null);
+        expect(responseToTest.body.templateTimelineVersion).to.be.eql(null);
+        expect(responseToTest.body.timelineType).to.be.eql(TimelineTypeEnum.default);
       });
 
       it('to Unfavorite an existing timeline template', async () => {
@@ -292,8 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
         const templateTimelineIdFromStore = 'f4a90a2d-365c-407b-9fef-c1dcb33a6ab3';
         const templateTimelineVersionFromStore = 1;
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body;
 
         await supertest.patch('/api/timeline/_favorite').set('kbn-xsrf', 'true').send({
           timelineId: savedObjectId,
@@ -312,18 +292,14 @@ export default function ({ getService }: FtrProviderContext) {
             timelineType: TimelineTypeEnum.template,
           });
 
-        expect(responseToTest.body.data!.persistFavorite.savedObjectId).to.be(savedObjectId);
-        expect(responseToTest.body.data!.persistFavorite.favorite).to.be.empty();
-        expect(responseToTest.body.data!.persistFavorite.version).to.not.be.eql(version);
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineId).to.be.eql(
-          templateTimelineIdFromStore
-        );
-        expect(responseToTest.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(
+        expect(responseToTest.body.savedObjectId).to.be(savedObjectId);
+        expect(responseToTest.body.favorite).to.be.empty();
+        expect(responseToTest.body.version).to.not.be.eql(version);
+        expect(responseToTest.body.templateTimelineId).to.be.eql(templateTimelineIdFromStore);
+        expect(responseToTest.body.templateTimelineVersion).to.be.eql(
           templateTimelineVersionFromStore
         );
-        expect(responseToTest.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.template
-        );
+        expect(responseToTest.body.timelineType).to.be.eql(TimelineTypeEnum.template);
       });
 
       it('to a timeline without a timelineId', async () => {
@@ -337,14 +313,12 @@ export default function ({ getService }: FtrProviderContext) {
             timelineType: TimelineTypeEnum.default,
           });
 
-        expect(response.body.data!.persistFavorite.savedObjectId).to.not.be.empty();
-        expect(response.body.data!.persistFavorite.favorite.length).to.be(1);
-        expect(response.body.data!.persistFavorite.version).to.not.be.empty();
-        expect(response.body.data!.persistFavorite.templateTimelineId).to.be.eql(null);
-        expect(response.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(null);
-        expect(response.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.default
-        );
+        expect(response.body.savedObjectId).to.not.be.empty();
+        expect(response.body.favorite.length).to.be(1);
+        expect(response.body.version).to.not.be.empty();
+        expect(response.body.templateTimelineId).to.be.eql(null);
+        expect(response.body.templateTimelineVersion).to.be.eql(null);
+        expect(response.body.timelineType).to.be.eql(TimelineTypeEnum.default);
       });
 
       it('to a timeline template without a timelineId', async () => {
@@ -361,18 +335,12 @@ export default function ({ getService }: FtrProviderContext) {
             timelineType: TimelineTypeEnum.template,
           });
 
-        expect(response.body.data!.persistFavorite.savedObjectId).to.not.be.empty();
-        expect(response.body.data!.persistFavorite.favorite.length).to.be(1);
-        expect(response.body.data!.persistFavorite.version).to.not.be.empty();
-        expect(response.body.data!.persistFavorite.templateTimelineId).to.be.eql(
-          templateTimelineIdFromStore
-        );
-        expect(response.body.data!.persistFavorite.templateTimelineVersion).to.be.eql(
-          templateTimelineVersionFromStore
-        );
-        expect(response.body.data!.persistFavorite.timelineType).to.be.eql(
-          TimelineTypeEnum.template
-        );
+        expect(response.body.savedObjectId).to.not.be.empty();
+        expect(response.body.favorite.length).to.be(1);
+        expect(response.body.version).to.not.be.empty();
+        expect(response.body.templateTimelineId).to.be.eql(templateTimelineIdFromStore);
+        expect(response.body.templateTimelineVersion).to.be.eql(templateTimelineVersionFromStore);
+        expect(response.body.timelineType).to.be.eql(TimelineTypeEnum.template);
       });
     });
 
@@ -380,47 +348,35 @@ export default function ({ getService }: FtrProviderContext) {
       it('one timeline', async () => {
         const titleToSaved = 'hello title';
         const response = await createBasicTimeline(supertest, titleToSaved);
-        const { savedObjectId } = response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId } = response.body;
 
         const responseToTest = await supertest
-          .delete('/api/timeline')
+          .delete(TIMELINE_URL)
           .set('kbn-xsrf', 'true')
           .send({
             savedObjectIds: [savedObjectId],
           });
 
-        expect(responseToTest.body.data!.deleteTimeline).to.be(true);
+        expect(responseToTest.statusCode).to.be(200);
       });
 
       it('multiple timelines', async () => {
         const titleToSaved = 'hello title';
         const response1 = await createBasicTimeline(supertest, titleToSaved);
-        const savedObjectId1 =
-          response1.body.data && response1.body.data.persistTimeline.timeline
-            ? response1.body.data.persistTimeline.timeline.savedObjectId
-            : '';
+        const savedObjectId1 = response1.body ? response1.body.savedObjectId : '';
 
         const response2 = await createBasicTimeline(supertest, titleToSaved);
-        const savedObjectId2 =
-          response2.body.data && response2.body.data.persistTimeline.timeline
-            ? response2.body.data.persistTimeline.timeline.savedObjectId
-            : '';
+        const savedObjectId2 = response2.body ? response2.body.savedObjectId : '';
 
         const responseToTest = await supertest
-          .delete('/api/timeline')
+          .delete(TIMELINE_URL)
           .set('kbn-xsrf', 'true')
           .send({
             savedObjectIds: [savedObjectId1, savedObjectId2],
           });
 
-        expect(responseToTest.body.data!.deleteTimeline).to.be(true);
+        expect(responseToTest.status).to.be(200);
       });
     });
   });
 }
-
-const omitTypename = (key: string, value: keyof TimelineResponse) =>
-  key === '__typename' ? undefined : value;
-
-const omitTypenameInTimeline = (timeline: TimelineResponse) =>
-  JSON.parse(JSON.stringify(timeline), omitTypename);

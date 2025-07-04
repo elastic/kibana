@@ -31,9 +31,9 @@ export function readCliArgs(argv: string[]) {
       'docker-push',
       'skip-docker-contexts',
       'skip-docker-ubi',
-      'skip-docker-ubuntu',
       'skip-docker-wolfi',
       'skip-docker-cloud',
+      'skip-docker-cloud-fips',
       'skip-docker-serverless',
       'skip-docker-fips',
       'release',
@@ -140,10 +140,10 @@ export function readCliArgs(argv: string[]) {
     createCdnAssets: !Boolean(flags['skip-cdn-assets']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
-    createDockerUbuntu:
-      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
     createDockerWolfi: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-wolfi']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
+    createDockerCloudFIPS:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud-fips']),
     createDockerServerless:
       (isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
       Boolean(flags.serverless),

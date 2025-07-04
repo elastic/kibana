@@ -25,7 +25,7 @@
         "tags": [],
         "label": "KibanaPrivilege",
         "description": [],
-        "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+        "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privilege.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privilege.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -53,7 +53,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privilege.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -68,7 +68,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privilege.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -83,7 +83,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privilege.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -105,7 +105,7 @@
               },
               ") => boolean"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privilege.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -125,7 +125,7 @@
                     "text": "KibanaPrivilege"
                   }
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/kibana_privilege.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privilege.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -143,7 +143,7 @@
         "tags": [],
         "label": "KibanaPrivileges",
         "description": [],
-        "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+        "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -157,7 +157,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -177,7 +177,7 @@
                     "text": "RawKibanaPrivileges"
                   }
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -199,7 +199,7 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -233,7 +233,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -253,7 +253,7 @@
                     "text": "RoleKibanaPrivilege"
                   }
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -278,7 +278,7 @@
                 "text": "SecuredFeature"
               }
             ],
-            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -292,7 +292,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -318,7 +318,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -349,7 +349,7 @@
                 "text": "PrivilegeCollection"
               }
             ],
-            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -370,7 +370,7 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -405,7 +405,7 @@
             "text": "KibanaPrivilege"
           }
         ],
-        "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+        "path": "x-pack/platform/packages/private/security/role_management_model/src/primary_feature_privilege.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -419,7 +419,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/primary_feature_privilege.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -433,7 +433,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/primary_feature_privilege.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -454,7 +454,7 @@
                     "text": "FeatureKibanaPrivileges"
                   }
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/primary_feature_privilege.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -469,7 +469,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/primary_feature_privilege.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -487,7 +487,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/primary_feature_privilege.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -500,7 +500,7 @@
             "tags": [],
             "label": "requireAllSpaces",
             "description": [],
-            "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/primary_feature_privilege.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -511,7 +511,7 @@
             "tags": [],
             "label": "disabled",
             "description": [],
-            "path": "x-pack/packages/security/role_management_model/src/primary_feature_privilege.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/primary_feature_privilege.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -525,7 +525,7 @@
         "tags": [],
         "label": "PrivilegeCollection",
         "description": [],
-        "path": "x-pack/packages/security/role_management_model/src/privilege_collection.ts",
+        "path": "x-pack/platform/packages/private/security/role_management_model/src/privilege_collection.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -539,7 +539,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/privilege_collection.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/privilege_collection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -560,7 +560,7 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/privilege_collection.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/privilege_collection.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -586,7 +586,7 @@
               },
               ") => boolean"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/privilege_collection.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/privilege_collection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -606,7 +606,7 @@
                     "text": "KibanaPrivilege"
                   }
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/privilege_collection.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/privilege_collection.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -641,7 +641,7 @@
             "text": "KibanaFeature"
           }
         ],
-        "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+        "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -655,7 +655,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -675,7 +675,7 @@
                     "text": "KibanaFeatureConfig"
                   }
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -687,7 +687,7 @@
                 "tags": [],
                 "label": "actionMapping",
                 "description": [],
-                "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -701,7 +701,7 @@
                     "signature": [
                       "[privilegeId: string]:  string[]"
                     ],
-                    "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+                    "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -720,7 +720,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -752,7 +752,7 @@
               },
               ")[]"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -776,7 +776,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -787,7 +787,7 @@
                 "tags": [],
                 "label": "{ includeMinimalFeaturePrivileges }",
                 "description": [],
-                "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -798,7 +798,7 @@
                     "tags": [],
                     "label": "includeMinimalFeaturePrivileges",
                     "description": [],
-                    "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+                    "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -825,7 +825,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -849,7 +849,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -873,7 +873,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -906,7 +906,7 @@
             "text": "SubFeature"
           }
         ],
-        "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+        "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -927,7 +927,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -938,7 +938,7 @@
             "tags": [],
             "label": "privilegesTooltip",
             "description": [],
-            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -952,7 +952,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -972,7 +972,7 @@
                     "text": "SubFeatureConfig"
                   }
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -984,7 +984,7 @@
                 "tags": [],
                 "label": "actionMapping",
                 "description": [],
-                "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -998,7 +998,7 @@
                     "signature": [
                       "[privilegeId: string]:  string[]"
                     ],
-                    "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                    "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1025,7 +1025,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1065,7 +1065,7 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1076,7 +1076,7 @@
                 "tags": [],
                 "label": "{\n    predicate = () => true,\n  }",
                 "description": [],
-                "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1106,7 +1106,7 @@
                       },
                       ") => boolean) | undefined"
                     ],
-                    "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                    "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -1126,7 +1126,7 @@
                             "text": "SubFeaturePrivilege"
                           }
                         ],
-                        "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                        "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
                         "deprecated": false,
                         "trackAdoption": false,
                         "isRequired": true
@@ -1147,7 +1147,7 @@
                             "text": "SecuredSubFeature"
                           }
                         ],
-                        "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+                        "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
                         "deprecated": false,
                         "trackAdoption": false,
                         "isRequired": true
@@ -1170,7 +1170,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/secured_sub_feature.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/secured_sub_feature.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1203,7 +1203,7 @@
             "text": "KibanaPrivilege"
           }
         ],
-        "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+        "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1217,7 +1217,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1237,7 +1237,7 @@
                     "text": "SubFeaturePrivilegeConfig"
                   }
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1252,7 +1252,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1267,7 +1267,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1281,7 +1281,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1292,7 +1292,7 @@
             "tags": [],
             "label": "requireAllSpaces",
             "description": [],
-            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1306,7 +1306,7 @@
         "tags": [],
         "label": "SubFeaturePrivilegeGroup",
         "description": [],
-        "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+        "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege_group.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1320,7 +1320,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege_group.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1340,7 +1340,7 @@
                     "text": "SubFeaturePrivilegeGroupConfig"
                   }
                 ],
-                "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege_group.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1352,7 +1352,7 @@
                 "tags": [],
                 "label": "actionMapping",
                 "description": [],
-                "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+                "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege_group.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1366,7 +1366,7 @@
                     "signature": [
                       "[privilegeId: string]:  string[]"
                     ],
-                    "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+                    "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege_group.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1385,7 +1385,7 @@
             "signature": [
               "\"mutually_exclusive\" | \"independent\""
             ],
-            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege_group.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1406,7 +1406,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security/role_management_model/src/sub_feature_privilege_group.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/sub_feature_privilege_group.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1435,7 +1435,7 @@
           },
           ") => boolean"
         ],
-        "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+        "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1455,7 +1455,7 @@
                 "text": "RoleKibanaPrivilege"
               }
             ],
-            "path": "x-pack/packages/security/role_management_model/src/kibana_privileges.ts",
+            "path": "x-pack/platform/packages/private/security/role_management_model/src/kibana_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

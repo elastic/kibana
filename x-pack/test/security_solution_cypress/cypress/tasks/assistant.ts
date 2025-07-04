@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CONNECTOR_NAME_INPUT, SAVE_ACTION_CONNECTOR_BTN } from '../screens/common/rule_actions';
+import { azureConnectorAPIPayload } from './api_calls/connectors';
 import { TIMELINE_CHECKBOX } from '../screens/timelines';
 import { CLOSE_FLYOUT } from '../screens/alerts';
 import {
@@ -41,10 +43,10 @@ import {
   PROMPT_CONTEXT_SELECTOR,
   QUICK_PROMPT_BADGE,
   ADD_NEW_CONNECTOR,
-  SHOW_ANONYMIZED_BUTTON,
   SEND_TO_TIMELINE_BUTTON,
+  OPENAI_CONNECTOR_OPTION,
+  SECRETS_APIKEY_INPUT,
 } from '../screens/ai_assistant';
-import { TOASTER } from '../screens/alerts_detection_rules';
 
 export const openAssistant = (context?: 'rule' | 'alert') => {
   if (!context) {
@@ -97,9 +99,24 @@ export const updateConversationTitle = (newTitle: string) => {
   assertConversationTitle(newTitle);
 };
 
+export const submitMessage = () => {
+  cy.get(SUBMIT_CHAT).click();
+};
+
 export const typeAndSendMessage = (message: string) => {
   cy.get(USER_PROMPT).type(message);
-  cy.get(SUBMIT_CHAT).click();
+  submitMessage();
+};
+
+// message must get sent before the title can be updated
+export const createAndTitleConversation = (newTitle = 'Something else') => {
+  createNewChat();
+  assertNewConversation(false, 'New chat');
+  assertConnectorSelected(azureConnectorAPIPayload.name);
+  typeAndSendMessage('hello');
+  assertMessageSent('hello');
+  assertErrorResponse();
+  updateConversationTitle(newTitle);
 };
 
 export const sendQueryToTimeline = () => {
@@ -113,7 +130,7 @@ export const clearSystemPrompt = () => {
 
 export const sendQuickPrompt = (prompt: string) => {
   cy.get(QUICK_PROMPT_BADGE(prompt)).click();
-  cy.get(SUBMIT_CHAT).click();
+  submitMessage();
 };
 
 export const selectSystemPrompt = (systemPrompt: string) => {
@@ -137,6 +154,14 @@ export const createSystemPrompt = (
     });
   }
   cy.get(MODAL_SAVE_BUTTON).click();
+};
+
+export const createOpenAIConnector = (connectorName: string) => {
+  cy.get(OPENAI_CONNECTOR_OPTION).click();
+  cy.get(CONNECTOR_NAME_INPUT).type(connectorName);
+  cy.get(SECRETS_APIKEY_INPUT).type('1234');
+  cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
+  cy.get(SAVE_ACTION_CONNECTOR_BTN).should('not.exist');
 };
 
 export const createQuickPrompt = (
@@ -176,6 +201,9 @@ export const assertNewConversation = (isWelcome: boolean, title: string) => {
 export const assertConversationTitle = (title: string) =>
   cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
 
+export const assertConversationTitleContains = (title: string) =>
+  cy.get(CONVERSATION_TITLE + ' h2').should('contains.text', title);
+
 export const assertSystemPromptSent = (message: string) => {
   cy.get(CONVERSATION_MESSAGE).eq(0).should('contain', message);
 };
@@ -204,13 +232,6 @@ export const assertConnectorSelected = (connectorName: string) => {
   cy.get(CONNECTOR_SELECTOR).should('have.text', connectorName);
 };
 
-export const assertErrorToastShown = (message?: string) => {
-  cy.get(TOASTER).should('be.visible');
-  if (message?.length) {
-    cy.get(TOASTER).should('contain', message);
-  }
-};
-
 const assertConversationTitleReadOnly = () => {
   cy.get(CONVERSATION_TITLE + ' h2').click();
   cy.get(CONVERSATION_TITLE + ' input').should('not.exist');
@@ -219,7 +240,6 @@ const assertConversationTitleReadOnly = () => {
 export const assertConversationReadOnly = () => {
   assertConversationTitleReadOnly();
   cy.get(ADD_NEW_CONNECTOR).should('be.disabled');
-  cy.get(SHOW_ANONYMIZED_BUTTON).should('be.disabled');
   cy.get(CHAT_CONTEXT_MENU).should('be.disabled');
   cy.get(FLYOUT_NAV_TOGGLE).should('be.disabled');
   cy.get(NEW_CHAT).should('be.disabled');

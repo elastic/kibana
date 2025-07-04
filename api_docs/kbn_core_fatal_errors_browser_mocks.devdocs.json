@@ -14,7 +14,7 @@
         "tags": [],
         "label": "fatalErrorsServiceMock",
         "description": [],
-        "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
+        "path": "src/core/packages/fatal-errors/browser-mocks/src/fatal_errors_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "signature": [
               "() => jest.Mocked<FatalErrorsServiceContract>"
             ],
-            "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
+            "path": "src/core/packages/fatal-errors/browser-mocks/src/fatal_errors_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -43,16 +43,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-public.FatalErrorsSetup",
-                "text": "FatalErrorsSetup"
-              },
+              "FatalErrorsSetup",
               ">"
             ],
-            "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
+            "path": "src/core/packages/fatal-errors/browser-mocks/src/fatal_errors_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -67,16 +61,10 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-public.FatalErrorsSetup",
-                "text": "FatalErrorsSetup"
-              },
+              "FatalErrorsSetup",
               ">"
             ],
-            "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
+            "path": "src/core/packages/fatal-errors/browser-mocks/src/fatal_errors_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

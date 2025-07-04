@@ -29,7 +29,7 @@
         "signature": [
           "({ client, children }: React.PropsWithChildren<ContextProps>) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/file/context/src/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "React.PropsWithChildren<ContextProps>"
             ],
-            "path": "packages/shared-ux/file/context/src/index.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -69,7 +69,7 @@
             "text": "FilesContextValue"
           }
         ],
-        "path": "packages/shared-ux/file/context/src/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -85,7 +85,7 @@
         "tags": [],
         "label": "FilesContextValue",
         "description": [],
-        "path": "packages/shared-ux/file/context/src/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -108,7 +108,7 @@
               },
               "<any>"
             ],
-            "path": "packages/shared-ux/file/context/src/index.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

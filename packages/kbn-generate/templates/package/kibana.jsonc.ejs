@@ -1,6 +1,8 @@
 {
   "type": "shared-common",
   "id": <%- json(pkg.id) %>,
-  "owner": <%- json(pkg.owner) %><% if (pkg.dev) { %>,
+  "owner": <%- json(pkg.owner) %>,<% if (!pkg.dev) { %>
+  "group": <%- json(pkg.group) %>,
+  "visibility": <%- json(pkg.visibility) %><% } else { %>
   "devOnly": true<% } %>
 }

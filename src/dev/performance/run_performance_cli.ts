@@ -47,6 +47,7 @@ const journeyTargetGroups: JourneyTargetGroups = {
   maps: ['ecommerce_dashboard_map_only'],
   ml: ['aiops_log_rate_analysis', 'many_fields_transform', 'tsdb_logs_data_visualizer'],
   esql: ['many_fields_discover_esql', 'web_logs_dashboard_esql'],
+  http2: ['data_stress_test_lens_http2', 'ecommerce_dashboard_http2'],
 };
 
 const readFilesRecursively = (dir: string, callback: Function) => {
@@ -108,7 +109,8 @@ async function startEs(props: EsRunProps) {
       'scripts/es',
       'snapshot',
       '--license=trial',
-      // Temporarily disabling APM
+      // Temporarily disabling APM because the token needs to be added to the keystore
+      // and cannot be set via command line
       // ...(JOURNEY_APM_CONFIG.active
       //   ? [
       //       '-E',
@@ -154,6 +156,8 @@ async function runFunctionalTest(props: TestRunProps) {
           k.startsWith('ELASTIC_APM_') ? [[k, undefined]] : []
         )
       ),
+      ELASTIC_APM_ENVIRONMENT: process.env.ELASTIC_APM_ENVIRONMENT,
+      ELASTIC_APM_SERVICE_NAME: process.env.ELASTIC_APM_SERVICE_NAME,
       TEST_PERFORMANCE_PHASE: phase,
       TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
       TEST_ES_DISABLE_STARTUP: 'true',

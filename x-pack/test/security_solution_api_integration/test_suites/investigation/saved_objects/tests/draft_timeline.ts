@@ -6,29 +6,28 @@
  */
 
 import expect from '@kbn/expect';
+import { TIMELINE_DRAFT_URL } from '@kbn/security-solution-plugin/common/constants';
+import TestAgent from 'supertest/lib/agent';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 
-import { FtrProviderContext } from '../../../../../api_integration/ftr_provider_context';
-
-export default function ({ getService }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
-  const supertest = getService('supertest');
+export default function ({ getService }: FtrProviderContextWithSpaces) {
+  const utils = getService('securitySolutionUtils');
+  let supertest: TestAgent;
 
   describe('Draft timeline - Saved Objects', () => {
-    before(() => kibanaServer.savedObjects.cleanStandardList());
-    after(() => kibanaServer.savedObjects.cleanStandardList());
+    before(async () => (supertest = await utils.createSuperTest()));
 
     describe('Clean draft timelines', () => {
       it('returns a draft timeline if none exists', async () => {
         const response = await supertest
-          .post('/api/timeline/_draft')
+          .post(TIMELINE_DRAFT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
             timelineType: 'default',
           });
 
-        const { savedObjectId, version } =
-          response.body.data && response.body.data.persistTimeline.timeline;
+        const { savedObjectId, version } = response.body.data && response.body;
 
         expect(savedObjectId).to.not.be.empty();
         expect(version).to.not.be.empty();
@@ -36,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('returns a draft timeline template if none exists', async () => {
         const response = await supertest
-          .post('/api/timeline/_draft')
+          .post(TIMELINE_DRAFT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -49,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
           timelineType,
           templateTimelineId,
           templateTimelineVersion,
-        } = response.body.data && response.body.data.persistTimeline.timeline;
+        } = response.body.data && response.body;
 
         expect(savedObjectId).to.not.be.empty();
         expect(version).to.not.be.empty();
@@ -60,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('returns a cleaned draft timeline if another one already exists', async () => {
         const response = await supertest
-          .post('/api/timeline/_draft')
+          .post(TIMELINE_DRAFT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -72,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
           pinnedEventIds: initialPinnedEventIds,
           noteIds: initialNoteIds,
           version: initialVersion,
-        } = response.body.data && response.body.data.persistTimeline.timeline;
+        } = response.body.data && response.body;
 
         expect(initialPinnedEventIds).to.have.length(0, 'should not have any pinned events');
         expect(initialNoteIds).to.have.length(0, 'should not have any notes');
@@ -107,14 +106,14 @@ export default function ({ getService }: FtrProviderContext) {
           pinnedEventIds,
           noteIds,
           status: newStatus,
-        } = getTimelineRequest.body.data && getTimelineRequest.body.data.getOneTimeline;
+        } = getTimelineRequest.body.data && getTimelineRequest.body;
 
         expect(newStatus).to.be.equal('draft', 'status should still be draft');
         expect(pinnedEventIds).to.have.length(1, 'should have one pinned event');
         expect(noteIds).to.have.length(1, 'should have one note');
 
         const cleanDraftTimelineRequest = await supertest
-          .post('/api/timeline/_draft')
+          .post(TIMELINE_DRAFT_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -126,8 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
           pinnedEventIds: cleanedPinnedEventIds,
           noteIds: cleanedNoteIds,
           version: cleanedVersion,
-        } = cleanDraftTimelineRequest.body.data &&
-        cleanDraftTimelineRequest.body.data.persistTimeline.timeline;
+        } = cleanDraftTimelineRequest.body.data && cleanDraftTimelineRequest.body;
 
         expect(cleanedPinnedEventIds).to.have.length(0, 'should not have pinned events anymore');
         expect(cleanedNoteIds).to.have.length(0, 'should not have notes anymore');

@@ -1,0 +1,21 @@
+{
+  "close_point_in_time": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_pit"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-open-point-in-time",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

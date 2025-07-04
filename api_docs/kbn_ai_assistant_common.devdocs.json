@@ -27,7 +27,7 @@
         "label": "filterScopes",
         "description": [],
         "signature": [
-          "(scope: ",
+          "(scopeFilters: ",
           {
             "pluginId": "@kbn/ai-assistant-common",
             "scope": "common",
@@ -35,18 +35,18 @@
             "section": "def-common.AssistantScope",
             "text": "AssistantScope"
           },
-          " | undefined) => (value: T) => boolean"
+          "[] | undefined) => (value: T) => boolean"
         ],
-        "path": "x-pack/packages/kbn-ai-assistant-common/src/utils/filter_scopes.ts",
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ai-assistant-common",
             "id": "def-common.filterScopes.$1",
-            "type": "CompoundType",
+            "type": "Array",
             "tags": [],
-            "label": "scope",
+            "label": "scopeFilters",
             "description": [],
             "signature": [
               {
@@ -56,9 +56,9 @@
                 "section": "def-common.AssistantScope",
                 "text": "AssistantScope"
               },
-              " | undefined"
+              "[] | undefined"
             ],
-            "path": "x-pack/packages/kbn-ai-assistant-common/src/utils/filter_scopes.ts",
+            "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -81,7 +81,7 @@
         "signature": [
           "\"search\" | \"observability\" | \"all\""
         ],
-        "path": "x-pack/packages/kbn-ai-assistant-common/src/types/index.ts",
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

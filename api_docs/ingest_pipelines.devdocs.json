@@ -21,7 +21,7 @@
           },
           " extends Partial<IngestPipelinesBaseParams>"
         ],
-        "path": "x-pack/plugins/ingest_pipelines/public/locator.ts",
+        "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,9 +42,72 @@
               },
               ".LIST"
             ],
-            "path": "x-pack/plugins/ingest_pipelines/public/locator.ts",
+            "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/locator.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ingestPipelines",
+        "id": "def-public.IngestPipelinesPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "IngestPipelinesPluginStart",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "ingestPipelines",
+            "id": "def-public.IngestPipelinesPluginStart.getIngestPipelineFlyoutComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getIngestPipelineFlyoutComponent",
+            "description": [],
+            "signature": [
+              "(deps: { history: ",
+              "ScopedHistory",
+              "<unknown>; }) => React.FC<",
+              "IngestPipelineFlyoutProps",
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ingestPipelines",
+                "id": "def-public.IngestPipelinesPluginStart.getIngestPipelineFlyoutComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "ingestPipelines",
+                    "id": "def-public.IngestPipelinesPluginStart.getIngestPipelineFlyoutComponent.$1.history",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "history",
+                    "description": [],
+                    "signature": [
+                      "ScopedHistory",
+                      "<unknown>"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -58,7 +121,7 @@
         "tags": [],
         "label": "INGEST_PIPELINES_PAGES",
         "description": [],
-        "path": "x-pack/plugins/ingest_pipelines/public/locator.ts",
+        "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -75,7 +138,7 @@
         "signature": [
           "\"INGEST_PIPELINES_APP_LOCATOR\""
         ],
-        "path": "x-pack/plugins/ingest_pipelines/public/locator.ts",
+        "path": "x-pack/platform/plugins/shared/ingest_pipelines/public/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,0 +1,36 @@
+{
+  "indices.clear_cache": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "index": [],
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "fielddata": "__flag__",
+      "fields": [],
+      "ignore_unavailable": "__flag__",
+      "query": "__flag__",
+      "request": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_cache/clear",
+      "{index}/_cache/clear"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-clear-cache",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

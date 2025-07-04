@@ -10,36 +10,32 @@
  * valid deprecations
  */
 
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const translogSettingsIndexDeprecation: IndicesCreateRequest = {
   index: 'deprecated_settings',
-  body: {
-    settings: {
-      'translog.retention.size': '1b',
-      'translog.retention.age': '5m',
-      'index.soft_deletes.enabled': true,
-    },
+  settings: {
+    'translog.retention.size': '1b',
+    'translog.retention.age': '5m',
+    'index.soft_deletes.enabled': true,
   },
 };
 
 const multiFieldsIndexDeprecation: IndicesCreateRequest = {
   index: 'nested_multi_fields',
-  body: {
-    mappings: {
-      properties: {
-        text: {
-          type: 'text',
-          fields: {
-            english: {
-              type: 'text',
-              analyzer: 'english',
-              fields: {
-                english: {
-                  type: 'text',
-                  analyzer: 'english',
-                },
+  mappings: {
+    properties: {
+      text: {
+        type: 'text',
+        fields: {
+          english: {
+            type: 'text',
+            analyzer: 'english',
+            fields: {
+              english: {
+                type: 'text',
+                analyzer: 'english',
               },
             },
           },
@@ -95,12 +91,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('ES deprecations logs page', () => {
+    describe('ES deprecations logs flyout', () => {
       beforeEach(async () => {
-        await PageObjects.upgradeAssistant.navigateToEsDeprecationLogs();
+        await PageObjects.upgradeAssistant.navigateToPage();
       });
 
       it('with logs collection disabled', async () => {
+        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (loggingEnabled) {
           await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
@@ -113,6 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('with logs collection enabled', async () => {
+        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (!loggingEnabled) {
           await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();

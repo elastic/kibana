@@ -40,7 +40,11 @@ export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDe
         /**
          * Important: You must restrict access to this endpoint using access `tags`.
          */
-        options: { tags: ['access:suggestUserProfiles'] },
+        security: {
+          authz: {
+            requiredPrivileges: ['suggestUserProfiles'],
+          },
+        },
       },
       async (context, request, response) => {
         const [, pluginDeps] = await core.getStartServices();

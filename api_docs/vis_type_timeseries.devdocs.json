@@ -24,7 +24,7 @@
           ") => data is ",
           "SeriesData"
         ],
-        "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
+        "path": "src/platform/plugins/shared/vis_types/timeseries/common/vis_data_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
             "signature": [
               "TimeseriesVisData"
             ],
-            "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
+            "path": "src/platform/plugins/shared/vis_types/timeseries/common/vis_data_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,7 +60,7 @@
           ") => data is ",
           "TableData"
         ],
-        "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
+        "path": "src/platform/plugins/shared/vis_types/timeseries/common/vis_data_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -74,7 +74,7 @@
             "signature": [
               "TimeseriesVisData"
             ],
-            "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
+            "path": "src/platform/plugins/shared/vis_types/timeseries/common/vis_data_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -99,7 +99,7 @@
           " | ",
           "TableData"
         ],
-        "path": "src/plugins/vis_types/timeseries/common/types/vis_data.ts",
+        "path": "src/platform/plugins/shared/vis_types/timeseries/common/types/vis_data.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -113,7 +113,7 @@
       "tags": [],
       "label": "VisTypeTimeseriesSetup",
       "description": [],
-      "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
+      "path": "src/platform/plugins/shared/vis_types/timeseries/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -134,18 +134,12 @@
               "text": "DataRequestHandlerContext"
             },
             ", fakeRequest: ",
-            {
-              "pluginId": "@kbn/core-http-server",
-              "scope": "server",
-              "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>, options: any) => Promise<",
             "TimeseriesVisData",
             ">"
           ],
-          "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
+          "path": "src/platform/plugins/shared/vis_types/timeseries/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -165,7 +159,7 @@
                   "text": "DataRequestHandlerContext"
                 }
               ],
-              "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
+              "path": "src/platform/plugins/shared/vis_types/timeseries/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -178,16 +172,10 @@
               "label": "fakeRequest",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/core-http-server",
-                  "scope": "server",
-                  "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>"
               ],
-              "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
+              "path": "src/platform/plugins/shared/vis_types/timeseries/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -202,7 +190,7 @@
               "signature": [
                 "any"
               ],
-              "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
+              "path": "src/platform/plugins/shared/vis_types/timeseries/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true

@@ -31,15 +31,13 @@ export default function ({ getService }: FtrProviderContext) {
   const createIndex = async () => {
     await es.indices.create({
       index: INDEX_NAME,
-      body: {
-        mappings: {
-          properties: {
-            foo: {
-              type: 'integer',
-            },
-            bar: {
-              type: 'keyword',
-            },
+      mappings: {
+        properties: {
+          foo: {
+            type: 'integer',
+          },
+          bar: {
+            type: 'keyword',
           },
         },
       },

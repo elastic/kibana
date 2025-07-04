@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { EuiPage } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
 import { Page } from '../../components/page';
 import { DrilldownsManager } from '../drilldowns_manager';
 
-export const App: React.FC = () => {
-  return (
+export const App = ({ core }: { core: CoreStart }) => {
+  return core.rendering.addContext(
     <EuiPage>
       <Page title={'UI Actions Enhanced'}>
         <DrilldownsManager />

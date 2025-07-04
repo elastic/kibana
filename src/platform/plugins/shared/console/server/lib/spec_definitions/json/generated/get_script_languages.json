@@ -1,0 +1,21 @@
+{
+  "get_script_languages": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_script_language"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script-languages",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

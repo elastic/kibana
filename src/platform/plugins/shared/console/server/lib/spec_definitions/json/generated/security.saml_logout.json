@@ -1,0 +1,21 @@
+{
+  "security.saml_logout": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/saml/logout"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-saml-logout",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

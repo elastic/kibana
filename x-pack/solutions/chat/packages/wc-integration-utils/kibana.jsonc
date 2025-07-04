@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/wc-integration-utils",
+  "owner": [
+    "@elastic/search-kibana",
+    "@elastic/workchat-eng"
+  ],
+  "group": "chat",
+  "visibility": "private"
+}

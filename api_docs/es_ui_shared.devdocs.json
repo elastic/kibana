@@ -21,7 +21,7 @@
           "FieldToValueMap",
           ", any>"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
               "(props: Props) => ",
               "FieldToValueMap"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -50,7 +50,7 @@
                 "signature": [
                   "Props"
                 ],
-                "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -68,7 +68,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -82,7 +82,7 @@
                 "signature": [
                   "Props"
                 ],
-                "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -108,7 +108,7 @@
               },
               ") => void"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -128,7 +128,7 @@
                     "text": "Frequency"
                   }
                 ],
-                "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -148,7 +148,7 @@
               "FieldToValueMap",
               ") => void"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -162,7 +162,7 @@
                 "signature": [
                   "FieldToValueMap"
                 ],
-                "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+                "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -180,7 +180,7 @@
             "signature": [
               "() => React.JSX.Element | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -196,7 +196,7 @@
             "signature": [
               "() => React.JSX.Element"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -217,7 +217,7 @@
         "signature": [
           "(value?: string | undefined) => string | undefined"
         ],
-        "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/url/attempt_to_uri_decode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -231,7 +231,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/url/attempt_to_uri_decode.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -250,7 +250,7 @@
         "signature": [
           "({ privilegesEndpoint, httpClient, children }: Props) => React.JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -264,7 +264,7 @@
             "signature": [
               "Props"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -285,7 +285,7 @@
           "ParsedQuery",
           "<string>"
         ],
-        "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/url/extract_query_params.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -299,7 +299,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/url/extract_query_params.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -318,7 +318,7 @@
         "signature": [
           "<T extends object = { [key: string]: any; }>({ label, helpText, onUpdate, value, defaultValue, codeEditorProps, error: propsError, ...rest }: Props<T>) => React.JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/components/json_editor/json_editor.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -333,7 +333,7 @@
             "signature": [
               "Props<T>"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/json_editor/json_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -350,7 +350,7 @@
         "signature": [
           "({ title, message, dataTestSubj }: Props) => React.JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -364,7 +364,7 @@
             "signature": [
               "Props"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -383,7 +383,7 @@
         "signature": [
           "({ title, error, actions, isCentered, ...rest }: Props) => React.JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -397,7 +397,7 @@
             "signature": [
               "Props"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -416,7 +416,7 @@
         "signature": [
           "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/components/page_loading/page_loading.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -430,7 +430,7 @@
             "signature": [
               "{ children?: React.ReactNode; }"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/page_loading/page_loading.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -449,7 +449,7 @@
         "signature": [
           "({ title, error, actions, ...rest }: Props) => React.JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -463,7 +463,7 @@
             "signature": [
               "Props"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -482,7 +482,7 @@
         "signature": [
           "({ inline, \"data-test-subj\": dataTestSubj, children, ...rest }: Props) => React.JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/components/section_loading/section_loading.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -496,7 +496,7 @@
             "signature": [
               "Props"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/section_loading/section_loading.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -514,13 +514,7 @@
         "description": [],
         "signature": [
           "<D = any, E = any>(httpClient: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", { path, method, body, query, version, asSystemRequest }: ",
           {
             "pluginId": "esUiShared",
@@ -539,7 +533,7 @@
           },
           "<D, E>>"
         ],
-        "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -551,15 +545,9 @@
             "label": "httpClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -580,7 +568,7 @@
                 "text": "SendRequestConfig"
               }
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -600,7 +588,7 @@
           "() => ",
           "Authorization"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -616,13 +604,7 @@
         "description": [],
         "signature": [
           "<D = any, E = Error>(httpClient: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", { path, method, query, body, pollIntervalMs, initialData, deserializer, version, }: ",
           {
             "pluginId": "esUiShared",
@@ -641,7 +623,7 @@
           },
           "<D, E>"
         ],
-        "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -653,15 +635,9 @@
             "label": "httpClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -682,7 +658,7 @@
                 "text": "UseRequestConfig"
               }
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -701,7 +677,7 @@
         "signature": [
           "(props: ViewApiRequestFlyoutProps) => React.JSX.Element"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -715,7 +691,7 @@
             "signature": [
               "ViewApiRequestFlyoutProps"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -734,7 +710,7 @@
         "signature": [
           "({ privileges: requiredPrivileges, children }: Props) => JSX.Element | null"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -748,7 +724,7 @@
             "signature": [
               "Props"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -766,7 +742,7 @@
         "tags": [],
         "label": "Authorization",
         "description": [],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -777,7 +753,7 @@
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -792,7 +768,7 @@
               "Error",
               " | null"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -812,7 +788,7 @@
                 "text": "Privileges"
               }
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -826,7 +802,7 @@
         "tags": [],
         "label": "Error",
         "description": [],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -837,7 +813,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -851,7 +827,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -865,7 +841,21 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.Error.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -889,7 +879,7 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/components/json_editor/use_json.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -903,7 +893,7 @@
             "signature": [
               "{ raw: string; format(): T; }"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/json_editor/use_json.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -917,7 +907,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/json_editor/use_json.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -933,7 +923,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/json_editor/use_json.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -947,7 +937,7 @@
         "tags": [],
         "label": "MissingPrivileges",
         "description": [],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -961,7 +951,7 @@
             "signature": [
               "[key: string]:  string[] | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -975,7 +965,7 @@
         "tags": [],
         "label": "Privileges",
         "description": [],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -986,7 +976,7 @@
             "tags": [],
             "label": "hasAllPrivileges",
             "description": [],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1006,7 +996,7 @@
                 "text": "MissingPrivileges"
               }
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1020,7 +1010,7 @@
         "tags": [],
         "label": "SendRequestConfig",
         "description": [],
-        "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1031,7 +1021,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1045,7 +1035,7 @@
             "signature": [
               "\"get\" | \"delete\" | \"head\" | \"post\" | \"put\" | \"patch\""
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1057,16 +1047,10 @@
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchQuery",
-                "text": "HttpFetchQuery"
-              },
+              "HttpFetchQuery",
               " | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1080,7 +1064,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1096,7 +1080,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1110,7 +1094,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1134,7 +1118,7 @@
           },
           "<D, E>"
         ],
-        "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1148,7 +1132,7 @@
             "signature": [
               "D | null"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1162,7 +1146,7 @@
             "signature": [
               "E | null"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1193,7 +1177,7 @@
             "text": "SendRequestConfig"
           }
         ],
-        "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1207,7 +1191,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1221,7 +1205,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1235,7 +1219,7 @@
             "signature": [
               "((data: any) => any) | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1249,7 +1233,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+                "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1277,7 +1261,7 @@
           },
           "<D, E>"
         ],
-        "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1288,7 +1272,7 @@
             "tags": [],
             "label": "isInitialRequest",
             "description": [],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1299,7 +1283,7 @@
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1313,7 +1297,7 @@
             "signature": [
               "E | null"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1327,7 +1311,7 @@
             "signature": [
               "D | null | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1341,7 +1325,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1363,7 +1347,7 @@
         "signature": [
           "\"MINUTE\" | \"HOUR\" | \"DAY\" | \"WEEK\" | \"MONTH\" | \"YEAR\""
         ],
-        "path": "src/plugins/es_ui_shared/public/components/cron_editor/types.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/components/cron_editor/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1386,7 +1370,7 @@
           },
           "<T>) => void"
         ],
-        "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/components/json_editor/use_json.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1408,7 +1392,7 @@
               },
               "<T>"
             ],
-            "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/components/json_editor/use_json.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1429,7 +1413,7 @@
           "Authorization",
           ">"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1441,7 +1425,7 @@
         "tags": [],
         "label": "indices",
         "description": [],
-        "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/public/indices/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1455,7 +1439,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/indices/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1469,7 +1453,7 @@
             "signature": [
               "(indexName?: string | undefined) => boolean"
             ],
-            "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/indices/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1484,7 +1468,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                "path": "src/platform/plugins/shared/es_ui_shared/public/indices/validate/validate_index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1500,7 +1484,7 @@
             "signature": [
               "(indexName: string) => string[]"
             ],
-            "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/indices/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1512,7 +1496,7 @@
                 "tags": [],
                 "label": "indexName",
                 "description": [],
-                "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                "path": "src/platform/plugins/shared/es_ui_shared/public/indices/validate/validate_index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1528,7 +1512,7 @@
             "signature": [
               "(indexName: string) => boolean"
             ],
-            "path": "src/plugins/es_ui_shared/public/indices/index.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/public/indices/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1540,7 +1524,7 @@
                 "tags": [],
                 "label": "indexName",
                 "description": [],
-                "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
+                "path": "src/platform/plugins/shared/es_ui_shared/public/indices/validate/validate_index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1567,16 +1551,10 @@
         ],
         "signature": [
           "({ error, response, handleCustomError, }: EsErrorHandlerParams) => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1590,7 +1568,7 @@
             "signature": [
               "EsErrorHandlerParams"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1609,7 +1587,7 @@
         "signature": [
           "(err: string) => ParsedError"
         ],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1623,7 +1601,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1649,7 +1627,7 @@
         "tags": [],
         "label": "MissingPrivileges",
         "description": [],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1663,7 +1641,7 @@
             "signature": [
               "[key: string]:  string[] | undefined"
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1677,7 +1655,7 @@
         "tags": [],
         "label": "Privileges",
         "description": [],
-        "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+        "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1688,7 +1666,7 @@
             "tags": [],
             "label": "hasAllPrivileges",
             "description": [],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1708,7 +1686,7 @@
                 "text": "MissingPrivileges"
               }
             ],
-            "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

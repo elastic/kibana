@@ -6,9 +6,9 @@
  */
 
 import { APM_METRIC_INDEX_NAME } from '../../constants';
-import { GetService } from '../../types';
+import type { GetService } from '../../types';
 import { getSpaceUrlPrefix } from '../authentication/spaces';
-import { User } from '../authentication/types';
+import type { User } from '../authentication/types';
 import { getAlertsTargetIndices } from './get_alerts_target_indices';
 
 export const deleteAlert = async (
@@ -22,7 +22,7 @@ export const deleteAlert = async (
   const { body: targetIndices } = await getAlertsTargetIndices(getService, user, spaceId);
   if (id) {
     const { body, status } = await supertest
-      .delete(`${getSpaceUrlPrefix(spaceId)}/api/alerts/alert/${id}`)
+      .delete(`${getSpaceUrlPrefix(spaceId)}/api/alerting/rule/${id}`)
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'foo');
 
@@ -35,10 +35,8 @@ export const deleteAlert = async (
 
   await es.deleteByQuery({
     index: targetIndices[0],
-    body: {
-      query: {
-        match_all: {},
-      },
+    query: {
+      match_all: {},
     },
     refresh: true,
   });

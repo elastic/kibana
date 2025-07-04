@@ -28,31 +28,49 @@ describe('request logging', () => {
 
   describe('http server response logging', () => {
     describe('configuration', () => {
+      let root: ReturnType<typeof createRoot>;
+
+      afterEach(async () => {
+        await root?.shutdown();
+      });
       it('does not log with a default config', async () => {
-        const root = createRoot({
+        root = createRoot({
           plugins: { initialize: false },
           elasticsearch: { skipStartupConnectionCheck: true },
           server: { restrictInternalApis: false },
+          logging: {
+            appenders: {
+              'test-console': { type: 'console', layout: { type: 'json' } },
+            },
+            loggers: [
+              {
+                name: 'http.server.response',
+                appenders: ['test-console'],
+                level: 'off',
+              },
+            ],
+          },
         });
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').expect(200, 'pong');
         expect(mockConsoleLog).not.toHaveBeenCalled();
-
-        await root.shutdown();
       });
 
       it('logs at the correct level and with the correct context', async () => {
-        const root = createRoot({
+        root = createRoot({
           logging: {
             appenders: {
               'test-console': {
@@ -80,12 +98,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').expect(200, 'pong');
@@ -93,8 +114,6 @@ describe('request logging', () => {
         const [level, logger] = mockConsoleLog.mock.calls[0][0].split('|');
         expect(level).toBe('DEBUG');
         expect(logger).toBe('http.server.response');
-
-        await root.shutdown();
       });
     });
 
@@ -131,19 +150,22 @@ describe('request logging', () => {
       });
 
       afterEach(async () => {
-        await root.shutdown();
+        await root?.shutdown();
       });
 
       it('handles a GET request', async () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').expect(200, 'pong');
@@ -164,6 +186,7 @@ describe('request logging', () => {
         http.createRouter('/').post(
           {
             path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
             validate: {
               body: schema.object({ message: schema.string() }),
             },
@@ -193,12 +216,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/a', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/a',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/b').expect(404);
@@ -214,12 +240,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').query({ hey: 'ya' }).expect(200, 'pong');
@@ -233,12 +262,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         const response = await request.get(root, '/ping').expect(200, 'pong');
@@ -252,12 +284,15 @@ describe('request logging', () => {
           await root.preboot();
           const { http } = await root.setup();
 
-          http
-            .createRouter('/')
-            .get(
-              { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-              (context, req, res) => res.ok({ headers: { bar: 'world' }, body: 'pong' })
-            );
+          http.createRouter('/').get(
+            {
+              path: '/ping',
+              security: { authz: { enabled: false, reason: '' } },
+              validate: false,
+              options: { authRequired: 'optional' },
+            },
+            (context, req, res) => res.ok({ headers: { bar: 'world' }, body: 'pong' })
+          );
           await root.start();
 
           await request.get(root, '/ping').set('foo', 'hello').expect(200);
@@ -274,6 +309,7 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: { authz: { enabled: false, reason: '' } },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
@@ -343,6 +379,7 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: { authz: { enabled: false, reason: '' } },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
@@ -376,6 +413,7 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: { authz: { enabled: false, reason: '' } },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
@@ -443,6 +481,7 @@ describe('request logging', () => {
           http.createRouter('/').post(
             {
               path: '/ping',
+              security: { authz: { enabled: false, reason: '' } },
               validate: {
                 body: schema.object({ message: schema.string() }),
               },
@@ -474,12 +513,15 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http
-          .createRouter('/')
-          .get(
-            { path: '/ping', validate: false, options: { authRequired: 'optional' } },
-            (context, req, res) => res.ok({ body: 'pong' })
-          );
+        http.createRouter('/').get(
+          {
+            path: '/ping',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { authRequired: 'optional' },
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
         await root.start();
 
         await request.get(root, '/ping').set('user-agent', 'world').expect(200);

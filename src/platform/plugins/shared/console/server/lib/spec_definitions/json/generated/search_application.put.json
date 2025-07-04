@@ -1,0 +1,22 @@
+{
+  "search_application.put": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "create": "__flag__"
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_application/search_application/{name}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-put",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

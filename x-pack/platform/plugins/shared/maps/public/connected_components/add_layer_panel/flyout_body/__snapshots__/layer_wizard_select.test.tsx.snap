@@ -1,0 +1,97 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LayerWizardSelect Should render layer select after layer wizards are loaded 1`] = `
+<Fragment>
+  <EuiFacetGroup
+    gutterSize="s"
+    layout="horizontal"
+  >
+    <EuiFacetButton
+      isSelected={true}
+      key="all"
+      minWidth={false}
+      onClick={[Function]}
+    >
+      <MemoizedFormattedMessage
+        defaultMessage="All"
+        id="xpack.maps.layerWizardSelect.allCategories"
+      />
+    </EuiFacetButton>
+    <EuiFacetButton
+      isSelected={false}
+      key="ELASTICSEARCH"
+      minWidth={false}
+      onClick={[Function]}
+    >
+      Elasticsearch
+    </EuiFacetButton>
+    <EuiFacetButton
+      isSelected={false}
+      key="SOLUTIONS"
+      minWidth={false}
+      onClick={[Function]}
+    >
+      Solutions
+    </EuiFacetButton>
+  </EuiFacetGroup>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGrid
+    columns={2}
+    component="ul"
+    gutterSize="m"
+  >
+    <EuiFlexItem
+      component="li"
+      key="wizard 1"
+    >
+      <EuiCard
+        betaBadgeProps={
+          Object {
+            "label": "",
+          }
+        }
+        data-test-subj="wizard1"
+        description="mock wizard without icon"
+        isDisabled={false}
+        onClick={[Function]}
+        title="wizard 1"
+        titleSize="xs"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="li"
+      key="wizard 2"
+    >
+      <EuiCard
+        betaBadgeProps={
+          Object {
+            "label": "",
+          }
+        }
+        data-test-subj="wizard2"
+        description="mock wizard with icon"
+        icon={
+          <EuiIcon
+            size="l"
+            type="logoObservability"
+          />
+        }
+        isDisabled={false}
+        onClick={[Function]}
+        title="wizard 2"
+        titleSize="xs"
+      />
+    </EuiFlexItem>
+  </EuiFlexGrid>
+</Fragment>
+`;
+
+exports[`LayerWizardSelect Should render loading screen before layer wizards are loaded 1`] = `
+<EuiPanel>
+  <EuiSkeletonText
+    lines={2}
+  />
+</EuiPanel>
+`;

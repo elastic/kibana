@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterListUsagePopover renders the popover for 1 job 1`] = `
+<div>
+  <div
+    class="euiPopover emotion-euiPopover-inline-block"
+    id="job_filter_list_usage"
+  >
+    <button
+      class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
+      type="button"
+    >
+      <span
+        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+      >
+        <span
+          class="eui-textTruncate euiButtonEmpty__text"
+        >
+          1 job
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`FilterListUsagePopover renders the popover for 2 detectors 1`] = `
+<div>
+  <div
+    class="euiPopover emotion-euiPopover-inline-block"
+    id="detector_filter_list_usage"
+  >
+    <button
+      class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
+      type="button"
+    >
+      <span
+        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+      >
+        <span
+          class="eui-textTruncate euiButtonEmpty__text"
+        >
+          3 detectors
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

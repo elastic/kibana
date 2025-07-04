@@ -1,0 +1,28 @@
+{
+  "ml.get_categories": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "from": "",
+      "partition_field_value": "",
+      "size": [
+        "100"
+      ]
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/results/categories/{category_id}",
+      "_ml/anomaly_detectors/{job_id}/results/categories"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-categories",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

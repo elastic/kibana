@@ -39,7 +39,7 @@
           },
           ") => React.ForwardRefExoticComponent<React.PropsWithoutRef<React.ComponentPropsWithRef<TElement>> & React.RefAttributes<TRef>>"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,7 +53,7 @@
             "signature": [
               "Loader<TElement>"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,7 +74,7 @@
                 "text": "DynamicOptions"
               }
             ],
-            "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -95,7 +95,7 @@
         "signature": [
           "() => React.JSX.Element"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/fallback.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/fallback.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -114,7 +114,7 @@
         "signature": [
           "(element: HTMLElement | null | undefined, container?: HTMLElement | undefined) => HTMLAnchorElement | undefined"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,7 +128,7 @@
             "signature": [
               "HTMLElement | null | undefined"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -143,7 +143,7 @@
             "signature": [
               "HTMLElement | undefined"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -164,7 +164,7 @@
         "signature": [
           "(event: React.MouseEvent<Element, MouseEvent>) => boolean"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,7 +178,7 @@
             "signature": [
               "React.MouseEvent<Element, MouseEvent>"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -207,7 +207,7 @@
           },
           "> & React.RefAttributes<R>>"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,7 +223,7 @@
             "signature": [
               "React.ComponentType<P>"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -240,7 +240,7 @@
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -260,7 +260,7 @@
         "description": [
           "\nOptions for the lazy loaded component"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -274,7 +274,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -290,7 +290,7 @@
         "description": [
           "\nOptional services that the Suspense wrapper can use"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -304,16 +304,10 @@
               "\nThe `AnalyticsServiceStart` object from `CoreStart`"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-public.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              },
+              "AnalyticsServiceStart",
               " | undefined"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

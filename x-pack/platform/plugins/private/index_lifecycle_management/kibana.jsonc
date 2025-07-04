@@ -1,0 +1,33 @@
+{
+  "type": "plugin",
+  "id": "@kbn/index-lifecycle-management-plugin",
+  "owner": "@elastic/kibana-management",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "indexLifecycleManagement",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "ilm"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "features",
+      "share"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "usageCollection",
+      "indexManagement",
+      "home"
+    ],
+    "requiredBundles": [
+      "indexManagement",
+      "kibanaReact",
+      "esUiShared"
+    ]
+  }
+}

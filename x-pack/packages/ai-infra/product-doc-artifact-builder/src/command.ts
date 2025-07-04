@@ -6,19 +6,19 @@
  */
 
 import Path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
 import yargs from 'yargs';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { DocumentationProduct } from '@kbn/product-doc-common';
 import type { TaskConfig } from './types';
 import { buildArtifacts } from './build_artifacts';
-import { sourceProductNames } from './artifact/product_name';
 
 function options(y: yargs.Argv) {
   return y
     .option('productName', {
       describe: 'name of products to generate documentation for',
       array: true,
-      choices: sourceProductNames,
-      default: ['Kibana'],
+      choices: Object.values(DocumentationProduct),
+      default: [DocumentationProduct.kibana],
     })
     .option('stackVersion', {
       describe: 'The stack version to generate documentation for',
@@ -71,6 +71,10 @@ function options(y: yargs.Argv) {
       demandOption: true,
       default: process.env.KIBANA_EMBEDDING_CLUSTER_PASSWORD,
     })
+    .option('inferenceId', {
+      describe: 'The inference id to use for the artifacts',
+      string: true,
+    })
     .locale('en');
 }
 
@@ -89,6 +93,7 @@ export function runScript() {
         embeddingClusterUrl: argv.embeddingClusterUrl!,
         embeddingClusterUsername: argv.embeddingClusterUsername!,
         embeddingClusterPassword: argv.embeddingClusterPassword!,
+        inferenceId: argv.inferenceId,
       };
 
       return buildArtifacts(taskConfig);

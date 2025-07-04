@@ -28,7 +28,7 @@ const getRoleConfiguration = (role: string, filePath: string): any => {
 };
 
 const rolesPath =
-  '../../../packages/kbn-es/src/serverless_resources/project_roles/security/roles.yml';
+  '../../../src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml';
 
 export const getApiKeyForUser = async () => {
   const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });

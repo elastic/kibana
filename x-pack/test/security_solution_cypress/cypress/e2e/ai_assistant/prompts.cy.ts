@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/user/translations';
-import { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptCreateProps } from '@kbn/elastic-assistant-common/impl/schemas';
+import { IS_SERVERLESS } from '../../env_var_names_constants';
 import { QUICK_PROMPT_BADGE, USER_PROMPT } from '../../screens/ai_assistant';
 import { createRule } from '../../tasks/api_calls/rules';
 import {
@@ -16,10 +16,12 @@ import {
   assertSystemPromptSelected,
   assertSystemPromptSent,
   clearSystemPrompt,
+  createAndTitleConversation,
   createQuickPrompt,
   createSystemPrompt,
   openAssistant,
   resetConversation,
+  selectConnector,
   selectConversation,
   selectSystemPrompt,
   sendQuickPrompt,
@@ -28,9 +30,10 @@ import {
 import {
   deleteConversations,
   deletePrompts,
+  waitForConversation,
   waitForCreatePrompts,
 } from '../../tasks/api_calls/assistant';
-import { createAzureConnector } from '../../tasks/api_calls/connectors';
+import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
 import { login } from '../../tasks/login';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
@@ -55,14 +58,26 @@ const customPrompt2 = {
   content: 'This is an enhanced system prompt.',
   promptType,
 };
+const mockConvo1 = {
+  id: 'spooky',
+  title: 'Spooky convo',
+  messages: [],
+};
+const mockConvo2 = {
+  id: 'silly',
+  title: 'Silly convo',
+  messages: [],
+};
 
 describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteConnectors();
     deleteConversations();
     deletePrompts();
-    login();
+    login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
     createAzureConnector();
+    waitForConversation(mockConvo1);
+    waitForConversation(mockConvo2);
   });
 
   describe('System Prompts', () => {
@@ -95,15 +110,17 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     it('Last selected system prompt persists in conversation', () => {
       visitGetStartedPage();
       openAssistant();
+      selectConversation(mockConvo1.title);
+      selectConnector(azureConnectorAPIPayload.name);
       selectSystemPrompt(customPrompt2.name);
       typeAndSendMessage('hello');
       assertSystemPromptSent(customPrompt2.content);
       assertMessageSent('hello', true);
       resetConversation();
       assertSystemPromptSelected(customPrompt2.name);
-      selectConversation('Timeline');
+      selectConversation(mockConvo2.title);
       assertEmptySystemPrompt();
-      selectConversation('Welcome');
+      selectConversation(mockConvo1.title);
       assertSystemPromptSelected(customPrompt2.name);
     });
 
@@ -119,10 +136,17 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       assertMessageSent('hello', true);
     });
 
+    // due to the missing profile_uid when creating conversations from the API
+    // bulk actions cannot be performed on conversations, so they must be created from the UI for this test
     it('Add prompt from system prompt selector and set multiple conversations (including current) as default conversation', () => {
       visitGetStartedPage();
       openAssistant();
-      createSystemPrompt(testPrompt.name, testPrompt.content, ['Welcome', 'Timeline']);
+      createAndTitleConversation('Lucky title');
+      resetConversation();
+      createAndTitleConversation('Lovely title');
+      resetConversation();
+      // current conversation is 'Lovely title'
+      createSystemPrompt(testPrompt.name, testPrompt.content, ['Lucky title', 'Lovely title']);
       assertSystemPromptSelected(testPrompt.name);
       typeAndSendMessage('hello');
 
@@ -130,7 +154,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       assertMessageSent('hello', true);
       // ensure response before changing convo
       assertErrorResponse();
-      selectConversation('Timeline');
+      selectConversation('Lucky title');
       assertSystemPromptSelected(testPrompt.name);
       typeAndSendMessage('hello');
 
@@ -157,10 +181,6 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       expandFirstAlert();
       openAssistant('alert');
       cy.get(QUICK_PROMPT_BADGE(testPrompt.name)).should('be.visible');
-      cy.get(USER_PROMPT).should(
-        'have.text',
-        EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N
-      );
       cy.get(QUICK_PROMPT_BADGE(testPrompt.name)).click();
       cy.get(USER_PROMPT).should('have.text', testPrompt.content);
     });

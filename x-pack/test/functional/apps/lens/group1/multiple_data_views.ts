@@ -33,16 +33,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   function assertMatchesExpectedData(
     state: DebugState,
-    expectedData: Array<Array<{ x: number; y: number }>>
+    expectedData: Array<Array<{ x: number; y: number }>>,
+    chartType: 'bars' | 'lines' = 'bars'
   ) {
-    expect(
-      state?.bars?.map(({ bars }) =>
-        bars.map((bar) => ({
-          x: bar.x,
-          y: Math.floor(bar.y * 100) / 100,
-        }))
-      )
-    ).to.eql(expectedData);
+    if (chartType === 'lines') {
+      expect(
+        state?.lines
+          ?.map(({ points }) =>
+            points
+              .map((point) => ({ x: point.x, y: Math.floor(point.y * 100) / 100 }))
+              .sort(({ x }, { x: x2 }) => x - x2)
+          )
+          .filter((a) => a.length > 0)
+      ).to.eql(expectedData);
+    } else {
+      expect(
+        state?.bars?.map(({ bars }) =>
+          bars.map((point) => ({ x: point.x, y: Math.floor(point.y * 100) / 100 }))
+        )
+      ).to.eql(expectedData);
+    }
   }
 
   describe('lens with multiple data views', () => {
@@ -56,27 +66,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': true });
 
-      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
 
-      await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
       await common.navigateToApp('lens');
     });
 
     after(async () => {
       await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
-      await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
       );
-      await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
     });
 

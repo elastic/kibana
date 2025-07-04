@@ -29,7 +29,7 @@
         "description": [
           "\nA category definition for nav links to know where to sort them in the left hand nav"
         ],
-        "path": "packages/core/application/core-application-common/src/app_category.ts",
+        "path": "src/core/packages/application/common/src/app_category.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
             "description": [
               "\nUnique identifier for the categories"
             ],
-            "path": "packages/core/application/core-application-common/src/app_category.ts",
+            "path": "src/core/packages/application/common/src/app_category.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -55,7 +55,7 @@
             "description": [
               "\nLabel used for category name.\nAlso used as aria-label if one isn't set."
             ],
-            "path": "packages/core/application/core-application-common/src/app_category.ts",
+            "path": "src/core/packages/application/common/src/app_category.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -71,7 +71,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-common/src/app_category.ts",
+            "path": "src/core/packages/application/common/src/app_category.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -87,7 +87,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/application/core-application-common/src/app_category.ts",
+            "path": "src/core/packages/application/common/src/app_category.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -103,7 +103,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-common/src/app_category.ts",
+            "path": "src/core/packages/application/common/src/app_category.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -125,7 +125,7 @@
         "signature": [
           "\"kbnAppWrapper\""
         ],
-        "path": "packages/core/application/core-application-common/src/app_wrapper_class.ts",
+        "path": "src/core/packages/application/common/src/app_wrapper_class.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -141,16 +141,10 @@
         "description": [],
         "signature": [
           "{ [x: string]: ",
-          {
-            "pluginId": "@kbn/core-application-common",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationCommonPluginApi",
-            "section": "def-common.AppCategory",
-            "text": "AppCategory"
-          },
+          "AppCategory",
           "; }"
         ],
-        "path": "packages/core/application/core-application-common/src/default_app_categories.ts",
+        "path": "src/core/packages/application/common/src/default_app_categories.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

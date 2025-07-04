@@ -23,12 +23,10 @@ import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
-  LensEmbeddableInput,
   FormulaPublicApi,
   DateHistogramIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { StartDependencies } from './plugin';
 
@@ -269,7 +267,7 @@ export const App = (props: {
             onTableRowClick={(_data) => {
               // call back event for on table row click event
             }}
-            viewMode={ViewMode.VIEW}
+            viewMode={'view'}
             extraActions={[
               {
                 id: 'testAction',
@@ -288,7 +286,7 @@ export const App = (props: {
           />
           {isSaveModalVisible && (
             <LensSaveModalComponent
-              initialInput={attributes as unknown as LensEmbeddableInput}
+              initialInput={{ attributes }}
               onSave={() => {}}
               onClose={() => setIsSaveModalVisible(false)}
             />

@@ -1,0 +1,23 @@
+{
+  "security.has_privileges": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_security/user/_has_privileges",
+      "_security/user/{user}/_has_privileges"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-has-privileges",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

@@ -18,16 +18,10 @@
         "label": "SavedObjectsExportError",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-            "section": "def-server.SavedObjectsExportError",
-            "text": "SavedObjectsExportError"
-          },
+          "SavedObjectsExportError",
           " extends Error"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+        "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +35,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -55,7 +49,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -70,7 +64,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -85,7 +79,7 @@
                 "signature": [
                   "Record<string, any> | undefined"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -102,15 +96,9 @@
             "description": [],
             "signature": [
               "(limit: number) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsExportError",
-                "text": "SavedObjectsExportError"
-              }
+              "SavedObjectsExportError"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -124,7 +112,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -141,23 +129,11 @@
             "description": [],
             "signature": [
               "(objects: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<unknown>[]) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsExportError",
-                "text": "SavedObjectsExportError"
-              }
+              "SavedObjectsExportError"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -169,16 +145,10 @@
                 "label": "objects",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<unknown>[]"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -197,23 +167,11 @@
             ],
             "signature": [
               "(objects: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<unknown>[], cause: Error) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsExportError",
-                "text": "SavedObjectsExportError"
-              }
+              "SavedObjectsExportError"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -225,16 +183,10 @@
                 "label": "objects",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<unknown>[]"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -249,7 +201,7 @@
                 "signature": [
                   "Error"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -268,15 +220,9 @@
             ],
             "signature": [
               "(objectKeys: string[]) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsExportError",
-                "text": "SavedObjectsExportError"
-              }
+              "SavedObjectsExportError"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -290,7 +236,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -309,16 +255,10 @@
         "label": "SavedObjectsImportError",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-            "section": "def-server.SavedObjectsImportError",
-            "text": "SavedObjectsImportError"
-          },
+          "SavedObjectsImportError",
           " extends Error"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+        "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -331,15 +271,9 @@
             "description": [],
             "signature": [
               "(limit: number) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsImportError",
-                "text": "SavedObjectsImportError"
-              }
+              "SavedObjectsImportError"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -353,7 +287,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -370,15 +304,9 @@
             "description": [],
             "signature": [
               "(nonUniqueEntries: string[]) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsImportError",
-                "text": "SavedObjectsImportError"
-              }
+              "SavedObjectsImportError"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -392,7 +320,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -409,15 +337,9 @@
             "description": [],
             "signature": [
               "(nonUniqueRetryObjects: string[]) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsImportError",
-                "text": "SavedObjectsImportError"
-              }
+              "SavedObjectsImportError"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -431,7 +353,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -448,15 +370,9 @@
             "description": [],
             "signature": [
               "(nonUniqueRetryDestinations: string[]) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsImportError",
-                "text": "SavedObjectsImportError"
-              }
+              "SavedObjectsImportError"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -470,7 +386,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -487,23 +403,11 @@
             "description": [],
             "signature": [
               "(objects: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<unknown>[]) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
-                "section": "def-server.SavedObjectsImportError",
-                "text": "SavedObjectsImportError"
-              }
+              "SavedObjectsImportError"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -515,16 +419,10 @@
                 "label": "objects",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObject",
-                    "text": "SavedObject"
-                  },
+                  "SavedObject",
                   "<unknown>[]"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
+                "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -552,7 +450,7 @@
         "signature": [
           "\"*\""
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/constants.ts",
+        "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

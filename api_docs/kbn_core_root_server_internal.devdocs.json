@@ -19,7 +19,7 @@
         "description": [
           "\nTop-level entry point to kick off the app and start the Kibana server."
         ],
-        "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+        "path": "src/core/packages/root/server-internal/src/root/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
                 "text": "LoggerFactory"
               }
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -53,7 +53,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -73,7 +73,7 @@
                     "text": "RawConfigurationProvider"
                   }
                 ],
-                "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+                "path": "src/core/packages/root/server-internal/src/root/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -94,7 +94,7 @@
                     "text": "Env"
                   }
                 ],
-                "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+                "path": "src/core/packages/root/server-internal/src/root/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -109,7 +109,7 @@
                 "signature": [
                   "((reason?: string | Error | undefined) => void) | undefined"
                 ],
-                "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+                "path": "src/core/packages/root/server-internal/src/root/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -129,7 +129,7 @@
               "InternalCorePreboot",
               " | undefined>"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -147,7 +147,7 @@
               "InternalCoreSetup",
               ">"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -165,7 +165,7 @@
               "InternalCoreStart",
               ">"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -181,7 +181,7 @@
             "signature": [
               "(reason?: any) => Promise<void>"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -195,7 +195,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+                "path": "src/core/packages/root/server-internal/src/root/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -220,7 +220,7 @@
           "ConfigService",
           ") => void"
         ],
-        "path": "packages/core/root/core-root-server-internal/src/register_service_config.ts",
+        "path": "src/core/packages/root/server-internal/src/register_service_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -234,7 +234,7 @@
             "signature": [
               "ConfigService"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/register_service_config.ts",
+            "path": "src/core/packages/root/server-internal/src/register_service_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

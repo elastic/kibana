@@ -18,13 +18,7 @@
         "label": "ExecutionContextService",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-execution-context-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreExecutionContextServerInternalPluginApi",
-            "section": "def-server.ExecutionContextService",
-            "text": "ExecutionContextService"
-          },
+          "ExecutionContextService",
           " implements ",
           "CoreService",
           "<",
@@ -33,7 +27,7 @@
           "IExecutionContext",
           ">"
         ],
-        "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+        "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +41,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+            "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -61,7 +55,7 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+                "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -80,7 +74,7 @@
               "() => ",
               "IExecutionContext"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+            "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -97,7 +91,7 @@
               "() => ",
               "IExecutionContext"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+            "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -113,7 +107,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
+            "path": "src/core/packages/execution-context/server-internal/src/execution_context_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -135,7 +129,7 @@
         "tags": [],
         "label": "executionContextConfig",
         "description": [],
-        "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_config.ts",
+        "path": "src/core/packages/execution-context/server-internal/src/execution_context_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,7 +140,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_config.ts",
+            "path": "src/core/packages/execution-context/server-internal/src/execution_context_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -175,7 +169,7 @@
               },
               "<boolean>; }>"
             ],
-            "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_config.ts",
+            "path": "src/core/packages/execution-context/server-internal/src/execution_context_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }

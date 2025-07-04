@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
       //Create data for rollup job so it doesn't fail
       await es.index({
         index: rollupSourceIndexName,
-        body: {
+        document: {
           '@timestamp': new Date().toISOString(),
         },
       });

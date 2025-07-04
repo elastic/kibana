@@ -1,0 +1,27 @@
+{
+  "security.disable_user_profile": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ]
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_security/profile/{uid}/_disable"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-disable-user-profile",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

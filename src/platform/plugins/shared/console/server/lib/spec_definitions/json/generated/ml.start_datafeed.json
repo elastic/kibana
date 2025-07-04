@@ -1,0 +1,28 @@
+{
+  "ml.start_datafeed": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "end": [],
+      "start": [],
+      "timeout": [
+        "20s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/datafeeds/{datafeed_id}/_start"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-start-datafeed",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

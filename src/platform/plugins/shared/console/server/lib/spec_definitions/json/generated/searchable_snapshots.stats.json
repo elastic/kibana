@@ -1,0 +1,27 @@
+{
+  "searchable_snapshots.stats": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "level": [
+        "cluster",
+        "indices",
+        "shards"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_searchable_snapshots/stats",
+      "{index}/_searchable_snapshots/stats"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-searchable-snapshots-stats",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

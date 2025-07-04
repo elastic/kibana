@@ -1,0 +1,24 @@
+# BYTE_LENGTH
+
+Returns the byte length of a string. Since all strings are in UTF-8, a single character may use multiple bytes.
+
+## Syntax
+
+`BYTE_LENGTH(string)`
+
+### Parameters
+
+#### `string`
+
+String expression. If `null`, the function returns `null`.
+
+## Examples
+
+```esql
+FROM airports
+| WHERE country == "India"
+| KEEP city
+| EVAL fn_length = LENGTH(city), fn_byte_length = BYTE_LENGTH(city)
+```
+
+This example calculates both the character length and the byte length of city names in airports located in India.

@@ -1,0 +1,40 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../typings/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing",
+    "@kbn/ui-actions-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/alerts-ui-shared",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/response-ops-alerts-table",
+    "@kbn/response-ops-rules-apis",
+    "@kbn/data-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/rule-data-utils",
+    "@kbn/response-ops-alerts-filters-form",
+    "@kbn/i18n-react",
+    "@kbn/alerting-types",
+    "@kbn/react-kibana-mount",
+    "@kbn/es-query",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types"
+  ]
+}

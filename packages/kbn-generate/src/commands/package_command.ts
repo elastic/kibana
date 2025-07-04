@@ -10,6 +10,7 @@
 import Fsp from 'fs/promises';
 import Path from 'path';
 
+import inquirer from 'inquirer';
 import normalizePath from 'normalize-path';
 import globby from 'globby';
 import { ESLint } from 'eslint';
@@ -18,8 +19,13 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
 import { sortPackageJson } from '@kbn/sort-package-json';
 
+import {
+  KIBANA_GROUPS,
+  type KibanaGroup,
+  type ModuleVisibility,
+} from '@kbn/projects-solutions-groups';
 import { validateElasticTeam } from '../lib/validate_elastic_team';
-import { ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
+import { PKG_TEMPLATE_DIR, determineDevPackageDir, determinePackageDir } from '../paths';
 import type { GenerateCommand } from '../generate_command';
 import { ask } from '../lib/ask';
 
@@ -32,7 +38,7 @@ export const PackageCommand: GenerateCommand = {
   usage: 'node scripts/generate package [pkgId]',
   flags: {
     boolean: ['web', 'force', 'dev'],
-    string: ['dir', 'owner'],
+    string: ['dir', 'owner', 'group'],
     help: `
       --dev          Generate a package which is intended for dev-only use and can access things like devDependencies
       --web          Build webpack-compatible version of sources for this package. If your package is intended to be
@@ -42,6 +48,7 @@ export const PackageCommand: GenerateCommand = {
       --force        If the --dir already exists, delete it before generation
       --owner        Github username of the owner for this package, if this is not specified then you will be asked for
                       this value interactively.
+      --group        Group the package belongs to
     `,
   },
   async run({ log, flags, render }) {
@@ -66,27 +73,9 @@ export const PackageCommand: GenerateCommand = {
 
     const web = !!flags.web;
     const dev = !!flags.dev;
-
-    const packageDir = flags.dir
-      ? Path.resolve(`${flags.dir}`)
-      : Path.resolve(ROOT_PKG_DIR, pkgId.slice(1).replace('/', '-'));
-    const normalizedRepoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
-
-    try {
-      await Fsp.readdir(packageDir);
-      if (!!flags.force) {
-        await Fsp.rm(packageDir, { recursive: true });
-        log.warning('deleted existing package at', packageDir);
-      } else {
-        throw createFailError(
-          `Package dir [${packageDir}] already exists, either choose a new package name, or pass --force to delete the package and regenerate it`
-        );
-      }
-    } catch (error) {
-      if (isFailError(error)) {
-        throw error;
-      }
-    }
+    let group = flags.group as KibanaGroup | undefined;
+    let visibility: ModuleVisibility = 'shared';
+    let calculatedPackageDir: string;
 
     const owner =
       flags.owner ||
@@ -103,6 +92,98 @@ export const PackageCommand: GenerateCommand = {
       }));
     if (typeof owner !== 'string' || !owner.startsWith('@')) {
       throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
+    }
+
+    let isCliScript = false;
+    if (dev) {
+      isCliScript = (
+        await inquirer.prompt<{ cli: boolean }>({
+          type: 'list',
+          default: false,
+          choices: [
+            { name: 'Yes, it can go in /packages', value: true },
+            { name: 'No, it will be used from platform / solutions code', value: false },
+          ],
+          name: 'cli',
+          message: `Is the package going to be used exclusively from tooling / CLI scripts?`,
+        })
+      ).cli;
+    }
+
+    if (isCliScript) {
+      group = 'platform';
+      calculatedPackageDir = determineDevPackageDir(pkgId);
+    } else {
+      group =
+        group ||
+        (
+          await inquirer.prompt<{
+            group: KibanaGroup;
+          }>({
+            type: 'list',
+            choices: [
+              ...KIBANA_GROUPS.map((groupName) => ({
+                name: groupName,
+                value: groupName,
+              })),
+            ],
+            name: 'group',
+            message: `What group is this package part of?`,
+          })
+        ).group;
+
+      let xpack: boolean;
+
+      if (group === 'platform') {
+        const resXpack = await inquirer.prompt<{ xpack: boolean }>({
+          type: 'list',
+          default: false,
+          choices: [
+            { name: 'Yes', value: true },
+            { name: 'No', value: false },
+          ],
+          name: 'xpack',
+          message: `Does this package have x-pack licensed code?`,
+        });
+        xpack = resXpack.xpack;
+      } else {
+        xpack = true;
+      }
+
+      visibility = (
+        await inquirer.prompt<{
+          visibility: ModuleVisibility;
+        }>({
+          type: 'list',
+          choices: [
+            { name: 'Private', value: 'private' },
+            { name: 'Shared', value: 'shared' },
+          ],
+          name: 'visibility',
+          message: `What visibility does this package have? "private" (used from within platform) or "shared" (used from solutions)`,
+        })
+      ).visibility;
+
+      calculatedPackageDir = determinePackageDir({ pkgId, group, visibility, xpack });
+    }
+
+    const packageDir = flags.dir ? Path.resolve(`${flags.dir}`) : calculatedPackageDir;
+    const normalizedRepoRelativeDir = normalizePath(Path.relative(REPO_ROOT, packageDir));
+
+    try {
+      await Fsp.readdir(packageDir);
+      if (!!flags.force) {
+        await Fsp.rm(packageDir, { recursive: true });
+        log.warning('deleted existing package at', packageDir);
+      } else {
+        throw createFailError(
+          `Package dir [${packageDir}] already exists, either choose a new package name, or pass --force to delete the package and regenerate it`
+        );
+      }
+    } catch (error) {
+      if (isFailError(error)) {
+        throw error;
+      }
     }
 
     const templateFiles = await globby('**/*', {
@@ -145,6 +226,8 @@ export const PackageCommand: GenerateCommand = {
           web,
           dev,
           owner,
+          group,
+          visibility,
           directoryName: Path.basename(normalizedRepoRelativeDir),
           normalizedRepoRelativeDir,
         },

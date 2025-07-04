@@ -16,6 +16,9 @@ export function defineRoutes(router: IRouter) {
     .get({
       path: '/api/feature_flags_example/example',
       access: 'public',
+      security: {
+        authz: { enabled: false, reason: 'Public route that does not require authorization' },
+      },
     })
     .addVersion(
       {

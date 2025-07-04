@@ -1,0 +1,21 @@
+{
+  "sql.delete_async": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_sql/async/delete/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-delete-async",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

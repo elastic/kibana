@@ -2,7 +2,10 @@
   "name": "Kibana",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": ".."
+    "context": "..",
+    "args": {
+      "KBN_DIR": "${containerWorkspaceFolder}"
+    }
   },
   "customizations": {
     "vscode": {
@@ -21,7 +24,8 @@
     5601,
     9229,
     9230,
-    9231
+    9231,
+    9001
   ],
   "postStartCommand": "${containerWorkspaceFolder}/.devcontainer/scripts/post_start.sh",
   "remoteUser": "vscode",

@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/core-plugin-execution-context-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "corePluginExecutionContext",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "core_plugin_execution_context"
+    ]
+  }
+}

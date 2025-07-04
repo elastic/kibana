@@ -14,7 +14,7 @@ import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plug
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_FIELD_LIST_ACTION_ID, FIELD_LIST_ID } from './constants';
-import { FieldListSerializedStateState } from './types';
+import { FieldListSerializedState } from './types';
 
 export const registerCreateFieldListAction = (uiActions: UiActionsPublicStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
@@ -26,7 +26,7 @@ export const registerCreateFieldListAction = (uiActions: UiActionsPublicStart) =
     },
     execute: async ({ embeddable }) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-      embeddable.addNewPanel<FieldListSerializedStateState>({
+      embeddable.addNewPanel<FieldListSerializedState>({
         panelType: FIELD_LIST_ID,
       });
     },

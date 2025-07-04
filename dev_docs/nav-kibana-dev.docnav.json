@@ -47,6 +47,9 @@
           "id": "kibStyleGuide"
         },
         {
+          "id": "kibHttpApiGuidelines"
+        },
+        {
           "id": "ktRFCProcess"
         },
         {
@@ -101,7 +104,10 @@
           "id": "kibBuildingBlocks"
         },
         {
-          "id": "kibDevDocsSecurityIntro"
+          "id": "kibDevDocsSecurityAPIAuthorization"
+        },
+        {
+          "id": "kibDevDocsSecurityKibanaSystemUser"
         },
         {
           "id": "kibDevFeaturePrivileges",
@@ -180,14 +186,22 @@
           "label": "data.search"
         },
         {
-          "id": "kibDevTutorialFileService",
-          "label": "File service"
+          "id": "kibDevTutorialScreenshotting",
+          "label": "Screenshotting",
+          "items": [
+            {
+              "id": "kibDevDocsUpdatingPuppeteerAndChromium"
+            }
+          ]
         },
         {
           "id": "kibDevTutorialDataViews"
         },
         {
           "id": "kibDevTutorialDebugging"
+        },
+        {
+          "id": "kibDevTutorialDebuggingFipsTestFailures"
         },
         {
           "id": "kibDevTutorialBuildingDistributable",
@@ -264,10 +278,6 @@
           ]
         },
         {
-          "id": "kibDevTutorialScreenshotting",
-          "label": "Screenshotting"
-        },
-        {
           "id": "kibDevTutorialAdvancedSettings",
           "label": "Advanced Settings"
         },
@@ -276,8 +286,8 @@
           "label": "Kibana Page Template"
         },
         {
-          "id": "kibDevReactKibanaContext",
-          "label": "Kibana React Contexts"
+          "id": "kibDevRenderingService",
+          "label": "Core Rendering Service"
         },
         {
           "id": "kibDevDocsChromeRecentlyAccessed",
@@ -462,9 +472,6 @@
           "id": "kibDataSearchPluginApi"
         },
         {
-          "id": "kibBfetchPluginApi"
-        },
-        {
           "id": "kibAlertingPluginApi"
         },
         {
@@ -619,9 +626,6 @@
         },
         {
           "id": "kibTelemetryCollectionManagerPluginApi"
-        },
-        {
-          "id": "kibTelemetryCollectionXpackPluginApi"
         },
         {
           "id": "kibTelemetryManagementSectionPluginApi"

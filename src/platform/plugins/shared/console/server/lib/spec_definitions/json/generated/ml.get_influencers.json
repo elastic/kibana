@@ -1,0 +1,36 @@
+{
+  "ml.get_influencers": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "desc": "__flag__",
+      "end": [
+        "-1"
+      ],
+      "exclude_interim": "__flag__",
+      "influencer_score": "",
+      "from": "",
+      "size": [
+        "100"
+      ],
+      "sort": "",
+      "start": [
+        "-1"
+      ]
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/results/influencers"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-influencers",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

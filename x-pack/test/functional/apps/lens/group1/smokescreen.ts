@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow creation of lens xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -60,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Afancilenstest');
       await lens.clickVisualizeListItemTitle('Afancilenstest');
-      await lens.goToTimeRange();
+
       await lens.waitForVisualization('xyVisChart');
 
       expect(await lens.getTitle()).to.eql('Afancilenstest');
@@ -75,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
-      await lens.goToTimeRange();
+
       // Change the IP field to filters
       await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
@@ -94,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-      await lens.goToTimeRange();
+
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
       await lens.switchToVisualization('lnsDatatable');
       expect(await lens.getDatatableHeaderText()).to.eql('Maximum of bytes');
@@ -106,7 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should transition from a multi-layer stacked bar to a multi-layer line chart and correctly remove all layers', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -150,7 +148,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should transition selected layer in a multi layer bar using layer chart switch', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -197,7 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
-      await lens.goToTimeRange();
+
       await lens.removeDimension('lnsXY_splitDimensionPanel');
       await lens.switchToVisualization('line');
       await lens.configureDimension({
@@ -255,7 +252,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
       await elasticChart.setNewChartUiDebugFlag(true);
-      await lens.goToTimeRange();
+
       await lens.switchToVisualization('bar');
 
       await lens.configureDimension({
@@ -323,7 +320,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should transition from a multi-layer stacked bar to treemap chart using suggestions', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -367,7 +363,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
-      await lens.goToTimeRange();
+
       expect(await lens.hasChartSwitchWarning('pie')).to.eql(true);
       await lens.switchToVisualization('pie');
 
@@ -394,7 +390,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
-      await lens.goToTimeRange();
+
       await lens.switchToVisualization('line');
       expect(await lens.getTitle()).to.eql('lnsXYvis');
       expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql('@timestamp');
@@ -410,7 +406,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsPieVis');
       await lens.clickVisualizeListItemTitle('lnsPieVis');
-      await lens.goToTimeRange();
+
       expect(await lens.hasChartSwitchWarning('treemap')).to.eql(false);
       await lens.switchToVisualization('treemap');
       expect(await lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')).to.eql([
@@ -425,7 +421,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create a pie chart and switch to datatable', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
+
       await lens.switchToVisualization('pie');
       await lens.configureDimension({
         dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
@@ -452,7 +448,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create a heatmap chart and transition to barchart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
+
       await lens.switchToVisualization('heatmap', 'heat');
 
       await lens.configureDimension({
@@ -482,7 +478,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create a valid XY chart with references', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -517,7 +512,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow formatting on references', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
+
       await lens.switchToVisualization('lnsDatatable');
 
       await lens.configureDimension({
@@ -563,7 +558,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should handle edge cases in reference-based operations', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -596,7 +590,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should keep the field selection while transitioning to every reference-based operation', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -633,7 +626,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not leave an incomplete column in the visualization config with field-based operation', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -646,7 +638,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should revert to previous configuration and not leave an incomplete column in the visualization config with reference-based operations', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -682,7 +673,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should transition from unique count to last value', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -715,7 +705,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow filtering by legend on an xy chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -745,7 +734,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow filtering by legend on a pie chart', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
+
       await lens.switchToVisualization('pie');
 
       await lens.configureDimension({
@@ -828,6 +817,104 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       await lens.waitForVisualization('xyVisChart');
       expect(await lens.getWorkspaceErrorCount()).to.eql(0);
+    });
+
+    it('should keep suggestions up to date with the current configuration', async () => {
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+      // duplicate the layer
+      await lens.duplicateLayer();
+
+      // now make the first layer bar percentage to lead it in an broken rendering state
+      await lens.switchToVisualizationSubtype('Percentage');
+
+      // now check that both the main visualization and the current visualization suggestion are in error state
+      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await testSubjects.existOrFail(
+        'lnsSuggestion-currentVisualization > lnsSuggestionPanel__error'
+      );
+
+      // revert the subtype to stacked and everything should be fine again
+      await lens.switchToVisualizationSubtype('Stacked');
+
+      expect(await lens.getWorkspaceErrorCount()).to.eql(0);
+      await testSubjects.missingOrFail(
+        'lnsSuggestion-currentVisualization > lnsSuggestionPanel__error'
+      );
+    });
+
+    describe('Area/Line pointVisibility', () => {
+      before(async () => {
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisType('lens');
+        await elasticChart.setNewChartUiDebugFlag(true);
+        await lens.configureDimension({
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
+        await lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
+      });
+
+      describe('Line Chart', () => {
+        before(async () => {
+          await lens.switchToVisualization('line');
+          await lens.waitForVisualization('xyVisChart');
+          await lens.openVisualOptions();
+        });
+        it(`points should be visible when Point visibility is 'Auto'`, async () => {
+          await testSubjects.click('xy_point_visibility_auto');
+          const { lines } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(lines?.[0]?.visiblePoints).to.be(true);
+        });
+        it(`points should be visible when Point visibility is 'Show'`, async () => {
+          await testSubjects.click('xy_point_visibility_show');
+          const { lines } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(lines?.[0]?.visiblePoints).to.be(true);
+        });
+        it(`points should not be visible when Point visibility is 'Hide'`, async () => {
+          await testSubjects.click('xy_point_visibility_hide');
+          const { lines } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(lines?.[0]?.visiblePoints).to.be(false);
+        });
+      });
+
+      describe('Area Chart', () => {
+        before(async () => {
+          await lens.switchToVisualization('area');
+          await lens.waitForVisualization('xyVisChart');
+          await lens.openVisualOptions();
+        });
+        it(`points should be visible when Point visibility is 'Auto'`, async () => {
+          await testSubjects.click('xy_point_visibility_auto');
+          const { areas } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(areas?.[0]?.lines?.y1?.visiblePoints).to.be(true);
+        });
+        it(`points should be visible when Point visibility is 'Show'`, async () => {
+          await testSubjects.click('xy_point_visibility_show');
+          const { areas } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(areas?.[0]?.lines?.y1?.visiblePoints).to.be(true);
+        });
+        it(`points should not be visible when Point visibility is 'Hide'`, async () => {
+          await testSubjects.click('xy_point_visibility_hide');
+          const { areas } = await elasticChart.getChartDebugData('xyVisChart');
+          expect(areas?.[0]?.lines?.y1?.visiblePoints).to.be(false);
+        });
+      });
     });
   });
 }

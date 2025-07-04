@@ -31,7 +31,7 @@ export function AnomalyChartsProvider({ getService }: FtrProviderContext) {
             ? await testSubjects.find(chartsContainerSubj)
             : await testSubjects.find('mlExplorerChartsContainer');
         const actualChartsCount = (
-          await chartsContainer?.findAllByClassName('ml-explorer-chart-container', 3000)
+          await chartsContainer?.findAllByTestSubject('mlExplorerChartContainerItem', 3000)
         ).length;
         expect(actualChartsCount).to.eql(
           expectedChartsCount,

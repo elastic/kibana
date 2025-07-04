@@ -80,7 +80,7 @@ function findAllScreenshots(log: ToolingLog) {
     return globby
       .sync(
         [
-          'test/functional/**/screenshots/failure/*.png',
+          'src/platform/test/functional/**/screenshots/failure/*.png',
           'x-pack/test/functional/**/screenshots/failure/*.png',
         ],
         {
@@ -179,6 +179,12 @@ export async function reportFailuresToFile(
                    </div>`
                 : ''
             }
+            <div>
+                <strong>Owners</strong>:
+                <pre>${escape(
+                  failure?.owners ? (failure?.owners as string) : 'Unable to determine code owners'
+                )}</pre>
+            </div>
             <div>
                 <strong>Failures in tracked branches</strong>:
                     <span class="badge rounded-pill bg-danger">${failure.failureCount || 0}</span>
