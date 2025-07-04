@@ -3035,6 +3035,23 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getMlAuthz",
+            "type": "Function",
+            "tags": [],
+            "label": "getMlAuthz",
+            "description": [],
+            "signature": [
+              "() => ",
+              "MlAuthz"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
