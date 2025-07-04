@@ -39,10 +39,25 @@ export const KIBANA_SOLUTIONS = [
  */
 export type KibanaSolution = (typeof KIBANA_SOLUTIONS)[number];
 
+/**
+ * Complete tier for Observability solution.
+ */
 export const KIBANA_OBSERVABILITY_COMPLETE_TIER = 'complete' as const;
+/**
+ * Logs Essentials tier for Observability solution.
+ */
 export const KIBANA_OBSERVABILITY_LOGS_ESSENTIALS_TIER = 'logs_essentials' as const;
+/**
+ * Complete tier for Security solution.
+ */
 export const KIBANA_SECURITY_COMPLETE_TIER = 'complete' as const;
+/**
+ * Essentials tier for Security solution.
+ */
 export const KIBANA_SECURITY_ESSENTIALS_TIER = 'essentials' as const;
+/**
+ * Search AI Lake tier for Security solution.
+ */
 export const KIBANA_SECURITY_SEARCH_AI_LAKE_TIER = 'search_ai_lake' as const;
 
 /**
@@ -62,4 +77,7 @@ export const KIBANA_PRODUCT_TIERS = {
   [KIBANA_CHAT_SOLUTION]: [] as const,
 } as const;
 
+/**
+ * Existing product tiers for all Kibana solutions.
+ */
 export type KibanaProductTier = (typeof KIBANA_PRODUCT_TIERS)[KibanaSolution][number];
