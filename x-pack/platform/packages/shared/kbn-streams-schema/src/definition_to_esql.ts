@@ -102,13 +102,13 @@ export function definitionToESQLQuery(
     }
   });
 
-  const insistCalls = Array.from(inFields)
+  const insistCalls = Array.from([...inFields, ...mappedFields])
     // Filter out fields that are inherited
     .filter((fieldName) => !inheritedFields.includes(fieldName))
     .map((fieldName) => `INSIST_🐔 ${fieldName}`)
     .join(' | ');
 
-  const mappingsArray = Array.from(inFields)
+  const mappingsArray = Array.from([...inFields, ...mappedFields])
     // Filter out fields that are inherited
     .filter((fieldName) => !inheritedFields.includes(fieldName))
     .flatMap((fieldName) => {
