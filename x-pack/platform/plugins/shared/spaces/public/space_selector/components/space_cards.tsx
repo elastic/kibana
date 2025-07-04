@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './space_cards.scss';
-
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
 
@@ -21,7 +19,7 @@ interface Props {
 export class SpaceCards extends Component<Props, {}> {
   public render() {
     return (
-      <div className="spaceCards">
+      <div>
         <EuiFlexGroup gutterSize="l" justifyContent="center" wrap responsive={false}>
           {this.props.spaces.map(this.renderSpace)}
         </EuiFlexGroup>

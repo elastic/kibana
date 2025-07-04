@@ -75,8 +75,14 @@ const Template = (args: RuleEventLogListProps) => {
   return <RuleEventLogList {...args} />;
 };
 
-export const Empty = Template.bind({});
+export const Empty = {
+  render: Template,
+};
 
-export const WithEvents = Template.bind({});
+export const WithEvents = {
+  render: Template,
+};
 
-export const WithPaginatedEvents = Template.bind({});
+export const WithPaginatedEvents = {
+  render: Template,
+};

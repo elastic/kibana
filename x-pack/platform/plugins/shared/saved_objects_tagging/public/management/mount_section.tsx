@@ -8,7 +8,6 @@
 import React, { FC, PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import { CoreSetup, ApplicationStart } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getTagsCapabilities } from '../../common';
 import { SavedObjectTaggingPluginStart } from '../types';
@@ -52,7 +51,7 @@ export const mountSection = async ({
   coreStart.chrome.docTitle.change(title);
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...coreStart}>
+    coreStart.rendering.addContext(
       <RedirectToHomeIfUnauthorized applications={coreStart.application}>
         <TagManagementPage
           setBreadcrumbs={setBreadcrumbs}
@@ -64,7 +63,7 @@ export const mountSection = async ({
           assignableTypes={assignableTypes}
         />
       </RedirectToHomeIfUnauthorized>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 

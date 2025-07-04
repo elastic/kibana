@@ -1,0 +1,13 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateRuleRequest:
+          $ref: './examples_update_rule.request.yaml'
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          updateRuleResponse:
+            $ref: './examples_update_rule.response.yaml'

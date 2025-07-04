@@ -77,7 +77,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
     const policyNavLinks = usePolicyNavLinks(artifact, policies);
 
     return (
-      <CardContainerPanel {...commonProps} data-test-subj={dataTestSubj}>
+      <CardContainerPanel {...commonProps} item={item} data-test-subj={dataTestSubj}>
         <CardSectionPanel className="top-section">
           <CardHeader
             name={artifact.name}

@@ -211,6 +211,7 @@ function renderTestCases(
       expect(getScriptPathsMock).toHaveBeenCalledWith({
         darkMode: true,
         baseHref: '/mock-server-basepath',
+        themeName: 'borealis',
       });
     });
 
@@ -254,6 +255,19 @@ function renderTestCases(
     it('renders feature flags overrides', async () => {
       mockRenderingSetupDeps.featureFlags.getOverrides.mockReturnValueOnce({
         'my-overridden-flag': 1234,
+      });
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders initial feature flags', async () => {
+      mockRenderingSetupDeps.featureFlags.getInitialFeatureFlags.mockResolvedValueOnce({
+        'my-initial-flag': 1234,
       });
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings, {

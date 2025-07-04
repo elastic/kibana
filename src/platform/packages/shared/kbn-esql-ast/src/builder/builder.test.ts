@@ -25,7 +25,7 @@ describe('command', () => {
     const node = Builder.command({
       name: 'from',
       args: [
-        Builder.expression.source({ index: 'my_index', sourceType: 'index' }),
+        Builder.expression.source.node({ index: 'my_index', sourceType: 'index' }),
         Builder.option({
           name: 'by',
           args: [
@@ -94,42 +94,79 @@ describe('function', () => {
 
 describe('source', () => {
   test('basic index', () => {
-    const node = Builder.expression.source({ index: 'my_index', sourceType: 'index' });
+    const node = Builder.expression.source.node({ index: 'my_index', sourceType: 'index' });
     const text = BasicPrettyPrinter.expression(node);
 
     expect(text).toBe('my_index');
   });
 
   test('basic index using shortcut', () => {
-    const node = Builder.expression.source('my_index');
+    const node = Builder.expression.source.node('my_index');
     const text = BasicPrettyPrinter.expression(node);
 
     expect(text).toBe('my_index');
   });
 
+  test('basic quoted index using shortcut', () => {
+    const node = Builder.expression.source.node(Builder.expression.literal.string('my_index'));
+    const text = BasicPrettyPrinter.expression(node);
+
+    expect(text).toBe('"my_index"');
+  });
+
   test('index with cluster', () => {
-    const node = Builder.expression.source({
+    const node = Builder.expression.source.node({
       index: 'my_index',
       sourceType: 'index',
-      cluster: 'my_cluster',
+      prefix: Builder.expression.literal.string('my_cluster', { unquoted: true }),
     });
     const text = BasicPrettyPrinter.expression(node);
 
     expect(text).toBe('my_cluster:my_index');
   });
 
-  test('can use .indexSource() shorthand to specify cluster', () => {
-    const node = Builder.expression.indexSource('my_index', 'my_cluster');
+  test('index with cluster - plain text cluster', () => {
+    const node = Builder.expression.source.node({
+      index: 'my_index',
+      sourceType: 'index',
+      prefix: 'my_cluster',
+    });
     const text = BasicPrettyPrinter.expression(node);
 
     expect(text).toBe('my_cluster:my_index');
   });
 
   test('policy index', () => {
-    const node = Builder.expression.source({ index: 'my_policy', sourceType: 'policy' });
+    const node = Builder.expression.source.node({ index: 'my_policy', sourceType: 'policy' });
     const text = BasicPrettyPrinter.expression(node);
 
     expect(text).toBe('my_policy');
+  });
+
+  describe('.index', () => {
+    test('can use .source.index() shorthand to specify cluster', () => {
+      const node = Builder.expression.source.index('my_index', 'my_cluster');
+      const text = BasicPrettyPrinter.expression(node);
+
+      expect(text).toBe('my_cluster:my_index');
+    });
+
+    test('can use .source.index() and specify quotes around cluster', () => {
+      const node = Builder.expression.source.index(
+        'my_index',
+        Builder.expression.literal.string('hello 👋')
+      );
+      const text = BasicPrettyPrinter.expression(node);
+
+      expect(text).toBe('"hello 👋":my_index');
+    });
+
+    test('can use .source.index() shorthand to specify selector', () => {
+      const node = Builder.expression.source.index('my_index', '', 'my_selector');
+      const text = BasicPrettyPrinter.expression(node);
+
+      expect(text).toBe('my_index::my_selector');
+    });
   });
 });
 
@@ -252,7 +289,7 @@ describe('literal', () => {
 
   describe('lists', () => {
     test('string list', () => {
-      const node = Builder.expression.literal.list({
+      const node = Builder.expression.list.literal({
         values: [
           Builder.expression.literal.string('a'),
           Builder.expression.literal.string('b'),
@@ -265,7 +302,7 @@ describe('literal', () => {
     });
 
     test('integer list', () => {
-      const node = Builder.expression.literal.list({
+      const node = Builder.expression.list.literal({
         values: [
           Builder.expression.literal.integer(1),
           Builder.expression.literal.integer(2),
@@ -278,7 +315,7 @@ describe('literal', () => {
     });
 
     test('boolean list', () => {
-      const node = Builder.expression.literal.list({
+      const node = Builder.expression.list.literal({
         values: [
           Builder.expression.literal.boolean(true),
           Builder.expression.literal.boolean(false),
@@ -308,6 +345,20 @@ describe('param', () => {
     expect(text).toBe('?');
     expect(node).toMatchObject({
       type: 'literal',
+      paramKind: '?',
+      literalType: 'param',
+      paramType: 'unnamed',
+    });
+  });
+
+  test('unnamed (double)', () => {
+    const node = Builder.param.build('??');
+    const text = BasicPrettyPrinter.expression(node);
+
+    expect(text).toBe('??');
+    expect(node).toMatchObject({
+      type: 'literal',
+      paramKind: '??',
       literalType: 'param',
       paramType: 'unnamed',
     });
@@ -320,6 +371,21 @@ describe('param', () => {
     expect(text).toBe('?the_name');
     expect(node).toMatchObject({
       type: 'literal',
+      paramKind: '?',
+      literalType: 'param',
+      paramType: 'named',
+      value: 'the_name',
+    });
+  });
+
+  test('named (double)', () => {
+    const node = Builder.param.build('??the_name');
+    const text = BasicPrettyPrinter.expression(node);
+
+    expect(text).toBe('??the_name');
+    expect(node).toMatchObject({
+      type: 'literal',
+      paramKind: '??',
       literalType: 'param',
       paramType: 'named',
       value: 'the_name',
@@ -333,6 +399,21 @@ describe('param', () => {
     expect(text).toBe('?123');
     expect(node).toMatchObject({
       type: 'literal',
+      paramKind: '?',
+      literalType: 'param',
+      paramType: 'positional',
+      value: 123,
+    });
+  });
+
+  test('positional (double)', () => {
+    const node = Builder.param.build('??123');
+    const text = BasicPrettyPrinter.expression(node);
+
+    expect(text).toBe('??123');
+    expect(node).toMatchObject({
+      type: 'literal',
+      paramKind: '??',
       literalType: 'param',
       paramType: 'positional',
       value: 123,
@@ -371,5 +452,69 @@ describe('order', () => {
     const text = BasicPrettyPrinter.expression(node);
 
     expect(text).toBe('a.b.c ASC NULLS FIRST');
+  });
+});
+
+describe('map', () => {
+  test('can construct an empty map', () => {
+    const node1 = Builder.expression.map();
+    const node2 = Builder.expression.map({});
+    const node3 = Builder.expression.map({
+      entries: [],
+    });
+
+    expect(node1).toMatchObject({
+      type: 'map',
+      entries: [],
+    });
+    expect(node2).toMatchObject({
+      type: 'map',
+      entries: [],
+    });
+    expect(node3).toMatchObject({
+      type: 'map',
+      entries: [],
+    });
+  });
+
+  test('can construct a map with two keys', () => {
+    const node = Builder.expression.map({
+      entries: [
+        Builder.expression.entry('foo', Builder.expression.literal.integer(1)),
+        Builder.expression.entry('bar', Builder.expression.literal.integer(2)),
+      ],
+    });
+
+    expect(node).toMatchObject({
+      type: 'map',
+      entries: [
+        {
+          type: 'map-entry',
+          key: {
+            type: 'literal',
+            literalType: 'keyword',
+            valueUnquoted: 'foo',
+          },
+          value: {
+            type: 'literal',
+            literalType: 'integer',
+            value: 1,
+          },
+        },
+        {
+          type: 'map-entry',
+          key: {
+            type: 'literal',
+            literalType: 'keyword',
+            valueUnquoted: 'bar',
+          },
+          value: {
+            type: 'literal',
+            literalType: 'integer',
+            value: 2,
+          },
+        },
+      ],
+    });
   });
 });

@@ -40,14 +40,14 @@ import {
 
 interface Props {
   anomaly: MlAnomaliesTableRecordExtended;
-  examples: string[];
-  definition: CategoryDefinition;
   isAggregatedData: boolean;
-  filter: EntityCellFilter;
   influencersLimit: number;
-  influencerFilter: EntityCellFilter;
   tabIndex: number;
   job: ExplorerJob;
+  definition?: CategoryDefinition;
+  examples?: string[];
+  filter?: EntityCellFilter;
+  influencerFilter?: EntityCellFilter;
 }
 
 export const AnomalyDetails: FC<Props> = ({
@@ -117,25 +117,28 @@ export const AnomalyDetails: FC<Props> = ({
 const Contents: FC<{
   anomaly: MlAnomaliesTableRecordExtended;
   isAggregatedData: boolean;
-  filter: EntityCellFilter;
   influencersLimit: number;
-  influencerFilter: EntityCellFilter;
   job: ExplorerJob;
+  filter?: EntityCellFilter;
+  influencerFilter?: EntityCellFilter;
 }> = ({ anomaly, isAggregatedData, filter, influencersLimit, influencerFilter, job }) => {
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const dividerStyle = useMemo(() => {
     return isPopulatedObject(anomaly.source.anomaly_score_explanation)
-      ? { borderRight: `1px solid ${colors.lightShade}` }
+      ? { borderRight: `1px solid ${euiTheme.colors.lightShade}` }
       : {};
-  }, [colors, anomaly]);
+  }, [euiTheme.colors, anomaly]);
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <div className="ml-anomalies-table-details" data-test-subj="mlAnomaliesListRowDetails">
+        <div
+          css={{
+            padding: euiTheme.size.m,
+          }}
+          data-test-subj="mlAnomaliesListRowDetails"
+        >
           <Description anomaly={anomaly} />
           <EuiSpacer size="m" />
 
@@ -185,7 +188,7 @@ const Description: FC<{ anomaly: MlAnomaliesTableRecordExtended }> = ({ anomaly 
 const Details: FC<{
   anomaly: MlAnomaliesTableRecordExtended;
   isAggregatedData: boolean;
-  filter: EntityCellFilter;
+  filter?: EntityCellFilter;
   job: ExplorerJob;
 }> = ({ anomaly, isAggregatedData, filter, job }) => {
   const isInterimResult = anomaly.source?.is_interim ?? false;
@@ -210,7 +213,11 @@ const Details: FC<{
         {isInterimResult === true && (
           <>
             <EuiIcon type="warning" />
-            <span className="interim-result">
+            <span
+              css={{
+                fontStyle: 'italic',
+              }}
+            >
               <FormattedMessage
                 id="xpack.ml.anomaliesTable.anomalyDetails.interimResultLabel"
                 defaultMessage="Interim result"
@@ -230,7 +237,7 @@ const Details: FC<{
 const Influencers: FC<{
   anomaly: MlAnomaliesTableRecordExtended;
   influencersLimit: number;
-  influencerFilter: EntityCellFilter;
+  influencerFilter?: EntityCellFilter;
 }> = ({ anomaly, influencersLimit, influencerFilter }) => {
   const [showAllInfluencers, setShowAllInfluencers] = useState(false);
   const toggleAllInfluencers = setShowAllInfluencers.bind(null, (prev) => !prev);
@@ -239,7 +246,7 @@ const Influencers: FC<{
   let listItems: Array<{ title: string; description: React.ReactElement }> = [];
   let othersCount = 0;
   let numToDisplay = 0;
-  if (anomalyInfluencers !== undefined) {
+  if (anomalyInfluencers !== undefined && influencerFilter !== undefined) {
     numToDisplay =
       showAllInfluencers === true
         ? anomalyInfluencers.length
@@ -302,22 +309,29 @@ const Influencers: FC<{
   return null;
 };
 
-const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] }> = ({
+const CategoryExamples: FC<{ definition?: CategoryDefinition; examples: string[] }> = ({
   definition,
   examples,
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup
       direction="column"
       justifyContent="center"
       gutterSize="xs"
-      className="mlAnomalyCategoryExamples"
+      css={{
+        padding: euiTheme.size.l,
+      }}
     >
       {definition !== undefined && definition.terms && (
         <>
           <EuiFlexItem key={`example-terms`}>
             <EuiText size="xs">
-              <h4 className="mlAnomalyCategoryExamples__header">
+              <h4
+                css={{
+                  display: 'inline',
+                }}
+              >
                 {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.termsTitle', {
                   defaultMessage: 'Terms',
                 })}
@@ -330,7 +344,7 @@ const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] 
                     defaultMessage: 'Description',
                   }
                 )}
-                type="questionInCircle"
+                type="question"
                 color="subdued"
                 size="s"
                 content={
@@ -352,7 +366,11 @@ const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] 
         <>
           <EuiFlexItem key={`example-regex`}>
             <EuiText size="xs">
-              <h4 className="mlAnomalyCategoryExamples__header">
+              <h4
+                css={{
+                  display: 'inline',
+                }}
+              >
                 {i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.regexTitle', {
                   defaultMessage: 'Regex',
                 })}
@@ -365,7 +383,7 @@ const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] 
                     defaultMessage: 'Description',
                   }
                 )}
-                type="questionInCircle"
+                type="question"
                 color="subdued"
                 size="s"
                 content={
@@ -396,7 +414,13 @@ const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] 
                 </h4>
               </EuiText>
             )}
-            <span className="mlAnomalyCategoryExamples__item">{example}</span>
+            <span
+              css={{
+                fontFamily: euiTheme.font.familyCode,
+              }}
+            >
+              {example}
+            </span>
           </EuiFlexItem>
         );
       })}

@@ -12,6 +12,7 @@ import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/pu
 import { getAlertUrlErrorCount, getAlertUrlTransaction } from '../../../../common/utils/formatters';
 import {
   anomalyMessage,
+  anomalyRecoveryMessage,
   errorCountMessage,
   errorCountRecoveryMessage,
   transactionDurationMessage,
@@ -140,6 +141,7 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     validate: validateAnomalyRule,
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
+    defaultRecoveryMessage: anomalyRecoveryMessage,
     priority: 90,
   });
 }

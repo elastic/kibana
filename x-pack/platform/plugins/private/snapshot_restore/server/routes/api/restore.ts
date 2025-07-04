@@ -104,6 +104,12 @@ export function registerRestoreRoutes({
   router.post(
     {
       path: addBasePath('restore/{repository}/{snapshot}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { body: restoreSettingsSchema, params: restoreParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {

@@ -6,8 +6,9 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
-import { InventoryTitle } from './inventory_title';
+import { AssetInventoryTitle } from './asset_inventory_title';
 import { CenteredWrapper } from './onboarding/centered_wrapper';
+import { TEST_SUBJ_LOADING } from '../constants';
 
 /**
  * A loading state for the asset inventory page.
@@ -15,10 +16,10 @@ import { CenteredWrapper } from './onboarding/centered_wrapper';
 export const AssetInventoryLoading = () => (
   <EuiFlexGroup>
     <EuiFlexItem>
-      <InventoryTitle />
+      <AssetInventoryTitle />
       <EuiSpacer size="l" />
       <CenteredWrapper>
-        <EuiLoadingLogo logo="logoSecurity" size="xl" />
+        <EuiLoadingLogo logo="logoSecurity" size="xl" data-test-subj={TEST_SUBJ_LOADING} />
       </CenteredWrapper>
     </EuiFlexItem>
   </EuiFlexGroup>

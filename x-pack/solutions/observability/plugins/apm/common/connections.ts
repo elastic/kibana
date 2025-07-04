@@ -36,19 +36,19 @@ export type Node = ServiceNode | DependencyNode;
 export interface ConnectionStats {
   latency: {
     value: number | null;
-    timeseries: Coordinate[];
+    timeseries?: Coordinate[];
   };
   throughput: {
     value: number | null;
-    timeseries: Coordinate[];
+    timeseries?: Coordinate[];
   };
   errorRate: {
     value: number | null;
-    timeseries: Coordinate[];
+    timeseries?: Coordinate[];
   };
   totalTime: {
     value: number | null;
-    timeseries: Coordinate[];
+    timeseries?: Coordinate[];
   };
 }
 

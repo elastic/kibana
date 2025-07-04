@@ -8,6 +8,7 @@ import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_s
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
+import { MonitorConfigRepository } from './services/monitor_config_repository';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
@@ -56,6 +57,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       );
 
       server.syntheticsEsClient = syntheticsEsClient;
+      const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+      const monitorConfigRepository = new MonitorConfigRepository(
+        savedObjectsClient,
+        encryptedSavedObjectsClient
+      );
 
       const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
@@ -69,6 +75,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           server,
           spaceId,
           syntheticsMonitorClient,
+          monitorConfigRepository,
         });
         if (isKibanaResponse(res)) {
           return res;
@@ -108,8 +115,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
               },
             });
           }
+        } else if (e.statusCode >= 500) {
+          server.logger.error(e);
+        } else {
+          server.logger.debug(e);
         }
-        server.logger.error(e);
         throw e;
       }
     });

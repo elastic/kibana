@@ -6,7 +6,7 @@
  */
 
 import { first, isEmpty } from 'lodash';
-import { SanitizedRule, RuleTypeParams } from '../../common/rule';
+import type { SanitizedRule, RuleTypeParams } from '../../common/rule';
 import { getActiveSnoozeIfExist } from './snooze/get_active_snooze_if_exist';
 
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;

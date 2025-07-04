@@ -30,6 +30,7 @@ import { FrameType, normalizeFrameType } from '@kbn/profiling-utils';
  */
 const RED = 0xfd8484;
 const ORANGE = 0xffaa00;
+const DARKORANGE = 0xff8800;
 const YELLOW = 0xe1e100;
 
 export const FRAME_TYPE_COLOR_MAP = {
@@ -44,11 +45,13 @@ export const FRAME_TYPE_COLOR_MAP = {
   [FrameType.JavaScript]: [0xcbc3e3, 0xd5cfe8, 0xdfdbee, 0xeae7f3],
   [FrameType.PHPJIT]: [0xccfc82, 0xd1fc8e, 0xd6fc9b, 0xdbfca7],
   [FrameType.DotNET]: [0x6c60e1, 0x8075e5, 0x948be9, 0xa8a0ed],
+  [FrameType.Go]: [0x00add8, 0x31bee0, 0x68cce7, 0x9cdbed],
   [FrameType.ErrorFlag]: [0x0, 0x0, 0x0, 0x0], // This is a special case, it's not a real frame type
   [FrameType.Error]: [0xfd8484, 0xfd9d9d, 0xfeb5b5, 0xfecece],
   [FrameType.Root]: [RED, RED, RED, RED],
   [FrameType.ProcessName]: [ORANGE, ORANGE, ORANGE, ORANGE],
   [FrameType.ThreadName]: [YELLOW, YELLOW, YELLOW, YELLOW],
+  [FrameType.ExecutableName]: [DARKORANGE, DARKORANGE, DARKORANGE, DARKORANGE],
 };
 
 export function frameTypeToRGB(frameType: FrameType, x: number): number {

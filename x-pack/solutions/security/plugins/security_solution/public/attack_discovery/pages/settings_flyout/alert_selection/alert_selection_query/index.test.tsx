@@ -24,15 +24,15 @@ const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
 
 describe('AlertSelectionQuery', () => {
   const defaultProps = {
-    end: 'now',
     filterManager: jest.fn() as unknown as FilterManager,
-    filters: [],
-    query: { query: '', language: 'kuery' },
-    setEnd: jest.fn(),
-    setFilters: jest.fn(),
-    setQuery: jest.fn(),
-    setStart: jest.fn(),
-    start: 'now-15m',
+    settings: {
+      end: 'now',
+      filters: [],
+      query: { query: '', language: 'kuery' },
+      size: 100,
+      start: 'now-15m',
+    },
+    onSettingsChanged: jest.fn(),
   };
 
   beforeEach(() => {

@@ -10,5 +10,5 @@
 export { GuideCards } from '../src/components/landing_page/guide/guide_cards';
 export { GuideFilters } from '../src/components/landing_page/guide/guide_filters';
 export type { GuideFilterValues } from '../src/components/landing_page/guide/guide_filters';
-export { guideCards } from '../src/components/landing_page/guide/guide_cards.constants';
+export { getGuideCards } from '../src/components/landing_page/guide/guide_cards.constants';
 export type { GuideCardConstants } from '../src/components/landing_page/guide/guide_cards.constants';

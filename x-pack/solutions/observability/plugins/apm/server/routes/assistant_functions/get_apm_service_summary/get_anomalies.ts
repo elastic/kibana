@@ -146,7 +146,7 @@ export async function getAnomalies({
     const job = maybe(jobsById[jobId]);
 
     if (!job) {
-      logger.warn(`Could not find job for id ${jobId}`);
+      logger.debug(`Could not find job for id ${jobId}`);
       return undefined;
     }
 

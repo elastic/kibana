@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { Rule } from '../../types';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { RulesClientContext } from '../types';
+import type { RulesClientContext } from '../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export async function runSoon(context: RulesClientContext, { id }: { id: string }) {

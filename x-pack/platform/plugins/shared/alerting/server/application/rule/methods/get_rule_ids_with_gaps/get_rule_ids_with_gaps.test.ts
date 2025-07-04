@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization';
+import type { AlertingAuthorization } from '../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -23,7 +23,8 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { ConstructorOptions, RulesClient } from '../../../../rules_client';
+import type { ConstructorOptions } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 describe('getRuleIdsWithGaps', () => {
@@ -149,6 +150,9 @@ describe('getRuleIdsWithGaps', () => {
         unique_rule_ids: {
           buckets: [{ key: 'rule-1' }, { key: 'rule-2' }],
         },
+        latest_gap_timestamp: {
+          value: 1704067200000,
+        },
       };
 
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
@@ -162,13 +166,17 @@ describe('getRuleIdsWithGaps', () => {
         filter,
         expect.objectContaining({
           filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z" AND (kibana.alert.rule.gap.status : unfilled OR kibana.alert.rule.gap.status : partially_filled)`,
-          aggs: { unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } } },
+          aggs: {
+            latest_gap_timestamp: { max: { field: '@timestamp' } },
+            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
+          },
         })
       );
 
       expect(result).toEqual({
         total: 2,
         ruleIds: ['rule-1', 'rule-2'],
+        latestGapTimestamp: 1704067200000,
       });
     });
 
@@ -177,6 +185,9 @@ describe('getRuleIdsWithGaps', () => {
         aggregations: {
           unique_rule_ids: {
             buckets: [],
+          },
+          latest_gap_timestamp: {
+            value: null,
           },
         },
       });
@@ -188,13 +199,17 @@ describe('getRuleIdsWithGaps', () => {
         filter,
         expect.objectContaining({
           filter: expect.stringContaining('event.action: gap AND event.provider: alerting'),
-          aggs: { unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } } },
+          aggs: {
+            latest_gap_timestamp: { max: { field: '@timestamp' } },
+            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
+          },
         })
       );
 
       expect(result).toEqual({
         total: 0,
         ruleIds: [],
+        latestGapTimestamp: null,
       });
     });
 
@@ -211,7 +226,10 @@ describe('getRuleIdsWithGaps', () => {
         filter,
         expect.objectContaining({
           filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z"`,
-          aggs: { unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } } },
+          aggs: {
+            latest_gap_timestamp: { max: { field: '@timestamp' } },
+            unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
+          },
         })
       );
     });

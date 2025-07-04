@@ -9,13 +9,12 @@
 
 import { NodeColorAccessor, PATH_KEY } from '@elastic/charts';
 import { decreaseOpacity } from '@kbn/charts-plugin/public';
-import { MultiFieldKey } from '@kbn/data-plugin/common';
 import { getColorFactory } from '@kbn/coloring';
-import { isMultiFieldKey } from '@kbn/data-plugin/common';
+import { MultiFieldKey } from '@kbn/data-plugin/common';
 import { ChartTypes } from '../../../common/types';
 
 export function getCategoryKeys(category: string | MultiFieldKey): string | string[] {
-  return isMultiFieldKey(category) ? category.keys.map(String) : `${category}`;
+  return MultiFieldKey.isInstance(category) ? category.keys.map(String) : `${category}`;
 }
 
 /**

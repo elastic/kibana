@@ -17,7 +17,6 @@ import {
 import type { AlertResponseActionsSupport } from './use_alert_response_actions_support';
 import {
   ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD,
-  RESPONSE_ACTIONS_ONLY_SUPPORTED_ON_ALERTS,
   useAlertResponseActionsSupport,
 } from './use_alert_response_actions_support';
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
@@ -96,7 +95,6 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
         {
           isAlert: false,
           isSupported: false,
-          unsupportedReason: RESPONSE_ACTIONS_ONLY_SUPPORTED_ON_ALERTS,
           details: {
             agentId: '',
             agentIdField: '',
@@ -109,7 +107,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
     );
   });
 
-  it('should set `isSupported` to `false` for if not an Alert', () => {
+  it('should set `isSupported` to `true` for if it is not an Alert but supported', () => {
     alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(
       'sentinel_one',
       { 'kibana.alert.rule.uuid': undefined }
@@ -118,8 +116,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
     expect(renderHook().result.current).toEqual(
       getExpectedResult({
         isAlert: false,
-        isSupported: false,
-        unsupportedReason: RESPONSE_ACTIONS_ONLY_SUPPORTED_ON_ALERTS,
+        isSupported: true,
         details: {
           agentType: 'sentinel_one',
           agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one[0],

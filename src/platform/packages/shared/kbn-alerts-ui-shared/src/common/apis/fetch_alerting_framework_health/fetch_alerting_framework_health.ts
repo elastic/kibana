@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract } from '@kbn/actions-types';
-import { AlertingFrameworkHealth, AlertsHealth } from '@kbn/alerting-types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { AsApiContract } from '@kbn/actions-types';
+import type { AlertingFrameworkHealth, AlertsHealth } from '@kbn/alerting-types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { transformAlertingFrameworkHealthResponse, transformAlertsHealthResponse } from '.';
 

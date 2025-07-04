@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import moment from 'moment';
 
 import { screen } from '@testing-library/react';
-import { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import { AppMockRenderer, createAppMockRenderer } from '../../../../lib/test_utils';
+import type { AppMockRenderer } from '../../../../lib/test_utils';
+import { createAppMockRenderer } from '../../../../lib/test_utils';
 import type { FormProps } from '../schema';
 import { DatePickerRangeField } from './date_picker_range_field';
 

@@ -69,8 +69,8 @@ export function createMockVisualization(
 
 export const mockVisualizationMap = (): VisualizationMap => {
   return {
-    testVis: createMockVisualization(),
-    testVis2: createMockVisualization(),
+    testVis: createMockVisualization('testVis'),
+    testVis2: createMockVisualization('testVis2'),
   };
 };
 

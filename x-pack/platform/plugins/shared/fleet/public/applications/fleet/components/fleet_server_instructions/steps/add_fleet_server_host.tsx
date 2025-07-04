@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
-import { EuiAccordion, EuiIconTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import {
   EuiSwitch,
   EuiButton,
@@ -24,8 +24,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import styled from 'styled-components';
-
 import type { FleetServerHost } from '../../../types';
 
 import { useStartServices, useLink, useFleetStatus } from '../../../hooks';
@@ -34,12 +32,6 @@ import { MultiRowInput } from '../../../sections/settings/components/multi_row_i
 import { FleetServerHostSelect } from '../components';
 import { SSLFormSection } from '../../../sections/settings/components/fleet_server_hosts_flyout/ssl_form_section';
 import { ExperimentalFeaturesService } from '../../../services';
-
-const StyledEuiAccordion = styled(EuiAccordion)`
-  .ingest-active-button {
-    color: ${(props) => props.theme.eui.euiColorPrimary};
-  }
-`;
 
 export const getAddFleetServerHostStep = ({
   fleetServerHostForm,
@@ -244,25 +236,12 @@ export const AddFleetServerHostStepContent = ({
             </>
           </EuiFormRow>
           <EuiSpacer size="m" />
-          <StyledEuiAccordion
-            id="advancedSSLOptions"
-            data-test-subj="advancedSSLOptionsButton"
-            buttonContent={
-              <FormattedMessage
-                id="xpack.fleet.fleetServerSetup.SSLOptionsToggleLabel"
-                defaultMessage="SSL options"
-              />
-            }
-            buttonClassName="ingest-active-button"
-          >
-            <EuiSpacer size="s" />
-            <SSLFormSection
-              inputs={inputs}
-              useSecretsStorage={enableSSLSecrets && useSecretsStorage}
-              onToggleSecretAndClearValue={onToggleSecretAndClearValue}
-              isConvertedToSecret={isConvertedToSecret}
-            />
-          </StyledEuiAccordion>
+          <SSLFormSection
+            inputs={inputs}
+            useSecretsStorage={enableSSLSecrets && useSecretsStorage}
+            onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+            isConvertedToSecret={isConvertedToSecret}
+          />
           <EuiSpacer size="m" />
           {fleetServerHosts.length > 0 ? (
             <EuiFormRow fullWidth {...inputs.isDefaultInput.formRowProps}>

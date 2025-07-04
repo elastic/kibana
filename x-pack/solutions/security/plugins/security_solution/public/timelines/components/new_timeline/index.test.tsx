@@ -26,7 +26,6 @@ jest.mock('react-redux', () => {
 
   return {
     ...original,
-    useSelector: jest.fn(),
     useDispatch: () => jest.fn(),
   };
 });
@@ -37,8 +36,19 @@ const renderNewTimelineButton = (type: TimelineType) =>
   render(<NewTimelineButton type={type} />, { wrapper: TestProviders });
 
 describe('NewTimelineButton', () => {
-  const dataViewId = '';
-  const selectedPatterns: string[] = [];
+  const dataViewId = 'security-solution';
+  const selectedPatterns: string[] = [
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'logs-*',
+    'packetbeat-*',
+    'traces-apm*',
+    'winlogbeat-*',
+    '-*elastic-cloud-logs-*',
+    '.siem-signals-spacename',
+  ];
   (useDiscoverInTimelineContext as jest.Mock).mockReturnValue({
     resetDiscoverAppState: jest.fn(),
   });

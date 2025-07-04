@@ -8,28 +8,30 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import { RRule, Weekday } from '@kbn/rrule';
-import { RRuleParams, DateRange } from '../../../../common';
-import { MaintenanceWindow } from '../types';
+import type { RRuleParams, DateRange } from '../../../../common';
+import type { MaintenanceWindow } from '../types';
 
 export interface GenerateMaintenanceWindowEventsParams {
   rRule: RRuleParams;
   expirationDate: string;
   duration: number;
+  startDate?: string;
 }
 
 export const generateMaintenanceWindowEvents = ({
   rRule,
   expirationDate,
   duration,
+  startDate,
 }: GenerateMaintenanceWindowEventsParams) => {
   const { dtstart, until, wkst, byweekday, ...rest } = rRule;
 
-  const startDate = new Date(dtstart);
+  const rRuleStartDate = new Date(dtstart);
   const endDate = new Date(expirationDate);
 
   const rRuleOptions = {
     ...rest,
-    dtstart: startDate,
+    dtstart: rRuleStartDate,
     until: until ? new Date(until) : null,
     wkst: wkst ? Weekday[wkst] : null,
     byweekday: byweekday ?? null,
@@ -37,7 +39,8 @@ export const generateMaintenanceWindowEvents = ({
 
   try {
     const recurrenceRule = new RRule(rRuleOptions);
-    const occurrenceDates = recurrenceRule.between(startDate, endDate);
+    const eventStartDate = startDate ? new Date(startDate) : rRuleStartDate;
+    const occurrenceDates = recurrenceRule.between(eventStartDate, endDate);
 
     return occurrenceDates.map((date) => {
       return {

@@ -12,7 +12,6 @@ import { useLocation } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   AutoDetectPage,
-  CustomLogsPage,
   KubernetesPage,
   LandingPage,
   OtelLogsPage,
@@ -20,6 +19,7 @@ import {
   FirehosePage,
 } from './pages';
 import { ObservabilityOnboardingAppServices } from '..';
+import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
 
 const queryClient = new QueryClient();
 
@@ -31,6 +31,8 @@ export function ObservabilityOnboardingFlow() {
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
+  useFlowBreadcrumb(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
@@ -40,9 +42,6 @@ export function ObservabilityOnboardingFlow() {
       <Routes>
         <Route path="/auto-detect">
           <AutoDetectPage />
-        </Route>
-        <Route path="/customLogs">
-          <CustomLogsPage />
         </Route>
         <Route path="/kubernetes">
           <KubernetesPage />

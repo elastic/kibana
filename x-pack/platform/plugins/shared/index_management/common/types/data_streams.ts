@@ -23,6 +23,7 @@ type TimestampField = TimestampFieldFromEs;
 interface PrivilegesFromEs {
   delete_index: boolean;
   manage_data_stream_lifecycle: boolean;
+  read_failure_store: boolean;
 }
 
 type Privileges = PrivilegesFromEs;
@@ -46,6 +47,7 @@ export interface EnhancedDataStreamFromEs extends IndicesDataStream {
   privileges: {
     delete_index: boolean;
     manage_data_stream_lifecycle: boolean;
+    read_failure_store: boolean;
   };
   index_mode?: string | null;
 }
@@ -68,6 +70,7 @@ export interface DataStream {
   privileges: Privileges;
   hidden: boolean;
   nextGenerationManagedBy: string;
+  failureStoreEnabled?: boolean;
   lifecycle?: IndicesDataStreamLifecycleWithRollover & {
     enabled?: boolean;
     effective_retention?: string;
@@ -89,4 +92,11 @@ export interface DataRetention {
   infiniteDataRetention?: boolean;
   value?: number;
   unit?: string;
+}
+
+export interface DataStreamOptions {
+  failure_store?: {
+    enabled: boolean;
+  };
+  [key: string]: unknown;
 }

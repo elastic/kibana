@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features/keys';
+import {
+  ALL_PRODUCT_FEATURE_KEYS,
+  ProductFeatureSecurityKey,
+} from '@kbn/security-solution-features/keys';
 
-// Just copying all feature keys for now.
-// We may need a different set of keys in the future if we create serverless-specific productFeatures
-export const DEFAULT_PRODUCT_FEATURES = [...ALL_PRODUCT_FEATURE_KEYS];
+// List of product features that are disabled in different offering (eg. Serverless).
+const DISABLED_PRODUCT_FEATURES: ProductFeatureKeyType[] = [
+  ProductFeatureSecurityKey.externalDetections,
+  ProductFeatureSecurityKey.configurations,
+];
+
+export const DEFAULT_PRODUCT_FEATURES = ALL_PRODUCT_FEATURE_KEYS.filter(
+  (key) => !DISABLED_PRODUCT_FEATURES.includes(key as ProductFeatureKeyType)
+);

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import type { HttpStart } from '@kbn/core/public';
 import React from 'react';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
-import TutorialConfigAgent from '.';
+import { TutorialConfigAgent } from '.';
 import type { APIReturnType } from '../../services/rest/create_call_apm_api';
 
 export type APIResponseType = APIReturnType<'GET /internal/apm/fleet/agents'>;
@@ -74,16 +74,19 @@ function Wrapper({
     />
   );
 }
-export const Integration: Story<Args> = (args) => {
-  return <Wrapper {...args} />;
-};
 
-Integration.args = {
-  apmAgent: 'java',
-  onPrem: true,
-  hasFleetPoliciesWithApmIntegration: false,
-  hasCloudPolicyWithApmIntegration: false,
-  isFleetEnabled: true,
+export const Integration: StoryObj<Args> = {
+  render: (args) => {
+    return <Wrapper {...args} />;
+  },
+
+  args: {
+    apmAgent: 'java',
+    onPrem: true,
+    hasFleetPoliciesWithApmIntegration: false,
+    hasCloudPolicyWithApmIntegration: false,
+    isFleetEnabled: true,
+  },
 };
 
 export default {

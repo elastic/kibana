@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { ExecuteOptions } from '../../../../../lib/action_executor';
+import type { ExecuteOptions } from '../../../../../lib/action_executor';
 
 export type ConnectorExecuteParams = Omit<ExecuteOptions, 'request' | 'actionExecutionId'>;

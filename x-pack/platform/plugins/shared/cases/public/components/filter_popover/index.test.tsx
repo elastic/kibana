@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { FilterPopover } from '.';
 
 // Failing: See https://github.com/elastic/kibana/issues/176679
-describe.skip('FilterPopover ', () => {
+describe('FilterPopover ', () => {
   const onSelectedOptionsChanged = jest.fn();
   const tags: string[] = ['coke', 'pepsi'];
 

@@ -73,9 +73,12 @@ export async function reassignAgent(
     );
   }
 
+  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+
   await updateAgent(esClient, agentId, {
     policy_id: newAgentPolicyId,
     policy_revision: null,
+    ...(newAgentPolicy?.space_ids ? { namespaces: newAgentPolicy.space_ids } : {}),
   });
 
   const currentSpaceId = getCurrentNamespace(soClient);
@@ -124,6 +127,7 @@ export async function reassignAgents(
     const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
+      showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       page: 1,
       perPage: batchSize,

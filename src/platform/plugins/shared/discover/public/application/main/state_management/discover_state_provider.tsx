@@ -63,6 +63,10 @@ export const DiscoverMainProvider = ({
   return (
     <DiscoverStateProvider value={value}>
       <DiscoverAppStateProvider value={value.appState}>
+        {/**
+         * TODO: We should be able to remove this since it already wraps the whole application,
+         * but doing so causes FTR flakiness in CI, so it needs to be investigated further.
+         */}
         <InternalStateProvider store={value.internalState}>{children}</InternalStateProvider>
       </DiscoverAppStateProvider>
     </DiscoverStateProvider>

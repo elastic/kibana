@@ -7,25 +7,19 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  ILM_LOCATOR_ID,
   IlmLocatorParams,
   Phases,
   PolicyFromES,
 } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
-  IngestStreamGetResponse,
   IngestStreamLifecycle,
-  StreamGetResponse,
-  UnwiredStreamGetResponse,
-  WiredStreamGetResponse,
   getAncestors,
   isIlmLifecycle,
-  isUnwiredStreamGetResponse,
-  isWiredStreamDefinition,
-  isWiredStreamGetResponse,
   findInheritedLifecycle,
   findInheritingStreams,
   isDslLifecycle,
+  Streams,
 } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -55,6 +49,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import useToggle from 'react-use/lib/useToggle';
+import { useKibana } from '../../../hooks/use_kibana';
 import { rolloverCondition } from './helpers/rollover_condition';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useWiredStreams } from '../../../hooks/use_wired_streams';
@@ -67,9 +62,8 @@ interface ModalOptions {
   closeModal: () => void;
   updateLifecycle: (lifecycle: IngestStreamLifecycle) => void;
   getIlmPolicies: () => Promise<PolicyFromES[]>;
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   updateInProgress: boolean;
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
 }
 
 export function EditLifecycleModal({
@@ -231,9 +225,15 @@ function IlmModal({
   updateLifecycle,
   updateInProgress,
   getIlmPolicies,
-  ilmLocator,
   definition,
 }: ModalOptions) {
+  const {
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+
+  const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
   const existingLifecycle = definition.stream.ingest.lifecycle;
   const [selectedPolicy, setSelectedPolicy] = useState(
     isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : undefined
@@ -372,9 +372,9 @@ function IlmModal({
 }
 
 function InheritModal({ definition, ...options }: ModalOptions) {
-  if (isWiredStreamGetResponse(definition)) {
+  if (Streams.WiredStream.GetResponse.is(definition)) {
     return <InheritModalWired definition={definition} {...options} />;
-  } else if (isUnwiredStreamGetResponse(definition)) {
+  } else if (Streams.UnwiredStream.GetResponse.is(definition)) {
     return <InheritModalUnwired definition={definition} {...options} />;
   }
 }
@@ -384,7 +384,7 @@ function InheritModalWired({
   closeModal,
   updateInProgress,
   updateLifecycle,
-}: ModalOptions & { definition: WiredStreamGetResponse }) {
+}: ModalOptions & { definition: Streams.WiredStream.GetResponse }) {
   const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
 
   const parents = useMemo(() => {
@@ -452,7 +452,7 @@ function InheritModalUnwired({
   closeModal,
   updateInProgress,
   updateLifecycle,
-}: ModalOptions & { definition: UnwiredStreamGetResponse }) {
+}: ModalOptions & { definition: Streams.UnwiredStream.GetResponse }) {
   return (
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
@@ -489,7 +489,7 @@ function ModalFooter({
   onConfirm,
   closeModal,
 }: {
-  definition: StreamGetResponse;
+  definition: Streams.all.GetResponse;
   updateInProgress: boolean;
   confirmationLabel: string;
   confirmationIsDisabled?: boolean;
@@ -498,19 +498,19 @@ function ModalFooter({
 }) {
   const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
   const inheritingStreams = useMemo(() => {
-    if (!isWiredStreamGetResponse(definition) || wiredStreamsLoading || !wiredStreams) {
+    if (!Streams.WiredStream.GetResponse.is(definition) || wiredStreamsLoading || !wiredStreams) {
       return [];
     }
     return findInheritingStreams(
       definition.stream,
-      wiredStreams.filter(isWiredStreamDefinition)
+      wiredStreams.filter(Streams.WiredStream.Definition.is)
     ).filter((name) => name !== definition.stream.name);
   }, [definition, wiredStreams, wiredStreamsLoading]);
 
   return (
     <EuiModalFooter>
       <EuiFlexGroup direction="column">
-        {isWiredStreamGetResponse(definition) ? (
+        {Streams.WiredStream.GetResponse.is(definition) ? (
           <EuiFlexItem>
             <EuiCallOut
               title={i18n.translate(

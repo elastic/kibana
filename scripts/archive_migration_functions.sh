@@ -19,11 +19,11 @@
 
 standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-element,canvas-workpad,dashboard,search,lens,map,cases,uptime-dynamic-settings,osquery-saved-query,osquery-pack,infrastructure-ui-source,metrics-explorer-view,inventory-view,infrastructure-monitoring-log-view,apm-indices"
 
-orig_archive="test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects"
+orig_archive="src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects"
 new_archive="x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects"
-testFiles=("test/plugin_functional/test_suites/saved_objects_management/scroll_count.ts")
+testFiles=("src/platform/test/plugin_functional/test_suites/saved_objects_management/scroll_count.ts")
 
-test_config="test/plugin_functional/config.ts"
+test_config="src/platform/test/plugin_functional/config.ts"
 
 list_stragglers() {
 
@@ -33,7 +33,7 @@ list_stragglers() {
     if [ -n "$a" ]; then
       echo "${a%/mappings.json}"
     fi
-  done <<<"$(find test/functional/fixtures/es_archiver -name mappings.json)"
+  done <<<"$(find src/platform/test/functional/fixtures/es_archiver -name mappings.json)"
 
   echo
   echo
@@ -379,7 +379,7 @@ save_kbn() {
   set -x
   node scripts/kbn_archiver.js --config "$test_config" save "$new_archive" --type $standard_list --space "$space"
   set +x
-  #  node scripts/kbn_archiver.js --config x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts save x-pack/test/functional/fixtures/kbn_archiver/saved_objects/default_space --type search,index-pattern,visualization,dashboard,lens,map,graph-workspace,query,tag,url,canvas-workpad
+  #  node scripts/kbn_archiver.js --config x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts save x-pack/test/functional/fixtures/kbn_archiver/saved_objects/default_space --type search,index-pattern,visualization,dashboard,lens,map,graph-workspace,query,tag,url,canvas-workpad
 }
 
 load_kbn() {

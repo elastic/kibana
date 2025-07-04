@@ -10,10 +10,10 @@ import { Logger } from '@kbn/logging';
 import { ChatCompleteResponse } from '@kbn/inference-common';
 import type { ObservabilityAIAssistantClient } from '..';
 import { Message, MessageRole } from '../../../../common';
-import { LangTracer } from '../instrumentation/lang_tracer';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
-
+export const TITLE_SYSTEM_MESSAGE =
+  'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.';
 type ChatFunctionWithoutConnectorAndTokenCount = (
   name: string,
   params: Omit<
@@ -26,17 +26,14 @@ export function getGeneratedTitle({
   messages,
   chat,
   logger,
-  tracer,
 }: {
   messages: Message[];
   chat: ChatFunctionWithoutConnectorAndTokenCount;
   logger: Pick<Logger, 'debug' | 'error'>;
-  tracer: LangTracer;
 }): Observable<string> {
   return from(
     chat('generate_title', {
-      systemMessage:
-        'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
+      systemMessage: TITLE_SYSTEM_MESSAGE,
       messages: [
         {
           '@timestamp': new Date().toISOString(),
@@ -65,7 +62,6 @@ export function getGeneratedTitle({
         },
       ],
       functionCall: TITLE_CONVERSATION_FUNCTION_NAME,
-      tracer,
       stream: false,
     })
   ).pipe(

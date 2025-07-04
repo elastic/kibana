@@ -12,6 +12,7 @@ exports[`HostWorkingDir renders correctly against snapshot 1`] = `
       field="host.name"
       fieldType="keyword"
       isAggregatable={true}
+      scopeId="some_scope"
       value="[hostname-123]"
     />
   </TokensFlexItem>
@@ -32,6 +33,7 @@ exports[`HostWorkingDir renders correctly against snapshot 1`] = `
       fieldType="keyword"
       iconType="folderOpen"
       isAggregatable={true}
+      scopeId="some_scope"
       value="[working-directory-123]"
     />
   </TokensFlexItem>

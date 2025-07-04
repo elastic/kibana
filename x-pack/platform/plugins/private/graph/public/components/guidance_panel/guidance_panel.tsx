@@ -15,14 +15,15 @@ import {
   EuiLink,
   EuiCallOut,
   EuiScreenReaderOnly,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { connect } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { css } from '@emotion/react';
 import {
   GraphState,
   hasDatasourceSelector,
@@ -48,22 +49,17 @@ function ListItem({
   state: 'done' | 'active' | 'disabled';
   children: ReactNode;
 }) {
+  const isDisabled = state === 'disabled';
+
   return (
     // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <li
-      className={classNames('gphGuidancePanel__item', {
-        'gphGuidancePanel__item--disabled': state === 'disabled',
-      })}
-      aria-disabled={state === 'disabled'}
+      css={[styles.listItem, isDisabled && styles.disabledListItem]}
+      aria-disabled={isDisabled}
       aria-current={state === 'active' ? 'step' : undefined}
     >
-      {state !== 'disabled' && (
-        <span
-          className={classNames('gphGuidancePanel__itemIcon', {
-            'gphGuidancePanel__itemIcon--done': state === 'done',
-          })}
-          aria-hidden={true}
-        >
+      {!isDisabled && (
+        <span css={[styles.itemIcon, state === 'done' && styles.doneIcon]} aria-hidden={true}>
           <EuiIcon type={state === 'active' ? 'sortRight' : 'check'} />
         </span>
       )}
@@ -112,7 +108,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ol className="gphGuidancePanel__list" aria-labelledby="graphHeading">
+          <ol css={styles.list} aria-labelledby="graphHeading">
             <ListItem state={hasDatasource ? 'done' : 'active'}>
               <EuiLink onClick={onOpenDatasourcePicker}>
                 {i18n.translate(
@@ -160,7 +156,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
       <EuiPanel paddingSize="none">
         <EuiCallOut
           color="warning"
-          iconType="help"
+          iconType="question"
           title={i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
             defaultMessage: 'No data source',
           })}
@@ -212,7 +208,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
 
   return (
     <EuiFlexGroup justifyContent="center">
-      <EuiFlexItem className="gphGuidancePanel">{content}</EuiFlexItem>
+      <EuiFlexItem css={styles.guidancePanel}>{content}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }
@@ -239,3 +235,52 @@ export const GuidancePanel = connect(
     },
   })
 )(GuidancePanelComponent);
+
+const styles = {
+  guidancePanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      maxWidth: '580px',
+      margin: `${euiTheme.size.l} 0`,
+    }),
+
+  list: css({
+    listStyle: 'none',
+    margin: '0',
+    padding: '0',
+  }),
+
+  listItem: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'block',
+      maxWidth: '420px',
+      position: 'relative',
+      paddingLeft: euiTheme.size.xl,
+      marginBottom: euiTheme.size.l,
+    }),
+
+  disabledListItem: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.darkShade,
+
+      button: {
+        color: `${euiTheme.colors.darkShade} !important`,
+      },
+    }),
+
+  itemIcon: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      left: '0',
+      top: `calc(-${euiTheme.size.xs} / 2)`,
+      width: euiTheme.size.l,
+      height: euiTheme.size.l,
+      padding: euiTheme.size.xs,
+    }),
+
+  doneIcon: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.success,
+      color: euiTheme.colors.emptyShade,
+      borderRadius: '50%',
+    }),
+};

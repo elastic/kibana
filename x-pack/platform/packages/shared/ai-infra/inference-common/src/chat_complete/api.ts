@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { Overwrite } from 'utility-types';
 import type { Observable } from 'rxjs';
-import type { ToolCallsOf, ToolOptions } from './tools';
+import type { ToolCallsOf, ToolChoiceType, ToolOptions } from './tools';
 import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 import type { ChatCompleteMetadata } from './metadata';
@@ -55,33 +56,36 @@ import type { ChatCompleteMetadata } from './metadata';
  * });
  * ```
  */
-export type ChatCompleteAPI = <
-  TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
->(
-  options: ChatCompleteOptions<TToolOptions, TStream>
-) => ChatCompleteCompositeResponse<TToolOptions, TStream>;
+
+export interface DefaultChatCompleteOptions {
+  stream: false;
+  tools: {};
+  toolChoice: ToolChoiceType.auto;
+}
+
+type ChatCompleteCompositeResponseOptions = Pick<
+  ChatCompleteOptions,
+  'stream' | 'tools' | 'toolChoice'
+>;
+
+type ChatCompleteResponseOptions = Pick<ChatCompleteOptions, 'tools' | 'toolChoice'>;
+
+export type ChatCompleteAPIResponse<TOptions extends ChatCompleteOptions = ChatCompleteOptions> =
+  ChatCompleteCompositeResponse<Overwrite<DefaultChatCompleteOptions, TOptions>>;
+
+export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(
+  options: TOptions
+) => ChatCompleteAPIResponse<TOptions>;
 
 /**
  * Options used to call the {@link ChatCompleteAPI}
  */
-export type ChatCompleteOptions<
-  TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
-> = {
+export type ChatCompleteOptions = {
   /**
    * The ID of the connector to use.
    * Must be an inference connector, or an error will be thrown.
    */
   connectorId: string;
-  /**
-   * Set to true to enable streaming, which will change the API response type from
-   * a single {@link ChatCompleteResponse} promise
-   * to a {@link ChatCompleteStreamResponse} event observable.
-   *
-   * Defaults to false.
-   */
-  stream?: TStream;
   /**
    * Optional system message for the LLM.
    */
@@ -114,7 +118,53 @@ export type ChatCompleteOptions<
    * Optional metadata related to call execution.
    */
   metadata?: ChatCompleteMetadata;
-} & TToolOptions;
+  /**
+   * The maximum amount of times to retry in case of error returned from the provider.
+   *
+   * Defaults to 3.
+   */
+  maxRetries?: number;
+  /**
+   * Optional configuration for the retry mechanism.
+   *
+   * Note that defaults are very fine, so only use this if you really have a reason to do so.
+   */
+  retryConfiguration?: ChatCompleteRetryConfiguration;
+  /**
+   * Set to true to enable streaming, which will change the API response type from
+   * a single {@link ChatCompleteResponse} promise
+   * to a {@link ChatCompleteStreamResponse} event observable.
+   *
+   * Defaults to false.
+   */
+  stream?: boolean;
+} & ToolOptions;
+
+export interface ChatCompleteRetryConfiguration {
+  /**
+   * Defines the strategy for error retry
+   *
+   * Either one of
+   * - all: will retry all errors
+   * - auto: will only retry errors that could be recoverable (e.g rate limit, connectivity)
+   * Of a custom function to manually handle filtering
+   *
+   * Defaults to "auto"
+   */
+  retryOn?: 'all' | 'auto' | ((err: Error) => boolean);
+  /**
+   * The initial delay for incremental backoff, in ms.
+   *
+   * Defaults to 1000.
+   */
+  initialDelay?: number;
+  /**
+   * The backoff exponential multiplier.
+   *
+   * Defaults to 2.
+   */
+  backoffMultiplier?: number;
+}
 
 /**
  * Composite response type from the {@link ChatCompleteAPI},
@@ -122,25 +172,26 @@ export type ChatCompleteOptions<
  * whether API was called with stream mode enabled or not.
  */
 export type ChatCompleteCompositeResponse<
-  TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
-> = TStream extends true
-  ? ChatCompleteStreamResponse<TToolOptions>
-  : Promise<ChatCompleteResponse<TToolOptions>>;
+  TOptions extends ChatCompleteCompositeResponseOptions = ChatCompleteCompositeResponseOptions
+> =
+  | (true extends TOptions['stream'] ? ChatCompleteStreamResponse<TOptions> : never)
+  | (false extends TOptions['stream'] ? Promise<ChatCompleteResponse<TOptions>> : never);
 
 /**
  * Response from the {@link ChatCompleteAPI} when streaming is enabled.
  *
  * Observable of {@link ChatCompletionEvent}
  */
-export type ChatCompleteStreamResponse<TToolOptions extends ToolOptions = ToolOptions> = Observable<
-  ChatCompletionEvent<TToolOptions>
->;
+export type ChatCompleteStreamResponse<
+  TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions
+> = Observable<ChatCompletionEvent<TOptions>>;
 
 /**
  * Response from the {@link ChatCompleteAPI} when streaming is not enabled.
  */
-export interface ChatCompleteResponse<TToolOptions extends ToolOptions = ToolOptions> {
+export interface ChatCompleteResponse<
+  TOptions extends ChatCompleteResponseOptions = ChatCompleteResponseOptions
+> {
   /**
    * The text content of the LLM response.
    */
@@ -148,7 +199,7 @@ export interface ChatCompleteResponse<TToolOptions extends ToolOptions = ToolOpt
   /**
    * The eventual tool calls performed by the LLM.
    */
-  toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
+  toolCalls: ToolCallsOf<TOptions>['toolCalls'];
   /**
    * Token counts
    */

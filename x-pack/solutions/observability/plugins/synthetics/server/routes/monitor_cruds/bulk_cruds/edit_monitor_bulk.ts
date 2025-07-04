@@ -7,7 +7,6 @@
 import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { RouteContext } from '../../types';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
 import {
   ConfigKey,
@@ -30,27 +29,6 @@ export interface MonitorConfigUpdate {
   monitorWithRevision: SyntheticsMonitorWithSecretsAttributes;
   decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
 }
-
-const updateConfigSavedObjects = async ({
-  routeContext,
-  monitorsToUpdate,
-}: {
-  routeContext: RouteContext;
-  monitorsToUpdate: MonitorConfigUpdate[];
-}) => {
-  return await routeContext.savedObjectsClient.bulkUpdate<MonitorFields>(
-    monitorsToUpdate.map(({ monitorWithRevision, decryptedPreviousMonitor }) => ({
-      type: syntheticsMonitorType,
-      id: decryptedPreviousMonitor.id,
-      attributes: {
-        ...monitorWithRevision,
-        [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
-        [ConfigKey.MONITOR_QUERY_ID]:
-          monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
-      },
-    }))
-  );
-};
 
 async function syncUpdatedMonitors({
   spaceId,
@@ -92,11 +70,24 @@ export const syncEditedMonitorBulk = async ({
   privateLocations: SyntheticsPrivateLocations;
   spaceId: string;
 }) => {
-  const { server } = routeContext;
+  const { server, monitorConfigRepository } = routeContext;
 
   try {
+    const data = monitorsToUpdate.map(({ monitorWithRevision, decryptedPreviousMonitor }) => ({
+      id: decryptedPreviousMonitor.id,
+      attributes: {
+        ...monitorWithRevision,
+        [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
+        [ConfigKey.MONITOR_QUERY_ID]:
+          monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
+      } as unknown as MonitorFields,
+      soType: decryptedPreviousMonitor.type,
+    }));
     const [editedMonitorSavedObjects, editSyncResponse] = await Promise.all([
-      updateConfigSavedObjects({ monitorsToUpdate, routeContext }),
+      monitorConfigRepository.bulkUpdate({
+        monitors: data,
+        namespace: spaceId !== routeContext.spaceId ? spaceId : undefined,
+      }),
       syncUpdatedMonitors({ monitorsToUpdate, routeContext, spaceId, privateLocations }),
     ]);
 
@@ -132,7 +123,6 @@ export const syncEditedMonitorBulk = async ({
       editedMonitors: editedMonitorSavedObjects?.saved_objects,
     };
   } catch (e) {
-    server.logger.error(`Unable to update Synthetics monitors, ${e.message}`);
     await rollbackCompletely({ routeContext, monitorsToUpdate });
     throw e;
   }
@@ -145,17 +135,19 @@ export const rollbackCompletely = async ({
   monitorsToUpdate: MonitorConfigUpdate[];
   routeContext: RouteContext;
 }) => {
-  const { savedObjectsClient, server } = routeContext;
+  const { server, monitorConfigRepository } = routeContext;
   try {
-    await savedObjectsClient.bulkUpdate<MonitorFields>(
-      monitorsToUpdate.map(({ decryptedPreviousMonitor }) => ({
-        type: syntheticsMonitorType,
+    await monitorConfigRepository.bulkUpdate({
+      monitors: monitorsToUpdate.map(({ decryptedPreviousMonitor }) => ({
         id: decryptedPreviousMonitor.id,
-        attributes: decryptedPreviousMonitor.attributes,
-      }))
-    );
-  } catch (e) {
-    server.logger.error(`Unable to rollback Synthetics monitors edit ${e.message} `);
+        attributes: decryptedPreviousMonitor.attributes as unknown as MonitorFields,
+        soType: decryptedPreviousMonitor.type,
+      })),
+    });
+  } catch (error) {
+    server.logger.error(`Unable to rollback Synthetics monitors edit, Error: ${error.message}`, {
+      error,
+    });
   }
 };
 
@@ -173,7 +165,7 @@ export const rollbackFailedUpdates = async ({
   if (!failedPolicyUpdates || failedPolicyUpdates.length === 0) {
     return;
   }
-  const { server, savedObjectsClient } = routeContext;
+  const { server, monitorConfigRepository } = routeContext;
 
   try {
     const failedConfigs: Record<
@@ -195,16 +187,19 @@ export const rollbackFailedUpdates = async ({
         return failedConfigs[decryptedPreviousMonitor.id];
       })
       .map(({ decryptedPreviousMonitor }) => ({
-        type: syntheticsMonitorType,
         id: decryptedPreviousMonitor.id,
-        attributes: decryptedPreviousMonitor.attributes,
+        attributes: decryptedPreviousMonitor.attributes as unknown as MonitorFields,
+        soType: decryptedPreviousMonitor.type,
       }));
 
     if (monitorsToRevert.length > 0) {
-      await savedObjectsClient.bulkUpdate<MonitorFields>(monitorsToRevert);
+      await monitorConfigRepository.bulkUpdate({ monitors: monitorsToRevert });
     }
     return failedConfigs;
-  } catch (e) {
-    server.logger.error(`Unable to rollback Synthetics monitor failed updates, ${e.message} `);
+  } catch (error) {
+    server.logger.error(
+      `Unable to rollback Synthetics monitor failed updates, Error: ${error.message}`,
+      { error }
+    );
   }
 };

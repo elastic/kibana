@@ -11,9 +11,8 @@ import type { EuiStepStatus } from '@elastic/eui';
 import { EuiSpacer, EuiSteps } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import type { FileAnalysis } from './file_manager/file_wrapper';
-import { STATUS } from './file_manager/file_manager';
-import { type UploadStatus } from './file_manager/file_manager';
+import type { UploadStatus, FileAnalysis } from '@kbn/file-upload';
+import { STATUS } from '@kbn/file-upload';
 import { FileStatus } from './file_status';
 
 interface Props {
@@ -54,7 +53,7 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       title: i18n.translate(
         'xpack.dataVisualizer.file.overallUploadStatus.creatingIndexAndIngestPipeline',
         {
-          defaultMessage: 'Creating index and ingest pipeline',
+          defaultMessage: 'Creating index',
         }
       ),
       children: <></>,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import words from 'lodash/words';
+import { words } from 'lodash';
 
 import { Query } from '@elastic/eui';
 import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
@@ -103,6 +103,7 @@ export const getFieldDefinition = <T extends SettingType>(
     userValue: savedValue,
     value: defaultValue,
     solution,
+    technicalPreview,
   } = setting;
 
   const { isCustom, isOverridden } = params;
@@ -146,6 +147,7 @@ export const getFieldDefinition = <T extends SettingType>(
     type,
     unsavedFieldId: `${id}-unsaved`,
     solution,
+    technicalPreview,
   };
 
   // TODO: clintandrewhall - add validation (e.g. `select` contains non-empty `options`)

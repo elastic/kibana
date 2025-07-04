@@ -15,6 +15,7 @@ import { processResponse, processInferenceResult } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getFillMaskOutputComponent } from './fill_mask_output';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 const DEFAULT_MASK_TOKEN = '[MASK]';
 
@@ -36,9 +37,10 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    telemetryClient: ITelemetryClient
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, telemetryClient);
     const maskToken = model.inference_config?.[this.inferenceType]?.mask_token;
     if (maskToken) {
       this.maskToken = maskToken;

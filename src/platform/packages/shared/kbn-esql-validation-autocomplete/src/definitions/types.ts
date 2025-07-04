@@ -6,17 +6,23 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type {
+import {
   ESQLAstItem,
   ESQLCommand,
-  ESQLCommandOption,
   ESQLFunction,
   ESQLMessage,
   ESQLSource,
+  ESQLAstCommand,
+  ESQLAst,
 } from '@kbn/esql-ast';
-import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLPolicy } from '../validation/types';
+import type {
+  ESQLPolicy,
+  ReferenceMaps,
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+} from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
@@ -64,9 +70,9 @@ export const isFieldType = (type: string | FunctionParameterType): type is Field
 export const dataTypes = [
   ...fieldTypes,
   'null',
-  'time_literal', // @TODO consider merging time_literal with time_duration
   'time_duration',
   'date_period',
+  'param', // Defines a named param such as ?value or ??field
 ] as const;
 
 export type SupportedDataType = (typeof dataTypes)[number];
@@ -128,46 +134,11 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
   (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
 
 export interface Signature {
-  params: Array<{
-    name: string;
-    type: FunctionParameterType;
-    optional?: boolean;
-    supportsWildcard?: boolean;
-    /**
-     * If set, this parameter does not accept a field. It only accepts a constant,
-     * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
-     */
-    constantOnly?: boolean;
-    /**
-     * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-     */
-    fieldsOnly?: boolean;
-    /**
-     * if provided this means that the value must be one
-     * of the options in the array iff the value is a literal.
-     *
-     * String values are case insensitive.
-     *
-     * If the value is not a literal, this field is ignored because
-     * we can't check the return value of a function to see if it
-     * matches one of the options prior to runtime.
-     */
-    acceptedValues?: string[];
-    /**
-     * Must only be included _in addition to_ literalOptions.
-     *
-     * If provided this is the list of suggested values that
-     * will show up in the autocomplete. If omitted, the literalOptions
-     * will be used as suggestions.
-     *
-     * This is useful for functions that accept
-     * values that we don't want to show as suggestions.
-     */
-    literalSuggestions?: string[];
-    mapParams?: string;
-  }>;
+  params: FunctionParameter[];
   minParams?: number;
   returnType: FunctionReturnType;
+  // Not used yet, but we will in the future.
+  license?: string;
 }
 
 export enum FunctionDefinitionTypes {
@@ -177,6 +148,109 @@ export enum FunctionDefinitionTypes {
   GROUPING = 'grouping',
 }
 
+/**
+ * This is a list of locations within an ES|QL query.
+ *
+ * It is currently used to suggest appropriate functions and
+ * operators given the location of the cursor.
+ */
+export enum Location {
+  /**
+   * In the top-level EVAL command
+   */
+  EVAL = 'eval',
+
+  /**
+   * In the top-level WHERE command
+   */
+  WHERE = 'where',
+
+  /**
+   * In the top-level ROW command
+   */
+  ROW = 'row',
+
+  /**
+   * In the top-level SORT command
+   */
+  SORT = 'sort',
+
+  /**
+   * In the top-level STATS command
+   */
+  STATS = 'stats',
+
+  /**
+   * In a grouping clause
+   */
+  STATS_BY = 'stats_by',
+
+  /**
+   * In a per-agg filter
+   */
+  STATS_WHERE = 'stats_where',
+
+  /**
+   * Top-level ENRICH command
+   */
+  ENRICH = 'enrich',
+
+  /**
+   * ENRICH...WITH clause
+   */
+  ENRICH_WITH = 'enrich_with',
+
+  /**
+   * In the top-level DISSECT command (used only for
+   * assignment in APPEND_SEPARATOR)
+   */
+  DISSECT = 'dissect',
+
+  /**
+   * In RENAME (used only for AS)
+   */
+  RENAME = 'rename',
+
+  /**
+   * In the JOIN command (used only for AS)
+   */
+  JOIN = 'join',
+
+  /**
+   * In the SHOW command
+   */
+  SHOW = 'show',
+
+  /**
+   * In the COMPLETION command
+   */
+  COMPLETION = 'completion',
+}
+
+const commandOptionNameToLocation: Record<string, Location> = {
+  eval: Location.EVAL,
+  where: Location.WHERE,
+  row: Location.ROW,
+  sort: Location.SORT,
+  stats: Location.STATS,
+  by: Location.STATS_BY,
+  enrich: Location.ENRICH,
+  with: Location.ENRICH_WITH,
+  dissect: Location.DISSECT,
+  rename: Location.RENAME,
+  join: Location.JOIN,
+  show: Location.SHOW,
+  completion: Location.COMPLETION,
+};
+
+/**
+ * Pause before using this in new places. Where possible, use the Location enum directly.
+ *
+ * This is primarily around for backwards compatibility with the old system of command and option names.
+ */
+export const getLocationFromCommandOrOptionName = (name: string) =>
+  commandOptionNameToLocation[name];
+
 export interface FunctionDefinition {
   type: FunctionDefinitionTypes;
   preview?: boolean;
@@ -184,13 +258,14 @@ export interface FunctionDefinition {
   name: string;
   alias?: string[];
   description: string;
-  supportedCommands: string[];
-  supportedOptions?: string[];
+  locationsAvailable: Location[];
   signatures: Signature[];
   examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
   customParametersSnippet?: string;
+  // Not used yet, but we will in the future.
+  license?: string;
 }
 
 export type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
@@ -220,14 +295,14 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   columnExists: (column: string) => boolean;
   /**
-   * Gets the name that should be used for the next variable.
+   * Gets the name that should be used for the next userDefinedColumn.
    *
    * @param extraFieldNames — names that should be recognized as columns
    * but that won't be found in the current table from Elasticsearch. This is currently only
    * used to recognize enrichment fields from a policy in the ENRICH command.
    * @returns
    */
-  getSuggestedVariableName: (extraFieldNames?: string[]) => string;
+  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[]) => string;
   /**
    * Examine the AST to determine the type of an expression.
    * @param expression
@@ -266,55 +341,85 @@ export interface CommandSuggestParams<CommandName extends string> {
    * Generate a list of recommended queries
    * @returns
    */
-  getRecommendedQueriesSuggestions: (prefix?: string) => Promise<SuggestionRawDefinition[]>;
+  getRecommendedQueriesSuggestions: (
+    queryString: string,
+    prefix?: string
+  ) => Promise<SuggestionRawDefinition[]>;
   /**
    * The AST for the query behind the cursor.
    */
   previousCommands?: ESQLCommand[];
   callbacks?: ESQLCallbacks;
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  getVariables?: () => ESQLControlVariable[] | undefined;
   supportsControls?: boolean;
+  references?: {
+    fields: Map<string, ESQLFieldWithMetadata>;
+    userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
+  };
 }
 
 export type CommandSuggestFunction<CommandName extends string> = (
   params: CommandSuggestParams<CommandName>
-) => Promise<SuggestionRawDefinition[]>;
+) => Promise<SuggestionRawDefinition[]> | SuggestionRawDefinition[];
 
-export interface CommandBaseDefinition<CommandName extends string> {
+export interface CommandDefinition<CommandName extends string> {
   name: CommandName;
+
+  /**
+   * A description of what the command does. Displayed in the autocomplete.
+   */
+  description: string;
+
+  /**
+   * The pattern for declaring this command statement. Displayed in the autocomplete.
+   */
+  declaration: string;
+
+  /**
+   * A list of examples of how to use the command. Displayed in the autocomplete.
+   */
+  examples: string[];
 
   /**
    * Command name prefix, such as "LEFT" or "RIGHT" for JOIN command.
    */
   types?: CommandTypeDefinition[];
 
-  alias?: string;
-  description: string;
   /**
    * Displays a Technical preview label in the autocomplete
    */
   preview?: boolean;
+
   /**
-   * Whether to show or hide in autocomplete suggestion list
+   * Whether to show or hide in autocomplete suggestion list. We generally use
+   * this for commands that are not yet ready to be advertised.
    */
   hidden?: boolean;
-  suggest?: CommandSuggestFunction<CommandName>;
-  /** @deprecated this property will disappear in the future */
-  signature: {
-    multipleParams: boolean;
-    // innerTypes here is useful to drill down the type in case of "column"
-    // i.e. column of type string
-    params: Array<{
-      name: string;
-      type: string;
-      optional?: boolean;
-      innerTypes?: Array<SupportedDataType | 'any' | 'policy'>;
-      values?: string[];
-      valueDescriptions?: string[];
-      constantOnly?: boolean;
-      wildcards?: boolean;
-    }>;
-  };
+
+  /**
+   * This method is run when the command is being validated, but it does not
+   * prevent the default behavior. If you need a full override, we are currently
+   * doing those directly in the validateCommand function in the validation module.
+   */
+  validate?: (
+    command: ESQLCommand<CommandName>,
+    references: ReferenceMaps,
+    ast: ESQLAst
+  ) => ESQLMessage[];
+
+  /**
+   * This method is called to load suggestions when the cursor is within this command.
+   */
+  suggest: CommandSuggestFunction<CommandName>;
+
+  /**
+   * This method is called to define the fields available after this command is applied.
+   */
+  fieldsSuggestionsAfter?: (
+    lastCommand: ESQLAstCommand,
+    previousCommandFields: ESQLFieldWithMetadata[],
+    userDefinedColumns: ESQLFieldWithMetadata[]
+  ) => ESQLFieldWithMetadata[];
 }
 
 export interface CommandTypeDefinition {
@@ -322,43 +427,50 @@ export interface CommandTypeDefinition {
   description?: string;
 }
 
-export interface CommandOptionsDefinition<CommandName extends string = string>
-  extends CommandBaseDefinition<CommandName> {
-  wrapped?: string[];
-  optional: boolean;
-  skipCommonValidation?: boolean;
-  validate?: (
-    option: ESQLCommandOption,
-    command: ESQLCommand,
-    references?: unknown
-  ) => ESQLMessage[];
-}
-
-export interface CommandModeDefinition {
-  name: string;
-  description: string;
-  values: Array<{ name: string; description: string }>;
-  prefix?: string;
-}
-
-export interface CommandDefinition<CommandName extends string>
-  extends CommandBaseDefinition<CommandName> {
-  examples: string[];
-  validate?: (option: ESQLCommand) => ESQLMessage[];
-  /** @deprecated this property will disappear in the future */
-  modes: CommandModeDefinition[];
-  /** @deprecated this property will disappear in the future */
-  options: CommandOptionsDefinition[];
-}
-
 export interface Literals {
   name: string;
   description: string;
 }
 
-export type SignatureType =
-  | FunctionDefinition['signatures'][number]
-  | CommandOptionsDefinition['signature'];
-export type SignatureArgType = SignatureType['params'][number];
+export interface FunctionParameter {
+  name: string;
+  type: FunctionParameterType;
+  optional?: boolean;
+  supportsWildcard?: boolean;
 
-export type FunctionParameter = FunctionDefinition['signatures'][number]['params'][number];
+  /**
+   * If set, this parameter does not accept a field. It only accepts a constant,
+   * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
+   */
+  constantOnly?: boolean;
+
+  /**
+   * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
+   */
+  fieldsOnly?: boolean;
+
+  /**
+   * if provided this means that the value must be one
+   * of the options in the array iff the value is a literal.
+   *
+   * String values are case insensitive.
+   *
+   * If the value is not a literal, this field is ignored because
+   * we can't check the return value of a function to see if it
+   * matches one of the options prior to runtime.
+   */
+  acceptedValues?: string[];
+
+  /**
+   * Must only be included _in addition to_ acceptedValues.
+   *
+   * If provided this is the list of suggested values that
+   * will show up in the autocomplete. If omitted, the acceptedValues
+   * will be used as suggestions.
+   *
+   * This is useful for functions that accept
+   * values that we don't want to show as suggestions.
+   */
+  literalSuggestions?: string[];
+  mapParams?: string;
+}

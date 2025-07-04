@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { screen, render } from '@testing-library/react';
 import React from 'react';
 
 import { Embeddable } from './embeddable';
 
 describe('Embeddable', () => {
   test('it renders', () => {
-    const wrapper = shallow(
+    render(
       <Embeddable>
         <p>{'Test content'}</p>
       </Embeddable>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByTestId('siemEmbeddable')).toMatchSnapshot();
   });
 });

@@ -7,7 +7,8 @@
 
 import moment from 'moment';
 import Boom from '@hapi/boom';
-import { buildEsQuery, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { getScopedQueryErrorMessage } from '../../../../../common';
 import { getEsQueryConfig } from '../../../../lib/get_es_query_config';
@@ -16,7 +17,8 @@ import {
   generateMaintenanceWindowEvents,
   shouldRegenerateEvents,
   mergeEvents,
-} from '../../lib/generate_maintenance_window_events';
+  getMaintenanceWindowExpirationDate,
+} from '../../lib';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import {
   transformMaintenanceWindowAttributesToMaintenanceWindow,
@@ -26,7 +28,7 @@ import {
   getMaintenanceWindowSo,
   createMaintenanceWindowSo,
 } from '../../../../data/maintenance_window';
-import { UpdateMaintenanceWindowParams } from './types';
+import type { UpdateMaintenanceWindowParams } from './types';
 import { updateMaintenanceWindowParamsSchema } from './schemas';
 
 export async function updateMaintenanceWindow(
@@ -97,7 +99,11 @@ async function updateWithOCC(
       throw Boom.badRequest('Cannot edit archived maintenance windows');
     }
 
-    const expirationDate = moment.utc().add(1, 'year').toISOString();
+    const expirationDate = getMaintenanceWindowExpirationDate({
+      rRule: maintenanceWindow.rRule,
+      duration: maintenanceWindow.duration,
+    });
+
     const modificationMetadata = await getModificationMetadata();
 
     let events = generateMaintenanceWindowEvents({
@@ -126,14 +132,6 @@ async function updateWithOCC(
         updatedBy: modificationMetadata.updatedBy,
         updatedAt: modificationMetadata.updatedAt,
       });
-
-    if (updateMaintenanceWindowAttributes.scopedQuery) {
-      if (updateMaintenanceWindowAttributes.categoryIds?.length !== 1) {
-        throw Boom.badRequest(
-          `Error validating update maintenance window data - scoped query must be accompanied by 1 category ID`
-        );
-      }
-    }
 
     // We are deleting and then creating rather than updating because SO.update
     // performs a partial update on the rRule, we would need to null out all of the fields

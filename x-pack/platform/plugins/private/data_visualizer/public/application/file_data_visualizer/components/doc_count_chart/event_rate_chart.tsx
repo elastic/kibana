@@ -17,6 +17,7 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 import { i18n } from '@kbn/i18n';
 
@@ -35,6 +36,7 @@ interface Props {
 
 export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width }) => {
   const { euiTheme } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
   const theme: PartialTheme = useMemo(
     () => ({
       scales: { histogramPadding: 0.2 },
@@ -65,10 +67,11 @@ export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width })
       <Chart>
         <Axes />
         <Tooltip type={TooltipType.None} />
-        <Settings theme={theme} locale={i18n.getLocale()} />
+        <Settings theme={theme} locale={i18n.getLocale()} baseTheme={chartBaseTheme} />
 
         <HistogramBarSeries
           id="event_rate"
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'time'}

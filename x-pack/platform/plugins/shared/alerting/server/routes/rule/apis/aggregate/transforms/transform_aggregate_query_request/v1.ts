@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { AggregateOptions } from '../../../../../../application/rule/methods/aggregate/types';
+import type { RewriteRequestCase } from '@kbn/actions-plugin/common';
+import type { AggregateOptions } from '../../../../../../application/rule/methods/aggregate/types';
 
 export const transformAggregateQueryRequest: RewriteRequestCase<AggregateOptions> = ({
   search,

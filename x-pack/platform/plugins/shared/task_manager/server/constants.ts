@@ -11,7 +11,10 @@ export const CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: string[] = [
   'sampleTaskWithLimitedConcurrency',
   'timedTaskWithSingleConcurrency',
   'timedTaskWithLimitedConcurrency',
+  'sampleTaskSharedConcurrencyType1',
+  'sampleTaskSharedConcurrencyType2',
 
   // task types requiring a concurrency
   'report:execute',
+  'report:execute-scheduled',
 ];

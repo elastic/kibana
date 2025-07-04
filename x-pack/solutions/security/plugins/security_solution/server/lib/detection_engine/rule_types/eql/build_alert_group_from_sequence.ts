@@ -76,7 +76,6 @@ export const buildAlertGroupFromSequence = ({
   const {
     alertTimestampOverride,
     intendedTimestamp,
-    mergeStrategy,
     completeRule,
     spaceId,
     inputIndex: indicesToQuery,
@@ -96,21 +95,11 @@ export const buildAlertGroupFromSequence = ({
   try {
     baseAlerts = sequence.events.map((event) =>
       transformHitToAlert({
-        spaceId,
-        completeRule,
+        sharedParams,
         doc: event,
-        mergeStrategy,
-        // TODO: respect ignore fields
-        ignoreFields: {},
-        ignoreFieldsRegexes: [],
         applyOverrides: false,
         buildReasonMessage,
-        indicesToQuery,
-        alertTimestampOverride,
-        ruleExecutionLogger,
         alertUuid: 'placeholder-alert-uuid', // This is overriden below
-        publicBaseUrl,
-        intendedTimestamp,
       })
     );
   } catch (error) {

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { composeStories } from '@storybook/testing-react';
+import { composeStories } from '@storybook/react';
 import { waitFor } from '@testing-library/react';
 import React from 'react';
+import { userEvent } from '@testing-library/user-event';
 import { disableConsoleWarning, renderWithTheme } from '../../../../../utils/test_helpers';
 import * as stories from './waterfall_container.stories';
 
@@ -30,7 +31,7 @@ describe('WaterfallContainer', () => {
     const parentItem = buttons[1];
     const childItem = buttons[2];
 
-    parentItem.click();
+    await userEvent.click(parentItem);
 
     expect(parentItem).toHaveAttribute('aria-expanded', 'false');
     expect(childItem).toHaveAttribute('aria-expanded', 'true');

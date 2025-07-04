@@ -26,10 +26,10 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
+import type { DeepPartial } from '@kbn/utility-types';
 import { get, omit } from 'lodash';
-import { Alert as LegacyAlert } from '../../alert/alert';
-import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
+import type { Alert as LegacyAlert } from '../../alert/alert';
+import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
@@ -50,6 +50,7 @@ interface BuildOngoingAlertOpts<
   runTimestamp?: string;
   timestamp: string;
   kibanaVersion: string;
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
 }
 
 /**
@@ -72,6 +73,7 @@ export const buildOngoingAlert = <
   runTimestamp,
   timestamp,
   kibanaVersion,
+  dangerouslyCreateAlertsInAllSpaces,
 }: BuildOngoingAlertOpts<
   AlertData,
   LegacyState,
@@ -122,7 +124,7 @@ export const buildOngoingAlert = <
       : {}),
     ...(isImproving != null ? { [ALERT_SEVERITY_IMPROVING]: isImproving } : {}),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
-    [SPACE_IDS]: rule[SPACE_IDS],
+    [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
     [VERSION]: kibanaVersion,
     [TAGS]: Array.from(
       new Set([

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { NumberFormatArgInput } from '../number_format';
@@ -18,8 +17,12 @@ const numberFormats = [
   { value: '0.0b', text: 'Bytes' },
 ];
 
-storiesOf('arguments/NumberFormat', module)
-  .add('with no format', () => (
+export default {
+  title: 'arguments/NumberFormat',
+};
+
+export const WithNoFormat = {
+  render: () => (
     <NumberFormatArgInput
       numberFormats={numberFormats}
       onValueChange={action('onValueChange')}
@@ -27,8 +30,13 @@ storiesOf('arguments/NumberFormat', module)
       argId="NumberFormatExample1"
       renderError={action('renderError')}
     />
-  ))
-  .add('with preset format', () => (
+  ),
+
+  name: 'with no format',
+};
+
+export const WithPresetFormat = {
+  render: () => (
     <NumberFormatArgInput
       numberFormats={numberFormats}
       onValueChange={action('onValueChange')}
@@ -36,8 +44,13 @@ storiesOf('arguments/NumberFormat', module)
       argId="NumberFormatExample2"
       renderError={action('renderError')}
     />
-  ))
-  .add('with custom format', () => (
+  ),
+
+  name: 'with preset format',
+};
+
+export const WithCustomFormat = {
+  render: () => (
     <NumberFormatArgInput
       numberFormats={numberFormats}
       onValueChange={action('onValueChange')}
@@ -45,4 +58,7 @@ storiesOf('arguments/NumberFormat', module)
       argId="NumberFormatExample3"
       renderError={action('renderError')}
     />
-  ));
+  ),
+
+  name: 'with custom format',
+};

@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
+
+export const findRuleParamsExamples = () => path.join(__dirname, 'examples_find_rules.yaml');
 
 export const findRulesRequestQuerySchema = schema.object({
   per_page: schema.number({

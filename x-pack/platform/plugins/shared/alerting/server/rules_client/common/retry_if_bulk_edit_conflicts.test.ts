@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 
 import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
 import { RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { BulkEditSkipReason } from '../../../common/bulk_edit';
+import type { BulkEditSkipReason } from '../../../common/bulk_action';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const mockFilter: KueryNode = {

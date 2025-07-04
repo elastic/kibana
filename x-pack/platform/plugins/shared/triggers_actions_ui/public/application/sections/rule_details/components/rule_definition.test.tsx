@@ -33,10 +33,10 @@ jest.mock('../../../lib/capabilities', () => ({
   hasManageApiKeysCapability: jest.fn(() => true),
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../hooks/use_load_rule_types_query', () => ({
-  useLoadRuleTypesQuery: jest.fn(),
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
+  useGetRuleTypesPermissions: jest.fn(),
 }));
-const { useLoadRuleTypesQuery } = jest.requireMock('../../../hooks/use_load_rule_types_query');
+const { useGetRuleTypesPermissions } = jest.requireMock('@kbn/alerts-ui-shared/src/common/hooks');
 
 const mockedRuleTypeIndex = new Map(
   Object.entries({
@@ -105,7 +105,7 @@ describe('Rule Definition', () => {
       hasManageApiKeysCapability: jest.fn(() => true),
     }));
     ruleTypeRegistry.has.mockImplementation((id) => {
-      if (id === 'siem_rule') {
+      if (id === 'siem_rule' || id === 'attack-discovery') {
         return false;
       }
       return true;
@@ -122,7 +122,7 @@ describe('Rule Definition', () => {
       requiresAppContext: false,
     };
     ruleTypeRegistry.get.mockImplementation((id) => {
-      if (id === 'siem_rule') {
+      if (id === 'siem_rule' || id === 'attack-discovery') {
         throw new Error('error');
       }
       return ruleTypeR;
@@ -134,7 +134,7 @@ describe('Rule Definition', () => {
       { id: '.index', iconClass: 'indexOpen' },
     ] as ActionTypeModel[]);
 
-    useLoadRuleTypesQuery.mockReturnValue({ ruleTypesState: { data: mockedRuleTypeIndex } });
+    useGetRuleTypesPermissions.mockReturnValue({ ruleTypesState: { data: mockedRuleTypeIndex } });
 
     wrapper = mount(
       <QueryClientProvider client={new QueryClient()}>
@@ -161,8 +161,8 @@ describe('Rule Definition', () => {
     expect(wrapper.find('[data-test-subj="ruleSummaryRuleDefinition"]')).toBeTruthy();
   });
 
-  it('show rule type name from "useLoadRuleTypesQuery"', async () => {
-    expect(useLoadRuleTypesQuery).toHaveBeenCalledTimes(2);
+  it('show rule type name from "useGetRuleTypesPermissions"', async () => {
+    expect(useGetRuleTypesPermissions).toHaveBeenCalledTimes(2);
     const ruleType = wrapper.find('[data-test-subj="ruleSummaryRuleType"]');
     expect(ruleType).toBeTruthy();
     expect(ruleType.find('div.euiText').text()).toEqual(
@@ -186,6 +186,18 @@ describe('Rule Definition', () => {
     const ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
     expect(ruleDescription).toBeTruthy();
     expect(ruleDescription.find('div.euiText').text()).toEqual('Security detection rule');
+  });
+
+  it('show Attack Discovery rule type description "', async () => {
+    await setup({
+      ruleOverwrite: {
+        consumer: 'siem',
+        ruleTypeId: 'attack-discovery',
+      },
+    });
+    const ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
+    expect(ruleDescription).toBeTruthy();
+    expect(ruleDescription.find('div.euiText').text()).toEqual('Attack Discovery rule');
   });
 
   it('show rule conditions only if the rule allows multiple conditions', async () => {

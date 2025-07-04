@@ -1,0 +1,1542 @@
+openapi: 3.0.1
+info:
+  title: Synthetics
+  description: OpenAPI schema for Synthetics endpoints
+  version: '1.0'
+  contact:
+    name: Actionable Observability Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: https://{kibana_url}
+    variables:
+      kibana_url:
+        default: localhost:5601
+tags:
+  - name: synthetics
+paths:
+  /api/synthetics/monitors:
+    get:
+      summary: Get monitors
+      operationId: get-synthetic-monitors
+      description: >
+        Get a list of monitors.
+
+        You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      parameters:
+        - name: filter
+          description: Additional filtering criteria.
+          in: query
+          schema:
+            type: string
+        - name: locations
+          description: The locations to filter by.
+          in: query
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - name: monitorTypes
+          description: The monitor types to filter.
+          in: query
+          schema:
+            oneOf:
+              - type: string
+                enum:
+                  - browser
+                  - http
+                  - icmp
+                  - tcp
+              - type: array
+        - name: page 
+          description: The page number for paginated results.
+          in: query
+          schema:
+            type: integer
+        - name: per_page 
+          description: The number of items to return per page.
+          in: query
+          schema:
+            type: integer
+        - name: projects
+          description: The projects to filter by.
+          in: query
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - name: query
+          description: A free-text query string.
+          in: query
+          schema:
+            type: string
+        - name: schedules
+          description: The schedules to filter by.
+          in: query
+          schema:
+            oneOf:
+              - type: array
+              - type: string
+        - name: sortField 
+          description: The field to sort the results by.
+          in: query
+          schema:
+            type: string
+            enum:
+             - name
+             - createdAt
+             - updatedAt
+             - status
+        - name: sortOrder
+          description: The sort order.
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: status
+          description: The status to filter by.
+          in: query
+          schema:
+            oneOf:
+              - type: array
+              - type: string
+        - name: tags
+          description: Tags to filter monitors.
+          in: query
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - name: useLogicalAndFor
+          description: >
+            Specifies whether to apply logical AND filtering for specific fields.
+            Accepts either a string with values "tags" or "locations" or an array containing both.
+          in: query
+          schema:
+            oneOf:
+              - type: string
+                enum:
+                  - tags
+                  - locations
+              - type: array
+                items:
+                  type: string
+                  enum:
+                    - tags
+                    - locations
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                getSyntheticMonitorsResponseExample1:
+                  description: A successful response from `GET /api/synthetics/monitors?tags=prod&monitorTypes=http&locations=us-east-1&projects=project1&status=up`.
+                  value: |-
+                    {
+                        "page": 1,
+                        "total": 24,
+                        "monitors": [
+                            {
+                                "type": "icmp",
+                                "enabled": false,
+                                "alert": {
+                                    "status": {
+                                        "enabled": true
+                                    },
+                                    "tls": {
+                                        "enabled": true
+                                    }
+                                },
+                                "schedule": {
+                                    "number": "3",
+                                    "unit": "m"
+                                },
+                                "config_id": "e59142e5-1fe3-4aae-b0b0-19d6345e65a1",
+                                "timeout": "16",
+                                "name": "8.8.8.8:80",
+                                "locations": [
+                                    {
+                                        "id": "us_central",
+                                        "label": "North America - US Central",
+                                        "geo": {
+                                            "lat": 41.25,
+                                            "lon": -95.86
+                                        },
+                                        "isServiceManaged": true
+                                    }
+                                ],
+                                "namespace": "default",
+                                "origin": "ui",
+                                "id": "e59142e5-1fe3-4aae-b0b0-19d6345e65a1",
+                                "max_attempts": 2,
+                                "wait": "7",
+                                "revision": 3,
+                                "mode": "all",
+                                "ipv4": true,
+                                "ipv6": true,
+                                "created_at": "2023-11-07T09:57:04.152Z",
+                                "updated_at": "2023-12-04T19:19:34.039Z",
+                                "host": "8.8.8.8:80"
+                            }
+                        ],
+                        "absoluteTotal": 24,
+                        "perPage": 10,
+                    }
+    post:
+      summary: Create a monitor
+      operationId: post-synthetic-monitors
+      description: >
+        Create a new monitor with the specified attributes.
+        A monitor can be one of the following types: HTTP, TCP, ICMP, or Browser.
+        The required and default fields may vary based on the monitor type.
+
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              description: >
+                The request body should contain the attributes of the monitor you want to create.
+                The required and default fields differ depending on the monitor type.
+              oneOf:
+                - $ref: "#/components/schemas/browserMonitorFields"
+                - $ref: "#/components/schemas/httpMonitorFields"
+                - $ref: "#/components/schemas/icmpMonitorFields"
+                - $ref: "#/components/schemas/tcpMonitorFields"
+              discriminator:
+                propertyName: type
+            examples:
+              postSyntheticMonitorsRequestExample1:
+                summary: HTTP monitor
+                description: Create an HTTP monitor to check a website's availability.
+                value: |-
+                  {
+                    "type": "http",
+                    "name": "Website Availability",
+                    "url": "https://example.com",
+                    "tags": ["website", "availability"],
+                    "locations": ["united_kingdom"]
+                  }
+              postSyntheticMonitorsRequestExample2:
+                summary: TCP monitor
+                description: Create a TCP monitor to monitor a server's availability.
+                value: |-
+                  {
+                    "type": "tcp",
+                    "name": "Server Availability",
+                    "host": "example.com",
+                    "private_locations": ["my_private_location"]
+                  }
+              postSyntheticMonitorsRequestExample3:
+                summary: ICMP monitor
+                description: Create an ICMP monitor to perform ping checks.
+                value: |-
+                  {
+                    "type": "icmp",
+                    "name": "Ping Test",
+                    "host": "example.com",
+                    "locations": ["united_kingdom"]
+                  }
+              postSyntheticMonitorsRequestExample4:
+                summary: Browser monitor
+                description: Create a browser monitor to check a website.
+                value: |-
+                  {
+                    "type": "browser",
+                    "name": "Example journey",
+                    "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
+                    "locations": ["united_kingdom"]
+                  }
+      responses:
+        '200':
+          description: A successful response.
+          # content:
+          #   application/json:
+          #     examples:
+  /api/synthetics/monitors/{id}:
+    delete:
+      summary: Delete a monitor
+      operationId: delete-synthetic-monitor
+      description: >
+        Delete a monitor from the Synthetics app.
+
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      parameters:
+        - description: The identifier for the monitor that you want to delete.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+    get:
+      summary: Get a monitor
+      operationId: get-synthetic-monitor
+      tags:
+        - synthetics
+      parameters:
+        - in: path
+          name: id
+          description: The ID of the monitor.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                getSyntheticMonitorResponseExample1:
+                  description: A successful response from `GET /api/synthetics/monitors/<id>`.
+                  value: |-
+                    {
+                        "type": "http",
+                        "enabled": true,
+                        "alert": {
+                            "status": {
+                                "enabled": true
+                            },
+                            "tls": {
+                                "enabled": true
+                            }
+                        },
+                        "schedule": {
+                            "number": "3",
+                            "unit": "m"
+                        },
+                        "config_id": "a8188705-d01e-4bb6-87a1-64fa5e4b07ec",
+                        "timeout": "16",
+                        "name": "am i something",
+                        "locations": [
+                            {
+                                "id": "us_central",
+                                "label": "North America - US Central",
+                                "geo": {
+                                    "lat": 41.25,
+                                    "lon": -95.86
+                                },
+                                "isServiceManaged": true
+                            }
+                        ],
+                        "namespace": "default",
+                        "origin": "ui",
+                        "id": "a8188705-d01e-4bb6-87a1-64fa5e4b07ec",
+                        "max_attempts": 2,
+                        "__ui": {
+                            "is_tls_enabled": false
+                        },
+                        "max_redirects": "0",
+                        "response.include_body": "on_error",
+                        "response.include_headers": true,
+                        "check.request.method": "GET",
+                        "mode": "any",
+                        "response.include_body_max_bytes": "1024",
+                        "ipv4": true,
+                        "ipv6": true,
+                        "ssl.verification_mode": "full",
+                        "ssl.supported_protocols": [
+                            "TLSv1.1",
+                            "TLSv1.2",
+                            "TLSv1.3"
+                        ],
+                        "revision": 13,
+                        "created_at": "2023-11-08T08:45:29.334Z",
+                        "updated_at": "2023-12-18T20:31:44.770Z",
+                        "url": "https://fast.com"
+                    }
+        '404':
+          description: If the monitor is not found, the API returns a 404 error.
+    put:
+      summary: Update a monitor
+      operationId: put-synthetic-monitor
+      description: >
+        Update a monitor with the specified attributes.
+        The required and default fields may vary based on the monitor type.
+
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+
+        You can also partially update a monitor.
+        This will only update the fields that are specified in the request body.
+        All other fields are left unchanged.
+        The specified fields should conform to the monitor type.
+        For example, you can't update the `inline_scipt` field of a HTTP monitor.
+      tags:
+        - synthetics
+      parameters:
+        - description: The identifier for the monitor that you want to update.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: >
+                The request body should contain the attributes of the monitor you want to update.
+                The required and default fields differ depending on the monitor type.
+              oneOf:
+                - $ref: "#/components/schemas/browserMonitorFields"
+                - $ref: "#/components/schemas/httpMonitorFields"
+                - $ref: "#/components/schemas/icmpMonitorFields"
+                - $ref: "#/components/schemas/tcpMonitorFields"
+              discriminator:
+                propertyName: type
+            examples:
+              putSyntheticMonitorsRequestExample1:
+                summary: HTTP monitor
+                description: Update an HTTP monitor that checks a website's availability.
+                value: |-
+                  {
+                    "type": "http",
+                    "name": "Website Availability",
+                    "url": "https://example.com",
+                    "tags": ["website", "availability"],
+                    "locations": ["united_kingdom"]
+                  }
+              putSyntheticMonitorsRequestExample2:
+                summary: TCP monitor
+                description: Update a TCP monitor that monitors a server's availability.
+                value: |-
+                  {
+                    "type": "tcp",
+                    "name": "Server Availability",
+                    "host": "example.com",
+                    "private_locations": ["my_private_location"]
+                  }
+              putSyntheticMonitorsRequestExample3:
+                summary: ICMP monitor
+                description: Update an ICMP monitor that performs ping checks.
+                value: |-
+                  {
+                    "type": "icmp",
+                    "name": "Ping Test",
+                    "host": "example.com",
+                    "locations": ["united_kingdom"]
+                  }
+              putSyntheticMonitorsRequestExample4:
+                summary: Browser monitor
+                description: Update a browser monitor that checks a website.
+                value: |-
+                  {
+                    "type": "browser",
+                    "name": "Example journey",
+                    "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
+                    "locations": ["united_kingdom"]
+                  }
+  /api/synthetics/monitors/_bulk_delete:
+    post:
+      summary: Delete monitors
+      operationId: delete-synthetic-monitors
+      description: >
+        Delete multiple monitors by sending a list of config IDs.
+      tags:
+        - synthetics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ids
+              properties:
+                ids:
+                  description: An array of monitor IDs to delete.
+                  type: array
+                  items:
+                    type: string
+            examples:
+              bulkDeleteRequestExample1:
+                description: Run `POST /api/synthetics/monitors/_bulk_delete` to delete a list of monitors. 
+                value: |-
+                  {
+                    "ids": [
+                      "monitor1-id",
+                      "monitor2-id"
+                    ]
+                  }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: The API response includes information about the deleted monitors.
+                  properties:
+                    deleted:
+                      type: boolean
+                      description: >
+                        If it is `true`, the monitor was successfully deleted
+                        If it is `false`, the monitor was not deleted.
+                    ids:
+                      type: string
+                      description: The unique identifier of the deleted monitor.
+              examples:
+                deleteMonitorsResponseExample1:
+                  description: A response from successfully deleting multiple monitors.
+                  value: |-
+                    [
+                      {
+                        "id": "monitor1-id",
+                        "deleted": true
+                      },
+                      {
+                        "id": "monitor2-id",
+                        "deleted": true
+                      }
+                    ]
+  /api/synthetics/params:
+    get:
+      summary: Get parameters
+      operationId: get-parameters
+      description: >
+        Get a list of all parameters.
+        You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  - $ref: "#/components/schemas/getParameterResponse"
+              examples:
+                getParametersResponseExample1:
+                  summary: Read access
+                  description: A successful response for a user with read-only permissions to get a list of parameters.
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "description": "Description for param1",
+                        "tags": ["tag1", "tag2"],
+                        "namespaces": ["namespace1"]
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "description": "Description for param2",
+                        "tags": ["tag3"],
+                        "namespaces": ["namespace2"]
+                      }
+                    ]
+                getParametersResponseExample2:
+                  summary: Write access
+                  description: A successful response for a user with write permissions to get a list of parameters.
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "description": "Description for param1",
+                        "tags": ["tag1", "tag2"],
+                        "namespaces": ["namespace1"],
+                        "value": "value1"
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "description": "Description for param2",
+                        "tags": ["tag3"],
+                        "namespaces": ["namespace2"],
+                        "value": "value2"
+                      }
+                    ]
+    post:
+      summary: Add parameters
+      operationId: post-parameters
+      description: >
+        Add one or more parameters to the Synthetics app.
+
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      requestBody:
+        required: true
+        description: The request body can contain either a single parameter object or an array of parameter objects.
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: array
+                  items:
+                    $ref: "#/components/schemas/parameterRequest"
+                - $ref: "#/components/schemas/parameterRequest"
+            examples:
+              postParametersRequestExample1:
+                summary: Single parameter
+                description: Add a single parameter.
+                value: |-
+                  {
+                    "key": "your-key-name",
+                    "value": "your-parameter-value",
+                    "description": "Param to use in browser monitor",
+                    "tags": ["authentication", "security"],
+                    "share_across_spaces": true
+                  }
+              postParametersRequestExample2:
+                summary: Multiple parameters
+                description: Add multiple parameters.
+                value: |-           
+                  [
+                    {
+                      "key": "param1",
+                      "value": "value1"
+                    },
+                    {
+                      "key": "param2",
+                      "value": "value2"
+                    }
+                  ]
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: "#/components/schemas/postParameterResponse"
+                  - $ref: "#/components/schemas/postParameterResponse"
+              examples:
+                postParametersResponseExample1:
+                  summary: Single parameter
+                  description: A successful response for a single added parameter.
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-key-name",
+                      "value": "your-param-value",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "share_across_spaces": true
+                    }
+                postParametersResponseExample2:
+                  summary: Multiple parameters
+                  description: A successful response for multiple added parameters.
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "value": "value1"
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "value": "value2"
+                      }
+                    ]
+  /api/synthetics/params/{id}:
+    delete:
+      summary: Delete a parameter
+      operationId: delete-parameter
+      description: >
+        Delete a parameter from the Synthetics app.
+        
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      parameters:
+        - in: path
+          name: id
+          description: The ID for the parameter to delete.
+          required: true
+          schema:
+            type: string
+    get:
+      summary: Get a parameter
+      operationId: get-parameter
+      description: >
+        Get a parameter from the Synthetics app.
+        
+        You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      parameters:
+        - in: path
+          name: id
+          description: The unique identifier for the parameter.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getParameterResponse"
+              examples:
+                getParameterResponseExample1:
+                  summary: Read access
+                  description: A successful response for a user with read-only permissions to get a single parameter.
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-api-key",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "namespaces": ["namespace1", "namespace2"]
+                    }
+                getParameterResponseExample2:
+                  summary: Write access
+                  description: A successful response for a user with write permissions to get a single parameter.
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-param-key",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "namespaces": ["namespace1", "namespace2"],
+                      "value": "your-param-value"
+                    }
+    put:
+      summary: Update a parameter
+      operationId: put-parameter
+      description: >
+        Update a parameter in the Synthetics app.
+
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      parameters:
+        - in: path
+          name: id
+          description: The unique identifier for the parameter.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The request body cannot be empty; at least one attribute is required.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  description: The updated description of the parameter. 
+                key:
+                  type: string
+                  description: The key of the parameter.
+                tags:
+                  type: array
+                  description: An array of updated tags to categorize the parameter.
+                  items:
+                    type: string
+                value:
+                  type: string
+                  description: The updated value associated with the parameter.
+            examples:
+              putParameterRequestExample1:
+                value: |-
+                  {
+                    "key": "updated_param_key",
+                    "value": "updated-param-value",
+                    "description": "Updated Param to be used in browser monitor",
+                    "tags": ["authentication", "security", "updated"]
+                  }
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                putParameterResponseExample1:
+                  value: |-
+                    {
+                      "id": "param_id1",
+                      "key": "updated_param_key",
+                      "value": "updated-param-value",
+                      "description": "Updated Param to be used in browser monitor",
+                      "tags": ["authentication", "security", "updated"]
+                    }
+  /api/synthetics/params/_bulk_delete:
+    delete:
+      summary: Delete parameters
+      operationId: delete-parameters
+      description: >
+        Delete parameters from the Synthetics app.
+        
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              property:
+                ids:
+                  description: An array of parameter IDs to delete.
+                  type: array
+                  items:
+                    type: string
+            examples:
+              deleteParametersRequestExample1:
+                description: Run `POST /api/synthetics/params/_bulk_delete` to delete multiple parameters.
+                value: |-
+                  {
+                    "ids": ["param1-id", "param2-id"]
+                  }
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    deleted:
+                      type: boolean
+                      description: >
+                        Indicates whether the parameter was successfully deleted.
+                        It is `true` if it was deleted.
+                        It is `false` if it was not deleted.
+                    id:
+                      type: string
+                      description: The unique identifier for the deleted parameter.
+              examples:
+                deleteParametersResponseExample1:
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "deleted": true
+                      }
+                    ]
+  /api/synthetics/private_locations:
+    get:
+      summary: Get private locations
+      operationId: get-private-locations
+      description: >
+        Get a list of private locations.
+
+        You must have `read` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/getPrivateLocation"
+              examples:
+                getPrivateLocationsResponseExample1:
+                  value: |-
+                    [
+                        {
+                            "label": "Test private location",
+                            "id": "fleet-server-policy",
+                            "agentPolicyId": "fleet-server-policy",
+                            "isInvalid": false,
+                            "geo": {
+                                "lat": 0,
+                                "lon": 0
+                            },
+                            "namespace": "default"
+                        },
+                        {
+                            "label": "Test private location 2",
+                            "id": "691225b0-6ced-11ee-8f5a-376306ee85ae",
+                            "agentPolicyId": "691225b0-6ced-11ee-8f5a-376306ee85ae",
+                            "isInvalid": false,
+                            "geo": {
+                                "lat": 0,
+                                "lon": 0
+                            },
+                            "namespace": "test"
+                        }
+                    ]
+    post:
+      summary: Create a private location
+      operationId: post-private-location
+      description: You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - agentPolicyId
+                - label
+              properties:
+                agentPolicyId:
+                  type: string
+                  description: The ID of the agent policy associated with the private location.
+                geo:
+                  type: object
+                  description: Geographic coordinates (WGS84) for the location.
+                  required:
+                    - lat
+                    - lon
+                  properties:
+                    lat:
+                      type: number
+                      description: The latitude of the location.
+                    lon:
+                      type: number
+                      description: The longitude of the location.
+                label:
+                  type: string
+                  description: A label for the private location.
+                spaces:
+                  type: array
+                  items:
+                    type: string
+                  description: >
+                    An array of space IDs where the private location is available.
+                    If it is not provided, the private location is available in all spaces.
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: An array of tags to categorize the private location.
+            examples:
+              postPrivateLocationRequestExample1:
+                description: Run `POST /api/private_locations` to create a private location.
+                value: |-
+                  {
+                    "label": "Private Location 1",
+                    "agentPolicyId": "abcd1234",
+                    "tags": ["private", "testing"],
+                    "geo": {
+                      "lat": 40.7128,
+                      "lon": -74.0060
+                    }
+                    "spaces": ["default"]
+                  }
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                postPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                      "id": "abcd1234",
+                      "label": "Private Location 1",
+                      "agentPolicyId": "abcd1234",
+                      "tags": ["private", "testing"],
+                      "geo": {
+                        "lat": 40.7128,
+                        "lon": -74.0060
+                      }
+                    }
+        '400':
+          description: If the `agentPolicyId` is already used by an existing private location or if the `label` already exists, the API will return a 400 Bad Request response with a corresponding error message.
+  /api/synthetics/private_locations/{id}:
+    delete:
+      summary: Delete a private location
+      operationId: delete-private-location
+      description: >
+        You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+
+        The API does not return a response body for deletion, but it will return an appropriate status code upon successful deletion.
+        
+        A location cannot be deleted if it has associated monitors in use.
+        You must delete all monitors associated with the location before deleting the location.
+      tags:
+        - synthetics
+      parameters:
+        - in: path
+          name: id
+          description: The unique identifier of the private location to be deleted.
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1024
+    get:
+      summary: Get a private location
+      operationId: get-private-location
+      description: >
+        You must have `read` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+      tags:
+        - synthetics
+      parameters:
+        - in: path
+          name: id
+          description: A private location identifier or label.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPrivateLocation"
+              examples:
+                getPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                        "label": "Test private location",
+                        "id": "test-private-location-id",
+                        "agentPolicyId": "test-private-location-id",
+                        "isServiceManaged": false,
+                        "isInvalid": false,
+                        "geo": {
+                            "lat": 0,
+                            "lon": 0
+                        },
+                        "namespace": "default"
+                    }
+    put:
+      summary: Update a private location
+      operationId: put-private-location
+      description: >
+        Update an existing private location's label.
+
+        You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+
+        When a private location's label is updated, all monitors using this location will also be updated to maintain data consistency.
+      tags:
+        - synthetics
+      parameters:
+        - in: path
+          name: id
+          description: The unique identifier of the private location to be updated.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - label
+              properties:
+                label:
+                  type: string
+                  minLength: 1
+                  description: A new label for the private location. Must be at least 1 character long.
+            examples:
+              putPrivateLocationRequestExample1:
+                description: Update a private location's label.
+                value: |-
+                  {
+                    "label": "Updated Private Location Name"
+                  }
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPrivateLocation"
+              examples:
+                putPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                      "label": "Updated Private Location Name",
+                      "id": "test-private-location-id",
+                      "agentPolicyId": "test-private-location-id",
+                      "isServiceManaged": false,
+                      "isInvalid": false,
+                      "tags": ["private", "testing", "updated"],
+                      "geo": {
+                        "lat": 37.7749,
+                        "lon": -122.4194
+                      },
+                      "spaces": ["*"]
+                    }
+        '400':
+          description: If the `label` is shorter than 1 character the API will return a 400 Bad Request response with a corresponding error message.
+        '404':
+          description: If the private location with the specified ID does not exist, the API will return a 404 Not Found response.
+components:
+  schemas:
+    commonMonitorFields:
+      title: Common monitor fields
+      type: object
+      required:
+        - name
+      properties:
+        alert:
+          type: object
+          description: >
+            The alert configuration.
+            The default is `{ status: { enabled: true }, tls: { enabled: true } }`.
+        enabled:
+          type: boolean
+          default: true
+          description: Specify whether the monitor is enabled.
+        locations:
+          type: array
+          items:
+            type: string
+          description: |
+            The location to deploy the monitor.
+            Monitors can be deployed in multiple locations so that you can detect differences in availability and response times across those locations.
+            To list available locations you can:
+            
+            - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
+            - Go to *Synthetics > Management* and click *Create monitor*. Locations will be listed in *Locations*.
+          externalDocs:
+            url: https://github.com/elastic/synthetics/blob/main/src/locations/public-locations.ts
+            # description:
+        name:
+          type: string
+          description: The monitor name.
+        namespace:
+          type: string
+          default: default
+          description: >
+            The namespace field should be lowercase and not contain spaces.
+            The namespace must not include any of the following characters: `*`, `\`, `/`, `?`, `"`, `<`, `>`, `|`, whitespace, `,`, `#`, `:`, or `-`.
+        params:
+          type: string
+          description: The monitor parameters.
+        private_locations:
+          type: array
+          items:
+            type: string
+          description: |
+            The private locations to which the monitors will be deployed.
+            These private locations refer to locations hosted and managed by you, whereas `locations` are hosted by Elastic.
+            You can specify a private location using the location's name.
+            To list available private locations you can:
+            
+            - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
+            - Go to *Synthetics > Settings* and click *Private locationsr*. Private locations will be listed in the table.
+
+            > info
+            > You can provide `locations` or `private_locations` or both. At least one is required.
+        retest_on_failure:
+          type: boolean
+          default: true
+          description: >
+            Turn retesting for when a monitor fails on or off.
+            By default, monitors are automatically retested if the monitor goes from "up" to "down".
+            If the result of the retest is also "down", an error will be created and if configured, an alert sent. The monitor will then resume running according to the defined schedule.
+            Using `retest_on_failure` can reduce noise related to transient problems.
+        schedule:
+          type: number
+          description: >
+            The monitor's schedule in minutes.
+            Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`.
+            The default value is `3` minutes for HTTP, TCP, and ICMP monitors.
+            The default value is `10` minutes for Browser monitors.
+        service.name:
+          type: string
+          description: The APM service name.
+        tags:
+          type: array
+          items:
+            type: string
+          description: An array of tags.
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+          description: >
+            Key-value pairs of labels to associate with the monitor.
+            Labels can be used for filtering and grouping monitors.
+        timeout:
+          type: number
+          default: 16
+          description: >
+            The monitor timeout in seconds.
+            The monitor will fail if it doesn't complete within this time.
+    browserMonitorFields:
+      title: Browser monitor fields
+      allOf: # Combines the common fields schema with the browser monitor-specific details
+        - $ref: "#/components/schemas/commonMonitorFields"
+        - type: object
+          required:
+            - inline_script
+            - type
+          additionalProperties: true
+          properties:
+            ignore_https_errors:
+              type: boolean
+              default: false
+              description: Ignore HTTPS errors.
+            inline_script:
+              type: string
+              description: The inline script.
+            playwright_options:
+              type: object
+              description: Playwright options.
+            screenshots:
+              type: string
+              default: on
+              enum:
+                - on
+                - off
+                - only-on-failure
+              description: The screenshot option.
+            synthetics_args:
+              type: array
+              description: Synthetics agent CLI arguments.
+            type:
+              type: string
+              description: The monitor type.
+              enum:
+                - browser
+    httpMonitorFields:
+      title: HTTP monitor fields
+      allOf: # Combines the common fields schema with the hTTP monitor-specific details
+        - $ref: "#/components/schemas/commonMonitorFields"
+        - type: object
+          required:
+            - type
+            - url
+          additionalproperties: true
+          properties:
+            check:
+              type: objects
+              description: The check request settings.
+              properties:
+                request:
+                  type: object
+                  description: An optional request to send to the remote host.
+                  properties:
+                    method:
+                      type: string
+                      enum:
+                        - HEAD
+                        - GET
+                        - POST
+                        - OPTIONS
+                      description: The HTTP method to use.
+                    headers:
+                      type: object
+                      description: >
+                        A dictionary of additional HTTP headers to send.
+                        By default, Synthetics will set the User-Agent header to identify itself.
+                    body:
+                      type: string
+                      description: Optional request body content.
+                response:
+                  type: object
+                  description: The expected response.
+                  additionalProperties: true
+                  properties:
+                    body:
+                      type: object
+                      # properties:
+                        # negative:
+                        #   type: TBD
+                        #   description: A list of regular expressions to match the body output negatively. Return match failed if single expression matches. HTTP response bodies of up to 100MiB are supported.
+                        # positive:
+                        #   type: TBD
+                        #   description: A list of regular expressions to match the body output. Only a single expression needs to match.
+                    headers:
+                      type: object
+                      description: A dictionary of expected HTTP headers. If the header is not found, the check fails.
+                    # json:
+                    #   type: TBD
+                    #   description:  |
+                    #     A list of expressions executed against the body when parsed as JSON. Body sizes must be less than or equal to 100 MiB.
+                    #
+                    #     - description (string): A description of the check.
+                    #     - expression (string): TBD
+                    # status:
+                    #   type: TBD
+                    #   description: A list of expected status codes. 4xx and 5xx codes are considered down by default. Other codes are considered up.     
+            ipv4:
+              type: boolean
+              default: true
+              description: If `true`, ping using the ipv4 protocol.
+            ipv6:
+              type: boolean
+              default: true
+              description: If `true`, ping using the ipv6 protocol.
+            max_redirects:
+              type: number
+              default: 0
+              description: The maximum number of redirects to follow.
+            mode:
+              type: string
+              enum:
+                - all
+                - any
+              default: any
+              description: >
+                The mode of the monitor.
+                If it is `all`, the monitor pings all resolvable IPs for a hostname.
+                If it is `any`, the monitor pings only one IP address for a hostname.
+                If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, you should use `all`.
+            password:
+              type: string
+              description: >
+                The password for authenticating with the server.
+                The credentials are passed with the request.
+            proxy_headers:
+              type: object
+              description: Additional headers to send to proxies during CONNECT requests.
+            proxy_url:
+              type: string
+              description: The URL of the proxy to use for this monitor.
+            response:
+              type: object
+              description: Controls the indexing of the HTTP response body contents to the `http.response.body.contents field`.
+              # properties:
+              #   include_body:
+              #     type: string
+              #     default: on_error
+              #     enum:
+              #       - always
+              #       - never
+              #       - on_error
+              #     description: |
+              #       If it is `on_error`, include the body if an error is encountered during the check.
+              #       If it is `never`, never include the body.
+              #       If it is `always`, always include the body.
+              #   include_body_max_bytes:
+              #     type: number
+              #     default: 1024
+              #     description: Set `response.include_body_max_bytes` to control the maximum size of the stored body contents.       
+            ssl:
+              type: object
+              description: >
+                The TLS/SSL connection settings for use with the HTTPS endpoint.
+                If you don't specify settings, the system defaults are used.
+            type:
+              type: string
+              description: The monitor type.
+              enum:
+                - http
+            url:
+              type: string
+              description: The URL to monitor.
+            username:
+              type: string
+              description: >
+                The username for authenticating with the server.
+                The credentials are passed with the request.
+    tcpMonitorFields:
+      title: TCP monitor fields
+      allOf: # Combines the common fields schema with the TCP monitor-specific details
+        - $ref: "#/components/schemas/commonMonitorFields"
+        - type: object
+          required:
+            - host
+            - type
+          additionalProperties: true
+          properties:
+            # check:
+            #   type: TBD
+            #   description: |
+            #     An optional payload string to send to the remote host and the expected answer.
+            #     If no payload is specified, the endpoint is assumed to be available if the connection attempt was successful.
+            #     If `send` is specified without `receive`, any response is accepted as OK.
+            #     If `receive` is specified without `send`, no payload is sent, but the client expects to receive a payload in the form of a "hello message" or "banner" on connect.
+            #
+            #     - `send` (Optional, string): check.send: Hello World
+            #     - `receive` (Optional, string): check.receive: Hello World
+            host:
+              type: string
+              description: >
+                The host to monitor; it can be an IP address or a hostname.
+                The host can include the port using a colon, for example "example.com:9200".
+            proxy_url:
+              type: string
+              description: >
+                The URL of the SOCKS5 proxy to use when connecting to the server.
+                The value must be a URL with a scheme of `socks5://`.
+                If the SOCKS5 proxy server requires client authentication, then a username and password can be embedded in the URL.
+                When using a proxy, hostnames are resolved on the proxy server instead of on the client.
+                You can change this behavior by setting the `proxy_use_local_resolver` option.
+            proxy_use_local_resolver:
+              type: boolean
+              default: false
+              description: >
+                Specify that hostnames are resolved locally instead of being resolved on the proxy server.
+                If `false`, name resolution occurs on the proxy server.
+            ssl:
+              type: object
+              description: >
+                The TLS/SSL connection settings for use with the HTTPS endpoint.
+                If you don't specify settings, the system defaults are used.
+            type:
+              type: string
+              description: The monitor type.
+              enum:
+                - tcp
+    icmpMonitorFields:
+      title: ICMP monitor fields
+      allOf: # Combines the common fields schema with the ICMP monitor-specific details
+        - $ref: "#/components/schemas/commonMonitorFields"
+        - type: object
+          required:
+            - host
+            - type
+          additionalProperties: true
+          properties:
+            host:
+              type: string
+              description: The host to ping.
+            type:
+              type: string
+              description: The monitor type.
+              enum:
+                - icmp
+            wait:
+              type: number
+              default: 1
+              description: The wait time in seconds.
+    getParameterResponse:
+      title: Get parameter response
+      type: object
+      required:
+      properties:
+        description:
+          type: string
+          description: >
+            The description of the parameter.
+            It is included in the response if the user has read-only permissions to the Synthetics app.
+        id:
+          type: string
+          description: The unique identifier of the parameter.
+        key:
+          type: string
+          description: The key of the parameter.
+        namespaces:
+          type: array
+          items:
+            type: string
+          description: >
+            The namespaces associated with the parameter.
+            It is included in the response if the user has read-only permissions to the Synthetics app.
+        tags:
+          type: array
+          items:
+            type: string
+          description: >
+            An array of tags associated with the parameter.
+            It is included in the response if the user has read-only permissions to the Synthetics app.
+        value:
+          type: string
+          description: >
+            The value associated with the parameter.
+            It will be included in the response if the user has write permissions.  
+    getPrivateLocation:
+      title: Post a private location
+      type: object
+      additionalProperties: true
+      properties:
+        agentPolicyId:
+          type: string
+          description: The ID of the agent policy associated with the private location.
+        geo:
+          type: object
+          description: Geographic coordinates (WGS84) for the location.
+          required:
+            - lat
+            - lon
+          properties:
+            lat:
+              type: number
+              description: The latitude of the location.
+            lon:
+              type: number
+              description: The longitude of the location.
+        id:
+          type: string
+          description: The unique identifier of the private location.
+        isInvalid:
+          type: boolean
+          description: >
+            Indicates whether the location is invalid.
+            If `true`, the location is invalid, which means the agent policy associated with the location is deleted.
+        label:
+          type: string
+          description: A label for the private location.
+        namespace:
+          type: string
+          description: The namespace of the location, which is the same as the namespace of the agent policy associated with the location.
+    parameterRequest:
+      title: Parameter request
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        description:
+          type: string
+          description: A description of the parameter.
+        key:
+          type: string
+          description: The key of the parameter.
+        share_across_spaces:
+          type: boolean
+          description: Specify whether the parameter should be shared across spaces.
+        tags:
+          type: array
+          items:
+            type: string
+          description: An array of tags to categorize the parameter.
+        value:
+          type: string
+          description: The value associated with the parameter.
+    postParameterResponse:
+      title: Post parameter response
+      type: object
+      properties:
+        description:
+          type: string
+          description: A description of the parameter.
+        id:
+          type: string
+          description: The unique identifier for the parameter.
+        key:
+          type: string
+          description: The parameter key.
+        share_across_spaces:
+          type: boolean
+          description: Indicates whether the parameter is shared across spaces.
+        tags:
+          type: array
+          items:
+            type: string
+          description: An array of tags associated with the parameter.
+        value:
+          type: string
+          description: The value associated with the parameter.

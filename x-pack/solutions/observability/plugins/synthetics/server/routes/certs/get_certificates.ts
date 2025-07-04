@@ -6,12 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import {
-  getAllMonitors,
-  processMonitors,
-} from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { monitorAttributes } from '../../../common/types/saved_objects';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { CertResult, GetCertsParams } from '../../../common/runtime_types';
 import { ConfigKey } from '../../../common/constants/monitor_management';
@@ -34,12 +31,11 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       to: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ request, syntheticsEsClient, savedObjectsClient }) => {
+  handler: async ({ request, syntheticsEsClient, monitorConfigRepository }) => {
     const queryParams = request.query;
 
-    const monitors = await getAllMonitors({
-      soClient: savedObjectsClient,
-      filter: `${monitorAttributes}.${ConfigKey.ENABLED}: true`,
+    const monitors = await monitorConfigRepository.getAll({
+      filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
     });
 
     if (monitors.length === 0) {

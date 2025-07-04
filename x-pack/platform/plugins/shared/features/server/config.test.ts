@@ -39,7 +39,7 @@ describe('config schema', () => {
       ConfigSchema.validate(
         {
           overrides: {
-            featureA: { name: 'new name', hidden: true },
+            featureA: { name: 'new name', description: 'new description', hidden: true },
             featureB: {
               order: 100,
               category: 'management',
@@ -73,6 +73,7 @@ describe('config schema', () => {
       Object {
         "overrides": Object {
           "featureA": Object {
+            "description": "new description",
             "hidden": true,
             "name": "new name",
           },
@@ -114,6 +115,27 @@ describe('config schema', () => {
     `);
   });
 
+  it('can override `description` when it is `null`', () => {
+    expect(
+      ConfigSchema.validate(
+        {
+          overrides: {
+            featureA: { description: null },
+          },
+        },
+        { serverless: true }
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "overrides": Object {
+          "featureA": Object {
+            "description": null,
+          },
+        },
+      }
+    `);
+  });
+
   it('properly validates category override', () => {
     for (const category of Object.keys(DEFAULT_APP_CATEGORIES)) {
       expect(
@@ -128,7 +150,7 @@ describe('config schema', () => {
         { serverless: true }
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[overrides.featureA.category]: Unknown category \\"unknown\\". Should be one of kibana, enterpriseSearch, observability, security, management"`
+      `"[overrides.featureA.category]: Unknown category \\"unknown\\". Should be one of kibana, enterpriseSearch, observability, security, chat, management"`
     );
   });
   it('properly validates sub-feature privilege inclusion override', () => {

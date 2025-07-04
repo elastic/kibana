@@ -17,16 +17,15 @@ import {
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
-import {
-  createLlmProxy,
-  LlmProxy,
-  ToolMessage,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { decodeEvents, getConversationCreatedEvent } from '../helpers';
+import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
-import { clearConversations } from '../knowledge_base/helpers';
-import { systemMessageSorted } from './functions/helpers';
+import {
+  systemMessageSorted,
+  clearConversations,
+  decodeEvents,
+  getConversationCreatedEvent,
+} from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -48,43 +47,29 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('/internal/observability_ai_assistant/chat/complete', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let proxy: LlmProxy;
     let connectorId: string;
 
-    async function getEvents(
-      params: { screenContexts?: ObservabilityAIAssistantScreenContextRequest[] },
-      title: string,
-      conversationResponse: string | ToolMessage
-    ) {
-      void proxy.interceptTitle(title);
-      void proxy.interceptConversation(conversationResponse);
-
-      const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
-        await roleScopedSupertest.getSupertestWithRoleScope('editor', {
-          useCookieHeader: true,
-          withInternalHeaders: true,
-        });
-
-      const response = await supertestEditorWithCookieCredentials
-        .post('/internal/observability_ai_assistant/chat/complete')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          messages,
-          connectorId,
-          persist: true,
-          screenContexts: params.screenContexts || [],
-          scopes: ['all'],
-        });
+    async function getEvents(params: {
+      screenContexts?: ObservabilityAIAssistantScreenContextRequest[];
+    }) {
+      const response = await observabilityAIAssistantAPIClient.editor({
+        endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+        params: {
+          body: {
+            messages,
+            connectorId,
+            persist: true,
+            screenContexts: params.screenContexts || [],
+            scopes: ['all'],
+          },
+        },
+      });
 
       await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      return String(response.body)
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .map((line) => JSON.parse(line) as StreamingChatResponseEvent)
-        .slice(2); // ignore context request/response, we're testing this elsewhere
+      return decodeEvents(response.body).slice(2); // ignore context request/response, we're testing this elsewhere
     }
 
     before(async () => {
@@ -110,7 +95,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             withInternalHeaders: true,
           });
 
-        proxy.interceptConversation('Hello!').catch((e) => {
+        proxy.interceptWithResponse('Hello!').catch((e) => {
           log.error(`Failed to intercept conversation ${e}`);
         });
 
@@ -231,7 +216,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('forwards the system message as the first message in the request to the LLM with message role "system"', async () => {
-        const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
+        const simulatorPromise = proxy.interceptWithResponse('Hello from LLM Proxy');
         await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
           params: {
@@ -258,12 +243,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
-        events = await getEvents({}, 'Title for at new conversation', 'Hello again').then(
-          (_events) => {
-            return _events.filter(
-              (event) => event.type !== StreamingChatResponseEventType.BufferFlush
-            );
-          }
+        void proxy.interceptTitle('Title for a new conversation');
+        void proxy.interceptWithResponse('Hello again');
+
+        const allEvents = await getEvents({});
+        events = allEvents.filter(
+          (event) => event.type !== StreamingChatResponseEventType.BufferFlush
         );
       });
 
@@ -306,7 +291,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(omit(events[4], 'conversation.id', 'conversation.last_updated')).to.eql({
           type: StreamingChatResponseEventType.ConversationCreate,
           conversation: {
-            title: 'Title for at new conversation',
+            title: 'Title for a new conversation',
           },
         });
       });
@@ -320,41 +305,32 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
-        events = await getEvents(
-          {
-            screenContexts: [
-              {
-                actions: [
-                  {
-                    name: 'my_action',
-                    description: 'My action',
-                    parameters: {
-                      type: 'object',
-                      properties: {
-                        foo: {
-                          type: 'string',
-                        },
+        void proxy.interceptTitle('Title for conversation with screen context action');
+        void proxy.interceptWithFunctionRequest({
+          name: 'my_action',
+          arguments: () => JSON.stringify({ foo: 'bar' }),
+        });
+
+        events = await getEvents({
+          screenContexts: [
+            {
+              actions: [
+                {
+                  name: 'my_action',
+                  description: 'My action',
+                  parameters: {
+                    type: 'object',
+                    properties: {
+                      foo: {
+                        type: 'string',
                       },
                     },
                   },
-                ],
-              },
-            ],
-          },
-          'Title for conversation with screen context action',
-          {
-            tool_calls: [
-              {
-                toolCallId: 'fake-id',
-                index: 1,
-                function: {
-                  name: 'my_action',
-                  arguments: JSON.stringify({ foo: 'bar' }),
                 },
-              },
-            ],
-          }
-        );
+              ],
+            },
+          ],
+        });
       });
 
       it('closes the stream without persisting the conversation', () => {
@@ -404,7 +380,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           throw new Error('Failed to intercept conversation title', e);
         });
 
-        proxy.interceptConversation('Good night, sir!').catch((e) => {
+        proxy.interceptWithResponse('Good night, sir!').catch((e) => {
           throw new Error('Failed to intercept conversation ', e);
         });
 
@@ -437,7 +413,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        proxy.interceptConversation('Good night, sir!').catch((e) => {
+        proxy.interceptWithResponse('Good night, sir!').catch((e) => {
           log.error(`Failed to intercept conversation ${e}`);
         });
 
@@ -473,9 +449,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await clearConversations(es);
       });
     });
-
-    // todo
-    it.skip('executes a function', async () => {});
 
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {

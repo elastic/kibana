@@ -2,20 +2,16 @@
 
 exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 <div
-  className="icvContainer__wrapper"
+  css="unknown styles"
 >
   <div
-    className="icvContainer"
+    css="unknown styles"
   >
     <EuiFlexGroup
       wrap={true}
     >
       <EuiFlexItem
-        css={
-          Object {
-            "minWidth": "250px",
-          }
-        }
+        css="unknown styles"
         data-test-subj="inputControlItem"
         key="mock-list-control"
       >
@@ -90,20 +86,16 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 
 exports[`Clear btns enabled when there are values 1`] = `
 <div
-  className="icvContainer__wrapper"
+  css="unknown styles"
 >
   <div
-    className="icvContainer"
+    css="unknown styles"
   >
     <EuiFlexGroup
       wrap={true}
     >
       <EuiFlexItem
-        css={
-          Object {
-            "minWidth": "250px",
-          }
-        }
+        css="unknown styles"
         data-test-subj="inputControlItem"
         key="mock-list-control"
       >
@@ -178,20 +170,16 @@ exports[`Clear btns enabled when there are values 1`] = `
 
 exports[`Renders list control 1`] = `
 <div
-  className="icvContainer__wrapper"
+  css="unknown styles"
 >
   <div
-    className="icvContainer"
+    css="unknown styles"
   >
     <EuiFlexGroup
       wrap={true}
     >
       <EuiFlexItem
-        css={
-          Object {
-            "minWidth": "250px",
-          }
-        }
+        css="unknown styles"
         data-test-subj="inputControlItem"
         key="mock-list-control"
       >
@@ -266,20 +254,16 @@ exports[`Renders list control 1`] = `
 
 exports[`Renders range control 1`] = `
 <div
-  className="icvContainer__wrapper"
+  css="unknown styles"
 >
   <div
-    className="icvContainer"
+    css="unknown styles"
   >
     <EuiFlexGroup
       wrap={true}
     >
       <EuiFlexItem
-        css={
-          Object {
-            "minWidth": "250px",
-          }
-        }
+        css="unknown styles"
         data-test-subj="inputControlItem"
         key="mock-range-control"
       >

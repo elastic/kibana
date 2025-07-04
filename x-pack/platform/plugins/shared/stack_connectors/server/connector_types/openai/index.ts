@@ -6,25 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  SubActionConnectorType,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
   GenerativeAIForSecurityConnectorFeatureId,
   GenerativeAIForObservabilityConnectorFeatureId,
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
+import { nonPkiSecretsValidator, pkiSecretsValidator } from './lib/other_openai_utils';
 import {
   OPENAI_CONNECTOR_ID,
   OPENAI_TITLE,
   OpenAiProviderType,
 } from '../../../common/openai/constants';
 import { ConfigSchema, SecretsSchema } from '../../../common/openai/schema';
-import { Config, Secrets } from '../../../common/openai/types';
+import type { Config, Secrets } from '../../../common/openai/types';
 import { OpenAIConnector } from './openai';
 import { renderParameterTemplates } from './render';
 
@@ -36,7 +35,10 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     config: ConfigSchema,
     secrets: SecretsSchema,
   },
-  validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
+  validators: [
+    { type: ValidatorType.CONFIG, validator: configValidator },
+    { type: ValidatorType.SECRETS, validator: secretsValidator },
+  ],
   supportedFeatureIds: [
     GenerativeAIForSecurityConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
@@ -45,6 +47,17 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
 });
+
+const secretsValidator = (secretsObject: Secrets) => {
+  const validatorFn =
+    ('certificateData' in secretsObject && secretsObject.certificateData) ||
+    ('privateKeyData' in secretsObject && secretsObject.privateKeyData)
+      ? pkiSecretsValidator
+      : nonPkiSecretsValidator;
+  validatorFn(secretsObject);
+
+  return secretsObject;
+};
 
 export const configValidator = (configObject: Config, validatorServices: ValidatorServices) => {
   try {

@@ -1,0 +1,164 @@
+{
+  "id": "@kbn/observability-schema",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/observability-schema",
+        "id": "def-common.GetRelatedDashboardsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetRelatedDashboardsResponse",
+        "description": [],
+        "signature": [
+          "{ suggestedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; }"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-observability-schema/related_dashboards/rest_specs/get_related_dashboards/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-schema",
+        "id": "def-common.RelatedDashboard",
+        "type": "Type",
+        "tags": [],
+        "label": "RelatedDashboard",
+        "description": [],
+        "signature": [
+          "{ id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-observability-schema/related_dashboards/schema/related_dashboard/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-schema",
+        "id": "def-common.RelevantPanel",
+        "type": "Type",
+        "tags": [],
+        "label": "RelevantPanel",
+        "description": [],
+        "signature": [
+          "{ matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-observability-schema/related_dashboards/schema/relevant_panel/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-schema",
+        "id": "def-common.SuggestedDashboard",
+        "type": "Type",
+        "tags": [],
+        "label": "SuggestedDashboard",
+        "description": [],
+        "signature": [
+          "{ id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-observability-schema/related_dashboards/schema/related_dashboard/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/observability-schema",
+        "id": "def-common.getRelatedDashboardsParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getRelatedDashboardsParamsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ query: Zod.ZodObject<{ alertId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { alertId: string; }, { alertId: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { alertId: string; }; }, { query: { alertId: string; }; }>"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-observability-schema/related_dashboards/rest_specs/get_related_dashboards/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-schema",
+        "id": "def-common.getRelatedDashboardsResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getRelatedDashboardsResponseSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ suggestedDashboards: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; matchedBy: Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; index: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; linked: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }, { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }>; relevantPanelCount: Zod.ZodOptional<Zod.ZodNumber>; relevantPanels: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ panel: Zod.ZodObject<{ panelIndex: Zod.ZodString; type: Zod.ZodString; panelConfig: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; title: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }, { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }>; matchedBy: Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; index: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { index?: string[] | undefined; fields?: string[] | undefined; }, { index?: string[] | undefined; fields?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }, { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }, { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }>, \"many\">; linkedDashboards: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; matchedBy: Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; index: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; linked: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }, { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }>; relevantPanelCount: Zod.ZodOptional<Zod.ZodNumber>; relevantPanels: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ panel: Zod.ZodObject<{ panelIndex: Zod.ZodString; type: Zod.ZodString; panelConfig: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; title: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }, { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }>; matchedBy: Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; index: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { index?: string[] | undefined; fields?: string[] | undefined; }, { index?: string[] | undefined; fields?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }, { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }, { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { suggestedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; }, { suggestedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; }>"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-observability-schema/related_dashboards/rest_specs/get_related_dashboards/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-schema",
+        "id": "def-common.relatedDashboardSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "relatedDashboardSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; matchedBy: Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; index: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; linked: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }, { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }>; relevantPanelCount: Zod.ZodOptional<Zod.ZodNumber>; relevantPanels: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ panel: Zod.ZodObject<{ panelIndex: Zod.ZodString; type: Zod.ZodString; panelConfig: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; title: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }, { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }>; matchedBy: Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; index: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { index?: string[] | undefined; fields?: string[] | undefined; }, { index?: string[] | undefined; fields?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }, { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }, { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }>"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-observability-schema/related_dashboards/schema/related_dashboard/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-schema",
+        "id": "def-common.relevantPanelSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "relevantPanelSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ panel: Zod.ZodObject<{ panelIndex: Zod.ZodString; type: Zod.ZodString; panelConfig: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; title: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }, { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }>; matchedBy: Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; index: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { index?: string[] | undefined; fields?: string[] | undefined; }, { index?: string[] | undefined; fields?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }, { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }>"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-observability-schema/related_dashboards/schema/relevant_panel/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/observability-schema",
+        "id": "def-common.suggestedDashboardSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "suggestedDashboardSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; matchedBy: Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; index: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { index?: string[] | undefined; fields?: string[] | undefined; }, { index?: string[] | undefined; fields?: string[] | undefined; }>; relevantPanelCount: Zod.ZodNumber; relevantPanels: Zod.ZodArray<Zod.ZodObject<{ panel: Zod.ZodObject<{ panelIndex: Zod.ZodString; type: Zod.ZodString; panelConfig: Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>; title: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }, { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }>; matchedBy: Zod.ZodObject<{ fields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; index: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { index?: string[] | undefined; fields?: string[] | undefined; }, { index?: string[] | undefined; fields?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }, { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }>, \"many\">; score: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }, { id: string; title: string; description: string; score: number; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }>"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-observability-schema/related_dashboards/schema/related_dashboard/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

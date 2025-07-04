@@ -2,23 +2,25 @@
 navigation_title: "Swimlane"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/swimlane-action-type.html
+applies_to:
+  stack: all
+  serverless:
+    observability: ga
+    security: ga
 ---
 
 # Swimlane connector and action [swimlane-action-type]
 
-
 The Swimlane connector uses the [Swimlane REST API](https://swimlane.com/knowledge-center/docs/developer-guide/rest-api/) to create Swimlane records.
-
 
 ## Create connectors in {{kib}} [define-swimlane-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you're creating a rule. For example:
 
-:::{image} ../../images/swimlane-connector.png
+:::{image} ../images/swimlane-connector.png
 :alt: Swimlane connector
-:class: screenshot
+:screenshot:
 :::
-
 
 ### Connector configuration [swimlane-connector-configuration]
 
@@ -36,14 +38,13 @@ Application ID
 API token
 :   Swimlane API authentication token for HTTP basic authentication.
 
-
 ## Test connectors [swimlane-action-configuration]
 
-You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
+You can test connectors as you're creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/swimlane-params-test.png
+:::{image} ../images/swimlane-params-test.png
 :alt: Swimlane params test
-:class: screenshot
+:screenshot:
 :::
 
 Swimlane actions have the following configuration properties.
@@ -57,5 +58,3 @@ Severity
 ::::{note}
 Alert ID and Rule Name are filled automatically. Specifically, Alert ID is set to `{{alert.id}}` and Rule Name to `{{rule.name}}`.
 ::::
-
-

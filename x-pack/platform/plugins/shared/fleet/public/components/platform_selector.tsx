@@ -28,7 +28,7 @@ import {
 } from '../../common/constants/epm';
 import {
   usePlatform,
-  VISIBLE_PALFORM_OPTIONS,
+  VISIBLE_PLATFORM_OPTIONS,
   EXTENDED_PLATFORM_OPTIONS,
   KUBERNETES_PLATFORM_OPTION,
 } from '../hooks';
@@ -149,9 +149,11 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               defaultMessage: 'Platform options',
             })}
           >
-            {VISIBLE_PALFORM_OPTIONS.map((option) => (
+            {VISIBLE_PLATFORM_OPTIONS.map((option) => (
               <EuiFilterButton
                 key={option.id}
+                isToggle
+                isSelected={platform === option.id}
                 hasActiveFilters={platform === option.id}
                 onClick={() => setPlatform(option.id)}
                 data-test-subj={option['data-test-subj']}
@@ -197,7 +199,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   'data-test-subj': option['data-test-subj'],
                 }))}
                 onChange={(_allOptions, _event, option) => setPlatform(option.key)}
-                style={{ width: 150 }}
+                css={{ width: 150 }}
                 listProps={{ paddingSize: 'none', onFocusBadge: false }}
               >
                 {(list) => list}

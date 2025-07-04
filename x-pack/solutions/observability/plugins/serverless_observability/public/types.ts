@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { ObservabilityPublicSetup } from '@kbn/observability-plugin/public';
@@ -16,6 +15,7 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPublicSetup {}
@@ -36,7 +36,7 @@ export interface ServerlessObservabilityPublicStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   serverless: ServerlessPluginStart;
   management: ManagementStart;
-  data: DataPublicPluginStart;
   security: SecurityPluginStart;
   streams?: StreamsPluginStart;
+  cases?: CasesPublicStart;
 }

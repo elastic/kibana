@@ -92,7 +92,7 @@ import { fooResource } from '../../schemas/v1';
 // Note: this response schema is instantiated lazily to avoid creating schemas that are not needed in most cases!
 const fooResourceResponse = () => {
   return schema.object({
-    id: schema.string({ 
+    id: schema.string({
       maxLength: 20,
       meta: { description: 'Add a description.' }
     }),
@@ -120,8 +120,8 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
       options: {
         tags: ['oas-tag:my tag'],  // Each operation must have a tag that's used to group similar endpoints in the docs
         availability: {
-          since: '1.0.0',
-          stability: 'experimental',
+          since: '1.0.0', // The version that the API was added.
+          stability: 'experimental', // The current lifecycle: experimental, beta, or stable
         },
       },
     })
@@ -129,7 +129,7 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
       version: '2023-10-31',
       validate: {
         request: {
-          body: ,
+          body: fooResource,
         },
         response: {
           200: {
@@ -154,6 +154,124 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
   );
 }
 ```
+
+##### Adding examples
+
+Beyond the schema of requests and responses, it is **very useful** to provide
+concrete requests and responses as examples. Examples go beyond defaults and
+provide a more intuitive understanding for end users in learning the behaviour
+of your API. See the [bump.sh documentation](https://docs.bump.sh/guides/openapi/specification/v3.1/data-models/examples/)
+for more information on how examples will be shown to end users.
+
+To add examples to the endpoint we created above you could do the following:
+
+```typescript
+// ...
+    .addVersion({
+      version: '2023-10-31',
+      options: {
+        // Be sure and lazily instantiate this value. It's only used at dev time!
+        oasOperationObject: () => ({
+          requestBody: {
+            content: {
+              'application/json': {
+                examples: {
+                  fooExample1: {
+                    summary: 'An example foo request',
+                    value: {
+                      name: 'Cool foo!',
+                    } as FooResource,
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            200: {
+              content: {
+                'application/json': {
+                  examples: {
+                    /* Put your 200 response examples here */
+                  },
+                },
+              },
+            },
+          },
+        }),
+      },
+      validate: {
+        request: {
+          body: fooResource,
+        },
+        response: {
+          200: {
+            body: fooResourceResponse,
+          },
+        },
+      },
+    },
+// ...
+```
+The strength of this approach is your examples are captured in code and type
+checked at dev time. So any shape errors should be caught as you author.
+
+<details>
+
+<summary>I have prexisting YAML based examples I'd like to use!</summary>
+
+If you pre-existing examples created in YAML that you would like
+to use the following approach:
+
+```typescript
+import path from 'node:path';
+
+const oasOperationObject: () => path.join(__dirname, 'foo.examples.yaml'),
+
+// ...
+    .addVersion({
+      version: '2023-10-31',
+      options: {
+        oasOperationObject,
+      },
+      validate: {
+        request: {
+          body: fooResource,
+        },
+        response: {
+          200: {
+            body: fooResourceResponse,
+          },
+        },
+      },
+    },
+// ...
+```
+
+Where the contents of `foo.examples.yaml` are:
+
+```yaml
+requestBody:
+  content:
+    application/json:
+      examples: # Make sure to use the examples array, example (singular) has been deprecated
+        fooExample:
+          summary: Foo example
+          description: >
+            An example request of creating foo.
+          value:
+            name: 'Cool foo!'
+        fooExampleRef:
+          # You can use JSONSchema $refs to organize this file further
+          $ref: "./examples/foo_example_i_factored_out_of_this_file.yaml"
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          # Apply a similar pattern to writing examples here
+```
+
+</details>
 
 #### 3. Generating OAS
 
@@ -185,9 +303,19 @@ OAS for public routes are written to the Kibana repo as a snapshot that will ult
 <DocCallOut title="Under construction" color="warning">
   At the time of writing we only capture OAS for a subset of Kibana's HTTP APIs to give teams time to check and improve the quality of generated OAS.
 
-  If you would like OAS for your endpoints to be included in the snapshot, **please reach out to #kibana-core**.
+  If you would like OAS for your endpoints to be included in the snapshot, **please reach out to #kibana-core** or follow the instructions below.
 </DocCallOut>
 
+To publish OAS to our docs site create a pull request updating [this command](https://github.com/elastic/kibana/blob/970e9fe4a3c29df81ccff6761d4986d316338398/.buildkite/scripts/steps/checks/capture_oas_snapshot.sh#L11) to include your HTTP API path.
+
+The OAS will be pushed and published to our [stateful](https://www.elastic.co/docs/api/doc/kibana/) and [serverless](https://www.elastic.co/docs/api/doc/serverless/) docs hosted by bump.sh.
+
+If you would like to preview your docs before merging, you can do the following:
+
+1. Install the bump cli: https://www.npmjs.com/package/bump-cli
+2. Save your docs to a local file `curl localhost:5601/api/oas\?access\=public\&version\=2023-10-31\&pathStartsWith\=/api/saved_objects/_export > temp.json`
+3. `npx bump preview temp.json`
+4. Once done, your docs should be hosted at a temporary location provided by bump.sh
 
 ### FAQs
 

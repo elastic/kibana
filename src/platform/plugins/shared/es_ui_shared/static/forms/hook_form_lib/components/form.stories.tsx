@@ -8,12 +8,11 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 
 import { action } from '@storybook/addon-actions';
 import { TextField } from '../../components';
-import { STORYBOOK_SECTION } from '../constants';
 import { FormHook, FieldConfig } from '../types';
 import { useForm } from '../hooks/use_form';
 import { Form, Props as FormProps } from './form';
@@ -22,13 +21,13 @@ import { formStories } from './__stories__';
 
 export default {
   component: Form,
-  title: `${STORYBOOK_SECTION}/Form`,
+  title: 'Form lib/Form',
   subcomponents: { UseField },
   decorators: [(Story) => <div style={{ maxWidth: '600px' }}>{Story()}</div>],
   parameters: {
     controls: { hideNoControlsWarning: true },
   },
-} as ComponentMeta<typeof Form>;
+} as Meta<typeof Form>;
 
 type Args = Pick<FormProps, 'children' | 'FormWrapper'>;
 
@@ -57,7 +56,7 @@ const titleConfigBase: FieldConfig<string> = {
 
 // --- SIMPLE
 
-export const Simple = (args: Args) => {
+const SimpleStoryComponent = (args: Args) => {
   const { form } = useForm();
 
   return (
@@ -74,10 +73,12 @@ export const Simple = (args: Args) => {
   );
 };
 
-Simple.parameters = {
-  docs: {
-    source: {
-      code: `
+export const Simple: StoryObj<Args> = {
+  render: (args) => <SimpleStoryComponent {...args} />,
+  parameters: {
+    docs: {
+      source: {
+        code: `
 const MyFormComponent = () => {
   const { form } = useForm();
 
@@ -103,7 +104,8 @@ const MyFormComponent = () => {
   );
 };
       `,
-      language: 'tsx',
+        language: 'tsx',
+      },
     },
   },
 };
@@ -116,7 +118,7 @@ const formSchema = {
   },
 };
 
-export const Schema = (args: Args) => {
+const SchemaStoryComponent = (args: Args) => {
   const { form } = useForm({
     schema: formSchema,
   });
@@ -129,10 +131,12 @@ export const Schema = (args: Args) => {
   );
 };
 
-Schema.parameters = {
-  docs: {
-    source: {
-      code: `
+export const Schema: StoryObj<Args> = {
+  render: (args) => <SchemaStoryComponent {...args} />,
+  parameters: {
+    docs: {
+      source: {
+        code: `
 const formSchema = {
   title: {
     label: 'Title',
@@ -160,7 +164,8 @@ const MyFormComponent = () => {
   );
 };
       `,
-      language: 'tsx',
+        language: 'tsx',
+      },
     },
   },
 };

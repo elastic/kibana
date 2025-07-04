@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import './filters.scss';
 import React, { useState } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
+import { EuiFormRow, EuiLink, htmlIdGenerator, useEuiTheme } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { queryFilterToAst } from '@kbn/data-plugin/common';
@@ -27,6 +26,7 @@ import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
+import { draggablePopoverButtonStyles } from '../styles';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';
@@ -76,6 +76,7 @@ export const filtersOperation: OperationDefinition<
   displayName: filtersLabel,
   priority: 3, // Higher than any metric
   input: 'none',
+  scale: () => 'ordinal',
   isTransferable: () => true,
 
   getDefaultLabel: () => filtersLabel,
@@ -108,7 +109,6 @@ export const filtersOperation: OperationDefinition<
       label: filtersLabel,
       dataType: 'string',
       operationType: OPERATION_NAME,
-      scale: 'ordinal',
       isBucketed: true,
       params,
     };
@@ -181,6 +181,7 @@ export const FilterList = ({
   indexPattern: IndexPattern;
   defaultQuery: Filter;
 }) => {
+  const euiThemeContext = useEuiTheme();
   const [activeFilterId, setActiveFilterId] = useState('');
   const [localFilters, setLocalFilters] = useState(() =>
     filters.map((filter) => ({ ...filter, id: generateId() }))
@@ -275,6 +276,7 @@ export const FilterList = ({
                     title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
                       defaultMessage: 'Click to edit',
                     })}
+                    css={draggablePopoverButtonStyles(euiThemeContext)}
                   >
                     {filter.label || (filter.input.query as string) || defaultLabel}
                   </EuiLink>
@@ -285,9 +287,7 @@ export const FilterList = ({
         })}
       </DragDropBuckets>
       <NewBucketButton
-        onClick={() => {
-          onAddFilter();
-        }}
+        onClick={onAddFilter}
         label={i18n.translate('xpack.lens.indexPattern.filters.addaFilter', {
           defaultMessage: 'Add a filter',
         })}

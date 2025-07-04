@@ -11,7 +11,7 @@ Object {
     },
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-a3c54471-615f-4ff9-9fda-69b5b2ea3eef",
+      "name": "indexpattern-datasource-layer-layer-id-generated-uuid",
       "type": "index-pattern",
     },
     Object {
@@ -29,14 +29,14 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "a3c54471-615f-4ff9-9fda-69b5b2ea3eef": Object {
+          "layer-id-generated-uuid": Object {
             "columnOrder": Array [
-              "42334c6e-98d9-47a2-b4cb-a445abb44c93",
-              "37bdf546-3c11-4b08-8c5d-e37debc44f1d",
-              "0a923af2-c880-4aa3-aa93-a0b9c2801f6d",
+              "column-top-value-id-generated-uuid",
+              "column-timestamp-id-generated-uuid",
+              "column-count-id-generated-uuid",
             ],
             "columns": Object {
-              "0a923af2-c880-4aa3-aa93-a0b9c2801f6d": Object {
+              "column-count-id-generated-uuid": Object {
                 "dataType": "number",
                 "isBucketed": false,
                 "label": "Count of records",
@@ -47,7 +47,7 @@ Object {
                 "scale": "ratio",
                 "sourceField": "___records___",
               },
-              "37bdf546-3c11-4b08-8c5d-e37debc44f1d": Object {
+              "column-timestamp-id-generated-uuid": Object {
                 "dataType": "date",
                 "isBucketed": true,
                 "label": "@timestamp",
@@ -59,7 +59,7 @@ Object {
                 "scale": "interval",
                 "sourceField": "@timestamp",
               },
-              "42334c6e-98d9-47a2-b4cb-a445abb44c93": Object {
+              "column-top-value-id-generated-uuid": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.dataset",
@@ -67,7 +67,7 @@ Object {
                 "params": Object {
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "0a923af2-c880-4aa3-aa93-a0b9c2801f6d",
+                    "columnId": "column-count-id-generated-uuid",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -202,15 +202,15 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "0a923af2-c880-4aa3-aa93-a0b9c2801f6d",
+            "column-count-id-generated-uuid",
           ],
-          "layerId": "a3c54471-615f-4ff9-9fda-69b5b2ea3eef",
+          "layerId": "layer-id-generated-uuid",
           "layerType": "data",
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "42334c6e-98d9-47a2-b4cb-a445abb44c93",
-          "xAccessor": "37bdf546-3c11-4b08-8c5d-e37debc44f1d",
+          "splitAccessor": "column-top-value-id-generated-uuid",
+          "xAccessor": "column-timestamp-id-generated-uuid",
         },
       ],
       "legend": Object {

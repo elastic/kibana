@@ -3,7 +3,7 @@
   "info": {
     "title": "SLOs",
     "description": "OpenAPI schema for SLOs endpoints",
-    "version": "1.0",
+    "version": "1.1",
     "contact": {
       "name": "Actionable Observability Team"
     },
@@ -130,6 +130,27 @@
               "type": "string"
             },
             "example": "slo.name:latency* and slo.tags : \"prod\""
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The page size to use for cursor-based pagination, must be greater or equal than 1",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "searchAfter",
+            "in": "query",
+            "description": "The cursor to use for fetching the results from, when using a cursor-base pagination.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           },
           {
             "name": "page",
@@ -677,6 +698,182 @@
         }
       }
     },
+    "/s/{spaceId}/api/observability/slos/_bulk_purge_rollup": {
+      "post": {
+        "summary": "Batch delete rollup and summary data",
+        "operationId": "deleteRollupDataOp",
+        "description": "The deletion occurs for the specified list of `sloId`. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
+        "tags": [
+          "slo"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/bulk_purge_rollup_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bulk_purge_rollup_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/s/{spaceId}/internal/observability/slos/_definitions": {
+      "get": {
+        "summary": "Get the SLO definitions",
+        "operationId": "getDefinitionsOp",
+        "description": "You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
+        "tags": [
+          "slo"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "name": "includeOutdatedOnly",
+            "in": "query",
+            "description": "Indicates if the API returns only outdated SLO or all SLO definitions",
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "Filters the SLOs by tag",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Filters the SLOs by name",
+            "schema": {
+              "type": "string"
+            },
+            "example": "my service availability"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page to use for pagination, must be greater or equal than 1",
+            "schema": {
+              "type": "number"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "Number of SLOs returned by page",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "maximum": 1000
+            },
+            "example": 100
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/find_slo_definitions_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/s/{spaceId}/api/observability/slos/_delete_instances": {
       "post": {
         "summary": "Batch delete rollup and summary data",
@@ -706,6 +903,146 @@
         "responses": {
           "204": {
             "description": "Successful request"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/s/{spaceId}/api/observability/slos/_bulk_delete": {
+      "post": {
+        "summary": "Bulk delete SLO definitions and their associated summary and rollup data.",
+        "operationId": "bulkDeleteOp",
+        "description": "Bulk delete SLO definitions and their associated summary and rollup data.  This endpoint initiates a bulk deletion operation for SLOs, which may take some time to complete.  The status of the operation can be checked using the `GET /api/slo/_bulk_delete/{taskId}` endpoint.\n",
+        "tags": [
+          "slo"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/bulk_delete_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bulk_delete_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}": {
+      "get": {
+        "summary": "Retrieve the status of the bulk deletion",
+        "operationId": "bulkDeleteStatusOp",
+        "description": "Retrieve the status of the bulk deletion operation for SLOs.  This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.\n",
+        "tags": [
+          "slo"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "description": "The task id of the bulk delete operation",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "8853df00-ae2e-11ed-90af-09bb6422b258"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bulk_delete_status_response"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad request",
@@ -1137,38 +1474,70 @@
                     "description": "List of metrics with their name, aggregation type, and field.",
                     "type": "array",
                     "items": {
-                      "type": "object",
-                      "required": [
-                        "name",
-                        "aggregation",
-                        "field"
-                      ],
-                      "properties": {
-                        "name": {
-                          "description": "The name of the metric. Only valid options are A-Z",
-                          "type": "string",
-                          "example": "A",
-                          "pattern": "^[A-Z]$"
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "aggregation",
+                            "field"
+                          ],
+                          "properties": {
+                            "name": {
+                              "description": "The name of the metric. Only valid options are A-Z",
+                              "type": "string",
+                              "example": "A",
+                              "pattern": "^[A-Z]$"
+                            },
+                            "aggregation": {
+                              "description": "The aggregation type of the metric.",
+                              "type": "string",
+                              "example": "sum",
+                              "enum": [
+                                "sum"
+                              ]
+                            },
+                            "field": {
+                              "description": "The field of the metric.",
+                              "type": "string",
+                              "example": "processor.processed"
+                            },
+                            "filter": {
+                              "description": "The filter to apply to the metric.",
+                              "type": "string",
+                              "example": "processor.outcome: *"
+                            }
+                          }
                         },
-                        "aggregation": {
-                          "description": "The aggregation type of the metric. Only valid option is \"sum\"",
-                          "type": "string",
-                          "example": "sum",
-                          "enum": [
-                            "sum"
-                          ]
-                        },
-                        "field": {
-                          "description": "The field of the metric.",
-                          "type": "string",
-                          "example": "processor.processed"
-                        },
-                        "filter": {
-                          "description": "The filter to apply to the metric.",
-                          "type": "string",
-                          "example": "processor.outcome: \"success\""
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "aggregation"
+                          ],
+                          "properties": {
+                            "name": {
+                              "description": "The name of the metric. Only valid options are A-Z",
+                              "type": "string",
+                              "example": "A",
+                              "pattern": "^[A-Z]$"
+                            },
+                            "aggregation": {
+                              "description": "The aggregation type of the metric.",
+                              "type": "string",
+                              "example": "doc_count",
+                              "enum": [
+                                "doc_count"
+                              ]
+                            },
+                            "filter": {
+                              "description": "The filter to apply to the metric.",
+                              "type": "string",
+                              "example": "processor.outcome: *"
+                            }
+                          }
                         }
-                      }
+                      ]
                     }
                   },
                   "equation": {
@@ -1190,38 +1559,70 @@
                     "description": "List of metrics with their name, aggregation type, and field.",
                     "type": "array",
                     "items": {
-                      "type": "object",
-                      "required": [
-                        "name",
-                        "aggregation",
-                        "field"
-                      ],
-                      "properties": {
-                        "name": {
-                          "description": "The name of the metric. Only valid options are A-Z",
-                          "type": "string",
-                          "example": "A",
-                          "pattern": "^[A-Z]$"
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "aggregation",
+                            "field"
+                          ],
+                          "properties": {
+                            "name": {
+                              "description": "The name of the metric. Only valid options are A-Z",
+                              "type": "string",
+                              "example": "A",
+                              "pattern": "^[A-Z]$"
+                            },
+                            "aggregation": {
+                              "description": "The aggregation type of the metric.",
+                              "type": "string",
+                              "example": "sum",
+                              "enum": [
+                                "sum"
+                              ]
+                            },
+                            "field": {
+                              "description": "The field of the metric.",
+                              "type": "string",
+                              "example": "processor.processed"
+                            },
+                            "filter": {
+                              "description": "The filter to apply to the metric.",
+                              "type": "string",
+                              "example": "processor.outcome: *"
+                            }
+                          }
                         },
-                        "aggregation": {
-                          "description": "The aggregation type of the metric. Only valid option is \"sum\"",
-                          "type": "string",
-                          "example": "sum",
-                          "enum": [
-                            "sum"
-                          ]
-                        },
-                        "field": {
-                          "description": "The field of the metric.",
-                          "type": "string",
-                          "example": "processor.processed"
-                        },
-                        "filter": {
-                          "description": "The filter to apply to the metric.",
-                          "type": "string",
-                          "example": "processor.outcome: *"
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "aggregation"
+                          ],
+                          "properties": {
+                            "name": {
+                              "description": "The name of the metric. Only valid options are A-Z",
+                              "type": "string",
+                              "example": "A",
+                              "pattern": "^[A-Z]$"
+                            },
+                            "aggregation": {
+                              "description": "The aggregation type of the metric.",
+                              "type": "string",
+                              "example": "doc_count",
+                              "enum": [
+                                "doc_count"
+                              ]
+                            },
+                            "filter": {
+                              "description": "The filter to apply to the metric.",
+                              "type": "string",
+                              "example": "processor.outcome: *"
+                            }
+                          }
                         }
-                      }
+                      ]
                     }
                   },
                   "equation": {
@@ -1895,6 +2296,14 @@
         "description": "A paginated response of SLOs matching the query.\n",
         "type": "object",
         "properties": {
+          "size": {
+            "type": "number",
+            "example": 25,
+            "description": "Size provided for cursor based pagination"
+          },
+          "searchAfter": {
+            "type": "string"
+          },
           "page": {
             "type": "number",
             "example": 1
@@ -2292,6 +2701,148 @@
           }
         }
       },
+      "bulk_purge_rollup_request": {
+        "title": "Bulk Purge Rollup data request",
+        "description": "The bulk purge rollup data request takes a list of SLO ids and a purge policy, then deletes the rollup data according to the purge policy. This API can be used to remove the staled data of an instance SLO that no longer get updated.\n",
+        "type": "object",
+        "required": [
+          "list",
+          "purgePolicy"
+        ],
+        "properties": {
+          "list": {
+            "description": "An array of slo ids",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "The SLO Definition id",
+              "example": "8853df00-ae2e-11ed-90af-09bb6422b258"
+            }
+          },
+          "purgePolicy": {
+            "description": "Policy that dictates which SLI documents to purge based on age",
+            "type": "object",
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "purgeType": {
+                    "type": "string",
+                    "description": "Specifies whether documents will be purged based on a specific age or on a timestamp",
+                    "enum": [
+                      "fixed-age"
+                    ]
+                  },
+                  "age": {
+                    "type": "string",
+                    "description": "The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.",
+                    "example": "7d"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "purgeType": {
+                    "type": "string",
+                    "description": "Specifies whether documents will be purged based on a specific age or on a timestamp",
+                    "enum": [
+                      "fixed-time"
+                    ]
+                  },
+                  "timestamp": {
+                    "type": "string",
+                    "description": "The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.",
+                    "example": "2024-12-31T00:00:00.000Z"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "bulk_purge_rollup_response": {
+        "title": "Bulk Purge Rollup data response",
+        "description": "The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.\n",
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "description": "The task id of the purge operation",
+            "example": "8853df00-ae2e-11ed-90af-09bb6422b258"
+          }
+        }
+      },
+      "find_slo_definitions_response": {
+        "title": "Find SLO definitions response",
+        "description": "A paginated response of SLO definitions matching the query.\n",
+        "type": "object",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "number",
+                "example": 1
+              },
+              "perPage": {
+                "type": "number",
+                "example": 25
+              },
+              "total": {
+                "type": "number",
+                "example": 34
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/slo_with_summary_response"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "number",
+                "default": 1,
+                "description": "for backward compability"
+              },
+              "perPage": {
+                "type": "number",
+                "example": 25,
+                "description": "for backward compability"
+              },
+              "size": {
+                "type": "number",
+                "example": 25
+              },
+              "searchAfter": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "some-slo-id",
+                  "other-cursor-id"
+                ],
+                "description": "the cursor to provide to get the next paged results"
+              },
+              "total": {
+                "type": "number",
+                "example": 34
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/slo_with_summary_response"
+                }
+              }
+            }
+          }
+        ]
+      },
       "delete_slo_instances_request": {
         "title": "Delete SLO instances request",
         "description": "The delete SLO instances request takes a list of SLO id and instance id, then delete the rollup and summary data. This API can be used to remove the staled data of an instance SLO that no longer get updated.\n",
@@ -2319,6 +2870,78 @@
                   "description": "The SLO instance identifier",
                   "type": "string",
                   "example": "8853df00-ae2e-11ed-90af-09bb6422b258"
+                }
+              }
+            }
+          }
+        }
+      },
+      "bulk_delete_request": {
+        "title": "Bulk delete SLO request",
+        "description": "The bulk delete SLO request takes a list of SLOs Definition id to delete.\n",
+        "type": "object",
+        "required": [
+          "list"
+        ],
+        "properties": {
+          "list": {
+            "description": "An array of SLO Definition id",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "8853df00-ae2e-11ed-90af-09bb6422b258",
+              "description": "The SLO Definition id"
+            }
+          }
+        }
+      },
+      "bulk_delete_response": {
+        "title": "Bulk delete SLO response",
+        "description": "The bulk delete SLO response returns a taskId that can be used to poll for its status\n",
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "example": "d08506b7-f0e8-4f8b-a06a-a83940f4db91",
+            "description": "The taskId of the bulk delete operation"
+          }
+        }
+      },
+      "bulk_delete_status_response": {
+        "title": "The status of the bulk deletion",
+        "description": "Indicates if the bulk deletion is completed, with the detailed results of the operation.",
+        "type": "object",
+        "properties": {
+          "isDone": {
+            "type": "boolean",
+            "example": true,
+            "description": "Indicates if the bulk deletion operation is completed"
+          },
+          "error": {
+            "type": "string",
+            "example": "Task not found",
+            "description": "The error message if the bulk deletion operation failed"
+          },
+          "results": {
+            "description": "The results of the bulk deletion operation, including the success status and any errors for each SLO",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "example": "d08506b7-f0e8-4f8b-a06a-a83940f4db91",
+                  "description": "The ID of the SLO that was deleted"
+                },
+                "success": {
+                  "type": "boolean",
+                  "example": true,
+                  "description": "The result of the deletion operation for this SLO"
+                },
+                "error": {
+                  "type": "string",
+                  "example": "SLO [d08506b7-f0e8-4f8b-a06a-a83940f4db91] not found",
+                  "description": "The error message if the deletion operation failed for this SLO"
                 }
               }
             }

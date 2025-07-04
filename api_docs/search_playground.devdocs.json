@@ -16,6 +16,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-public.PlaygroundPageMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "PlaygroundPageMode",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [],
@@ -88,9 +100,199 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
+    "interfaces": [
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.PlaygroundSavedObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "PlaygroundSavedObject",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.queryFields",
+            "type": "Object",
+            "tags": [],
+            "label": "queryFields",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string[] | undefined; }"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.elasticsearchQueryJSON",
+            "type": "string",
+            "tags": [],
+            "label": "elasticsearchQueryJSON",
+            "description": [],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.userElasticsearchQueryJSON",
+            "type": "string",
+            "tags": [],
+            "label": "userElasticsearchQueryJSON",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.prompt",
+            "type": "string",
+            "tags": [],
+            "label": "prompt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.citations",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "citations",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "{ sourceFields: Record<string, string[] | undefined>; docSize: number; } | undefined"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.PlaygroundSavedObject.summarizationModel",
+            "type": "Object",
+            "tags": [],
+            "label": "summarizationModel",
+            "description": [],
+            "signature": [
+              "{ connectorId: string; modelId?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.APIRoutes",
+        "type": "Enum",
+        "tags": [],
+        "label": "APIRoutes",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.ContextModelLimitError",
+        "type": "string",
+        "tags": [],
+        "label": "ContextModelLimitError",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.DEFAULT_CONTEXT_DOCUMENTS",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_CONTEXT_DOCUMENTS",
+        "description": [],
+        "signature": [
+          "3"
+        ],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.PLAYGROUND_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "PLAYGROUND_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"search_playground\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "searchPlayground",
         "id": "def-common.PLUGIN_ID",
@@ -128,6 +330,18 @@
         "signature": [
           "\"/app/search_playground\""
         ],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.ROUTE_VERSIONS",
+        "type": "string",
+        "tags": [],
+        "label": "ROUTE_VERSIONS",
+        "description": [],
         "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -10,7 +10,11 @@
 export { FieldList, type FieldListProps } from './src/components/field_list';
 export { FieldListGrouped, type FieldListGroupedProps } from './src/components/field_list_grouped';
 export { FieldListFilters, type FieldListFiltersProps } from './src/components/field_list_filters';
-export { FieldItemButton, type FieldItemButtonProps } from './src/components/field_item_button';
+export {
+  FieldItemButton,
+  type FieldItemButtonProps,
+  type GenericFieldItemButtonType,
+} from './src/components/field_item_button';
 export type {
   FieldTopValuesBucketProps,
   FieldTopValuesBucketParams,
@@ -56,6 +60,7 @@ export type {
   AdditionalFieldGroups,
 } from './src/types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
+export type { UnifiedFieldListRestorableState } from './src/restorable_state';
 
 export {
   useExistingFieldsFetcher,

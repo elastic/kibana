@@ -107,7 +107,9 @@ export class ObservabilityAIAssistantAppPlugin
     const appService = (this.appService = createAppService({
       pluginsStart,
     }));
+
     const isEnabled = appService.isEnabled();
+
     if (isEnabled) {
       coreStart.chrome.navControls.registerRight({
         mount: (element) => {

@@ -27,16 +27,16 @@ export const ONBOARDING_PAGE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ONBOARDING_PAGE_DEFAULT_TOPIC = i18n.translate(
-  'xpack.securitySolution.onboarding.topic.default',
+export const ONBOARDING_SEARCH_AI_LAKE_PAGE_TITLE = i18n.translate(
+  'xpack.securitySolution.onboarding.searchAILake.title',
   {
-    defaultMessage: 'Set up security',
+    defaultMessage: `Welcome to Elastic’s AI for the SOC`,
   }
 );
 
-export const ONBOARDING_PAGE_SIEM_MIGRATIONS_TOPIC = i18n.translate(
-  'xpack.securitySolution.onboarding.topic.siemMigrations',
+export const ONBOARDING_SEARCH_AI_LAKE_PAGE_SUB_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.onboarding.searchAILake.subDescription',
   {
-    defaultMessage: 'SIEM Rule migration',
+    defaultMessage: `Empowering SOCs for faster threat detection, investigation, and response.`,
   }
 );

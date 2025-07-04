@@ -15,7 +15,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { alertsMock } from '../../../../mocks';
 import { RecoveredActionGroup } from '../../../../../common';
-import { RegistryAlertTypeWithAuth } from '../../../../authorization';
+import type { RegistryAlertTypeWithAuth } from '../../../../authorization';
 
 const rulesClient = rulesClientMock.create();
 
@@ -47,10 +47,10 @@ const ruleTypes: RegistryAlertTypeWithAuth[] = [
     },
     category: 'test',
     producer: 'test',
+    solution: 'stack',
     enabledInLicense: true,
     defaultScheduleInterval: '10m',
     hasAlertsMappings: false,
-    hasFieldsForAAD: false,
     validLegacyConsumers: [],
   },
 ];

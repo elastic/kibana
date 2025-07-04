@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 const TimeWindowSchema = schema.object({
   unit: schema.oneOf(
@@ -52,6 +53,7 @@ const StatusRuleConditionSchema = schema.object({
     NumberOfChecksSchema,
   ]),
   includeRetests: schema.maybe(schema.boolean()),
+  alertOnNoData: schema.maybe(schema.boolean()),
 });
 
 export const syntheticsMonitorStatusRuleParamsSchema = schema.object(

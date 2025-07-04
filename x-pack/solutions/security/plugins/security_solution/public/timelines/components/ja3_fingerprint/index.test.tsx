@@ -19,6 +19,7 @@ describe('Ja3Fingerprint', () => {
     render(
       <TestProviders>
         <Ja3Fingerprint
+          scopeId="some_scope"
           eventId="KzNOvGkBqd-n62SwSPa4"
           contextId="test"
           fieldName="tls.fingerprints.ja3.hash"
@@ -34,6 +35,7 @@ describe('Ja3Fingerprint', () => {
     render(
       <TestProviders>
         <Ja3Fingerprint
+          scopeId="some_scope"
           eventId="KzNOvGkBqd-n62SwSPa4"
           contextId="test"
           fieldName="tls.fingerprints.ja3.hash"
@@ -49,6 +51,7 @@ describe('Ja3Fingerprint', () => {
     render(
       <TestProviders>
         <Ja3Fingerprint
+          scopeId="some_scope"
           eventId="KzNOvGkBqd-n62SwSPa4"
           contextId="test"
           fieldName="tls.fingerprints.ja3.hash"

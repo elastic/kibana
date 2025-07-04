@@ -9,18 +9,19 @@
 
 import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
-
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type {
   SerializedTimeRange,
   SerializedTitles,
   SerializedPanelState,
 } from '@kbn/presentation-publishing';
-import type { SavedSearch, SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import {
+  toSavedSearchAttributes,
+  type SavedSearch,
+  type SavedSearchAttributes,
+} from '@kbn/saved-search-plugin/common';
 import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
-
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';
 import type { DiscoverServices } from '../../build_services';
 import {
@@ -36,7 +37,7 @@ export const deserializeState = async ({
 }: {
   serializedState: SerializedPanelState<SearchEmbeddableSerializedState>;
   discoverServices: DiscoverServices;
-}) => {
+}): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState.rawState, EDITABLE_PANEL_KEYS);
   const savedObjectId = serializedState.rawState.savedObjectId;
   if (savedObjectId) {
@@ -62,13 +63,12 @@ export const deserializeState = async ({
   } else {
     // by value
     const { byValueToSavedSearch } = discoverServices.savedSearch;
-    const savedSearch = await byValueToSavedSearch(
-      inject(
-        serializedState.rawState as unknown as EmbeddableStateWithType,
-        serializedState.references ?? []
-      ) as SavedSearchUnwrapResult,
-      true
-    );
+    const savedSearchUnwrappedResult = inject(
+      serializedState.rawState as unknown as EmbeddableStateWithType,
+      serializedState.references ?? []
+    ) as SavedSearchUnwrapResult;
+
+    const savedSearch = await byValueToSavedSearch(savedSearchUnwrappedResult, true);
     return {
       ...savedSearch,
       ...panelState,
@@ -91,12 +91,15 @@ export const serializeState = ({
   savedSearch: SavedSearch;
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
-  serializeDynamicActions: (() => DynamicActionsSerializedState) | undefined;
+  serializeDynamicActions: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined;
   savedObjectId?: string;
 }): SerializedPanelState<SearchEmbeddableSerializedState> => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
+
+  const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+    serializeDynamicActions?.() ?? {};
 
   if (savedObjectId) {
     const editableAttributesBackup = initialState.rawSavedObjectAttributes ?? {};
@@ -115,11 +118,10 @@ export const serializeState = ({
         // Serialize the current dashboard state into the panel state **without** updating the saved object
         ...serializeTitles(),
         ...serializeTimeRange(),
-        ...serializeDynamicActions?.(),
+        ...dynamicActionsState,
         ...overwriteState,
       },
-      // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
-      references: [],
+      references: dynamicActionsReferences ?? [],
     };
   }
 
@@ -135,8 +137,9 @@ export const serializeState = ({
     rawState: {
       ...serializeTitles(),
       ...serializeTimeRange(),
+      ...dynamicActionsState,
       ...(state as unknown as SavedSearchAttributes),
     },
-    references,
+    references: [...references, ...(dynamicActionsReferences ?? [])],
   };
 };

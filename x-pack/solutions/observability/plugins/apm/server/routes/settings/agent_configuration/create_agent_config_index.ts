@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Mappings } from '@kbn/observability-plugin/server';
 import { createOrUpdateIndex } from '@kbn/observability-plugin/server';
-import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
+import { APM_AGENT_CONFIGURATION_INDEX } from '@kbn/apm-sources-access-plugin/server';
 
 export async function createApmAgentConfigurationIndex({
   client,

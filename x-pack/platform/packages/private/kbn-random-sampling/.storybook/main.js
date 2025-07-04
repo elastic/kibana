@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-const baseConfig = require('@kbn/storybook').defaultConfig;
+const defaultConfig = require('@kbn/storybook').defaultConfig;
 
 module.exports = {
-  ...baseConfig,
-  stories: ['../**/*.stories.mdx', ...baseConfig.stories],
+  ...defaultConfig,
   typescript: {
     reactDocgen: 'react-docgen-typescript',
   },

@@ -20,17 +20,17 @@ export const initFindFieldsMetadataRoute = ({
     .get({
       access: 'internal',
       path: FIND_FIELDS_METADATA_URL,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization to keep available the access to static fields metadata such as ECS fields. For other sources (fleet integrations), appropriate checks are performed at the API level.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization to keep available the access to static fields metadata such as ECS fields. For other sources (fleet integrations), appropriate checks are performed at the API level.',
-          },
-        },
         validate: {
           request: {
             query: createValidationFunction(fieldsMetadataV1.findFieldsMetadataRequestQueryRT),

@@ -11,7 +11,7 @@ import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { ProjectMonitorsRequest, ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
+import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/project_monitor/add_monitor_project';
 import {
   PROFILE_VALUES_ENUM,
@@ -30,8 +30,6 @@ import { comparePolicies } from './sample_data/test_policy';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddProjectMonitorsPrivateLocations', function () {
-    // see details: https://github.com/elastic/kibana/issues/213576
-    this.tags(['failsOnMKI']);
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
@@ -218,7 +216,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const journeyId = monitor.id;
         const createdMonitorsResponse = await supertestWithoutAuth
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-          .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+          .query({
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${journeyId}`,
+          })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .expect(200);
@@ -303,6 +303,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           updated_at: decryptedCreatedMonitor.rawBody.updated_at,
           created_at: decryptedCreatedMonitor.rawBody.created_at,
           labels: {},
+          maintenance_windows: [],
+          spaces: ['default'],
         });
       }
     });
@@ -332,7 +334,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const journeyId = monitor.id;
         const createdMonitorsResponse = await supertestWithoutAuth
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-          .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+          .query({
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${journeyId}`,
+          })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .expect(200);
@@ -386,7 +390,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
         const createdMonitorsResponse = await supertestWithoutAuth
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-          .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+          .query({
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${journeyId}`,
+          })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .expect(200);
@@ -484,6 +490,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ipv4: true,
           max_attempts: 2,
           labels: {},
+          maintenance_windows: [],
+          spaces: ['default'],
           updated_at: decryptedCreatedMonitor.updated_at,
           created_at: decryptedCreatedMonitor.created_at,
         });
@@ -526,7 +534,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
         const createdMonitorsResponse = await supertestWithoutAuth
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-          .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+          .query({
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${journeyId}`,
+          })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .expect(200);
@@ -603,6 +613,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: '',
           max_attempts: 2,
           labels: {},
+          maintenance_windows: [],
+          spaces: ['default'],
           updated_at: decryptedCreatedMonitor.updated_at,
           created_at: decryptedCreatedMonitor.created_at,
         });
@@ -643,7 +655,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const journeyId = monitor.id;
         const createdMonitorsResponse = await supertestWithoutAuth
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-          .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+          .query({
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${journeyId}`,
+          })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .expect(200);
@@ -711,6 +725,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           updated_at: decryptedCreatedMonitor.updated_at,
           created_at: decryptedCreatedMonitor.created_at,
           labels: {},
+          maintenance_windows: [],
+          spaces: ['default'],
         });
       }
     });
@@ -841,7 +857,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const getResponse = await supertestWithoutAuth
         .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
         })
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -885,7 +901,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
         })
         .expect(200);
       const { monitors } = getResponse.body;
@@ -928,7 +944,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
         })
         .set('kbn-xsrf', 'true')
         .expect(200);
@@ -1051,7 +1067,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
         })
         .set('kbn-xsrf', 'true')
         .expect(200);
@@ -1093,7 +1109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
         })
         .expect(200);
       const { monitors: monitorsUpdated } = getResponseUpdated.body;
@@ -1137,7 +1153,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
         })
         .expect(200);
       const { monitors } = getResponse.body;
@@ -1161,7 +1177,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await supertestWithoutAuth
         .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
         })
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -1219,7 +1235,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await supertestWithoutAuth
         .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
         })
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -1267,7 +1283,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const monitorsResponse = await supertestWithoutAuth
         .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
         })
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -1328,7 +1344,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const monitorsResponse = await supertestWithoutAuth
         .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
         })
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -1389,7 +1405,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const monitorsResponse = await supertestWithoutAuth
         .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitorRequest.monitors[0].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${monitorRequest.monitors[0].id}`,
         })
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -1456,7 +1472,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const monitorsResponse = await supertestWithoutAuth
         .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
         })
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -1537,7 +1553,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const monitorsResponse = await supertestWithoutAuth
         .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
         })
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
@@ -1754,7 +1770,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const getResponse = await supertestWithoutAuth
         .get(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .query({
-          filter: `${syntheticsMonitorType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
+          filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${httpProjectMonitors.monitors[1].id}`,
         })
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())

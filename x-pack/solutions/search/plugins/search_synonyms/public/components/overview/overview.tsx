@@ -17,10 +17,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { SynonymSets } from '../synonym_sets/synonym_sets';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
+import { useSynonymsBreadcrumbs } from '../../hooks/use_synonyms_breadcrumbs';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { CreateSynonymsSetModal } from '../synonym_sets/create_new_set_modal';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
@@ -32,6 +34,7 @@ export const SearchSynonymsOverview = () => {
   } = useKibana();
   const { data: synonymsData, isInitialLoading, isError, error } = useFetchSynonymsSets();
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  useSynonymsBreadcrumbs();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -46,7 +49,7 @@ export const SearchSynonymsOverview = () => {
       solutionNav={searchNavigation?.useClassicNavigation(history)}
       color="primary"
     >
-      {synonymsData && !isInitialLoading && !isError && (
+      {!isInitialLoading && !isError && synonymsData?._meta.totalItemCount !== 0 && (
         <KibanaPageTemplate.Header
           pageTitle="Synonyms"
           restrictWidth
@@ -92,7 +95,14 @@ export const SearchSynonymsOverview = () => {
           </EuiText>
         </KibanaPageTemplate.Header>
       )}
-      <KibanaPageTemplate.Section restrictWidth>
+      <KibanaPageTemplate.Section
+        restrictWidth
+        contentProps={{
+          css: css({
+            height: '100%',
+          }),
+        }}
+      >
         {isCreateModalVisible && (
           <CreateSynonymsSetModal
             onClose={() => {
@@ -109,11 +119,22 @@ export const SearchSynonymsOverview = () => {
           <SynonymSets />
         )}
         {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount === 0 && (
-          <EmptyPrompt
-            getStartedAction={() => {
-              setIsCreateModalVisible(true);
-            }}
-          />
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="center"
+            direction="column"
+            css={css({
+              height: '75%',
+            })}
+          >
+            <EuiFlexItem>
+              <EmptyPrompt
+                getStartedAction={() => {
+                  setIsCreateModalVisible(true);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}

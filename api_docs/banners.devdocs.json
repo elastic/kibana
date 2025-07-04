@@ -69,6 +69,17 @@
           },
           {
             "parentPluginId": "banners",
+            "id": "def-common.BannerConfiguration.linkColor",
+            "type": "string",
+            "tags": [],
+            "label": "linkColor",
+            "description": [],
+            "path": "x-pack/platform/plugins/private/banners/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "banners",
             "id": "def-common.BannerConfiguration.backgroundColor",
             "type": "string",
             "tags": [],

@@ -11,22 +11,19 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { getRuleTagsRoute } from './get_rule_tags';
+import type { KibanaRequest } from '@kbn/core-http-server';
 
 const rulesClient = rulesClientMock.create();
+rulesClient.getTags.mockResolvedValue({
+  data: ['a', 'b', 'c'],
+  page: 1,
+  perPage: 10,
+  total: 3,
+});
 
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
-
-beforeEach(() => {
-  jest.resetAllMocks();
-  rulesClient.getTags.mockResolvedValueOnce({
-    data: ['a', 'b', 'c'],
-    page: 1,
-    perPage: 10,
-    total: 3,
-  });
-});
 
 describe('getRuleTagsRoute', () => {
   it('gets rule tags with proper parameters', async () => {
@@ -46,11 +43,11 @@ describe('getRuleTagsRoute', () => {
           search: 'test',
           per_page: 10,
           page: 1,
+          rule_type_ids: ['rule_type_1', 'rule_type_2'],
         },
       },
       ['ok']
     );
-
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -65,6 +62,7 @@ describe('getRuleTagsRoute', () => {
         },
       }
     `);
+
     expect(res.ok).toHaveBeenCalledWith({
       body: {
         data: ['a', 'b', 'c'],
@@ -72,6 +70,70 @@ describe('getRuleTagsRoute', () => {
         per_page: 10,
         total: 3,
       },
+    });
+  });
+
+  it('correctly parses query params', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getRuleTagsRoute(router, licenseState);
+    const [, handler] = router.get.mock.calls[0];
+
+    // No rule_type_ids
+    const query = {
+      search: 'test',
+      per_page: 10,
+      page: 1,
+    };
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        query,
+      },
+      ['ok']
+    );
+    await handler(context, req, res);
+    expect(rulesClient.getTags).toHaveBeenCalledWith({
+      search: 'test',
+      perPage: 10,
+      page: 1,
+    });
+
+    // Singe rule_type_ids value
+    await handler(
+      context,
+      {
+        query: {
+          ...query,
+          rule_type_ids: 'rule_type_1',
+        },
+      } as KibanaRequest,
+      res
+    );
+    expect(rulesClient.getTags).toHaveBeenCalledWith({
+      search: 'test',
+      perPage: 10,
+      page: 1,
+      ruleTypeIds: ['rule_type_1'],
+    });
+
+    // Array rule_type_ids
+    await handler(
+      context,
+      {
+        query: {
+          ...query,
+          rule_type_ids: ['rule_type_1', 'rule_type_2'],
+        },
+      } as KibanaRequest,
+      res
+    );
+    expect(rulesClient.getTags).toHaveBeenCalledWith({
+      search: 'test',
+      perPage: 10,
+      page: 1,
+      ruleTypeIds: ['rule_type_1', 'rule_type_2'],
     });
   });
 

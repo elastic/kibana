@@ -9,17 +9,16 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
 
-import type { GraphState } from '../../types';
+import type { DefendInsightsGraphState } from '../../../../../langchain/graphs';
 import { mockAnonymizedEvents } from '../../mock/mock_anonymized_events';
-import { getDefaultRefinePrompt } from '../refine/helpers/get_default_refine_prompt';
-import { getDefendInsightsPrompt } from '../helpers/prompts';
 import { getRetrieveAnonymizedEventsNode } from '.';
+import { DEFEND_INSIGHTS } from '../../../../../prompt/prompts';
 
 const insightType = DefendInsightType.Enum.incompatible_antivirus;
-const initialGraphState: GraphState = {
+const initialGraphState: DefendInsightsGraphState = {
   insights: null,
-  prompt: getDefendInsightsPrompt({ type: insightType }),
-  anonymizedEvents: [],
+  prompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.DEFAULT,
+  anonymizedDocuments: [],
   combinedGenerations: '',
   combinedRefinements: '',
   errors: [],
@@ -30,7 +29,8 @@ const initialGraphState: GraphState = {
   maxHallucinationFailures: 5,
   maxRepeatedGenerations: 3,
   refinements: [],
-  refinePrompt: getDefaultRefinePrompt(),
+  refinePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.REFINE,
+  continuePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
   replacements: {},
   unrefinedResults: null,
 };
@@ -81,7 +81,7 @@ describe('getRetrieveAnonymizedEventsNode', () => {
   });
 
   it('updates state with anonymized events', async () => {
-    const state: GraphState = { ...initialGraphState };
+    const state: DefendInsightsGraphState = { ...initialGraphState };
 
     const retrieveAnonymizedEvents = getRetrieveAnonymizedEventsNode({
       insightType,
@@ -92,11 +92,11 @@ describe('getRetrieveAnonymizedEventsNode', () => {
 
     const result = await retrieveAnonymizedEvents(state);
 
-    expect(result).toHaveProperty('anonymizedEvents', mockAnonymizedEvents);
+    expect(result).toHaveProperty('anonymizedDocuments', mockAnonymizedEvents);
   });
 
   it('calls onNewReplacements with updated replacements', async () => {
-    const state: GraphState = { ...initialGraphState };
+    const state: DefendInsightsGraphState = { ...initialGraphState };
     const onNewReplacements = jest.fn();
     const replacements = { key: 'value' };
 

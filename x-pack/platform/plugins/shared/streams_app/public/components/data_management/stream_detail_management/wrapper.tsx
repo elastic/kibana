@@ -5,63 +5,93 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
-import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
+import { Streams } from '@kbn/streams-schema';
+import type { ReactNode } from 'react';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { StreamsAppPageTemplate } from '../../streams_app_page_template';
+import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
 
 export type ManagementTabs = Record<
   string,
   {
     content: JSX.Element;
-    label: string;
+    label: ReactNode;
   }
 >;
 
 export function Wrapper({
   tabs,
   streamId,
-  subtab,
+  tab,
 }: {
   tabs: ManagementTabs;
   streamId: string;
-  subtab: string;
+  tab: string;
 }) {
   const router = useStreamsAppRouter();
+  const { definition } = useStreamDetail();
+
+  const tabMap = Object.fromEntries(
+    Object.entries(tabs).map(([tabName, currentTab]) => {
+      return [
+        tabName,
+        {
+          href: router.link('/{key}/management/{tab}', {
+            path: { key: streamId, tab: tabName },
+          }),
+          label: currentTab.label,
+          content: currentTab.content,
+        },
+      ];
+    })
+  );
+
+  const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="l"
-      className={css`
-        max-width: 100%;
-      `}
-    >
-      {Object.keys(tabs).length > 1 && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend="Management tabs"
-            idSelected={subtab}
-            onChange={(optionId) => {
-              router.push('/{key}/management/{subtab}', {
-                path: { key: streamId, subtab: optionId },
-                query: {},
-              });
-            }}
-            options={Object.keys(tabs).map((id) => ({
-              id,
-              label: tabs[id].label,
-            }))}
-          />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem
-        className={css`
-          overflow: auto;
+    <>
+      <EuiPageHeader
+        paddingSize="l"
+        bottomBorder="extended"
+        breadcrumbs={[
+          {
+            href: router.link('/'),
+            text: (
+              <EuiButtonEmpty iconType="arrowLeft" size="s" flush="left">
+                {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
+                  defaultMessage: 'Streams',
+                })}
+              </EuiButtonEmpty>
+            ),
+          },
+        ]}
+        css={css`
+          background: ${euiTheme.colors.backgroundBasePlain};
         `}
-        grow
-      >
-        {tabs[subtab].content}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        pageTitle={
+          <EuiFlexGroup gutterSize="s" alignItems="baseline">
+            {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
+              defaultMessage: 'Manage stream {streamId}',
+              values: { streamId },
+            })}
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <DiscoverBadgeButton definition={definition} />
+              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+            </EuiFlexGroup>
+          </EuiFlexGroup>
+        }
+        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({
+          label,
+          href,
+          isSelected: tab === tabKey,
+        }))}
+      />
+      <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>
+    </>
   );
 }

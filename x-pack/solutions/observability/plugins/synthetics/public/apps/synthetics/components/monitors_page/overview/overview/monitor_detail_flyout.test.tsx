@@ -37,7 +37,6 @@ describe('Monitor Detail Flyout', () => {
     jest.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
       data: {
         docId: 'docId',
-        timestamp: '2013-03-01 12:54:23',
         monitor: {
           name: 'test monitor',
           id: 'test-id',
@@ -109,7 +108,7 @@ describe('Monitor Detail Flyout', () => {
         },
       }
     );
-    getByText(testErrorText);
+    getByText(testErrorText, { exact: false });
   });
 
   it('renders loading state while fetching', () => {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { TagList } from '../tag_list';
 import { TagSpec } from '../../../lib/tag';
@@ -55,16 +54,34 @@ const mockTagRegistry: { [tag: string]: TagSpec } = {
 
 const getTag = (name: string): TagSpec => mockTagRegistry[name] || { name, color: '#666666' };
 
-storiesOf('components/Tags/TagList', module)
-  .add('empty list', () => <TagList getTag={getTag} />)
-  .add('with health tags', () => <TagList tags={['tag1', 'tag4', 'tag6']} getTag={getTag} />)
-  .add('with badge tags', () => (
-    <TagList tags={['tag1', 'tag2', 'tag3']} getTag={getTag} tagType="badge" />
-  ))
-  .add('with lots of tags', () => (
+export default {
+  title: 'components/Tags/TagList',
+};
+
+export const EmptyList = {
+  render: () => <TagList getTag={getTag} />,
+  name: 'empty list',
+};
+
+export const WithHealthTags = {
+  render: () => <TagList tags={['tag1', 'tag4', 'tag6']} getTag={getTag} />,
+  name: 'with health tags',
+};
+
+export const WithBadgeTags = {
+  render: () => <TagList tags={['tag1', 'tag2', 'tag3']} getTag={getTag} tagType="badge" />,
+
+  name: 'with badge tags',
+};
+
+export const WithLotsOfTags = {
+  render: () => (
     <TagList
       tags={['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6', 'tag7', 'tag8', 'tag9', 'tag10']}
       getTag={getTag}
       tagType="badge"
     />
-  ));
+  ),
+
+  name: 'with lots of tags',
+};

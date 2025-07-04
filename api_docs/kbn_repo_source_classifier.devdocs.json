@@ -133,7 +133,7 @@
               "Type of the module"
             ],
             "signature": [
-              "\"non-package\" | \"tests or mocks\" | \"static\" | \"tooling\" | \"server package\" | \"browser package\" | \"common package\""
+              "\"static\" | \"non-package\" | \"tests or mocks\" | \"tooling\" | \"server package\" | \"browser package\" | \"common package\""
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
             "deprecated": false,
@@ -149,7 +149,7 @@
               "Specifies the group to which this module belongs"
             ],
             "signature": [
-              "\"search\" | \"security\" | \"observability\" | \"platform\" | \"common\""
+              "\"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\" | \"common\""
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
             "deprecated": false,
@@ -165,7 +165,7 @@
               "Specifies the module visibility, i.e. whether it can be accessed by everybody or only modules in the same group"
             ],
             "signature": [
-              "\"private\" | \"shared\""
+              "\"shared\" | \"private\""
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
             "deprecated": false,
@@ -248,7 +248,7 @@
         "label": "ModuleType",
         "description": [],
         "signature": [
-          "\"non-package\" | \"tests or mocks\" | \"static\" | \"tooling\" | \"server package\" | \"browser package\" | \"common package\""
+          "\"static\" | \"non-package\" | \"tests or mocks\" | \"tooling\" | \"server package\" | \"browser package\" | \"common package\""
         ],
         "path": "packages/kbn-repo-source-classifier/src/module_type.ts",
         "deprecated": false,

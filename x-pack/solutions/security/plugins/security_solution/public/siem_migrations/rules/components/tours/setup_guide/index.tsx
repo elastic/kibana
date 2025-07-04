@@ -61,6 +61,7 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
       content={i18n.SETUP_SIEM_MIGRATION_TOUR_CONTENT}
       isStepOpen={showTour}
       maxWidth={tourState.tourPopoverWidth}
+      zIndex={1}
       onFinish={onTourFinished}
       step={1}
       stepsTotal={1}

@@ -9,9 +9,13 @@
 
 import { TabItem } from '../types';
 
+export const getTabIdAttribute = (item: TabItem) => {
+  return `tab-${item.id}`;
+};
+
 export const getTabAttributes = (item: TabItem, tabContentId: string) => {
   return {
-    id: `tab-${item.id}`,
+    id: getTabIdAttribute(item),
     'aria-controls': tabContentId,
   };
 };

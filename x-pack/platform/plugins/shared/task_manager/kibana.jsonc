@@ -14,9 +14,12 @@
       "xpack",
       "task_manager"
     ],
+    "requiredPlugins": [
+      "licensing"
+    ],
     "optionalPlugins": [
       "cloud",
-      "usageCollection"
+      "usageCollection",
     ]
   }
 }

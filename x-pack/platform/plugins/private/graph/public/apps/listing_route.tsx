@@ -96,7 +96,6 @@ export function ListingRoute({
       findItems={findItems}
       deleteItems={capabilities.graph.delete ? deleteItems : undefined}
       editItem={capabilities.graph.save ? editItem : undefined}
-      listingLimit={listingLimit}
       initialFilter={initialFilter}
       initialPageSize={initialPageSize}
       emptyPrompt={getNoItemsMessage(

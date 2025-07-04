@@ -9,6 +9,7 @@ import { BehaviorSubject, combineLatest, distinctUntilChanged, from, map } from 
 
 import type {
   AnalyticsServiceStart,
+  CoreStart,
   DocLinksStart,
   HttpSetup,
   HttpStart,
@@ -35,6 +36,7 @@ interface StartDeps {
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
   userProfile: UserProfileService;
+  rendering: CoreStart['rendering'];
 }
 
 const DEFAULT_SECURITY_CHECKUP_STATE = Object.freeze<SecurityCheckupState>({

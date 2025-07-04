@@ -14,8 +14,6 @@ import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { experimentalFeaturesMock } from '../../mocks';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
@@ -70,12 +68,6 @@ const otherOpenAiConnector = {
 const navigateToUrl = jest.fn();
 
 describe('ConnectorFields renders', () => {
-  beforeAll(() => {
-    ExperimentalFeaturesService.init({
-      // @ts-ignore force enable for testing
-      experimentalFeatures: { ...experimentalFeaturesMock, openAIAdditionalHeadersOn: true },
-    });
-  });
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaMock().services.application.navigateToUrl = navigateToUrl;
@@ -403,6 +395,103 @@ describe('ConnectorFields renders', () => {
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
+  });
+
+  describe('PKI Configuration', () => {
+    it('toggles pki as expected', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={testFormData}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
+
+      expect(screen.queryByTestId('openAISSLCRTInput')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('openAISSLKEYInput')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('verificationModeSelect')).not.toBeInTheDocument();
+      expect(pkiToggle).toBeInTheDocument();
+
+      await userEvent.click(pkiToggle);
+      expect(screen.getByTestId('openAISSLCRTInput')).toBeInTheDocument();
+      expect(screen.getByTestId('openAISSLKEYInput')).toBeInTheDocument();
+      expect(screen.getByTestId('verificationModeSelect')).toBeInTheDocument();
+    });
+    it('succeeds without pki', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            ...testFormData,
+          },
+          isValid: true,
+        });
+      });
+    });
+    it('succeeds with pki', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
+      await userEvent.click(pkiToggle);
+      const certFile = new File(['hello'], 'cert.crt', { type: 'text/plain' });
+      const keyFile = new File(['world'], 'key.key', { type: 'text/plain' });
+      await userEvent.upload(screen.getByTestId('openAISSLCRTInput'), certFile);
+      await userEvent.upload(screen.getByTestId('openAISSLKEYInput'), keyFile);
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            ...testFormData,
+            config: {
+              ...testFormData.config,
+              verificationMode: 'full',
+            },
+            secrets: {
+              apiKey: 'thats-a-nice-looking-key',
+              certificateData: Buffer.from('hello').toString('base64'),
+              privateKeyData: Buffer.from('world').toString('base64'),
+            },
+            __internal__: {
+              hasHeaders: false,
+              hasPKI: true,
+            },
+          },
+          isValid: true,
+        });
+      });
     });
   });
 });

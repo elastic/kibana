@@ -32,6 +32,7 @@ export function initRoutes(
     {
       path: '/authentication/app',
       validate: false,
+      security: { authz: { enabled: false, reason: '' } },
     },
     async (context, request, response) => {
       if (authenticationAppOptions.simulateUnauthorized) {
@@ -47,6 +48,12 @@ export function initRoutes(
     router.get(
       {
         path: `/authentication/app/${isAuthFlow ? 'auth_flow' : 'not_auth_flow'}`,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           query: schema.object({
             statusCode: schema.maybe(schema.number()),
@@ -71,6 +78,12 @@ export function initRoutes(
   router.post(
     {
       path: '/authentication/app/setup',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: schema.object({ simulateUnauthorized: schema.boolean() }) },
       options: { authRequired: false, xsrfRequired: false },
     },
@@ -83,6 +96,12 @@ export function initRoutes(
   router.post(
     {
       path: '/authentication/slow/me',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           duration: schema.duration(),
@@ -141,6 +160,12 @@ export function initRoutes(
   router.post(
     {
       path: '/api_keys/_grant',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: restApiKeySchema },
     },
     async (context, request, response) => {
@@ -228,6 +253,12 @@ export function initRoutes(
   router.post(
     {
       path: '/session/_run_cleanup',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {
@@ -240,6 +271,12 @@ export function initRoutes(
   router.post(
     {
       path: '/session/toggle_cleanup_task',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: schema.object({ enabled: schema.boolean() }) },
     },
     async (context, request, response) => {
@@ -294,6 +331,12 @@ export function initRoutes(
   router.post(
     {
       path: '/simulate_point_in_time_failure',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: schema.object({ simulateOpenPointInTimeFailure: schema.boolean() }) },
       options: { authRequired: false, xsrfRequired: false },
     },
@@ -334,6 +377,12 @@ export function initRoutes(
   router.get(
     {
       path: '/cleanup_task_status',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
       options: { authRequired: false },
     },

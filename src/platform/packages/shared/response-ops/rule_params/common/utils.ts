@@ -125,7 +125,7 @@ export function validateAggType(aggType: string): string | undefined {
 }
 
 export function validateGroupBy(groupBy: string): string | undefined {
-  if (groupBy === 'all' || groupBy === 'top') {
+  if (groupBy === 'all' || groupBy === 'top' || groupBy === 'row') {
     return;
   }
 
@@ -162,7 +162,13 @@ export const getComparatorSchemaType = (validate: (comparator: Comparator) => st
       schema.literal(Comparator.BETWEEN),
       schema.literal(Comparator.NOT_BETWEEN),
     ],
-    { validate }
+    {
+      validate,
+      meta: {
+        description:
+          'The comparison function for the threshold. For example: greater than, less than, greater than or equal to, between, or not between.',
+      },
+    }
   );
 
 export const ComparatorFnNames = new Set(ComparatorFns.keys());

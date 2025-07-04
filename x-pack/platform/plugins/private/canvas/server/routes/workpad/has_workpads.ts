@@ -15,6 +15,12 @@ export function initializeHasWorkpadsRoute(deps: RouteInitializerDeps) {
     .get({
       path: `${API_ROUTE_WORKPAD}/hasWorkpads`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the SO client',
+        },
+      },
     })
     .addVersion(
       {

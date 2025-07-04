@@ -1,0 +1,4 @@
+type: object
+description: >
+  This object summarizes the current configuration of Task Manager.
+  This includes dynamic configurations that change over time, such as `poll_interval` and `max_workers`, which can adjust in reaction to changing load on the system.

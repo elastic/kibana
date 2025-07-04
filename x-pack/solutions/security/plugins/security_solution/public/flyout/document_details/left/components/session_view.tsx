@@ -10,6 +10,8 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiPanel } from '@elastic/eui';
 import type { Process } from '@kbn/session-view-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { CustomProcess } from '../../session_view/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { SESSION_VIEW_TEST_ID } from './test_ids';
@@ -26,8 +28,17 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
 import { SessionViewNoDataMessage } from '../../shared/components/session_view_no_data_message';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 export const SESSION_VIEW_ID = 'session-view';
+
+export const SESSION_VIEWER_BANNER = {
+  title: i18n.translate('xpack.securitySolution.flyout.preview.sessionViewerTitle', {
+    defaultMessage: 'Preview session view panel',
+  }),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+};
 
 /**
  * Session view displayed in the document details expandable flyout left section under the Visualize tab
@@ -50,8 +61,18 @@ export const SessionView: FC = memo(() => {
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
-  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
-  const eventDetailsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
+  const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   const { openPreviewPanel, closePreviewPanel } = useExpandableFlyoutApi();
   const openAlertDetailsPreview = useCallback(
@@ -66,7 +87,7 @@ export const SessionView: FC = memo(() => {
           id: DocumentDetailsPreviewPanelKey,
           params: {
             id: evtId,
-            indexName: eventDetailsIndex,
+            indexName: alertsIndex,
             scopeId,
             banner: ALERT_PREVIEW_BANNER,
             isPreviewMode: true,
@@ -78,7 +99,7 @@ export const SessionView: FC = memo(() => {
         panel: 'preview',
       });
     },
-    [openPreviewPanel, eventDetailsIndex, scopeId, telemetry]
+    [openPreviewPanel, alertsIndex, scopeId, telemetry]
   );
 
   const openDetailsInPreview = useCallback(
@@ -107,6 +128,7 @@ export const SessionView: FC = memo(() => {
           scopeId,
           jumpToEntityId,
           jumpToCursor,
+          banner: SESSION_VIEWER_BANNER,
         },
       });
     },
@@ -132,9 +154,8 @@ export const SessionView: FC = memo(() => {
         ...sessionViewConfig,
         isFullScreen: true,
         loadAlertDetails: openAlertDetailsPreview,
-        openDetailsInExpandableFlyout: (selectedProcess: Process | null) =>
-          openDetailsInPreview(selectedProcess),
-        closeDetailsInExpandableFlyout: () => closeDetailsInPreview(),
+        openDetails: (selectedProcess: Process | null) => openDetailsInPreview(selectedProcess),
+        closeDetails: () => closeDetailsInPreview(),
         canReadPolicyManagement,
         resetJumpToEntityId: jumpToEntityId,
         resetJumpToCursor: jumpToCursor,

@@ -108,8 +108,7 @@ export const CUSTOM_QUERY_REQUIRED = 'A custom query is required.';
 
 export const THREAT_MATCH_QUERY_REQUIRED = 'An indicator index query is required.';
 
-export const DATA_VIEW_COMBO_BOX =
-  '[data-test-subj="pick-rule-data-source"] [data-test-subj="comboBoxInput"]';
+export const DATA_VIEW_COMBO_BOX = '[data-test-subj="pick-rule-data-source"]';
 
 export const DATA_VIEW_OPTION = '[data-test-subj="rule-index-toggle-dataView"]';
 
@@ -311,6 +310,9 @@ export const PREVIEW_LOGGED_REQUESTS_CHECKBOX = '[data-test-subj="show-elasticse
 
 export const PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON =
   '[data-test-subj="preview-logged-requests-accordion"] button';
+
+export const PREVIEW_LOGGED_REQUESTS_PAGE_ACCORDION_BUTTON =
+  '[data-test-subj="preview-logged-requests-page-accordion"] button';
 
 export const PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON =
   '[data-test-subj="preview-logged-requests-item-accordion"] button';

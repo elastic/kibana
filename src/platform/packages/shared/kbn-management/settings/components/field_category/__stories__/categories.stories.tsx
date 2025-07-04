@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ComponentMeta, Story } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { FieldCategories as Component } from '../categories';
 import { Params, useCategoryStory } from './use_category_story';
@@ -38,9 +38,9 @@ export default {
       default: 'ghost',
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
-export const Categories: Story<Params> = (params) => {
+const CategoriesComponent = (params: Params) => {
   const {
     onClearQuery,
     isSavingEnabled,
@@ -74,4 +74,8 @@ export const Categories: Story<Params> = (params) => {
       />
     </FieldCategoryProvider>
   );
+};
+
+export const Categories: StoryObj<Params> = {
+  render: (params) => <CategoriesComponent {...params} />,
 };

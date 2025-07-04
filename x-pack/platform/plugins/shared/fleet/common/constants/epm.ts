@@ -25,7 +25,6 @@ export const FLEET_CLOUD_SECURITY_POSTURE_PACKAGE = 'cloud_security_posture';
 export const FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE = 'kspm';
 export const FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE = 'cspm';
 export const FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE = 'vuln_mgmt';
-export const FLEET_CLOUD_DEFEND_PACKAGE = 'cloud_defend';
 export const FLEET_CLOUD_BEAT_PACKAGE = 'cloudbeat';
 export const FLEET_CONNECTORS_PACKAGE = 'elastic_connectors';
 
@@ -35,8 +34,6 @@ export const GLOBAL_DATA_TAG_EXCLUDED_INPUTS = new Set<string>([
   `pf-elastic-symbolizer`,
   `pf-elastic-collector`,
   `fleet-server`,
-  FLEET_CLOUD_DEFEND_PACKAGE,
-  `${FLEET_CLOUD_DEFEND_PACKAGE}/control`,
   FLEET_CLOUD_BEAT_PACKAGE,
   `${FLEET_CLOUD_BEAT_PACKAGE}/cis_k8s`,
   `${FLEET_CLOUD_BEAT_PACKAGE}/cis_eks`,
@@ -50,6 +47,7 @@ export const PACKAGE_TEMPLATE_SUFFIX = '@package';
 export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
 
 export const DATASET_VAR_NAME = 'data_stream.dataset';
+export const DATA_STREAM_TYPE_VAR_NAME = 'data_stream.type';
 
 export const CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION = '2.9.0';
 

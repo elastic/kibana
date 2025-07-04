@@ -23,17 +23,17 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
     .get({
       path: `${FONTS_API_PATH}/{fontstack}/{range}`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is only serving static files.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because it is only serving static files.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({
@@ -69,17 +69,17 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
     .get({
       path: INDEX_SETTINGS_API_PATH,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             query: schema.object({

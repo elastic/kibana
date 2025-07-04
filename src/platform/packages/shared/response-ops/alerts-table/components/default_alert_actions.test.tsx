@@ -16,9 +16,8 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createPartialObjectMock } from '../utils/test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_load_rule_types_query', () => ({
-  useLoadRuleTypesQuery: jest.fn(),
-}));
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
+
 jest.mock('./view_rule_details_alert_action', () => {
   return {
     ViewRuleDetailsAlertAction: () => (
@@ -44,8 +43,8 @@ jest.mock('./mark_as_untracked_alert_action', () => {
   };
 });
 
-const { useLoadRuleTypesQuery } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_load_rule_types_query'
+const { useGetRuleTypesPermissions } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
 );
 
 const http = httpServiceMock.createStartContract();
@@ -70,7 +69,7 @@ const TestComponent = (_props: AlertActionsProps) => (
 
 describe('DefaultAlertActions', () => {
   it('should show "Mute" and "Marked as untracked" option', async () => {
-    useLoadRuleTypesQuery.mockReturnValue({ authorizedToCreateAnyRules: true });
+    useGetRuleTypesPermissions.mockReturnValue({ authorizedToCreateAnyRules: true });
 
     render(<TestComponent {...props} />);
 
@@ -79,7 +78,7 @@ describe('DefaultAlertActions', () => {
   });
 
   it('should hide "Mute" and "Marked as untracked" option', async () => {
-    useLoadRuleTypesQuery.mockReturnValue({ authorizedToCreateAnyRules: false });
+    useGetRuleTypesPermissions.mockReturnValue({ authorizedToCreateAnyRules: false });
 
     render(<TestComponent {...props} />);
 

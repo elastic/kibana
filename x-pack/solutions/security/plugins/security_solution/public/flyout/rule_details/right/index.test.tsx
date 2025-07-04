@@ -12,7 +12,7 @@ import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../common/mock';
 import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
 import { RulePanel } from '.';
-import { getStepsData } from '../../../detections/pages/detection_engine/rules/helpers';
+import { getStepsData } from '../../../detection_engine/common/helpers';
 import { useRuleDetails } from '../hooks/use_rule_details';
 import {
   mockAboutStepRule,
@@ -39,7 +39,7 @@ const mockUseRuleDetails = useRuleDetails as jest.Mock;
 jest.mock('../hooks/use_rule_details');
 
 const mockGetStepsData = getStepsData as jest.Mock;
-jest.mock('../../../detections/pages/detection_engine/rules/helpers');
+jest.mock('../../../detection_engine/common/helpers');
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type React from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_CASE_IDS, isSiemRuleType } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -38,7 +39,7 @@ interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   alertsCount: number;
   casesConfig?: PublicAlertsDataGridProps['casesConfiguration'];
-  getBulkActions?: PublicAlertsDataGridProps['getBulkActions'];
+  additionalBulkActions?: PublicAlertsDataGridProps['additionalBulkActions'];
   refresh: () => void;
   hideBulkActions?: boolean;
   application: ApplicationStart;
@@ -282,14 +283,14 @@ export const useBulkUntrackActions = ({
   ]);
 };
 
-const EMPTY_BULK_ACTIONS_CONFIG = () => [];
+const EMPTY_BULK_ACTIONS_CONFIG: BulkActionsPanelConfig[] = [];
 
 export function useBulkActions({
   alertsCount,
   casesConfig,
   query,
   refresh,
-  getBulkActions = EMPTY_BULK_ACTIONS_CONFIG,
+  additionalBulkActions = EMPTY_BULK_ACTIONS_CONFIG,
   ruleTypeIds,
   hideBulkActions,
   http,
@@ -300,13 +301,12 @@ export function useBulkActions({
   const {
     bulkActionsStore: [bulkActionsState, updateBulkActionsState],
   } = useAlertsTableContext();
-  const configBulkActionPanels = getBulkActions(query, refresh);
 
   const clearSelection = useCallback(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
   }, [updateBulkActionsState]);
   const setIsBulkActionsLoading = useCallback(
-    (isLoading: boolean = true) => {
+    (isLoading = true) => {
       updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
     },
     [updateBulkActionsState]
@@ -342,11 +342,11 @@ export function useBulkActions({
 
     return initialItems.length
       ? addItemsToInitialPanel({
-          panels: configBulkActionPanels,
+          panels: additionalBulkActions,
           items: initialItems,
         })
-      : configBulkActionPanels;
-  }, [configBulkActionPanels, initialItems, hideBulkActions]);
+      : additionalBulkActions;
+  }, [additionalBulkActions, initialItems, hideBulkActions]);
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 

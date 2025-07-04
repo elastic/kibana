@@ -12,8 +12,8 @@ import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
-import { ResolvedSanitizedRule, RuleAction, RuleSystemAction } from '../../../../../common';
+import type { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
+import type { ResolvedSanitizedRule, RuleAction, RuleSystemAction } from '../../../../../common';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 const rulesClient = rulesClientMock.create();
@@ -76,6 +76,13 @@ describe('resolveRuleRoute', () => {
     outcome: 'aliasMatch',
     alias_target_id: '2',
     revision: 0,
+    artifacts: {
+      dashboards: [
+        {
+          id: '123',
+        },
+      ],
+    },
   };
 
   const resolveResult = {
@@ -116,6 +123,7 @@ describe('resolveRuleRoute', () => {
       },
     ],
     outcome: 'aliasMatch',
+    artifacts: mockedRule.artifacts,
   };
 
   it('resolves a rule with proper parameters', async () => {
@@ -252,5 +260,49 @@ describe('resolveRuleRoute', () => {
         uuid: '123-456',
       },
     ]);
+  });
+
+  it('returns the artifacts if defined', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    resolveRuleRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    // TODO (http-versioning): Remove this cast, this enables us to move forward
+    // without fixing all of other solution types
+    rulesClient.resolve.mockResolvedValueOnce({
+      ...mockedRule,
+      artifacts: {
+        dashboards: [
+          {
+            id: '123',
+          },
+        ],
+      },
+    } as ResolvedSanitizedRule);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: { id: '1' },
+      },
+      ['ok']
+    );
+
+    const routeRes = await handler(context, req, res);
+
+    // @ts-expect-error: body exists
+    expect(routeRes.body.artifacts).not.toBeUndefined();
+
+    // @ts-expect-error: body exists
+    expect(routeRes.body.artifacts).toEqual({
+      dashboards: [
+        {
+          id: '123',
+        },
+      ],
+    });
   });
 });

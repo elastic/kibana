@@ -31,9 +31,9 @@ import type {
   NotificationsStart,
 } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import { kbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { LoginFormProps } from './components';
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
@@ -155,10 +155,9 @@ export class LoginPage extends Component<Props, State> {
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
     return (
-      <div className="loginWelcome login-form">
+      <div className="loginWelcome login-form" css={kbnFullScreenBgCss}>
         <header className="loginWelcome__header">
           <div className={contentHeaderClasses}>
-            <EuiSpacer size="xxl" />
             <span className="loginWelcome__logo" style={logoStyle}>
               {logo}
             </span>
@@ -170,7 +169,6 @@ export class LoginPage extends Component<Props, State> {
                 />
               </h1>
             </EuiTitle>
-            <EuiSpacer size="xl" />
           </div>
         </header>
         <div className={contentBodyClasses}>
@@ -372,12 +370,7 @@ export function renderLoginPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(
-    <KibanaRenderContextProvider {...services}>
-      <LoginPage {...props} />
-    </KibanaRenderContextProvider>,
-    element
-  );
+  ReactDOM.render(services.rendering.addContext(<LoginPage {...props} />), element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 }

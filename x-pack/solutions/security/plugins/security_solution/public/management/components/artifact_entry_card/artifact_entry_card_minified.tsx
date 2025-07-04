@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
+import { CardArtifactProvider } from './components/card_artifact_context';
 import type { CriteriaConditionsProps } from './components/criteria_conditions';
 import { CriteriaConditions } from './components/criteria_conditions';
 import type { AnyArtifact } from './types';
@@ -108,42 +109,44 @@ export const ArtifactEntryCardMinified = memo(
         hasShadow={false}
         hasBorder
       >
-        {cardTitle}
-        <EuiSplitPanel.Inner paddingSize="s">
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
-            <EuiTitle size="xxs">
-              <h5 data-test-subj={getTestId('descriptionTitle')}>{DESCRIPTION_LABEL}</h5>
-            </EuiTitle>
-            <DescriptionField data-test-subj={getTestId('description')}>
-              {artifact.description}
-            </DescriptionField>
-          </EuiPanel>
+        <CardArtifactProvider item={item}>
+          {cardTitle}
+          <EuiSplitPanel.Inner paddingSize="s">
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+              <EuiTitle size="xxs">
+                <h5 data-test-subj={getTestId('descriptionTitle')}>{DESCRIPTION_LABEL}</h5>
+              </EuiTitle>
+              <DescriptionField data-test-subj={getTestId('description')}>
+                {artifact.description}
+              </DescriptionField>
+            </EuiPanel>
 
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
-            <EuiButtonEmpty
-              data-test-subj={getTestId('collapse')}
-              color="primary"
-              size="s"
-              flush="left"
-              iconType={accordionTrigger === 'open' ? 'arrowUp' : 'arrowDown'}
-              iconSide="right"
-              iconSize="m"
-              onClick={handleOnToggleAccordion}
-              style={{ fontWeight: 400 }}
-            >
-              {getAccordionTitle()}
-            </EuiButtonEmpty>
-            <EuiAccordion id="showDetails" arrowDisplay="none" forceState={accordionTrigger}>
-              {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+              <EuiButtonEmpty
+                data-test-subj={getTestId('collapse')}
+                color="primary"
+                size="s"
+                flush="left"
+                iconType={accordionTrigger === 'open' ? 'arrowUp' : 'arrowDown'}
+                iconSide="right"
+                iconSize="m"
+                onClick={handleOnToggleAccordion}
+                style={{ fontWeight: 400 }}
+              >
+                {getAccordionTitle()}
+              </EuiButtonEmpty>
+              <EuiAccordion id="showDetails" arrowDisplay="none" forceState={accordionTrigger}>
+                {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
-              <CriteriaConditions
-                os={artifact.os as CriteriaConditionsProps['os']}
-                entries={artifact.entries}
-                data-test-subj={getTestId('criteriaConditions')}
-              />
-            </EuiAccordion>
-          </EuiPanel>
-        </EuiSplitPanel.Inner>
+                <CriteriaConditions
+                  os={artifact.os as CriteriaConditionsProps['os']}
+                  entries={artifact.entries}
+                  data-test-subj={getTestId('criteriaConditions')}
+                />
+              </EuiAccordion>
+            </EuiPanel>
+          </EuiSplitPanel.Inner>
+        </CardArtifactProvider>
       </CardContainerPanel>
     );
   }

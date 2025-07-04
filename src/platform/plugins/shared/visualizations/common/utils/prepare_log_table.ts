@@ -7,13 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
+import {
+  Datatable,
+  DatatableColumn,
+  DimensionType,
+} from '@kbn/expressions-plugin/common/expression_types/specs';
 import { ExpressionValueVisDimension } from '../expression_functions/vis_dimension';
 import { ExpressionValueXYDimension } from '../expression_functions/xy_dimension';
 
 type DimensionColumn = ExpressionValueVisDimension | ExpressionValueXYDimension | string;
 
 export type Dimension = [DimensionColumn[] | undefined, string];
+export type LayerDimension = [DimensionColumn[] | undefined, string, DimensionType];
+const isLayerDimensions = (
+  dimensions: Dimension[] | LayerDimension[]
+): dimensions is LayerDimension[] => dimensions[0].length === 3;
 
 const isColumnEqualToAccessor = (
   column: DatatableColumn,
@@ -45,7 +53,7 @@ const getAccessorFromDimension = (dimension: DimensionColumn) => {
 const getDimensionName = (
   column: DatatableColumn,
   columnIndex: number,
-  dimensions: Dimension[]
+  dimensions: LayerDimension[] | Dimension[]
 ) => {
   for (const dimension of dimensions) {
     if (
@@ -58,11 +66,28 @@ const getDimensionName = (
   }
 };
 
+const getDimensionType = (
+  column: DatatableColumn,
+  columnIndex: number,
+  dimensions: LayerDimension[]
+) => {
+  for (const dimension of dimensions) {
+    if (
+      dimension[0]?.find((d) =>
+        isColumnEqualToAccessor(column, columnIndex, getAccessorFromDimension(d))
+      )
+    ) {
+      return dimension[2];
+    }
+  }
+};
+
 export const prepareLogTable = (
   datatable: Datatable,
-  dimensions: Dimension[],
+  dimensions: LayerDimension[] | Dimension[],
   removeUnmappedColumns: boolean = false
 ) => {
+  const hasLayerDimensions = isLayerDimensions(dimensions);
   return {
     ...datatable,
     columns: datatable.columns
@@ -72,6 +97,9 @@ export const prepareLogTable = (
           meta: {
             ...column.meta,
             dimensionName: getDimensionName(column, columnIndex, dimensions),
+            ...(hasLayerDimensions
+              ? { dimensionType: getDimensionType(column, columnIndex, dimensions) }
+              : {}),
           },
         };
       })

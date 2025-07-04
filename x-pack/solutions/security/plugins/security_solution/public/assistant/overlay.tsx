@@ -8,14 +8,21 @@ import React from 'react';
 import {
   AssistantOverlay as ElasticAssistantOverlay,
   useAssistantContext,
+  AssistantSpaceIdProvider,
 } from '@kbn/elastic-assistant';
+import { useSpaceId } from '../common/hooks/use_space_id';
 
 export const AssistantOverlay: React.FC = () => {
   const { assistantAvailability } = useAssistantContext();
+  const spaceId = useSpaceId();
 
-  if (!assistantAvailability.hasAssistantPrivilege) {
+  if (!assistantAvailability.hasAssistantPrivilege || !spaceId) {
     return null;
   }
 
-  return <ElasticAssistantOverlay />;
+  return (
+    <AssistantSpaceIdProvider spaceId={spaceId}>
+      <ElasticAssistantOverlay />
+    </AssistantSpaceIdProvider>
+  );
 };

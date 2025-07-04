@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import { ActionType, ActionTypeRegistryContract, ActionTypeSecrets } from '../types';
+import type { ActionType, ActionTypeRegistryContract, ActionTypeSecrets } from '../types';
 
 describe('transform connector for export', () => {
   const connectorType: jest.Mocked<ActionType> = {

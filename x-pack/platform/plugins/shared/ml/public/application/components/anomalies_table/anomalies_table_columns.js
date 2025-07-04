@@ -25,9 +25,9 @@ import { EntityCell } from '../entity_cell';
 import { InfluencersCell } from './influencers_cell';
 import { LinksMenu } from './links_menu';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import { formatValue } from '../../formatters/format_value';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS } from './anomalies_table_constants';
 import { SeverityCell } from './severity_cell';
+import { AnomalyValueDisplay } from './anomaly_value_display';
 
 function renderTime(date, aggregationInterval) {
   if (aggregationInterval === 'hour') {
@@ -118,13 +118,13 @@ export function getColumns(
       name: (
         <span>
           {i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
-            defaultMessage: 'Severity',
+            defaultMessage: 'Score',
           })}
           &nbsp;
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableSeverityTooltip', {
               defaultMessage:
@@ -207,7 +207,7 @@ export function getColumns(
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableActualTooltip', {
               defaultMessage: 'The actual values in the anomaly record results.',
@@ -220,7 +220,14 @@ export function getColumns(
           item.jobId,
           item.source.detector_index
         );
-        return formatValue(item.actual, item.source.function, fieldFormat, item.source);
+        return (
+          <AnomalyValueDisplay
+            value={item.actual}
+            function={item.source.function}
+            fieldFormat={fieldFormat}
+            record={item.source}
+          />
+        );
       },
       sortable: true,
       className: 'eui-textBreakNormal',
@@ -240,7 +247,7 @@ export function getColumns(
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate('xpack.ml.overview.anomalyDetection.tableTypicalTooltip', {
               defaultMessage: 'The typical values in the anomaly record results.',
@@ -253,7 +260,14 @@ export function getColumns(
           item.jobId,
           item.source.detector_index
         );
-        return formatValue(item.typical, item.source.function, fieldFormat, item.source);
+        return (
+          <AnomalyValueDisplay
+            value={item.typical}
+            function={item.source.function}
+            fieldFormat={fieldFormat}
+            record={item.source}
+          />
+        );
       },
       sortable: true,
       className: 'eui-textBreakNormal',
@@ -304,12 +318,22 @@ export function getColumns(
         const examples = get(examplesByJobId, [item.jobId, item.entityValue], []);
         return (
           <EuiLink
-            className="mlAnomalyCategoryExamples__link"
+            css={{
+              width: '100%',
+            }}
             onClick={() => toggleRow(item, ANOMALIES_TABLE_TABS.CATEGORY_EXAMPLES)}
           >
             {examples.map((example, i) => {
               return (
-                <span key={`example${i}`} className="category-example">
+                <span
+                  key={`example${i}`}
+                  css={{
+                    display: 'block',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
                   {example}
                 </span>
               );

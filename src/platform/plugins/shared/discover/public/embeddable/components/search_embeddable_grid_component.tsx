@@ -13,10 +13,7 @@ import type { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { FetchContext } from '@kbn/presentation-publishing';
-import {
-  useBatchedOptionalPublishingSubjects,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { DataGridDensity } from '@kbn/unified-data-table';
@@ -25,7 +22,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getSortForEmbeddable } from '../../utils';
+import { getSortForEmbeddable } from '../../utils/sorting';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { isEsqlMode } from '../initialize_fetch';
@@ -70,6 +67,10 @@ export function SearchEmbeddableGridComponent({
     totalHitCount,
     columnsMeta,
     grid,
+    panelTitle,
+    panelDescription,
+    savedSearchTitle,
+    savedSearchDescription,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -81,22 +82,17 @@ export function SearchEmbeddableGridComponent({
     stateManager.rows,
     stateManager.totalHitCount,
     stateManager.columnsMeta,
-    stateManager.grid
+    stateManager.grid,
+    api.title$,
+    api.description$,
+    api.defaultTitle$,
+    api.defaultDescription$
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
   // `fetchContext.query` and `fetchContext.filters` are Dashboard's query and filters
-
   const savedSearchQuery = apiQuery;
   const savedSearchFilters = apiFilters;
-
-  const [panelTitle, panelDescription, savedSearchTitle, savedSearchDescription] =
-    useBatchedOptionalPublishingSubjects(
-      api.title$,
-      api.description$,
-      api.defaultTitle$,
-      api.defaultDescription$
-    );
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
 

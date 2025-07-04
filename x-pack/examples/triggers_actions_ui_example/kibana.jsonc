@@ -18,6 +18,7 @@
       "dataViews",
       "dataViewEditor",
       "unifiedSearch",
+      "taskManager",
       "fieldFormats",
       "licensing",
       "fieldsMetadata"

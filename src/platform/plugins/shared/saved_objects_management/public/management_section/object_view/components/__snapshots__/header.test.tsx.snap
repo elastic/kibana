@@ -20,7 +20,7 @@ exports[`Intro component renders correctly 1`] = `
         </h1>
       </div>
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+        class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"

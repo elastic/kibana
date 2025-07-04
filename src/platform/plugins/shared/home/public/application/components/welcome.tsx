@@ -13,91 +13,125 @@
  * in Elasticsearch.
  */
 
-import React from 'react';
-import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPortal } from '@elastic/eui';
+import React, { useEffect } from 'react';
+import {
+  EuiTitle,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPortal,
+  UseEuiTheme,
+  useEuiShadow,
+  mathWithUnits,
+} from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { getServices } from '../kibana_services';
 
 import { SampleDataCard } from './sample_data';
 
-interface Props {
+interface WelcomeProps {
   urlBasePath: string;
   onSkip: () => void;
 }
-
 /**
  * Shows a full-screen welcome page that gives helpful quick links to beginners.
  */
-export class Welcome extends React.Component<Props> {
-  private services = getServices();
+export const Welcome: React.FC<WelcomeProps> = ({ urlBasePath, onSkip }: WelcomeProps) => {
+  const services = getServices();
+  const euiShadowM = useEuiShadow('m');
 
-  private hideOnEsc = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      this.props.onSkip();
-    }
+  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
+
+  const redirectToAddData = () => {
+    services.application.navigateToApp('integrations', { path: '/browse' });
   };
 
-  private redirectToAddData() {
-    this.services.application.navigateToApp('integrations', { path: '/browse' });
-  }
-
-  private onSampleDataDecline = () => {
-    this.services.trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataDecline');
-    this.props.onSkip();
+  const onSampleDataDecline = () => {
+    services.trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataDecline');
+    onSkip();
   };
 
-  private onSampleDataConfirm = () => {
-    this.services.trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataConfirm');
-    this.redirectToAddData();
+  const onSampleDataConfirm = () => {
+    services.trackUiMetric(METRIC_TYPE.CLICK, 'sampleDataConfirm');
+    redirectToAddData();
   };
 
-  componentDidMount() {
-    const { welcomeService } = this.services;
-    this.services.trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
-    document.addEventListener('keydown', this.hideOnEsc);
+  useEffect(() => {
+    const hideOnEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onSkip();
+      }
+    };
+    const { welcomeService } = services;
+    services.trackUiMetric(METRIC_TYPE.LOADED, 'welcomeScreenMount');
+    document.addEventListener('keydown', hideOnEsc);
     welcomeService.onRendered();
-  }
 
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.hideOnEsc);
-  }
+    return () => {
+      document.removeEventListener('keydown', hideOnEsc);
+    };
+  }, [onSkip, services]);
 
-  render() {
-    const { urlBasePath } = this.props;
-    const { welcomeService } = this.services;
-    return (
-      <EuiPortal>
-        <div className="homWelcome" data-test-subj="homeWelcomeInterstitial">
-          <header className="homWelcome__header">
-            <div className="homWelcome__content eui-textCenter">
-              <EuiSpacer size="xl" />
-              <span className="homWelcome__logo">
-                <EuiIcon type="logoElastic" size="xxl" />
-              </span>
-              <EuiTitle size="l" className="homWelcome__title">
-                <h1>
-                  <FormattedMessage id="home.welcomeTitle" defaultMessage="Welcome to Elastic" />
-                </h1>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-            </div>
-          </header>
-          <div className="homWelcome__content homWelcome-body">
-            <EuiFlexGroup gutterSize="l">
-              <EuiFlexItem>
-                <SampleDataCard
-                  urlBasePath={urlBasePath}
-                  onConfirm={this.onSampleDataConfirm}
-                  onDecline={this.onSampleDataDecline}
-                />
-                <EuiSpacer size="s" />
-                {welcomeService.renderTelemetryNotice()}
-              </EuiFlexItem>
-            </EuiFlexGroup>
+  const { welcomeService } = services;
+
+  return (
+    <EuiPortal>
+      <div data-test-subj="homeWelcomeInterstitial" css={[styles, kbnFullScreenBgCss]}>
+        <header className="homeWelcome__header">
+          <div className="homeWelcome__content eui-textCenter">
+            <EuiSpacer size="xl" />
+            <span
+              className="homeWelcome__logo"
+              css={css`
+                ${euiShadowM}
+              `}
+            >
+              <EuiIcon type="logoElastic" size="xxl" />
+            </span>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage id="home.welcomeTitle" defaultMessage="Welcome to Elastic" />
+              </h1>
+            </EuiTitle>
+            <EuiSpacer size="m" />
           </div>
+        </header>
+        <div className="homeWelcome__content">
+          <EuiFlexGroup gutterSize="l">
+            <EuiFlexItem>
+              <SampleDataCard
+                urlBasePath={urlBasePath}
+                onConfirm={onSampleDataConfirm}
+                onDecline={onSampleDataDecline}
+              />
+              <EuiSpacer size="s" />
+              {welcomeService.renderTelemetryNotice()}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </div>
-      </EuiPortal>
-    );
-  }
-}
+      </div>
+    </EuiPortal>
+  );
+};
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    '.homeWelcome__header': {
+      padding: euiTheme.size.xl,
+      zIndex: 10,
+    },
+    '.homeWelcome__logo': {
+      marginBottom: euiTheme.size.xl,
+      display: 'inline-block',
+    },
+    '.homeWelcome__content': {
+      margin: 'auto',
+      maxWidth: mathWithUnits(euiTheme.size.xxxxl, (x) => x * 8),
+      paddingLeft: euiTheme.size.xl,
+      paddingRight: euiTheme.size.xl,
+      zIndex: 10,
+    },
+  });

@@ -14,7 +14,7 @@ import {
   syntheticsMonitorLocationQueryLocatorID,
 } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { DefinitionItem } from './definition_item';
+import { DefinitionItem } from '../definition/definition_item';
 
 interface Props {
   slo: SLOWithSummaryResponse;

@@ -12,13 +12,16 @@ import axios from 'axios';
 import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {
-  const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
+  // BOOKMARK - List of Kibana project types
+  const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|chat)$/;
   try {
+    // BOOKMARK - List of Kibana project types
     return (
       await Promise.all([
         projectRequest.get('/api/v1/serverless/projects/elasticsearch'),
         projectRequest.get('/api/v1/serverless/projects/security'),
         projectRequest.get('/api/v1/serverless/projects/observability'),
+        // TODO handle the new 'chat' project type - https://elastic.slack.com/archives/C5UDAFZQU/p1741692053429579
       ])
     )
       .map((response) => response.data.items)
@@ -47,11 +50,13 @@ async function deleteProject({
   id,
   name,
 }: {
-  type: 'elasticsearch' | 'observability' | 'security';
+  // BOOKMARK - List of Kibana project types
+  type: 'elasticsearch' | 'security' | 'observability' | 'chat';
   id: number;
   name: string;
 }) {
   try {
+    // TODO handle the new 'chat' project type, and ideally rename 'elasticsearch' to 'search'
     await projectRequest.delete(`/api/v1/serverless/projects/${type}/${id}`);
 
     execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${name}`, {
@@ -97,7 +102,9 @@ async function purgeProjects() {
     } else if (
       !Boolean(
         pullRequest.labels.filter((label: any) =>
-          /^ci:project-deploy-(elasticsearch|security|observability)$/.test(label.name)
+          /^ci:project-deploy-(elasticsearch|observability|log_essentials|security)$/.test(
+            label.name
+          )
         ).length
       )
     ) {
@@ -124,6 +131,7 @@ const projectRequest = axios.create({
   headers: {
     Authorization: `ApiKey ${process.env.PROJECT_API_KEY}`,
   },
+  allowAbsoluteUrls: false,
 });
 
 purgeProjects().catch((e) => {

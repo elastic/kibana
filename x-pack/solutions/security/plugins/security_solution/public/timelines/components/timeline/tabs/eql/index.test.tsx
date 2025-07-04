@@ -14,7 +14,7 @@ import { TestProviders } from '../../../../../common/mock/test_providers';
 
 import type { Props as EqlTabContentComponentProps } from '.';
 import EqlTabContentComponent from '.';
-import { TimelineId } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -28,7 +28,6 @@ import { timelineActions } from '../../../../store';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultRowRenderers } from '../../body/renderers';
 import { useDispatch } from 'react-redux';
-import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 
@@ -267,7 +266,7 @@ describe('EQL Tab', () => {
 
           expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
 
-          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
           expect(fetchNotesMock).toHaveBeenCalledWith(['1']);
 
           // Page : 2
@@ -280,7 +279,7 @@ describe('EQL Tab', () => {
           await waitFor(() => {
             expect(screen.getByTestId('pagination-button-1')).toHaveAttribute(
               'aria-current',
-              'true'
+              'page'
             );
 
             expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [mockTimelineData[1]._id]);
@@ -295,7 +294,7 @@ describe('EQL Tab', () => {
           await waitFor(() => {
             expect(screen.getByTestId('pagination-button-2')).toHaveAttribute(
               'aria-current',
-              'true'
+              'page'
             );
 
             expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [mockTimelineData[2]._id]);
@@ -339,7 +338,7 @@ describe('EQL Tab', () => {
 
           expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
 
-          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'page');
           expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
             'Rows per page: 1'
           );

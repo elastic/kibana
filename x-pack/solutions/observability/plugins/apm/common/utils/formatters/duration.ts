@@ -154,6 +154,15 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
 );
 
 export function asTransactionRate(value: Maybe<number>) {
+  const displayedValue = asTransactionValue(value);
+
+  return i18n.translate('xpack.apm.transactionRateLabel', {
+    defaultMessage: `{displayedValue} tpm`,
+    values: { displayedValue },
+  });
+}
+
+export function asTransactionValue(value: Maybe<number>) {
   if (!isFiniteNumber(value)) {
     return NOT_AVAILABLE_LABEL;
   }
@@ -168,10 +177,7 @@ export function asTransactionRate(value: Maybe<number>) {
     displayedValue = asDecimal(value);
   }
 
-  return i18n.translate('xpack.apm.transactionRateLabel', {
-    defaultMessage: `{displayedValue} tpm`,
-    values: { displayedValue },
-  });
+  return displayedValue;
 }
 
 export function asExactTransactionRate(value: number) {

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  FieldDefinition,
-  IngestStreamGetResponse,
-  isWiredStreamGetResponse,
-} from '@kbn/streams-schema';
+import { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { ErrorActorEvent, fromPromise } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
@@ -19,10 +15,10 @@ import { StreamEnrichmentServiceDependencies } from './types';
 import { processorConverter } from '../../utils';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
-export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest'>;
+export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;
 
 export interface UpsertStreamInput {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   processors: ProcessorDefinitionWithUIAttributes[];
   fields?: FieldDefinition;
 }
@@ -31,13 +27,13 @@ export function createUpsertStreamActor({
   streamsRepositoryClient,
 }: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient'>) {
   return fromPromise<UpsertStreamResponse, UpsertStreamInput>(({ input, signal }) => {
-    return streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest`, {
+    return streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
       signal,
       params: {
         path: {
           name: input.definition.stream.name,
         },
-        body: isWiredStreamGetResponse(input.definition)
+        body: Streams.WiredStream.GetResponse.is(input.definition)
           ? {
               ingest: {
                 ...input.definition.stream.ingest,

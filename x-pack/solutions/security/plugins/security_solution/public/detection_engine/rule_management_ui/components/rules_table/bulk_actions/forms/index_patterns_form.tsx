@@ -6,28 +6,29 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../../common/translations';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
   Field,
-  getUseField,
-  useFormData,
-  useForm,
   FIELD_TYPES,
   fieldValidators,
+  getUseField,
+  useForm,
+  useFormData,
 } from '../../../../../../shared_imports';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
+
 const CommonUseField = getUseField({ component: Field });
 
 type IndexPatternsEditActions =

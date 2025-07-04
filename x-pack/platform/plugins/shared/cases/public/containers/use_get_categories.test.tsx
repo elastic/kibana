@@ -17,7 +17,7 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 // Failing: See https://github.com/elastic/kibana/issues/207999
-describe.skip('useGetCategories', () => {
+describe('useGetCategories', () => {
   const abortCtrl = new AbortController();
   beforeEach(() => {
     jest.clearAllMocks();

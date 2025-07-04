@@ -21,9 +21,11 @@ const options = [
 export function CollapseSetting({
   value,
   onChange,
+  display,
 }: {
   value: string;
   onChange: (value: CollapseFunction) => void;
+  display?: 'rowCompressed' | 'columnCompressed';
 }) {
   return (
     <>
@@ -41,11 +43,11 @@ export function CollapseSetting({
             <span>
               {i18n.translate('xpack.lens.collapse.label', { defaultMessage: 'Collapse by' })}
               {''}
-              <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
+              <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
             </span>
           </EuiToolTip>
         }
-        display="rowCompressed"
+        display={display ?? 'rowCompressed'}
         fullWidth
       >
         <EuiSelect

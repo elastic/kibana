@@ -11,11 +11,18 @@ import * as t from 'io-ts';
 import { CoreSetup } from '@kbn/core-lifecycle-browser';
 import { createRepositoryClient } from './create_repository_client';
 
+const disabledAuthz = {
+  authz: {
+    enabled: false as const,
+    reason: 'This is a test',
+  },
+};
+
 describe('createRepositoryClient', () => {
-  const getMock = jest.fn();
+  const fetchMock = jest.fn();
   const coreSetupMock = {
     http: {
-      get: getMock,
+      fetch: fetchMock,
     },
   } as unknown as CoreSetup;
 
@@ -28,14 +35,16 @@ describe('createRepositoryClient', () => {
       'GET /internal/handler': {
         endpoint: 'GET /internal/handler',
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
 
     fetch('GET /internal/handler');
 
-    expect(getMock).toHaveBeenCalledTimes(1);
-    expect(getMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
+      method: 'GET',
       body: undefined,
       query: undefined,
       version: undefined,
@@ -47,14 +56,16 @@ describe('createRepositoryClient', () => {
       'GET /api/handler 2024-08-05': {
         endpoint: 'GET /api/handler 2024-08-05',
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
 
     fetch('GET /api/handler 2024-08-05');
 
-    expect(getMock).toHaveBeenCalledTimes(1);
-    expect(getMock).toHaveBeenNthCalledWith(1, '/api/handler', {
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenNthCalledWith(1, '/api/handler', {
+      method: 'GET',
       body: undefined,
       query: undefined,
       version: '2024-08-05',
@@ -66,6 +77,7 @@ describe('createRepositoryClient', () => {
       'GET /internal/handler': {
         endpoint: 'GET /internal/handler',
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
@@ -76,8 +88,9 @@ describe('createRepositoryClient', () => {
       },
     });
 
-    expect(getMock).toHaveBeenCalledTimes(1);
-    expect(getMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
+      method: 'GET',
       headers: {
         some_header: 'header_value',
       },
@@ -97,6 +110,7 @@ describe('createRepositoryClient', () => {
           }),
         }),
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
@@ -109,8 +123,9 @@ describe('createRepositoryClient', () => {
       },
     });
 
-    expect(getMock).toHaveBeenCalledTimes(1);
-    expect(getMock).toHaveBeenNthCalledWith(1, '/internal/handler/param_value', {
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenNthCalledWith(1, '/internal/handler/param_value', {
+      method: 'GET',
       body: undefined,
       query: undefined,
       version: undefined,
@@ -127,6 +142,7 @@ describe('createRepositoryClient', () => {
           }),
         }),
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
@@ -139,8 +155,9 @@ describe('createRepositoryClient', () => {
       },
     });
 
-    expect(getMock).toHaveBeenCalledTimes(1);
-    expect(getMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
+      method: 'GET',
       body: JSON.stringify({
         payload: 'body_value',
       }),
@@ -159,6 +176,7 @@ describe('createRepositoryClient', () => {
           }),
         }),
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
@@ -171,8 +189,9 @@ describe('createRepositoryClient', () => {
       },
     });
 
-    expect(getMock).toHaveBeenCalledTimes(1);
-    expect(getMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenNthCalledWith(1, '/internal/handler', {
+      method: 'GET',
       body: undefined,
       query: {
         parameter: 'query_value',

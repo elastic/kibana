@@ -49,7 +49,8 @@ import {
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { MissingPrivilegesCallout } from '../components/entity_store/components/missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
-import { useStoreEntityTypes } from '../hooks/use_enabled_entity_types';
+import { useEntityStoreTypes } from '../hooks/use_enabled_entity_types';
+import { EntityStoreErrorCallout } from '../components/entity_store/components/entity_store_error_callout';
 
 enum TabId {
   Import = 'import',
@@ -66,7 +67,7 @@ const isEntityStoreInstalled = (status?: StoreStatus) => status && status !== 'n
 const entityStoreLabel = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title',
   {
-    defaultMessage: 'Entity Store',
+    defaultMessage: 'Entity store',
   }
 );
 
@@ -81,7 +82,7 @@ export const EntityStoreManagementPage = () => {
   const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
   const [selectedTabId, setSelectedTabId] = useState(TabId.Import);
   const entityStoreStatus = useEntityStoreStatus({});
-  const entityTypes = useStoreEntityTypes();
+  const entityTypes = useEntityStoreTypes();
   const enableStoreMutation = useEnableEntityStoreMutation();
   const stopEntityEngineMutation = useStopEntityEngineMutation(entityTypes);
   const deleteEntityEngineMutation = useDeleteEntityEngineMutation({
@@ -130,26 +131,7 @@ export const EntityStoreManagementPage = () => {
 
   const callouts = (entityStoreStatus.data?.engines || [])
     .filter((engine) => engine.status === 'error')
-    .map((engine) => {
-      const err = engine.error as {
-        message: string;
-      };
-
-      return (
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.title"
-              defaultMessage={'An error occurred during entity store resource initialization'}
-            />
-          }
-          color="danger"
-          iconType="alert"
-        >
-          <p>{err?.message}</p>
-        </EuiCallOut>
-      );
-    });
+    .map((engine) => <EntityStoreErrorCallout engine={engine} />);
 
   return (
     <>
@@ -266,7 +248,7 @@ export const EntityStoreManagementPage = () => {
                 </p>
               </EuiCallOut>
             )}
-            {callouts}
+            {selectedTabId === TabId.Import && callouts}
             {selectedTabId === TabId.Import && <WhatIsAssetCriticalityPanel />}
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -289,7 +271,7 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
       />
       <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiIcon type="questionInCircle" size="xl" />
+        <EuiIcon type="question" size="xl" />
         <EuiTitle size="xxs">
           <h3>
             <FormattedMessage
@@ -343,7 +325,7 @@ const EntityStoreFeatureFlagNotAvailableCallout: React.FC = () => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <EuiText size="s">
           <FormattedMessage
@@ -405,7 +387,7 @@ const InsufficientAssetCriticalityPrivilegesCallout: React.FC = () => {
         />
       }
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
     >
       <EuiText size="s">
         <FormattedMessage
@@ -440,7 +422,7 @@ const AssetCriticalityIssueCallout: React.FC<{ errorMessage?: string | ReactNode
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <EuiText size="s">{msg}</EuiText>
       </EuiCallOut>

@@ -10,11 +10,11 @@
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { groupsReducerWithStorage, initialState } from './state/reducer';
+import { groupsReducerWithStorage, initialState as reducerInitialGroupings } from './state/reducer';
 import { GroupingProps, GroupSelectorProps, isNoneGroup } from '..';
 import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
-import { defaultGroup, GroupOption } from './types';
+import { defaultGroup, GroupMap, GroupOption } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
 
 /** Interface for grouping object where T is the `GroupingAggregation`
@@ -32,7 +32,12 @@ export interface UseGrouping<T> {
  */
 type StaticGroupingProps<T> = Pick<
   GroupingProps<T>,
-  'groupPanelRenderer' | 'getGroupStats' | 'onGroupToggle' | 'unit' | 'groupsUnit'
+  | 'groupPanelRenderer'
+  | 'getGroupStats'
+  | 'onGroupToggle'
+  | 'unit'
+  | 'groupsUnit'
+  | 'multiValueFields'
 >;
 
 /** Type for dynamic grouping component props where T is the consumer `GroupingAggregation`
@@ -66,6 +71,7 @@ export interface GroupingArgs<T> {
   /** for tracking
    * @param param { groupByField: string; tableId: string } selected group and table id
    */
+  initialGroupings?: GroupMap;
   onGroupChange?: (param: {
     groupByField: string;
     groupByFields: string[];
@@ -85,6 +91,7 @@ export interface GroupingArgs<T> {
  * @param componentProps {@link StaticGroupingProps} props passed to the grouping component.
  * These props are static compared to the dynamic props passed later to getGrouping
  * @param defaultGroupingOptions defines the grouping options as an array of {@link GroupOption}
+ * @param initialGroupings represents the initial groupingState value
  * @param fields FieldSpec array serialized version of DataViewField fields. Available in the custom grouping options
  * @param groupingId Unique identifier of the grouping component. Used in local storage
  * @param maxGroupingLevels maximum group nesting levels (optional)
@@ -97,6 +104,7 @@ export interface GroupingArgs<T> {
 export const useGrouping = <T,>({
   componentProps,
   defaultGroupingOptions,
+  initialGroupings,
   fields,
   groupingId,
   maxGroupingLevels,
@@ -105,7 +113,10 @@ export const useGrouping = <T,>({
   tracker,
   title,
 }: GroupingArgs<T>): UseGrouping<T> => {
-  const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
+  const [groupingState, dispatch] = useReducer(
+    groupsReducerWithStorage,
+    initialGroupings ?? reducerInitialGroupings
+  );
   const { activeGroups: selectedGroups } = useMemo(
     () => groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup,
     [groupingId, groupingState]

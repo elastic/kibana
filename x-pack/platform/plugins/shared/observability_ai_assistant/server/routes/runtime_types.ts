@@ -15,7 +15,50 @@ import {
   type StarterPrompt,
 } from '../../common/types';
 
+export const unredactionRt = t.type({
+  entity: t.string,
+  class_name: t.string,
+  start_pos: t.number,
+  end_pos: t.number,
+  type: t.union([t.literal('ner'), t.literal('regex')]),
+});
+
 export const messageRt: t.Type<Message> = t.type({
+  '@timestamp': t.string,
+  message: t.intersection([
+    t.type({
+      role: t.union([
+        t.literal(MessageRole.System),
+        t.literal(MessageRole.Assistant),
+        t.literal(MessageRole.Function),
+        t.literal(MessageRole.User),
+        t.literal(MessageRole.Elastic),
+      ]),
+    }),
+    t.partial({
+      content: t.string,
+      name: t.string,
+      event: t.string,
+      data: t.string,
+      function_call: t.intersection([
+        t.type({
+          name: t.string,
+          trigger: t.union([
+            t.literal(MessageRole.Assistant),
+            t.literal(MessageRole.User),
+            t.literal(MessageRole.Elastic),
+          ]),
+        }),
+        t.partial({
+          arguments: t.string,
+        }),
+      ]),
+      unredactions: t.array(unredactionRt),
+    }),
+  ]),
+});
+
+export const publicMessageRt: t.Type<Omit<Message, 'unredactions'>> = t.type({
   '@timestamp': t.string,
   message: t.intersection([
     t.type({
@@ -68,6 +111,7 @@ export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.interse
   }),
   t.partial({
     systemMessage: t.string,
+    archived: toBooleanRt,
   }),
 ]);
 

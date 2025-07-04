@@ -6,19 +6,20 @@
  */
 
 import fs from 'fs';
-import { Logger, CoreSetup, type ElasticsearchClient } from '@kbn/core/server';
-import {
+import type { Logger, CoreSetup } from '@kbn/core/server';
+import { type ElasticsearchClient } from '@kbn/core/server';
+import type {
   IntervalSchedule,
-  type ConcreteTaskInstance,
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
-import { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
+import { type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
 import axios from 'axios';
 import https from 'https';
-import { ActionsConfig } from '../config';
-import { ConnectorUsageReport } from './types';
-import { ActionsPluginsStart } from '../plugin';
+import type { ActionsConfig } from '../config';
+import type { ConnectorUsageReport } from './types';
+import type { ActionsPluginsStart } from '../plugin';
 
 export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
 export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';
@@ -33,7 +34,8 @@ export class ConnectorUsageReportingTask {
   private readonly eventLogIndex: string;
   private readonly projectId: string | undefined;
   private readonly caCertificate: string | undefined;
-  private readonly usageApiUrl: string;
+  private readonly usageApiUrl: string | undefined;
+  private readonly enabled: boolean;
 
   constructor({
     logger,
@@ -53,8 +55,9 @@ export class ConnectorUsageReportingTask {
     this.logger = logger;
     this.projectId = projectId;
     this.eventLogIndex = eventLogIndex;
-    this.usageApiUrl = config.url;
-    const caCertificatePath = config.ca?.path;
+    this.usageApiUrl = config?.url;
+    this.enabled = config?.enabled ?? true;
+    const caCertificatePath = config?.ca?.path;
 
     if (caCertificatePath && caCertificatePath.length > 0) {
       try {
@@ -112,6 +115,15 @@ export class ConnectorUsageReportingTask {
   private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
     const { state } = taskInstance;
 
+    if (!this.enabled) {
+      this.logger.warn(
+        `Usage API is disabled, ${CONNECTOR_USAGE_REPORTING_TASK_TYPE} will be skipped`
+      );
+      return {
+        state,
+      };
+    }
+
     if (!this.projectId) {
       this.logger.warn(
         `Missing required project id while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}, reporting task will be deleted`
@@ -131,12 +143,21 @@ export class ConnectorUsageReportingTask {
       };
     }
 
+    if (!this.usageApiUrl) {
+      this.logger.error(
+        `Missing required Usage API url while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
+      );
+      return {
+        state,
+      };
+    }
+
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client.asInternalUser;
 
     const now = new Date();
     const oneDayAgo = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
-    const lastReportedUsageDate: Date = !!state.lastReportedUsageDate
+    const lastReportedUsageDate: Date = state.lastReportedUsageDate
       ? new Date(state.lastReportedUsageDate)
       : oneDayAgo;
 
@@ -174,7 +195,7 @@ export class ConnectorUsageReportingTask {
 
     try {
       attempts = attempts + 1;
-      await this.pushUsageRecord(record);
+      await this.pushUsageRecord({ url: this.usageApiUrl, record });
       this.logger.info(
         `Connector usage record has been successfully reported, ${record.creation_timestamp}, usage: ${record.usage.quantity}, period:${record.usage.period_seconds}`
       );
@@ -292,11 +313,18 @@ export class ConnectorUsageReportingTask {
     };
   };
 
-  private pushUsageRecord = async (record: ConnectorUsageReport) => {
-    return axios.post(this.usageApiUrl, [record], {
+  private pushUsageRecord = async ({
+    url,
+    record,
+  }: {
+    url: string;
+    record: ConnectorUsageReport;
+  }) => {
+    return axios.post(url, [record], {
       headers: { 'Content-Type': 'application/json' },
       timeout: CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT,
       httpsAgent: new https.Agent({
+        allowPartialTrustChain: true,
         ca: this.caCertificate,
       }),
     });

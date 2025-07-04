@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { fetchActionRequestById } from './utils/fetch_action_request_by_id';
 import type { FetchActionResponsesResult } from './utils/fetch_action_responses';
 import { fetchActionResponses } from './utils/fetch_action_responses';
@@ -18,18 +17,26 @@ import {
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { EndpointError, isEndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
-import type { EndpointMetadataService } from '../metadata';
 
 /**
  * Get Action Details for a single action id
- * @param esClient
- * @param metadataService
+ * @param endpointService
+ * @param spaceId
  * @param actionId
  */
 export const getActionDetailsById = async <T extends ActionDetails = ActionDetails>(
-  esClient: ElasticsearchClient,
-  metadataService: EndpointMetadataService,
-  actionId: string
+  endpointService: EndpointAppContextService,
+  spaceId: string,
+  actionId: string,
+  {
+    bypassSpaceValidation = false,
+  }: Partial<{
+    /**
+     * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
+     * USE IT CAREFULLY!
+     */
+    bypassSpaceValidation: boolean;
+  }> = {}
 ): Promise<T> => {
   let normalizedActionRequest: ReturnType<typeof mapToNormalizedActionRequest> | undefined;
   let actionResponses: FetchActionResponsesResult;
@@ -38,10 +45,13 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
     // Get both the Action Request(s) and action Response(s)
     const [actionRequestEsDoc, actionResponseResult] = await Promise.all([
       // Get the action request(s)
-      fetchActionRequestById(esClient, actionId),
+      fetchActionRequestById(endpointService, spaceId, actionId, { bypassSpaceValidation }),
 
       // Get all responses
-      fetchActionResponses({ esClient, actionIds: [actionId] }),
+      fetchActionResponses({
+        esClient: endpointService.getInternalEsClient(),
+        actionIds: [actionId],
+      }),
     ]);
 
     actionResponses = actionResponseResult;
@@ -63,8 +73,8 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
   const agentsHostInfo =
     normalizedActionRequest.agentType === 'endpoint'
       ? await getAgentHostNamesWithIds({
-          esClient,
-          metadataService,
+          endpointService,
+          spaceId,
           agentIds: normalizedActionRequest.agents,
         })
       : {};

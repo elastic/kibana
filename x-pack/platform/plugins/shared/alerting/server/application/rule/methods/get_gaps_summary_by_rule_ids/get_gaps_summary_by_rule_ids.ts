@@ -6,10 +6,11 @@
  */
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
-import { RuleBulkOperationAggregation, RulesClientContext } from '../../../../rules_client';
-import { GetGapsSummaryByRuleIdsParams, GetGapsSummaryByRuleIdsResponse } from './types';
+import type { RuleBulkOperationAggregation, RulesClientContext } from '../../../../rules_client';
+import type { GetGapsSummaryByRuleIdsParams, GetGapsSummaryByRuleIdsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 import { convertRuleIdsToKueryNode } from '../../../../lib';

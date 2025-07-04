@@ -36,7 +36,7 @@ export async function createOrUpdateStaticDataView({
 }): CreateDataViewResponse {
   const { config } = resources;
   const dataViewId = getStaticDataViewId(spaceId);
-  logger.info(`create static data view ${dataViewId}`);
+  logger.debug(`create static data view ${dataViewId}`);
 
   return withApmSpan('create_static_data_view', async () => {
     // don't auto-create APM data view if it's been disabled via the config

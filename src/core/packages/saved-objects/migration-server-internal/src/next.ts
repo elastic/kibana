@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as Option from 'fp-ts/lib/Option';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import { pipe } from 'fp-ts/pipeable';
+import * as Option from 'fp-ts/Option';
+import * as TaskEither from 'fp-ts/TaskEither';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { WaitGroup } from './kibana_migrator_utils';
@@ -58,7 +58,6 @@ import type {
 import { createDelayFn } from './common/utils';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
-import { REMOVED_TYPES } from './core';
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -77,7 +76,8 @@ export const nextActionMap = (
   transformRawDocs: TransformRawDocs,
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,
-  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>,
+  removedTypes: string[]
 ) => {
   return {
     INIT: (state: InitState) =>
@@ -104,7 +104,7 @@ export const nextActionMap = (
         excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
         excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
         knownTypes: state.knownTypes,
-        removedTypes: REMOVED_TYPES,
+        removedTypes,
       }),
     CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK: (
       state: CleanupUnknownAndExcludedWaitForTaskState
@@ -118,7 +118,12 @@ export const nextActionMap = (
       Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
     REFRESH_SOURCE: (state: RefreshSource) =>
       Actions.refreshIndex({ client, index: state.sourceIndex.value }),
-    CHECK_CLUSTER_ROUTING_ALLOCATION: () => Actions.checkClusterRoutingAllocationEnabled(client),
+    REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
+      Actions.checkClusterRoutingAllocationEnabled(client),
+    CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
+      Actions.checkClusterRoutingAllocationEnabled(client),
+    RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
+      Actions.checkClusterRoutingAllocationEnabled(client),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,
@@ -322,14 +327,16 @@ export const next = (
   transformRawDocs: TransformRawDocs,
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,
-  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>
+  updateRelocationAliases: WaitGroup<Actions.AliasAction[]>,
+  removedTypes: string[]
 ) => {
   const map = nextActionMap(
     client,
     transformRawDocs,
     readyToReindex,
     doneReindexing,
-    updateRelocationAliases
+    updateRelocationAliases,
+    removedTypes
   );
   return (state: State) => {
     const delay = createDelayFn(state);

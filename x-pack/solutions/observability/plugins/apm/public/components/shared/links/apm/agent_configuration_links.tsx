@@ -7,7 +7,7 @@
 
 import type { IBasePath } from '@kbn/core/public';
 import type { AgentConfigurationIntake } from '../../../../../common/agent_configuration/configuration_types';
-import { getLegacyApmHref } from './apm_link';
+import { getLegacyApmHref } from './apm_link_hooks';
 
 export function editAgentConfigurationHref(
   configService: AgentConfigurationIntake['service'],

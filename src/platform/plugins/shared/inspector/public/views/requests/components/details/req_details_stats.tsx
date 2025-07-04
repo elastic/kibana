@@ -8,6 +8,7 @@
  */
 
 import React, { Component } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiIcon,
   EuiIconTip,
@@ -15,45 +16,47 @@ import {
   EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
 import { DetailViewProps } from './types';
+import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
 
 // TODO: Replace by property once available
 interface RequestDetailsStatRow extends RequestStatistic {
   id: string;
 }
 
+const StatRow = ({ stat }: { stat: RequestDetailsStatRow }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiTableRow>
+      <EuiTableRowCell>
+        {stat.label}
+
+        <span css={css({ marginLeft: euiTheme.size.xs })}>
+          {stat.description ? (
+            <EuiIconTip
+              aria-label={i18n.translate('inspector.requests.descriptionRowIconAriaLabel', {
+                defaultMessage: 'Description',
+              })}
+              type="question"
+              color="subdued"
+              content={stat.description}
+            />
+          ) : (
+            <EuiIcon type="empty" />
+          )}
+        </span>
+      </EuiTableRowCell>
+      <EuiTableRowCell>{stat.value}</EuiTableRowCell>
+    </EuiTableRow>
+  );
+};
+
 export class RequestDetailsStats extends Component<DetailViewProps> {
   static shouldShow = (request: Request) =>
     Boolean(request.stats && Object.keys(request.stats).length);
-
-  renderStatRow = (stat: RequestDetailsStatRow) => {
-    return [
-      <EuiTableRow key={stat.id}>
-        <EuiTableRowCell>
-          {stat.label}
-
-          <span className="insRequestDetailsStats__icon">
-            {stat.description ? (
-              <EuiIconTip
-                aria-label={i18n.translate('inspector.requests.descriptionRowIconAriaLabel', {
-                  defaultMessage: 'Description',
-                })}
-                type="questionInCircle"
-                color="subdued"
-                content={stat.description}
-              />
-            ) : (
-              <EuiIcon type="empty" />
-            )}
-          </span>
-        </EuiTableRowCell>
-        <EuiTableRowCell>{stat.value}</EuiTableRowCell>
-      </EuiTableRow>,
-    ];
-  };
 
   render() {
     const { stats } = this.props.request;
@@ -68,7 +71,11 @@ export class RequestDetailsStats extends Component<DetailViewProps> {
 
     return (
       <EuiTable responsiveBreakpoint={false}>
-        <EuiTableBody>{sortedStats.map(this.renderStatRow)}</EuiTableBody>
+        <EuiTableBody>
+          {sortedStats.map((stat) => (
+            <StatRow stat={stat} key={stat.id} />
+          ))}
+        </EuiTableBody>
       </EuiTable>
     );
   }

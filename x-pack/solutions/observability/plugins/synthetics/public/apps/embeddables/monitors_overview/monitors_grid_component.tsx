@@ -5,41 +5,121 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { areFiltersEmpty } from '../common/utils';
 import { getOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
-import { setOverviewPageStateAction } from '../../synthetics/state';
+import {
+  OverviewView,
+  selectOverviewTrends,
+  setFlyoutConfig,
+  setOverviewPageStateAction,
+  trendStatsBatch,
+} from '../../synthetics/state';
 import { MonitorFilters } from './types';
 import { EmbeddablePanelWrapper } from '../../synthetics/components/common/components/embeddable_panel_wrapper';
 import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 import { OverviewGrid } from '../../synthetics/components/monitors_page/overview/overview/overview_grid';
+import { useMonitorsSortedByStatus } from '../../synthetics/hooks/use_monitors_sorted_by_status';
+import { MetricItem } from '../../synthetics/components/monitors_page/overview/overview/metric_item/metric_item';
+import { FlyoutParamProps } from '../../synthetics/components/monitors_page/overview/overview/types';
+import { MaybeMonitorDetailsFlyout } from '../../synthetics/components/monitors_page/overview/overview/monitor_detail_flyout';
+import { useOverviewStatus } from '../../synthetics/components/monitors_page/hooks/use_overview_status';
+import { OverviewLoader } from '../../synthetics/components/monitors_page/overview/overview/overview_loader';
 
 export const StatusGridComponent = ({
   reload$,
   filters,
+  view,
 }: {
   reload$: Subject<boolean>;
   filters: MonitorFilters;
+  view: OverviewView;
 }) => {
   const overviewStore = useRef(getOverviewStore());
 
   const hasFilters = !areFiltersEmpty(filters);
+  const singleMonitor =
+    filters && filters.locations.length === 1 && filters.monitorIds.length === 1;
 
-  return (
+  const monitorOverviewListComponent = (
+    <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
+      <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} view={view} />
+    </SyntheticsEmbeddableContext>
+  );
+
+  return singleMonitor ? (
+    monitorOverviewListComponent
+  ) : (
     <EmbeddablePanelWrapper
       titleAppend={hasFilters ? <ShowSelectedFilters filters={filters ?? {}} /> : null}
     >
-      <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
-        <MonitorsOverviewList filters={filters} />
-      </SyntheticsEmbeddableContext>
+      {monitorOverviewListComponent}
     </EmbeddablePanelWrapper>
   );
 };
 
-const MonitorsOverviewList = ({ filters }: { filters: MonitorFilters }) => {
+const SingleMonitorView = () => {
+  const trendData = useSelector(selectOverviewTrends);
+  const dispatch = useDispatch();
+
+  const setFlyoutConfigCallback = useCallback(
+    (params: FlyoutParamProps) => {
+      dispatch(setFlyoutConfig(params));
+    },
+    [dispatch]
+  );
+
+  const { loaded } = useOverviewStatus({
+    scopeStatusByLocation: true,
+  });
+  const monitorsSortedByStatus = useMonitorsSortedByStatus();
+
+  if (loaded && monitorsSortedByStatus.length !== 1) {
+    throw new Error(
+      'One and only one monitor should always be returned by useMonitorsSortedByStatus in this component, this should never happen'
+    );
+  }
+
+  const monitor = monitorsSortedByStatus.length === 1 ? monitorsSortedByStatus[0] : undefined;
+
+  useEffect(() => {
+    if (monitor && !trendData[monitor.configId + monitor.locationId]) {
+      dispatch(
+        trendStatsBatch.get([
+          {
+            configId: monitor.configId,
+            locationId: monitor.locationId,
+            schedule: monitor.schedule,
+          },
+        ])
+      );
+    }
+  }, [dispatch, monitor, trendData]);
+
+  const style = { height: '100%' };
+
+  if (!monitor) return <OverviewLoader rows={1} columns={1} style={style} />;
+
+  return (
+    <>
+      <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} style={style} />
+      <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />
+    </>
+  );
+};
+
+const MonitorsOverviewList = ({
+  filters,
+  singleMonitor,
+  view,
+}: {
+  filters: MonitorFilters;
+  singleMonitor?: boolean;
+  view: OverviewView;
+}) => {
   const dispatch = useDispatch();
   useEffect(() => {
     if (!filters) return;
@@ -54,5 +134,9 @@ const MonitorsOverviewList = ({ filters }: { filters: MonitorFilters }) => {
     );
   }, [dispatch, filters]);
 
-  return <OverviewGrid />;
+  if (singleMonitor && view === 'cardView') {
+    return <SingleMonitorView />;
+  }
+
+  return <OverviewGrid view={view} isEmbeddable />;
 };

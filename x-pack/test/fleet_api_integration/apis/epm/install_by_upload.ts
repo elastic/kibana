@@ -97,7 +97,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should install a tar archive correctly', async function () {
       const res = await uploadPackage();
-      expect(res.body.items.length).to.be(32);
+      expect(res.body.items.length).to.be(33);
     });
 
     it('should upgrade when uploading a newer zip archive', async () => {
@@ -111,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(32);
+      expect(res.body.items.length).to.be(33);
       expect(res.body.items.some((item: any) => item.id.includes(testPkgNewVersion)));
 
       await deletePackage(testPkgName, testPkgNewVersion);
@@ -182,7 +182,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(32);
+      expect(res.body.items.length).to.be(33);
     });
 
     it('should throw an error if the archive is zip but content type is gzip', async function () {
@@ -209,7 +209,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Error during extraction of package: Error: end of central directory record signature not found. Assumed content type was application/zip, check if this matches the archive type."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Error during extraction of package: Error: End of central directory record signature not found. Either not a zip file, or file is truncated.. Assumed content type was application/zip, check if this matches the archive type."}'
       );
     });
 

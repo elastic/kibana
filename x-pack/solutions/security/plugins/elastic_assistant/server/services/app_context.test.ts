@@ -35,6 +35,14 @@ describe('AppContextService', () => {
     isSupported: jest.fn(),
     getTool: jest.fn(),
   };
+  const toolThree: AssistantTool = {
+    id: 'tool-three',
+    name: 'ToolThree',
+    description: 'Description 3',
+    sourceRegister: 'Source3',
+    isSupported: jest.fn(),
+    getTool: jest.fn(),
+  };
 
   beforeEach(() => {
     appContextService.stop();
@@ -55,7 +63,6 @@ describe('AppContextService', () => {
       appContextService.registerFeatures('super', {
         assistantModelEvaluation: true,
         defendInsights: true,
-        assistantAttackDiscoverySchedulingEnabled: true,
       });
       appContextService.stop();
 
@@ -100,6 +107,17 @@ describe('AppContextService', () => {
     });
   });
 
+  it('get tools for multiple plugins', () => {
+    const pluginName1 = 'pluginName1';
+    const pluginName2 = 'pluginName2';
+
+    appContextService.start(mockAppContext);
+    appContextService.registerTools(pluginName2, [toolOne, toolThree]);
+    appContextService.registerTools(pluginName1, [toolOne]);
+
+    expect(appContextService.getRegisteredTools([pluginName1, pluginName2]).length).toEqual(2);
+  });
+
   describe('registering features', () => {
     it('should register and get features for a single plugin', () => {
       const pluginName = 'pluginName';
@@ -107,7 +125,6 @@ describe('AppContextService', () => {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
         defendInsights: true,
-        assistantAttackDiscoverySchedulingEnabled: true,
       };
 
       appContextService.start(mockAppContext);
@@ -124,14 +141,12 @@ describe('AppContextService', () => {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
         defendInsights: true,
-        assistantAttackDiscoverySchedulingEnabled: true,
       };
       const pluginTwo = 'plugin2';
       const featuresTwo: AssistantFeatures = {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: false,
         defendInsights: false,
-        assistantAttackDiscoverySchedulingEnabled: false,
       };
 
       appContextService.start(mockAppContext);
@@ -148,13 +163,11 @@ describe('AppContextService', () => {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
         defendInsights: true,
-        assistantAttackDiscoverySchedulingEnabled: true,
       };
       const featuresTwo: AssistantFeatures = {
         ...defaultAssistantFeatures,
         assistantModelEvaluation: false,
         defendInsights: false,
-        assistantAttackDiscoverySchedulingEnabled: false,
       };
 
       appContextService.start(mockAppContext);
@@ -177,7 +190,6 @@ describe('AppContextService', () => {
       const featuresSubset: Partial<AssistantFeatures> = {
         assistantModelEvaluation: true,
         defendInsights: true,
-        assistantAttackDiscoverySchedulingEnabled: true,
       };
 
       appContextService.start(mockAppContext);

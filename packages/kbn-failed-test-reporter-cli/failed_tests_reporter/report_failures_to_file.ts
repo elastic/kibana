@@ -80,7 +80,7 @@ function findAllScreenshots(log: ToolingLog) {
     return globby
       .sync(
         [
-          'test/functional/**/screenshots/failure/*.png',
+          'src/platform/test/functional/**/screenshots/failure/*.png',
           'x-pack/test/functional/**/screenshots/failure/*.png',
         ],
         {

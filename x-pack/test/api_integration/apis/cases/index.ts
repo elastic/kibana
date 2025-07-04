@@ -8,12 +8,12 @@
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
-} from '../../../cases_api_integration/common/lib/authentication';
+} from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication';
 
-import { loginUsers } from '../../../cases_api_integration/common/lib/api/user_profiles';
+import { loginUsers } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api/user_profiles';
 import { casesAllUser, obsCasesAllUser, secAllUser, users } from './common/users';
 import { roles } from './common/roles';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('cases', function () {

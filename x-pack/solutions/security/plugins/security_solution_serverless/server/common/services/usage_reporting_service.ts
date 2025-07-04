@@ -75,6 +75,7 @@ export class UsageReportingService {
       cert: tlsConfig.certificate,
       key: tlsConfig.key,
       ca: tlsConfig.certificateAuthorities,
+      allowPartialTrustChain: true,
     });
 
     return this.agent;

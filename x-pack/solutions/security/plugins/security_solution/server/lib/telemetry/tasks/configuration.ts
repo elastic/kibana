@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../sender';
 import { TelemetryChannel, type TelemetryConfiguration } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
@@ -36,7 +36,7 @@ export function createTelemetryConfigurationTaskConfig() {
       const log = newTelemetryLogger(logger.get('configuration'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l('Running telemetry task');
+      log.debug('Running telemetry task');
 
       try {
         const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
@@ -50,9 +50,9 @@ export function createTelemetryConfigurationTaskConfig() {
 
         const configArtifact = manifest.data as unknown as TelemetryConfiguration;
 
-        log.l('Got telemetry configuration artifact', {
+        log.debug('Got telemetry configuration artifact', {
           artifact: configArtifact ?? '<null>',
-        });
+        } as LogMeta);
 
         telemetryConfiguration.max_detection_alerts_batch =
           configArtifact.max_detection_alerts_batch;
@@ -69,7 +69,7 @@ export function createTelemetryConfigurationTaskConfig() {
         }
 
         if (configArtifact.sender_channels) {
-          log.l('Updating sender channels configuration');
+          log.info('Updating sender channels configuration');
           telemetryConfiguration.sender_channels = configArtifact.sender_channels;
           const channelsDict = Object.values(TelemetryChannel).reduce(
             (acc, channel) => acc.set(channel as string, channel),
@@ -78,7 +78,7 @@ export function createTelemetryConfigurationTaskConfig() {
 
           Object.entries(configArtifact.sender_channels).forEach(([channelName, config]) => {
             if (channelName === 'default') {
-              log.l('Updating default configuration');
+              log.debug('Updating default configuration');
               sender.updateDefaultQueueConfig({
                 bufferTimeSpanMillis: config.buffer_time_span_millis,
                 inflightEventsThreshold: config.inflight_events_threshold,
@@ -87,9 +87,11 @@ export function createTelemetryConfigurationTaskConfig() {
             } else {
               const channel = channelsDict.get(channelName);
               if (!channel) {
-                log.l('Ignoring unknown channel', { channel: channelName });
+                log.info('Ignoring unknown channel', { channel: channelName } as LogMeta);
               } else {
-                log.l('Updating configuration for channel', { channel: channelName });
+                log.debug('Updating configuration for channel', {
+                  channel: channelName,
+                } as LogMeta);
                 sender.updateQueueConfig(channel, {
                   bufferTimeSpanMillis: config.buffer_time_span_millis,
                   inflightEventsThreshold: config.inflight_events_threshold,
@@ -101,25 +103,31 @@ export function createTelemetryConfigurationTaskConfig() {
         }
 
         if (configArtifact.pagination_config) {
-          log.l('Updating pagination configuration');
+          log.debug('Updating pagination configuration');
           telemetryConfiguration.pagination_config = configArtifact.pagination_config;
           _receiver.setMaxPageSizeBytes(configArtifact.pagination_config.max_page_size_bytes);
           _receiver.setNumDocsToSample(configArtifact.pagination_config.num_docs_to_sample);
         }
 
         if (configArtifact.indices_metadata_config) {
-          log.l('Updating indices metadata configuration');
+          log.debug('Updating indices metadata configuration');
           telemetryConfiguration.indices_metadata_config = configArtifact.indices_metadata_config;
+        }
+
+        if (configArtifact.ingest_pipelines_stats_config) {
+          log.debug('Updating ingest pipelines stats configuration');
+          telemetryConfiguration.ingest_pipelines_stats_config =
+            configArtifact.ingest_pipelines_stats_config;
         }
 
         await taskMetricsService.end(trace);
 
-        log.l('Updated TelemetryConfiguration', { configuration: telemetryConfiguration });
+        log.debug('Updated TelemetryConfiguration');
         return 0;
-      } catch (err) {
-        log.l('Failed to set telemetry configuration', { error: err.message });
+      } catch (error) {
+        log.warn('Failed to set telemetry configuration', { error });
         telemetryConfiguration.resetAllToDefault();
-        await taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

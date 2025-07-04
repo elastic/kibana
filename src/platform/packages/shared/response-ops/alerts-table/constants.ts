@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -22,7 +22,7 @@ import {
   STACK_MONITORING_DISPLAY_NAME,
   UPTIME_DISPLAY_NAME,
 } from './translations';
-import { AlertsTableSupportedConsumers } from './types';
+import type { AlertsTableSupportedConsumers } from './types';
 
 interface AlertProducerData {
   displayName: string;
@@ -138,3 +138,5 @@ export const FIELD_BROWSER_TEST_ID = 'fields-browser-container';
 export const FIELD_BROWSER_BTN_TEST_ID = 'show-field-browser';
 export const FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID = 'field-browser-custom-create-btn';
 export const ERROR_PROMPT_TEST_ID = 'alertsTableErrorPrompt';
+export const STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX =
+  '/app/management/insightsAndAlerting/triggersActions/rule/';

@@ -96,6 +96,21 @@ const FLYOUT_RESIZE_BUTTON = i18n.translate(
   }
 );
 
+const OPTIONS = [
+  {
+    id: 'overlay',
+    label: FLYOUT_TYPE_OVERLAY_MODE,
+    'data-test-subj': SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID,
+    toolTipContent: FLYOUT_TYPE_OVERLAY_TOOLTIP,
+  },
+  {
+    id: 'push',
+    label: FLYOUT_TYPE_PUSH_MODE,
+    'data-test-subj': SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID,
+    toolTipContent: FLYOUT_TYPE_PUSH_TOOLTIP,
+  },
+];
+
 export interface FlyoutCustomProps {
   /**
    * Hide the gear icon and settings menu if true
@@ -139,7 +154,8 @@ export interface SettingsMenuProps {
 /**
  * Renders a menu to allow the user to customize the flyout.
  * Current customization are:
- * - Flyout type: overlay or push
+ * - enable/disable push vs overlay
+ * - enable/disable reset size
  */
 export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
   ({ flyoutCustomProps }: SettingsMenuProps) => {
@@ -185,7 +201,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                   <EuiToolTip position="top" content={flyoutCustomProps?.pushVsOverlay?.tooltip}>
                     <EuiIcon
                       data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID}
-                      type="iInCircle"
+                      type="info"
                     />
                   </EuiToolTip>
                 )}
@@ -194,20 +210,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
             <EuiSpacer size="s" />
             <EuiButtonGroup
               legend={FLYOUT_TYPE_TITLE}
-              options={[
-                {
-                  id: 'overlay',
-                  label: FLYOUT_TYPE_OVERLAY_MODE,
-                  'data-test-subj': SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_OVERLAY_TEST_ID,
-                  toolTipContent: FLYOUT_TYPE_OVERLAY_TOOLTIP,
-                },
-                {
-                  id: 'push',
-                  label: FLYOUT_TYPE_PUSH_MODE,
-                  'data-test-subj': SETTINGS_MENU_FLYOUT_TYPE_BUTTON_GROUP_PUSH_TEST_ID,
-                  toolTipContent: FLYOUT_TYPE_PUSH_TOOLTIP,
-                },
-              ]}
+              options={OPTIONS}
               idSelected={flyoutType}
               onChange={pushVsOverlayOnChange}
               isDisabled={flyoutCustomProps?.pushVsOverlay?.disabled}
@@ -221,7 +224,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
                   <EuiToolTip position="top" content={flyoutCustomProps?.resize?.tooltip}>
                     <EuiIcon
                       data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID}
-                      type="iInCircle"
+                      type="info"
                     />
                   </EuiToolTip>
                 )}

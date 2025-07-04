@@ -53,6 +53,7 @@ import {
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // List
   router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .get({
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
@@ -86,6 +87,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
 
   // Get bulk
   router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .post({
       path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
       // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
@@ -122,6 +124,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
 
   // Get one
   router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .get({
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
       // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
@@ -161,6 +164,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     );
 
   router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .get({
       path: PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES,
       fleetAuthz: {
@@ -186,8 +190,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     );
 
   // Create
-  // Authz check moved to service here: https://github.com/elastic/kibana/pull/140458
   router.versioned
+    // @ts-ignore Authz check moved to service here: https://github.com/elastic/kibana/pull/140458
     .post({
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       summary: 'Create a package policy',
@@ -218,6 +222,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
 
   // Update
   router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
     .put({
       path: PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN,
       // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170

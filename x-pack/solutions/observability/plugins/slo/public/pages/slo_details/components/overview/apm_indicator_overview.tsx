@@ -16,7 +16,7 @@ import {
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
-import { DefinitionItem } from './definition_item';
+import { DefinitionItem } from '../definition/definition_item';
 
 interface Props {
   slo: SLOWithSummaryResponse;

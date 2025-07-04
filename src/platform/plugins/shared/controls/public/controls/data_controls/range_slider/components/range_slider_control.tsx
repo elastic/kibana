@@ -23,31 +23,33 @@ import { RangeSliderStrings } from '../range_slider_strings';
 import { rangeSliderControlStyles } from './range_slider.styles';
 
 interface Props {
-  fieldFormatter?: (value: string) => string;
+  compressed: boolean;
+  controlPanelClassName?: string;
   isInvalid: boolean;
   isLoading: boolean;
+  fieldName: string;
   max: number | undefined;
   min: number | undefined;
-  onChange: (value: RangeValue | undefined) => void;
   step: number;
-  value: RangeValue | undefined;
   uuid: string;
-  controlPanelClassName?: string;
-  compressed: boolean;
+  value: RangeValue | undefined;
+  fieldFormatter?: (value: string) => string;
+  onChange: (value: RangeValue | undefined) => void;
 }
 
 export const RangeSliderControl: FC<Props> = ({
-  fieldFormatter,
+  compressed,
+  controlPanelClassName,
   isInvalid,
   isLoading,
+  fieldName,
   max,
   min,
-  onChange,
   step,
-  value,
   uuid,
-  controlPanelClassName,
-  compressed,
+  value,
+  fieldFormatter,
+  onChange,
 }: Props) => {
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
@@ -141,10 +143,14 @@ export const RangeSliderControl: FC<Props> = ({
       inputValue,
       testSubj,
       placeholder,
+      ariaLabel,
+      id,
     }: {
       inputValue: string;
       testSubj: string;
       placeholder: string;
+      ariaLabel: string;
+      id: string;
     }) => {
       return {
         isInvalid: undefined, // disabling this prop to handle our own validation styling
@@ -155,9 +161,12 @@ export const RangeSliderControl: FC<Props> = ({
           isInvalid ? styles.fieldNumbers.invalid : styles.fieldNumbers.valid,
         ],
         className: 'rangeSliderAnchor__fieldNumber',
-        'data-test-subj': `rangeSlider__${testSubj}`,
         value: inputValue === placeholder ? '' : inputValue,
         title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
+        'data-test-subj': `rangeSlider__${testSubj}`,
+        'aria-label': ariaLabel,
+        'aria-labelledby': `control-title-${id}`,
+        id: `controls-range-slider-${id}`,
       };
     },
     [isInvalid, step, styles]
@@ -168,16 +177,20 @@ export const RangeSliderControl: FC<Props> = ({
       inputValue: displayedValue[0],
       testSubj: 'lowerBoundFieldNumber',
       placeholder: String(min ?? -Infinity),
+      ariaLabel: RangeSliderStrings.control.getLowerBoundAriaLabel(fieldName),
+      id: uuid,
     });
-  }, [getCommonInputProps, min, displayedValue]);
+  }, [getCommonInputProps, displayedValue, min, fieldName, uuid]);
 
   const maxInputProps = useMemo(() => {
     return getCommonInputProps({
       inputValue: displayedValue[1],
       testSubj: 'upperBoundFieldNumber',
       placeholder: String(max ?? Infinity),
+      ariaLabel: RangeSliderStrings.control.getUpperBoundAriaLabel(fieldName),
+      id: uuid,
     });
-  }, [getCommonInputProps, max, displayedValue]);
+  }, [getCommonInputProps, displayedValue, max, fieldName, uuid]);
 
   return (
     <span
@@ -216,7 +229,7 @@ export const RangeSliderControl: FC<Props> = ({
                   tabIndex={0}
                   iconType="alert"
                   size="s"
-                  color="euiColorVis5"
+                  color="euiColorVis9"
                   shape="square"
                   fill="dark"
                   title={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}

@@ -18,7 +18,6 @@
     "@kbn/entities-schema",
     "@kbn/core",
     "@kbn/core-plugins-server",
-    "@kbn/server-route-repository-client",
     "@kbn/logging",
     "@kbn/core-http-server",
     "@kbn/security-plugin",
@@ -34,10 +33,7 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/licensing-plugin",
     "@kbn/core-saved-objects-server",
-    "@kbn/es-types",
-    "@kbn/apm-utils",
     "@kbn/features-plugin",
-    "@kbn/core-elasticsearch-server-mocks",
     "@kbn/zod-helpers",
   ]
 }

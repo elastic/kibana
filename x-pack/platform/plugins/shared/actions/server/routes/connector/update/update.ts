@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { ILicenseState } from '../../../lib';
 import { BASE_ACTION_API_PATH } from '../../../../common';
-import { ActionsRequestHandlerContext } from '../../../types';
+import type { ActionsRequestHandlerContext } from '../../../types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
-import {
+import type {
   UpdateConnectorBodyV1,
   UpdateConnectorParamsV1,
+} from '../../../../common/routes/connector/apis/update';
+import {
   updateConnectorBodySchemaV1,
   updateConnectorParamsSchemaV1,
 } from '../../../../common/routes/connector/apis/update';
 import { transformUpdateConnectorResponseV1 } from './transforms';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
+import { errorHandler } from '../error_handler';
 
 export const updateConnectorRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -48,18 +51,22 @@ export const updateConnectorRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = (await context.actions).getActionsClient();
-        const { id }: UpdateConnectorParamsV1 = req.params;
-        const { name, config, secrets }: UpdateConnectorBodyV1 = req.body;
+        try {
+          const actionsClient = (await context.actions).getActionsClient();
+          const { id }: UpdateConnectorParamsV1 = req.params;
+          const { name, config, secrets }: UpdateConnectorBodyV1 = req.body;
 
-        return res.ok({
-          body: transformUpdateConnectorResponseV1(
-            await actionsClient.update({
-              id,
-              action: { name, config, secrets },
-            })
-          ),
-        });
+          return res.ok({
+            body: transformUpdateConnectorResponseV1(
+              await actionsClient.update({
+                id,
+                action: { name, config, secrets },
+              })
+            ),
+          });
+        } catch (error) {
+          return errorHandler(res, error);
+        }
       })
     )
   );

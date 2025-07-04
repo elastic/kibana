@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, FieldErrors, useFormContext } from 'react-hook-form';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -27,7 +27,7 @@ import { AnalyticsEvents } from '../analytics/constants';
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
-import { ChatForm, ChatFormFields, ChatRequestData, MessageRole } from '../types';
+import { PlaygroundForm, PlaygroundFormFields, ChatRequestData, MessageRole } from '../types';
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
@@ -35,41 +35,50 @@ import { QuestionInput } from './question_input';
 import { TelegramIcon } from './telegram_icon';
 import { transformFromChatMessages } from '../utils/transform_to_messages';
 import { useUsageTracker } from '../hooks/use_usage_tracker';
+import { PlaygroundBodySection } from './playground_body_section';
+import { elasticsearchQueryString } from '../utils/user_query';
 
-const buildFormData = (formData: ChatForm): ChatRequestData => ({
-  connector_id: formData[ChatFormFields.summarizationModel].connectorId!,
-  prompt: formData[ChatFormFields.prompt],
-  indices: formData[ChatFormFields.indices].join(),
-  citations: formData[ChatFormFields.citations],
-  elasticsearch_query: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
-  summarization_model: formData[ChatFormFields.summarizationModel].value,
-  source_fields: JSON.stringify(formData[ChatFormFields.sourceFields]),
-  doc_size: formData[ChatFormFields.docSize],
+const buildFormData = (
+  formData: PlaygroundForm,
+  formErrors: FieldErrors<PlaygroundForm>
+): ChatRequestData => ({
+  connector_id: formData[PlaygroundFormFields.summarizationModel]!.connectorId!,
+  prompt: formData[PlaygroundFormFields.prompt],
+  indices: formData[PlaygroundFormFields.indices].join(),
+  citations: formData[PlaygroundFormFields.citations],
+  elasticsearch_query: elasticsearchQueryString(
+    formData[PlaygroundFormFields.elasticsearchQuery],
+    formData[PlaygroundFormFields.userElasticsearchQuery],
+    formErrors[PlaygroundFormFields.userElasticsearchQuery]
+  ),
+  summarization_model: formData[PlaygroundFormFields.summarizationModel]!.value,
+  source_fields: JSON.stringify(formData[PlaygroundFormFields.sourceFields]),
+  doc_size: formData[PlaygroundFormFields.docSize],
 });
 
 export const Chat = () => {
   const { euiTheme } = useEuiTheme();
   const {
     control,
-    formState: { isValid, isSubmitting },
+    formState: { isValid, isSubmitting, errors: formErrors },
     resetField,
     handleSubmit,
     getValues,
-  } = useFormContext<ChatForm>();
+  } = useFormContext<PlaygroundForm>();
   const { messages, append, stop: stopRequest, setMessages, reload } = useChat();
   const messagesRef = useAutoBottomScroll();
   const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
   const usageTracker = useUsageTracker();
-  const onSubmit = async (data: ChatForm) => {
+  const onSubmit = async (data: PlaygroundForm) => {
     await append(
       { content: data.question, role: MessageRole.user, createdAt: new Date() },
       {
-        data: buildFormData(data),
+        data: buildFormData(data, formErrors),
       }
     );
     usageTracker?.click(AnalyticsEvents.chatQuestionSent);
 
-    resetField(ChatFormFields.question);
+    resetField(PlaygroundFormFields.question);
   };
   const handleStopRequest = () => {
     stopRequest();
@@ -96,7 +105,7 @@ export const Chat = () => {
     setIsRegenerating(true);
     const formData = getValues();
     await reload({
-      data: buildFormData(formData),
+      data: buildFormData(formData, formErrors),
     });
     setIsRegenerating(false);
 
@@ -112,135 +121,133 @@ export const Chat = () => {
   }, [usageTracker]);
 
   return (
-    <EuiForm
-      component="form"
-      css={{ display: 'flex', flexGrow: 1 }}
-      onSubmit={handleSubmit(onSubmit)}
-      data-test-subj="chatPage"
-    >
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem
-          grow={2}
-          css={{
-            paddingTop: euiTheme.size.l,
-            paddingBottom: euiTheme.size.l,
-            // don't allow the chat to shrink below 66.6% of the screen
-            flexBasis: 0,
-            minWidth: '66.6%',
-          }}
-        >
-          <EuiFlexGroup direction="column" className="eui-fullHeight">
-            {/* // Set scroll at the border of parent element*/}
-            <EuiFlexGroup
-              direction="column"
-              className="eui-yScroll"
-              css={{ paddingLeft: euiTheme.size.l, paddingRight: euiTheme.size.l }}
-              tabIndex={0}
-              ref={messagesRef}
-            >
-              <MessageList messages={chatMessages} />
-            </EuiFlexGroup>
-
-            <EuiFlexItem
-              grow={false}
-              css={{ paddingLeft: euiTheme.size.l, paddingRight: euiTheme.size.l }}
-            >
-              <EuiHorizontalRule margin="none" />
-
-              <EuiSpacer size="s" />
-
-              <EuiFlexGroup responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="sparkles"
-                    disabled={isToolBarActionsDisabled}
-                    onClick={regenerateMessages}
-                    size="xs"
-                    data-test-subj="regenerateActionButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.searchPlayground.chat.regenerateBtn"
-                      defaultMessage="Regenerate"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="refresh"
-                    disabled={isToolBarActionsDisabled}
-                    onClick={handleClearChat}
-                    size="xs"
-                    data-test-subj="clearChatActionButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.searchPlayground.chat.clearChatBtn"
-                      defaultMessage="Clear chat"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+    <PlaygroundBodySection>
+      <EuiForm
+        component="form"
+        css={{ display: 'flex', flexGrow: 1 }}
+        onSubmit={handleSubmit(onSubmit)}
+        data-test-subj="chatPage"
+      >
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem
+            grow={2}
+            css={{
+              paddingTop: euiTheme.size.l,
+              paddingBottom: euiTheme.size.l,
+              // don't allow the chat to shrink below 66.6% of the screen
+              flexBasis: 0,
+              minWidth: '66.6%',
+            }}
+          >
+            <EuiFlexGroup direction="column" className="eui-fullHeight">
+              {/* // Set scroll at the border of parent element*/}
+              <EuiFlexGroup
+                direction="column"
+                className="eui-yScroll"
+                css={{ paddingLeft: euiTheme.size.l, paddingRight: euiTheme.size.l }}
+                tabIndex={0}
+                ref={messagesRef}
+              >
+                <MessageList messages={chatMessages} />
               </EuiFlexGroup>
 
-              <EuiSpacer size="s" />
+              <EuiFlexItem
+                grow={false}
+                css={{ paddingLeft: euiTheme.size.l, paddingRight: euiTheme.size.l }}
+              >
+                <EuiHorizontalRule margin="none" />
 
-              <Controller
-                name={ChatFormFields.question}
-                control={control}
-                defaultValue=""
-                rules={{
-                  required: true,
-                  validate: (rule) => !!rule?.trim(),
-                }}
-                render={({ field }) => (
-                  <QuestionInput
-                    value={field.value}
-                    onChange={field.onChange}
-                    isDisabled={isSubmitting || isRegenerating}
-                    button={
-                      isSubmitting || isRegenerating ? (
-                        <EuiButtonIcon
-                          data-test-subj="stopRequestButton"
-                          aria-label={i18n.translate(
-                            'xpack.searchPlayground.chat.stopButtonAriaLabel',
-                            {
-                              defaultMessage: 'Stop request',
-                            }
-                          )}
-                          display="base"
-                          size="s"
-                          iconType="stop"
-                          onClick={handleStopRequest}
-                        />
-                      ) : (
-                        <EuiButtonIcon
-                          aria-label={i18n.translate(
-                            'xpack.searchPlayground.chat.sendButtonAriaLabel',
-                            {
-                              defaultMessage: 'Send a question',
-                            }
-                          )}
-                          display={isValid ? 'base' : 'empty'}
-                          size="s"
-                          type="submit"
-                          isLoading={isSubmitting}
-                          isDisabled={!isValid}
-                          iconType={TelegramIcon}
-                          data-test-subj="sendQuestionButton"
-                        />
-                      )
-                    }
-                  />
-                )}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+                <EuiSpacer size="s" />
 
-        <EuiHideFor sizes={['xs', 's']}>
-          <EuiFlexItem grow={1} css={{ flexBasis: 0, minWidth: '33.3%' }}>
-            <ChatSidebar />
+                <EuiFlexGroup responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="sparkles"
+                      disabled={isToolBarActionsDisabled}
+                      onClick={regenerateMessages}
+                      size="xs"
+                      data-test-subj="regenerateActionButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.searchPlayground.chat.regenerateBtn"
+                        defaultMessage="Regenerate"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="refresh"
+                      disabled={isToolBarActionsDisabled}
+                      onClick={handleClearChat}
+                      size="xs"
+                      data-test-subj="clearChatActionButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.searchPlayground.chat.clearChatBtn"
+                        defaultMessage="Clear chat"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiSpacer size="s" />
+
+                <Controller
+                  name={PlaygroundFormFields.question}
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <QuestionInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      isDisabled={isSubmitting || isRegenerating}
+                      button={
+                        isSubmitting || isRegenerating ? (
+                          <EuiButtonIcon
+                            data-test-subj="stopRequestButton"
+                            aria-label={i18n.translate(
+                              'xpack.searchPlayground.chat.stopButtonAriaLabel',
+                              {
+                                defaultMessage: 'Stop request',
+                              }
+                            )}
+                            display="base"
+                            size="s"
+                            iconType="stop"
+                            onClick={handleStopRequest}
+                          />
+                        ) : (
+                          <EuiButtonIcon
+                            aria-label={i18n.translate(
+                              'xpack.searchPlayground.chat.sendButtonAriaLabel',
+                              {
+                                defaultMessage: 'Send a question',
+                              }
+                            )}
+                            display={isValid ? 'base' : 'empty'}
+                            size="s"
+                            type="submit"
+                            isLoading={isSubmitting}
+                            isDisabled={!isValid}
+                            iconType={TelegramIcon}
+                            data-test-subj="sendQuestionButton"
+                          />
+                        )
+                      }
+                    />
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-        </EuiHideFor>
-      </EuiFlexGroup>
-    </EuiForm>
+
+          <EuiHideFor sizes={['xs', 's']}>
+            <EuiFlexItem grow={1} css={{ flexBasis: 0, minWidth: '33.3%' }}>
+              <ChatSidebar />
+            </EuiFlexItem>
+          </EuiHideFor>
+        </EuiFlexGroup>
+      </EuiForm>
+    </PlaygroundBodySection>
   );
 };

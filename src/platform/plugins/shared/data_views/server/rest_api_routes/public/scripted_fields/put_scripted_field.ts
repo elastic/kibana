@@ -27,15 +27,18 @@ export const registerPutScriptedFieldRoute = (
   >
 ) => {
   router.versioned
-    .put({ path: '/api/index_patterns/index_pattern/{id}/scripted_field', access: 'public' })
+    .put({
+      path: '/api/index_patterns/index_pattern/{id}/scripted_field',
+      access: 'public',
+      security: {
+        authz: {
+          requiredPrivileges: ['indexPatterns:manage'],
+        },
+      },
+    })
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
-        security: {
-          authz: {
-            requiredPrivileges: ['indexPatterns:manage'],
-          },
-        },
         validate: {
           request: {
             params: schema.object(

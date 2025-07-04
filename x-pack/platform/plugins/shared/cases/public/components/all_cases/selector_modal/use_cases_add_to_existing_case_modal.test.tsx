@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { waitFor, renderHook, act } from '@testing-library/react';
+import { waitFor, renderHook, act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import AllCasesSelectorModal from '.';
 import type { CaseUI } from '../../../../common';
 import { CaseStatuses } from '../../../../common/types/domain';
-import type { AppMockRenderer } from '../../../common/mock';
-import { allCasesPermissions, createAppMockRenderer } from '../../../common/mock';
+import { allCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
@@ -63,7 +62,7 @@ describe('use cases add to existing case modal hook', () => {
   });
 
   const dispatch = jest.fn();
-  let appMockRender: AppMockRenderer;
+
   const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
     return (
       <CasesContext.Provider
@@ -74,8 +73,13 @@ describe('use cases add to existing case modal hook', () => {
           permissions: allCasesPermissions(),
           basePath: '/jest',
           dispatch,
-          features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
+          features: {
+            alerts: { sync: true, enabled: true, isExperimental: false },
+            metrics: [],
+            observables: { enabled: true },
+          },
           releasePhase: 'ga',
+          settings: { displayIncrementalCaseId: false },
         }}
       >
         {children}
@@ -88,7 +92,6 @@ describe('use cases add to existing case modal hook', () => {
   };
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     dispatch.mockReset();
     AllCasesSelectorModalMock.mockReset();
     onSuccess.mockReset();
@@ -146,13 +149,14 @@ describe('use cases add to existing case modal hook', () => {
       return null;
     });
 
-    const result = appMockRender.render(<TestComponent />);
-    await userEvent.click(result.getByTestId('open-modal'));
+    renderWithTestingProviders(<TestComponent />);
+    await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(getAttachments).toHaveBeenCalledTimes(1);
-      expect(getAttachments).toHaveBeenCalledWith({ theCase: { id: 'test', owner: 'cases' } });
     });
+
+    expect(getAttachments).toHaveBeenCalledWith({ theCase: { id: 'test', owner: 'cases' } });
   });
 
   it('should show a toaster info when no attachments are defined and noAttachmentsToaster is defined', async () => {
@@ -168,10 +172,10 @@ describe('use cases add to existing case modal hook', () => {
       showInfoToast: mockedToastInfo,
     });
 
-    const result = appMockRender.render(
+    renderWithTestingProviders(
       <TestComponent noAttachmentsToaster={{ title: 'My title', content: 'My content' }} />
     );
-    await userEvent.click(result.getByTestId('open-modal'));
+    await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(mockedToastInfo).toHaveBeenCalledWith('My title', 'My content');
@@ -191,8 +195,8 @@ describe('use cases add to existing case modal hook', () => {
       showInfoToast: mockedToastInfo,
     });
 
-    const result = appMockRender.render(<TestComponent />);
-    await userEvent.click(result.getByTestId('open-modal'));
+    renderWithTestingProviders(<TestComponent />);
+    await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(mockedToastInfo).toHaveBeenCalledWith('No attachments added to the case', undefined);
@@ -215,16 +219,17 @@ describe('use cases add to existing case modal hook', () => {
       return null;
     });
 
-    const result = appMockRender.render(<TestComponent />);
-    await userEvent.click(result.getByTestId('open-modal'));
+    renderWithTestingProviders(<TestComponent />);
+    await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(mockBulkCreateAttachments).toHaveBeenCalledTimes(1);
-      expect(mockBulkCreateAttachments).toHaveBeenCalledWith({
-        caseId: 'test',
-        caseOwner: 'cases',
-        attachments: [alertComment],
-      });
+    });
+
+    expect(mockBulkCreateAttachments).toHaveBeenCalledWith({
+      caseId: 'test',
+      caseOwner: 'cases',
+      attachments: [alertComment],
     });
     expect(mockedToastSuccess).toHaveBeenCalled();
   });
@@ -246,8 +251,8 @@ describe('use cases add to existing case modal hook', () => {
       return null;
     });
 
-    const result = appMockRender.render(<TestComponent />);
-    await userEvent.click(result.getByTestId('open-modal'));
+    renderWithTestingProviders(<TestComponent />);
+    await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(onSuccess).toHaveBeenCalled();
@@ -269,9 +274,9 @@ describe('use cases add to existing case modal hook', () => {
       return null;
     });
 
-    const result = appMockRender.render(<TestComponent />);
+    renderWithTestingProviders(<TestComponent />);
 
-    await userEvent.click(result.getByTestId('open-modal'));
+    await userEvent.click(screen.getByTestId('open-modal'));
     // give a small delay for the reducer to run
 
     act(() => {
@@ -297,8 +302,8 @@ describe('use cases add to existing case modal hook', () => {
       return null;
     });
 
-    const result = appMockRender.render(<TestComponent />);
-    await userEvent.click(result.getByTestId('open-modal'));
+    renderWithTestingProviders(<TestComponent />);
+    await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
       expect(mockBulkCreateAttachments).toHaveBeenCalledWith({

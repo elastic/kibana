@@ -63,51 +63,57 @@ const getDataViewsRouteFactory =
       return schema.object({ [serviceKey]: dataViewListSchema });
     };
 
-    router.versioned.get({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .get({
+        path,
+        access: 'public',
+        description,
         security: {
           authz: {
             enabled: false,
             reason: 'Authorization provided by saved objects client',
           },
         },
-        validate: {
-          request: {},
-          response: { 200: { body: responseValidation } },
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {},
+            response: { 200: { body: responseValidation } },
+          },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
 
-          const dataViews = await getDataViews({
-            dataViewsService,
-            usageCollection,
-            counterName: `${req.route.method} ${path}`,
-          });
+            const dataViews = await getDataViews({
+              dataViewsService,
+              usageCollection,
+              counterName: `${req.route.method} ${path}`,
+            });
 
-          const body: Record<string, DataViewListItemRestResponse[]> = {
-            [serviceKey]: dataViews,
-          };
+            const body: Record<string, DataViewListItemRestResponse[]> = {
+              [serviceKey]: dataViews,
+            };
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body,
-          });
-        })
-      )
-    );
+            return res.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body,
+            });
+          })
+        )
+      );
   };
 
 export const registerGetDataViewsRoute = getDataViewsRouteFactory(

@@ -19,14 +19,15 @@ import {
   buildQueryForFieldsForStringSources,
   buildQueryForFieldsFromSource,
   buildQueryForFieldsInPolicies,
+  getEnrichCommands,
 } from './helpers';
-import type { ESQLRealField, ESQLPolicy } from './types';
+import type { ESQLFieldWithMetadata, ESQLPolicy } from './types';
 
 export async function retrieveFields(
   queryString: string,
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLRealField>> {
+): Promise<Map<string, ESQLFieldWithMetadata>> {
   if (!callbacks || commands.length < 1) {
     return new Map();
   }
@@ -52,7 +53,8 @@ export async function retrievePolicies(
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLPolicy>> {
-  if (!callbacks || commands.every(({ name }) => name !== 'enrich')) {
+  const enrichCommands = getEnrichCommands(commands);
+  if (!callbacks || !enrichCommands.length) {
     return new Map();
   }
 
@@ -78,11 +80,11 @@ export async function retrievePoliciesFields(
   commands: ESQLCommand[],
   policies: Map<string, ESQLPolicy>,
   callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLRealField>> {
+): Promise<Map<string, ESQLFieldWithMetadata>> {
   if (!callbacks) {
     return new Map();
   }
-  const enrichCommands = commands.filter(({ name }) => name === 'enrich');
+  const enrichCommands = getEnrichCommands(commands);
   if (!enrichCommands.length) {
     return new Map();
   }
@@ -103,7 +105,7 @@ export async function retrieveFieldsFromStringSources(
   queryString: string,
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLRealField>> {
+): Promise<Map<string, ESQLFieldWithMetadata>> {
   if (!callbacks) {
     return new Map();
   }

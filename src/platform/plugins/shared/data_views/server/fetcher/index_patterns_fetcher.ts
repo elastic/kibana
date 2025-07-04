@@ -122,11 +122,15 @@ export class IndexPatternsFetcher {
 
     if (this.rollupsEnabled && type === DataViewType.ROLLUP && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
-      const capabilityCheck = getCapabilitiesForRollupIndices(
+      const capabilities = getCapabilitiesForRollupIndices(
         await this.elasticsearchClient.rollup.getRollupIndexCaps({
           index: rollupIndex,
         })
-      )[rollupIndex];
+      );
+
+      const capabilityCheck =
+        // use the rollup index name BUT if its an alias, we'll take the first one
+        capabilities[rollupIndex] || capabilities[Object.keys(capabilities)[0]];
 
       if (capabilityCheck.error) {
         throw new Error(capabilityCheck.error);

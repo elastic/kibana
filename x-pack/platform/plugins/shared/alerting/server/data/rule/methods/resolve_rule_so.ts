@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsResolveResponse } from '@kbn/core/server';
-import { SavedObjectsResolveOptions } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract, SavedObjectsResolveResponse } from '@kbn/core/server';
+import type { SavedObjectsResolveOptions } from '@kbn/core-saved-objects-api-server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { RawRule } from '../../../types';
+import type { RawRule } from '../../../types';
 
 export interface ResolveRuleSoParams {
   savedObjectsClient: SavedObjectsClientContract;

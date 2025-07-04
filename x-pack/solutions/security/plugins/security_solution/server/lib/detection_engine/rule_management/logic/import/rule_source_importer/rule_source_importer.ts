@@ -13,7 +13,6 @@
  */
 
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../../types';
-import type { ConfigType } from '../../../../../../config';
 import type {
   RuleResponse,
   RuleToImport,
@@ -21,10 +20,9 @@ import type {
 } from '../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { ensureLatestRulesPackageInstalled } from '../../../../prebuilt_rules/logic/ensure_latest_rules_package_installed';
+import { ensureLatestRulesPackageInstalled } from '../../../../prebuilt_rules/logic/integrations/ensure_latest_rules_package_installed';
 import { calculateRuleSourceForImport } from '../calculate_rule_source_for_import';
 import type { CalculatedRuleSource, IRuleSourceImporter } from './rule_source_importer_interface';
-import type { PrebuiltRulesCustomizationStatus } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { IPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 
 interface RuleSpecifier {
@@ -96,10 +94,8 @@ const fetchMatchingAssets = async ({
  */
 export class RuleSourceImporter implements IRuleSourceImporter {
   private context: SecuritySolutionApiRequestHandlerContext;
-  private config: ConfigType;
   private ruleAssetsClient: IPrebuiltRuleAssetsClient;
   private ruleObjectsClient: IPrebuiltRuleObjectsClient;
-  private ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
   private latestPackagesInstalled: boolean = false;
   private matchingAssetsByRuleId: Record<string, PrebuiltRuleAsset> = {};
   private currentRulesById: Record<string, RuleResponse> = {};
@@ -107,23 +103,17 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private availableRuleAssetIds: Set<string> = new Set();
 
   constructor({
-    config,
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,
-    ruleCustomizationStatus,
   }: {
-    config: ConfigType;
     context: SecuritySolutionApiRequestHandlerContext;
     prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
     prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
-    ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
   }) {
-    this.config = config;
     this.ruleAssetsClient = prebuiltRuleAssetsClient;
     this.ruleObjectsClient = prebuiltRuleObjectsClient;
     this.context = context;
-    this.ruleCustomizationStatus = ruleCustomizationStatus;
   }
 
   /**
@@ -133,7 +123,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
    */
   public async setup(rules: RuleToImport[]): Promise<void> {
     if (!this.latestPackagesInstalled) {
-      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.config, this.context);
+      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.context);
       this.latestPackagesInstalled = true;
     }
 
@@ -159,7 +149,6 @@ export class RuleSourceImporter implements IRuleSourceImporter {
       currentRule: this.currentRulesById[rule.rule_id],
       prebuiltRuleAssetsByRuleId: this.matchingAssetsByRuleId,
       isKnownPrebuiltRule: this.availableRuleAssetIds.has(rule.rule_id),
-      ruleCustomizationStatus: this.ruleCustomizationStatus,
     });
   }
 
@@ -215,23 +204,17 @@ export class RuleSourceImporter implements IRuleSourceImporter {
 }
 
 export const createRuleSourceImporter = ({
-  config,
   context,
   prebuiltRuleAssetsClient,
   prebuiltRuleObjectsClient,
-  ruleCustomizationStatus,
 }: {
-  config: ConfigType;
   context: SecuritySolutionApiRequestHandlerContext;
   prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
   prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
-  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }): RuleSourceImporter => {
   return new RuleSourceImporter({
-    config,
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,
-    ruleCustomizationStatus,
   });
 };

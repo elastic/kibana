@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
-import { Logger } from '@kbn/core/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { stateSchemaByVersion } from '@kbn/alerting-state-types';
-import { TaskCost } from '@kbn/task-manager-plugin/server/task';
-import { TaskRunnerFactory } from './task_runner';
-import {
+import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import type { TaskRunnerFactory } from './task_runner';
+import type {
   RuleType,
   RuleTypeParams,
   RuleTypeState,
@@ -24,22 +24,20 @@ import {
   AlertInstanceContext,
   IRuleTypeAlerts,
 } from './types';
+import type { RecoveredActionGroupId, ActionGroup, RuleAlertData } from '../common';
 import {
   RecoveredActionGroup,
   getBuiltinActionGroups,
-  RecoveredActionGroupId,
-  ActionGroup,
   validateDurationSchema,
   parseDuration,
-  RuleAlertData,
 } from '../common';
-import { ILicenseState } from './lib/license_state';
+import type { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';
-import { InMemoryMetrics } from './monitoring';
-import { AlertingRulesConfig } from '.';
-import { AlertsService } from './alerts_service/alerts_service';
+import type { InMemoryMetrics } from './monitoring';
+import type { AlertingRulesConfig } from '.';
+import type { AlertsService } from './alerts_service/alerts_service';
 import { getRuleTypeIdValidLegacyConsumers } from './rule_type_registry_deprecated_consumers';
-import { AlertingConfig } from './config';
+import type { AlertingConfig } from './config';
 
 const RULE_TYPES_WITH_CUSTOM_COST: Record<string, TaskCost> = {
   'siem.indicatorRule': TaskCost.ExtraLarge,
@@ -66,17 +64,18 @@ export interface RegistryRuleType
     | 'actionVariables'
     | 'category'
     | 'producer'
+    | 'solution'
     | 'minimumLicenseRequired'
     | 'isExportable'
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
-    | 'fieldsForAAD'
     | 'alerts'
+    | 'priority'
+    | 'internallyManaged'
   > {
   id: string;
   enabledInLicense: boolean;
-  hasFieldsForAAD: boolean;
   hasAlertsMappings: boolean;
   validLegacyConsumers: string[];
 }
@@ -277,6 +276,20 @@ export class RuleTypeRegistry {
       }
     }
 
+    if (ruleType.priority) {
+      if (![TaskPriority.Normal, TaskPriority.NormalLongRunning].includes(ruleType.priority)) {
+        throw new Error(
+          i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidPriorityRuleTypeError', {
+            defaultMessage: 'Rule type "{id}" has invalid priority: {errorMessage}.',
+            values: {
+              id: ruleType.id,
+              errorMessage: ruleType.priority,
+            },
+          })
+        );
+      }
+    }
+
     const normalizedRuleType = augmentActionGroupsWithReserved<
       Params,
       ExtractedParams,
@@ -299,6 +312,7 @@ export class RuleTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`alerting:${ruleType.id}`]: {
         title: ruleType.name,
+        priority: ruleType.priority,
         timeout: ruleType.ruleTaskTimeout,
         stateSchemaByVersion,
         createTaskRunner: (context: RunContext) =>
@@ -395,6 +409,7 @@ export class RuleTypeRegistry {
         actionVariables: _ruleType.actionVariables,
         category: _ruleType.category,
         producer: _ruleType.producer,
+        solution: _ruleType.solution,
         minimumLicenseRequired: _ruleType.minimumLicenseRequired,
         isExportable: _ruleType.isExportable,
         ruleTaskTimeout: _ruleType.ruleTaskTimeout,
@@ -405,10 +420,9 @@ export class RuleTypeRegistry {
           _ruleType.name,
           _ruleType.minimumLicenseRequired
         ).isValid,
-        fieldsForAAD: _ruleType.fieldsForAAD,
-        hasFieldsForAAD: Boolean(_ruleType.fieldsForAAD),
         hasAlertsMappings: !!_ruleType.alerts,
         ...(_ruleType.alerts ? { alerts: _ruleType.alerts } : {}),
+        ...(_ruleType.priority ? { priority: _ruleType.priority } : {}),
         validLegacyConsumers: _ruleType.validLegacyConsumers,
       };
 
@@ -420,6 +434,12 @@ export class RuleTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.ruleTypes.keys()];
+  }
+
+  public getAllTypesForCategories(categories: string[]): string[] {
+    return [...this.ruleTypes.values()]
+      .filter((ruleType) => categories.includes(ruleType.category))
+      .map((ruleType) => ruleType.id);
   }
 }
 
@@ -499,7 +519,7 @@ function augmentActionGroupsWithReserved<
 
   const activeActionGroupSeverities = new Set<number>();
   actionGroups.forEach((actionGroup) => {
-    if (!!actionGroup.severity) {
+    if (actionGroup.severity) {
       if (activeActionGroupSeverities.has(actionGroup.severity.level)) {
         throw new Error(
           i18n.translate(

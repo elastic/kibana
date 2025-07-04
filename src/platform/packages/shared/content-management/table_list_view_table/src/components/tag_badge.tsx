@@ -34,7 +34,7 @@ export const TagBadge: FC<Props> = ({ tag, onClick }) => {
         onClick(tag, withModifierKey);
       }}
       onClickAriaLabel={i18n.translate('contentManagement.tableList.tagBadge.buttonLabel', {
-        defaultMessage: '{tagName} tag button.',
+        defaultMessage: '{tagName} tag',
         values: {
           tagName: tag.name,
         },

@@ -9,7 +9,7 @@ import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/se
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { createConfigRoute } from './config';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
-import { RegistryAlertTypeWithAuth } from '@kbn/alerting-plugin/server/authorization';
+import type { RegistryAlertTypeWithAuth } from '@kbn/alerting-plugin/server/authorization';
 
 const ruleTypes = [
   {

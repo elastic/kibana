@@ -7,6 +7,10 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+} from '../../../../common/types/saved_objects';
 import { validateSpaceId } from '../services/validate_space_id';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { ProjectMonitor } from '../../../../common/runtime_types';
@@ -20,6 +24,20 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE,
   validate: {
+    query: schema.object({
+      // primarily used for testing purposes, to specify the type of saved object
+      savedObjectType: schema.maybe(
+        schema.oneOf(
+          [
+            schema.literal(syntheticsMonitorSavedObjectType),
+            schema.literal(legacySyntheticsMonitorTypeSingle),
+          ],
+          {
+            defaultValue: syntheticsMonitorSavedObjectType,
+          }
+        )
+      ),
+    }),
     params: schema.object({
       projectName: schema.string(),
     }),
@@ -65,13 +83,10 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
         return response.forbidden({ body: { message: permissionError } });
       }
 
-      const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
-
       const pushMonitorFormatter = new ProjectMonitorFormatter({
         routeContext,
         projectId: decodedProjectName,
         spaceId,
-        encryptedSavedObjectsClient,
         monitors,
       });
 
@@ -83,12 +98,12 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
         failedMonitors: pushMonitorFormatter.failedMonitors,
       };
     } catch (error) {
-      server.logger.error(`Error adding monitors to project ${decodedProjectName}`);
       if (error.output?.statusCode === 404) {
         const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
         return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
       }
 
+      server.logger.error(`Error adding monitors to project ${decodedProjectName}`, { error });
       throw error;
     }
   },

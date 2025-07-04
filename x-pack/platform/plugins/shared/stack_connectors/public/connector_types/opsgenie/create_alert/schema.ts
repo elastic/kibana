@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 import * as rt from 'io-ts';
 import { isEmpty } from 'lodash';
 import { decodeSchema } from '../schema_utils';

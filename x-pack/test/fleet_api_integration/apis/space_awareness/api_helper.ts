@@ -482,7 +482,7 @@ export class SpaceTestApiClient {
     return res;
   }
   async installPackageKibanaAssets(
-    { pkgName, pkgVersion }: { pkgName: string; pkgVersion: string },
+    { pkgName, pkgVersion, spaceIds }: { pkgName: string; pkgVersion: string; spaceIds?: string[] },
     spaceId?: string
   ) {
     const { body: res } = await this.supertest
@@ -490,6 +490,7 @@ export class SpaceTestApiClient {
         `${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/${pkgVersion}/kibana_assets`
       )
       .set('kbn-xsrf', 'xxxx')
+      .send(spaceIds ? { space_ids: spaceIds } : {})
       .expect(200);
 
     return res;

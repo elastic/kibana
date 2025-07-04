@@ -17,14 +17,14 @@ export const phpDefinition: LanguageDefinition = {
   $response = $client->search(index: "books", params: $params);
   print_r($response['hits']['hits']); # list of books`,
   configureClient: ({ url, apiKey }) => `$client = ClientBuilder::create()
-  ->setEndpoint('${url}')
+  ->setHosts(['${url}'])
   ->setApiKey('${apiKey}')
   ->build();`,
   docLink: docLinks.phpClient,
   github: {
-    link: 'https://github.com/elastic/elasticsearch-serverless-php',
+    link: 'https://github.com/elastic/elasticsearch-php',
     label: i18n.translate('xpack.serverlessSearch.languages.php.githubLink', {
-      defaultMessage: 'elasticsearch-serverless-php',
+      defaultMessage: 'elasticsearch-php',
     }),
   },
   iconType: 'php.svg',
@@ -56,7 +56,7 @@ echo (string) $response->getBody();`,
     indexName,
     ingestPipeline,
   }) => `$client = ClientBuilder::create()
-  ->setEndpoint('${url}')
+  ->setHosts(['${url}'])
   ->setApiKey('${apiKey}')
   ->build();
 $params =[${ingestPipeline ? `\n  'pipeline' => '${ingestPipeline}',` : ''}
@@ -69,7 +69,7 @@ $response = $client->bulk($params);
 echo $response->getStatusCode();
 echo (string) $response->getBody();
 `,
-  installClient: 'composer require elastic/elasticsearch-serverless:*@alpha',
+  installClient: 'composer require elasticsearch/elasticsearch',
   name: i18n.translate('xpack.serverlessSearch.languages.php', {
     defaultMessage: 'PHP',
   }),

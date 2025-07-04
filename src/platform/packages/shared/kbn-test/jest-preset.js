@@ -52,6 +52,14 @@ module.exports = {
           ],
         ]
       : []),
+    ...(['1', 'yes', 'true'].includes(process.env.SCOUT_REPORTER_ENABLED)
+      ? [
+          [
+            '<rootDir>/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest',
+            { name: 'Jest tests (unit)', configCategory: 'unit-test' },
+          ],
+        ]
+      : []),
   ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
@@ -105,13 +113,15 @@ module.exports = {
     '^.+\\.(txt|html)?$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/raw.js',
     '^.+\\.peggy?$': '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/peggy.js',
+    '^.+\\.text?$':
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/dot_text.js',
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor, monaco-yaml which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/util/[/\\\\].+\\.js$',

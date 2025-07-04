@@ -106,7 +106,7 @@ export const getCertsRequestBody = ({
                   ? [
                       {
                         range: {
-                          'tls.certificate_not_valid_before': {
+                          'tls.server.x509.not_before': {
                             lte: absoluteDate(notValidBefore),
                           },
                         },
@@ -117,7 +117,7 @@ export const getCertsRequestBody = ({
                   ? [
                       {
                         range: {
-                          'tls.certificate_not_valid_after': {
+                          'tls.server.x509.not_after': {
                             lte: absoluteDate(notValidAfter),
                           },
                         },

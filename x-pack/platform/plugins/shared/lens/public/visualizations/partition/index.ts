@@ -8,11 +8,13 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { FormatFactory } from '@kbn/visualization-ui-components';
 import type { EditorFrameSetup } from '../../types';
 
 export interface PieVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
+  formatFactory: FormatFactory;
 }
 
 export interface PieVisualizationPluginStartPlugins {
@@ -20,12 +22,17 @@ export interface PieVisualizationPluginStartPlugins {
 }
 
 export class PieVisualization {
-  setup(core: CoreSetup, { editorFrame, charts }: PieVisualizationPluginSetupPlugins) {
+  setup(
+    core: CoreSetup,
+    { editorFrame, formatFactory, charts }: PieVisualizationPluginSetupPlugins
+  ) {
     editorFrame.registerVisualization(async () => {
-      const { getPieVisualization } = await import('../../async_services');
-      const palettes = await charts.palettes.getPalettes();
+      const [{ getPieVisualization }, paletteService] = await Promise.all([
+        import('../../async_services'),
+        charts.palettes.getPalettes(),
+      ]);
 
-      return getPieVisualization({ paletteService: palettes, kibanaTheme: core.theme });
+      return getPieVisualization({ paletteService, kibanaTheme: core.theme, formatFactory });
     });
   }
 }

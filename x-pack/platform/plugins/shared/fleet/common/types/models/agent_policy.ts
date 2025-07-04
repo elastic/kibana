@@ -8,9 +8,7 @@
 import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
-
-import type { SOSecret } from '..';
+import type { BaseSSLSecrets, MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
@@ -75,7 +73,12 @@ export interface AgentTargetVersion {
   percentage: number;
 }
 
+export interface CloudConnectors {
+  target_csp?: string;
+  enabled?: boolean;
+}
 export interface AgentlessPolicy {
+  cloud_connectors?: CloudConnectors;
   resources?: {
     requests?: {
       memory?: string;
@@ -179,6 +182,11 @@ export interface FullAgentPolicyMonitoring {
     };
   };
 }
+export interface FullAgentPolicyDownload {
+  sourceURI: string;
+  ssl?: BaseSSLConfig;
+  secrets?: BaseSSLSecrets;
+}
 
 export interface FullAgentPolicy {
   id: string;
@@ -198,7 +206,7 @@ export interface FullAgentPolicy {
   revision?: number;
   agent?: {
     monitoring: FullAgentPolicyMonitoring;
-    download: { sourceURI: string };
+    download: FullAgentPolicyDownload;
     features: Record<string, { enabled: boolean }>;
     protection?: {
       enabled: boolean;
@@ -239,9 +247,7 @@ export interface FullAgentPolicyFleetConfig {
   proxy_url?: string;
   proxy_headers?: any;
   ssl?: BaseSSLConfig;
-  secrets?: {
-    ssl?: { key?: SOSecret };
-  };
+  secrets?: BaseSSLSecrets;
 }
 
 export interface FullAgentPolicyKibanaConfig {
@@ -296,8 +302,20 @@ export interface FleetServerPolicy {
   inactivity_timeout?: number;
 }
 
-export interface AgentlessApiResponse {
-  id: string;
+export enum AgentlessApiDeploymentResponseCode {
+  Success = 'SUCCESS',
+  BackendFailed = 'BACKEND_OPERATION_FAILED',
+  BadRequest = 'BAD_REQUEST',
+  InternalError = 'INTERNAL_SERVER_ERROR',
+  NotAllowed = 'NOT_ALLOWED',
+  NotFound = 'NOT_FOUND',
+  Unauthorized = 'UNAUTHORIZED',
+  WrongEndpoint = 'WRONG_ENDPOINT',
+}
+
+export interface AgentlessApiDeploymentResponse {
+  code: AgentlessApiDeploymentResponseCode;
+  error: string | null;
 }
 
 // Definitions for agent policy outputs endpoints

@@ -72,13 +72,26 @@
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
                     "id": "def-public.StorybookMock.serviceArguments.canCreateNewDataView.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                        "id": "def-public.StorybookMock.serviceArguments.canCreateNewDataView.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -131,10 +144,10 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                        "id": "def-public.StorybookMock.serviceArguments.dataViewsDocLink.control.type",
+                        "id": "def-public.StorybookMock.serviceArguments.dataViewsDocLink.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                         "deprecated": false,
@@ -169,13 +182,26 @@
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
                     "id": "def-public.StorybookMock.serviceArguments.canTryEsql.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                        "id": "def-public.StorybookMock.serviceArguments.canTryEsql.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
@@ -228,10 +254,10 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
-                        "id": "def-public.StorybookMock.serviceArguments.esqlDocLink.control.type",
+                        "id": "def-public.StorybookMock.serviceArguments.esqlDocLink.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
                         "deprecated": false,

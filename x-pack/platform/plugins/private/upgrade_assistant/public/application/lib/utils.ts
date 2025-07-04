@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { tryCatch, fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { tryCatch, fold } from 'fp-ts/Either';
 
 import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
-import { ReindexStep, DataStreamReindexStatus } from '../../../common/types';
+import { ReindexStep, DataStreamMigrationStatus } from '../../../common/types';
 
 export const validateRegExpString = (s: string) =>
   pipe(
@@ -103,20 +103,20 @@ export const getReindexProgressLabel = (
 };
 
 export const getDataStreamReindexProgress = (
-  status: DataStreamReindexStatus,
-  reindexTaskPercComplete: number | null
+  status: DataStreamMigrationStatus,
+  taskPercComplete: number | null
 ): number => {
   switch (status) {
-    case DataStreamReindexStatus.notStarted:
+    case DataStreamMigrationStatus.notStarted:
       return 0;
 
-    case DataStreamReindexStatus.fetchFailed:
-    case DataStreamReindexStatus.failed:
-    case DataStreamReindexStatus.cancelled:
-    case DataStreamReindexStatus.inProgress: {
-      return reindexTaskPercComplete !== null ? Math.round(reindexTaskPercComplete * 100) : 0;
+    case DataStreamMigrationStatus.fetchFailed:
+    case DataStreamMigrationStatus.failed:
+    case DataStreamMigrationStatus.cancelled:
+    case DataStreamMigrationStatus.inProgress: {
+      return taskPercComplete !== null ? Math.round(taskPercComplete * 100) : 0;
     }
-    case DataStreamReindexStatus.completed: {
+    case DataStreamMigrationStatus.completed: {
       return 100;
     }
   }
@@ -125,9 +125,9 @@ export const getDataStreamReindexProgress = (
 };
 
 export const getDataStreamReindexProgressLabel = (
-  status: DataStreamReindexStatus,
-  reindexTaskPercComplete: number | null
+  status: DataStreamMigrationStatus,
+  taskPercComplete: number | null
 ): string => {
-  const percentsComplete = getDataStreamReindexProgress(status, reindexTaskPercComplete);
+  const percentsComplete = getDataStreamReindexProgress(status, taskPercComplete);
   return `${percentsComplete}%`;
 };

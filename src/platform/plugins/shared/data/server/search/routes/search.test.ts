@@ -9,7 +9,7 @@
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { from } from 'rxjs';
-import { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import { CoreSetup, type Logger, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerSearchRoute } from './search';
 import { DataPluginStart } from '../../plugin';
@@ -19,13 +19,18 @@ import { KbnSearchError } from '../report_search_error';
 
 describe('Search service', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
+  let mockLogger: Logger;
 
   function mockEsError(message: string, statusCode: number, errBody?: Record<string, any>) {
     return new KbnSearchError(message, statusCode, errBody);
   }
 
   async function runMockSearch(mockContext: any, mockRequest: any, mockResponse: any) {
-    registerSearchRoute(mockCoreSetup.http.createRouter());
+    registerSearchRoute(
+      mockCoreSetup.http.createRouter(),
+      mockLogger,
+      mockCoreSetup.executionContext
+    );
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls[0][1];
@@ -33,7 +38,11 @@ describe('Search service', () => {
   }
 
   async function runMockDelete(mockContext: any, mockRequest: any, mockResponse: any) {
-    registerSearchRoute(mockCoreSetup.http.createRouter());
+    registerSearchRoute(
+      mockCoreSetup.http.createRouter(),
+      mockLogger,
+      mockCoreSetup.executionContext
+    );
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.versioned.delete.mock.results[0].value.addVersion.mock.calls[0][1];
@@ -43,6 +52,7 @@ describe('Search service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCoreSetup = coreMock.createSetup();
+    mockLogger = coreMock.createPluginInitializerContext().logger.get();
   });
 
   it('handler calls context.search.search with the given request and strategy', async () => {

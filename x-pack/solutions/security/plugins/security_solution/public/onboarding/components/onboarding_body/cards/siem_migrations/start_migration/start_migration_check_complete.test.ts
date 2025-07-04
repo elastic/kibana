@@ -11,7 +11,7 @@ import type { SiemMigrationsService } from '../../../../../../siem_migrations/se
 import { checkStartMigrationCardComplete } from './start_migration_check_complete';
 
 describe('startMigrationCheckComplete', () => {
-  test('should return default values if siem migrations are not available', async () => {
+  it('should return default values if siem migrations are not available', async () => {
     // Arrange
     const siemMigrations = {
       rules: {
@@ -26,10 +26,14 @@ describe('startMigrationCheckComplete', () => {
     };
     const result = await checkStartMigrationCardComplete(services);
 
-    expect(result).toEqual({ isComplete: false, metadata: { missingCapabilities: [] } });
+    expect(result).toEqual({
+      completeBadgeText: '0 migrations',
+      isComplete: false,
+      metadata: { missingCapabilities: [] },
+    });
   });
 
-  test('should query Stats if siem migrations are available', async () => {
+  it('should query Stats if siem migrations are available', async () => {
     const siemMigrations = {
       rules: {
         getMissingCapabilities: jest.fn().mockReturnValue([]),
@@ -52,6 +56,7 @@ describe('startMigrationCheckComplete', () => {
     expect(siemMigrations.rules.getRuleMigrationsStats).toHaveBeenCalled();
 
     expect(result).toEqual({
+      completeBadgeText: '1 migration',
       isComplete: true,
       metadata: { missingCapabilities: [] },
     });

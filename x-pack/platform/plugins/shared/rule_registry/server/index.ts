@@ -7,7 +7,7 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110907
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
 export type {
@@ -39,12 +39,6 @@ export {
 export type { RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
 export type { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './rule_data_client/types';
 export { RuleDataClient } from './rule_data_client';
-export type { AlertAuditEventParams } from './alert_data_client/audit_events';
-export {
-  AlertAuditAction,
-  operationAlertAuditActionMap,
-  alertAuditEvent,
-} from './alert_data_client/audit_events';
 
 export { createPersistenceRuleTypeWrapper } from './utils/create_persistence_rule_type_wrapper';
 export type {

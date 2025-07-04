@@ -6,13 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
 } from '../../../../authorization';
-import { RulesClientContext } from '../../../../rules_client';
-import { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
+import type { RulesClientContext } from '../../../../rules_client';
+import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
@@ -51,6 +51,9 @@ export async function getRuleIdsWithGaps(
       start,
       end,
       statuses,
+      hasUnfilledIntervals: params.hasUnfilledIntervals,
+      hasInProgressIntervals: params.hasInProgressIntervals,
+      hasFilledIntervals: params.hasFilledIntervals,
     });
 
     const aggs = await eventLogClient.aggregateEventsWithAuthFilter(
@@ -59,6 +62,11 @@ export async function getRuleIdsWithGaps(
       {
         filter,
         aggs: {
+          latest_gap_timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
           unique_rule_ids: {
             terms: {
               field: 'rule.id',
@@ -74,6 +82,7 @@ export async function getRuleIdsWithGaps(
     }
 
     const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;
+    const latestGapTimestampAgg = aggs.aggregations?.latest_gap_timestamp as { value: number };
 
     const resultBuckets = uniqueRuleIdsAgg?.buckets ?? [];
 
@@ -82,6 +91,7 @@ export async function getRuleIdsWithGaps(
     const result: GetRuleIdsWithGapsResponse = {
       total: ruleIds?.length,
       ruleIds,
+      latestGapTimestamp: latestGapTimestampAgg?.value,
     };
 
     return result;

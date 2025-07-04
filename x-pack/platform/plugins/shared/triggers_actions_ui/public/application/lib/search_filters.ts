@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import {
-  ALERT_RULE_PRODUCER,
-  ALERT_RULE_TYPE_ID,
-  AlertConsumers,
-  DefaultAlertFieldName,
-} from '@kbn/rule-data-utils';
-import { FILTERS, FilterStateStore, PhrasesFilter } from '@kbn/es-query';
+import type { AlertConsumers, DefaultAlertFieldName } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import type { PhrasesFilter } from '@kbn/es-query';
+import { FILTERS, FilterStateStore } from '@kbn/es-query';
 
 const $state = {
   store: FilterStateStore.APP_STATE,

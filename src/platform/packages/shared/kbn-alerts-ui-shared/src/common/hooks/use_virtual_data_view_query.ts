@@ -10,7 +10,7 @@
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
+import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
 
 export interface UseVirtualDataViewParams {
   // Dependencies

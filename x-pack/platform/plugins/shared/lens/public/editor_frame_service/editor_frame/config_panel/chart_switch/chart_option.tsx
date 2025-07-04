@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './chart_switch.scss';
 import React from 'react';
 import {
   EuiFlexItem,
@@ -36,7 +35,7 @@ export const ChartOption = ({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon className="lnsChartSwitch__chartIcon" type={option.icon || 'empty'} />
+        <EuiIcon type={option.icon || 'empty'} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" data-test-subj="lnsChartSwitch-option-label">
@@ -88,7 +87,6 @@ const DataLossWarning = ({ content, id }: { content?: string; id: string }) => {
       color={euiTheme.colors.warning}
       content={content}
       iconProps={{
-        className: 'lnsChartSwitch__chartIcon',
         'data-test-subj': `lnsChartSwitchPopoverAlert_${id}`,
       }}
     />

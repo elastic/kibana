@@ -7,19 +7,21 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import {
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
+import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { Logger } from '@kbn/core/server';
-import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import type { Logger } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { bulkCreateRulesSo } from '../../../../data/rule';
-import { RawRule } from '../../../../types';
-import { RuleDomain, RuleParams } from '../../types';
+import type { RawRule } from '../../../../types';
+import type { RuleDomain, RuleParams } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
@@ -27,18 +29,19 @@ import {
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
 } from '../../../../rules_client/common';
-import { getRuleCircuitBreakerErrorMessage, SanitizedRule } from '../../../../../common';
+import type { SanitizedRule } from '../../../../../common';
+import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   createNewAPIKeySet,
-  migrateLegacyActions,
   updateMetaAttributes,
+  bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
-import { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
+import type { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
+import type { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
@@ -200,6 +203,8 @@ const bulkEnableRulesWithOCC = async (
         });
       }
 
+      await bulkMigrateLegacyActions({ context, rules: rulesFinderRules });
+
       await pMap(
         rulesFinderRules,
         async (rule) => {
@@ -220,13 +225,6 @@ const bulkEnableRulesWithOCC = async (
               ruleNameToRuleIdMapping[rule.id] = ruleName;
             }
 
-            const migratedActions = await migrateLegacyActions(context, {
-              ruleId: rule.id,
-              actions: rule.attributes.actions,
-              references: rule.references,
-              attributes: rule.attributes,
-            });
-
             const updatedAttributes = updateMetaAttributes(context, {
               ...rule.attributes,
               ...(!rule.attributes.apiKey &&
@@ -236,13 +234,6 @@ const bulkEnableRulesWithOCC = async (
                   username,
                   shouldUpdateApiKey: true,
                 }))),
-              ...(migratedActions.hasLegacyActions
-                ? {
-                    actions: migratedActions.resultedActions,
-                    throttle: undefined,
-                    notifyWhen: undefined,
-                  }
-                : {}),
               enabled: true,
               updatedBy: username,
               updatedAt: new Date().toISOString(),
@@ -284,9 +275,6 @@ const bulkEnableRulesWithOCC = async (
             rulesToEnable.push({
               ...rule,
               attributes: updatedAttributes,
-              ...(migratedActions.hasLegacyActions
-                ? { references: migratedActions.resultedReferences }
-                : {}),
             });
 
             context.auditLogger?.log(

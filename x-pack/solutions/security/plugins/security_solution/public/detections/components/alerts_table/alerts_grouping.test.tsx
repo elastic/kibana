@@ -21,6 +21,14 @@ import { createTelemetryServiceMock } from '../../../common/lib/telemetry/teleme
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { getQuery, groupingSearchResponse } from './grouping_settings/mock';
 import { AlertsEventTypes } from '../../../common/lib/telemetry';
+import {
+  defaultGroupingOptions,
+  defaultGroupStatsAggregations,
+  defaultGroupStatsRenderer,
+  defaultGroupTitleRenderers,
+} from './grouping_settings';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../sourcerer/containers');
@@ -45,10 +53,10 @@ jest.mock('../../../common/containers/use_global_time', () => {
 });
 
 const mockOptions = [
-  { label: 'ruleName', key: 'kibana.alert.rule.name' },
-  { label: 'userName', key: 'user.name' },
-  { label: 'hostName', key: 'host.name' },
-  { label: 'sourceIP', key: 'source.ip' },
+  { label: 'Rule name', key: 'kibana.alert.rule.name' },
+  { label: 'User name', key: 'user.name' },
+  { label: 'Host name', key: 'host.name' },
+  { label: 'Source IP', key: 'source.ip' },
 ];
 
 jest.mock('../../../common/utils/alerts', () => {
@@ -111,20 +119,26 @@ const sourcererDataView = {
 };
 const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
 
+const dataViewSpec: DataViewSpec = { title: 'test' };
+const dataView: DataView = createStubDataView({ spec: dataViewSpec });
+
 const testProps: AlertsTableComponentProps = {
   ...mockDate,
+  accordionButtonContent: defaultGroupTitleRenderers,
+  accordionExtraActionGroupStats: {
+    aggregations: defaultGroupStatsAggregations,
+    renderer: defaultGroupStatsRenderer,
+  },
+  dataViewSpec: dataView.toSpec(),
   defaultFilters: [],
+  defaultGroupingOptions,
   globalFilters: [],
   globalQuery: {
     query: 'query',
     language: 'language',
   },
-  hasIndexMaintenance: true,
-  hasIndexWrite: true,
   loading: false,
   renderChildComponent,
-  runtimeMappings: {},
-  signalIndexName: 'test',
   tableId: TableId.test,
 };
 
@@ -191,6 +205,7 @@ describe('GroupedAlertsTable', () => {
     });
     expect(mockDispatch.mock.calls[1][0].payload).toEqual({
       activeGroups: ['none'],
+      options: mockOptions,
       tableId: testProps.tableId,
     });
   });
@@ -308,7 +323,7 @@ describe('GroupedAlertsTable', () => {
       ).toEqual(null);
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
     });
 
     fireEvent.click(getAllByTestId('group-selector-dropdown')[0]);
@@ -321,7 +336,7 @@ describe('GroupedAlertsTable', () => {
     ].forEach((pagination) => {
       expect(
         within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
       ).toEqual(null);
@@ -369,7 +384,7 @@ describe('GroupedAlertsTable', () => {
     ].forEach((pagination) => {
       expect(
         within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
       ).toEqual(null);
@@ -418,7 +433,7 @@ describe('GroupedAlertsTable', () => {
       ).toEqual(null);
       expect(
         within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-      ).toEqual('true');
+      ).toEqual('page');
     });
 
     // level 2 pagination is reset
@@ -426,7 +441,7 @@ describe('GroupedAlertsTable', () => {
       within(getByTestId('grouping-level-2-pagination'))
         .getByTestId('pagination-button-0')
         .getAttribute('aria-current')
-    ).toEqual('true');
+    ).toEqual('page');
     expect(
       within(getByTestId('grouping-level-2-pagination'))
         .getByTestId('pagination-button-1')
@@ -472,11 +487,11 @@ describe('GroupedAlertsTable', () => {
         ).toEqual(null);
         expect(
           within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
       } else {
         expect(
           within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
         expect(within(pagination).queryByTestId('pagination-button-1')).not.toBeInTheDocument();
       }
     });
@@ -521,11 +536,11 @@ describe('GroupedAlertsTable', () => {
         ).toEqual(null);
         expect(
           within(pagination).getByTestId('pagination-button-1').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
       } else {
         expect(
           within(pagination).getByTestId('pagination-button-0').getAttribute('aria-current')
-        ).toEqual('true');
+        ).toEqual('page');
         expect(within(pagination).queryByTestId('pagination-button-1')).not.toBeInTheDocument();
       }
     });

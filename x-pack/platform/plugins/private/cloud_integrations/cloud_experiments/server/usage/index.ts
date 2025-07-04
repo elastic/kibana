@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerUsageCollector } from './register_usage_collector';
+export { registerUsageCollector, getAllFlags } from './register_usage_collector';

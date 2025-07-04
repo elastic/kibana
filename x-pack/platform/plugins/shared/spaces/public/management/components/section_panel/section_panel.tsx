@@ -6,7 +6,8 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { Component, Fragment } from 'react';
 
@@ -15,6 +16,37 @@ interface Props {
   title?: string | ReactNode;
   dataTestSubj?: string;
 }
+
+const SectionPanelTitle = ({
+  iconType,
+  title,
+}: {
+  iconType?: IconType;
+  title: string | ReactNode;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
+      <EuiTitle size="s">
+        <h2>
+          {iconType && (
+            <Fragment>
+              <EuiIcon
+                type={iconType}
+                size={'xl'}
+                css={css`
+                  vertical-align: text-bottom;
+                  margin-right: ${euiTheme.size.s};
+                `}
+              />
+            </Fragment>
+          )}
+          {title}
+        </h2>
+      </EuiTitle>
+    </EuiFlexGroup>
+  );
+};
 
 export class SectionPanel extends Component<React.PropsWithChildren<Props>, {}> {
   public render() {
@@ -31,26 +63,7 @@ export class SectionPanel extends Component<React.PropsWithChildren<Props>, {}> 
       return null;
     }
 
-    return (
-      <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h2>
-              {this.props.iconType && (
-                <Fragment>
-                  <EuiIcon
-                    type={this.props.iconType}
-                    size={'xl'}
-                    className={'spcSectionPanel__collapsiblePanelLogo'}
-                  />{' '}
-                </Fragment>
-              )}
-              {this.props.title}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <SectionPanelTitle iconType={this.props.iconType} title={this.props.title as string} />;
   };
 
   public getForm = () => {

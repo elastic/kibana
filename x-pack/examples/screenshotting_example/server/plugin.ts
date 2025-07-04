@@ -27,6 +27,7 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void, {}, Start
             expression: schema.string(),
           }),
         },
+        security: { authz: { requiredPrivileges: ['screenshotting'] } },
       },
       async (_context, request, response) => {
         const [, { screenshotting }] = await getStartServices();

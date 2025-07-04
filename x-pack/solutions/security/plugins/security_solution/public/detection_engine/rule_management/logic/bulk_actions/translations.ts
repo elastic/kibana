@@ -14,10 +14,10 @@ import {
   BulkActionEditTypeEnum,
   BulkActionTypeEnum,
 } from '../../../../../common/api/detection_engine/rule_management';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../common/translations';
 import type { BulkActionResponse, BulkActionSummary } from '../../api/api';
 
-export function summarizeBulkSuccess(action: BulkActionType): string {
+export function summarizeBulkSuccess(action: BulkActionType, summary: BulkActionSummary): string {
   switch (action) {
     case BulkActionTypeEnum.export:
       return i18n.RULES_BULK_EXPORT_SUCCESS;
@@ -36,6 +36,12 @@ export function summarizeBulkSuccess(action: BulkActionType): string {
 
     case BulkActionTypeEnum.run:
       return i18n.RULES_BULK_MANUAL_RULE_RUN_SUCCESS;
+
+    case BulkActionTypeEnum.fill_gaps:
+      if (summary.succeeded === 0 && summary.skipped > 0) {
+        return i18n.RULES_BULK_FILL_GAPS_SUCCESS_ALL_SKIPPED;
+      }
+      return i18n.RULES_BULK_FILL_GAPS_SUCCESS;
 
     case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_SUCCESS;
@@ -64,6 +70,12 @@ export function explainBulkSuccess(
 
     case BulkActionTypeEnum.run:
       return i18n.RULES_BULK_MANUAL_RULE_RUN_SUCCESS_DESCRIPTION(summary.succeeded);
+
+    case BulkActionTypeEnum.fill_gaps:
+      if (summary.succeeded === 0 && summary.skipped > 0) {
+        return i18n.RULES_BULK_FILL_GAPS_SUCCESS_ALL_RULES_SKIPPED_DESCRIPTION;
+      }
+      return i18n.RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION(summary.succeeded, summary.skipped);
   }
 }
 
@@ -110,6 +122,9 @@ export function summarizeBulkError(action: BulkActionType): string {
     case BulkActionTypeEnum.run:
       return i18n.RULES_BULK_MANUAL_RULE_RUN_FAILURE;
 
+    case BulkActionTypeEnum.fill_gaps:
+      return i18n.RULES_BULK_FILL_GAPS_FAILURE;
+
     case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_FAILURE;
   }
@@ -141,6 +156,9 @@ export function explainBulkError(action: BulkActionType, error: HTTPError): stri
 
     case BulkActionTypeEnum.run:
       return i18n.RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION(summary.failed);
+
+    case BulkActionTypeEnum.fill_gaps:
+      return i18n.RULES_BULK_FILL_GAPS_FAILURE_DESCRIPTION(summary.failed);
 
     case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_FAILURE_DESCRIPTION(summary.failed, summary.skipped);

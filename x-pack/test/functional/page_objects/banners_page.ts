@@ -8,19 +8,19 @@
 import { FtrService } from '../ftr_provider_context';
 
 export class BannersPageObject extends FtrService {
-  private readonly find = this.ctx.getService('find');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
 
   isTopBannerVisible() {
-    return this.find.existsByCssSelector('.header__topBanner .kbnUserBanner__container');
+    return this.testSubjects.exists('bannerInnerWrapper');
   }
 
   async getTopBannerText() {
     if (!(await this.isTopBannerVisible())) {
       return '';
     }
-    const bannerContainer = await this.find.byCssSelector(
-      '.header__topBanner .kbnUserBanner__container'
-    );
+
+    const bannerContainer = await this.testSubjects.find('bannerInnerWrapper');
+
     return bannerContainer.getVisibleText();
   }
 }

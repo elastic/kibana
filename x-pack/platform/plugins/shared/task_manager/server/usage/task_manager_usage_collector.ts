@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { combineLatest, Observable } from 'rxjs';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { MonitoredHealth } from '../routes/health';
-import { TaskManagerUsage } from './types';
-import { MonitoredUtilization } from '../routes/background_task_utilization';
-import { BackgroundTaskUtilizationStat } from '../monitoring/background_task_utilization_statistics';
-import { MonitoredStat } from '../monitoring/monitoring_stats_stream';
+import type { Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { MonitoredHealth } from '../routes/health';
+import type { TaskManagerUsage } from './types';
+import type { MonitoredUtilization } from '../routes/background_task_utilization';
+import type { BackgroundTaskUtilizationStat } from '../monitoring/background_task_utilization_statistics';
+import type { MonitoredStat } from '../monitoring/monitoring_stats_stream';
 
 export function createTaskManagerUsageCollector(
   usageCollection: UsageCollectionSetup,

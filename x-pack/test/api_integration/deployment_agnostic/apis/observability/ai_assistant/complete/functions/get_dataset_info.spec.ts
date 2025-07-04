@@ -11,12 +11,8 @@ import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { last } from 'lodash';
 import { GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import {
-  LlmProxy,
-  RelevantField,
-  createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { chatComplete, getSystemMessage, systemMessageSorted } from './helpers';
+import { LlmProxy, RelevantField, createLlmProxy } from '../../utils/create_llm_proxy';
+import { chatComplete, getSystemMessage, systemMessageSorted } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { createSimpleSyntheticLogs } from '../../synthtrace_scenarios/simple_logs';
 
@@ -25,8 +21,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const synthtrace = getService('synthtrace');
 
-  describe('get_dataset_info', function () {
-    this.tags(['failsOnMKI']);
+  describe('tool: get_dataset_info', function () {
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
 
@@ -42,6 +38,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
+    });
+
+    afterEach(async () => {
+      llmProxy.clear();
     });
 
     // Calling `get_dataset_info` via the chat/complete endpoint
@@ -62,12 +62,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'get_dataset_info',
           arguments: () => JSON.stringify({ index: 'logs*' }),
-          when: () => true,
         });
 
         ({ getRelevantFields } = llmProxy.interceptSelectRelevantFieldsToolChoice());
 
-        void llmProxy.interceptConversation(`Yes, you do have logs. Congratulations! 🎈️🎈️🎈️`);
+        void llmProxy.interceptWithResponse(`Yes, you do have logs. Congratulations! 🎈️🎈️🎈️`);
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: USER_MESSAGE,
@@ -84,6 +83,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => {
         await logsSynthtraceEsClient.clean();
+      });
+
+      afterEach(async () => {
+        llmProxy.clear();
       });
 
       it('makes 3 requests to the LLM', () => {

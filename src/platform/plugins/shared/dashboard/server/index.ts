@@ -8,13 +8,26 @@
  */
 
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, ConfigSchema } from './config';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: {
-    allowByValueEmbeddables: true,
-  },
+export const configSchema = schema.object({
+  /**
+   * this config is unused, but cannot be removed as removing a yml setting is a breaking change.
+   * This can be removed in 10.0. https://github.com/elastic/kibana/issues/221197
+   */
+  allowByValueEmbeddables: schema.boolean({ defaultValue: true }),
+});
+
+export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   schema: configSchema,
+  deprecations: ({ deprecate }) => {
+    return [
+      deprecate('allowByValueEmbeddables', '9.1.0', {
+        level: 'warning',
+        message: `This setting is deprecated and ignored by the system. Please remove this setting.`,
+      }),
+    ];
+  },
 };
 
 //  This exports static code and TypeScript types,
@@ -26,7 +39,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { DashboardPluginSetup, DashboardPluginStart } from './types';
-export type { DashboardAttributes } from './content_management';
-export type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
+export type { DashboardAttributes, DashboardPanel, DashboardSection } from './content_management';
+export type { DashboardSavedObjectAttributes, SavedDashboardPanel } from './dashboard_saved_object';
 
 export { PUBLIC_API_PATH } from './api/constants';

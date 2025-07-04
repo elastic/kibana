@@ -10,6 +10,11 @@
 import { resolve } from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  type KibanaGroup,
+  KIBANA_SOLUTIONS,
+  ModuleVisibility,
+} from '@kbn/projects-solutions-groups';
 
 export const TEMPLATE_DIR = resolve(__dirname, '../templates');
 export const PKG_TEMPLATE_DIR = resolve(TEMPLATE_DIR, 'package');
@@ -19,9 +24,10 @@ export const PKG_DIRS: Record<string, string> = {
   'oss|platform|shared': resolve(REPO_ROOT, 'src/platform/packages/shared'),
   'xpack|platform|private': resolve(REPO_ROOT, 'x-pack/platform/packages/private'),
   'xpack|platform|shared': resolve(REPO_ROOT, 'x-pack/platform/packages/shared'),
-  'xpack|observability|private': resolve(REPO_ROOT, 'x-pack/solutions/observability/packages'),
-  'xpack|security|private': resolve(REPO_ROOT, 'x-pack/solutions/security/packages'),
-  'xpack|search|private': resolve(REPO_ROOT, 'x-pack/solutions/search/packages'),
+  ...KIBANA_SOLUTIONS.reduce<Record<string, string>>((agg, solution) => {
+    agg[`xpack|${solution}|private`] = resolve(REPO_ROOT, `x-pack/solutions/${solution}/packages`);
+    return agg;
+  }, {}),
 };
 
 function folderName(pkgId: string) {
@@ -39,8 +45,8 @@ export function determinePackageDir({
   xpack,
 }: {
   pkgId: string;
-  group: 'observability' | 'platform' | 'security' | 'search';
-  visibility: 'private' | 'shared';
+  group: KibanaGroup;
+  visibility: ModuleVisibility;
   xpack: boolean;
 }) {
   const dir = PKG_DIRS[`${xpack ? 'xpack' : 'oss'}|${group}|${visibility}`];

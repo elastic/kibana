@@ -19,6 +19,8 @@ export interface DocOverrides {
     label: string;
   };
   configId?: string;
+  tlsNotBefore?: string;
+  tlsNotAfter?: string;
 }
 
 export const makeUpSummary = ({
@@ -28,9 +30,11 @@ export const makeUpSummary = ({
   configId,
   testRunId,
   location,
+  tlsNotBefore,
+  tlsNotAfter,
 }: DocOverrides = {}) => ({
   ...getGeoData(location),
-  ...commons,
+  ...getCommons({ tlsNotBefore, tlsNotAfter }),
   summary: {
     up: 1,
     down: 0,
@@ -61,7 +65,7 @@ export const makeDownSummary = ({
   configId,
 }: DocOverrides = {}) => ({
   ...getGeoData(location),
-  ...commons,
+  ...getCommons(),
   summary: {
     up: 0,
     down: 1,
@@ -115,7 +119,13 @@ const getMonitorData = ({
   status: status ?? 'down',
 });
 
-const commons = {
+const getCommons = ({
+  tlsNotBefore,
+  tlsNotAfter,
+}: {
+  tlsNotBefore?: string;
+  tlsNotAfter?: string;
+} = {}) => ({
   url: {
     scheme: 'https',
     port: 443,
@@ -163,15 +173,14 @@ const commons = {
   tls: {
     established: true,
     cipher: 'TLS-AES-128-GCM-SHA256',
-    certificate_not_valid_before: '2022-11-28T08:19:01.000Z',
     server: {
       x509: {
-        not_after: '2023-02-20T08:19:00.000Z',
+        not_after: tlsNotAfter || '2023-02-20T08:19:00.000Z',
         subject: {
           distinguished_name: 'CN=www.google.com',
           common_name: 'www.google.com',
         },
-        not_before: '2022-11-28T08:19:01.000Z',
+        not_before: tlsNotBefore || '2022-11-28T08:19:01.000Z',
         public_key_algorithm: 'ECDSA',
         public_key_curve: 'P-256',
         signature_algorithm: 'SHA256-RSA',
@@ -192,7 +201,6 @@ const commons = {
       },
     },
     version: '1.3',
-    certificate_not_valid_after: '2023-02-20T08:19:00.000Z',
     version_protocol: 'tls',
   },
   http: {
@@ -238,4 +246,4 @@ const commons = {
   meta: {
     space_id: 'default',
   },
-};
+});

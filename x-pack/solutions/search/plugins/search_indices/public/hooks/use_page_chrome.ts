@@ -8,22 +8,25 @@
 import { useEffect } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { useKibana } from './use_kibana';
+import { PARENT_BREADCRUMB } from '../constants';
 
-export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[]) => {
-  const { chrome, http, serverless } = useKibana().services;
+export const usePageChrome = (
+  docTitle: string,
+  breadcrumbs: ChromeBreadcrumb[],
+  includeParentBreadcrumb: boolean = true
+) => {
+  const { chrome, serverless } = useKibana().services;
 
   useEffect(() => {
     chrome.docTitle.change(docTitle);
-    const newBreadcrumbs = breadcrumbs.map((breadcrumb) => {
-      if (breadcrumb.href && http.basePath.get().length > 0) {
-        breadcrumb.href = http.basePath.prepend(breadcrumb.href);
-      }
-      return breadcrumb;
-    });
+
     if (serverless) {
-      serverless.setBreadcrumbs(newBreadcrumbs);
+      serverless.setBreadcrumbs(breadcrumbs);
     } else {
-      chrome.setBreadcrumbs(newBreadcrumbs);
+      const newBreadcrumbs = includeParentBreadcrumb
+        ? [PARENT_BREADCRUMB, ...breadcrumbs]
+        : breadcrumbs;
+      chrome.setBreadcrumbs(newBreadcrumbs, { project: { value: newBreadcrumbs, absolute: true } });
     }
     return () => {
       // clear manually set breadcrumbs
@@ -33,5 +36,5 @@ export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[])
         chrome.setBreadcrumbs([]);
       }
     };
-  }, [breadcrumbs, chrome, docTitle, http.basePath, serverless]);
+  }, [chrome, docTitle, serverless, breadcrumbs, includeParentBreadcrumb]);
 };

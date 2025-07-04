@@ -1,6 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/eslint-plugin-css",
-  "devOnly": true,
-  "owner": "@elastic/appex-sharedux"
-}

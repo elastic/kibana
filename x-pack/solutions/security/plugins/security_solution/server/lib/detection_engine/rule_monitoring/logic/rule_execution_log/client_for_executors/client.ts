@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import { sum } from 'lodash';
 import type { Duration } from 'moment';
@@ -39,6 +40,7 @@ import type {
 } from './client_interface';
 import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_names';
 
 export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
@@ -83,6 +85,8 @@ export const createRuleExecutionLogClientForExecutors = (
       await withSecuritySpan('IRuleExecutionLogForExecutors.logStatusChange', async () => {
         const correlationIds = baseCorrelationIds.withStatus(args.newStatus);
         const logMeta = correlationIds.getLogMeta();
+
+        agent.addLabels({ [SECURITY_RULE_STATUS]: args.newStatus });
 
         try {
           const normalizedArgs = normalizeStatusChangeArgs(args);
@@ -260,6 +264,7 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
           total_enrichment_duration_ms: normalizeDurations(metrics.enrichmentDurations),
           execution_gap_duration_s: normalizeGap(metrics.executionGap),
           gap_range: metrics.gapRange ?? undefined,
+          frozen_indices_queried_count: metrics.frozenIndicesQueriedCount,
         }
       : undefined,
     userError,

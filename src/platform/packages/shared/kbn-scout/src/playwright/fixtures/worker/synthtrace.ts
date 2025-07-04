@@ -8,41 +8,45 @@
  */
 
 import { Readable } from 'stream';
-import type { ApmFields, Fields, InfraDocument, OtelDocument } from '@kbn/apm-synthtrace-client';
+import type {
+  ApmFields,
+  Fields,
+  InfraDocument,
+  ApmOtelFields,
+  SynthtraceGenerator,
+  LogDocument,
+} from '@kbn/apm-synthtrace-client';
 import Url from 'url';
 import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
 import {
   getApmSynthtraceEsClient,
   getInfraSynthtraceEsClient,
-  getOtelSynthtraceEsClient,
+  getLogsSynthtraceEsClient,
 } from '../../../common/services/synthtrace';
 import { coreWorkerFixtures } from './core_fixtures';
-import type { SynthtraceEvents } from '../../global_hooks/synthtrace_ingestion';
 
 interface SynthtraceFixtureEsClient<TFields extends Fields> {
-  index: (events: SynthtraceEvents<TFields>) => Promise<void>;
+  index: (events: SynthtraceGenerator<TFields>) => Promise<void>;
   clean: SynthtraceEsClient<TFields>['clean'];
 }
 
 export interface SynthtraceFixture {
   apmSynthtraceEsClient: SynthtraceFixtureEsClient<ApmFields>;
   infraSynthtraceEsClient: SynthtraceFixtureEsClient<InfraDocument>;
-  otelSynthtraceEsClient: SynthtraceFixtureEsClient<OtelDocument>;
+  logsSynthtraceEsClient: SynthtraceFixtureEsClient<LogDocument>;
+  otelSynthtraceEsClient: SynthtraceFixtureEsClient<ApmOtelFields>;
 }
 
 const useSynthtraceClient = async <TFields extends Fields>(
   client: SynthtraceEsClient<TFields>,
   use: (client: SynthtraceFixtureEsClient<TFields>) => Promise<void>
 ) => {
-  const index = async (events: SynthtraceEvents<TFields>) =>
+  const index = async (events: SynthtraceGenerator<TFields>) =>
     await client.index(Readable.from(Array.from(events).flatMap((event) => event.serialize())));
 
   const clean = async () => await client.clean();
 
   await use({ index, clean });
-
-  // cleanup function after all tests have ran
-  await client.clean();
 };
 
 export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture>({
@@ -80,11 +84,11 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
     },
     { scope: 'worker' },
   ],
-  otelSynthtraceEsClient: [
+  logsSynthtraceEsClient: [
     async ({ esClient, log }, use) => {
-      const otelSynthtraceEsClient = await getOtelSynthtraceEsClient(esClient, log);
+      const logsSynthtraceEsClient = await getLogsSynthtraceEsClient(esClient, log);
 
-      await useSynthtraceClient<OtelDocument>(otelSynthtraceEsClient, use);
+      await useSynthtraceClient<LogDocument>(logsSynthtraceEsClient, use);
     },
     { scope: 'worker' },
   ],

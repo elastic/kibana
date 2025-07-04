@@ -35,6 +35,7 @@ export async function updatePackage(
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: installedPackage.id,
+    name: installedPackage.attributes.name,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -62,6 +63,7 @@ export async function updateDatastreamExperimentalFeatures(
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 

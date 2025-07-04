@@ -14,28 +14,37 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
-import type { Filter, Query } from '@kbn/es-query';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import { AlertSelection } from './alert_selection';
-import { getMaxAlerts } from './alert_selection/helpers/get_max_alerts';
+import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
+  DEFAULT_END,
+  DEFAULT_START,
+} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import type { Filter, Query } from '@kbn/es-query';
+
 import { useKibana } from '../../../common/lib/kibana';
 import { Footer } from './footer';
-import { getDefaultQuery } from '../helpers';
 import * as i18n from './translations';
+import { useSettingsView } from './hooks/use_settings_view';
+import { useTabsView } from './hooks/use_tabs_view';
+import type { AlertsSelectionSettings } from './types';
+import { MIN_FLYOUT_WIDTH } from './constants';
+import { getMaxAlerts } from './alert_selection/helpers/get_max_alerts';
+import { getDefaultQuery } from '../helpers';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 export const DEFAULT_STACK_BY_FIELD = 'kibana.alert.rule.name';
 
-const MIN_WIDTH = 448; // px
-
-interface Props {
+export interface Props {
+  connectorId: string | undefined;
   end: string | undefined;
   filters: Filter[] | undefined;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
   onClose: () => void;
+  onConnectorIdSelected: (connectorId: string) => void;
   query: Query | undefined;
   setEnd: React.Dispatch<React.SetStateAction<string | undefined>>;
   setFilters: React.Dispatch<React.SetStateAction<Filter[] | undefined>>;
@@ -43,140 +52,145 @@ interface Props {
   setQuery: React.Dispatch<React.SetStateAction<Query | undefined>>;
   setStart: React.Dispatch<React.SetStateAction<string | undefined>>;
   start: string | undefined;
+  stats: AttackDiscoveryStats | null;
 }
 
 const SettingsFlyoutComponent: React.FC<Props> = ({
+  connectorId,
   end,
   filters,
-  setLocalStorageAttackDiscoveryMaxAlerts,
   localStorageAttackDiscoveryMaxAlerts,
   onClose,
+  onConnectorIdSelected,
   query,
   setEnd,
   setFilters,
+  setLocalStorageAttackDiscoveryMaxAlerts,
   setQuery,
   setStart,
   start,
+  stats,
 }) => {
+  const {
+    services: { featureFlags },
+  } = useKibana();
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'attackDiscoverySettingsFlyoutTitle',
   });
 
-  const { uiSettings } = useKibana().services;
-  const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
-
-  const [alertSummaryStackBy0, setAlertSummaryStackBy0] = useState<string>(DEFAULT_STACK_BY_FIELD);
-  const [alertsPreviewStackBy0, setAlertsPreviewStackBy0] =
-    useState<string>(DEFAULT_STACK_BY_FIELD);
-
-  // local state:
-  const [localEnd, setLocalEnd] = useState<string>(end ?? DEFAULT_END);
-  const [localFilters, setLocalFilters] = useState<Filter[]>(filters ?? []);
-  const [localQuery, setLocalQuery] = useState<Query>(query ?? getDefaultQuery());
-  const [localStart, setLocalStart] = useState<string>(start ?? DEFAULT_START);
-  const [localMaxAlerts, setLocalMaxAlerts] = useState(
-    localStorageAttackDiscoveryMaxAlerts ?? `${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`
+  const isAttackDiscoverySchedulingEnabled = featureFlags.getBooleanValue(
+    ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
+    false
   );
 
-  const onReset = useCallback(() => {
-    // reset local state:
-    setAlertSummaryStackBy0(DEFAULT_STACK_BY_FIELD);
-    setAlertsPreviewStackBy0(DEFAULT_STACK_BY_FIELD);
+  const [settings, setSettings] = useState<AlertsSelectionSettings>({
+    end: end ?? DEFAULT_END,
+    filters: filters ?? [],
+    query: query ?? getDefaultQuery(),
+    size: getMaxAlerts(
+      localStorageAttackDiscoveryMaxAlerts ?? `${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`
+    ),
+    start: start ?? DEFAULT_START,
+  });
 
-    setLocalEnd(DEFAULT_END);
-    setLocalFilters([]);
-    setLocalQuery(getDefaultQuery());
-    setLocalStart(DEFAULT_START);
-    setLocalMaxAlerts(`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`);
+  const onSettingsReset = useCallback(() => {
+    // reset local state:
+    setSettings({
+      end: DEFAULT_END,
+      filters: [],
+      query: getDefaultQuery(),
+      size: getMaxAlerts(`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`),
+      start: DEFAULT_START,
+    });
   }, []);
 
-  const onSave = useCallback(() => {
+  const onSettingsSave = useCallback(() => {
     // copy local state:
-    setEnd(localEnd);
-    setFilters(localFilters);
-    setQuery(localQuery);
-    setStart(localStart);
-    setLocalStorageAttackDiscoveryMaxAlerts(localMaxAlerts);
+    setEnd(settings.end);
+    setFilters(settings.filters);
+    setQuery(settings.query);
+    setStart(settings.start);
+    setLocalStorageAttackDiscoveryMaxAlerts(`${settings.size}`);
 
     onClose();
   }, [
-    localEnd,
-    localFilters,
-    localMaxAlerts,
-    localQuery,
-    localStart,
     onClose,
     setEnd,
     setFilters,
     setLocalStorageAttackDiscoveryMaxAlerts,
     setQuery,
     setStart,
+    settings,
   ]);
 
-  const numericMaxAlerts = useMemo(() => getMaxAlerts(localMaxAlerts), [localMaxAlerts]);
+  const { settingsView, actionButtons: settingsActionButtons } = useSettingsView({
+    connectorId,
+    onConnectorIdSelected,
+    onSettingsReset,
+    onSettingsSave,
+    onSettingsChanged: setSettings,
+    settings,
+    showConnectorSelector: true,
+    stats,
+  });
 
-  useEffect(() => {
-    let isSubscribed = true;
+  const { tabsContainer, actionButtons: tabsActionButtons } = useTabsView({
+    connectorId,
+    onConnectorIdSelected,
+    onSettingsReset,
+    onSettingsSave,
+    onSettingsChanged: setSettings,
+    settings,
+    stats,
+  });
 
-    // init the Filter manager with the local filters:
-    filterManager.current.setFilters(localFilters);
+  const content = useMemo(() => {
+    if (isAttackDiscoverySchedulingEnabled) {
+      return tabsContainer;
+    }
+    return settingsView;
+  }, [isAttackDiscoverySchedulingEnabled, settingsView, tabsContainer]);
 
-    // subscribe to filter updates:
-    const subscription = filterManager.current.getUpdates$().subscribe({
-      next: () => {
-        if (isSubscribed) {
-          const newFilters = filterManager.current.getFilters();
+  const actionButtons = useMemo(() => {
+    if (isAttackDiscoverySchedulingEnabled) {
+      return tabsActionButtons;
+    }
+    return settingsActionButtons;
+  }, [isAttackDiscoverySchedulingEnabled, settingsActionButtons, tabsActionButtons]);
 
-          setLocalFilters(newFilters);
-        }
-      },
-    });
-
-    return () => {
-      isSubscribed = false;
-      subscription.unsubscribe();
-    };
-  }, [localFilters]);
+  const hasBorder =
+    isAttackDiscoverySchedulingEnabled || attackDiscoveryAlertsEnabled ? false : true;
 
   return (
     <EuiFlyoutResizable
       aria-labelledby={flyoutTitleId}
       data-test-subj="settingsFlyout"
-      minWidth={MIN_WIDTH}
+      minWidth={MIN_FLYOUT_WIDTH}
       onClose={onClose}
-      paddingSize="m"
+      paddingSize={attackDiscoveryAlertsEnabled ? 'l' : 'm'}
       side="right"
-      size="s"
+      size={attackDiscoveryAlertsEnabled ? 'm' : 's'}
       type="overlay"
     >
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder={hasBorder}>
         <EuiTitle data-test-subj="title" size="m">
-          <h2 id={flyoutTitleId}>{i18n.ATTACK_DISCOVERY_SETTINGS}</h2>
+          <h2 id={flyoutTitleId}>
+            {attackDiscoveryAlertsEnabled
+              ? i18n.ATTACK_DISCOVERY_SETTINGS_AND_SCHEDULE
+              : i18n.ATTACK_DISCOVERY_SETTINGS}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiSpacer size="s" />
-        <AlertSelection
-          alertsPreviewStackBy0={alertsPreviewStackBy0}
-          alertSummaryStackBy0={alertSummaryStackBy0}
-          end={localEnd}
-          filterManager={filterManager.current}
-          filters={localFilters}
-          maxAlerts={numericMaxAlerts}
-          query={localQuery}
-          setAlertsPreviewStackBy0={setAlertsPreviewStackBy0}
-          setAlertSummaryStackBy0={setAlertSummaryStackBy0}
-          setEnd={setLocalEnd}
-          setMaxAlerts={setLocalMaxAlerts}
-          setQuery={setLocalQuery}
-          setStart={setLocalStart}
-          start={localStart}
-        />
+        {attackDiscoveryAlertsEnabled ? null : <EuiSpacer size="s" />}
+        {content}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <Footer closeModal={onClose} onReset={onReset} onSave={onSave} />
+        <Footer closeModal={onClose} actionButtons={actionButtons} />
       </EuiFlyoutFooter>
     </EuiFlyoutResizable>
   );

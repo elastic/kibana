@@ -25,15 +25,15 @@ export function registerPolicyRoutes(
       access: 'public',
       path: BASE_POLICY_RESPONSE_ROUTE,
       options: { authRequired: true },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
         version: '2023-10-31',
-        security: {
-          authz: {
-            requiredPrivileges: ['securitySolution'],
-          },
-        },
         validate: {
           request: GetPolicyResponseSchema,
         },

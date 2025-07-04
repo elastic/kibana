@@ -30,12 +30,14 @@ export default {
 const mock = new NoDataCardStorybookMock();
 const argTypes = mock.getArgumentTypes();
 
-export const Card = (params: NoDataCardStorybookParams) => {
-  return (
-    <NoDataCardProvider {...mock.getServices(params)}>
-      <NoDataCard {...params} />
-    </NoDataCardProvider>
-  );
-};
+export const Card = {
+  render: (params: NoDataCardStorybookParams) => {
+    return (
+      <NoDataCardProvider {...mock.getServices(params)}>
+        <NoDataCard {...params} />
+      </NoDataCardProvider>
+    );
+  },
 
-Card.argTypes = argTypes;
+  argTypes,
+};

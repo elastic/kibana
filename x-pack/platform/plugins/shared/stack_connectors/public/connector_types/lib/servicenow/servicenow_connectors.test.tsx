@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { act, within, render, screen, waitFor } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
@@ -15,7 +14,6 @@ import { updateActionConnector } from '@kbn/triggers-actions-ui-plugin/public/ap
 import ServiceNowConnectorFields from './servicenow_connectors';
 import { getAppInfo } from './api';
 import { ConnectorFormTestProvider } from '../test_utils';
-import { mount } from 'enzyme';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -59,19 +57,19 @@ describe('ServiceNowActionConnectorFields renders', () => {
       ...usesTableApiConnector.config,
       isOAuth: true,
       usesTableApi: false,
-      clientId: 'test-id',
-      userIdentifierValue: 'email',
-      jwtKeyId: 'test-id',
+      clientId: 'test-client-id',
+      userIdentifierValue: 'test-user-identifier',
+      jwtKeyId: 'test-jwt-key-id',
     },
     secrets: {
-      clientSecret: 'secret',
-      privateKey: 'secret-key',
-      privateKeyPassword: 'secret-pass',
+      clientSecret: 'test-client-secret',
+      privateKey: 'secret-private-key',
+      privateKeyPassword: 'test-private-key-password',
     },
   };
 
-  test('alerting servicenow connector fields are rendered', () => {
-    const wrapper = mountWithIntl(
+  it('alerting servicenow connector fields are rendered', () => {
+    render(
       <ConnectorFormTestProvider connector={usesTableApiConnector}>
         <ServiceNowConnectorFields
           readOnly={false}
@@ -80,18 +78,14 @@ describe('ServiceNowActionConnectorFields renders', () => {
         />
       </ConnectorFormTestProvider>
     );
-    expect(
-      wrapper.find('[data-test-subj="connector-servicenow-username-form-input"]').length > 0
-    ).toBeTruthy();
 
-    expect(wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="connector-servicenow-password-form-input"]').length > 0
-    ).toBeTruthy();
+    expect(screen.getByTestId('connector-servicenow-username-form-input')).toBeInTheDocument();
+    expect(screen.getByTestId('credentialsApiUrlFromInput')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-password-form-input')).toBeInTheDocument();
   });
 
-  test('case specific servicenow connector fields is rendered', () => {
-    const wrapper = mountWithIntl(
+  it('case specific servicenow connector fields is rendered', () => {
+    render(
       <ConnectorFormTestProvider connector={usesImportSetApiConnector}>
         <ServiceNowConnectorFields
           readOnly={false}
@@ -101,10 +95,111 @@ describe('ServiceNowActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="connector-servicenow-password-form-input"]').length > 0
-    ).toBeTruthy();
+    expect(screen.getByTestId('credentialsApiUrlFromInput')).toBeInTheDocument();
+    expect(screen.getByTestId('connector-servicenow-password-form-input')).toBeInTheDocument();
+  });
+
+  it('OAuth fields are rendered correctly', () => {
+    render(
+      <ConnectorFormTestProvider connector={usesImportSetApiConnectorOauth}>
+        <ServiceNowConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    expect(screen.getByRole('textbox', { name: 'Client ID' })).toHaveValue(
+      usesImportSetApiConnectorOauth.config.clientId
+    );
+
+    expect(screen.getByRole('textbox', { name: 'User identifier' })).toHaveValue(
+      usesImportSetApiConnectorOauth.config.userIdentifierValue
+    );
+
+    expect(screen.getByRole('textbox', { name: 'JWT verifier key ID' })).toHaveValue(
+      usesImportSetApiConnectorOauth.config.jwtKeyId
+    );
+
+    expect(screen.getByLabelText('Client secret')).toHaveValue(
+      usesImportSetApiConnectorOauth.secrets.clientSecret
+    );
+
+    expect(screen.getByLabelText('Private key')).toHaveValue(
+      usesImportSetApiConnectorOauth.secrets.privateKey
+    );
+
+    expect(screen.getByLabelText('Private key password')).toHaveValue(
+      usesImportSetApiConnectorOauth.secrets.privateKeyPassword
+    );
+  });
+
+  it('sets the OAuth fields correctly', async () => {
+    const onSubmit = jest.fn();
+    const connector = {
+      id: 'test',
+      actionTypeId: '.servicenow',
+      isDeprecated: false,
+      name: 'SN',
+      config: { apiUrl: 'https://test.com', usesTableApi: false },
+      secrets: {},
+    };
+
+    render(
+      <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <ServiceNowConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await userEvent.click(screen.getByTestId('use-oauth-switch'));
+
+    await userEvent.type(
+      await screen.findByRole('textbox', { name: 'Client ID' }),
+      'test-client-id'
+    );
+
+    await userEvent.type(
+      screen.getByRole('textbox', { name: 'User identifier' }),
+      'test-user-identifier'
+    );
+    await userEvent.type(
+      screen.getByRole('textbox', { name: 'JWT verifier key ID' }),
+      'test-jwt-key-id'
+    );
+
+    await userEvent.type(screen.getByLabelText('Client secret'), 'test-client-secret');
+    await userEvent.type(screen.getByLabelText('Private key'), 'test-private-key');
+    await userEvent.type(
+      screen.getByLabelText('Private key password'),
+      'test-private-key-password'
+    );
+
+    await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {
+          ...connector,
+          config: {
+            ...usesImportSetApiConnectorOauth.config,
+            clientId: 'test-client-id',
+            userIdentifierValue: 'test-user-identifier',
+            jwtKeyId: 'test-jwt-key-id',
+          },
+          secrets: {
+            clientSecret: 'test-client-secret',
+            privateKey: 'test-private-key',
+            privateKeyPassword: 'test-private-key-password',
+          },
+        },
+        isValid: true,
+      });
+    });
   });
 
   describe('Elastic certified ServiceNow application', () => {
@@ -125,8 +220,8 @@ describe('ServiceNowActionConnectorFields renders', () => {
       jest.clearAllMocks();
     });
 
-    test('should render the correct callouts when the connectors needs the application', () => {
-      const wrapper = mountWithIntl(
+    it('should render the correct callouts when the connectors needs the application', () => {
+      render(
         <ConnectorFormTestProvider connector={usesImportSetApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
@@ -136,13 +231,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      expect(wrapper.find('[data-test-subj="snInstallationCallout"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="snDeprecatedCallout"]').exists()).toBeFalsy();
-      expect(wrapper.find('[data-test-subj="snApplicationCallout"]').exists()).toBeFalsy();
+      expect(screen.getByTestId('snInstallationCallout')).toBeInTheDocument();
+      expect(screen.queryByTestId('snDeprecatedCallout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('snApplicationCallout')).not.toBeInTheDocument();
     });
 
-    test('should render the correct callouts if the connector uses the table API', () => {
-      const wrapper = mountWithIntl(
+    it('should render the correct callouts if the connector uses the table API', () => {
+      render(
         <ConnectorFormTestProvider connector={usesTableApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
@@ -152,15 +247,15 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      expect(wrapper.find('[data-test-subj="snInstallationCallout"]').exists()).toBeFalsy();
-      expect(wrapper.find('[data-test-subj="snDeprecatedCallout"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="snApplicationCallout"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('snInstallationCallout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('snDeprecatedCallout')).toBeInTheDocument();
+      expect(screen.queryByTestId('snApplicationCallout')).not.toBeInTheDocument();
     });
 
-    test('should get application information when saving the connector', async () => {
+    it('should get application information when saving the connector', async () => {
       getAppInfoMock.mockResolvedValue(applicationInfoData);
 
-      const wrapper = mountWithIntl(
+      render(
         <ConnectorFormTestProvider connector={usesImportSetApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
@@ -170,16 +265,14 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await preSubmitValidator();
-      });
+      await act(async () => preSubmitValidator());
 
       expect(getAppInfoMock).toHaveBeenCalledTimes(1);
-      expect(wrapper.find('[data-test-subj="snApplicationCallout"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('snApplicationCallout')).not.toBeInTheDocument();
     });
 
-    test('should NOT get application information when the connector uses the old API', async () => {
-      const wrapper = mountWithIntl(
+    it('should NOT get application information when the connector uses the old API', async () => {
+      render(
         <ConnectorFormTestProvider connector={usesTableApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
@@ -189,19 +282,17 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await preSubmitValidator();
-      });
+      await act(async () => preSubmitValidator());
 
       expect(getAppInfoMock).toHaveBeenCalledTimes(0);
-      expect(wrapper.find('[data-test-subj="snApplicationCallout"]').exists()).toBeFalsy();
+      expect(screen.queryByTestId('snApplicationCallout')).not.toBeInTheDocument();
     });
 
-    test('should render error when save failed', async () => {
+    it('should render error when save failed', async () => {
       const errorMessage = 'request failed';
       getAppInfoMock.mockRejectedValueOnce(new Error(errorMessage));
 
-      mountWithIntl(
+      render(
         <ConnectorFormTestProvider connector={usesImportSetApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
@@ -211,30 +302,21 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        const res = await preSubmitValidator();
-        const messageWrapper = mount(<>{res?.message}</>);
+      const res = await act(async () => preSubmitValidator());
 
-        expect(getAppInfoMock).toHaveBeenCalledTimes(1);
-        expect(
-          messageWrapper.find('[data-test-subj="snApplicationCallout"]').exists()
-        ).toBeTruthy();
+      expect(getAppInfoMock).toHaveBeenCalledTimes(1);
 
-        expect(
-          messageWrapper
-            .find('[data-test-subj="snApplicationCallout"]')
-            .first()
-            .text()
-            .includes(errorMessage)
-        ).toBeTruthy();
-      });
+      render(<>{res?.message}</>);
+
+      expect(screen.getByTestId('errorCallout')).toBeInTheDocument();
+      expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
 
-    test('should render error when the response is a REST api error', async () => {
+    it('should render error when the response is a REST api error', async () => {
       const errorMessage = 'request failed';
       getAppInfoMock.mockResolvedValue({ error: { message: errorMessage }, status: 'failure' });
 
-      mountWithIntl(
+      render(
         <ConnectorFormTestProvider connector={usesImportSetApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
@@ -244,26 +326,42 @@ describe('ServiceNowActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        const res = await preSubmitValidator();
-        const messageWrapper = mount(<>{res?.message}</>);
+      const res = await act(async () => preSubmitValidator());
 
-        expect(getAppInfoMock).toHaveBeenCalledTimes(1);
-        expect(
-          messageWrapper.find('[data-test-subj="snApplicationCallout"]').exists()
-        ).toBeTruthy();
+      expect(getAppInfoMock).toHaveBeenCalledTimes(1);
 
-        expect(
-          messageWrapper
-            .find('[data-test-subj="snApplicationCallout"]')
-            .first()
-            .text()
-            .includes(errorMessage)
-        ).toBeTruthy();
-      });
+      render(<>{res?.message}</>);
+
+      expect(screen.getByTestId('errorCallout')).toBeInTheDocument();
+      expect(screen.getByText(errorMessage)).toBeInTheDocument();
     });
 
-    test('should migrate the deprecated connector correctly', async () => {
+    it('should render an application required error when the error is a CORS error', async () => {
+      const error = new Error('my cors error');
+      error.name = 'TypeError';
+
+      getAppInfoMock.mockRejectedValueOnce(error);
+
+      render(
+        <ConnectorFormTestProvider connector={usesImportSetApiConnector}>
+          <ServiceNowConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={registerPreSubmitValidator}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      const res = await act(async () => preSubmitValidator());
+
+      expect(getAppInfoMock).toHaveBeenCalledTimes(1);
+
+      render(<>{res?.message}</>);
+
+      expect(screen.getByTestId('snApplicationCallout')).toBeInTheDocument();
+    });
+
+    it('should migrate the deprecated connector correctly', async () => {
       getAppInfoMock.mockResolvedValue(applicationInfoData);
       updateActionConnectorMock.mockResolvedValue({ isDeprecated: false });
 
@@ -322,7 +420,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
       expect(await screen.findByTestId('snInstallationCallout')).toBeInTheDocument();
     });
 
-    test('should NOT migrate the deprecated connector when there is an error', async () => {
+    it('should NOT migrate the deprecated connector when there is an error', async () => {
       const errorMessage = 'request failed';
       getAppInfoMock.mockRejectedValueOnce(new Error(errorMessage));
       updateActionConnectorMock.mockResolvedValue({ isDeprecated: false });

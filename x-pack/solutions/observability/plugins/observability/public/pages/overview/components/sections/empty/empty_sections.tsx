@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../../../../utils/kibana_react';
@@ -19,19 +18,18 @@ import { useHasData } from '../../../../../hooks/use_has_data';
 import { EmptySection, Section } from './empty_section';
 
 export function EmptySections() {
-  const { http, share } = useKibana().services;
-  const onboardingMetricsHref = share?.url.locators
-    .get(OBSERVABILITY_ONBOARDING_LOCATOR)
-    ?.useUrl({ category: 'metrics' });
+  const { http, serverless: isServerless } = useKibana().services;
   const theme = useContext(ThemeContext);
   const { hasDataMap } = useHasData();
+  const { euiTheme } = useEuiTheme();
 
-  const appEmptySections = getEmptySections({ http, onboardingMetricsHref }).filter(({ id }) => {
+  const appEmptySections = getEmptySections({ http }).filter(({ id, showInServerless }) => {
     const app = hasDataMap[id];
-    if (app) {
-      return app.status === FETCH_STATUS.FAILURE || !app.hasData;
-    }
-    return false;
+
+    const appFailedOrMissingData = app && (app.status === FETCH_STATUS.FAILURE || !app.hasData);
+    const serverlessCheck = !Boolean(isServerless) || showInServerless;
+
+    return appFailedOrMissingData && serverlessCheck;
   });
   return (
     <EuiFlexItem>
@@ -46,9 +44,11 @@ export function EmptySections() {
         {appEmptySections.map((app) => {
           return (
             <EuiFlexItem
+              data-test-subj={`empty-section-${app.id}`}
               key={app.id}
               style={{
                 border: `${theme.eui.euiBorderEditable}`,
+                borderColor: euiTheme.border.color,
                 borderRadius: `${theme.eui.euiBorderRadius}`,
               }}
             >
@@ -61,13 +61,7 @@ export function EmptySections() {
   );
 }
 
-const getEmptySections = ({
-  http,
-  onboardingMetricsHref,
-}: {
-  http: HttpSetup;
-  onboardingMetricsHref?: string;
-}): Section[] => {
+const getEmptySections = ({ http }: { http: HttpSetup }): Section[] => {
   return [
     {
       id: 'infra_logs',
@@ -80,9 +74,10 @@ const getEmptySections = ({
           'Fast, easy, and scalable centralized log monitoring with out-of-the-box support for common data sources.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.logs.link', {
-        defaultMessage: 'Install Filebeat',
+        defaultMessage: 'Add logs',
       }),
-      href: http.basePath.prepend('/app/home#/tutorial_directory/logging'),
+      href: http.basePath.prepend('/app/integrations/browse?q=logs'),
+      showInServerless: true,
     },
     {
       id: 'apm',
@@ -98,6 +93,7 @@ const getEmptySections = ({
         defaultMessage: 'Install Agent',
       }),
       href: http.basePath.prepend('/app/apm/tutorial'),
+      showInServerless: true,
     },
     {
       id: 'infra_metrics',
@@ -109,9 +105,10 @@ const getEmptySections = ({
         defaultMessage: 'Stream, visualize, and analyze your infrastructure metrics.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.metrics.link', {
-        defaultMessage: 'Install Metricbeat',
+        defaultMessage: 'Add metrics',
       }),
-      href: onboardingMetricsHref ?? http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
+      href: http.basePath.prepend('/app/integrations/browse?q=metrics'),
+      showInServerless: true,
     },
     {
       id: 'uptime',
@@ -126,6 +123,7 @@ const getEmptySections = ({
         defaultMessage: 'Install Heartbeat',
       }),
       href: http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
+      showInServerless: false,
     },
     {
       id: 'ux',
@@ -141,6 +139,7 @@ const getEmptySections = ({
         defaultMessage: 'Install RUM Agent',
       }),
       href: http.basePath.prepend('/app/apm/tutorial'),
+      showInServerless: false,
     },
     {
       id: 'alert',
@@ -156,6 +155,7 @@ const getEmptySections = ({
         defaultMessage: 'Create rule',
       }),
       href: http.basePath.prepend(paths.observability.rules),
+      showInServerless: true,
     },
     {
       id: 'universal_profiling',
@@ -174,6 +174,7 @@ const getEmptySections = ({
         defaultMessage: 'Install Profiling Host Agent',
       }),
       href: http.basePath.prepend('/app/profiling/add-data-instructions'),
+      showInServerless: false,
     },
   ];
 };

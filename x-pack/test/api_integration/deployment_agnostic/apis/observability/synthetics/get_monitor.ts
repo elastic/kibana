@@ -25,8 +25,7 @@ import { PrivateLocationTestService } from '../../../services/synthetics_private
 import { getFixtureJson } from './helpers/get_fixture_json';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/204069
-  describe.skip('getSyntheticsMonitors', function () {
+  describe('getSyntheticsMonitors', function () {
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
@@ -57,6 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await privateLocationTestService.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       privateLocation = await privateLocationTestService.addTestPrivateLocation();
       await supertest
@@ -230,9 +230,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         const allMonitors = [...monitors, ...monitors];
+
         for (const mon of allMonitors) {
           await saveMonitor(
-            { ...mon, name: mon.name + Date.now(), locations: [spaceScopedPrivateLocation] },
+            {
+              ...mon,
+              name: mon.name + Date.now(),
+              locations: [spaceScopedPrivateLocation],
+              spaces: [],
+            },
             SPACE_ID
           );
         }
@@ -291,6 +297,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             revision: 1,
             locations: [privateLocation],
             name: `${monitors[0].name}-${uuid}-0`,
+            spaces: ['default'],
           })
         );
       });
@@ -321,6 +328,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               journey_id: '',
               max_attempts: 2,
               labels: {},
+              maintenance_windows: [],
+              spaces: ['default'],
             },
             ['config_id', 'id', 'form_monitor_type']
           )

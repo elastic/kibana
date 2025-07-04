@@ -21,12 +21,16 @@ import type {
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps, UseCspOptions } from '../types';
 import { showErrorToast } from '../..';
-import { getVulnerabilitiesAggregationCount, getVulnerabilitiesQuery } from '../utils/hooks_utils';
+import {
+  getVulnerabilitiesAggregationCount,
+  getVulnerabilitiesQuery,
+} from '../utils/findings_query_builders';
 
 export enum VULNERABILITY {
+  TITLE = 'vulnerability.title',
   ID = 'vulnerability.id',
   SEVERITY = 'vulnerability.severity',
-  PACKAGE_NAME = 'vulnerability.package.name',
+  PACKAGE_NAME = 'package.name',
 }
 
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
@@ -42,13 +46,14 @@ export interface VulnerabilitiesPackage extends Vulnerability {
 }
 
 export interface VulnerabilitiesFindingTableDetailsFields {
+  [VULNERABILITY.TITLE]: string;
   [VULNERABILITY.ID]: string;
   [VULNERABILITY.SEVERITY]: string;
   [VULNERABILITY.PACKAGE_NAME]: string;
 }
 
 export type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'score'> &
-  Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'> &
+  Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource' | 'event'> &
   VulnerabilitiesFindingTableDetailsFields;
 
 interface FindingsAggs {
@@ -86,6 +91,7 @@ export const useVulnerabilitiesFindings = (options: UseCspOptions) => {
           [VULNERABILITY.ID]: finding._source?.vulnerability?.id,
           [VULNERABILITY.SEVERITY]: finding._source?.vulnerability?.severity,
           [VULNERABILITY.PACKAGE_NAME]: finding._source?.package?.name,
+          event: finding._source?.event,
         })) as VulnerabilitiesFindingDetailFields[],
       };
     },

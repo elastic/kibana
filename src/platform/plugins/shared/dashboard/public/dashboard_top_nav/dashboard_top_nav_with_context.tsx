@@ -23,6 +23,3 @@ export const DashboardTopNavWithContext = (props: DashboardTopNavProps) => (
     <InternalDashboardTopNav {...props} />
   </DashboardContext.Provider>
 );
-
-// eslint-disable-next-line import/no-default-export
-export default DashboardTopNavWithContext;

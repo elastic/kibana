@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import type { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { ALERT_EVALUATION_THRESHOLD, ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
 import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
-import { StackAlertType } from './types';
+import type { StackAlertType } from './types';
 
 export const STACK_AAD_INDEX_NAME = 'stack';
 

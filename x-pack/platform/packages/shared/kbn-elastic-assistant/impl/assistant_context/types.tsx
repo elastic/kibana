@@ -53,6 +53,7 @@ export interface AssistantTelemetry {
     isEnabledKnowledgeBase: boolean;
   }) => void;
   reportAssistantQuickPrompt: (params: { promptTitle: string }) => void;
+  reportAssistantStarterPrompt: (params: { promptTitle: string }) => void;
   reportAssistantSettingToggled: (params: {
     assistantStreamingEnabled?: boolean;
     alertsCountUpdated?: boolean;
@@ -60,6 +61,8 @@ export interface AssistantTelemetry {
 }
 
 export interface AssistantAvailability {
+  // True when searchAiLake configurations is available
+  hasSearchAILakeConfigurations: boolean;
   // True when user is Enterprise, or Security Complete PLI for serverless. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
@@ -72,6 +75,7 @@ export interface AssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  isStarterPromptsEnabled: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {

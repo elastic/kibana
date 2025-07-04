@@ -12,7 +12,6 @@ import type {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
-import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import { BaseValidator, GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE } from './base_validator';
 
 export class EndpointExceptionsValidator extends BaseValidator {
@@ -44,9 +43,8 @@ export class EndpointExceptionsValidator extends BaseValidator {
 
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
     await this.validateHasWritePrivilege();
+    await this.validateCanCreateGlobalArtifacts(item);
     await this.validateCreateOwnerSpaceIds(item);
-
-    await this.setOwnerSpaceId(item);
 
     return item;
   }
@@ -57,10 +55,7 @@ export class EndpointExceptionsValidator extends BaseValidator {
   ) {
     await this.validateHasWritePrivilege();
     await this.validateUpdateOwnerSpaceIds(item, currentItem);
-
-    if (!hasArtifactOwnerSpaceId(item)) {
-      await this.setOwnerSpaceId(item);
-    }
+    await this.validateCanUpdateItemInActiveSpace(item, currentItem);
 
     return item;
   }
@@ -70,8 +65,9 @@ export class EndpointExceptionsValidator extends BaseValidator {
     await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
-  async validatePreGetOneItem(): Promise<void> {
+  async validatePreGetOneItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasReadPrivilege();
+    await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
   async validatePreMultiListFind(): Promise<void> {

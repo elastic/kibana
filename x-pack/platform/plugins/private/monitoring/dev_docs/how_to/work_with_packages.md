@@ -149,7 +149,7 @@ See the [elastic-package-test documentation](https://github.com/elastic/elastic-
 
 The system tests spawn a full setup (`elastic-package stack up` + `elastic-package service up`), install the package and attach a policy to a running agent to collect live data. This real-world setup can be leveraged to continuously validate future versions of the stack when they are released. Right now the service dependencies are running on 8.5.0 and the tests validate that this version is supported. The plan is to have an automated job that opens a PR validating that the tests are still successful with the latest released version.
 
-On the Stack Monitoring side, we have an API integration test suite running against packages; see https://github.com/elastic/kibana/tree/main/x-pack/test/monitoring_api_integration#readme
+On the Stack Monitoring side, we have an API integration test suite running against packages; see https://github.com/elastic/kibana/tree/main/x-pack/platform/test/monitoring_api_integration#readme
 
 ## Troubleshooting
 

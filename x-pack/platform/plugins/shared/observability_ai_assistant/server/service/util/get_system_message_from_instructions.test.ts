@@ -14,9 +14,10 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         applicationInstructions: ['first', 'second'],
-        userInstructions: [],
-        adHocInstructions: [],
+        kbUserInstructions: [],
+        apiUserInstructions: [],
         availableFunctionNames: [],
+        anonymizationInstruction: '',
       })
     ).toEqual(`first\n\nsecond`);
   });
@@ -30,9 +31,10 @@ describe('getSystemMessageFromInstructions', () => {
             return availableFunctionNames[0];
           },
         ],
-        userInstructions: [],
-        adHocInstructions: [],
+        kbUserInstructions: [],
+        apiUserInstructions: [],
         availableFunctionNames: ['myFunction'],
+        anonymizationInstruction: '',
       })
     ).toEqual(`first\n\nmyFunction`);
   });
@@ -41,15 +43,15 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         applicationInstructions: ['first'],
-        userInstructions: [{ id: 'second', text: 'second from kb' }],
-        adHocInstructions: [
+        kbUserInstructions: [{ id: 'second', text: 'second from kb' }],
+        apiUserInstructions: [
           {
             id: 'second',
             text: 'second from adhoc instruction',
-            instruction_type: 'user_instruction',
           },
         ],
         availableFunctionNames: [],
+        anonymizationInstruction: '',
       })
     ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond from adhoc instruction`);
   });
@@ -58,9 +60,10 @@ describe('getSystemMessageFromInstructions', () => {
     expect(
       getSystemMessageFromInstructions({
         applicationInstructions: ['first'],
-        userInstructions: [{ id: 'second', text: 'second_kb' }],
-        adHocInstructions: [],
+        kbUserInstructions: [{ id: 'second', text: 'second_kb' }],
+        apiUserInstructions: [],
         availableFunctionNames: [],
+        anonymizationInstruction: '',
       })
     ).toEqual(`first\n\n${USER_INSTRUCTIONS_HEADER}\n\nsecond_kb`);
   });
@@ -74,9 +77,10 @@ describe('getSystemMessageFromInstructions', () => {
             return undefined;
           },
         ],
-        userInstructions: [],
-        adHocInstructions: [],
+        kbUserInstructions: [],
+        apiUserInstructions: [],
         availableFunctionNames: [],
+        anonymizationInstruction: '',
       })
     ).toEqual(`first`);
   });

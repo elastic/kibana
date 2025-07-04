@@ -24,6 +24,7 @@ import {
   DataTableRecord,
   getFieldValue,
   INDEX_FIELD,
+  FILTER_OUT_EXACT_FIELDS_FOR_CONTENT,
   TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
 import { TraceDocument, formatFieldValue } from '@kbn/discover-utils/src';
@@ -32,7 +33,6 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
-import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
 import { TransactionNameIcon } from './icons/transaction_name_icon';
 
 type FieldKey = keyof DataTableRecord['flattened'];
@@ -91,10 +91,6 @@ const getResourceBadgeComponent = (
   share?: SharePluginStart
 ): React.ComponentType<FieldBadgeWithActionsProps> => {
   switch (name) {
-    case SERVICE_NAME_FIELD:
-      return (props: FieldBadgeWithActionsProps) => (
-        <ServiceNameBadgeWithActions {...props} share={share} core={core} />
-      );
     case EVENT_OUTCOME_FIELD:
       return EventOutcomeBadge;
     default:
@@ -163,7 +159,7 @@ export const createResourceFields = ({
       fieldFormats,
       dataView,
       dataView.getFieldByName(name),
-      'text'
+      'html'
     );
 
     return {
@@ -209,5 +205,11 @@ export const formatJsonDocumentForContent = (row: DataTableRecord) => {
   };
 };
 
-const isFieldAllowed = (field: string) =>
-  !FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => field.startsWith(prefix));
+export const isFieldAllowed = (field: string): boolean => {
+  const isExactMatchExcluded = FILTER_OUT_EXACT_FIELDS_FOR_CONTENT.includes(field);
+  const isPrefixMatchExcluded = FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) =>
+    field.startsWith(prefix)
+  );
+
+  return !isExactMatchExcluded && !isPrefixMatchExcluded;
+};

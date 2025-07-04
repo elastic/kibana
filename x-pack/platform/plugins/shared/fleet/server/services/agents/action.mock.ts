@@ -86,11 +86,11 @@ export function createClientMock() {
   };
   const regularAgentPolicySO = {
     id: 'regular-agent-policy',
-    attributes: { is_managed: false },
+    attributes: { is_managed: false, space_ids: ['space1'] },
   } as SavedObject<AgentPolicy>;
   const regularAgentPolicySO2 = {
     id: 'regular-agent-policy-2',
-    attributes: { is_managed: false },
+    attributes: { is_managed: false, space_ids: ['space1', 'default'] },
   } as SavedObject<AgentPolicy>;
   const hostedAgentPolicySO = {
     id: 'hosted-agent-policy',

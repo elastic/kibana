@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingChart } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiLink } from '@elastic/eui';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+import React, { useEffect, useRef, useState } from 'react';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
-
+import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_budget_chart';
-import { EmbeddableSloProps } from './types';
-import { SloOverviewDetails } from '../common/slo_overview_details';
 import { ErrorBudgetHeader } from '../../../pages/slo_details/components/error_budget_header';
 import { SLOGroupings } from '../../../pages/slos/components/common/slo_groupings';
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+import { SloOverviewDetails } from '../common/slo_overview_details';
+import { EmbeddableSloProps } from './types';
 
 export function SloErrorBudget({
   sloId,
@@ -85,30 +82,30 @@ export function SloErrorBudget({
     }
   }, [isLoading, onRenderComplete]);
 
-  const isSloNotFound = !isLoading && slo === undefined;
-
-  if (isRefetching || isLoading || !slo) {
+  if (isRefetching || isLoading) {
     return (
-      <LoadingContainer>
-        <LoadingContent>
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="center">
+        <EuiFlexItem grow={false}>
           <EuiLoadingChart />
-        </LoadingContent>
-      </LoadingContainer>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
+  const isSloNotFound = slo === undefined;
   if (isSloNotFound) {
     return (
-      <LoadingContainer>
-        <LoadingContent>
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="center">
+        <EuiFlexItem grow={false}>
           {i18n.translate('xpack.slo.sloEmbeddable.overview.sloNotFoundText', {
             defaultMessage:
               'The SLO has been deleted. You can safely delete the widget from the dashboard.',
           })}
-        </LoadingContent>
-      </LoadingContainer>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
+
   const hasGroupBy = slo.instanceId !== ALL_VALUE;
   return (
     <div data-shared-item="" ref={containerRef} style={{ width: '100%', padding: 10 }}>
@@ -133,7 +130,7 @@ export function SloErrorBudget({
       </EuiFlexGroup>
 
       <EuiFlexGroup direction="column" gutterSize="l">
-        <ErrorBudgetHeader showTitle={false} slo={slo} />
+        <ErrorBudgetHeader hideTitle={true} slo={slo} />
         <ErrorBudgetChart
           data={errorBudgetBurnDownData}
           isLoading={historicalSummaryLoading}
@@ -145,19 +142,3 @@ export function SloErrorBudget({
     </div>
   );
 }
-
-export const LoadingContainer = euiStyled.div`
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-`;
-
-export const LoadingContent = euiStyled.div`
-  flex: 0 0 auto;
-  align-self: center;
-  text-align: center;
-`;

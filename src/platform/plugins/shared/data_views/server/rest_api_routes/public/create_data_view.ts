@@ -58,78 +58,84 @@ const registerCreateDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .post({
+        path,
+        access: 'public',
+        description,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            body: schema.object({
-              override: schema.maybe(schema.boolean({ defaultValue: false })),
-              refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-              data_view: serviceKey === SERVICE_KEY ? dataViewSpecSchema : schema.never(),
-              index_pattern:
-                serviceKey === SERVICE_KEY_LEGACY ? dataViewSpecSchema : schema.never(),
-            }),
-          },
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  [serviceKey]: dataViewSpecSchema,
-                }),
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              body: schema.object({
+                override: schema.maybe(schema.boolean({ defaultValue: false })),
+                refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
+                data_view: serviceKey === SERVICE_KEY ? dataViewSpecSchema : schema.never(),
+                index_pattern:
+                  serviceKey === SERVICE_KEY_LEGACY ? dataViewSpecSchema : schema.never(),
+              }),
+            },
+            response: {
+              200: {
+                body: () =>
+                  schema.object({
+                    [serviceKey]: dataViewSpecSchema,
+                  }),
+              },
             },
           },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
 
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
-          const body = req.body;
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
+            const body = req.body;
 
-          const spec = serviceKey === SERVICE_KEY ? body.data_view : body.index_pattern;
+            const spec = serviceKey === SERVICE_KEY ? body.data_view : body.index_pattern;
 
-          const dataView = await createDataView({
-            dataViewsService,
-            usageCollection,
-            spec: { ...spec, name: spec.name || spec.title } as DataViewSpec,
-            override: body.override,
-            refreshFields: body.refresh_fields,
-            counterName: `${req.route.method} ${path}`,
-          });
+            const dataView = await createDataView({
+              dataViewsService,
+              usageCollection,
+              spec: { ...spec, name: spec.name || spec.title } as DataViewSpec,
+              override: body.override,
+              refreshFields: body.refresh_fields,
+              counterName: `${req.route.method} ${path}`,
+            });
 
-          const toSpecParams =
-            body.refresh_fields === false ? {} : { fieldParams: { fieldName: ['*'] } };
+            const toSpecParams =
+              body.refresh_fields === false ? {} : { fieldParams: { fieldName: ['*'] } };
 
-          const responseBody: Record<string, DataViewSpecRestResponse> = {
-            [serviceKey]: {
-              ...(await dataView.toSpec(toSpecParams)),
-              namespaces: dataView.namespaces,
-            },
-          };
+            const responseBody: Record<string, DataViewSpecRestResponse> = {
+              [serviceKey]: {
+                ...(await dataView.toSpec(toSpecParams)),
+                namespaces: dataView.namespaces,
+              },
+            };
 
-          return res.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: responseBody,
-          });
-        })
-      )
-    );
+            return res.ok({
+              headers: {
+                'content-type': 'application/json',
+              },
+              body: responseBody,
+            });
+          })
+        )
+      );
   };
 
 export const registerCreateDataViewRoute = registerCreateDataViewRouteFactory(

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
 
 import type { AxiosError } from 'axios';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CrowdStrikeSessionManager } from './rtr_session_manager';
-import { ExperimentalFeatures } from '../../../common/experimental_features';
-import { isAggregateError, NodeSystemError } from './types';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import type { NodeSystemError } from './types';
+import { isAggregateError } from './types';
 import type {
   CrowdstrikeConfig,
   CrowdstrikeSecrets,
@@ -23,7 +25,10 @@ import type {
   CrowdstrikeGetAgentOnlineStatusResponse,
   RelaxedCrowdstrikeBaseApiResponse,
   CrowdStrikeExecuteRTRResponse,
+  CrowdstrikeGetScriptsResponse,
 } from '../../../common/crowdstrike/types';
+import type { CrowdstrikeGetTokenResponseSchema } from '../../../common/crowdstrike/schema';
+import { CrowdstrikeGetScriptsResponseSchema } from '../../../common/crowdstrike/schema';
 import {
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
@@ -31,9 +36,7 @@ import {
   RelaxedCrowdstrikeBaseApiResponseSchema,
   CrowdstrikeRTRCommandParamsSchema,
   CrowdstrikeExecuteRTRResponseSchema,
-  CrowdstrikeGetScriptsParamsSchema,
   CrowdstrikeApiDoNotValidateResponsesSchema,
-  CrowdstrikeGetTokenResponseSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
@@ -74,7 +77,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     batchExecuteRTR: string;
     batchActiveResponderExecuteRTR: string;
     batchAdminExecuteRTR: string;
-    getRTRCloudScriptsDetails: string;
+    getRTRCloudScripts: string;
   };
 
   constructor(
@@ -93,7 +96,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
       batchExecuteRTR: `${this.config.url}/real-time-response/combined/batch-command/v1`,
       batchActiveResponderExecuteRTR: `${this.config.url}/real-time-response/combined/batch-active-responder-command/v1`,
       batchAdminExecuteRTR: `${this.config.url}/real-time-response/combined/batch-admin-command/v1`,
-      getRTRCloudScriptsDetails: `${this.config.url}/real-time-response/entities/scripts/v1`,
+      getRTRCloudScripts: `${this.config.url}/real-time-response/entities/scripts/v1`,
     };
 
     if (!CrowdstrikeConnector.base64encodedToken) {
@@ -144,11 +147,10 @@ export class CrowdstrikeConnector extends SubActionConnector<
         method: 'batchAdminExecuteRTR',
         schema: CrowdstrikeRTRCommandParamsSchema, // Define a proper schema for the command
       });
-      // temporary to fetch scripts and help testing
       this.registerSubAction({
         name: SUB_ACTION.GET_RTR_CLOUD_SCRIPTS,
         method: 'getRTRCloudScripts',
-        schema: CrowdstrikeGetScriptsParamsSchema,
+        schema: CrowdstrikeRTRCommandParamsSchema, // Empty schema - this request do not have any parameters
       });
     }
   }
@@ -369,18 +371,16 @@ export class CrowdstrikeConnector extends SubActionConnector<
     );
   }
 
-  // TODO: for now just for testing purposes, will be a part of a following PR
   public async getRTRCloudScripts(
-    payload: CrowdstrikeGetAgentsParams,
+    payload: {},
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
-    // @ts-expect-error will be a part of the next PR
-    return this.crowdstrikeApiRequest(
+  ): Promise<CrowdstrikeGetScriptsResponse> {
+    return await this.crowdstrikeApiRequest(
       {
-        url: this.urls.getRTRCloudScriptsDetails,
+        url: this.urls.getRTRCloudScripts,
         method: 'GET',
         paramsSerializer,
-        responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
+        responseSchema: CrowdstrikeGetScriptsResponseSchema,
       },
       connectorUsageCollector
     );

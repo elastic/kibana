@@ -378,8 +378,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('opens a job from job list link', async () => {
           await ml.testExecution.logTestStep('navigate to job list');
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToJobManagement();
+          await ml.navigation.navigateToStackManagementMlSection(
+            'anomaly_detection',
+            'ml-jobs-list'
+          );
 
           await ml.testExecution.logTestStep(
             'check that the single metric viewer button is enabled'
@@ -423,8 +425,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('opens a job from job list link', async () => {
           await ml.testExecution.logTestStep('navigate to job list');
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToJobManagement();
+          await ml.navigation.navigateToStackManagementMlSection(
+            'anomaly_detection',
+            'ml-jobs-list'
+          );
 
           await ml.testExecution.logTestStep(
             'check that the single metric viewer button is disabled'

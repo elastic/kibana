@@ -1,0 +1,4078 @@
+{
+  "id": "@kbn/wc-framework-types-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowExecutionError",
+        "type": "Class",
+        "tags": [],
+        "label": "WorkflowExecutionError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.WorkflowExecutionError",
+            "text": "WorkflowExecutionError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionError.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"invalidConfiguration\" | \"invalidParameter\" | \"workflowNotFound\" | \"nodeTypeNotFound\" | \"toolNotFound\" | \"internalError\""
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionError.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.WorkflowExecutionErrorMeta",
+                "text": "WorkflowExecutionErrorMeta"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.WorkflowExecutionError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.WorkflowExecutionError.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wc-framework-types-server",
+                    "scope": "common",
+                    "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                    "section": "def-common.WorkflowExecutionErrorType",
+                    "text": "WorkflowExecutionErrorType"
+                  }
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.WorkflowExecutionError.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "meta",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wc-framework-types-server",
+                    "scope": "common",
+                    "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                    "section": "def-common.WorkflowExecutionErrorMeta",
+                    "text": "WorkflowExecutionErrorMeta"
+                  }
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.createToolProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "createToolProvider",
+        "description": [
+          "\nUtility function to create a {@link ToolProvider} from a list of tools."
+        ],
+        "signature": [
+          "(tools: ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.Tool",
+            "text": "Tool"
+          },
+          "<Zod.ZodRawShape, unknown>[]) => ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.ToolProvider",
+            "text": "ToolProvider"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.createToolProvider.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "tools",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.Tool",
+                "text": "Tool"
+              },
+              "<Zod.ZodRawShape, unknown>[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.isWorkflowExecutionError",
+        "type": "Function",
+        "tags": [],
+        "label": "isWorkflowExecutionError",
+        "description": [],
+        "signature": [
+          "(error: Error) => boolean"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.isWorkflowExecutionError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.AsyncProvider",
+        "type": "Interface",
+        "tags": [],
+        "label": "AsyncProvider",
+        "description": [
+          "\nGeneric async provider interface"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.AsyncProvider",
+            "text": "AsyncProvider"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.AsyncProvider.has",
+            "type": "Function",
+            "tags": [],
+            "label": "has",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<boolean>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.AsyncProvider.has.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.AsyncProvider.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<T>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.AsyncProvider.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.AsyncProvider.getAllKeys",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllKeys",
+            "description": [],
+            "signature": [
+              "() => Promise<string[]>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.AsyncProvider.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [],
+            "signature": [
+              "() => Promise<T[]>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.BaseWorkflowDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseWorkflowDefinition",
+        "description": [
+          "\nDescribes the definition of a workflow.\n\nThis is only meant to be the \"pure\" definition. Persistence related things (e.g. id),\nor ownerId will be on higher-level structures."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.BaseWorkflowDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nA unique ID that can be used to reference this workflow."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.BaseWorkflowDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nThe name of the workflow.\n\nShould be human (and LLM) readable, e.g. \"Salesforce Case Summarization\".\nWill be exposed to the LLM in some situations."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.BaseWorkflowDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nA short description of what this workflow does.\nWill be exposed to the LLM in some situations (e.g. assistant orchestrator or intent detection step)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.BaseWorkflowDefinition.inputs",
+            "type": "Array",
+            "tags": [],
+            "label": "inputs",
+            "description": [
+              "\nList of inputs for this workflow."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.WorkflowDefinitionInput",
+                "text": "WorkflowDefinitionInput"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.BaseWorkflowDefinition.outputs",
+            "type": "Array",
+            "tags": [],
+            "label": "outputs",
+            "description": [
+              "\nList of outputs for this workflow."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.WorkflowDefinitionOutput",
+                "text": "WorkflowDefinitionOutput"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.BuiltInNodeDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "BuiltInNodeDefinition",
+        "description": [
+          "\nA definition for a builtIn node, bound to the corresponding configuration schema."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.BuiltInNodeDefinition",
+            "text": "BuiltInNodeDefinition"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.BuiltInNodeDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique ID for this node, within the workflow definition"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.BuiltInNodeDefinition.type",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe type of node."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.BuiltInNodeDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nOptional description of what the node does in the workflow"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.BuiltInNodeDefinition.configuration",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "configuration",
+            "description": [
+              "\nSpecific configuration for this node's type."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.NodeTypeToNodeConfigMap",
+                "text": "NodeTypeToNodeConfigMap"
+              },
+              "[T]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.FunctionWorkflowDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "FunctionWorkflowDefinition",
+        "description": [
+          "\nFunction workflows allow arbitrary function execution as workflows.\n\nCan be used to \"import\" a workflow in the framework."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.FunctionWorkflowDefinition",
+            "text": "FunctionWorkflowDefinition"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.BaseWorkflowDefinition",
+            "text": "BaseWorkflowDefinition"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.FunctionWorkflowDefinition.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nUnique type identifier for function workflows"
+            ],
+            "signature": [
+              "\"function\""
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.FunctionWorkflowDefinition.handler",
+            "type": "Function",
+            "tags": [],
+            "label": "handler",
+            "description": [
+              "\nThe function handler that should be called to execute the workflow."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.FunctionWorkflowHandlerParams",
+                "text": "FunctionWorkflowHandlerParams"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<Record<string, unknown>>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.FunctionWorkflowDefinition.handler.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wc-framework-types-server",
+                    "scope": "common",
+                    "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                    "section": "def-common.FunctionWorkflowHandlerParams",
+                    "text": "FunctionWorkflowHandlerParams"
+                  }
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.FunctionWorkflowHandlerParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "FunctionWorkflowHandlerParams",
+        "description": [
+          "\nArguments for a function workflow."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.FunctionWorkflowHandlerParams.inputs",
+            "type": "Object",
+            "tags": [],
+            "label": "inputs",
+            "description": [
+              "\nThe inputs for the workflow"
+            ],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.FunctionWorkflowHandlerParams.eventHandler",
+            "type": "Function",
+            "tags": [],
+            "label": "eventHandler",
+            "description": [
+              "\nEvent handler that can be used to send custom workflow events"
+            ],
+            "signature": [
+              "(event: ",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.WorkflowRunEvent",
+                "text": "WorkflowRunEvent"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.FunctionWorkflowHandlerParams.eventHandler.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wc-framework-types-common",
+                    "scope": "common",
+                    "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                    "section": "def-common.NodeProgressionEvent",
+                    "text": "NodeProgressionEvent"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/wc-framework-types-common",
+                    "scope": "common",
+                    "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                    "section": "def-common.WorkflowProgressionEvent",
+                    "text": "WorkflowProgressionEvent"
+                  }
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.GraphWorkflowDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "GraphWorkflowDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.GraphWorkflowDefinition",
+            "text": "GraphWorkflowDefinition"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.BaseWorkflowDefinition",
+            "text": "BaseWorkflowDefinition"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.GraphWorkflowDefinition.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nUnique type identifier for graph workflows"
+            ],
+            "signature": [
+              "\"graph\""
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.GraphWorkflowDefinition.steps",
+            "type": "Array",
+            "tags": [],
+            "label": "steps",
+            "description": [
+              "\nConfiguration for each of the workflow's nodes."
+            ],
+            "signature": [
+              "AllBuiltInNodeDefinitions[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.IntentRecognitionNodeConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntentRecognitionNodeConfigType",
+        "description": [
+          "\nConfig for `intentRecognition` node type."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.IntentRecognitionNodeConfigType.prompt",
+            "type": "string",
+            "tags": [],
+            "label": "prompt",
+            "description": [
+              "\nThe prompt explaining the LLM the criteria for its choices"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.IntentRecognitionNodeConfigType.branches",
+            "type": "Array",
+            "tags": [],
+            "label": "branches",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.IntentRecognitionBranch",
+                "text": "IntentRecognitionBranch"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.LoopNodeConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "LoopNodeConfigType",
+        "description": [
+          "\nRepresents the configuration for a `loop` node."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.LoopNodeConfigType.inputList",
+            "type": "string",
+            "tags": [],
+            "label": "inputList",
+            "description": [
+              "\nReference of the context variable to loop over.\nSupports interpolation. If interpolated value is a list,\nwill use it directly. If interpolated value is a string,\nwill retrieve the corresponding entry in the current state."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.LoopNodeConfigType.itemVar",
+            "type": "string",
+            "tags": [],
+            "label": "itemVar",
+            "description": [
+              "\nName of the state property to inject the current loop element into.\nSupports interpolation, but final value must be a string."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.LoopNodeConfigType.steps",
+            "type": "Array",
+            "tags": [],
+            "label": "steps",
+            "description": [
+              "\nThe sequence of steps to execute for each element in the list."
+            ],
+            "signature": [
+              "AllBuiltInNodeDefinitions[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.LoopNodeConfigType.output",
+            "type": "Object",
+            "tags": [],
+            "label": "output",
+            "description": [
+              "\nIf defined, will accumulate results from each loop iteration,\nby reading the `output.source` context property in the loop's state,\nand creating a `output.destination` array in the parent's state."
+            ],
+            "signature": [
+              "{ source: string; destination: string; } | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.ModelProvider",
+        "type": "Interface",
+        "tags": [],
+        "label": "ModelProvider",
+        "description": [
+          "\nProvider, allowing to select various models depending on the needs.\n\nFor now, only exposes a single default model type."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/models/model_provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ModelProvider.getDefaultModel",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultModel",
+            "description": [
+              "\nReturns the default model to be used for LLM tasks."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/inference-langchain",
+                "scope": "common",
+                "docId": "kibKbnInferenceLangchainPluginApi",
+                "section": "def-common.InferenceChatModel",
+                "text": "InferenceChatModel"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/models/model_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeEventReporter",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeEventReporter",
+        "description": [
+          "\nEvent reporter that can be used to report real time progress, or telemetry events from a node run."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/event_reporter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeEventReporter.reportProgress",
+            "type": "Function",
+            "tags": [],
+            "label": "reportProgress",
+            "description": [],
+            "signature": [
+              "(event: ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.NodeProgressionReporterEvent",
+                "text": "NodeProgressionReporterEvent"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/event_reporter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.NodeEventReporter.reportProgress.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wc-framework-types-server",
+                    "scope": "common",
+                    "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                    "section": "def-common.NodeProgressionReporterEvent",
+                    "text": "NodeProgressionReporterEvent"
+                  }
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/event_reporter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeFactoryBaseServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeFactoryBaseServices",
+        "description": [
+          "\nBase set of (pre-scoped) services that will always be exposed to the node factory."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeFactoryBaseServices.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [
+              "\nLogger scoped to this node.\n\nNote: logging from within workflows is mostly for debugging purposes.\nprogression and telemetry events should be used instead for other usages."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeFactoryBaseServices.modelProvider",
+            "type": "Object",
+            "tags": [],
+            "label": "modelProvider",
+            "description": [
+              "\nProvider exposing LLM models to be used."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.ModelProvider",
+                "text": "ModelProvider"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeFactoryBaseServices.toolProvider",
+            "type": "Object",
+            "tags": [],
+            "label": "toolProvider",
+            "description": [
+              "\nProvider exposing tools that are available in that given context (workflow/node)"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.ToolProvider",
+                "text": "ToolProvider"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeFactoryBaseServices.esClusterClient",
+            "type": "Object",
+            "tags": [],
+            "label": "esClusterClient",
+            "description": [
+              "\nScoped cluster client."
+            ],
+            "signature": [
+              "IScopedClusterClient"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeFactoryBaseServices.workflowRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "workflowRegistry",
+            "description": [
+              "\nRegistry exposing the workflows accessible in the node's context."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.Provider",
+                "text": "Provider"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.WorkflowDefinition",
+                "text": "WorkflowDefinition"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeFactoryBaseServices.nodeRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "nodeRegistry",
+            "description": [
+              "\nRegistry exposing node types, can be used to access node type definitions."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.Provider",
+                "text": "Provider"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.NodeTypeDefinition",
+                "text": "NodeTypeDefinition"
+              },
+              "<",
+              "DefaultNodeRunnerInput",
+              ", {}>>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeFactoryBaseServices.workflowRunner",
+            "type": "Object",
+            "tags": [],
+            "label": "workflowRunner",
+            "description": [
+              "\nScoped node runner, can be used to run nodes as part of a node's execution flow,\ne.g. for conditional nodes."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.ScopedRunner",
+                "text": "ScopedRunner"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeFactoryContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeFactoryContext",
+        "description": [
+          "\nContext that is exposed to a {@NodeRunnerFactory} function."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.NodeFactoryContext",
+            "text": "NodeFactoryContext"
+          },
+          "<CustomServices>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeFactoryContext.nodeConfiguration",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nodeConfiguration",
+            "description": [
+              "\nThe (non-interpolated) configuration bound to this node."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".parallelSequences> | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".loop> | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".toolExecution> | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".workflowExecution> | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".prompt> | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".intentRecognition>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeFactoryContext.services",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "services",
+            "description": [
+              "\nScoped services that can be used by the factory."
+            ],
+            "signature": [
+              "CustomServices & ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.NodeFactoryBaseServices",
+                "text": "NodeFactoryBaseServices"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeRef",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeRef",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/call_chain.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeRef.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"node\""
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/call_chain.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeRef.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/call_chain.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeRunner",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeRunner",
+        "description": [
+          "\nRepresents an instance of a node runner."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.NodeRunner",
+            "text": "NodeRunner"
+          },
+          "<Input>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/runner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeRunner.run",
+            "type": "Function",
+            "tags": [],
+            "label": "run",
+            "description": [
+              "\nRun the node with the provided inputs."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.RunNodeParams",
+                "text": "RunNodeParams"
+              },
+              "<Input>) => Promise<void>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.NodeRunner.run.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wc-framework-types-server",
+                    "scope": "common",
+                    "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                    "section": "def-common.RunNodeParams",
+                    "text": "RunNodeParams"
+                  },
+                  "<Input>"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeTypeDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeTypeDefinition",
+        "description": [
+          "\nRepresents the definition for a given node type.\n\nSimilar to SOs, vis types and so on, this defines all the properties\nand handlers that are going to be used to manage the lifecycle of a node type."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.NodeTypeDefinition",
+            "text": "NodeTypeDefinition"
+          },
+          "<NodeInput, CustomServices>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/type_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeTypeDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe unique identifier for this node type (it's type)"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/type_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeTypeDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nHuman-readable name for this node type"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/type_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeTypeDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nShort human-readable description for this node type."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/type_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeTypeDefinition.factory",
+            "type": "Function",
+            "tags": [],
+            "label": "factory",
+            "description": [
+              "\nThe {@link NodeRunnerFactory} for this node type."
+            ],
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.NodeFactoryContext",
+                "text": "NodeFactoryContext"
+              },
+              "<CustomServices>) => ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.NodeRunner",
+                "text": "NodeRunner"
+              },
+              "<NodeInput>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/type_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.NodeTypeDefinition.factory.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wc-framework-types-server",
+                    "scope": "common",
+                    "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                    "section": "def-common.NodeFactoryContext",
+                    "text": "NodeFactoryContext"
+                  },
+                  "<CustomServices>"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeTypeDefinition.customServicesProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "customServicesProvider",
+            "description": [
+              "\nAllows defining a handler to return arbitrary services that will be exposed to\nthe {@link NodeRunnerFactory} via it's context, {@link NodeFactoryContext}.\n\nThis can be used as a convenient way to pass down additional services to\nthe node factory and runner, for situations where the node type might need\nto access those services during its execution."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.CustomServicesProvider",
+                "text": "CustomServicesProvider"
+              },
+              "<CustomServices> | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/type_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeTypeToNodeConfigMap",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeTypeToNodeConfigMap",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeTypeToNodeConfigMap.NodeType.workflowExecution",
+            "type": "Object",
+            "tags": [],
+            "label": "[NodeType.workflowExecution]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.WorkflowExecutionNodeConfigType",
+                "text": "WorkflowExecutionNodeConfigType"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeTypeToNodeConfigMap.NodeType.toolExecution",
+            "type": "Object",
+            "tags": [],
+            "label": "[NodeType.toolExecution]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.ToolExecutionNodeConfigType",
+                "text": "ToolExecutionNodeConfigType"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeTypeToNodeConfigMap.NodeType.prompt",
+            "type": "Object",
+            "tags": [],
+            "label": "[NodeType.prompt]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.PromptNodeConfigType",
+                "text": "PromptNodeConfigType"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeTypeToNodeConfigMap.NodeType.parallelSequences",
+            "type": "Object",
+            "tags": [],
+            "label": "[NodeType.parallelSequences]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.ParallelSequencesNodeConfigType",
+                "text": "ParallelSequencesNodeConfigType"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeTypeToNodeConfigMap.NodeType.loop",
+            "type": "Object",
+            "tags": [],
+            "label": "[NodeType.loop]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.LoopNodeConfigType",
+                "text": "LoopNodeConfigType"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeTypeToNodeConfigMap.NodeType.intentRecognition",
+            "type": "Object",
+            "tags": [],
+            "label": "[NodeType.intentRecognition]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.IntentRecognitionNodeConfigType",
+                "text": "IntentRecognitionNodeConfigType"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.ParallelSequencesNodeConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParallelSequencesNodeConfigType",
+        "description": [
+          "\nConfig for `parallelSequences` node type."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ParallelSequencesNodeConfigType.branches",
+            "type": "Array",
+            "tags": [],
+            "label": "branches",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.SequenceBranch",
+                "text": "SequenceBranch"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.PromptNodeConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "PromptNodeConfigType",
+        "description": [
+          "\nConfig for `prompt` node type."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.PromptNodeConfigType.prompt",
+            "type": "string",
+            "tags": [],
+            "label": "prompt",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.PromptNodeConfigType.output",
+            "type": "string",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.Provider",
+        "type": "Interface",
+        "tags": [],
+        "label": "Provider",
+        "description": [
+          "\nGeneric provider interface"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.Provider",
+            "text": "Provider"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.Provider.has",
+            "type": "Function",
+            "tags": [],
+            "label": "has",
+            "description": [],
+            "signature": [
+              "(id: string) => boolean"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.Provider.has.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.Provider.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(id: string) => T"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.Provider.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.Provider.getAllKeys",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllKeys",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.Provider.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [],
+            "signature": [
+              "() => T[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.Registry",
+        "type": "Interface",
+        "tags": [],
+        "label": "Registry",
+        "description": [
+          "\nGeneric registry interface"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.Registry",
+            "text": "Registry"
+          },
+          "<T> extends ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.Provider",
+            "text": "Provider"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.Registry.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [],
+            "signature": [
+              "(definition: T) => void"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.Registry.register.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "definition",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/utils/registries.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.RunNodeParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RunNodeParams",
+        "description": [
+          "\nParam type for {@link NodeRunner.run}"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.RunNodeParams",
+            "text": "RunNodeParams"
+          },
+          "<Input>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/runner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunNodeParams.input",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "input",
+            "description": [
+              "\nraw input (configuration for this node, as described in the configuration"
+            ],
+            "signature": [
+              "Input"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunNodeParams.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "\nGlobal state for this run.\n\nUsually, nodes don't need to access this directly, as the node's configuration\nshould be sufficient for the framework to inject the right properties,\nbut the state is still exposed to the nodes during execution"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.WorkflowState",
+                "text": "WorkflowState"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunNodeParams.eventReporter",
+            "type": "Object",
+            "tags": [],
+            "label": "eventReporter",
+            "description": [
+              "\nEvent reporter for this run."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.NodeEventReporter",
+                "text": "NodeEventReporter"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunNodeParams.executionState",
+            "type": "Object",
+            "tags": [],
+            "label": "executionState",
+            "description": [
+              "\nThe current workflow execute state.\nCan be used when manually throwing errors from the node run handler."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.WorkflowExecutionState",
+                "text": "WorkflowExecutionState"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.RunWorkflowOutput",
+        "type": "Interface",
+        "tags": [],
+        "label": "RunWorkflowOutput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.RunWorkflowOutput",
+            "text": "RunWorkflowOutput"
+          },
+          "<Output>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunWorkflowOutput.runId",
+            "type": "string",
+            "tags": [],
+            "label": "runId",
+            "description": [
+              "\nThe runId that was bound to this run. Can be used to find events in\ntracing / telemetry or so on."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunWorkflowOutput.output",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "output",
+            "description": [
+              "\nThe output from the workflow."
+            ],
+            "signature": [
+              "Output"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.RunWorkflowParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RunWorkflowParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.RunWorkflowParams",
+            "text": "RunWorkflowParams"
+          },
+          "<Input>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunWorkflowParams.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe ID of the workflow to run."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunWorkflowParams.inputs",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "inputs",
+            "description": [
+              "\nThe inputs to execute the workflow with.\nInputs will be validated against the defined schema."
+            ],
+            "signature": [
+              "Input"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunWorkflowParams.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nThe request that initiated that run."
+            ],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunWorkflowParams.toolProvider",
+            "type": "Object",
+            "tags": [],
+            "label": "toolProvider",
+            "description": [
+              "\nIf specified, the workflow runner will use\ntools from this provider in addition to the default ones when\nrunning the workflow.\n\nCan be used to expose custom tools."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.ToolProvider",
+                "text": "ToolProvider"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunWorkflowParams.onEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "onEvent",
+            "description": [
+              "\nOptional event handler to handle workflow execution events.\n\nCan be used to handle progression events in real time."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.WorkflowRunEventHandler",
+                "text": "WorkflowRunEventHandler"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.RunWorkflowParams.defaultConnectorId",
+            "type": "string",
+            "tags": [],
+            "label": "defaultConnectorId",
+            "description": [
+              "\nIf specified, will use that connector as the default connector\ninstead of picking the default one automatically."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.ScopedRunner",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScopedRunner",
+        "description": [
+          "\nAn internal runner scoped to the current workflow execution context.\nCan be used to have nodes execute workflows or node definitions as part of their execution.\nE.g. for conditional nodes, parallel nodes or other...\n\nExposed to node execution via the {@link NodeFactoryBaseServices}."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ScopedRunner.runWorkflow",
+            "type": "Function",
+            "tags": [],
+            "label": "runWorkflow",
+            "description": [
+              "\nRun a workflow definition, using a context bound to the current execution flow."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.ScopedRunnerRunWorkflowParams",
+                "text": "ScopedRunnerRunWorkflowParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.ScopedRunnerRunWorkflowOutput",
+                "text": "ScopedRunnerRunWorkflowOutput"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.ScopedRunner.runWorkflow.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wc-framework-types-server",
+                    "scope": "common",
+                    "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                    "section": "def-common.ScopedRunnerRunWorkflowParams",
+                    "text": "ScopedRunnerRunWorkflowParams"
+                  }
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ScopedRunner.runNode",
+            "type": "Function",
+            "tags": [],
+            "label": "runNode",
+            "description": [
+              "\nRun a node definition, using a context bound to the current execution flow."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.ScopedRunnerRunNodeParams",
+                "text": "ScopedRunnerRunNodeParams"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.ScopedRunner.runNode.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wc-framework-types-server",
+                    "scope": "common",
+                    "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                    "section": "def-common.ScopedRunnerRunNodeParams",
+                    "text": "ScopedRunnerRunNodeParams"
+                  }
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.ScopedRunnerRunNodeParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScopedRunnerRunNodeParams",
+        "description": [
+          "\nParams for {@link ScopedRunner.runNode}"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ScopedRunnerRunNodeParams.nodeDefinition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nodeDefinition",
+            "description": [
+              "\nThe definition of the node to run."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".parallelSequences> | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".loop> | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".toolExecution> | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".workflowExecution> | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".prompt> | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.BuiltInNodeDefinition",
+                "text": "BuiltInNodeDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeType",
+                "text": "NodeType"
+              },
+              ".intentRecognition>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ScopedRunnerRunNodeParams.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "\nThe state passed to the node."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.WorkflowState",
+                "text": "WorkflowState"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.ScopedRunnerRunWorkflowParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScopedRunnerRunWorkflowParams",
+        "description": [
+          "\nParams for {@link ScopedRunner.runWorkflow}"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ScopedRunnerRunWorkflowParams.workflowDefinition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "workflowDefinition",
+            "description": [
+              "\nThe definition of the workflow to run."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.GraphWorkflowDefinition",
+                "text": "GraphWorkflowDefinition"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.FunctionWorkflowDefinition",
+                "text": "FunctionWorkflowDefinition"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ScopedRunnerRunWorkflowParams.inputs",
+            "type": "Object",
+            "tags": [],
+            "label": "inputs",
+            "description": [
+              "\nThe input passed to the workflow."
+            ],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.SequenceBranch",
+        "type": "Interface",
+        "tags": [],
+        "label": "SequenceBranch",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.SequenceBranch.steps",
+            "type": "Array",
+            "tags": [],
+            "label": "steps",
+            "description": [],
+            "signature": [
+              "AllBuiltInNodeDefinitions[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.Tool",
+        "type": "Interface",
+        "tags": [],
+        "label": "Tool",
+        "description": [
+          "\nRepresents a tool that will be available to workflows."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.Tool",
+            "text": "Tool"
+          },
+          "<RunInput, RunOutput> extends ",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.ToolDescriptor",
+            "text": "ToolDescriptor"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/tool.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.Tool.schema",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "\nTool's input schema, in zod format."
+            ],
+            "signature": [
+              "RunInput"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/tool.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.Tool.handler",
+            "type": "Function",
+            "tags": [],
+            "label": "handler",
+            "description": [
+              "\nHandler to call to execute the tool.\n\nNote: if the return type is not a string, it will be stringified when passed down to the LLM"
+            ],
+            "signature": [
+              "(args: { [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<RunInput>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<RunInput>, any>[k]; }) => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<RunOutput>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/tool.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.Tool.handler.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "{ [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<RunInput>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<RunInput>, any>[k]; }"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.ToolExecutionNodeConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolExecutionNodeConfigType",
+        "description": [
+          "\nConfig for `toolExecution` node type."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ToolExecutionNodeConfigType.toolId",
+            "type": "string",
+            "tags": [],
+            "label": "toolId",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ToolExecutionNodeConfigType.toolArguments",
+            "type": "Object",
+            "tags": [],
+            "label": "toolArguments",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ToolExecutionNodeConfigType.parseResponse",
+            "type": "boolean",
+            "tags": [],
+            "label": "parseResponse",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ToolExecutionNodeConfigType.output",
+            "type": "string",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.ToolProvider",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolProvider",
+        "description": [
+          "\nRepresents a tool provider exposed to a workflow to let it call tools.\n\nTool providers can be either sync or async, to adapt to potential remote implementations."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/provider.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ToolProvider.has",
+            "type": "Function",
+            "tags": [],
+            "label": "has",
+            "description": [
+              "\nChecks if the registry contains a tool for this ID."
+            ],
+            "signature": [
+              "(id: string) => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<boolean>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.ToolProvider.has.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/provider.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ToolProvider.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nReturns a tool based on its ID\n\nWill throw if no entries are found for the given id."
+            ],
+            "signature": [
+              "(id: string) => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.Tool",
+                "text": "Tool"
+              },
+              "<Zod.ZodRawShape, unknown>>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.ToolProvider.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/provider.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.ToolProvider.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [
+              "\nReturns all tools that are registered in that registry."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.Tool",
+                "text": "Tool"
+              },
+              "<Zod.ZodRawShape, unknown>[]>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/tools/provider.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowDefinitionInput",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowDefinitionInput",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowDefinitionInput.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowDefinitionInput.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowDefinitionInput.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"string\" | \"number\" | \"array\""
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowDefinitionInput.required",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "required",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowDefinitionOutput",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowDefinitionOutput",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowDefinitionOutput.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowDefinitionOutput.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowDefinitionOutput.ref",
+            "type": "string",
+            "tags": [],
+            "label": "ref",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowExecutionErrorMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowExecutionErrorMeta",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionErrorMeta.state",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.WorkflowExecutionState",
+                "text": "WorkflowExecutionState"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowExecutionNodeConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowExecutionNodeConfigType",
+        "description": [
+          "\nConfig for `workflowExecution` node type."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionNodeConfigType.workflowId",
+            "type": "string",
+            "tags": [],
+            "label": "workflowId",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionNodeConfigType.inputs",
+            "type": "Object",
+            "tags": [],
+            "label": "inputs",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionNodeConfigType.output",
+            "type": "string",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowExecutionState",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowExecutionState",
+        "description": [
+          "\nMeta containing all the info associated with the current execution"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/execution_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionState.runId",
+            "type": "string",
+            "tags": [],
+            "label": "runId",
+            "description": [
+              "\nThe id of this workflow execution run."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/execution_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionState.workflowId",
+            "type": "string",
+            "tags": [],
+            "label": "workflowId",
+            "description": [
+              "\nID of the workflow that this error was thrown from.\nIn case of nested workflows, it will be the ID of the lowest level workflow."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/execution_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionState.rootWorkflowId",
+            "type": "string",
+            "tags": [],
+            "label": "rootWorkflowId",
+            "description": [
+              "\nID of the root workflow, the workflow that was requested to be executed"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/execution_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionState.stepId",
+            "type": "string",
+            "tags": [],
+            "label": "stepId",
+            "description": [
+              "\nIf the error occurred during a step execution, this will be the step's ID."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/execution_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowExecutionState.callChain",
+            "type": "Array",
+            "tags": [],
+            "label": "callChain",
+            "description": [
+              "\nThe whole call chain for this error."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.CallChainRef",
+                "text": "CallChainRef"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/execution_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowRef",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowRef",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/call_chain.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowRef.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"workflow\""
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/call_chain.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowRef.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/call_chain.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowRunner",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowRunner",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.WorkflowRunner",
+            "text": "WorkflowRunner"
+          },
+          "<Input, Output>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowRunner.run",
+            "type": "Function",
+            "tags": [],
+            "label": "run",
+            "description": [],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.RunWorkflowParams",
+                "text": "RunWorkflowParams"
+              },
+              "<Input>) => Promise<",
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.RunWorkflowOutput",
+                "text": "RunWorkflowOutput"
+              },
+              "<Output>>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.WorkflowRunner.run.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/wc-framework-types-server",
+                    "scope": "common",
+                    "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                    "section": "def-common.RunWorkflowParams",
+                    "text": "RunWorkflowParams"
+                  },
+                  "<Input>"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowState",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowState",
+        "description": [
+          "\nRepresents the workflow state, that gets propagated through nodes during execution."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/state/state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowState.has",
+            "type": "Function",
+            "tags": [],
+            "label": "has",
+            "description": [],
+            "signature": [
+              "(key: string) => boolean"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/state/state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.WorkflowState.has.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/state/state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowState.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "<T = unknown>(key: string) => T"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/state/state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.WorkflowState.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/state/state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowState.getKeys",
+            "type": "Function",
+            "tags": [],
+            "label": "getKeys",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/state/state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowState.set",
+            "type": "Function",
+            "tags": [],
+            "label": "set",
+            "description": [],
+            "signature": [
+              "<T>(key: string, value: T) => void"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/state/state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.WorkflowState.set.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/state/state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/wc-framework-types-server",
+                "id": "def-common.WorkflowState.set.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/state/state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.CallChain",
+        "type": "Type",
+        "tags": [],
+        "label": "CallChain",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.CallChainRef",
+            "text": "CallChainRef"
+          },
+          "[]"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/call_chain.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.CallChainRef",
+        "type": "Type",
+        "tags": [],
+        "label": "CallChainRef",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.NodeRef",
+            "text": "NodeRef"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.WorkflowRef",
+            "text": "WorkflowRef"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/call_chain.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.CustomServicesProvider",
+        "type": "Type",
+        "tags": [],
+        "label": "CustomServicesProvider",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<T>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/type_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.IntentRecognitionBranch",
+        "type": "Type",
+        "tags": [],
+        "label": "IntentRecognitionBranch",
+        "description": [],
+        "signature": [
+          "IntentRecognitionConditionBranch",
+          " | ",
+          "IntentRecognitionDefaultBranch"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "NodeDefinition",
+        "description": [
+          "\nDescribes the configuration structure of a node within a {@link WorkflowDefinition}.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.BuiltInNodeDefinition",
+            "text": "BuiltInNodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.NodeType",
+            "text": "NodeType"
+          },
+          ".parallelSequences> | ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.BuiltInNodeDefinition",
+            "text": "BuiltInNodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.NodeType",
+            "text": "NodeType"
+          },
+          ".loop> | ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.BuiltInNodeDefinition",
+            "text": "BuiltInNodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.NodeType",
+            "text": "NodeType"
+          },
+          ".toolExecution> | ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.BuiltInNodeDefinition",
+            "text": "BuiltInNodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.NodeType",
+            "text": "NodeType"
+          },
+          ".workflowExecution> | ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.BuiltInNodeDefinition",
+            "text": "BuiltInNodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.NodeType",
+            "text": "NodeType"
+          },
+          ".prompt> | ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.BuiltInNodeDefinition",
+            "text": "BuiltInNodeDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.NodeType",
+            "text": "NodeType"
+          },
+          ".intentRecognition>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeFactoryServices",
+        "type": "Type",
+        "tags": [],
+        "label": "NodeFactoryServices",
+        "description": [
+          "\nFactory services, composed of the base services and additional services that can be\ninjected via {@link NodeDefinition.customServicesProvider}"
+        ],
+        "signature": [
+          "CustomServices & ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.NodeFactoryBaseServices",
+            "text": "NodeFactoryBaseServices"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeProgressionReporterEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "NodeProgressionReporterEvent",
+        "description": [
+          "\nSubset of the properties of a {@link NodeProgressionEvent} that needs to be specified\nby the emitter."
+        ],
+        "signature": [
+          "{ label: string; data?: Record<string, string> | undefined; }"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/event_reporter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeRunnerFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "NodeRunnerFactory",
+        "description": [
+          "\nRepresents a factory that can return a runner for a given node type."
+        ],
+        "signature": [
+          "(context: ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.NodeFactoryContext",
+            "text": "NodeFactoryContext"
+          },
+          "<CustomServices>) => ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.NodeRunner",
+            "text": "NodeRunner"
+          },
+          "<InputShape>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.NodeRunnerFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-server",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+                "section": "def-common.NodeFactoryContext",
+                "text": "NodeFactoryContext"
+              },
+              "<CustomServices>"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.NodeSequence",
+        "type": "Type",
+        "tags": [],
+        "label": "NodeSequence",
+        "description": [],
+        "signature": [
+          "AllBuiltInNodeDefinitions[]"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/node_type_configs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.ScopedNodeProvider",
+        "type": "Type",
+        "tags": [],
+        "label": "ScopedNodeProvider",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.Provider",
+            "text": "Provider"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.NodeTypeDefinition",
+            "text": "NodeTypeDefinition"
+          },
+          "<",
+          "DefaultNodeRunnerInput",
+          ", {}>>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/nodes/internal_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.ScopedRunnerRunWorkflowOutput",
+        "type": "Type",
+        "tags": [],
+        "label": "ScopedRunnerRunWorkflowOutput",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.RunWorkflowOutput",
+            "text": "RunWorkflowOutput"
+          },
+          "<Record<string, unknown>>"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.ScopedWorkflowProvider",
+        "type": "Type",
+        "tags": [],
+        "label": "ScopedWorkflowProvider",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.Provider",
+            "text": "Provider"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.WorkflowDefinition",
+            "text": "WorkflowDefinition"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/internal_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.GraphWorkflowDefinition",
+            "text": "GraphWorkflowDefinition"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/wc-framework-types-server",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesServerPluginApi",
+            "section": "def-common.FunctionWorkflowDefinition",
+            "text": "FunctionWorkflowDefinition"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowExecutionErrorType",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowExecutionErrorType",
+        "description": [],
+        "signature": [
+          "\"invalidConfiguration\" | \"invalidParameter\" | \"workflowNotFound\" | \"nodeTypeNotFound\" | \"toolNotFound\" | \"internalError\""
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowInputType",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowInputType",
+        "description": [],
+        "signature": [
+          "\"string\" | \"number\" | \"array\""
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-server",
+        "id": "def-common.WorkflowRunEventHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowRunEventHandler",
+        "description": [],
+        "signature": [
+          "(event: ",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.WorkflowRunEvent",
+            "text": "WorkflowRunEvent"
+          },
+          ") => void"
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-server",
+            "id": "def-common.WorkflowRunEventHandler.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeProgressionEvent",
+                "text": "NodeProgressionEvent"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.WorkflowProgressionEvent",
+                "text": "WorkflowProgressionEvent"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-server/src/workflows/runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

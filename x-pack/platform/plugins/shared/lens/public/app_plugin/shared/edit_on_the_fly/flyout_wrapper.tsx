@@ -19,6 +19,7 @@ import {
   EuiLink,
   EuiBetaBadge,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -37,6 +38,7 @@ export const FlyoutWrapper = ({
   onCancel,
   navigateToLensEditor,
   onApply,
+  isReadOnly,
 }: FlyoutWrapperProps) => {
   return (
     <>
@@ -55,15 +57,9 @@ export const FlyoutWrapper = ({
                 <h2>
                   <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      {isNewPanel
-                        ? i18n.translate('xpack.lens.config.createVisualizationLabel', {
-                            defaultMessage: 'Create {lang} visualization',
-                            values: { lang: language },
-                          })
-                        : i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                            defaultMessage: 'Edit {lang} visualization',
-                            values: { lang: language },
-                          })}
+                      {i18n.translate('xpack.lens.config.showVisualizationLabel', {
+                        defaultMessage: 'Configuration',
+                      })}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
@@ -92,7 +88,7 @@ export const FlyoutWrapper = ({
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            {navigateToLensEditor && (
+            {navigateToLensEditor && !isReadOnly && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
                   <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
@@ -106,6 +102,16 @@ export const FlyoutWrapper = ({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
       )}
+      {isInlineFlyoutVisible && isReadOnly ? (
+        <EuiCallOut
+          title={i18n.translate('xpack.lens.config.readOnly', {
+            defaultMessage: 'Read-only: Changes will be reverted on close',
+          })}
+          color="warning"
+          iconType="warning"
+          size="s"
+        />
+      ) : null}
 
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
@@ -116,6 +122,7 @@ export const FlyoutWrapper = ({
           margin-left: -${euiThemeVars.euiFormMaxWidth};
           pointer-events: none;
           .euiFlyoutBody__overflow {
+            transform: initial;
             -webkit-mask-image: none;
             padding-left: inherit;
             margin-left: inherit;
@@ -154,23 +161,22 @@ export const FlyoutWrapper = ({
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={onApply}
-                fill
-                aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
-                  defaultMessage: 'Apply changes',
-                })}
-                disabled={Boolean(isNewPanel) ? false : !isSaveable}
-                iconType="check"
-                data-test-subj="applyFlyoutButton"
-              >
-                <FormattedMessage
-                  id="xpack.lens.config.applyFlyoutLabel"
-                  defaultMessage="Apply and close"
-                />
-              </EuiButton>
-            </EuiFlexItem>
+            {isReadOnly ? null : (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={onApply}
+                  fill
+                  disabled={Boolean(isNewPanel) ? false : !isSaveable}
+                  iconType="check"
+                  data-test-subj="applyFlyoutButton"
+                >
+                  <FormattedMessage
+                    id="xpack.lens.config.applyFlyoutLabel"
+                    defaultMessage="Apply and close"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       )}

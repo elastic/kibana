@@ -9,7 +9,7 @@ import { useController } from 'react-hook-form';
 import { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import { useCallback } from 'react';
 import { useIndicesFields } from './use_indices_fields';
-import { ChatFormFields } from '../types';
+import { PlaygroundFormFields } from '../types';
 import { useUsageTracker } from './use_usage_tracker';
 import { AnalyticsEvents } from '../analytics/constants';
 
@@ -18,7 +18,12 @@ export const useSourceIndicesFields = () => {
   const {
     field: { value: selectedIndices, onChange: onIndicesChange },
   } = useController({
-    name: ChatFormFields.indices,
+    name: PlaygroundFormFields.indices,
+  });
+  const {
+    field: { onChange: onUserQueryChange },
+  } = useController({
+    name: PlaygroundFormFields.userElasticsearchQuery,
   });
   const { fields, isLoading: isFieldsLoading } = useIndicesFields(selectedIndices);
 
@@ -43,9 +48,10 @@ export const useSourceIndicesFields = () => {
   const setIndices = useCallback(
     (indices: IndexName[]) => {
       onIndicesChange(indices);
+      onUserQueryChange(null);
       usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, indices.length);
     },
-    [onIndicesChange, usageTracker]
+    [onIndicesChange, onUserQueryChange, usageTracker]
   );
 
   return {

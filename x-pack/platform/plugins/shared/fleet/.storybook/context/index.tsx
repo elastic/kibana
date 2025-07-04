@@ -8,19 +8,22 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
 
 import { EMPTY } from 'rxjs';
-import type { DecoratorFn } from '@storybook/react';
+import type { Decorator } from '@storybook/react';
 import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
 import type {
   PluginsServiceStart,
+  PricingServiceStart,
   SecurityServiceStart,
   UserProfileServiceStart,
 } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { coreFeatureFlagsMock } from '@kbn/core/public/mocks';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
@@ -43,6 +46,7 @@ import { getCloud } from './cloud';
 import { getShare } from './share';
 import { getExecutionContext } from './execution_context';
 import { getCustomBranding } from './custom_branding';
+import { getRendering } from './rendering';
 
 // TODO: clintandrewhall - this is not ideal, or complete.  The root context of Fleet applications
 // requires full start contracts of its dependencies.  As a result, we have to mock all of those contracts
@@ -52,13 +56,13 @@ import { getCustomBranding } from './custom_branding';
 // Expect this to grow as components that are given Stories need access to mocked services.
 export const StorybookContext: React.FC<{
   children: React.ReactNode;
-  storyContext?: Parameters<DecoratorFn>[1];
+  storyContext?: Parameters<Decorator>;
 }> = ({ storyContext, children: storyChildren }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();
   const history = new CoreScopedHistory(browserHistory, basepath);
 
-  const isCloudEnabled = storyContext?.args.isCloudEnabled;
+  const isCloudEnabled = Boolean(storyContext?.[1].args.isCloudEnabled);
   // @ts-ignore {} no assignable to parameter
   ExperimentalFeaturesService.init({});
   const startServices: FleetStartServices = useMemo(
@@ -72,6 +76,8 @@ export const StorybookContext: React.FC<{
         optIn: () => {},
         telemetryCounter$: EMPTY,
       },
+      embeddable: {} as unknown as EmbeddableStart,
+      logsDataAccess: {} as unknown as LogsDataAccessPluginStart,
       application: getApplication(),
       executionContext: getExecutionContext(),
       featureFlags: coreFeatureFlagsMock.createStart(),
@@ -85,6 +91,7 @@ export const StorybookContext: React.FC<{
         languageClientsUiComponents: {},
       },
       customBranding: getCustomBranding(),
+      rendering: getRendering(),
       dashboard: {} as unknown as DashboardStart,
       docLinks: getDocLinks(),
       http: getHttp(),
@@ -101,6 +108,7 @@ export const StorybookContext: React.FC<{
         theme$: EMPTY,
         getTheme: () => ({ darkMode: false, name: 'amsterdam' }),
       },
+      pricing: {} as unknown as PricingServiceStart,
       security: {} as unknown as SecurityServiceStart,
       userProfile: {} as unknown as UserProfileServiceStart,
       plugins: {} as unknown as PluginsServiceStart,
@@ -121,6 +129,7 @@ export const StorybookContext: React.FC<{
           addFleetServers: true,
         },
         integrations: {
+          all: true,
           readPackageInfo: true,
           readInstalledPackages: true,
           installPackages: true,

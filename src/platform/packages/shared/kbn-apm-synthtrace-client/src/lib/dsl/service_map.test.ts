@@ -101,7 +101,12 @@ describe('serviceMap', () => {
         const [transaction, ...spans] = traceDocs;
         expect(transaction).toHaveProperty(['processor.event'], 'transaction');
         expect(
-          spans.every(({ 'processor.event': processorEvent }) => processorEvent === 'span')
+          spans
+            .filter(
+              ({ 'processor.event': processorEvent, 'span.type': spanType }) =>
+                processorEvent === 'span' && spanType !== 'app'
+            )
+            .every(({ 'span.destination.service.resource': spanDest }) => spanDest !== undefined)
         ).toBe(true);
       }
     });
@@ -263,7 +268,9 @@ function getTraceDocsSubset(transaction: BaseSpan): ApmFields[] {
 
   const children = transaction.getChildren();
   if (children) {
-    const childFields = children.flatMap((child) => getTraceDocsSubset(child));
+    const childFields = children
+      .filter((p) => p.fields['processor.event'] === 'span')
+      .flatMap((child) => getTraceDocsSubset(child));
     return [subsetFields, ...childFields];
   }
   return [subsetFields];

@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 import * as i18n from '../translations';
 
 interface EmptyPromptProps {
@@ -36,7 +36,7 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
             key="documentation-button"
             target="_blank"
             href={docLinks.alerting.maintenanceWindows}
-            iconType="help"
+            iconType="question"
           >
             {i18n.EMPTY_PROMPT_DOCUMENTATION}
           </EuiButtonEmpty>,

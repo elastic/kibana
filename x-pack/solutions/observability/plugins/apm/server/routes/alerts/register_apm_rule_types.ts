@@ -14,7 +14,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import {
   AGENT_NAME,
   CONTAINER_ID,

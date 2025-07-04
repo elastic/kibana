@@ -32,16 +32,14 @@ const INVALID_TUTORIAL: TutorialSchema = {
   longDescription: 'long description with lots of text',
   completionTimeMinutes: 10,
   previewImagePath: 'path',
-  onPrem: { instructionSets: [], params: [] },
-  elasticCloud: { instructionSets: [], params: [] },
-  onPremElasticCloud: { instructionSets: [], params: [] },
+  onPrem: { instructionSets: [] },
+  elasticCloud: { instructionSets: [] },
+  onPremElasticCloud: { instructionSets: [] },
   artifacts: {
     exportedFields: { documentationUrl: 'url' },
     dashboards: [],
     application: { path: 'path', label: 'path' },
   },
-  savedObjects: [],
-  savedObjectsInstallMsg: 'testMsg',
 };
 const VALID_TUTORIAL: TutorialSchema = {
   id: 'test',
@@ -54,16 +52,14 @@ const VALID_TUTORIAL: TutorialSchema = {
   longDescription: 'long description with lots of text',
   completionTimeMinutes: 10,
   previewImagePath: 'path',
-  onPrem: { instructionSets: [], params: [] },
-  elasticCloud: { instructionSets: [], params: [] },
-  onPremElasticCloud: { instructionSets: [], params: [] },
+  onPrem: { instructionSets: [] },
+  elasticCloud: { instructionSets: [] },
+  onPremElasticCloud: { instructionSets: [] },
   artifacts: {
     exportedFields: { documentationUrl: 'url' },
     dashboards: [],
     application: { path: 'path', label: 'path' },
   },
-  savedObjects: [],
-  savedObjectsInstallMsg: 'testMsg',
 };
 const invalidTutorialProvider = INVALID_TUTORIAL;
 const validTutorialProvider = VALID_TUTORIAL;

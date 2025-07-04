@@ -51,7 +51,7 @@ function generateData({
 const getAbleToModifyCase = () => {
   it('should be able to modify settings', () => {
     const { rangeFrom, rangeTo } = timeRange;
-    const TEST_ENV = 'test environment ' + new Date().toISOString();
+    const TEST_ENV = 'test env ' + new Date().toISOString();
 
     synthtrace.index(
       generateData({
@@ -66,12 +66,40 @@ const getAbleToModifyCase = () => {
     const button = cy.get('button[data-test-subj="apmJobsListCreateJobButton"]');
     button.should('not.be.disabled');
     button.click();
-    cy.get('div[data-test-subj="comboBoxInput"]').click();
-    cy.get(`button[title="${TEST_ENV}"]`).click();
+    cy.get('div[data-test-subj="comboBoxInput"]').click({ force: true });
+    cy.get(`button[title="${TEST_ENV}"]`).click({ force: true });
     cy.get('button[data-test-subj="apmAddEnvironmentsCreateJobsButton"]').click();
     cy.intercept('GET', '/internal/apm/settings/anomaly-detection/jobs*').as('internalApiRequest');
-    cy.wait('@internalApiRequest');
+    cy.wait('@internalApiRequest', { timeout: 15000 });
     cy.contains('Anomaly detection jobs created');
+  });
+
+  it('should show error if api call crashes when modifying settings', () => {
+    cy.intercept('POST', '/internal/apm/settings/anomaly-detection/jobs', {
+      statusCode: 500,
+    });
+
+    const { rangeFrom, rangeTo } = timeRange;
+    const TEST_ENV =
+      'Synthtrace: case scenario TEST-with-a-really-long-name ' + new Date().toISOString();
+
+    synthtrace.index(
+      generateData({
+        from: new Date(rangeFrom).getTime(),
+        to: new Date(rangeTo).getTime(),
+        serviceName: 'opbeans-node',
+        environment: TEST_ENV,
+      })
+    );
+
+    cy.visitKibana(basePath);
+    const button = cy.get('button[data-test-subj="apmJobsListCreateJobButton"]');
+    button.should('not.be.disabled');
+    button.click();
+    cy.get('div[data-test-subj="comboBoxInput"]').click({ force: true });
+    cy.get(`button[title="${TEST_ENV}"]`).click({ force: true });
+    cy.get('button[data-test-subj="apmAddEnvironmentsCreateJobsButton"]').click();
+    cy.contains('Anomaly detection jobs could not be created');
   });
 };
 

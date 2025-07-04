@@ -207,7 +207,7 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiBasicTable insDataTableFormat__table eui-xScroll css-1f59z3t"
+    class="euiBasicTable insDataTableFormat__table eui-xScroll css-bhtp2o-DataTableFormatClass"
     data-test-subj="inspectorTable"
   >
     <table
@@ -227,26 +227,30 @@ Array [
             role="columnheader"
             scope="col"
           >
-            <button
-              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-              data-test-subj="tableHeaderSortButton"
-              type="button"
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
             >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
               >
-                <span
-                  class="eui-textTruncate"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                 >
-                  column1
-                </span>
-                <span
-                  class="euiTableSortIcon euiTableSortIcon--sortable"
-                  color="subdued"
-                  data-euiicon-type="sortable"
-                />
-              </div>
-            </button>
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    column1
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </span>
           </th>
         </tr>
       </thead>
@@ -347,7 +351,6 @@ Array [
               />
             </button>
             <ul
-              aria-label="Pagination for table: "
               class="euiPagination__list emotion-euiPagination__list"
             >
               <li
@@ -355,7 +358,7 @@ Array [
               >
                 <button
                   aria-controls="__table_generated-id"
-                  aria-current="true"
+                  aria-current="page"
                   aria-label="Page 1 of 1"
                   class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
                   data-test-subj="pagination-button-0"
@@ -488,7 +491,7 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiBasicTable insDataTableFormat__table eui-xScroll css-1f59z3t"
+    class="euiBasicTable insDataTableFormat__table eui-xScroll css-bhtp2o-DataTableFormatClass"
     data-test-subj="inspectorTable"
   >
     <table
@@ -508,27 +511,31 @@ Array [
             role="columnheader"
             scope="col"
           >
-            <button
-              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-              data-test-subj="tableHeaderSortButton"
-              type="button"
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
             >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
               >
-                <span
-                  class="eui-textTruncate"
-                  title="column1"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                 >
-                  column1
-                </span>
-                <span
-                  class="euiTableSortIcon euiTableSortIcon--sortable"
-                  color="subdued"
-                  data-euiicon-type="sortable"
-                />
-              </div>
-            </button>
+                  <span
+                    class="eui-textTruncate"
+                    title="column1"
+                  >
+                    column1
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </span>
           </th>
         </tr>
       </thead>
@@ -629,7 +636,6 @@ Array [
               />
             </button>
             <ul
-              aria-label="Pagination for table: "
               class="euiPagination__list emotion-euiPagination__list"
             >
               <li
@@ -637,7 +643,7 @@ Array [
               >
                 <button
                   aria-controls="__table_generated-id"
-                  aria-current="true"
+                  aria-current="page"
                   aria-label="Page 1 of 1"
                   class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
                   data-test-subj="pagination-button-0"

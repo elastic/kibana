@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ruleNotifyWhenV1, RuleNotifyWhenV1 } from '../../common';
+import type { RuleNotifyWhenV1 } from '../../common';
+import { ruleNotifyWhenV1 } from '../../common';
 
 export function validateNotifyWhen(notifyWhen: string) {
   if (Object.values(ruleNotifyWhenV1).includes(notifyWhen as RuleNotifyWhenV1)) {

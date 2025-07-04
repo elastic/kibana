@@ -7,8 +7,11 @@
 
 import React from 'react';
 
-import { EuiComment, useEuiTheme } from '@elastic/eui';
+import { EuiComment, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../common/doc_links';
+import { ContextModelLimitError } from '../../../common';
 
 interface SystemMessageProps {
   content: React.ReactNode;
@@ -16,7 +19,6 @@ interface SystemMessageProps {
 
 export const SystemMessage: React.FC<SystemMessageProps> = ({ content }) => {
   const { euiTheme } = useEuiTheme();
-
   return (
     <EuiComment
       username={i18n.translate('xpack.searchPlayground.chat.message.system.username', {
@@ -28,7 +30,35 @@ export const SystemMessage: React.FC<SystemMessageProps> = ({ content }) => {
           defaultMessage: 'System',
         }
       )}
-      event={content}
+      event={
+        content === ContextModelLimitError ? (
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.searchPlayground.chat.message.system.contextModelLimitError"
+                defaultMessage="{SystemMessage}: Try reducing the number of selected documents and fields to stay within context limits. {LearnMore}"
+                values={{
+                  SystemMessage: content,
+                  LearnMore: (
+                    <EuiLink
+                      href={docLinks.context}
+                      target="_blank"
+                      data-test-subj="system-contentModelLimit-learnMore-documentation-link"
+                    >
+                      <FormattedMessage
+                        id="xpack.searchPlayground.chat.message.system.contextModelLimitError.LearnMore"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+        ) : (
+          content
+        )
+      }
       timelineAvatar="dot"
       eventColor="subdued"
       css={{
@@ -38,6 +68,7 @@ export const SystemMessage: React.FC<SystemMessageProps> = ({ content }) => {
           borderRadius: euiTheme.border.radius.medium,
         },
       }}
+      data-test-subj="systemMessage"
     />
   );
 };
