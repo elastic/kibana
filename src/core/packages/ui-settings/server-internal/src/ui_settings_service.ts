@@ -22,6 +22,7 @@ import type {
   UiSettingsParams,
   UiSettingsScope,
 } from '@kbn/core-ui-settings-common';
+import { BuildFlavor } from '@kbn/config';
 import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
 import type {
@@ -34,7 +35,6 @@ import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { registerRoutes, registerInternalRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
-import { BuildFlavor } from '@kbn/config';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -119,7 +119,7 @@ export class UiSettingsService
   public async start(): Promise<InternalUiSettingsServiceStart> {
     if (this.allowlist) {
       // If we are in development mode, check if all settings in the allowlist are registered
-      if (this.isDev && this.buildFlavor == "serverless") {
+      if (this.isDev && this.buildFlavor == 'serverless') {
         this.validateAllowlist();
       }
       this.applyAllowlist(this.uiSettingsDefaults, false);
