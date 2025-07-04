@@ -35,7 +35,15 @@ export function getDataStreamLifecycle(
     return { dsl: { data_retention: retention ? String(retention) : undefined } };
   }
 
-  return { disabled: {} };
+  if (dataStream.next_generation_managed_by === 'Unmanaged') {
+    return { disabled: {} };
+  }
+
+  return {
+    error: {
+      message: `Unknown data stream lifecycle state [${dataStream.next_generation_managed_by}]`,
+    },
+  };
 }
 
 interface ReadUnmanagedAssetsParams extends BaseParams {

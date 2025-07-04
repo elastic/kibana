@@ -155,12 +155,15 @@ export async function updateDataStreamsLifecycle({
       );
 
       if (!isServerless) {
-        // we don't need overrides for serverless since it only allows DSL
+        // we don't need overrides for serverless since data streams can
+        // only be managed by dsl
         await putDataStreamsSettings({ esClient, names, logger, lifecycle });
       }
     } else if (isInheritLifecycle(lifecycle)) {
-      // inheriting a lifecycle here means falling back to the template configuration
-      // so we need to update streams individually.
+      // classic streams only - inheriting a lifecycle means falling back to
+      // the template configuration. if we find a DSL we need to explicitly
+      // set it explicitly since there is no way to fall back to the template
+      // value, for ILM or disabled we only have to unset any overrides
       await Promise.all(
         names.map(async (name) => {
           const templateLifecycle = await getTemplateLifecycle({ esClient, name, logger });
@@ -179,7 +182,7 @@ export async function updateDataStreamsLifecycle({
             });
           }
 
-          await putDataStreamsSettings({ esClient, names, logger, lifecycle: { inherit: {} } });
+          await putDataStreamsSettings({ esClient, names, logger, lifecycle });
         })
       );
     }
