@@ -6,6 +6,7 @@
  */
 
 export { AgentService } from './agents';
+export { AgentProfilesService } from './agents/profiles';
 export { ChatService } from './chat';
 export { ConversationsService } from './conversations';
 export { ToolsService } from './tools';
