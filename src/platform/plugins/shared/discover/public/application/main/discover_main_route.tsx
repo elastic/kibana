@@ -118,7 +118,10 @@ export const DiscoverMainRoute = ({
           return false;
         }
 
-        return stateContainer.savedSearchState.getHasChanged$().getValue();
+        const isSaved = !!stateContainer.savedSearchState.getId();
+        const hasChanged = stateContainer.savedSearchState.getHasChanged$().getValue();
+
+        return isSaved && hasChanged;
       });
 
       if (!hasAnyUnsavedTab) return actions.default();
