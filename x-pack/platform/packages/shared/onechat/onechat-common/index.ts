@@ -33,6 +33,7 @@ export {
   toolMatchSelection,
   filterToolsBySelection,
   allToolsSelectionWildcard,
+  allToolsSelection,
 } from './tools';
 export {
   OnechatErrorCode,

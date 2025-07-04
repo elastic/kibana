@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export interface CallAgentResponse<TResult = unknown> {
-  runId: string;
-  result: TResult;
+import type { AgentDescriptor } from '@kbn/onechat-common';
+
+export interface ListAgentsResponse {
+  agents: AgentDescriptor[];
 }

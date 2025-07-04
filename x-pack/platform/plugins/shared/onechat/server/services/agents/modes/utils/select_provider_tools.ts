@@ -9,15 +9,15 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { filterToolsBySelection, ToolSelection } from '@kbn/onechat-common';
 import type { ToolProvider, ExecutableTool } from '@kbn/onechat-server';
 
-export const filterProviderTools = async ({
+export const selectProviderTools = async ({
   provider,
-  rules,
+  selection,
   request,
 }: {
   provider: ToolProvider;
-  rules: ToolSelection[];
+  selection: ToolSelection[];
   request: KibanaRequest;
 }): Promise<ExecutableTool[]> => {
   const tools = await provider.list({ request });
-  return filterToolsBySelection(tools, rules);
+  return filterToolsBySelection(tools, selection);
 };

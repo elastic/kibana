@@ -8,6 +8,7 @@
 import {
   oneChatDefaultAgentId,
   oneChatAgentProviderIds,
+  allToolsSelectionWildcard as allTools,
   AgentType,
   createAgentNotFoundError,
   toSerializedAgentIdentifier,
@@ -44,6 +45,9 @@ const createDefaultAgentDescriptor = (): ConversationalAgentDefinition => {
     type: AgentType.conversational,
     id: oneChatDefaultAgentId,
     description: 'Default onechat agent',
-    handler: createHandler({ agentId: oneChatDefaultAgentId }),
+    handler: createHandler({
+      agentId: oneChatDefaultAgentId,
+      toolSelection: [{ toolIds: [allTools] }],
+    }),
   };
 };
