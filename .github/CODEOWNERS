@@ -992,9 +992,9 @@ x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/respons
 x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
-x-pack/platform/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
+x-pack/platform/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
 x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
@@ -1115,9 +1115,6 @@ x-pack/solutions/security/test
 x-pack/test
 x-pack/test_serverless
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
-x-pack/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
-x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
-x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
