@@ -49,7 +49,7 @@ export const SolutionsViewBadge: FunctionComponent<{ badgeText: string }> = ({ b
       button={
         <EuiBadge
           color="hollow"
-          iconType="questionInCircle"
+          iconType="question"
           iconSide="right"
           onClick={() => setIsPopoverOpen((value) => !value)}
           onClickAriaLabel={onClickAriaLabel}
