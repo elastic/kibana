@@ -116,6 +116,7 @@ export const pageObjects = {
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
+  snapshotRestore: SnapshotRestorePageProvider,
   spaceSelector: SpaceSelectorPageObject,
   statusPage: StatusPageObject,
   tagManagement: TagManagementPageObject,
