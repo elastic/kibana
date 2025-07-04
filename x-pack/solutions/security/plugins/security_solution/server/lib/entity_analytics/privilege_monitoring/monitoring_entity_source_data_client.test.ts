@@ -113,7 +113,7 @@ describe('MonitoringEntitySourceDataClient', () => {
       );
 
       defaultOpts.soClient.update.mockResolvedValue({
-        id: 'entity-analytics-monitoring-entity-source-test-namespace-test-type-test-index-pattern', // TODO: https://github.com/elastic/security-team/issues/12851
+        id: 'entity-analytics-monitoring-entity-source-test-namespace-test-type-test-index-pattern',
         type: monitoringEntitySourceTypeName,
         attributes: { ...testDescriptor, name: 'Updated Source' },
         references: [],
