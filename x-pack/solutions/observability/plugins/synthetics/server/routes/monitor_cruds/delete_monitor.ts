@@ -10,6 +10,7 @@ import { DeleteMonitorAPI } from './services/delete_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { DeleteParamsResponse } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { MONITOR_WRITE_API } from '../../feature';
 
 export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
@@ -19,6 +20,7 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{id?}',
+  requiredPrivileges: [MONITOR_WRITE_API],
   validate: {},
   validation: {
     request: {

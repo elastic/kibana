@@ -22,6 +22,7 @@ export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
   validate: false,
+
   handler: async ({ savedObjectsClient }) => {
     const dynamicSettingsAttributes: DynamicSettingsAttributes = await getSyntheticsDynamicSettings(
       savedObjectsClient

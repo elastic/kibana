@@ -12,10 +12,12 @@ import { SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from '../monitor_cruds/monitor_validation';
+import { MONITOR_WRITE_API } from '../../feature';
 
 export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.RUN_ONCE_MONITOR + '/{monitorId}',
+  requiredPrivileges: [MONITOR_WRITE_API],
   validate: {
     body: schema.any(),
     params: schema.object({

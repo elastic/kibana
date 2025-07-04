@@ -21,11 +21,13 @@ import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { MONITOR_WRITE_API } from '../../feature';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
   validate: {},
+  requiredPrivileges: [MONITOR_WRITE_API],
   validation: {
     request: {
       body: schema.any(),

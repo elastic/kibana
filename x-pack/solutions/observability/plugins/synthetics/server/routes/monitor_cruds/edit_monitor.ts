@@ -36,12 +36,14 @@ import {
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { MONITOR_WRITE_API } from '../../feature';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
   validate: {},
+  requiredPrivileges: [MONITOR_WRITE_API],
   validation: {
     request: {
       params: schema.object({

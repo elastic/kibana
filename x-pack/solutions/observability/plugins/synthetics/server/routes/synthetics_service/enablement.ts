@@ -12,6 +12,7 @@ import {
   getAPIKeyForSyntheticsService,
   getSyntheticsEnablement,
 } from '../../synthetics_service/get_api_key';
+import { MONITOR_WRITE_API } from '../../feature';
 
 export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
@@ -62,6 +63,7 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () =>
 export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT,
+  requiredPrivileges: [MONITOR_WRITE_API],
   validate: {},
   handler: async ({
     response,

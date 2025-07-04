@@ -19,109 +19,111 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   syntheticsRoute,
   server,
   syntheticsMonitorClient
-) => ({
-  ...syntheticsRoute,
-  options: {
-    ...(syntheticsRoute.options ?? {}),
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [
-        'uptime-read',
-        ...(syntheticsRoute.requiredPrivileges ?? []),
-        ...(syntheticsRoute?.writeAccess ? ['uptime-write'] : []),
-      ],
+) => {
+  return {
+    ...syntheticsRoute,
+    options: {
+      ...(syntheticsRoute.options ?? {}),
     },
-  },
-  handler: async (context, request, response) => {
-    return withApmSpan('synthetics_route_handler', async () => {
-      const { elasticsearch, savedObjects, uiSettings } = await context.core;
+    security: {
+      authz: {
+        requiredPrivileges: [
+          'uptime-read',
+          ...(syntheticsRoute.requiredPrivileges ?? []),
+          ...(syntheticsRoute?.writeAccess ? ['uptime-write'] : []),
+        ],
+      },
+    },
+    handler: async (context, request, response) => {
+      return withApmSpan('synthetics_route_handler', async () => {
+        const { elasticsearch, savedObjects, uiSettings } = await context.core;
 
-      const { client: esClient } = elasticsearch;
-      const savedObjectsClient = savedObjects.getClient({
-        includedHiddenTypes: [syntheticsServiceApiKey.name],
-      });
+        const { client: esClient } = elasticsearch;
+        const savedObjectsClient = savedObjects.getClient({
+          includedHiddenTypes: [syntheticsServiceApiKey.name],
+        });
 
-      // specifically needed for the synthetics service api key generation
-      server.authSavedObjectsClient = savedObjectsClient;
+        // specifically needed for the synthetics service api key generation
+        server.authSavedObjectsClient = savedObjectsClient;
 
-      const syntheticsEsClient = new SyntheticsEsClient(
-        savedObjectsClient,
-        esClient.asCurrentUser,
-        {
-          request,
-          uiSettings,
-          isDev: Boolean(server.isDev) && !isTestUser(server),
-          heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
-        }
-      );
-
-      server.syntheticsEsClient = syntheticsEsClient;
-      const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
-      const monitorConfigRepository = new MonitorConfigRepository(
-        savedObjectsClient,
-        encryptedSavedObjectsClient
-      );
-
-      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-
-      try {
-        const res = await syntheticsRoute.handler({
-          syntheticsEsClient,
+        const syntheticsEsClient = new SyntheticsEsClient(
           savedObjectsClient,
-          context,
-          request,
-          response,
-          server,
-          spaceId,
-          syntheticsMonitorClient,
-          monitorConfigRepository,
-        });
-        if (isKibanaResponse(res)) {
-          return res;
-        }
+          esClient.asCurrentUser,
+          {
+            request,
+            uiSettings,
+            isDev: Boolean(server.isDev) && !isTestUser(server),
+            heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+          }
+        );
 
-        const inspectData = await syntheticsEsClient.getInspectData(syntheticsRoute.path);
+        server.syntheticsEsClient = syntheticsEsClient;
+        const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+        const monitorConfigRepository = new MonitorConfigRepository(
+          savedObjectsClient,
+          encryptedSavedObjectsClient
+        );
 
-        if (Array.isArray(res)) {
-          if (isEmpty(inspectData)) {
-            return response.ok({
-              body: res,
-            });
+        const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+        try {
+          const res = await syntheticsRoute.handler({
+            syntheticsEsClient,
+            savedObjectsClient,
+            context,
+            request,
+            response,
+            server,
+            spaceId,
+            syntheticsMonitorClient,
+            monitorConfigRepository,
+          });
+          if (isKibanaResponse(res)) {
+            return res;
+          }
+
+          const inspectData = await syntheticsEsClient.getInspectData(syntheticsRoute.path);
+
+          if (Array.isArray(res)) {
+            if (isEmpty(inspectData)) {
+              return response.ok({
+                body: res,
+              });
+            } else {
+              return response.ok({
+                body: {
+                  result: res,
+                  ...inspectData,
+                },
+              });
+            }
+          }
+
+          return response.ok({
+            body: {
+              ...res,
+              ...inspectData,
+            },
+          });
+        } catch (e) {
+          if (e.statusCode === 403) {
+            const privileges = await checkIndicesReadPrivileges(syntheticsEsClient);
+            if (!privileges.has_all_requested) {
+              return response.forbidden({
+                body: {
+                  message:
+                    'MissingIndicesPrivileges: You do not have permission to read from the synthetics-* indices. Please contact your administrator.',
+                },
+              });
+            }
+          } else if (e.statusCode >= 500) {
+            server.logger.error(e);
           } else {
-            return response.ok({
-              body: {
-                result: res,
-                ...inspectData,
-              },
-            });
+            server.logger.debug(e);
           }
+          throw e;
         }
-
-        return response.ok({
-          body: {
-            ...res,
-            ...inspectData,
-          },
-        });
-      } catch (e) {
-        if (e.statusCode === 403) {
-          const privileges = await checkIndicesReadPrivileges(syntheticsEsClient);
-          if (!privileges.has_all_requested) {
-            return response.forbidden({
-              body: {
-                message:
-                  'MissingIndicesPrivileges: You do not have permission to read from the synthetics-* indices. Please contact your administrator.',
-              },
-            });
-          }
-        } else if (e.statusCode >= 500) {
-          server.logger.error(e);
-        } else {
-          server.logger.debug(e);
-        }
-        throw e;
-      }
-    });
-  },
-});
+      });
+    },
+  };
+};

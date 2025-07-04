@@ -17,12 +17,14 @@ import { ProjectMonitor } from '../../../../common/runtime_types';
 
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
+import { MONITOR_WRITE_API } from '../../../feature';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
 
 export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE,
+  requiredPrivileges: [MONITOR_WRITE_API],
   validate: {
     query: schema.object({
       // primarily used for testing purposes, to specify the type of saved object

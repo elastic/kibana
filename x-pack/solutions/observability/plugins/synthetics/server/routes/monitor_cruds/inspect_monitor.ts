@@ -15,10 +15,12 @@ import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { validateMonitor } from './monitor_validation';
 import { getPrivateLocationsForMonitor } from './add_monitor/utils';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
+import { MONITOR_WRITE_API } from '../../feature';
 
 export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT,
+  requiredPrivileges: [MONITOR_WRITE_API],
   validate: {
     body: schema.any(),
     query: schema.object({

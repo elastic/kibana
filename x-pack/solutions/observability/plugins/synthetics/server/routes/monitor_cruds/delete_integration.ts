@@ -7,10 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { MONITOR_WRITE_API } from '../../feature';
 
 export const deletePackagePolicyRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.DELETE_PACKAGE_POLICY,
+  requiredPrivileges: [MONITOR_WRITE_API],
   validate: {
     params: schema.object({
       packagePolicyId: schema.string({ minLength: 1, maxLength: 1024 }),

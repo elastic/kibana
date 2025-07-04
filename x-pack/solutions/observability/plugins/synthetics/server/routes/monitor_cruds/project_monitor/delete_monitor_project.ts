@@ -13,10 +13,12 @@ import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../../com
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { getSavedObjectKqlFilter } from '../../common';
 import { validateSpaceId } from '../services/validate_space_id';
+import { MONITOR_WRITE_API } from '../../../feature';
 
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
+  requiredPrivileges: [MONITOR_WRITE_API],
   validate: {
     body: schema.object({
       monitors: schema.arrayOf(schema.string()),

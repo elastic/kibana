@@ -11,6 +11,7 @@ import { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { DeleteParamsResponse } from '../../../../common/runtime_types';
+import { MONITOR_WRITE_API } from '../../../feature';
 
 export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
@@ -20,6 +21,7 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PARAMS + '/_bulk_delete',
+  requiredPrivileges: [MONITOR_WRITE_API],
   validate: {},
   validation: {
     request: {

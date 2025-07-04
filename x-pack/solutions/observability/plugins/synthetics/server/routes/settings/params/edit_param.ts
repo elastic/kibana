@@ -14,6 +14,7 @@ import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MONITOR_WRITE_API } from '../../../feature';
 
 const RequestParamsSchema = schema.object({
   id: schema.string(),
@@ -28,6 +29,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PARAMS + '/{id}',
   validate: {},
+  requiredPrivileges: [MONITOR_WRITE_API],
   validation: {
     request: {
       params: RequestParamsSchema,

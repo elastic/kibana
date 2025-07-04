@@ -9,10 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { getJourneyScreenshotBlocks } from '../../queries/get_journey_screenshot_blocks';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { SyntheticsRestApiRouteFactory } from '../types';
+import { MONITOR_WRITE_API } from '../../feature';
 
 export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
+  requiredPrivileges: [MONITOR_WRITE_API],
   validate: {
     body: schema.object({
       hashes: schema.arrayOf(schema.string()),

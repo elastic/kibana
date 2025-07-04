@@ -18,6 +18,7 @@ import {
 } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MONITOR_WRITE_API } from '../../../feature';
 
 const ParamsObjectSchema = schema.object({
   key: schema.string({
@@ -36,6 +37,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.PARAMS,
+  requiredPrivileges: [MONITOR_WRITE_API],
   validate: {},
   validation: {
     request: {

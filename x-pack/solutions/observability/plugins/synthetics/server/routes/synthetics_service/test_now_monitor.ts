@@ -15,10 +15,12 @@ import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import { getMonitorNotFoundResponse } from './service_errors';
+import { MONITOR_WRITE_API } from '../../feature';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.TRIGGER_MONITOR + '/{monitorId}',
+  requiredPrivileges: [MONITOR_WRITE_API],
   validate: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
