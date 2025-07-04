@@ -66,7 +66,7 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
     // for forward compatibility with grid layout,
     // this variable can be used for sticky headers offset relative to the top of the application area
-    --kbn-application-sticky-headers-offset: calc(
+    --kbn-application--sticky-headers-offset: calc(
       var(--euiFixedHeadersOffset, 0px) + var(--kbn-application--top-bar-height, 0px)
     );
   }
