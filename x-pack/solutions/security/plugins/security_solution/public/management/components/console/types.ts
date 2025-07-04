@@ -270,12 +270,24 @@ export interface CommandArgumentValueSelectorProps<TSelection = any, TState = an
   store: TState;
 
   /**
+   * The command being processed. This provides access to command metadata and other context
+   * that the selector might need (e.g., agentType from command.meta)
+   */
+  command: Command;
+
+  /**
    * callback for the Value Selector to call and provide the selection value.
    * This selection value will then be passed along with the argument to the command execution
    * component.
    * @param newData
    */
   onChange: (newData: ArgSelectorState<TState>) => void;
+
+  /**
+   * Callback for requesting focus to be returned to the console input.
+   * Should be used instead of directly manipulating console state.
+   */
+  requestFocus?: () => void;
 }
 
 /**
