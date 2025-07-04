@@ -13,7 +13,7 @@ import type {
   BulkResponseItem,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
@@ -40,6 +40,7 @@ import {
   timer,
   withLatestFrom,
 } from 'rxjs';
+import { parsePrimitive } from './utils';
 
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
 
@@ -52,10 +53,18 @@ interface DocUpdate {
   value: Record<string, any>;
 }
 
+interface ColumnAddition {
+  name: string;
+}
+
 type Action =
   | { type: 'add'; payload: DocUpdate }
   | { type: 'undo' }
-  | { type: 'saved'; payload: any };
+  | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
+  | { type: 'add-column'; payload: ColumnAddition }
+  | { type: 'discard-unsaved-columns' }
+  | { type: 'discard-unsaved-changes' }
+  | { type: 'new-row-added'; payload: Record<string, any> };
 
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
 
@@ -85,6 +94,10 @@ export class IndexUpdateService {
 
   private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
   public readonly isFetching$: Observable<boolean> = this._isFetching$.asObservable();
+
+  private readonly _exitAttemptWithUnsavedFields$ = new BehaviorSubject<boolean>(false);
+  public readonly exitAttemptWithUnsavedFields$ =
+    this._exitAttemptWithUnsavedFields$.asObservable();
 
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([
@@ -124,6 +137,8 @@ export class IndexUpdateService {
       } else if (action.type === 'saved') {
         // Clear the buffer after save
         // TODO check for update response
+        return [];
+      } else if (action.type === 'discard-unsaved-changes') {
         return [];
       } else {
         return acc;
@@ -174,8 +189,35 @@ export class IndexUpdateService {
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
-  public readonly dataTableColumns$: Observable<DatatableColumn[]> = this.dataView$.pipe(
-    map((dataView) => {
+  private _pendingColumnsToBeSaved$ = new BehaviorSubject<ColumnAddition[]>([]);
+  public readonly pendingColumnsToBeSaved$: Observable<ColumnAddition[]> = this.actions$.pipe(
+    scan((acc: ColumnAddition[], action) => {
+      if (action.type === 'add-column') {
+        return [...acc, action.payload];
+      }
+      if (action.type === 'saved') {
+        // Filter out columns that were saved with a value
+        return acc.filter((column) =>
+          action.payload.updates.every((update) => update.value[column.name] === undefined)
+        );
+      }
+      if (action.type === 'new-row-added') {
+        // Filter out columns that were populated when adding a new row
+        return acc.filter((column) => action.payload[column.name] === undefined);
+      }
+      if (action.type === 'discard-unsaved-columns') {
+        return [];
+      }
+      return acc;
+    }, []),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
+  public readonly dataTableColumns$: Observable<DatatableColumn[]> = combineLatest([
+    this.dataView$,
+    this.pendingColumnsToBeSaved$.pipe(startWith([])),
+  ]).pipe(
+    map(([dataView, pendingColumnsToBeSaved]) => {
       if (!dataView.fields.length) {
         return [
           {
@@ -195,7 +237,16 @@ export class IndexUpdateService {
           },
         ];
       }
-
+      for (const column of pendingColumnsToBeSaved) {
+        if (!dataView.fields.getByName(column.name)) {
+          dataView.fields.add({
+            name: column.name,
+            type: KBN_FIELD_TYPES.UNKNOWN,
+            aggregatable: true,
+            searchable: true,
+          });
+        }
+      }
       return (
         dataView.fields
           // Exclude metadata fields. TODO check if this is the right way to do it
@@ -270,7 +321,7 @@ export class IndexUpdateService {
         .subscribe({
           next: ({ updates, response, rows, dataView }) => {
             // Clear the buffer after successful update
-            this.actions$.next({ type: 'saved', payload: response });
+            this.actions$.next({ type: 'saved', payload: { response, updates } });
 
             // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
 
@@ -373,6 +424,13 @@ export class IndexUpdateService {
           },
         })
     );
+
+    // Subscribe to pendingColumnsToBeSaved$ and update _pendingColumnsToBeSaved$
+    this._subscription.add(
+      this.pendingColumnsToBeSaved$.subscribe((columns) => {
+        this._pendingColumnsToBeSaved$.next(columns);
+      })
+    );
   }
 
   public refresh() {
@@ -392,14 +450,34 @@ export class IndexUpdateService {
     return this._indexName$.getValue();
   }
 
+  public getPendingFieldsToBeSaved(): string[] {
+    return this._pendingColumnsToBeSaved$.getValue().map((col) => col.name);
+  }
+
   // Add a new index
   public addDoc(doc: Record<string, any>) {
     this.actions$.next({ type: 'add', payload: { value: doc } });
   }
 
+  public async addNewRow(newRow: Record<string, any>) {
+    const response = await this.bulkUpdate([{ value: newRow }]);
+
+    if (!response.errors) {
+      this.actions$.next({ type: 'new-row-added', payload: newRow });
+    }
+    return response;
+  }
+
   /* Partial doc update */
-  public updateDoc(id: string, update: Record<string, any>) {
-    this.actions$.next({ type: 'add', payload: { id, value: update } });
+  public updateDoc(id: string, update: Record<string, unknown>) {
+    const parsedUpdate = Object.entries(update).reduce<Record<string, unknown>>(
+      (acc, [key, value]) => {
+        acc[key] = parsePrimitive(value);
+        return acc;
+      },
+      {}
+    );
+    this.actions$.next({ type: 'add', payload: { id, value: parsedUpdate } });
   }
 
   /**
@@ -443,6 +521,22 @@ export class IndexUpdateService {
    */
   public undo() {
     this.actions$.next({ type: 'undo' });
+  }
+
+  public addNewColumn(filedName: string) {
+    this.actions$.next({ type: 'add-column', payload: { name: filedName } });
+  }
+
+  public setExitAttemptWithUnsavedFields(value: boolean) {
+    this._exitAttemptWithUnsavedFields$.next(value);
+  }
+
+  public deleteUnsavedColumns() {
+    this.actions$.next({ type: 'discard-unsaved-columns' });
+  }
+
+  public discardUnsavedChanges() {
+    this.actions$.next({ type: 'discard-unsaved-changes' });
   }
 
   public destroy() {

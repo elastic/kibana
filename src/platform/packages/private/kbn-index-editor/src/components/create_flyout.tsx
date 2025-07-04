@@ -38,11 +38,18 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
     };
   });
 
-  const onFlyoutClose = () => {
+  const onFlyoutClose = async () => {
+    indexUpdateService.discardUnsavedChanges();
+    if (indexUpdateService.getPendingFieldsToBeSaved().length) {
+      deps.indexUpdateService.setExitAttemptWithUnsavedFields(true);
+      return;
+    }
+
     props.onClose?.({
       indexName: indexUpdateService.getIndexName()!,
       indexCreatedDuringFlyout: props.doesIndexExist ? false : indexUpdateService.getIndexCreated(),
     });
+
     indexUpdateService.destroy();
     flyoutSession.close();
   };
