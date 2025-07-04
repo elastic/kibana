@@ -18,8 +18,8 @@ import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useKibana } from '../../../common/lib/kibana';
 import { ActionsCell } from '../../../detections/components/alert_summary/table/actions_cell';
 import { CellValue } from '../../../detections/components/alert_summary/table/render_cell';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
-import { browserFieldsManager } from '../../../data_view_manager/utils/security_browser_fields_manager';
 import type { AdditionalTableContext } from '../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
@@ -102,11 +102,8 @@ export const Table = memo(
       [application, cases, data, fieldFormats, http, licensing, notifications, settings]
     );
 
-    // TODO: replace with useBrowserFields(DataViewManagerScope.detections)?
-    const { browserFields } = useMemo(
-      () => browserFieldsManager.getBrowserFields(dataView, DataViewManagerScopeName.detections),
-      [dataView]
-    );
+    // TODO: remove second Dataview parameter when newDataViewPickerEnabled is default
+    const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
 
     const additionalContext: AdditionalTableContext = useMemo(
       () => ({

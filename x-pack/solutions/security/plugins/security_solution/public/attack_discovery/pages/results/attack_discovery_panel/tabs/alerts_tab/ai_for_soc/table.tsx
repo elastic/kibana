@@ -11,8 +11,8 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
+import { useBrowserFields } from '../../../../../../../data_view_manager/hooks/use_browser_fields';
 import { DataViewManagerScopeName } from '../../../../../../../data_view_manager/constants';
-import { browserFieldsManager } from '../../../../../../../data_view_manager/utils/security_browser_fields_manager';
 import type { AdditionalTableContext } from '../../../../../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
@@ -85,10 +85,8 @@ export const Table = memo(({ dataView, id, packages, query, ruleResponse }: Tabl
     [application, cases, data, fieldFormats, http, licensing, notifications, settings]
   );
 
-  const { browserFields } = useMemo(
-    () => browserFieldsManager.getBrowserFields(dataView, DataViewManagerScopeName.detections),
-    [dataView]
-  );
+  // TODO: remove second Dataview parameter when newDataViewPickerEnabled is default
+  const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
 
   const additionalContext: AdditionalTableContext = useMemo(
     () => ({
