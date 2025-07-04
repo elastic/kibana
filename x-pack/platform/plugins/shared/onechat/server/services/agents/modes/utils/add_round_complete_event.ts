@@ -79,6 +79,7 @@ const createRoundFromEvents = ({
         type: ConversationRoundStepType.toolCall,
         tool_call_id: toolCall.tool_call_id,
         tool_id: toolCall.tool_id,
+        tool_type: toolCall.tool_type,
         args: toolCall.args,
         result: toolResult?.result ?? 'unknown',
       };

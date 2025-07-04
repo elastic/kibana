@@ -55,7 +55,7 @@ export const RoundAnswer: React.FC<RoundAnswerProps> = ({ round }) => {
                 <div className={stepHeaderClass}>
                   <EuiIcon type="wrench" color="primary" />
                   <EuiText size="s" color="subdued">
-                    Tool: {step.tool_id.toolId}
+                    Tool: {step.tool_id}
                   </EuiText>
                 </div>
                 <EuiSpacer size="xs" />

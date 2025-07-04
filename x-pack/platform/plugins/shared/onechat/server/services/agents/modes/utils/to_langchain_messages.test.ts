@@ -24,7 +24,8 @@ describe('conversationLangchainMessages', () => {
     result: string
   ): ToolCallWithResult => ({
     tool_call_id: id,
-    tool_id: { toolId, providerId: 'provider-1' },
+    tool_id: toolId,
+    tool_type: 'provider-1',
     args,
     result,
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StructuredToolIdentifier } from '../tools/tools';
+import type { PlainIdToolIdentifier } from '../tools/tools';
 import {
   oneChatDefaultAgentId,
   toSerializedAgentIdentifier,
@@ -54,9 +54,13 @@ export interface ToolCallWithResult {
    */
   tool_call_id: string;
   /**
-   * Structured identifier of the tool.
+   * Identifier of the tool.
    */
-  tool_id: StructuredToolIdentifier;
+  tool_id: PlainIdToolIdentifier;
+  /**
+   * Type of the tool.
+   */
+  tool_type: string;
   /**
    * Arguments the tool was called with.
    */
