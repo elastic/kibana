@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import {
-  Streams,
-  conditionToESQL,
-  getConditionFields,
-  getRegularEcsField,
-} from '@kbn/streams-schema';
+import { Streams, conditionToESQL, getConditionFields, getRegularEcsField } from '..';
 import {
   DateProcessorDefinition,
   GrokProcessorDefinition,
+  ProcessorDefinition,
+  RenameProcessorDefinition,
   SetProcessorDefinition,
   isGrokProcessorDefinition,
-} from '@kbn/streams-schema/src/models/ingest/processors';
+} from './models/ingest/processors';
 
 export function definitionToESQLQuery(
   definition: Streams.WiredStream.GetResponse,
@@ -45,15 +42,15 @@ export function definitionToESQLQuery(
   const processorHandlers = [
     {
       check: isGrokProcessorDefinition,
-      toStep: (step) => {
+      toStep: (step: ProcessorDefinition) => {
         const { field, patterns } = (step as GrokProcessorDefinition).grok;
         const pattern = patterns[0];
         // turn \ into a double backslash for ESQL
         const escapedPattern = pattern.replace(/\\/g, '\\\\');
         return `GROK ${field} "${escapedPattern}"`;
       },
-      getInFields: (step) => [(step as GrokProcessorDefinition).grok.field],
-      getOutFields: (step) => {
+      getInFields: (step: ProcessorDefinition) => [(step as GrokProcessorDefinition).grok.field],
+      getOutFields: (step: ProcessorDefinition) => {
         // analyze the first pattern to extract the field names
         const { patterns } = (step as GrokProcessorDefinition).grok;
         const pattern = patterns[0];
@@ -67,13 +64,14 @@ export function definitionToESQLQuery(
       },
     },
     {
-      check: (step) => 'rename' in step,
-      toStep: (step) => `RENAME ${step.rename.field} AS ${step.rename.target_field}`,
-      getInFields: (step) => [step.rename.field],
-      getOutFields: (step) => [step.rename.target_field],
+      check: (step: ProcessorDefinition) => 'rename' in step,
+      toStep: (step: RenameProcessorDefinition) =>
+        `RENAME ${step.rename.field} AS ${step.rename.target_field}`,
+      getInFields: (step: RenameProcessorDefinition) => [step.rename.field],
+      getOutFields: (step: RenameProcessorDefinition) => [step.rename.target_field],
     },
     {
-      check: (step) => 'set' in step,
+      check: (step: ProcessorDefinition) => 'set' in step,
       toStep: (step: SetProcessorDefinition) => {
         const { field, value } = step.set;
         return `EVAL ${field} = ${typeof value === 'string' ? `"${value}"` : value}`;
@@ -82,7 +80,7 @@ export function definitionToESQLQuery(
       getOutFields: (step: SetProcessorDefinition) => [step.set.field],
     },
     {
-      check: (step) => 'date' in step,
+      check: (step: ProcessorDefinition) => 'date' in step,
       toStep: (step: DateProcessorDefinition) =>
         `EVAL ${step.date.target_field ?? step.date.field} = DATE_PARSE("${
           step.date.formats[0]

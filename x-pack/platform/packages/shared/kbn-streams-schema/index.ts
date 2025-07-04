@@ -138,3 +138,4 @@ export type {
 
 export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';
 export { conditionToESQL } from './src/helpers/condition_to_esql';
+export { definitionToESQLQuery } from './src/definition_to_esql';

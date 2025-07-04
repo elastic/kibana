@@ -114,7 +114,7 @@ function StreamMaterialize({
       color="primary"
       iconType="info"
       titleSize="s"
-      title={<h2>Draft stream</h2>}
+      title={<h2>Draft mode</h2>}
       body={
         <>
           <p>

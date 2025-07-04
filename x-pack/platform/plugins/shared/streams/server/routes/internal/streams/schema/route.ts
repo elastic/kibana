@@ -12,6 +12,7 @@ import {
   getInheritedFieldsFromAncestors,
   getParentId,
   isNamespacedEcsField,
+  definitionToESQLQuery,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { addAliasesForNamespacedFields } from '../../../../lib/streams/component_templates/logs_layer';
@@ -19,7 +20,6 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
-import { definitionToESQLQuery } from './definition_to_esql';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 
@@ -88,6 +88,7 @@ export const unmappedFieldsRoute = createServerRoute({
         query: `${definitionToESQLQuery(streamResponse, parentResponse, {
           includeSource: true,
         })} | LIMIT ${UNMAPPED_SAMPLE_SIZE}`,
+        drop_null_columns: true,
       });
 
       response.columns.forEach((column) => {

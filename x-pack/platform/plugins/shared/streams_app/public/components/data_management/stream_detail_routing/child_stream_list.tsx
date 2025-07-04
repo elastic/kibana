@@ -38,6 +38,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const canReorderRoutingRules = routingSnapshot.can({ type: 'routingRule.reorder', routing });
   const canManageRoutingRules = definition.privileges.manage;
   const shouldDisplayCreateButton = definition.privileges.simulate;
+  const isDraft = definition.stream.ingest.wired.draft;
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -77,7 +78,12 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                         defaultMessage:
                           "You don't have sufficient privileges to create new streams, only simulate.",
                       })
-                    : undefined
+                    : isDraft
+                    ? i18n.translate('xpack.streams.streamDetailRouting.rules.draft', {
+                        defaultMessage:
+                          'You cannot create new streams while this stream is a draft. Please materialize it first.',
+                      })
+                    : null
                 }
               >
                 <EuiButton
@@ -85,7 +91,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                   size="s"
                   data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
                   onClick={createNewRule}
-                  disabled={!canCreateRoutingRules}
+                  disabled={!canCreateRoutingRules || isDraft}
                 >
                   {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
                     defaultMessage: 'Create child stream',
