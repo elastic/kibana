@@ -19,6 +19,16 @@ export const RangeSliderStrings = {
       i18n.translate('controls.rangeSlider.control.invalidSelectionWarningLabel', {
         defaultMessage: 'Selected range returns no results.',
       }),
+    getLowerBoundAriaLabel: (fieldName: string) =>
+      i18n.translate('controls.rangeSlider.control.lowerBoundAriaLabel', {
+        defaultMessage: 'Range slider lower bound for {fieldName}',
+        values: { fieldName },
+      }),
+    getUpperBoundAriaLabel: (fieldName: string) =>
+      i18n.translate('controls.rangeSlider.control.lowerBoundAriaLabel', {
+        defaultMessage: 'Range slider upper bound for {fieldName}',
+        values: { fieldName },
+      }),
   },
   editor: {
     getStepTitle: () =>
