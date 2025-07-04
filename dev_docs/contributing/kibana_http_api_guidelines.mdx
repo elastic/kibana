@@ -93,7 +93,7 @@ Getting your HTTP APIs into a stable state is a process based on feedback from a
 
 Public HTTP APIs are those that are exposed to users and are used by plugins and external tools. They are the focus of this document.
 
-Internal HTTP APIs are those that are used by Kibana's own code, like the UI. By default, when you register a new HTTP API it will be classified as `internal`. For example, this API is internal:
+Internal HTTP APIs are only used by code Elastic owns, like the UI. By default, when you register a new HTTP API it will be classified as `internal`. For example, this API is internal:
 
 ```typescript
 router.get({ path: '/api/foos' ... }, async () => {...})
