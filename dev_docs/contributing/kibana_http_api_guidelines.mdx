@@ -34,7 +34,7 @@ For example, a UI might want to optimise it's network requests by bundling multi
 
 A view or component in the UI might do the following for some, UI-specific purpose:
 ```
-GET /some_related_resources_for_this_page?ids_only=true&page=1
+GET /internal/some_related_resources_for_this_page?ids_only=true&page=1
 # Which returns:
 {
   "a_ids": ["1", "2"],
@@ -45,14 +45,14 @@ GET /some_related_resources_for_this_page?ids_only=true&page=1
 While API clients are better designed as:
 ```
 # Request 1
-GET /resource_as?page=1
+GET /api/resource_as?page=1
 {
   "items": [{ id: "1", "name": "Resource A 1" }, { id: "2", "name": "Resource A 2" }],
   "page": 1,
   "total": 2
 }
 # Request 2
-GET /resource_bs?page=1
+GET /api/resource_bs?page=1
 {
   "items": [{ id: "1", "name": "Resource B 1" }],
   "page": 1,
@@ -105,7 +105,7 @@ You can make an HTTP API public by changing the `access` setting to `public`:
 router.get({ path: '/api/foos', options: { access: 'public' } }, async () => {...})
 ```
 
-Again, see the principle regarding [commitment](#commitment) before making APIs public!
+See the principle regarding [commitment](#commitment) before making APIs public!
 
 ## Structure and conventions
 
