@@ -11,29 +11,74 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import moment from 'moment';
 import { Timestamp } from '.';
-import { asAbsoluteDateTime } from '../../utils/formatters/datetime';
+import userEvent from '@testing-library/user-event';
+import { mockNow } from '../../utils/test_helpers/mock_now';
 
-const timestamp = 1617549061000;
+const timestamp = 1570720000123; // Oct 10, 2019, 08:06:40.123 (UTC-7)
+const absoluteTimeMilis = 'Oct 10, 2019 @ 08:06:40.123 (UTC-7)';
+const relativeTime = '5 hours ago';
 
 describe('Timestamp', () => {
-  it('should render both absolute and relative time correctly', () => {
-    render(<Timestamp timestamp={timestamp} />);
-    const absoluteTime = asAbsoluteDateTime(timestamp);
-    const relativeTime = moment(timestamp).fromNow();
-
-    expect(screen.queryByTestId('unifiedDocViewerObservabilityTracesTimestamp')?.innerHTML).toEqual(
-      `${absoluteTime} (${relativeTime})`
-    );
+  beforeAll(() => {
+    mockNow(1570737000000);
+    moment.tz.setDefault('America/Los_Angeles');
   });
 
-  it('should display the relative time correctly for a recent timestamp', () => {
-    const recentTimestamp = moment().subtract(10, 'minutes').valueOf();
-    render(<Timestamp timestamp={recentTimestamp} />);
-    const absoluteTime = asAbsoluteDateTime(recentTimestamp);
-    const relativeTime = moment(recentTimestamp).fromNow();
+  afterAll(() => {
+    moment.tz.setDefault('');
+  });
 
-    expect(screen.queryByTestId('unifiedDocViewerObservabilityTracesTimestamp')?.innerHTML).toEqual(
-      `${absoluteTime} (${relativeTime})`
-    );
+  describe('default absoluteTimeType', () => {
+    it('should render both absolute and relative time correctly', async () => {
+      render(<Timestamp timestamp={timestamp} />);
+
+      const timeElement = await screen.getByText(`${absoluteTimeMilis} (${relativeTime})`);
+      expect(timeElement).toBeInTheDocument();
+    });
+  });
+
+  describe('absoluteTimeType as tooltip', () => {
+    it('should render relative time in body and absolute time in tooltip', async () => {
+      const user = userEvent.setup();
+      render(<Timestamp timestamp={timestamp} absoluteTimeType="tooltip" />);
+
+      const relativeTimeElement = screen.getByText(relativeTime);
+      expect(relativeTimeElement).toBeInTheDocument();
+
+      await user.hover(relativeTimeElement);
+
+      const tooltipElement = await screen.findByText(absoluteTimeMilis);
+      expect(tooltipElement).toBeInTheDocument();
+    });
+
+    it('should format with precision in milliseconds by default', async () => {
+      const user = userEvent.setup();
+      render(<Timestamp timestamp={timestamp} absoluteTimeType="tooltip" />);
+
+      await user.hover(screen.getByText(relativeTime));
+
+      const tooltipElement = await screen.findByText(absoluteTimeMilis);
+      expect(tooltipElement).toBeInTheDocument();
+    });
+
+    it('should format with precision in seconds', async () => {
+      const user = userEvent.setup();
+      render(<Timestamp timestamp={timestamp} timeUnit="seconds" absoluteTimeType="tooltip" />);
+
+      await user.hover(screen.getByText(relativeTime));
+
+      const tooltipElement = await screen.findByText('Oct 10, 2019 @ 08:06:40 (UTC-7)');
+      expect(tooltipElement).toBeInTheDocument();
+    });
+
+    it('should format with precision in minutes', async () => {
+      const user = userEvent.setup();
+      render(<Timestamp timestamp={timestamp} timeUnit="minutes" absoluteTimeType="tooltip" />);
+
+      await user.hover(screen.getByText(relativeTime));
+
+      const tooltipElement = await screen.findByText('Oct 10, 2019 @ 08:06 (UTC-7)');
+      expect(tooltipElement).toBeInTheDocument();
+    });
   });
 });
