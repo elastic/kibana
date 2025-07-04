@@ -342,6 +342,20 @@ Use [simple KQL](https://www.elastic.co/docs/explore-analyze/query-filter/langua
 }
 ```
 
+### Observability
+
+Please [follow the advice](https://github.com/elastic/observability-dev/blob/main/docs/observability-experience/resources/development-practices/low-level-api-guidelines.md#7-observability) outlined by observability developers
+
+### Security
+
+Please [follow the advice](https://github.com/elastic/observability-dev/blob/main/docs/observability-experience/resources/development-practices/low-level-api-guidelines.md#8-security) outlined by observability developers
+
+### Performance
+
+**Save the event loop!**
+
+Node.js is a single-threaded, non-cooperative, event loop based runtime. In practice this means the event loop is a precious, shared resource that [we should seek to keep unblocked](https://github.com/elastic/kibana/blob/9edce03a0510c32c1d210e0f3d1bea46c3b71143/src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts#L160-L175). The same goes for memory. Consider techniques for keeping _stable memory pressure_ in your HTTP APIs like chunking loading objects into memory from Elasticsearch instead of gathering everything all at once.
+
 ### Special data formats
 
 **Dates**
