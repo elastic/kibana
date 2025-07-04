@@ -411,7 +411,7 @@ class UrlPanelContentComponent extends Component<UrlPanelContentProps, State, Wi
     <EuiCopy
       beforeMessage={this.state.showWarningButton ? this.props.snapshotShareWarning : undefined}
       textToCopy={this.state.url || ''}
-      anchorClassName="eui-displayBlock"
+      tooltipProps={{ anchorClassName: 'eui-displayBlock' }}
     >
       {(copy) => (
         <EuiButton

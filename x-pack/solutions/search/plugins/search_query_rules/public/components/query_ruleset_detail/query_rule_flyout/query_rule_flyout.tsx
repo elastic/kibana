@@ -119,6 +119,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
       onClose={onClose}
       ownFocus={false}
       size="l"
+      data-test-subj="searchQueryRulesQueryRuleFlyout"
       aria-labelledby="flyoutTitle"
       css={css({
         overflowY: 'hidden',
@@ -294,7 +295,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               {shouldShowCriteriaCallout && (
                 <>
                   <EuiCallOut
-                    iconType="iInCircle"
+                    iconType="info"
                     size="s"
                     onDismiss={() => {
                       setCriteriaCalloutActive(false);
@@ -334,7 +335,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   ) : (
                     <>
                       <EuiCallOut
-                        iconType="iInCircle"
+                        iconType="info"
                         size="s"
                         color="warning"
                         title={

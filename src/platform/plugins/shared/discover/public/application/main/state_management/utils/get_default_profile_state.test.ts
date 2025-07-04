@@ -17,8 +17,10 @@ const emptyDataView = buildDataViewMock({
   name: 'emptyDataView',
   fields: fieldList(),
 });
-const { profilesManagerMock } = createContextAwarenessMocks();
-const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager();
+const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
+const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
+  scopedEbtManager: scopedEbtManagerMock,
+});
 
 scopedProfilesManager.resolveDataSourceProfile({});
 
@@ -46,6 +48,35 @@ describe('getDefaultProfileState', () => {
           columns: false,
           rowHeight: false,
           breakdownField: true,
+          hideChart: false,
+        },
+        dataView: emptyDataView,
+      }).getPreFetchState();
+      expect(appState).toEqual(undefined);
+    });
+
+    it('should return expected hideChart', () => {
+      let appState = getDefaultProfileState({
+        scopedProfilesManager,
+        resetDefaultProfileState: {
+          resetId: 'test',
+          columns: false,
+          rowHeight: false,
+          breakdownField: false,
+          hideChart: true,
+        },
+        dataView: dataViewWithTimefieldMock,
+      }).getPreFetchState();
+      expect(appState).toEqual({
+        hideChart: true,
+      });
+      appState = getDefaultProfileState({
+        scopedProfilesManager,
+        resetDefaultProfileState: {
+          resetId: 'test',
+          columns: false,
+          rowHeight: false,
+          breakdownField: false,
           hideChart: false,
         },
         dataView: emptyDataView,
