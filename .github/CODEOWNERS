@@ -984,6 +984,7 @@ src/platform/packages/shared/kbn-std @elastic/kibana-core
 src/platform/packages/private/kbn-stdio-dev-helpers @elastic/kibana-operations
 src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui
 src/platform/packages/shared/kbn-storybook @elastic/kibana-operations
+x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-program-team
 x-pack/platform/plugins/shared/streams_app @elastic/streams-program-team
 x-pack/solutions/observability/plugins/observability_streams_wrapper @elastic/streams-program-team
 x-pack/platform/plugins/shared/streams @simianhacker @flash1293 @dgieselaar
@@ -2442,6 +2443,9 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+
+# Token tracking
+x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-generative-ai
 
 ## Defend Workflows owner connectors
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
