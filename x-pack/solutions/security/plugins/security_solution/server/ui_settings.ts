@@ -410,7 +410,7 @@ export const initUiSettings = (
                 defaultMessage: 'Privileged user monitoring',
               }
             ),
-            value: true,
+            value: false,
             description: i18n.translate(
               'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
               {
