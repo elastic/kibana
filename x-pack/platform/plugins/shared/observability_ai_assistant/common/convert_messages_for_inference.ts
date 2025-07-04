@@ -36,7 +36,7 @@ export function collapseInternalToolCalls(messages: Message[], logger: Pick<Logg
     if (message.message.role === MessageRole.User && message.message.name === 'query') {
       const messagesToCollapse = takeWhile(messages.slice(i + 1), (msg) => {
         const name = msg.message.name || msg.message.function_call?.name;
-        return !name || ['query', 'visualize_query', 'execute_query'].includes(name);
+        return name && ['query', 'visualize_query', 'execute_query'].includes(name);
       });
 
       if (messagesToCollapse.length) {

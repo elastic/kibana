@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InferenceMessage } from '@elastic/elasticsearch/lib/api/types';
 import { collapseInternalToolCalls } from './convert_messages_for_inference';
 import { Message, MessageRole } from './types';
 
@@ -15,24 +16,70 @@ const mockLogger = {
   trace: jest.fn(),
 };
 
-const queryToolCalls: Message[] = [
+const userMessage: (msg: string) => Message = (msg: string) => ({
+  '@timestamp': '2025-07-02T10:00:00Z',
+  message: {
+    role: MessageRole.User,
+    content: msg,
+  },
+});
+
+const assistantMessage: (msg: string) => Message = (msg: string) => ({
+  '@timestamp': '2025-07-02T10:01:00Z',
+  message: {
+    content: msg,
+    role: MessageRole.Assistant,
+  },
+});
+
+const getDatasetInfoTool: Message[] = [
   {
-    '@timestamp': '2025-07-02T10:00:00Z',
+    '@timestamp': '2025-07-02T10:01:00Z',
     message: {
+      content:
+        "I'll help you visualize logs from your system. First, let me check what log indices are available:",
+      function_call: {
+        name: 'get_dataset_info',
+        arguments: '{"index": "logs-*"}',
+        trigger: MessageRole.Assistant,
+      },
+      role: MessageRole.Assistant,
+    },
+  },
+  {
+    '@timestamp': '2025-07-02T10:01:00Z',
+    message: {
+      content: JSON.stringify({
+        indices: ['remote_cluster:logs-cloud_security_posture.scores-default'],
+        fields: ['@timestamp:date', 'log.level:keyword'],
+        stats: {
+          analyzed: 386,
+          total: 386,
+        },
+      }),
+      name: 'get_dataset_info',
       role: MessageRole.User,
+    },
+  },
+];
+
+const queryTool: Message[] = [
+  {
+    '@timestamp': '2025-07-04T14:32:53.974Z',
+    message: {
+      content: 'Now that I can see the available log indices, let me visualize some logs for you:',
       function_call: {
         name: 'query',
         arguments: '',
         trigger: MessageRole.Assistant,
       },
-      content:
-        'I can see that we have logs indices with a `client.ip` field. Let me create a query to count the unique IP addresses.',
+      role: MessageRole.Assistant,
     },
   },
   {
-    '@timestamp': '2025-07-02T10:00:01Z',
+    '@timestamp': '2025-07-04T14:32:57.331Z',
     message: {
-      role: MessageRole.User,
+      content: '{}',
       data: JSON.stringify({
         keywords: ['STATS', 'COUNT_DISTINCT'],
         requestedDocumentation: {
@@ -41,22 +88,22 @@ const queryToolCalls: Message[] = [
         },
       }),
       name: 'query',
-      content: '{}',
+      role: MessageRole.User,
     },
   },
 ];
 
-const executeQueryToolCall: Message[] = [
+const executeQueryTool: Message[] = [
   {
     '@timestamp': '2025-07-02T10:01:00Z',
     message: {
+      content: undefined,
       role: MessageRole.Assistant,
       function_call: {
         name: 'execute_query',
         arguments: '{"query":"FROM logs"}',
         trigger: MessageRole.Assistant,
       },
-      content: undefined,
     },
   },
   {
@@ -68,6 +115,40 @@ const executeQueryToolCall: Message[] = [
         columns: [{ id: 'unique_ips', name: 'unique_ips', meta: { type: 'number' } }],
         rows: [[324567]],
       }),
+    },
+  },
+];
+
+const visualizeQueryTool: Message[] = [
+  {
+    '@timestamp': '2025-07-04T14:33:03.937Z',
+    message: {
+      content:
+        "Now I'll create a visualization of your logs. Let me query the available logs and create a meaningful visualization:",
+      role: MessageRole.Assistant,
+      function_call: {
+        name: 'visualize_query',
+        arguments: '{"query":"FROM remote_cluster:logs-* | LIMIT 10","intention":"visualizeBar"}',
+        trigger: MessageRole.Assistant,
+      },
+    },
+  },
+  {
+    '@timestamp': '2025-07-04T14:33:33.978Z',
+    message: {
+      content: JSON.stringify({
+        errorMessages: ['Request timed out'],
+        message:
+          'Only following query is visualized: ```esql\nFROM remote_cluster:logs-* | LIMIT 10\n```',
+      }),
+      data: JSON.stringify({
+        columns: [],
+        rows: [],
+        correctedQuery:
+          'FROM remote_cluster:logs-*\n| WHERE @timestamp >= NOW() - 24 hours\n| STATS count = COUNT(*) BY data_stream.dataset, log.level\n| SORT count DESC\n| LIMIT 10',
+      }),
+      name: 'visualize_query',
+      role: MessageRole.User,
     },
   },
 ];
@@ -98,53 +179,86 @@ describe('collapseInternalToolCalls', () => {
         '@timestamp': '2025-07-02T10:00:00Z',
         message: { role: MessageRole.User, content: 'hello' },
       },
-      ...queryToolCalls,
+      ...queryTool,
     ];
     const collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
     expect(collapsedMessages).toEqual(messages);
   });
 
-  describe('when collapsing an "execute_query" tool call', () => {
+  describe('when a conversation contains a "query" followed by "execute_query" tool call', () => {
     let collapsedMessages: Message[];
+    let messages: Message[];
     beforeEach(() => {
-      const messages: Message[] = [...queryToolCalls, ...executeQueryToolCall];
+      messages = [
+        userMessage('Please analyze my logs'),
+        ...getDatasetInfoTool,
+        ...queryTool,
+        ...executeQueryTool,
+        assistantMessage('Here is the result'),
+        userMessage('What about the unique IPs?'),
+      ];
       collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
     });
 
-    it('should collapse the "execute_query" tool call into the "query" tool response', () => {
-      expect(collapsedMessages).toEqual([
-        {
-          '@timestamp': expect.any(String),
-          message: {
-            content: expect.any(String),
-            function_call: { arguments: '', name: 'query', trigger: 'assistant' },
-            role: 'user',
-          },
-        },
-        {
-          '@timestamp': expect.any(String),
-          message: {
-            content: expect.stringContaining('execute_query'),
-            data: expect.any(String),
-            name: 'query',
-            role: 'user',
-          },
-        },
+    it('should have the right messages after collapsing', () => {
+      const formatMessages = (msg: Message) => ({
+        role: msg.message.role,
+        toolName: msg.message.function_call?.name,
+      });
+
+      // before collapsing
+      expect(messages.map(formatMessages)).toEqual([
+        { role: 'user' },
+        { role: 'assistant', toolName: 'get_dataset_info' },
+        { role: 'user' },
+        { role: 'assistant', toolName: 'query' },
+        { role: 'user' },
+        { role: 'assistant', toolName: 'execute_query' },
+        { role: 'user' },
+        { role: 'assistant' },
+        { role: 'user' },
+      ]);
+
+      // after collapsing
+      expect(collapsedMessages.map(formatMessages)).toEqual([
+        { role: 'user' },
+        { role: 'assistant', toolName: 'get_dataset_info' },
+        { role: 'user' },
+        { role: 'assistant', toolName: 'query' },
+        { role: 'user' },
+        { role: 'assistant' },
+        { role: 'user' },
       ]);
     });
 
-    it('should retain the query tool request', () => {
-      expect(collapsedMessages[0]).toEqual(queryToolCalls[0]);
+    it('should retain the messages up until the query response', () => {
+      expect(messages.slice(0, 4)).toEqual(collapsedMessages.slice(0, 4));
     });
 
-    it('should contain "execute_query" in "steps" property', () => {
-      const content = JSON.parse(collapsedMessages[1].message.content!);
+    it('should retain the messages after the "execute_query" response', () => {
+      expect(messages.slice(-2)).toEqual(collapsedMessages.slice(-2));
+    });
+
+    it('should remove the "execute_query" messages', () => {
+      expect(collapsedMessages).not.toContain(executeQueryTool[0]);
+      expect(collapsedMessages).not.toContain(executeQueryTool[1]);
+    });
+
+    it('should retain the "query" tool request', () => {
+      expect(collapsedMessages).toContain(queryTool[0]);
+    });
+
+    it('should collapse the "execute_query" calls into the "query" tool response', () => {
+      const queryToolResponse = collapsedMessages.find(
+        (msg) => msg.message.role === MessageRole.User && msg.message.name === 'query'
+      )!;
+
+      const content = JSON.parse(queryToolResponse.message.content!);
 
       expect(content.steps).toHaveLength(2);
       expect(content.steps[0].role).toBe('assistant');
       expect(content.steps[1].role).toBe('tool');
       expect(content.steps[1].name).toBe('execute_query');
-
       expect(content.steps).toEqual([
         {
           content: null,
@@ -171,43 +285,41 @@ describe('collapseInternalToolCalls', () => {
 
   describe('when a query message is followed by "visualize_query" tool pair', () => {
     let collapsedMessages: Message[];
+    let messages: Message[];
     beforeEach(() => {
-      const visualizeQueryToolCall: Message[] = [
-        {
-          '@timestamp': '2025-07-02T10:01:00Z',
-          message: {
-            role: MessageRole.Assistant,
-            function_call: {
-              name: 'visualize_query',
-              arguments: '{"query":"FROM logs | STATS count() BY response.keyword"}',
-              trigger: MessageRole.Assistant,
-            },
-            content: undefined,
-          },
-        },
-        {
-          '@timestamp': '2025-07-02T10:01:01Z',
-          message: {
-            role: MessageRole.User,
-            name: 'visualize_query',
-            content: JSON.stringify({ viz: 'some vega spec' }),
-          },
-        },
+      messages = [
+        userMessage('Please visualize my logs'),
+        ...getDatasetInfoTool,
+        ...queryTool,
+        ...visualizeQueryTool,
+        assistantMessage('Here is the result'),
+        userMessage('What about the unique IPs?'),
       ];
-      const messages: Message[] = [...queryToolCalls, ...visualizeQueryToolCall];
+
       collapsedMessages = collapseInternalToolCalls(messages, mockLogger);
     });
 
     it('should collapse "visualize_query" into the "query" response', () => {
-      expect(collapsedMessages[1].message.content).toContain('visualize_query');
-    });
+      const queryToolResponse = collapsedMessages.find(
+        (msg) => msg.message.role === MessageRole.User && msg.message.name === 'query'
+      )!;
 
-    it('should serialize the collapsed steps correctly', () => {
-      const content = JSON.parse(collapsedMessages[1].message.content!);
-      expect(content.steps).toHaveLength(2);
-      expect(content.steps[0].role).toBe('assistant');
-      expect(content.steps[1].role).toBe('tool');
-      expect(content.steps[1].name).toBe('visualize_query');
+      const steps = JSON.parse(queryToolResponse.message.content!).steps as [
+        InferenceMessage,
+        InferenceMessage
+      ];
+
+      const [toolCallRequest, toolCallResponse] = steps;
+
+      expect(steps).toHaveLength(2);
+
+      // @ts-expect-error
+      expect(toolCallRequest.toolCalls[0].function.name).toContain('visualize_query');
+      expect(toolCallRequest.role).toContain('assistant');
+
+      // @ts-expect-error
+      expect(toolCallResponse.name).toContain('visualize_query');
+      expect(toolCallResponse.role).toContain('tool');
     });
   });
 
@@ -215,8 +327,8 @@ describe('collapseInternalToolCalls', () => {
     let collapsedMessages: Message[];
     beforeEach(() => {
       const messages: Message[] = [
-        ...queryToolCalls,
-        ...executeQueryToolCall,
+        ...queryTool,
+        ...executeQueryTool,
         {
           '@timestamp': '2025-07-02T10:02:00Z',
           message: {
