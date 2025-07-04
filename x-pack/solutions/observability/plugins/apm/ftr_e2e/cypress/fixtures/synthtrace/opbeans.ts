@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
 import { apm, timerange, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
 import { shuffle, compact } from 'lodash';
 
@@ -64,7 +65,7 @@ export function opbeans({ from, to }: { from: number; to: number }) {
       )
   );
 
-  const serializedProducerInternalOnlyEvents = Array.from(opbeansJavaInternalOnlyEvents).flatMap(
+  const serializedOpbeansJavaInternalOnlyEvents = Array.from(opbeansJavaInternalOnlyEvents).flatMap(
     (event) => event.serialize()
   );
 
@@ -99,7 +100,7 @@ export function opbeans({ from, to }: { from: number; to: number }) {
             .defaults({
               'span.links': shuffle([
                 ...generateExternalSpanLinks(),
-                ...getSpanLinksFromEvents(opbeansJavaInternalOnlyEvents),
+                ...getSpanLinksFromEvents(serializedOpbeansJavaInternalOnlyEvents),
               ]),
             })
             .timestamp(timestamp)
