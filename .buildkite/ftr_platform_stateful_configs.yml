@@ -59,6 +59,7 @@ enabled:
   - src/platform/test/accessibility/config.ts
   - src/platform/test/analytics/config.ts
   - src/platform/test/api_integration/config.js
+  - src/platform/test/api_integration/apis/unused_urls_task/config.ts
   - src/platform/test/examples/config.js
   - src/platform/test/functional/apps/bundles/config.ts
   - src/platform/test/functional/apps/console/config.ts
@@ -336,7 +337,7 @@ enabled:
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.ts
-  - x-pack/test/usage_collection/config.ts
+  - x-pack/platform/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_http2.ts
@@ -409,4 +410,4 @@ enabled:
   - x-pack/platform/test/saved_object_api_integration/spaces_only/config.ts
   - x-pack/platform/test/saved_object_api_integration/low-level/config.ts
   - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts
-  - src/platform/test/api_integration/apis/unused_urls_task/config.ts
+  - x-pack/platform/test/usage_collection/config.ts
