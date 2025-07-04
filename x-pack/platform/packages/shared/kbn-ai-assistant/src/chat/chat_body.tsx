@@ -103,7 +103,6 @@ const fadeInAnimation = keyframes`
 
 const animClassName = (euiTheme: UseEuiTheme['euiTheme']) => css`
   height: 100%;
-  opacity: 0;
   ${euiCanAnimate} {
     animation: ${fadeInAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.bounce}
       ${euiTheme.animation.normal} forwards;
