@@ -14,6 +14,7 @@ import { CommonGlobalAppStyles } from '../common/global_app_styles';
 import {
   useHackSyncPushFlyout,
   hackEuiPushFlyoutPaddingInlineEnd,
+  hackEuiPushFlyoutPaddingInlineStart,
 } from './hack_use_sync_push_flyout';
 
 const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
@@ -28,7 +29,10 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbnHeaderBannerHeight: var(--kbn-layout--banner-height, 0px);
 
     // the total height of all app-area headers
-    --kbnAppHeadersOffset: 0px;
+    --kbnAppHeadersOffset: var(--kbn-application--content-top, 0px);
+
+    // height of the project header app action menu which is part of the application area
+    --kbnProjectHeaderAppActionMenuHeight: var(--kbn-application--top-bar-height, 0px);
   }
 
   #kibana-body {
@@ -69,15 +73,14 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
 // https://github.com/elastic/eui/issues/8820
 const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
-  // adjust position of the classic navigation overlay
+  // adjust position of the classic/project side-navigation
   .kbnBody .euiFlyout.euiCollapsibleNav {
     ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
     ${logicalCSS('left', 'var(--kbn-layout--application-left, 0px)')};
     ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
   }
 
-  // adjust position of the overlay flyouts
-  .kbnBody .euiFlyout:not(.euiCollapsibleNavBeta),
+  // adjust position of all other flyouts
   .kbnBody .euiFlyout:not(.euiCollapsibleNav) {
     // overlay flyout should only cover the application area
     &[class*='right']:not([class*='push']) {
@@ -91,14 +94,19 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
       ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
       ${logicalCSS('right', 'var(--kbn-layout--application-right, 0px)')};
     }
+
+    // ...
+    // no use-cases for left flyouts other then .euiCollapsibleNav, so skipping it for now
   }
 
   // push flyout should be pushing the application area, instead of body
   main[class*='LayoutApplication'] {
     ${logicalCSS('padding-right', `var(${hackEuiPushFlyoutPaddingInlineEnd}, 0px)`)};
+    ${logicalCSS('padding-left', `var(${hackEuiPushFlyoutPaddingInlineStart}, 0px)`)};
   }
   .kbnBody {
     ${logicalCSS('padding-right', `0px !important`)};
+    ${logicalCSS('padding-left', `0px !important`)};
   }
 
   // overlay mask "belowHeader" should only cover the application area
