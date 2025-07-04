@@ -17,7 +17,7 @@ import { parse } from 'url';
 import expect from '@kbn/expect';
 
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { FtrProviderContext } from '../../security_functional/ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');

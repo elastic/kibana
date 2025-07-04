@@ -1915,7 +1915,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/api_integration/apis/kibana @elastic/kibana-core
 /src/platform/test/api_integration/fixtures/import.ndjson @elastic/kibana-core
 /x-pack/platform/test/plugin_api_integration @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
-/x-pack/test/localization/ @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
+/x-pack/platform/test/localization/ @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
 /src/platform/test/ui_capabilities/newsfeed_err @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/66562
 /src/platform/test/server_integration/services/types.d.ts @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/81140
 /src/platform/test/server_integration/http @elastic/kibana-core
@@ -2041,14 +2041,14 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /src/platform/test/functional/page_objects/login_page.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/observability/role_management @elastic/kibana-security
 /x-pack/platform/test/functional/config_security_basic.ts @elastic/kibana-security
-/x-pack/test/functional/page_objects/user_profile_page.ts @elastic/kibana-security
+/x-pack/platform/test/functional/page_objects/user_profile_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/space_selector_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/security_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/role_mappings_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/copy_saved_objects_to_space_page.ts @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/39002
 /x-pack/test/functional/page_objects/api_keys_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/account_settings_page.ts @elastic/kibana-security
-/x-pack/test/functional/apps/user_profiles @elastic/kibana-security
+/x-pack/platform/test/functional/apps/user_profiles @elastic/kibana-security
 /x-pack/test/common/services/spaces.ts @elastic/kibana-security
 /x-pack/test/api_integration/config_security_*.ts @elastic/kibana-security
 /x-pack/test/functional/apps/api_keys @elastic/kibana-security
@@ -2828,7 +2828,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/test/functional_solution_sidenav/ftr_provider_context.ts @elastic/appex-sharedux
 /x-pack/test/functional_solution_sidenav/services.ts @elastic/appex-sharedux
 /x-pack/test/functional_solution_sidenav/index.ts @elastic/appex-sharedux
-/x-pack/test/functional_cloud @elastic/appex-sharedux
+/x-pack/platform/test/functional_cloud @elastic/appex-sharedux
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
 /x-pack/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/**/index.ts @elastic/appex-sharedux

@@ -19,6 +19,7 @@ import { ReportingPageObject } from './reporting_page';
 import { WatcherPageObject } from './watcher_page';
 import { SearchProfilerPageProvider } from './search_profiler_page';
 import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
+import { UserProfilePageProvider } from './user_profile_page';
 import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 
 // just like services, PageObjects are defined as a map of
@@ -37,6 +38,7 @@ export const pageObjects = {
   reporting: ReportingPageObject,
   watcher: WatcherPageObject,
   searchProfiler: SearchProfilerPageProvider,
-  upgradeAssistant: UpgradeAssistantFlyoutObject,
   snapshotRestore: SnapshotRestorePageProvider,
+  upgradeAssistant: UpgradeAssistantFlyoutObject,
+  userProfiles: UserProfilePageProvider,
 };
