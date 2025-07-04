@@ -8,36 +8,13 @@
  */
 
 import Boom from '@hapi/boom';
-import { MappingProperty, SortCombinations, SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import { SortCombinations, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server/src/apis';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
+import { getKeywordField, getMergedFieldType, isValidSortingField } from './sorting_params_utils';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
-
-const isValidKeywordField = (fieldMapping?: SavedObjectsFieldMapping): boolean => {
-  if (!fieldMapping) {
-    return false;
-  }
-  if (fieldMapping?.type === 'keyword') {
-    return true;
-  }
-  if (fieldMapping.type === 'text' && fieldMapping.fields) {
-    return Object.values(fieldMapping.fields).some(
-      (subField: MappingProperty) => subField?.type === 'keyword'
-    );
-  }
-  return false;
-};
-
-const getKeywordField = (fieldMapping?: SavedObjectsFieldMapping): string | undefined => {
-  if (fieldMapping && fieldMapping.type === 'text' && fieldMapping.fields) {
-    const field = Object.entries(fieldMapping.fields).find(
-      ([_, subField]: [string, MappingProperty]) => subField?.type === 'keyword'
-    );
-    return field ? field[0] : undefined;
-  }
-};
 
 export function getSortingParams(
   mappings: IndexMapping,
@@ -88,7 +65,7 @@ export function getSortingParams(
         // Throw error if any field is text without keyword subfield
         for (const t of types) {
           const fieldMapping = getProperty(mappings, `${t}.${sortField}`);
-          if (!isValidKeywordField(fieldMapping)) {
+          if (!isValidSortingField(fieldMapping)) {
             throw Boom.badRequest(
               `Sort field "${t}.${sortField}" is of type "text" and does not have a "keyword" subfield. Sorting on text fields requires a keyword subfield.`
             );
@@ -96,6 +73,12 @@ export function getSortingParams(
         }
         // Determine if any field is text with keyword, and use keyword if so
         const mergedFieldName = `merged_${sortField}`;
+        // Collect field mappings for type detection
+        const fieldMappings = types
+          .map((t) => getProperty(mappings, `${t}.${sortField}`))
+          .filter(Boolean) as SavedObjectsFieldMapping[];
+        const mergedFieldType = getMergedFieldType(fieldMappings);
+
         // Instead of emitting only the first found value, emit all possible values for the field across types
         // This ensures that sorting is done across all types as a single field
         // Use if/else if/else to ensure only one emit is called
@@ -116,7 +99,7 @@ export function getSortingParams(
         return {
           runtime_mappings: {
             [mergedFieldName]: {
-              type: 'keyword',
+              type: mergedFieldType,
               script: {
                 source: scriptSource,
               },
@@ -132,6 +115,8 @@ export function getSortingParams(
         };
       } else {
         // If not present in all types, throw an error
+        // this ensures that we do not attempt to sort by a field that is not available in all types
+        // but this can be relaxed if needed since ES allows sorting by fields that are not present in all documents
         throw Boom.badRequest(
           `Sort field "${sortField}" must be present in all types to use in sorting when multiple types are specified.`
         );
