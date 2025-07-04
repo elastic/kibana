@@ -2939,6 +2939,44 @@
                               }
                             }
                           }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled prebuilt rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled prebuilt rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within prebuilt rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within prebuilt rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of prebuilt rules with exceptions"
+                          }
                         }
                       }
                     },
@@ -3058,6 +3096,44 @@
                                 "description": "Number of elastic rules configured do not suppress alerts with missing fields"
                               }
                             }
+                          }
+                        },
+                        "response_actions": {
+                          "properties": {
+                            "enabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of enabled prebuilt rules configured with response actions"
+                              }
+                            },
+                            "disabled": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "Number of disabled prebuilt rules configured with response actions"
+                              }
+                            },
+                            "response_actions": {
+                              "properties": {
+                                "endpoint": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of endpoint response actions within prebuilt rules"
+                                  }
+                                },
+                                "osquery": {
+                                  "type": "long",
+                                  "_meta": {
+                                    "description": "Number of osquery response actions within prebuilt rules"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "has_exceptions": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of prebuilt rules with exceptions"
                           }
                         }
                       }
@@ -3254,12 +3330,6 @@
                         "type": "boolean",
                         "_meta": {
                           "description": "If the detection rule has been enabled by the user"
-                        }
-                      },
-                      "is_customized": {
-                        "type": "boolean",
-                        "_meta": {
-                          "description": "If the detection rule authored by Elastic has been customized by the user"
                         }
                       },
                       "elastic_rule": {
