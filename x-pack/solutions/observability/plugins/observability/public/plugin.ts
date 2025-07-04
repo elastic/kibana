@@ -455,6 +455,7 @@ export class Plugin
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
+      pricing: coreStart.pricing,
     });
 
     import('./navigation_tree').then(({ createDefinition }) => {
