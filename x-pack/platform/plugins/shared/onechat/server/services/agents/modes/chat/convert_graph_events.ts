@@ -70,8 +70,8 @@ export const convertGraphEvents = ({
               toolCallEvents.push({
                 type: ChatAgentEventType.toolCall,
                 data: {
-                  toolId,
-                  toolCallId: toolCall.toolCallId,
+                  tool_id: toolId,
+                  tool_call_id: toolCall.toolCallId,
                   args: toolCall.args,
                 },
               });
@@ -82,8 +82,8 @@ export const convertGraphEvents = ({
             const messageEvent: MessageCompleteEvent = {
               type: ChatAgentEventType.messageComplete,
               data: {
-                messageId: lastMessage.id ?? 'unknown',
-                messageContent: extractTextContent(lastMessage),
+                message_id: lastMessage.id ?? 'unknown',
+                message_content: extractTextContent(lastMessage),
               },
             };
 
@@ -101,8 +101,8 @@ export const convertGraphEvents = ({
             toolResultEvents.push({
               type: ChatAgentEventType.toolResult,
               data: {
-                toolCallId: toolMessage.tool_call_id,
-                toolId: toolId ?? toStructuredToolIdentifier('unknown'),
+                tool_call_id: toolMessage.tool_call_id,
+                tool_id: toolId ?? toStructuredToolIdentifier('unknown'),
                 result: extractTextContent(toolMessage),
               },
             });
