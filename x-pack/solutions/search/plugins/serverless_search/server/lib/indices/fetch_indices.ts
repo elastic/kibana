@@ -33,6 +33,6 @@ export async function fetchIndices(
     return [];
   }
   return indexNameSlice.map((name) => ({
-    name
+    name,
   }));
 }
