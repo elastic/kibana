@@ -17,7 +17,7 @@ import { DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public'
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
-import { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import {
   BehaviorSubject,
   Observable,
@@ -112,9 +112,9 @@ export class IndexUpdateService {
         },
       },
       flattened: {
-        field_1: 'Add a value',
-        field_2: 'Add a value',
-        field_3: 'Add a value',
+        [`Add a column`]: 'Add a value',
+        [`Add a column `]: 'Add a value',
+        [`Add a column  `]: 'Add a value',
       },
     },
   ]);
@@ -218,25 +218,6 @@ export class IndexUpdateService {
     this.pendingColumnsToBeSaved$.pipe(startWith([])),
   ]).pipe(
     map(([dataView, pendingColumnsToBeSaved]) => {
-      if (!dataView.fields.length) {
-        return [
-          {
-            id: 'field_1',
-            name: 'Add a field',
-            meta: { type: 'unknown' as DatatableColumnType },
-          },
-          {
-            id: 'field_2',
-            name: 'Add a field',
-            meta: { type: 'unknown' as DatatableColumnType },
-          },
-          {
-            id: 'field_3',
-            name: 'Add a field',
-            meta: { type: 'unknown' as DatatableColumnType },
-          },
-        ];
-      }
       for (const column of pendingColumnsToBeSaved) {
         if (!dataView.fields.getByName(column.name)) {
           dataView.fields.add({

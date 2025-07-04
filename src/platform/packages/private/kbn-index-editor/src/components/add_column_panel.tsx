@@ -7,67 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiForm, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
-import { KibanaContextExtra } from '../types';
+import { useAddColumnName } from '../hooks/use_add_column_name';
 
 interface AddColumnPanelProps {
   onHide: () => void;
 }
 
 export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
-  const {
-    services: { indexUpdateService, notifications },
-  } = useKibana<KibanaContextExtra>();
+  const { columnName, setColumnName, saveNewColumn } = useAddColumnName();
 
-  const columns = useObservable(indexUpdateService.dataTableColumns$, []);
-
-  const [columnName, setColumnName] = useState('');
-
-  const saveNewColumn = useCallback(
-    async (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-
-      if (!columnName) {
-        notifications.toasts.addWarning({
-          title: i18n.translate('indexEditor.addColumn.emptyName', {
-            defaultMessage: 'Column name cannot be empty',
-          }),
-        });
-        return;
-      }
-
-      if (columns.some((existingColumn) => existingColumn.name === columnName)) {
-        notifications.toasts.addWarning({
-          title: i18n.translate('indexEditor.addColumn.duplicatedName', {
-            defaultMessage: 'Column name {columnName} already exists',
-            values: { columnName },
-          }),
-        });
-        return;
-      }
-
-      indexUpdateService.addNewColumn(columnName);
-      notifications.toasts.addSuccess({
-        title: i18n.translate('indexEditor.addColumn.success', {
-          defaultMessage: 'Column {columnName} has been partially added',
-          values: { columnName },
-        }),
-        text: i18n.translate('indexEditor.addColumn.successDescription', {
-          defaultMessage: 'You need to add at least one value to this column before it is saved.',
-        }),
-        toastLifeTimeMs: 10000, // 10 seconds
-      });
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (await saveNewColumn()) {
       onHide();
-    },
-    [columnName, columns, indexUpdateService, notifications.toasts, onHide]
-  );
+    }
+  };
 
   return (
-    <EuiForm component="form" onSubmit={saveNewColumn}>
+    <EuiForm component="form" onSubmit={onSubmit}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexGroup gutterSize="s">
           <EuiFieldText

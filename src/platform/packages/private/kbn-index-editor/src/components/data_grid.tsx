@@ -22,8 +22,10 @@ import {
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection } from 'lodash';
+import times from 'lodash/times';
 import { KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './value_input_control';
+import { AddColumnHeader } from './add_column_header';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -162,9 +164,23 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     }, {} as CustomCellRenderer);
   }, [CellValueRenderer, visibleColumns]);
 
+  const newColumns = useMemo(() => {
+    const missingColumns = 4 - props.columns.length;
+    if (missingColumns > 0) {
+      return times(missingColumns, (idx) => ({
+        width: 200,
+        id: `add-column-${idx}`,
+        headerCellRender: AddColumnHeader,
+        rowCellRender: () => <div>Add a value...</div>,
+      }));
+    }
+    return [];
+  }, [props.columns]);
+
   return (
     <>
       <UnifiedDataTable
+        additionalControlColumns={newColumns}
         columns={visibleColumns}
         rows={rows}
         columnsMeta={columnsMeta}
