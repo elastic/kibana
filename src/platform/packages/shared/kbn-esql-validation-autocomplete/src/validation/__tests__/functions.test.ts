@@ -627,6 +627,18 @@ describe('function validation', () => {
             ],
           },
           {
+            name: 'stats_fn',
+            type: FunctionDefinitionTypes.AGG,
+            description: '',
+            locationsAvailable: [Location.STATS],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+          {
             name: 'row_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
@@ -675,7 +687,9 @@ describe('function validation', () => {
         await expectErrors('FROM a_index | EVAL SORT_FN()', [
           'EVAL does not support function sort_fn',
         ]);
-        await expectErrors('FROM a_index | SORT MAX()', ['SORT does not support function max']);
+        await expectErrors('FROM a_index | SORT STATS_FN()', [
+          'SORT does not support function stats_fn',
+        ]);
         await expectErrors('FROM a_index | STATS ROW_FN()', [
           'At least one aggregation function required in [STATS], found [ROW_FN()]',
           'STATS does not support function row_fn',
@@ -687,12 +701,50 @@ describe('function validation', () => {
       });
 
       it('validates option support', async () => {
+        setTestFunctions([
+          {
+            name: 'supports_by_option',
+            type: FunctionDefinitionTypes.SCALAR,
+            description: '',
+            locationsAvailable: [Location.EVAL, Location.STATS_BY],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+          {
+            name: 'does_not_support_by_option',
+            type: FunctionDefinitionTypes.SCALAR,
+            description: '',
+            locationsAvailable: [Location.EVAL],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+
+          {
+            name: 'agg_fn',
+            type: FunctionDefinitionTypes.AGG,
+            description: '',
+            locationsAvailable: [Location.STATS],
+            signatures: [
+              {
+                params: [],
+                returnType: 'keyword',
+              },
+            ],
+          },
+        ]);
         const { expectErrors } = await setup();
-        await expectErrors('FROM a_index | STATS MAX(doubleField) BY BUCKET(doubleField, 10)', []);
-        await expectErrors(
-          'FROM a_index | STATS MAX(doubleField) BY DOES_NOT_SUPPORT_BY_OPTION()',
-          ['Unknown function [does_not_support_by_option]']
-        );
+        await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
+        await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
+          'STATS BY does not support function does_not_support_by_option',
+        ]);
       });
     });
 
@@ -762,7 +814,6 @@ describe('function validation', () => {
 
         await expectErrors('FROM a_index | STATS AGG_FN(AGG_FN(""))', [
           'Aggregate function\'s parameters must be an attribute, literal or a non-aggregation function; found [AGG_FN("")] of type [keyword]',
-          'At least one aggregation function required in [STATS], found [AGG_FN(AGG_FN(""))]',
         ]);
         // @TODO — enable this test when we have fixed this bug
         // await expectErrors('FROM a_index | STATS AGG_FN(SCALAR_FN(AGG_FN("")))', [
