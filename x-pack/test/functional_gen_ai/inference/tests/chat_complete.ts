@@ -14,7 +14,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type SuperTest from 'supertest';
-import { aiAssistantAnonymizationRules } from '@kbn/inference-common';
+import { aiAssistantAnonymizationSettings } from '@kbn/inference-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export const setAdvancedSettings = async (
@@ -175,12 +175,12 @@ export const chatCompleteSuite = (
       describe('anonymization enabled', () => {
         before(async () => {
           await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationRules]: JSON.stringify([emailRule], null, 2),
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [emailRule] }, null, 2),
           });
         });
         after(async () => {
           await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationRules]: [],
+            [aiAssistantAnonymizationSettings]: [],
           });
         });
         it('returns a chat completion message with deanonymization data', async () => {
@@ -207,7 +207,7 @@ export const chatCompleteSuite = (
       describe('anonymization disabled', () => {
         before(async () => {
           await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationRules]: '[]',
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
           });
         });
         it('returns a chat completion message without deanonymization data', async () => {
@@ -347,7 +347,7 @@ export const chatCompleteSuite = (
       describe('anonymization disabled', () => {
         before(async () => {
           await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationRules]: '[]',
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
           });
         });
         it('returns events without deanonymization data and streams', async () => {
@@ -378,12 +378,12 @@ export const chatCompleteSuite = (
       describe('anonymization enabled', () => {
         before(async () => {
           await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationRules]: JSON.stringify([emailRule], null, 2),
+            [aiAssistantAnonymizationSettings]: JSON.stringify([emailRule], null, 2),
           });
         });
         after(async () => {
           await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationRules]: [],
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
           });
         });
         it('returns a chat completion message with deanonymization data and does not stream the response', async () => {

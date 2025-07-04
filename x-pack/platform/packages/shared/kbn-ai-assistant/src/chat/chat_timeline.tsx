@@ -18,8 +18,8 @@ import {
   type ObservabilityAIAssistantChatService,
   type TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { aiAssistantAnonymizationRules } from '@kbn/inference-common';
-import { AnonymizationRule } from '@kbn/inference-common';
+import { aiAssistantAnonymizationSettings } from '@kbn/inference-common';
+import { AnonymizationSettings } from '@kbn/inference-common';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
@@ -153,12 +153,15 @@ export function ChatTimeline({
   const { anonymizationEnabled } = useMemo(() => {
     try {
       // the response is JSON but will be a string while the setting is hidden temporarily (unregistered)
-      let rules = uiSettings?.get<AnonymizationRule[] | string>(aiAssistantAnonymizationRules);
-      if (typeof rules === 'string') {
-        rules = JSON.parse(rules);
-      }
+      const anonymizationRulesSettingsStr = uiSettings?.get<string>(
+        aiAssistantAnonymizationSettings
+      );
+      const settings = anonymizationRulesSettingsStr
+        ? (JSON.parse(anonymizationRulesSettingsStr) as AnonymizationSettings)
+        : undefined;
+
       return {
-        anonymizationEnabled: Array.isArray(rules) && rules.some((rule) => rule.enabled),
+        anonymizationEnabled: settings && settings.rules.some((rule) => rule.enabled),
       };
     } catch (e) {
       return { anonymizationEnabled: false };

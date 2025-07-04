@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { aiAssistantAnonymizationRules } from '@kbn/inference-common';
+import { aiAssistantAnonymizationSettings } from '@kbn/inference-common';
 import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
 import { setAdvancedSettings } from '../utils/advanced_settings';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
@@ -38,21 +38,23 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       // configure anonymization rules for these tests
       await setAdvancedSettings(supertest, {
-        [aiAssistantAnonymizationRules]: JSON.stringify(
-          [
-            {
-              entityClass: 'EMAIL',
-              type: 'RegExp',
-              pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
-              enabled: true,
-            },
-            {
-              entityClass: 'URL',
-              type: 'RegExp',
-              pattern: '(https?:\\/\\/[^\\s"\']+)',
-              enabled: true,
-            },
-          ],
+        [aiAssistantAnonymizationSettings]: JSON.stringify(
+          {
+            rules: [
+              {
+                entityClass: 'EMAIL',
+                type: 'RegExp',
+                pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+                enabled: true,
+              },
+              {
+                entityClass: 'URL',
+                type: 'RegExp',
+                pattern: '(https?:\\/\\/[^\\s"\']+)',
+                enabled: true,
+              },
+            ],
+          },
           null,
           2
         ),
@@ -64,7 +66,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
       await clearConversations(es);
       await setAdvancedSettings(supertest, {
-        [aiAssistantAnonymizationRules]: [],
+        [aiAssistantAnonymizationSettings]: [],
       });
     });
 

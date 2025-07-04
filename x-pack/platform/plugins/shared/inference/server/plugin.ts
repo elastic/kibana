@@ -10,8 +10,8 @@ import type { Logger } from '@kbn/logging';
 import {
   BoundInferenceClient,
   InferenceClient,
-  AnonymizationRule,
-  aiAssistantAnonymizationRules,
+  aiAssistantAnonymizationSettings,
+  AnonymizationSettings,
 } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
@@ -47,7 +47,7 @@ export class InferencePlugin
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
-    const { [aiAssistantAnonymizationRules]: anonymizationRules, ...restSettings } = uiSettings;
+    const { [aiAssistantAnonymizationSettings]: anonymizationRules, ...restSettings } = uiSettings;
     coreSetup.uiSettings.register(restSettings);
     const router = coreSetup.http.createRouter();
 
@@ -63,17 +63,10 @@ export class InferencePlugin
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     const createAnonymizationRulesPromise = (request: KibanaRequest) => {
       return (async () => {
-        if (request) {
-          const soClient = core.savedObjects.getScopedClient(request);
-          const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-          try {
-            const settingsStr = await uiSettingsClient.get<string>(aiAssistantAnonymizationRules);
-            return JSON.parse(settingsStr ?? '[]') as AnonymizationRule[];
-          } catch {
-            return [] as AnonymizationRule[];
-          }
-        }
-        return [] as AnonymizationRule[];
+        const soClient = core.savedObjects.getScopedClient(request);
+        const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+        const settingsStr = await uiSettingsClient.get<string>(aiAssistantAnonymizationSettings);
+        return (JSON.parse(settingsStr) as AnonymizationSettings).rules;
       })();
     };
     return {
