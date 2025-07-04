@@ -33,15 +33,6 @@ interface CustomScriptsErrorType {
  * @returns Query result containing custom scripts data
  */
 
-function getErrorFromResponse(response: any) {
-  console.log({ response });
-  if ('status_code' in response) {
-    return { errorCode: response.status_code, message: response.message };
-  } else if ('statusCode' in response) {
-    return { errorCode: response.statusCode, message: response.message };
-  }
-}
-
 export const useGetCustomScripts = (
   agentType: ResponseActionAgentType,
   options: Omit<
@@ -89,7 +80,9 @@ export const useGetCustomScripts = (
   });
 };
 
-export function getMessageFieldFromStringifiedObject(str: string): string | undefined {
+export function getMessageFieldFromStringifiedObject(
+  str: string
+): { error: { code: string; message: string } } | undefined {
   const marker = 'Response body: ';
   const idx = str.indexOf(marker);
   if (idx === -1) return undefined;
