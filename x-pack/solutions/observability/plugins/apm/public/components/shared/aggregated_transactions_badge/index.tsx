@@ -17,7 +17,7 @@ export function AggregatedTransactionsBadge() {
           defaultMessage: `This page is using transaction event data as no metric events were found in the current time range, or a filter has been applied based on fields that are not available in metric event documents.`,
         })}
       >
-        <EuiBadge iconType="iInCircle" color="hollow">
+        <EuiBadge iconType="info" color="hollow">
           {i18n.translate('xpack.apm.aggregatedTransactions.fallback.badge', {
             defaultMessage: `Based on sampled transactions`,
           })}

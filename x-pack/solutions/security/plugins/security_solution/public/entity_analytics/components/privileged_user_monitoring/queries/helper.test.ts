@@ -79,6 +79,33 @@ describe('removeInvalidForkBranchesFromESQL', () => {
     `);
   });
 
+  it('should remove fork and insert valid branch into the right position', () => {
+    const esql = `
+    FROM test-index
+      | EVAL new_field_1 = foo
+      | EVAL new_field_2 = foo
+      | FORK
+        (
+          EVAL new_field_3 = foo
+          | EVAL new_field_4 = foo
+        ) (
+          WHERE not_a_field IS NULL
+        )
+      | EVAL new_field_5 = foo
+      | EVAL new_field_6 = foo`;
+
+    expect(esql).not.toBe(undefined);
+    expect(removeInvalidForkBranchesFromESQL(fields, esql)).toMatchInlineSnapshot(`
+      "FROM test-index
+        | EVAL new_field_1 = foo
+        | EVAL new_field_2 = foo
+        | EVAL new_field_3 = foo
+        | EVAL new_field_4 = foo
+        | EVAL new_field_5 = foo
+        | EVAL new_field_6 = foo"
+    `);
+  });
+
   it('should remove invalid branches and return FORK query if multiple valid branches exist', () => {
     const esql =
       'FROM test-index | FORK (WHERE foo IS NULL) (WHERE bar IS NULL) (WHERE not_a_field IS NULL)';
@@ -104,15 +131,13 @@ describe('removeInvalidForkBranchesFromESQL', () => {
     `);
   });
 
-  // Fix The ESQL walker doesn't enter the sort "order" node for some reason
-  // This scenario will cause an error if the query sorts by a invalid field that was not present anywhere else
-  // it('should remove fork if the invalid field is present inside a SORT command with order', () => {
-  //   const esql = 'FROM test-index | FORK (SORT foo) (SORT not_a_field ASC)';
-  //   expect(removeInvalidForkBranchesFromESQL(fields, esql)).toMatchInlineSnapshot(`
-  //     "FROM test-index
-  //       | WHERE foo IS NULL"
-  //   `);
-  // });
+  it('should remove fork if the invalid field is present inside a SORT command with order', () => {
+    const esql = 'FROM test-index | FORK (SORT foo) (SORT not_a_field ASC)';
+    expect(removeInvalidForkBranchesFromESQL(fields, esql)).toMatchInlineSnapshot(`
+      "FROM test-index
+        | SORT foo"
+    `);
+  });
 
   it('should remove fork if the invalid field is present inside a WHERE command', () => {
     const esql = 'FROM test-index | FORK (WHERE foo IS NULL) (WHERE not_a_field IS NULL)';

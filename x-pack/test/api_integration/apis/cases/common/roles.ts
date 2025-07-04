@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Role } from '../../../../cases_api_integration/common/lib/authentication/types';
+import type { Role } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/types';
 
 /**
  * Roles for Cases in Security Solution

@@ -260,7 +260,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
               </EuiFormRow>
               <EuiSpacer size="m" />
               <EuiCallOut
-                iconType="iInCircle"
+                iconType="info"
                 title={
                   <FormattedMessage
                     id="xpack.fleet.settings.editOutputFlyout.remoteClusterConfigurationCalloutTitle"
