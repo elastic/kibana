@@ -34,7 +34,7 @@ describe('FlashMessages', () => {
     expect(wrapper.find(EuiCallOut)).toHaveLength(5);
     expect(wrapper.find(EuiCallOut).first().prop('color')).toEqual('success');
     expect(wrapper.find('[data-test-subj="error"]')).toHaveLength(1);
-    expect(wrapper.find(EuiCallOut).last().prop('iconType')).toEqual('iInCircle');
+    expect(wrapper.find(EuiCallOut).last().prop('iconType')).toEqual('info');
   });
 
   it('renders any children', () => {

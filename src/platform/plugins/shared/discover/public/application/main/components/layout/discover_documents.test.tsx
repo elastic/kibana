@@ -77,13 +77,15 @@ async function mountComponent(
   };
 
   profilesManager = profilesManager ?? services.profilesManager;
+  const scopedEbtManager = services.ebtManager.createScopedEBTManager();
 
   const component = mountWithIntl(
     <DiscoverTestProvider
       services={{ ...services, profilesManager }}
       stateContainer={stateContainer}
       customizationService={customisationService}
-      scopedProfilesManager={profilesManager.createScopedProfilesManager()}
+      scopedProfilesManager={profilesManager.createScopedProfilesManager({ scopedEbtManager })}
+      scopedEbtManager={scopedEbtManager}
     >
       <DiscoverDocuments {...props} />
     </DiscoverTestProvider>

@@ -42,6 +42,7 @@ export const mockAssistantAvailability: AssistantAvailability = {
   hasUpdateAIAssistantAnonymization: true,
   hasManageGlobalKnowledgeBase: true,
   isAssistantEnabled: true,
+  isStarterPromptsEnabled: true,
 };
 
 /** A utility for wrapping children in the providers required to run tests */

@@ -10,9 +10,11 @@ import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { OnDragEndResponder } from '@hello-pangea/dnd';
 import { euiDragDropReorder } from '@elastic/eui';
+import { AnalyticsEvents } from '../../../analytics/constants';
 import { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../../common/types';
 import { useFetchIndexNames } from '../../../hooks/use_fetch_index_names';
 import { isCriteriaAlways } from '../../../utils/query_rules_utils';
+import { useUsageTracker } from '../../../hooks/use_usage_tracker';
 
 export const createEmptyRuleset = (
   rulesetId: QueryRulesQueryRuleset['ruleset_id']
@@ -39,6 +41,7 @@ export const useQueryRuleFlyoutState = ({
   setIsFormDirty,
   onSave,
 }: UseQueryRuleFlyoutStateProps) => {
+  const usageTracker = useUsageTracker();
   const { control, getValues, reset, setValue, formState, trigger } =
     useFormContext<QueryRuleEditorForm>();
   const {
@@ -242,6 +245,7 @@ export const useQueryRuleFlyoutState = ({
   const shouldShowCriteriaCallout = criteriaCalloutActive && !isAlways;
 
   const dragEndHandle: OnDragEndResponder<string> = ({ source, destination }) => {
+    usageTracker?.click(AnalyticsEvents.ruleFlyoutDocumentsReordered);
     if (source && destination && (ruleFromRuleset || createMode)) {
       if (isDocRule) {
         const newActions = euiDragDropReorder(actionFields, source.index, destination.index);

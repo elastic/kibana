@@ -541,6 +541,7 @@ const AssistantComponent: React.FC<Props> = ({
                     isLoading={isInitialLoad}
                     isSettingsModalVisible={isSettingsModalVisible}
                     isWelcomeSetup={isWelcomeSetup}
+                    setUserPrompt={setUserPrompt}
                     setCurrentSystemPromptId={setCurrentSystemPromptId}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                   />

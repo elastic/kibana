@@ -30,7 +30,7 @@ export const FeatureTableCell = ({ feature, className }: Props) => {
         iconProps={{
           className: 'eui-alignTop',
         }}
-        type={'iInCircle'}
+        type={'info'}
         color={'subdued'}
         content={tooltipContent}
       />
