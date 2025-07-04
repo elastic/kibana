@@ -57,6 +57,10 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    after(async () => {
+      await deleteAllCaseItems(esClient);
+    });
+
     it('should sync the cases index', async () => {
       await createConfiguration(
         supertest,
