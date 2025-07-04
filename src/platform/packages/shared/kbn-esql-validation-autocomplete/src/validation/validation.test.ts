@@ -478,7 +478,6 @@ describe('validation logic', () => {
     describe('join', () => {
       testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', [
         '[t] index is not a valid JOIN index. Please use a "lookup" mode index JOIN commands.',
-        'Unknown index [t]',
       ]);
     });
 

@@ -28,6 +28,7 @@ import {
 } from './functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from './shared';
 import { ESQLAstItem, ESQLFunction } from '../../types';
+import { getTestFunctions } from './test_functions';
 
 export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
@@ -54,7 +55,12 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
 export const getOperatorSuggestions = (
   predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType }
 ): ISuggestionItem[] => {
-  const filteredDefinitions = filterFunctionDefinitions(operatorsDefinitions, predicates);
+  const filteredDefinitions = filterFunctionDefinitions(
+    getTestFunctions().length
+      ? [...operatorsDefinitions, ...getTestFunctions()]
+      : operatorsDefinitions,
+    predicates
+  );
 
   // make sure the operator has at least one signature that matches
   // the type of the existing left argument if provided (e.g. "doubleField <suggest>")

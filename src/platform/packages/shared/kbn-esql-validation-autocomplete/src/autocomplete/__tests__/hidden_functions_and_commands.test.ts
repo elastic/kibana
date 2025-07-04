@@ -8,7 +8,7 @@
  */
 import { FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
-import { setTestFunctions } from '../../shared/test_functions';
+import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
 
 describe('hidden commands', () => {

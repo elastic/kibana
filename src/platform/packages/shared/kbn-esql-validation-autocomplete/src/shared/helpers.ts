@@ -37,6 +37,7 @@ import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/gener
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { getExpressionType } from '@kbn/esql-ast/src/definitions/utils';
+import { getTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import {
   ESQLIdentifier,
   ESQLInlineCast,
@@ -49,7 +50,6 @@ import { uniqBy } from 'lodash';
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
 import { getLocationFromCommandOrOptionName } from './types';
 import type { ReferenceMaps } from '../validation/types';
-import { getTestFunctions } from './test_functions';
 import type { ESQLCallbacks, ReasonTypes } from './types';
 import { collectUserDefinedColumns } from './user_defined_columns';
 

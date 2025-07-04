@@ -173,8 +173,11 @@ export function getFunctionSignatures(
 
 const allFunctions = memoize(
   () =>
-    aggFunctionDefinitions.concat(scalarFunctionDefinitions).concat(groupingFunctionDefinitions),
-  () => []
+    aggFunctionDefinitions
+      .concat(scalarFunctionDefinitions)
+      .concat(groupingFunctionDefinitions)
+      .concat(getTestFunctions()),
+  () => getTestFunctions()
 );
 
 export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {

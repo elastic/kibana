@@ -2095,8 +2095,7 @@
     {
       "query": "ROW a=1::LONG | LOOKUP JOIN t ON a",
       "error": [
-        "[t] index is not a valid JOIN index. Please use a \"lookup\" mode index JOIN commands.",
-        "Unknown index [t]"
+        "[t] index is not a valid JOIN index. Please use a \"lookup\" mode index JOIN commands."
       ],
       "warning": []
     },
@@ -9339,6 +9338,190 @@
       ]
     },
     {
+      "query": "f",
+      "error": [
+        "SyntaxError: mismatched input 'f' expecting {'row', 'from', 'show'}"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from ",
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"index\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM \"\"\"index\"\"\"",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FrOm index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index, other_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index, other_index,.secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from ind*, other*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM *a_i*dex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM in*ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM *n*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM *n*ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i*d*x*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i*d*x",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i***x*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i****",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM i**",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM index**",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM *ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM *ex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM in*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM ind*ex",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM *,-.*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "fRoM .secret_index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from my-index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index, missingIndex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index*, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, missingIndex2*, index",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from index,",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
@@ -9357,6 +9540,130 @@
       "error": [
         "SyntaxError: mismatched input '=' expecting <EOF>",
         "Unknown index [assignment]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM `index`",
+      "error": [
+        "Unknown index [`index`]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from assignment = 1",
+      "error": [
+        "SyntaxError: mismatched input '=' expecting <EOF>",
+        "Unknown index [assignment]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from average()",
+      "error": [
+        "Unknown index [average()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "fRom custom_function()",
+      "error": [
+        "Unknown index [custom_function()]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM indexes*",
+      "error": [
+        "Unknown index [indexes*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from numberField",
+      "error": [
+        "Unknown index [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM policy",
+      "error": [
+        "Unknown index [policy]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex, index",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missingIndex2, index",
+      "error": [
+        "Unknown index [missingIndex2]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*",
+      "error": [
+        "Unknown index [missingIndex*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missing*Index2",
+      "error": [
+        "Unknown index [*missingIndex]",
+        "Unknown index [missing*Index2]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id, \t\n _index\n ",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from index (metadata _id)",
+      "error": [
+        "SyntaxError: mismatched input '(metadata' expecting <EOF>"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index METADATA _id, _source2",
+      "error": [
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode, _score]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from index metadata _id, _source METADATA _id2",
+      "error": [
+        "SyntaxError: mismatched input 'METADATA' expecting <EOF>"
       ],
       "warning": []
     }
