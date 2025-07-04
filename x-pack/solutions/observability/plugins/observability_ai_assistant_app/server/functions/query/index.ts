@@ -151,6 +151,11 @@ export function registerQueryFunction({
           ])
         ),
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
+        metadata: {
+          connectorTelemetry: {
+            pluginId: 'observability_ai_assistant',
+          },
+        },
       });
 
       const chatMessageId = v4();
