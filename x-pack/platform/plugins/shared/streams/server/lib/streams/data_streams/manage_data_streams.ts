@@ -143,7 +143,15 @@ export async function updateDataStreamsLifecycle({
         logger,
       });
 
-      await putDataStreamsSettings({ esClient, names, logger, lifecycle });
+      await putDataStreamsSettings({
+        esClient,
+        names,
+        logger,
+        settings: {
+          'index.lifecycle.name': lifecycle.ilm.policy,
+          'index.lifecycle.prefer_ilm': true,
+        },
+      });
     } else if (isDslLifecycle(lifecycle)) {
       await retryTransientEsErrors(
         () =>
@@ -157,7 +165,15 @@ export async function updateDataStreamsLifecycle({
       if (!isServerless) {
         // we don't need overrides for serverless since data streams can
         // only be managed by dsl
-        await putDataStreamsSettings({ esClient, names, logger, lifecycle });
+        await putDataStreamsSettings({
+          esClient,
+          names,
+          logger,
+          settings: {
+            'index.lifecycle.name': null,
+            'index.lifecycle.prefer_ilm': false,
+          },
+        });
       }
     } else if (isInheritLifecycle(lifecycle)) {
       // classic streams only - inheriting a lifecycle means falling back to
@@ -177,7 +193,7 @@ export async function updateDataStreamsLifecycle({
             };
           };
 
-          const templateLifecycle = await getTemplateLifecycle(template);
+          const templateLifecycle = getTemplateLifecycle(template);
           if (isDslLifecycle(templateLifecycle)) {
             await retryTransientEsErrors(
               () =>
@@ -193,7 +209,18 @@ export async function updateDataStreamsLifecycle({
             });
           }
 
-          await putDataStreamsSettings({ esClient, names, logger, lifecycle });
+          if (!isServerless) {
+            // unset any overriden settings
+            await putDataStreamsSettings({
+              esClient,
+              names: [name],
+              logger,
+              settings: {
+                'index.lifecycle.name': null,
+                'index.lifecycle.prefer_ilm': null,
+              },
+            });
+          }
         })
       );
     }
@@ -207,26 +234,23 @@ async function putDataStreamsSettings({
   esClient,
   names,
   logger,
-  lifecycle,
+  settings,
 }: {
   esClient: ElasticsearchClient;
   names: string[];
   logger: Logger;
-  lifecycle: IngestStreamLifecycle;
+  settings: {
+    'index.lifecycle.name'?: string | null;
+    'index.lifecycle.prefer_ilm'?: boolean | null;
+  };
 }) {
-  const isIlm = isIlmLifecycle(lifecycle);
-  const isInherit = isInheritLifecycle(lifecycle);
-
   await retryTransientEsErrors(
     () =>
       // TODO: use client method once available
       esClient.transport.request({
         method: 'PUT',
         path: `/_data_stream/${names.join(',')}/_settings`,
-        body: {
-          'index.lifecycle.name': isIlm ? lifecycle.ilm.policy : null,
-          'index.lifecycle.prefer_ilm': isInherit ? null : isIlm,
-        },
+        body: settings,
       }),
     { logger }
   );
