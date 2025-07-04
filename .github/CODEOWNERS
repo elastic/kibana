@@ -992,6 +992,8 @@ x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/respons
 x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
+x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
+x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
 x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
@@ -1111,8 +1113,6 @@ x-pack/solutions/security/test
 x-pack/test
 x-pack/test_serverless
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
-x-pack/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
-x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
@@ -1206,7 +1206,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/test/accessibility/apps/group3/search_sessions.ts @elastic/kibana-data-discovery
 /x-pack/platform/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-data-discovery
 /x-pack/platform/test/api_integration/apis/search @elastic/kibana-data-discovery
-/x-pack/test/examples/search_examples @elastic/kibana-data-discovery
+/x-pack/platform/test/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/data_views @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/discover @elastic/kibana-data-discovery
 /x-pack/platform/test/functional/apps/saved_query_management @elastic/kibana-data-discovery
@@ -1272,7 +1272,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /src/platform/test/functional/page_objects/tag_cloud_page.ts @elastic/kibana-visualizations
 /x-pack/platform/test/functional/page_objects/lens_page.ts @elastic/kibana-visualizations
 /x-pack/test/functional/es_archives/lens @elastic/kibana-visualizations
-/x-pack/test/examples/embedded_lens @elastic/kibana-visualizations
+/x-pack/platform/test/examples/embedded_lens @elastic/kibana-visualizations
 /x-pack/test/api_integration/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
 /x-pack/platform/test/api_integration/apis/lens @elastic/kibana-visualizations
 /src/platform/test/plugin_functional/test_suites/custom_visualizations @elastic/kibana-visualizations
@@ -1308,7 +1308,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/functional/apps/dashboard/reporting/ @elastic/response-ops
 /x-pack/test/functional/apps/reporting/ @elastic/response-ops
 /x-pack/platform/test/functional/apps/reporting_management/ @elastic/response-ops
-/x-pack/test/examples/screenshotting/ @elastic/response-ops
+/x-pack/platform/test/examples/screenshotting/ @elastic/response-ops
 /x-pack/test/functional/es_archives/lens/reporting/ @elastic/response-ops
 /x-pack/test/functional/es_archives/reporting/ @elastic/response-ops
 /x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/response-ops
@@ -1766,7 +1766,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/functional/ftr_provider_context.ts @elastic/appex-qa
 /x-pack/platform/test/functional/ftr_provider_context.ts @elastic/appex-qa
 /x-pack/test/functional/README.md @elastic/appex-qa
-/x-pack/test/examples/config.ts @elastic/appex-qa
+/x-pack/platform/test/examples/config.ts @elastic/appex-qa
 /x-pack/test/common/services/index.ts @elastic/appex-qa
 /x-pack/test/common/services/bsearch_secure.ts @elastic/appex-qa
 /x-pack/test/common/ftr_provider_context.ts @elastic/appex-qa
@@ -1927,7 +1927,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/cloud_integration @elastic/kibana-core
 /x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 /src/platform/test/server_integration @elastic/kibana-core
-/x-pack/test/functional_cors @elastic/kibana-core
+/x-pack/platform/test/functional_cors @elastic/kibana-core
 /x-pack/test/stack_functional_integration/apps/telemetry @elastic/kibana-core
 /src/platform/test/plugin_functional/plugins/core* @elastic/kibana-core
 /src/platform/test/plugin_functional/platform/plugins/shared/telemetry @elastic/kibana-core
@@ -1943,7 +1943,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/plugin_functional/test_suites/core* @elastic/kibana-core
 /src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
 /x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management @elastic/kibana-core
-/x-pack/test/functional_embedded @elastic/kibana-core
+/x-pack/platform/test/functional_embedded @elastic/kibana-core
 /src/platform/test/node_roles_functional @elastic/kibana-core
 /src/platform/test/functional/page_objects/newsfeed_page.ts @elastic/kibana-core # assigned per https://github.com/elastic/kibana/pull/160210
 /src/platform/test/functional/page_objects/home_page.ts @elastic/appex-sharedux
@@ -2130,7 +2130,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/solutions/security/test/api_integration_basic/apis/security_solution/cases_privileges.ts @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/upgrade/services/rules_upgrade_services.ts @elastic/response-ops
 /x-pack/test/upgrade/apps/rules @elastic/response-ops
-/x-pack/test/examples/triggers_actions_ui_examples @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/main/x-pack/examples/triggers_actions_ui_example/kibana.jsonc#L4
+/x-pack/platform/test/examples/triggers_actions_ui_examples @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/main/x-pack/examples/triggers_actions_ui_example/kibana.jsonc#L4
 /x-pack/test/functional/services/rules @elastic/response-ops
 /x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
 /x-pack/test/functional/fixtures/kbn_archiver/cases @elastic/response-ops @elastic/kibana-cases
@@ -2186,7 +2186,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /src/platform/test/functional/fixtures/kbn_archiver/annotation_listing_page_search.json @elastic/search-kibana
 /src/platform/test/functional/fixtures/es_archiver/search/downsampled @elastic/search-kibana
 /x-pack/test/functional_solution_sidenav/tests/search_sidenav.ts @elastic/search-kibana
-/x-pack/test/functional/services/search_sessions.ts @elastic/search-kibana
+/x-pack/platform/test/functional/services/search_sessions.ts @elastic/search-kibana
 /x-pack/test/functional/page_objects/search_* @elastic/search-kibana
 x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/search-kibana
 /x-pack/test/functional/apps/search_playground @elastic/search-kibana

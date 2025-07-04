@@ -11,7 +11,7 @@ import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('../functional/config.base.ts')
   );
 
   return {
