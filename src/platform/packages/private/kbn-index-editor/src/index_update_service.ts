@@ -17,7 +17,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import {
   BehaviorSubject,
   Observable,
@@ -87,7 +87,24 @@ export class IndexUpdateService {
   public readonly isFetching$: Observable<boolean> = this._isFetching$.asObservable();
 
   /** ES Documents */
-  private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
+  private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([
+    {
+      id: 'row_1',
+      raw: {
+        _id: 'row_1',
+        _source: {
+          field_1: 'Add a value',
+          field_2: 'Add a value',
+          field_3: 'Add a value',
+        },
+      },
+      flattened: {
+        field_1: 'Add a value',
+        field_2: 'Add a value',
+        field_3: 'Add a value',
+      },
+    },
+  ]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
   private readonly _totalHits$ = new BehaviorSubject<number>(0);
@@ -159,6 +176,26 @@ export class IndexUpdateService {
 
   public readonly dataTableColumns$: Observable<DatatableColumn[]> = this.dataView$.pipe(
     map((dataView) => {
+      if (!dataView.fields.length) {
+        return [
+          {
+            id: 'field_1',
+            name: 'Add a field',
+            meta: { type: 'unknown' as DatatableColumnType },
+          },
+          {
+            id: 'field_2',
+            name: 'Add a field',
+            meta: { type: 'unknown' as DatatableColumnType },
+          },
+          {
+            id: 'field_3',
+            name: 'Add a field',
+            meta: { type: 'unknown' as DatatableColumnType },
+          },
+        ];
+      }
+
       return (
         dataView.fields
           // Exclude metadata fields. TODO check if this is the right way to do it
@@ -283,8 +320,12 @@ export class IndexUpdateService {
         // Time range updates
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
         this._refreshSubject$,
+        this.indexCreated$,
       ])
         .pipe(
+          skipWhile(([_dataView, _timeRangeEmit, _refreshSubject, indexCreated]) => {
+            return !indexCreated;
+          }),
           tap(() => {
             this._isFetching$.next(true);
           }),
