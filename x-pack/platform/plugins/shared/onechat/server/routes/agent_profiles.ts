@@ -10,12 +10,12 @@ import { getHandlerWrapper } from './wrap_handler';
 import { apiPrivileges } from '../../common/features';
 import { ONECHAT_AGENT_API_UI_SETTING_ID } from '../../common/constants';
 import type {
-  GetAgentResponse,
-  CreateAgentResponse,
-  UpdateAgentResponse,
-  DeleteAgentResponse,
-  ListAgentsResponse,
-} from '../../common/http_api/agents';
+  GetAgentProfileResponse,
+  CreateAgentProfileResponse,
+  UpdateAgentProfileResponse,
+  DeleteAgentProfileResponse,
+  ListAgentProfilesResponse,
+} from '../../common/http_api/agent_profiles';
 
 const TECHNICAL_PREVIEW_WARNING =
   'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
@@ -65,7 +65,7 @@ export function registerAgentProfileRoutes({
         const { agents } = getInternalServices();
         const service = await agents.getProfileService(request);
         const agentProfiles = await service.list();
-        return response.ok<ListAgentsResponse>({ body: { agentProfiles } });
+        return response.ok<ListAgentProfilesResponse>({ body: { agentProfiles } });
       })
     );
 
@@ -103,7 +103,7 @@ export function registerAgentProfileRoutes({
         const service = await agents.getProfileService(request);
 
         const profile = await service.get(request.params.id);
-        return response.ok<GetAgentResponse>({ body: profile });
+        return response.ok<GetAgentProfileResponse>({ body: profile });
       })
     );
 
@@ -148,7 +148,7 @@ export function registerAgentProfileRoutes({
         const { agents } = getInternalServices();
         const service = await agents.getProfileService(request);
         const profile = await service.create(request.body);
-        return response.ok<CreateAgentResponse>({ body: profile });
+        return response.ok<CreateAgentProfileResponse>({ body: profile });
       })
     );
 
@@ -194,7 +194,7 @@ export function registerAgentProfileRoutes({
         const service = await agents.getProfileService(request);
         const update = { id: request.params.id, ...request.body };
         const profile = await service.update(update);
-        return response.ok<UpdateAgentResponse>({ body: profile });
+        return response.ok<UpdateAgentProfileResponse>({ body: profile });
       })
     );
 
@@ -227,7 +227,7 @@ export function registerAgentProfileRoutes({
         const service = await agents.getProfileService(request);
 
         const result = await service.delete({ id: request.params.id });
-        return response.ok<DeleteAgentResponse>({
+        return response.ok<DeleteAgentProfileResponse>({
           body: {
             success: result,
           },
