@@ -152,5 +152,76 @@ describe('AutoInstallContentPackagesTask', () => {
         pkgVersion: '1.1.0',
       });
     });
+
+    it('should not call registry if cached', async () => {
+      packageClientMock.getInstallation.mockResolvedValue({
+        install_status: 'installed',
+        version: '1.1.0',
+      } as any);
+
+      await runTask();
+      await runTask();
+
+      expect(MockRegistry.fetchList).toHaveBeenCalledTimes(1);
+    });
+
+    it('should install package if old version is installed', async () => {
+      packageClientMock.getInstallation.mockResolvedValue({
+        install_status: 'installed',
+        version: '1.0.0',
+      } as any);
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).toHaveBeenCalledWith({
+        pkgName: 'kubernetes_otel',
+        pkgVersion: '1.1.0',
+      });
+    });
+
+    it('should not install package if latest version is installed', async () => {
+      packageClientMock.getInstallation.mockResolvedValue({
+        install_status: 'installed',
+        version: '1.1.0',
+      } as any);
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+    });
+
+    it('should not install package if discovery field is not data_stream.dataset', async () => {
+      MockRegistry.fetchList.mockResolvedValue([
+        {
+          name: 'kubernetes_otel',
+          version: '1.1.0',
+          discovery: {
+            fields: [{ name: 'event.dataset', value: 'system.cpu' }],
+          },
+        } as any,
+      ]);
+      packageClientMock.getInstallation.mockResolvedValue(undefined);
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+    });
+
+    it('should not install package if discovery field value is not set', async () => {
+      MockRegistry.fetchList.mockResolvedValue([
+        {
+          name: 'kubernetes_otel',
+          version: '1.1.0',
+          discovery: {
+            fields: [{ name: 'data_stream.dataset' }],
+          },
+        } as any,
+      ]);
+      packageClientMock.getInstallation.mockResolvedValue(undefined);
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+    });
   });
 });
