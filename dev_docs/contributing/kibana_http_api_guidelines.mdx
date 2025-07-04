@@ -30,7 +30,7 @@ This principle is embodied in the rest of this document, so read on for examples
 
 Create a great _API_ user experience, as opposed to optimizing a single API for _UI_ use cases as well. Front-ends have very different needs and constraints from public HTTP API clients. Our public HTTP APIs should be primitives that are simple to use and compose.
 
-For example, a UI might want to optimise it's network requests by bundling multiple requests into a single request, but an API client would be better designed to de-optimise and simplify the requests:
+For example, a UI might want to optimize it's network requests by bundling multiple requests into a single request, but an API client would be better designed to de-optimize and simplify the requests:
 
 A view or component in the UI might do the following for some, UI-specific purpose:
 ```
@@ -61,7 +61,7 @@ GET /api/resource_bs?page=1
 ```
 
 <DocCallOut title="Internal vs Public APIs">
-  To further reinforce these different purposes Kibana HTTP APIs serve, we categorise them as either **internal** or **public**. See the [Internal vs Public APIs](#internal-vs-public-apis) section for more details.
+  To further reinforce these different purposes Kibana HTTP APIs serve, we categorize them as either **internal** or **public**. See the [Internal vs Public APIs](#internal-vs-public-apis) section for more details.
 </DocCallOut>
 
 ### Commitment
@@ -86,7 +86,7 @@ Getting your HTTP APIs into a stable state is a process based on feedback from a
 
   Even `Technical Preview` and `Beta` HTTP APIs should consider graceful paths for changes when possible.
 
-  Linus Torvalds famously said of Kernel development: "WE DO NOT BREAK USERSPACE!" (along with some other expletives). We should adopt this kind of rigor and empathy when working with our _public_ HTTP APIs and always proiritise finding ways to avoid breaking our APIs.
+  Linus Torvalds famously said of Kernel development: "WE DO NOT BREAK USERSPACE!" (along with some other expletives). We should adopt this kind of rigor and empathy when working with our _public_ HTTP APIs and always prioritize finding ways to avoid breaking our APIs.
 </DocCallOut>
 
 ## Internal vs Public APIs
@@ -252,9 +252,9 @@ If you are in doubt, rather go with stricter validation. Make a requirement more
 
 ### Headers
 
-**Should not be used to specify behaviour**
+**Should not be used to specify behavior**
 
-Outside of exceptional cases, you should always use the parameters, query parameters or body of the request to specify behaviour.
+Outside of exceptional cases, you should always use the parameters, query parameters or body of the request to specify behavior.
 
 ### Response codes
 
