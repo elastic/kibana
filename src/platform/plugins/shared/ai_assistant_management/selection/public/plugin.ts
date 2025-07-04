@@ -18,7 +18,7 @@ import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AIAssistantManagementSelectionPluginPublicSetup { }
+export interface AIAssistantManagementSelectionPluginPublicSetup {}
 
 export interface AIAssistantManagementSelectionPluginPublicStart {
   aiAssistantType$: Observable<AIAssistantType>;
@@ -31,16 +31,16 @@ export interface SetupDependencies {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDependencies { }
+export interface StartDependencies {}
 
 export class AIAssistantManagementPlugin
   implements
-  Plugin<
-    AIAssistantManagementSelectionPluginPublicSetup,
-    AIAssistantManagementSelectionPluginPublicStart,
-    SetupDependencies,
-    StartDependencies
-  >
+    Plugin<
+      AIAssistantManagementSelectionPluginPublicSetup,
+      AIAssistantManagementSelectionPluginPublicStart,
+      SetupDependencies,
+      StartDependencies
+    >
 {
   private readonly kibanaBranch: string;
   private readonly buildFlavor: BuildFlavor;
@@ -100,15 +100,13 @@ export class AIAssistantManagementPlugin
     return {};
   }
 
-  public start(coreStart: CoreStart,) {
+  public start(coreStart: CoreStart) {
     return {
       aiAssistantType$: this.getAiAssistantType$(coreStart),
     };
   }
 
-  private getAiAssistantType$(
-    coreStart: CoreStart,
-  ): Observable<AIAssistantType> {
+  private getAiAssistantType$(coreStart: CoreStart): Observable<AIAssistantType> {
     if (this.buildFlavor === 'serverless') {
       if (!this.config.serverlessUiSettingsKey) {
         return new BehaviorSubject(AIAssistantType.Never);

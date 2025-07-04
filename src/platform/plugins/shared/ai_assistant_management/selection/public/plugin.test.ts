@@ -8,15 +8,10 @@
  */
 
 import { CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { AIAssistantManagementPlugin, StartDependencies } from './plugin';
-import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
-import { Space } from '@kbn/spaces-plugin/public';
+import { AIAssistantManagementPlugin } from './plugin';
+import { firstValueFrom } from 'rxjs';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import {
-  OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-  SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-} from '../common/ui_setting_keys';
+import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 describe('AI Assistant Management Selection Plugin', () => {
   describe('serverless', () => {
@@ -62,8 +57,6 @@ describe('AI Assistant Management Selection Plugin', () => {
         },
       } as unknown as CoreStart;
 
-      
-
       const result = plugin.start(coreStart);
 
       const collected: any[] = [];
@@ -73,12 +66,8 @@ describe('AI Assistant Management Selection Plugin', () => {
       subscription.unsubscribe();
 
       const allCalls = (coreStart.uiSettings.get as jest.Mock).mock.calls;
-      expect(allCalls).toEqual([
-        ['aiAssistant:preferredAIAssistantType'],
-      ]);
-      expect(collected).toEqual([
-        AIAssistantType.Default,
-      ]);
+      expect(allCalls).toEqual([['aiAssistant:preferredAIAssistantType']]);
+      expect(collected).toEqual([AIAssistantType.Default]);
     });
   });
 });

@@ -10,7 +10,11 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import {
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+} from '../common/ui_setting_keys';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),

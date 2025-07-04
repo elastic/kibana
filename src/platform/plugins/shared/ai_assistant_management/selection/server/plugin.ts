@@ -16,8 +16,8 @@ import {
   Plugin,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { BuildFlavor } from '@kbn/config';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -26,8 +26,11 @@ import type {
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import { OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
-import { BuildFlavor } from '@kbn/config';
+import {
+  OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+} from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
 import { securitySolutionSetting } from './src/settings/security_setting';
