@@ -119,7 +119,7 @@ export class UiSettingsService
   public async start(): Promise<InternalUiSettingsServiceStart> {
     if (this.allowlist) {
       // If we are in development mode, check if all settings in the allowlist are registered
-      if (this.isDev && this.buildFlavor == 'serverless') {
+      if (this.isDev && this.buildFlavor === 'serverless') {
         this.validateAllowlist();
       }
       this.applyAllowlist(this.uiSettingsDefaults, false);
