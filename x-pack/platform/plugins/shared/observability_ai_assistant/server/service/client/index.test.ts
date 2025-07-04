@@ -296,6 +296,8 @@ describe('Observability AI Assistant client', () => {
             system:
               'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
             functionCalling: 'auto',
+            maxRetries: 0,
+            temperature: 0.25,
             toolChoice: expect.objectContaining({
               function: 'title_conversation',
             }),
@@ -333,6 +335,8 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
+            maxRetries: 0,
+            temperature: 0.25,
             toolChoice: undefined,
             tools: undefined,
             metadata: {
@@ -859,6 +863,8 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
+            maxRetries: 0,
+            temperature: 0.25,
             toolChoice: 'auto',
             tools: expect.any(Object),
             metadata: {
@@ -1018,6 +1024,8 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'auto',
+            maxRetries: 0,
+            temperature: 0.25,
             toolChoice: 'auto',
             tools: expect.any(Object),
             metadata: {
@@ -1285,7 +1293,7 @@ describe('Observability AI Assistant client', () => {
       }));
 
       stream = observableIntoStream(
-        await client.complete({
+        client.complete({
           connectorId: 'foo',
           messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
