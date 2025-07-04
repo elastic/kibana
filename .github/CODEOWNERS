@@ -1209,7 +1209,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/test/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/data_views @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/discover @elastic/kibana-data-discovery
-/x-pack/test/functional/apps/saved_query_management @elastic/kibana-data-discovery
+/x-pack/platform/test/functional/apps/saved_query_management @elastic/kibana-data-discovery
 /x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/discover @elastic/kibana-data-discovery
 /x-pack/test/search_sessions_integration @elastic/kibana-data-discovery
 /x-pack/test/stack_functional_integration/apps/ccs/ccs_discover.js @elastic/kibana-data-discovery
@@ -1967,7 +1967,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/api_integration/apis/stats @elastic/kibana-core # Assigned per: https://github.com/elastic/kibana/pull/20577
 /src/platform/test/api_integration/apis/saved_objects* @elastic/kibana-core
 /src/platform/test/api_integration/apis/core/*.ts @elastic/kibana-core
-/x-pack/test/functional/apps/saved_objects_management @elastic/kibana-core
+/x-pack/platform/test/functional/apps/saved_objects_management @elastic/kibana-core
 /x-pack/test/usage_collection @elastic/kibana-core
 /x-pack/test/licensing_plugin @elastic/kibana-core
 /x-pack/test/functional_execution_context @elastic/kibana-core
@@ -2222,13 +2222,13 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/functional/services/data_stream.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/watcher_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
-/x-pack/test/functional/page_objects/snapshot_restore_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/snapshot_restore_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/ingest_pipelines_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/grok_debugger_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
 /x-pack/test/functional/fixtures/ingest_pipeline_example_mapping.csv @elastic/kibana-management
-/x-pack/test/functional/apps/snapshot_restore @elastic/kibana-management
+/x-pack/platform/test/functional/apps/snapshot_restore @elastic/kibana-management
 /x-pack/platform/test/functional/apps/painless_lab @elastic/kibana-management
 /x-pack/test_serverless/functional/test_suites/common/spaces/spaces_management.ts @elastic/kibana-management
 /x-pack/test/stack_functional_integration/apps/management @elastic/kibana-management
