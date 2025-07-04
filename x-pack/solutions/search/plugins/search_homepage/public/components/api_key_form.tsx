@@ -61,14 +61,14 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = () => {
           <FormInfoField
             value={status === Status.showPreviewKey ? apiKey : API_KEY_MASK}
             copyValue={apiKey}
-            dataTestSubj="apiKeyFormAPIKey"
-            copyValueDataTestSubj="APIKeyButtonCopy"
+            dataTestSubj="searchHomepageApiKeyFormAPIKey"
+            copyValueDataTestSubj="searchHomepageAPIKeyButtonCopy"
             actions={[
               <EuiButtonIcon
                 iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}
                 color="text"
                 onClick={toggleApiKeyVisibility}
-                data-test-subj="showAPIKeyButton"
+                data-test-subj="searchHomepageShowAPIKeyButton"
                 aria-label={i18n.translate('xpack.searchHomepage.apiKeyForm.showApiKey', {
                   defaultMessage: 'Show API Key',
                 })}
