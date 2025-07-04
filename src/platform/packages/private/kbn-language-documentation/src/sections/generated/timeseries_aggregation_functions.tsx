@@ -17,7 +17,7 @@ export const functions = {
   description: i18n.translate(
     'languageDocumentation.documentationESQL.timeseriesAggregationFunctionsDocumentationESQLDescription',
     {
-      defaultMessage: `These functions can by used with STATS <AGGREGATION_FUNCTIONS>...BY when a TS command is used:`,
+      defaultMessage: `These functions can by used with STATS ...BY when a TS command is used:`,
     }
   ),
   // items are managed by scripts/generate_esql_docs.ts
