@@ -69,6 +69,7 @@ describe('CollapsedItemActions', () => {
           params: { message: 'test' },
         },
       ],
+      autoRecoverAlerts: true,
       params: { name: 'test rule type name' },
       createdBy: null,
       updatedBy: null,
@@ -233,6 +234,30 @@ describe('CollapsedItemActions', () => {
       expect(modal.exists()).toBeTruthy();
 
       modal.find('[data-test-subj="confirmModalConfirmButton"]').last().simulate('click');
+
+      await act(async () => {
+        await tick(10);
+        wrapper.update();
+      });
+      expect(bulkDisableRules).toHaveBeenCalledWith({
+        ids: ['1'],
+        untrack: false,
+      });
+    });
+
+    test('handles case when rule is unmuted and enabled and disable is clicked without showing untrack alerts modal', async () => {
+      const wrapper = mountWithIntl(
+        <CollapsedItemActions {...getPropsWithRule({ autoRecoverAlerts: false })} />
+      );
+      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      wrapper.find('button[data-test-subj="disableButton"]').simulate('click');
+
+      const modal = wrapper.find('[data-test-subj="untrackAlertsModal"]');
+      expect(modal.exists()).not.toBeTruthy();
 
       await act(async () => {
         await tick(10);

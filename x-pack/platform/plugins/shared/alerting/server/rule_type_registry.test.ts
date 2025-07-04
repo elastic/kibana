@@ -1073,6 +1073,7 @@ describe('Create Lifecycle', () => {
                 },
               },
             },
+            "autoRecoverAlerts": undefined,
             "category": "test",
             "defaultActionGroupId": "testActionGroup",
             "defaultScheduleInterval": undefined,

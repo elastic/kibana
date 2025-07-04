@@ -47,6 +47,7 @@ export interface ComponentOpts {
   isEditable: boolean;
   direction?: 'column' | 'row';
   hideSnoozeOption?: boolean;
+  autoRecoverAlerts?: boolean;
 }
 
 export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
@@ -59,6 +60,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   isEditable,
   hideSnoozeOption = false,
   direction = 'column',
+  autoRecoverAlerts = false,
 }: ComponentOpts) => {
   const {
     notifications: { toasts },
@@ -141,11 +143,13 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       }
       if (enable) {
         await onEnable();
-      } else {
+      } else if (autoRecoverAlerts) {
         onDisableModalOpen();
+      } else {
+        onDisable(false);
       }
     },
-    [rule.enabled, onEnable, onDisableModalOpen]
+    [rule.enabled, autoRecoverAlerts, onEnable, onDisableModalOpen, onDisable]
   );
 
   const onSnoozeRule = useCallback(

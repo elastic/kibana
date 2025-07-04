@@ -19,6 +19,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 
 const updateRulesToBulkEdit = jest.fn();
+const onDisable = jest.fn();
 
 describe('rule_quick_edit_buttons', () => {
   afterEach(() => {
@@ -127,5 +128,55 @@ describe('rule_quick_edit_buttons', () => {
 
     wrapper.find('[data-test-subj="bulkSnooze"]').first().simulate('click');
     expect(updateRulesToBulkEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls disable handler directly if none of the items tracks alerts lifecycle', async () => {
+    const mockRule: RuleTableItem = {
+      id: '1',
+      enabled: true,
+      enabledInLicense: true,
+      autoRecoverAlerts: false,
+    } as RuleTableItem;
+
+    const wrapper = mountWithIntl(
+      <RuleQuickEditButtons
+        isAllSelected={false}
+        getFilter={() => null}
+        selectedItems={[mockRule]}
+        onPerformingAction={() => {}}
+        onActionPerformed={() => {}}
+        onEnable={async () => {}}
+        onDisable={onDisable}
+        updateRulesToBulkEdit={() => {}}
+      />
+    );
+
+    wrapper.find('[data-test-subj="bulkDisable"]').first().simulate('click');
+    expect(onDisable).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call disable handler directly if some of the items track alerts lifecycle', async () => {
+    const mockRule: RuleTableItem = {
+      id: '1',
+      enabled: true,
+      enabledInLicense: true,
+      autoRecoverAlerts: true,
+    } as RuleTableItem;
+
+    const wrapper = mountWithIntl(
+      <RuleQuickEditButtons
+        isAllSelected={false}
+        getFilter={() => null}
+        selectedItems={[mockRule]}
+        onPerformingAction={() => {}}
+        onActionPerformed={() => {}}
+        onEnable={async () => {}}
+        onDisable={onDisable}
+        updateRulesToBulkEdit={() => {}}
+      />
+    );
+
+    wrapper.find('[data-test-subj="bulkDisable"]').first().simulate('click');
+    expect(onDisable).toHaveBeenCalledTimes(0);
   });
 });

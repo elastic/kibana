@@ -90,9 +90,14 @@ const ruleType: RuleType = {
   enabledInLicense: true,
   category: 'my-category',
   isExportable: true,
+  autoRecoverAlerts: true,
 };
 
 describe('rule_details', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('page', () => {
     it('renders the rule name as a title', () => {
       const rule = mockRule();
@@ -889,6 +894,41 @@ describe('rule_details', () => {
 
       expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
       expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id] });
+    });
+
+    it('should not show untrack alerts modal if rule type does not track alerts life cycle', async () => {
+      const rule = mockRule();
+      const requestRefresh = jest.fn();
+      const wrapper = mountWithIntl(
+        <RuleDetails
+          rule={rule}
+          ruleType={{ ...ruleType, autoRecoverAlerts: false }}
+          actionTypes={[]}
+          {...mockRuleApis}
+          requestRefresh={requestRefresh}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
+      actionsButton.simulate('click');
+
+      const disableButton = wrapper.find('[data-test-subj="disableButton"]').last();
+      expect(disableButton.exists()).toBeTruthy();
+
+      disableButton.simulate('click');
+
+      const modal = wrapper.find('[data-test-subj="untrackAlertsModal"]');
+      expect(modal.exists()).not.toBeTruthy();
+
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({
+        ids: [rule.id],
+        untrack: false,
+      });
     });
   });
 

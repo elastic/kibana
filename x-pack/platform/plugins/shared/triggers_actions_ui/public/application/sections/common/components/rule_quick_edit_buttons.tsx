@@ -64,6 +64,13 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     return !!selectedItems.find((alertItem) => !alertItem.enabledInLicense);
   }, [selectedItems, isAllSelected]);
 
+  const hasAutoRecoverAlertsRuleTypes = useMemo(() => {
+    if (isAllSelected) {
+      return false;
+    }
+    return !!selectedItems.find((alertItem) => alertItem.autoRecoverAlerts);
+  }, [selectedItems, isAllSelected]);
+
   async function deleteSelectedItems() {
     onPerformingAction();
     try {
@@ -233,8 +240,12 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   const onDisableClick = useCallback(() => {
-    setIsUntrackAlertsModalOpen(true);
-  }, []);
+    if (hasAutoRecoverAlertsRuleTypes) {
+      setIsUntrackAlertsModalOpen(true);
+    } else {
+      onDisable(false);
+    }
+  }, [hasAutoRecoverAlertsRuleTypes, onDisable]);
 
   const onModalClose = useCallback(() => {
     setIsUntrackAlertsModalOpen(false);
