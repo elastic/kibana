@@ -22,47 +22,52 @@ import type {
   IndicesStats,
 } from './indices_metadata_service.types';
 
-import { type ITelemetryReceiver, TelemetryReceiver } from './receiver';
-import { type ITelemetrySender, TelemetrySender } from './sender';
+import { type IMetadataReceiver, MetadataReceiver } from './receiver';
+import { type IMetadataSender, MetadataSender } from './sender';
 import {
-  TELEMETRY_DATA_STREAM_EVENT,
-  TELEMETRY_ILM_POLICY_EVENT,
-  TELEMETRY_ILM_STATS_EVENT,
-  TELEMETRY_INDEX_STATS_EVENT,
+  DATA_STREAM_EVENT,
+  ILM_POLICY_EVENT,
+  ILM_STATS_EVENT,
+  INDEX_STATS_EVENT,
 } from './ebt/events';
 
-const TASK_TYPE = 'MetricsDataAccess:IndicesMetadata';
-const TASK_ID = 'metrics-data-access:indices-metadata:1.0.0';
-const INTERVAL = '24h';
+const TASK_TYPE = 'IndicesMetadata:IndicesMetadataTask';
+const TASK_ID = 'indices-metadata:indices-metadata-task:1.0.0';
+const INTERVAL = '1m';
 
 export class IndicesMetadataService {
   private readonly logger: Logger;
-  private readonly receiver: ITelemetryReceiver;
-  private readonly sender: ITelemetrySender;
+  private receiver?: IMetadataReceiver;
+  private sender?: IMetadataSender;
 
   constructor(logger: Logger) {
-    this.logger = logger;
-    this.receiver = new TelemetryReceiver(this.logger.get('telemetry_events.receiver'));
-    this.sender = new TelemetrySender(this.logger.get('telemetry_events.sender'));
+    this.logger = logger.get(IndicesMetadataService.name);
+    this.receiver = new MetadataReceiver(logger);
+    this.sender = new MetadataSender(logger);
   }
 
   public setup(setup: IndicesMetadataServiceSetup) {
-    this.logger.info('Setting up indices metadata service');
+    this.logger.debug('Setting up indices metadata service');
     this.registerIndicesMetadataTask(setup.taskManager);
   }
 
   public async start(start: IndicesMetadataServiceStart) {
-    this.logger.info('Starting indices metadata service');
+    this.logger.debug('Starting indices metadata service');
 
-    await Promise.all([
-      this.scheduleIndicesMetadataTask(start.taskManager),
-      this.receiver.start(start.esClient),
-      this.sender.start(start.analytics),
-    ]);
+    this.receiver = start.receiver;
+    this.sender = start.sender;
+
+    await this.scheduleIndicesMetadataTask(start.taskManager)
+      .catch((error) => {
+        this.logger.error('Failed to schedule Indices Metadata Task', { error });
+      })
+      .finally(() => {
+        this.logger.debug('Indices Metadata Task scheduled');
+      });
   }
 
   private async publishIndicesMetadata() {
-    this.logger.info(`About to publish indices metadata`);
+    this.logger.debug('About to publish indices metadata');
 
     // 1. Get cluster stats and list of indices and datastreams
     const [indices, dataStreams] = await Promise.all([
@@ -82,8 +87,8 @@ export class IndicesMetadataService {
       .then((count) => {
         return count;
       })
-      .catch((err) => {
-        this.logger.warn(`Error getting indices stats`, { error: err.message } as LogMeta);
+      .catch((error) => {
+        this.logger.error('Error getting indices stats', { error });
         return 0;
       });
 
@@ -95,12 +100,12 @@ export class IndicesMetadataService {
         .then((names) => {
           return names;
         })
-        .catch((err) => {
-          this.logger.warn(`Error getting ILM stats`, { error: err.message } as LogMeta);
+        .catch((error) => {
+          this.logger.error('Error getting ILM stats', { error });
           return new Set<string>();
         });
     } else {
-      this.logger.warn(`ILM explain API is not available`);
+      this.logger.debug('ILM explain API is not available');
     }
 
     // 5. Publish ILM policies
@@ -108,12 +113,12 @@ export class IndicesMetadataService {
       .then((count) => {
         return count;
       })
-      .catch((err) => {
-        this.logger.warn(`Error getting ILM policies`, { error: err.message } as LogMeta);
+      .catch((error) => {
+        this.logger.warn('Error getting ILM policies', { error });
         return 0;
       });
 
-    this.logger.info(`Sent EBT events`, {
+    this.logger.debug('EBT events sent', {
       datastreams: dsCount,
       ilms: ilmNames.size,
       indices: indicesCount,
@@ -125,15 +130,15 @@ export class IndicesMetadataService {
     const events: DataStreams = {
       items: stats,
     };
-    this.sender.reportEBT(TELEMETRY_DATA_STREAM_EVENT, events);
-    this.logger.info(`Sent data streams`, { count: events.items.length } as LogMeta);
+    this.sender.reportEBT(DATA_STREAM_EVENT, events);
+    this.logger.debug('Data streams events sent', { count: events.items.length } as LogMeta);
     return events.items.length;
   }
 
   private registerIndicesMetadataTask(taskManager: TaskManagerSetupContract) {
     const service = this;
 
-    this.logger.info(`About to register task ${TASK_ID}`);
+    this.logger.debug('About to register task', { task: TASK_ID } as LogMeta);
 
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
@@ -151,18 +156,22 @@ export class IndicesMetadataService {
             },
 
             async cancel() {
-              service.logger?.warn(`Task ${TASK_ID} timed out`);
+              service.logger.warn('Task timed out', { task: TASK_ID } as LogMeta);
             },
           };
         },
       },
     });
+
+    this.logger.debug('Task registered', { task: TASK_ID, type: TASK_TYPE } as LogMeta);
   }
 
   private async scheduleIndicesMetadataTask(
     taskManager: TaskManagerStartContract
   ): Promise<TaskInstance | null> {
-    this.logger.info(`About to schedule task ${TASK_ID}`);
+    this.logger.debug('About to schedule task', { task: TASK_ID } as LogMeta);
+
+    taskManager.removeIfExists(TASK_ID).catch(() => {});
 
     try {
       const taskInstance = await taskManager.ensureScheduled({
@@ -176,15 +185,14 @@ export class IndicesMetadataService {
         scope: ['uptime'],
       });
 
-      this.logger?.info(
-        `Task ${TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}.`
-      );
+      this.logger.debug('Task scheduled', {
+        task: TASK_ID,
+        interval: taskInstance.schedule?.interval,
+      } as LogMeta);
 
       return taskInstance;
-    } catch (e) {
-      this.logger.error(e);
-      this.logger.error(`Error running synthetics syncs task: ${TASK_ID}, ${e?.message}`);
-
+    } catch (error) {
+      this.logger.error('ng synthetics syncs task', { task: TASK_ID, error });
       return null;
     }
   }
@@ -197,8 +205,8 @@ export class IndicesMetadataService {
     for await (const stat of this.receiver.getIndicesStats(indices)) {
       indicesStats.items.push(stat);
     }
-    this.sender.reportEBT(TELEMETRY_INDEX_STATS_EVENT, indicesStats);
-    this.logger.info(`Sent indices stats`, { count: indicesStats.items.length } as LogMeta);
+    this.sender.reportEBT(INDEX_STATS_EVENT, indicesStats);
+    this.logger.debug('Indices stats sent', { count: indicesStats.items.length } as LogMeta);
     return indicesStats.items.length;
   }
 
@@ -215,8 +223,8 @@ export class IndicesMetadataService {
       }
     }
 
-    this.sender.reportEBT(TELEMETRY_ILM_STATS_EVENT, ilmsStats);
-    this.logger.info(`Sent ILM stats`, { count: ilmNames.size } as LogMeta);
+    this.sender.reportEBT(ILM_STATS_EVENT, ilmsStats);
+    this.logger.debug('ILM stats sent', { count: ilmNames.size } as LogMeta);
 
     return ilmNames;
   }
@@ -229,8 +237,8 @@ export class IndicesMetadataService {
     for await (const policy of this.receiver.getIlmsPolicies(Array.from(ilmNames.values()))) {
       ilmPolicies.items.push(policy);
     }
-    this.sender.reportEBT(TELEMETRY_ILM_POLICY_EVENT, ilmPolicies);
-    this.logger.info('Sent ILM policies', { count: ilmPolicies.items.length } as LogMeta);
+    this.sender.reportEBT(ILM_POLICY_EVENT, ilmPolicies);
+    this.logger.debug('ILM policies sent', { count: ilmPolicies.items.length } as LogMeta);
     return ilmPolicies.items.length;
   }
 }

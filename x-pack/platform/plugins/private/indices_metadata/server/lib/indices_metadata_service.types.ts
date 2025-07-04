@@ -5,11 +5,12 @@
  * 2.0.
  */
 import type { DateTime } from '@elastic/elasticsearch/lib/api/types';
-import type { AnalyticsServiceStart, ElasticsearchClient } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { IMetadataReceiver } from './receiver';
+import { IMetadataSender } from './sender';
 
 export interface IndicesMetadataServiceSetup {
   taskManager: TaskManagerSetupContract;
@@ -17,8 +18,8 @@ export interface IndicesMetadataServiceSetup {
 
 export interface IndicesMetadataServiceStart {
   taskManager: TaskManagerStartContract;
-  esClient: ElasticsearchClient;
-  analytics: AnalyticsServiceStart;
+  sender: IMetadataSender;
+  receiver: IMetadataReceiver;
 }
 
 export interface IlmPolicies {

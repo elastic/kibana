@@ -22,10 +22,11 @@ import type {
   Index,
   IndexStats,
 } from './indices_metadata_service.types';
-import { Chunked } from './utils';
+import { chunkedBy } from './utils';
 
-export interface ITelemetryReceiver {
-  start(esClient: ElasticsearchClient): Promise<void>;
+export interface IMetadataReceiver {
+  setup(): void;
+  start(esClient: ElasticsearchClient): void;
 
   getIndices(): Promise<string[]>;
   getDataStreams(): Promise<DataStream[]>;
@@ -35,23 +36,25 @@ export interface ITelemetryReceiver {
   getIlmsPolicies(ilms: string[]): AsyncGenerator<IlmPolicy, void, unknown>;
 }
 
-export class TelemetryReceiver implements ITelemetryReceiver {
+export class MetadataReceiver implements IMetadataReceiver {
   private readonly logger: Logger;
   private _esClient?: ElasticsearchClient;
 
   constructor(logger: Logger) {
-    this.logger = logger;
+    this.logger = logger.get(MetadataReceiver.name);
   }
 
-  public async start(esClient: ElasticsearchClient) {
-    this.logger.info('Starting telemetry receiver');
+  public setup() {}
+
+  public start(esClient: ElasticsearchClient) {
+    this.logger.debug('Starting receiver');
     this._esClient = esClient;
   }
 
   public async getIndices(): Promise<string[]> {
     const es = this.esClient();
 
-    this.logger.info('Fetching indices');
+    this.logger.debug('Fetching indices');
 
     const request: IndicesGetRequest = {
       index: '*',
@@ -63,7 +66,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       .get(request)
       .then((indices) => Array.from(Object.keys(indices)))
       .catch((error) => {
-        this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
+        this.logger.error('Error fetching indices', { error_message: error } as LogMeta);
         throw error;
       });
   }
@@ -71,7 +74,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async getDataStreams(): Promise<DataStream[]> {
     const es = this.esClient();
 
-    this.logger.info('Fetching datstreams');
+    this.logger.debug('Fetching datstreams');
 
     const request: IndicesGetDataStreamRequest = {
       name: '*',
@@ -96,7 +99,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         })
       )
       .catch((error) => {
-        this.logger.warn('Error fetching datastreams', { error_message: error } as LogMeta);
+        this.logger.error('Error fetching datastreams', { error_message: error } as LogMeta);
         throw error;
       });
   }
@@ -104,11 +107,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async *getIndicesStats(indices: string[]) {
     const es = this.esClient();
 
-    this.logger.info('Fetching indices stats');
+    this.logger.debug('Fetching indices stats');
 
     const groupedIndices = this.chunkStringsByMaxLength(indices);
 
-    this.logger.info('Splitted indices into groups', {
+    this.logger.debug('Splitted indices into groups', {
       groups: groupedIndices.length,
       indices: indices.length,
     } as LogMeta);
@@ -141,7 +144,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           } as IndexStats;
         }
       } catch (error) {
-        this.logger.warn('Error fetching indices stats', { error_message: error } as LogMeta);
+        this.logger.error('Error fetching indices stats', { error_message: error } as LogMeta);
         throw error;
       }
     }
@@ -172,7 +175,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const groupedIndices = this.chunkStringsByMaxLength(indices);
 
-    this.logger.info('Splitted ilms into groups', {
+    this.logger.debug('Splitted ilms into groups', {
       groups: groupedIndices.length,
       indices: indices.length,
     } as LogMeta);
@@ -198,7 +201,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           yield entry;
         }
       } catch (error) {
-        this.logger.warn('Error fetching ilm stats', { error_message: error } as LogMeta);
+        this.logger.error('Error fetching ilm stats', { error_message: error } as LogMeta);
         throw error;
       }
     }
@@ -219,13 +222,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const groupedIlms = this.chunkStringsByMaxLength(ilms);
 
-    this.logger.info('Splitted ilms into groups', {
+    this.logger.debug('Splitted ilms into groups', {
       groups: groupedIlms.length,
       ilms: ilms.length,
     } as LogMeta);
 
     for (const group of groupedIlms) {
-      this.logger.info('Fetching ilm policies');
+      this.logger.debug('Fetching ilm policies');
       const request: IlmGetLifecycleRequest = {
         name: group.join(','),
         filter_path: [
@@ -254,7 +257,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           } as IlmPolicy;
         }
       } catch (error) {
-        this.logger.warn('Error fetching ilm policies', {
+        this.logger.error('Error fetching ilm policies', {
           error_message: error.message,
         } as LogMeta);
         throw error;
@@ -271,23 +274,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   private chunkStringsByMaxLength(strings: string[], maxLength: number = 3072): string[][] {
     // plus 1 for the comma separator
-    return this.chunkedBy(strings, maxLength, (index) => index.length + 1);
-  }
-
-  private chunkedBy<T>(list: T[], size: number, weight: (v: T) => number): T[][] {
-    function chunk(acc: Chunked<T>, value: T): Chunked<T> {
-      const currentWeight = weight(value);
-      if (acc.weight + currentWeight <= size) {
-        acc.current.push(value);
-        acc.weight += currentWeight;
-      } else {
-        acc.chunks.push(acc.current);
-        acc.current = [value];
-        acc.weight = currentWeight;
-      }
-      return acc;
-    }
-
-    return list.reduce(chunk, new Chunked<T>()).flush();
+    return chunkedBy(strings, maxLength, (index) => index.length + 1);
   }
 }

@@ -21,3 +21,20 @@ export class Chunked<T> {
     return this.chunks.filter((chunk) => chunk.length > 0);
   }
 }
+
+export function chunkedBy<T>(list: T[], size: number, weight: (v: T) => number): T[][] {
+  function chunk(acc: Chunked<T>, value: T): Chunked<T> {
+    const currentWeight = weight(value);
+    if (acc.weight + currentWeight <= size) {
+      acc.current.push(value);
+      acc.weight += currentWeight;
+    } else {
+      acc.chunks.push(acc.current);
+      acc.current = [value];
+      acc.weight = currentWeight;
+    }
+    return acc;
+  }
+
+  return list.reduce(chunk, new Chunked<T>()).flush();
+}

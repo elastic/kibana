@@ -35,7 +35,6 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
-    "@kbn/router-utils",
-    "@kbn/task-manager-plugin"
+    "@kbn/router-utils"
   ]
 }

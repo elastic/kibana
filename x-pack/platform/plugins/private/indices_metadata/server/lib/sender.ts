@@ -9,24 +9,28 @@ import type {
   AnalyticsServiceSetup,
   AnalyticsServiceStart,
   EventTypeOpts,
+  LogMeta,
   Logger,
 } from '@kbn/core/server';
 
-export interface ITelemetrySender {
-  start(analytics: AnalyticsServiceStart): Promise<void>;
+export interface IMetadataSender {
+  setup(): void;
+  start(analytics: AnalyticsServiceStart): void;
   reportEBT: <T>(eventTypeOpts: EventTypeOpts<T>, eventData: T) => void;
 }
 
-export class TelemetrySender implements ITelemetrySender {
+export class MetadataSender implements IMetadataSender {
   private readonly logger: Logger;
   private analytics?: AnalyticsServiceSetup;
 
   constructor(logger: Logger) {
-    this.logger = logger;
+    this.logger = logger.get(MetadataSender.name);
   }
 
-  public async start(analytics: AnalyticsServiceSetup) {
-    this.logger.info('Starting telemetry sender');
+  public setup() {}
+
+  public start(analytics: AnalyticsServiceSetup) {
+    this.logger.debug('Starting sender');
     this.analytics = analytics;
   }
 
@@ -34,7 +38,8 @@ export class TelemetrySender implements ITelemetrySender {
     if (!this.analytics) {
       throw Error('analytics is unavailable');
     }
-    this.logger.info(`Reporting event: ${eventTypeOpts.eventType}`);
+
+    this.logger.debug('Reporting event', { eventType: eventTypeOpts.eventType } as LogMeta);
     this.analytics.reportEvent(eventTypeOpts.eventType, eventData as object);
   }
 }
