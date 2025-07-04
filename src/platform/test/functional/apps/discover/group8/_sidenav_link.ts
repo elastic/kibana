@@ -88,7 +88,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await appsMenu.openCollapsibleNav();
       await header.clickDashboard();
-      await discover.leaveWithoutSaving();
       await header.waitUntilLoadingHasFinished();
 
       await appsMenu.openCollapsibleNav();
