@@ -24,7 +24,6 @@ import {
   EuiHorizontalRule,
   EuiIconTip,
   EuiLink,
-  EuiLoadingSpinner,
   EuiPopover,
   EuiText,
   EuiToolTip,
