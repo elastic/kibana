@@ -111,6 +111,10 @@ Again, see the principle regarding [commitment](#commitment) before making APIs 
 
 The following are a quick reference for how to structure your HTTP APIs.
 
+### RESTful-like APIs
+
+Kibana HTTP APIs do not need to implement the full RESTful specification. We aim for a more pragmatic but still user-friendly approach.
+
 ### Path
 
 **Use snake case**
@@ -118,6 +122,14 @@ The following are a quick reference for how to structure your HTTP APIs.
 `/api/my_api` ✅
 
 `/api/my-api`, `/api/myApi` ❌
+
+**Do contain version numbers**
+
+`/api/my_api` ✅
+
+`/api/v1/my_api` ❌
+
+See the section on [versioning](#versioning) for more details.
 
 **For public APIs, prefix with `/api`**
 
@@ -153,7 +165,7 @@ Delete can return a simple response instead of the full resource:
 
 ```
 DELETE /api/resources/{id}
-# -> 200 { "ok": true }
+# -> 204 No content
 ```
 
 **Stick to simple methods**
@@ -250,13 +262,13 @@ Outside of exceptional cases, you should always use the parameters, query parame
 
 See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status).
 
-### Pagination
+### Pagination and sorting
 
-**Request**
+**Page-based request**
 
 `GET /api/resources?page=1&size=10`
 
-**Response**
+**Page-based response**
 
 ```json
 {
@@ -267,14 +279,66 @@ See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/S
 }
 ```
 
-### Errors
+**Cursor based request**
+
+`GET /api/resources?pit_id=abc&search_after="valueA.valueB"&size=10`
+
+Where `valueA` and `valueB` are joined sort values identifying the last hit. See [ES docs](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after). Note: you may not need to support cursor based pagination if your resource will not be in excess of 1000 instances.
+
+**Cursor based response**
+
+```json
+{
+  "items": [...],
+  "total": 100,
+  "pit": "abc",
+  "search_after": "valueA1.valueB1",
+  "size": 10
+}
+```
+
+**Pagination requires sorting**
+
+Carefully decide a default for sorting resources returned by any API that support pagination. It is possible to accept a custom
+set of additional values for sorting, but this may not be needed. Adding this later is a non breaking change!
+
+Specify sorting in the query parameters like:
 
 ```
-4xx or 5xx status code
+GET /api/my_resources?sort=field_name,-other_name
+```
+
+Where `field_name` is the name of the field to sort by in ascending order and `-other_name` is the name of the field to sort by in descending order.
+
+### Filtering
+
+`GET /api/my_resources?filter=field_name:value`
+
+Use [simple KQL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/kql) to cover most of your filtering needs.
+
+<DocCallOut title="Beware of leaky filters!" color="warning">
+  Do not let API consumers directly query based on the schema of your database (saved) objects. This is leaking implementation detail that will make your API unversionable!
+
+  `coolField: "value" AND otherField: "value"` : ✅
+
+  `internalFieldName: "value" AND otherField: "value"` : ❌
+
+  Take care in [documenting](#documentation) the filtering options available in a KQL filter. In your server-side code you must always be prepared to translate field names provided in a KQL filter to match the database column names you want API users to filter on. If API users try to filter on a field that does not exist, you should return a `400` error.
+</DocCallOut>
+
+
+### Errors
+
+4xx or 5xx status code with a body:
+
+```json
 {
-  code?: "A machine-friendly code for interpreting this error",
   ok: false,
-  message: "A human-friendly explanation about what went wrong and how to fix it"
+  error: "A short summary of what went wrong",
+  message: "A human-friendly explanation about what went wrong and how to fix it",
+  attributes: {
+    /* Optional additional attributes */
+  },
 }
 ```
 
@@ -292,7 +356,9 @@ Alternatively, use 2 numbers in milliseconds or [ISO 8601](https://en.wikipedia.
 
 **Public HTTP APIs must have reference documentation**
 
-See our current reference documentation (here)[https://www.elastic.co/docs/api/doc/kibana/]. This is compiled from our OpenAPI spec. See <DocLink id="kibDevTutorialGeneratingOASForHTTPAPIs" text="this tutorial" /> about the code-first approach to generating OpenAPI spec available in Kibana.
+See our current reference documentation [here](https://www.elastic.co/docs/api/doc/kibana/). This is compiled from our OpenAPI spec.
+
+See <DocLink id="kibDevTutorialGeneratingOASForHTTPAPIs" text="this tutorial" /> about the code-first approach to generating OpenAPI spec available in Kibana.
 
 ## Versioning
 
