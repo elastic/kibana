@@ -139,10 +139,6 @@ export async function updateDataStreamsLifecycle({
 }) {
   try {
     if (isIlmLifecycle(lifecycle)) {
-      await retryTransientEsErrors(() => esClient.indices.deleteDataLifecycle({ name: names }), {
-        logger,
-      });
-
       await putDataStreamsSettings({
         esClient,
         names,
