@@ -9,18 +9,19 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiButton } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
 import { AgentsList } from './agents_list';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
 
 export const OnechatAgents = () => {
-  const history = useHistory();
+  const { createOnechatUrl } = useNavigation();
   const headerButtons = [
     <EuiButton
       iconType={'plusInCircle'}
       color="primary"
       fill
       iconSide="left"
-      onClick={() => history.push('/agents/new')}
+      href={createOnechatUrl(appPaths.agents.new)}
     >
       {i18n.translate('xpack.onechat.agents.newAgentButton', {
         defaultMessage: 'New Agent',

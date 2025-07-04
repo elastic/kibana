@@ -51,7 +51,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode }) => {
     });
   };
 
-  const { state, isLoading, isSubmitting, submit, tools, toolsLoading, toolsError } = useAgentEdit({
+  const { state, isLoading, isSubmitting, submit, toolsError } = useAgentEdit({
     agentId: mode === 'edit' ? agentId : undefined,
     onSaveSuccess,
     onSaveError,
