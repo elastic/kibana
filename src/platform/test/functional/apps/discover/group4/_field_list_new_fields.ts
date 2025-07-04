@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
         return (
           (await discover.getHitCountInt()) === 2 &&
-          (await unifiedFieldList.getSidebarSectionFieldCount('available')) === 3
+          (await unifiedFieldList.getSidebarSectionFieldNames('available')).length === 3
         );
       });
 
