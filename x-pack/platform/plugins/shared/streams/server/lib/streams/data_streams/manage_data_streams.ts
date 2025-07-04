@@ -161,9 +161,9 @@ export async function updateDataStreamsLifecycle({
       }
     } else if (isInheritLifecycle(lifecycle)) {
       // classic streams only - inheriting a lifecycle means falling back to
-      // the template configuration. if we find a DSL we need to explicitly
-      // set it explicitly since there is no way to fall back to the template
-      // value, for ILM or disabled we only have to unset any overrides
+      // the template configuration. if we find a DSL we need to set it
+      // explicitly since there is no way to fall back to the template value,
+      // for ILM or disabled we only have to unset any overrides
       await Promise.all(
         names.map(async (name) => {
           const templateLifecycle = await getTemplateLifecycle({ esClient, name, logger });
