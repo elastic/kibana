@@ -204,12 +204,19 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByLabelText('Loading')).toBeInTheDocument();
   });
 
-  describe('when there are no unsaved changes', () => {
+  describe.each([
+    { hasChanged: false, id: undefined },
+    { hasChanged: true, id: undefined },
+    { hasChanged: false, id: '1234' },
+  ])('when there are no unsaved changes', ({ hasChanged, id }) => {
     it('should call the default action', () => {
       // Given
       const tabMock = getTabRuntimeStateMock({
         stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>({
-          savedSearchState: { getHasChanged$: () => new BehaviorSubject(false) },
+          savedSearchState: {
+            getHasChanged$: () => new BehaviorSubject(hasChanged),
+            getId: () => id,
+          },
           dataState: {
             cancel: jest.fn(),
           },
@@ -248,7 +255,10 @@ describe('DiscoverMainRoute', () => {
       // Given
       const tabMock = getTabRuntimeStateMock({
         stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>({
-          savedSearchState: { getHasChanged$: () => new BehaviorSubject(true) },
+          savedSearchState: {
+            getHasChanged$: () => new BehaviorSubject(true),
+            getId: () => '1234',
+          },
           dataState: {
             cancel: jest.fn(),
           },
