@@ -8,10 +8,10 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
+  const functionalConfig = await readConfigFile(require.resolve('../../config.base.ts'));
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
+    testFiles: [require.resolve('./feature_controls/v2')],
   };
 }
