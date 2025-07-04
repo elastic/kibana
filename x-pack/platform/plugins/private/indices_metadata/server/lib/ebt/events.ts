@@ -23,13 +23,13 @@ export const DATA_STREAM_EVENT: EventTypeOpts<DataStreams> = {
         properties: {
           datastream_name: {
             type: 'keyword',
-            _meta: { description: 'Name of the data stream', optional: true },
+            _meta: { description: 'Name of the data stream' },
           },
           indices: {
             type: 'array',
             items: {
               properties: {
-                index_name: { type: 'date', _meta: { description: 'Index name', optional: true } },
+                index_name: { type: 'date', _meta: { description: 'Index name' } },
                 ilm_policy: { type: 'date', _meta: { optional: true, description: 'ILM policy' } },
               },
             },
@@ -37,7 +37,7 @@ export const DATA_STREAM_EVENT: EventTypeOpts<DataStreams> = {
           },
         },
       },
-      _meta: { description: 'Datastreams', optional: true },
+      _meta: { description: 'Datastreams' },
     },
   },
 };
@@ -51,7 +51,7 @@ export const INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
         properties: {
           index_name: {
             type: 'keyword',
-            _meta: { description: 'The name of the index being monitored.', optional: true },
+            _meta: { description: 'The name of the index being monitored.' },
           },
           query_total: {
             type: 'long',
@@ -93,7 +93,7 @@ export const INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
           },
         },
       },
-      _meta: { description: 'Datastreams', optional: true },
+      _meta: { description: 'Datastreams' },
     },
   },
 };
@@ -107,10 +107,7 @@ export const ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
         properties: {
           index_name: {
             type: 'keyword',
-            _meta: {
-              description: 'The name of the index currently managed by the ILM  policy.',
-              optional: true,
-            },
+            _meta: { description: 'The name of the index currently managed by the ILM  policy.' },
           },
           phase: {
             type: 'keyword',
@@ -137,7 +134,7 @@ export const ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
           },
         },
       },
-      _meta: { description: 'Datastreams', optional: true },
+      _meta: { description: 'Datastreams' },
     },
   },
 };
@@ -151,14 +148,11 @@ export const ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
         properties: {
           policy_name: {
             type: 'keyword',
-            _meta: { description: 'The name of the ILM policy.', optional: true },
+            _meta: { description: 'The name of the ILM policy.' },
           },
           modified_date: {
             type: 'date',
-            _meta: {
-              description: 'The date when the ILM policy was last modified.',
-              optional: true,
-            },
+            _meta: { description: 'The date when the ILM policy was last modified.' },
           },
           phases: {
             properties: {
@@ -169,7 +163,6 @@ export const ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
                     _meta: {
                       description:
                         'The minimum age before the index transitions to the "cold" phase.',
-                      optional: true,
                     },
                   },
                 },
@@ -186,7 +179,6 @@ export const ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
                     _meta: {
                       description:
                         'The minimum age before the index transitions to the "delete" phase.',
-                      optional: true,
                     },
                   },
                 },
@@ -203,7 +195,6 @@ export const ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
                     _meta: {
                       description:
                         'The minimum age before the index transitions to the "frozen" phase.',
-                      optional: true,
                     },
                   },
                 },
@@ -220,7 +211,6 @@ export const ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
                     _meta: {
                       description:
                         'The minimum age before the index transitions to the "hot" phase.',
-                      optional: true,
                     },
                   },
                 },
@@ -237,7 +227,6 @@ export const ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
                     _meta: {
                       description:
                         'The minimum age before the index transitions to the "warm" phase.',
-                      optional: true,
                     },
                   },
                 },
@@ -251,12 +240,11 @@ export const ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
             _meta: {
               description:
                 'The different phases of the ILM policy that define how the index is managed over time.',
-              optional: true,
             },
           },
         },
       },
-      _meta: { description: 'Datastreams', optional: true },
+      _meta: { description: 'Datastreams' },
     },
   },
 };
