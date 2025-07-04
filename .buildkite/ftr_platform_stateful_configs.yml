@@ -164,7 +164,7 @@ enabled:
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_common.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
-  - x-pack/test/disable_ems/config.ts
+  - x-pack/platform/test/disable_ems/config.ts
   - x-pack/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.agent.ts
   - x-pack/test/fleet_api_integration/config.agent_policy.ts
