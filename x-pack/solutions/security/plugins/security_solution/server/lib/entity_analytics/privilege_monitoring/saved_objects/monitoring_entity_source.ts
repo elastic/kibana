@@ -30,7 +30,7 @@ export class MonitoringEntitySourceDescriptorClient {
 
   async create(attributes: CreateMonitoringEntitySource) {
     const savedObjectId = this.getDynamicSavedObjectId(attributes);
-    await this.assertNameUniqueness(attributes);
+    await this.assertNameUniqueness({ ...attributes, id: savedObjectId });
 
     try {
       // If exists, update it.

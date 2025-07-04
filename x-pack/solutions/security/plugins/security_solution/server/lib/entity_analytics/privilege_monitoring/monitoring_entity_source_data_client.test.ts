@@ -33,6 +33,7 @@ describe('MonitoringEntitySourceDataClient', () => {
     type: 'test-type',
     name: 'Test Source',
     indexPattern: 'test-index-pattern',
+    managed: false,
     matchers: [
       {
         fields: ['user.role'],
@@ -69,16 +70,82 @@ describe('MonitoringEntitySourceDataClient', () => {
       });
 
       const result = await dataClient.init(testDescriptor);
+      const id = `entity-analytics-monitoring-entity-source-${namespace}-${testDescriptor.type}-${testDescriptor.indexPattern}`;
 
       expect(defaultOpts.soClient.create).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
         testDescriptor,
         {
-          id: `entity-analytics-monitoring-entity-source-${namespace}-${testDescriptor.type}-${testDescriptor.indexPattern}`,
+          id,
         }
       );
 
-      expect(result).toEqual(testDescriptor);
+      expect(result).toEqual({ ...testDescriptor, managed: false, id });
+    });
+
+    it('should update Monitoring Entity Source Sync Config Successfully when calling init when the SO already exists', async () => {
+      const existingDescriptor = {
+        total: 1,
+        saved_objects: [
+          {
+            attributes: testDescriptor,
+            id: 'entity-analytics-monitoring-entity-source-test-namespace-test-type-test-index-pattern',
+          },
+        ],
+      } as unknown as SavedObjectsFindResponse<unknown, unknown>;
+
+      const testSourceObject = {
+        filter: {},
+        indexPattern: 'test-index-pattern',
+        matchers: [
+          {
+            fields: ['user.role'],
+            values: ['admin'],
+          },
+        ],
+        name: 'Test Source',
+        type: 'test-type',
+        managed: false,
+      };
+
+      defaultOpts.soClient.find.mockResolvedValue(
+        existingDescriptor as unknown as SavedObjectsFindResponse<unknown, unknown>
+      );
+
+      defaultOpts.soClient.update.mockResolvedValue({
+        id: 'entity-analytics-monitoring-entity-source-test-namespace-test-type-test-index-pattern', // TODO: https://github.com/elastic/security-team/issues/12851
+        type: monitoringEntitySourceTypeName,
+        attributes: { ...testDescriptor, name: 'Updated Source' },
+        references: [],
+      });
+
+      const updatedDescriptor = { ...testDescriptor, name: 'Updated Source' };
+      const result = await dataClient.init(testDescriptor);
+
+      expect(defaultOpts.soClient.update).toHaveBeenCalledWith(
+        monitoringEntitySourceTypeName,
+        `entity-analytics-monitoring-entity-source-${namespace}-${testDescriptor.type}-${testDescriptor.indexPattern}`,
+        testSourceObject,
+        { refresh: 'wait_for' }
+      );
+
+      expect(result).toEqual(updatedDescriptor);
+    });
+
+    it('should not create Monitoring Entity Source Sync Config when a SO already exist with the same name', async () => {
+      const existingSavedObject = {
+        id: 'unique-id',
+        attributes: testDescriptor,
+      } as unknown as SavedObject<unknown>;
+
+      defaultOpts.soClient.find.mockResolvedValue({
+        total: 1,
+        saved_objects: [existingSavedObject],
+      } as unknown as SavedObjectsFindResponse<unknown, unknown>);
+
+      await expect(dataClient.init(testDescriptor)).rejects.toThrow(
+        `A monitoring entity source with the name "${testDescriptor.name}" already exists.`
+      );
     });
   });
 
@@ -101,46 +168,35 @@ describe('MonitoringEntitySourceDataClient', () => {
 
   describe('update', () => {
     it('should update Monitoring Entity Source Sync Config Successfully', async () => {
-      const existingDescriptor = {
-        total: 1,
-        saved_objects: [{ attributes: testDescriptor }],
-      } as unknown as SavedObjectsFindResponse<unknown, unknown>;
-
-      const testSourceObject = {
-        filter: {},
-        indexPattern: 'test-index-pattern',
-        matchers: [
-          {
-            fields: ['user.role'],
-            values: ['admin'],
-          },
-        ],
-        name: 'Test Source',
-        type: 'test-type',
+      const id = 'temp-id'; // TODO: https://github.com/elastic/security-team/issues/12851
+      const updateDescriptor = {
+        ...testDescriptor,
+        managed: false,
+        name: 'Updated Source',
+        id, // it preserves the id when updating
       };
 
-      defaultOpts.soClient.find.mockResolvedValue(
-        existingDescriptor as unknown as SavedObjectsFindResponse<unknown, unknown>
-      );
+      defaultOpts.soClient.find.mockResolvedValue({
+        total: 0,
+        saved_objects: [],
+      } as unknown as SavedObjectsFindResponse<unknown, unknown>);
 
       defaultOpts.soClient.update.mockResolvedValue({
-        id: `temp-id`, // TODO: https://github.com/elastic/security-team/issues/12851
+        id,
         type: monitoringEntitySourceTypeName,
-        attributes: { ...testDescriptor, name: 'Updated Source' },
+        attributes: updateDescriptor,
         references: [],
       });
 
-      const updatedDescriptor = { ...testDescriptor, name: 'Updated Source' };
-      const result = await dataClient.init(testDescriptor);
-
+      const result = await dataClient.update(updateDescriptor);
       expect(defaultOpts.soClient.update).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        `entity-analytics-monitoring-entity-source-${namespace}-${testDescriptor.type}-${testDescriptor.indexPattern}`,
-        testSourceObject,
+        id,
+        updateDescriptor,
+
         { refresh: 'wait_for' }
       );
-
-      expect(result).toEqual(updatedDescriptor);
+      expect(result).toEqual(updateDescriptor);
     });
   });
 
