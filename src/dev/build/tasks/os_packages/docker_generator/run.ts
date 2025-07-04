@@ -61,7 +61,7 @@ export async function runDockerGenerator(
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
   // That would produce oss, default and default-ubi7
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
-  const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
+  const imageArchitecture = flags.architecture === 'aarch64' ? '-arm64' : '-amd64';
   const dockerTargetFilename = config.resolveFromTarget(
     `kibana${imageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
