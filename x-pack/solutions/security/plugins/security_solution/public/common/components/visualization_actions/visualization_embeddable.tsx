@@ -45,7 +45,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   const { dataView } = useDataView(lensProps.scopeId);
 
   const indicesExist = newDataViewPickerEnabled
-    ? Boolean(dataView?.matchedIndices?.length)
+    ? Boolean(dataView.matchedIndices.length)
     : oldIndicesExist;
 
   const memorizedTimerange = useRef(lensProps.timerange);

@@ -17,7 +17,7 @@ export const useBrowserFields = (
   const { dataViewSpec } = useDataViewSpec(scope);
 
   return useMemo(() => {
-    if (!dataViewSpec) {
+    if (!dataViewSpec.id) {
       return {};
     }
 
@@ -27,5 +27,5 @@ export const useBrowserFields = (
     );
 
     return browserFields;
-  }, [dataViewSpec]);
+  }, [dataViewSpec.id, dataViewSpec?.title, dataViewSpec.fields]);
 };

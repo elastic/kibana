@@ -82,7 +82,10 @@ export const useSyncSourcererUrlState = (
  */
 export const useRestoreDataViewManagerStateFromURL = (
   initDataViewPickerWithSelection: (initialSelection: SelectDataViewAsyncPayload[]) => void,
-  scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
+  scopeId:
+    | SourcererScopeName.default
+    | SourcererScopeName.explore
+    | SourcererScopeName.detections = SourcererScopeName.default
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
