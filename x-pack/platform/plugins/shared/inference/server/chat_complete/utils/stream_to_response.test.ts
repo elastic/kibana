@@ -6,7 +6,11 @@
  */
 
 import { of } from 'rxjs';
-import { ChatCompletionEvent } from '@kbn/inference-common';
+import {
+  ChatCompletionEvent,
+  ChatCompletionMessageEvent,
+  MessageRole,
+} from '@kbn/inference-common';
 import { chunkEvent, tokensEvent, messageEvent } from '../../test_utils/chat_complete_events';
 import { streamToResponse } from './stream_to_response';
 
@@ -73,12 +77,12 @@ describe('streamToResponse', () => {
 
   it('includes deanonymization data in the response if present', async () => {
     // Create a message event with deanonymization data
-    const messageWithDeanonymization = {
+    const messageWithDeanonymization: ChatCompletionMessageEvent = {
       ...messageEvent('Your email is jorge@gmail.com'),
       deanonymized_input: [
         {
           message: {
-            role: 'user',
+            role: MessageRole.User,
             content: 'My email is jorge@gmail.com. What is my email?',
           },
           deanonymizations: [
@@ -98,7 +102,7 @@ describe('streamToResponse', () => {
         message: {
           content: 'Your email is jorge@gmail.com',
           toolCalls: [],
-          role: 'assistant',
+          role: MessageRole.Assistant,
         },
         deanonymizations: [
           {
