@@ -60,6 +60,7 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbn-application--content-height: calc(
       100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))
     );
+    --kbn-application--top-bar-height: 0px;
   }
 
   // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`
