@@ -12,6 +12,13 @@ import type {
   AgentProfileUpdateRequest,
   AgentProfileListOptions,
 } from '../../../../common/agent_profiles';
+import type {
+  CreateAgentResponse,
+  GetAgentResponse,
+  ListAgentsResponse,
+  UpdateAgentResponse,
+  DeleteAgentResponse,
+} from '../../../../common/http_api/agents';
 
 export class AgentProfilesService {
   private readonly http: HttpSetup;
@@ -23,8 +30,10 @@ export class AgentProfilesService {
   /**
    * List all agent profiles
    */
-  async list(options?: AgentProfileListOptions): Promise<AgentProfile[]> {
-    const res = await this.http.get<{ agentProfiles: AgentProfile[] }>('/api/chat/agents/profiles');
+  async list(options?: AgentProfileListOptions): Promise<ListAgentsResponse> {
+    const res = await this.http.get<{ agentProfiles: ListAgentsResponse }>(
+      '/api/chat/agents/profiles'
+    );
     return res.agentProfiles;
   }
 
@@ -32,14 +41,14 @@ export class AgentProfilesService {
    * Get a single agent profile by id
    */
   async get(id: string): Promise<AgentProfile> {
-    return await this.http.get<AgentProfile>(`/api/chat/agents/profiles/${id}`);
+    return await this.http.get<GetAgentResponse>(`/api/chat/agents/profiles/${id}`);
   }
 
   /**
    * Create a new agent profile
    */
   async create(profile: AgentProfileCreateRequest): Promise<AgentProfile> {
-    return await this.http.post<AgentProfile>(`/api/chat/agents/profiles`, {
+    return await this.http.post<CreateAgentResponse>(`/api/chat/agents/profiles`, {
       body: JSON.stringify(profile),
     });
   }
@@ -48,7 +57,7 @@ export class AgentProfilesService {
    * Update an existing agent profile
    */
   async update(id: string, update: AgentProfileUpdateRequest): Promise<AgentProfile> {
-    return await this.http.put<AgentProfile>(`/api/chat/agents/profiles/${id}`, {
+    return await this.http.put<UpdateAgentResponse>(`/api/chat/agents/profiles/${id}`, {
       body: JSON.stringify(update),
     });
   }
@@ -56,7 +65,7 @@ export class AgentProfilesService {
   /**
    * Delete an agent profile by id
    */
-  async delete(id: string): Promise<{ success: boolean }> {
-    return await this.http.delete<{ success: boolean }>(`/api/chat/agents/profiles/${id}`);
+  async delete(id: string): Promise<DeleteAgentResponse> {
+    return await this.http.delete<DeleteAgentResponse>(`/api/chat/agents/profiles/${id}`);
   }
 }

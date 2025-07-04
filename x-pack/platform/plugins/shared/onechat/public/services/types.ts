@@ -6,7 +6,7 @@
  */
 
 import type { AgentService } from './agents';
-import { AgentProfilesService } from './agents/profiles';
+import type { AgentProfilesService } from './agents/profiles';
 import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { ToolsService } from './tools';
