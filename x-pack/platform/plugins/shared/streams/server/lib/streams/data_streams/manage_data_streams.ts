@@ -237,7 +237,7 @@ export function getTemplateLifecycle(
     lifecycle?: { enabled: boolean; data_retention?: string };
   }
 ): IngestStreamLifecycleILM | IngestStreamLifecycleDSL | IngestStreamLifecycleDisabled {
-  const getBoolean = (value: boolean | string | undefined): boolean => {
+  const toBoolean = (value: boolean | string | undefined): boolean => {
     if (typeof value === 'boolean') {
       return value;
     }
@@ -248,9 +248,9 @@ export function getTemplateLifecycle(
   };
 
   const hasEffectiveDsl =
-    getBoolean(template.lifecycle?.enabled) &&
+    toBoolean(template.lifecycle?.enabled) &&
     !(
-      getBoolean(template.settings.index?.lifecycle?.prefer_ilm) &&
+      toBoolean(template.settings.index?.lifecycle?.prefer_ilm) &&
       template.settings.index?.lifecycle?.name
     );
   if (hasEffectiveDsl) {
