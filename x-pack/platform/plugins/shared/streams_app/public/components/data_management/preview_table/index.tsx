@@ -11,10 +11,12 @@ import {
   EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
+import { css } from '@emotion/css';
 import { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
 
 export function PreviewTable({
@@ -46,6 +48,7 @@ export function PreviewTable({
   selectedRowIndex?: number;
   onRowSelected?: (selectedRowIndex: number) => void;
 }) {
+  const { euiTheme: theme } = useEuiTheme();
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
@@ -173,6 +176,17 @@ export function PreviewTable({
         setVisibleColumns: setVisibleColumns || (() => {}),
         canDragAndDropColumns: false,
       }}
+      gridStyle={
+        selectedRowIndex !== undefined
+          ? {
+              rowClasses: {
+                [String(selectedRowIndex)]: css`
+                  background-color: ${theme.colors.backgroundBasePrimary};
+                `,
+              },
+            }
+          : undefined
+      }
       sorting={sortingConfig}
       inMemory={sortingConfig ? { level: 'sorting' } : undefined}
       height={height}
