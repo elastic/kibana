@@ -7,3 +7,4 @@
 
 export { createInternalRegistry } from './create_registry';
 export { combineAgentProviders } from './combine_providers';
+export { agentToDescriptor } from './to_descriptor';
