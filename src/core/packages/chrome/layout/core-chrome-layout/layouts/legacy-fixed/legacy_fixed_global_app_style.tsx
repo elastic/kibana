@@ -22,6 +22,8 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbnHeaderOffsetWithBanner: calc(var(--kbnHeaderBannerHeight) + var(--kbnHeaderOffset));
     // height of the action menu in the header in serverless projects
     --kbnProjectHeaderAppActionMenuHeight: ${euiTheme.base * 3}px;
+    // kbnAppHeadersOffset is the total height of all fixed headers + sticky action menu toolbar when present
+    --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0px);
   }
 
   #kibana-body {
@@ -54,12 +56,14 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 
   .kbnBody {
-    padding-top: var(--euiFixedHeadersOffset, 0);
+    padding-top: var(--euiFixedHeadersOffset, 0px);
 
     // forward compatibility with new grid layout variables,
-    --kbn-application--content-height: calc(
-      100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))
-    );
+    --kbn-application--content-height: calc(100vh - var(--kbnAppHeadersOffset, 0px));
+    --kbn-application--content-top: var(--kbnAppHeadersOffset, 0px);
+    --kbn-application--content-left: 0px;
+    --kbn-application--content-right: 0px;
+    --kbn-application--content-bottom: 0px;
   }
 
   // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`
