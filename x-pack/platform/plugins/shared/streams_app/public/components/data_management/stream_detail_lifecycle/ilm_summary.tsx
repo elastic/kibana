@@ -59,6 +59,7 @@ export function IlmSummary({
         signal,
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [streamsRepositoryClient, definition, stats]
   );
 
