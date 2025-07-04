@@ -6,6 +6,7 @@
  */
 
 import {
+  DraggableProvidedDragHandleProps,
   EuiButton,
   EuiForm,
   EuiSpacer,
@@ -140,14 +141,17 @@ export function AddProcessorPanel() {
         `}
         onClick={handleOpen}
         type="button"
+        paddingSize="m"
       >
-        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          <EuiIcon type="plus" />
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorAction',
-            { defaultMessage: 'Add a processor' }
-          )}
-        </EuiFlexGroup>
+        <EuiPanel hasShadow={false} color="transparent" paddingSize="xs">
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiIcon type="plus" />
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorAction',
+              { defaultMessage: 'Add a processor' }
+            )}
+          </EuiFlexGroup>
+        </EuiPanel>
       </EuiPanel>
     );
   }
@@ -233,11 +237,16 @@ const createDraftProcessorFromForm = (
 };
 
 export interface EditProcessorPanelProps {
+  dragHandleProps: DraggableProvidedDragHandleProps | null;
   processorRef: StreamEnrichmentContextType['processorsRefs'][number];
   processorMetrics?: ProcessorMetrics;
 }
 
-export function EditProcessorPanel({ processorRef, processorMetrics }: EditProcessorPanelProps) {
+export function EditProcessorPanel({
+  dragHandleProps,
+  processorRef,
+  processorMetrics,
+}: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
   const state = useSelector(processorRef, (s) => s);
   const getEnrichmentState = useGetStreamEnrichmentState();
@@ -320,7 +329,9 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
     <strong>{processor.type.toUpperCase()}</strong>
   ) : (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiIcon type="grab" />
+      <EuiPanel hasShadow={false} color="transparent" paddingSize="xs" {...dragHandleProps}>
+        <EuiIcon type="grab" />
+      </EuiPanel>
       <strong>{processor.type.toUpperCase()}</strong>
       <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
         {processorDescription}
