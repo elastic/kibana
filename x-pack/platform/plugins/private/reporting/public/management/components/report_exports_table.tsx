@@ -37,7 +37,7 @@ type TableColumn = EuiBasicTableColumn<Job>;
 
 interface State {
   page: number;
-  pageSize?: number;
+  perPage?: number;
   total: number;
   jobs: Job[];
   selectedJobs: Job[];
@@ -59,7 +59,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
 
     this.state = {
       page: 0,
-      pageSize: 50,
+      perPage: 50,
       total: 0,
       jobs: [],
       selectedJobs: [],
@@ -162,8 +162,8 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
   };
 
   private onTableChange = ({ page }: { page: { index: number; size: number } }) => {
-    const { index: pageIndex, size: pageSize } = page;
-    this.setState(() => ({ page: pageIndex, pageSize }), this.fetchJobs);
+    const { index: pageIndex, size: perPage } = page;
+    this.setState(() => ({ page: pageIndex, perPage }), this.fetchJobs);
   };
 
   private fetchJobs = async () => {
@@ -175,7 +175,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
     let jobs: Job[];
     let total: number;
     try {
-      jobs = await this.props.apiClient.list(this.state.page, this.state.pageSize);
+      jobs = await this.props.apiClient.list(this.state.page, this.state.perPage);
       total = await this.props.apiClient.total();
 
       this.isInitialJobsFetch = false;
@@ -431,7 +431,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
 
     const pagination = {
       pageIndex: this.state.page,
-      pageSize: this.state.pageSize,
+      pageSize: this.state.perPage,
       totalItemCount: this.state.total,
       showPerPageOptions: true,
     };
