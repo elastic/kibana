@@ -5,26 +5,13 @@
  * 2.0.
  */
 
-import type { AgentProfile } from '@kbn/onechat-common';
+import type { AgentDescriptor } from '@kbn/onechat-common';
 
 export interface CallAgentResponse<TResult = unknown> {
   runId: string;
   result: TResult;
+}
 
 export interface ListAgentsResponse {
   agents: AgentDescriptor[];
-}
-
-export type GetAgentResponse = AgentProfile;
-
-export interface ListAgentsResponse {
-  agentProfiles: AgentProfile[];
-}
-
-export type UpdateAgentResponse = AgentProfile;
-
-export type CreateAgentResponse = AgentProfile;
-
-export interface DeleteAgentResponse {
-  success: boolean;
 }
