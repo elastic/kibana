@@ -18,6 +18,7 @@ import type {
   AgentProfileListOptions,
   AgentProfileCreateRequest,
   AgentProfileUpdateRequest,
+  AgentProfileDeleteRequest,
 } from '../../../../common/agent_profiles';
 import { AgentProfileStorage } from './storage';
 import { fromEs, toEs, createRequestToEs, updateProfile, type Document } from './converters';
@@ -29,6 +30,7 @@ export interface AgentProfileClient {
   create(profile: AgentProfileCreateRequest): Promise<AgentProfile>;
   update(profile: AgentProfileUpdateRequest): Promise<AgentProfile>;
   list(options?: AgentProfileListOptions): Promise<AgentProfile[]>;
+  delete(options: AgentProfileDeleteRequest): Promise<boolean>;
 }
 
 export const createClient = ({
@@ -86,7 +88,9 @@ class AgentProfileClientImpl implements AgentProfileClient {
       track_total_hits: false,
       size: 1000,
       // no filtering options for now
-      query: {},
+      query: {
+        match_all: {},
+      },
     });
 
     return response.hits.hits.map((hit) => fromEs(hit as Document));
@@ -136,6 +140,27 @@ class AgentProfileClientImpl implements AgentProfileClient {
     });
 
     return this.get(profileUpdate.id);
+  }
+
+  async delete(options: AgentProfileDeleteRequest): Promise<boolean> {
+    const { id } = options;
+    let document: Document;
+    try {
+      document = await this.storage.getClient().get({ id });
+    } catch (e) {
+      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
+        throw createAgentNotFoundError({ agentId: id });
+      } else {
+        throw e;
+      }
+    }
+
+    if (!hasAccess({ profile: document, user: this.user })) {
+      throw createAgentNotFoundError({ agentId: id });
+    }
+
+    const deleteResponse = await this.storage.getClient().delete({ id });
+    return deleteResponse.result === 'deleted';
   }
 
   private async exists(agentId: string): Promise<boolean> {
