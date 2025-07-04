@@ -94,6 +94,7 @@ export function RelatedIntegrationField({
   );
 
   const hasError = Boolean(packageErrorMessage) || Boolean(versionErrorMessage);
+  const isVersionInputDisabled = !field.value.package || !integrations;
 
   return (
     <EuiFormRow
@@ -120,10 +121,12 @@ export function RelatedIntegrationField({
         </EuiFlexItem>
         <EuiFlexItem grow={3} className={MIN_WIDTH_VERSION_CONSTRAIN_STYLE}>
           <EuiFieldText
-            placeholder={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_PLACEHOLDER}
+            placeholder={
+              isVersionInputDisabled ? '' : i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_PLACEHOLDER
+            }
             prepend={i18n.INTEGRATION_VERSION}
             isLoading={isInitialLoading}
-            disabled={!field.value.package || !integrations}
+            disabled={isVersionInputDisabled}
             aria-label={i18n.RELATED_INTEGRATION_VERSION_DEPENDENCY_ARIA_LABEL}
             value={field.value.version}
             onChange={handleVersionChange}

@@ -15,6 +15,7 @@ x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/appex-ai-infra
 x-pack/platform/packages/private/ml/aiops_change_point_detection @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_components @elastic/ml-ui
@@ -69,6 +70,7 @@ packages/kbn-bazel-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-bfetch-error @elastic/appex-sharedux
 examples/bfetch_explorer @elastic/appex-sharedux
 src/platform/plugins/shared/bfetch @elastic/appex-sharedux
+src/platform/packages/shared/kbn-cache-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
@@ -2440,6 +2442,9 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+
+# Token tracking
+x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-generative-ai
 
 ## Defend Workflows owner connectors
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
