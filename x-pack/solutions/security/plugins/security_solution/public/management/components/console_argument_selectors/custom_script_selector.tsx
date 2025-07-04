@@ -83,7 +83,7 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       isLoading: isLoadingScripts,
       error: scriptsError,
     } = useGetCustomScripts(agentType);
-    console.log({ scriptsError });
+
     const scriptsOptions: SelectableOption[] = useMemo(() => {
       return data.map((script: CustomScript) => {
         const isChecked = script.name === value;
