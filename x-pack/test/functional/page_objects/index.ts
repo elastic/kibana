@@ -20,6 +20,7 @@ import { GisPageObject } from '@kbn/test-suites-xpack-platform/functional/page_o
 import { LensPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/lens_page';
 import { UpgradeAssistantFlyoutObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/upgrade_assistant_page';
 import { UserProfilePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/user_profile_page';
+import { SnapshotRestorePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/snapshot_restore_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
@@ -49,7 +50,6 @@ import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { RollupPageObject } from './rollup_page';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
 import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
-import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { StatusPageObject } from './status_page';
 import { TagManagementPageObject } from './tag_management_page';
 import { UptimePageObject } from './uptime_page';
@@ -116,7 +116,6 @@ export const pageObjects = {
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
-  snapshotRestore: SnapshotRestorePageProvider,
   spaceSelector: SpaceSelectorPageObject,
   statusPage: StatusPageObject,
   tagManagement: TagManagementPageObject,
