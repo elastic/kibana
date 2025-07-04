@@ -45,8 +45,7 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
 
           logger.debug(() => `Received completed message: ${JSON.stringify(concatenatedChunk)}`);
 
-          const content = concatenatedChunk.content;
-          const toolCalls = concatenatedChunk.tool_calls;
+          const { content, tool_calls: toolCalls } = concatenatedChunk;
           const activeSpan = trace.getActiveSpan();
           if (activeSpan) {
             setChoice(activeSpan, { content, toolCalls });
@@ -56,7 +55,7 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
 
           return {
             type: ChatCompletionEventType.ChatCompletionMessage,
-            content: concatenatedChunk.content,
+            content,
             toolCalls: validatedToolCalls,
           };
         })
