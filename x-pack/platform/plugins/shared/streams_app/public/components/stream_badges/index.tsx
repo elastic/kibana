@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IlmLocatorParams, ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import {
@@ -184,6 +184,26 @@ export function DiscoverBadgeButton({
     return null;
   }
 
+  const isDraft =
+    !Streams.WiredStream.GetResponse.is(definition) || definition.stream.ingest.wired.draft;
+
+  if (isDraft) {
+    return (
+      <EuiButton
+        data-test-subj="streamsDetailOpenInDiscoverBadgeButton"
+        href={discoverLink}
+        iconType="discoverApp"
+        fill={false}
+        size="s"
+        aria-label={i18n.translate(
+          'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
+          { defaultMessage: 'Open in Discover' }
+        )}
+      >
+        Preview
+      </EuiButton>
+    );
+  }
   return (
     <EuiButtonIcon
       data-test-subj="streamsDetailOpenInDiscoverBadgeButton"
@@ -194,6 +214,8 @@ export function DiscoverBadgeButton({
         'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
         { defaultMessage: 'Open in Discover' }
       )}
-    />
+    >
+      Test
+    </EuiButtonIcon>
   );
 }
