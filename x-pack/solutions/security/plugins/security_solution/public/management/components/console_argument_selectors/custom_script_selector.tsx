@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import type { CustomScript } from '../../../../server/endpoint/services';
 import { useConsoleStateDispatch } from '../console/hooks/state_selectors/use_console_state_dispatch';
@@ -77,7 +78,12 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       [onChange, state, value, valueText]
     );
 
-    const { data = [], isLoading: isLoadingScripts } = useGetCustomScripts(agentType);
+    const {
+      data = [],
+      isLoading: isLoadingScripts,
+      error: scriptsError,
+    } = useGetCustomScripts(agentType);
+    console.log({ scriptsError });
     const scriptsOptions: SelectableOption[] = useMemo(() => {
       return data.map((script: CustomScript) => {
         const isChecked = script.name === value;
@@ -88,6 +94,8 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
         };
       });
     }, [data, value]);
+    const text =
+      'Failed to fetch Microsoft Defender for Endpoint scripts, failed with: Attempt to send [getLibraryFiles] to Microsoft Defender for Endpoint failed: Status code: 403. Message: API Error: [Forbidden] Request failed with status code 403\nURL called:[get] https://api.securitycenter.windows.com/api/libraryfiles\nResponse body: {"error":{"code":"Forbidden","message":"Missing application roles. API required roles: Library.Manage, application roles: Machine.Isolate,Machine.LiveResponse,Alert.Read.All,Machine.Read.All.","target":"|00-d0c81c58933936a716c4ad5f6c57934b-d0481d26e0baef1a-01.49e7c371_1."}}';
 
     // There is a race condition between the parent input and search input which results in search having the last char of the argument eg. 'e' from '--CloudFile'
     // This is a workaround to ensure the popover is not shown until the input is focused
@@ -160,7 +168,7 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       [onChange, state]
     );
 
-    if (isAwaitingRenderDelay || isLoadingScripts) {
+    if (isAwaitingRenderDelay || (isLoadingScripts && !scriptsError)) {
       return <EuiLoadingSpinner />;
     }
 
@@ -206,6 +214,14 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
               showIcons: true,
               textWrap: 'truncate',
             }}
+            errorMessage={
+              scriptsError ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.customScriptSelector.errorLoading"
+                  defaultMessage="Error loading scripts"
+                />
+              ) : undefined
+            }
           >
             {(list, search) => (
               <>

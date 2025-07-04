@@ -4,15 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'React';
 import type { UseQueryResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
+import { useRef } from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { EuiText } from '@elastic/eui';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomScript, CustomScriptsResponse } from '../../../../server/endpoint/services';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
-import { useHttp } from '../../../common/lib/kibana';
+import { useHttp, useKibana } from '../../../common/lib/kibana';
 
 /**
  * Error type for custom scripts API errors
@@ -29,6 +32,16 @@ interface CustomScriptsErrorType {
  * @param options - Additional options for the query
  * @returns Query result containing custom scripts data
  */
+
+function getErrorFromResponse(response: any) {
+  console.log({ response });
+  if ('status_code' in response) {
+    return { errorCode: response.status_code, message: response.message };
+  } else if ('statusCode' in response) {
+    return { errorCode: response.statusCode, message: response.message };
+  }
+}
+
 export const useGetCustomScripts = (
   agentType: ResponseActionAgentType,
   options: Omit<
@@ -37,6 +50,8 @@ export const useGetCustomScripts = (
   > = {}
 ): UseQueryResult<CustomScript[], IHttpFetchError<CustomScriptsErrorType>> => {
   const http = useHttp();
+  const { notifications } = useKibana();
+  const toastShownRef = useRef(false);
 
   return useQuery<CustomScript[], IHttpFetchError<CustomScriptsErrorType>>({
     queryKey: ['get-custom-scripts', agentType],
@@ -48,7 +63,41 @@ export const useGetCustomScripts = (
             agentType,
           },
         })
-        .then((response) => response.data);
+        .then((response) => response.data)
+        .catch((err) => {
+          const { error } = getMessageFieldFromStringifiedObject(err?.body.message) || {};
+          if (error && !toastShownRef.current) {
+            notifications.toasts.danger({
+              title: error.code,
+              body: (
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.securitySolution.endpoint.customScripts.fetchError"
+                      defaultMessage="Failed to fetch Microsoft Defender for Endpoint scripts"
+                    />
+                  </p>
+                  <p>{err.body.message}</p>
+                </EuiText>
+              ),
+            });
+            toastShownRef.current = true;
+          }
+          throw error;
+        });
     },
   });
 };
+
+export function getMessageFieldFromStringifiedObject(str: string): string | undefined {
+  const marker = 'Response body: ';
+  const idx = str.indexOf(marker);
+  if (idx === -1) return undefined;
+
+  const jsonPart = str.slice(idx + marker.length).trim();
+  try {
+    return JSON.parse(jsonPart);
+  } catch {
+    return undefined;
+  }
+}

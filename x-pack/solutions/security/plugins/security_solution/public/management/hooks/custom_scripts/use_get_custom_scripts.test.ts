@@ -7,7 +7,11 @@
 
 import { renderHook } from '@testing-library/react';
 import { useQuery } from '@tanstack/react-query';
-import { useGetCustomScripts } from './use_get_custom_scripts';
+import type { UseQueryOptions } from '@tanstack/react-query';
+import {
+  useGetCustomScripts,
+  getMessageFieldFromStringifiedObject,
+} from './use_get_custom_scripts';
 
 jest.mock('@tanstack/react-query');
 jest.mock('../../../common/lib/kibana');
@@ -15,14 +19,20 @@ jest.mock('../../../common/lib/kibana');
 describe('useGetCustomScripts', () => {
   const mockUseQuery = useQuery as jest.MockedFunction<typeof useQuery>;
   const mockHttpGet = jest.fn();
+  const mockNotifications = { toasts: { danger: jest.fn() } };
+  const mockUseKibana = jest.requireMock('../../../common/lib/kibana').useKibana;
+  const mockUseHttp = jest.requireMock('../../../common/lib/kibana').useHttp;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     // Mock the useHttp hook
-    jest.requireMock('../../../common/lib/kibana').useHttp.mockReturnValue({
+    mockUseHttp.mockReturnValue({
       get: mockHttpGet,
     });
+
+    // Mock the useKibana hook
+    mockUseKibana.mockReturnValue({ notifications: mockNotifications });
 
     // Mock the useQuery hook
     mockUseQuery.mockReturnValue({
@@ -65,6 +75,53 @@ describe('useGetCustomScripts', () => {
     expect(mockUseQuery).toHaveBeenCalledWith({
       queryKey: ['get-custom-scripts', 'sentinel_one'],
       queryFn: expect.any(Function),
+    });
+  });
+
+  test('displays a toast notification on error and only once per error', async () => {
+    // Override the default mock for this test
+    mockHttpGet.mockRejectedValue({
+      body: {
+        message: 'Response body: {"error":{"code":"Forbidden","message":"Test error message"}}',
+      },
+    });
+
+    renderHook(() => useGetCustomScripts('endpoint'));
+
+    const queryOptions = mockUseQuery.mock.calls[0][0] as UseQueryOptions<unknown, unknown>;
+    const queryFn = queryOptions.queryFn as () => Promise<unknown>;
+
+    // Simulate error thrown in queryFn
+    try {
+      await queryFn();
+    } catch (e) {}
+    expect(mockNotifications.toasts.danger).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Forbidden',
+        body: expect.any(Object),
+      })
+    );
+    // Call again, should not show another toast
+    try {
+      await queryFn();
+    } catch (e) {}
+    expect(mockNotifications.toasts.danger).toHaveBeenCalledTimes(1);
+  });
+
+  describe('getMessageFieldFromStringifiedObject', () => {
+    it('parses error JSON from stringified response', () => {
+      const str =
+        'Some error. Response body: {"error":{"code":"Forbidden","message":"Test error"}}';
+      const result = getMessageFieldFromStringifiedObject(str);
+      expect(result).toEqual({ error: { code: 'Forbidden', message: 'Test error' } });
+    });
+    it('returns undefined if marker is missing', () => {
+      const str = 'No marker here';
+      expect(getMessageFieldFromStringifiedObject(str)).toBeUndefined();
+    });
+    it('returns undefined if JSON is invalid', () => {
+      const str = 'Response body: not-json';
+      expect(getMessageFieldFromStringifiedObject(str)).toBeUndefined();
     });
   });
 });
