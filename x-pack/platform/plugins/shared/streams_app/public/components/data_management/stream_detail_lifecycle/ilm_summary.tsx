@@ -59,6 +59,8 @@ export function IlmSummary({
         signal,
       });
     },
+    // we pass the stats as a hack to refresh the ilm summary
+    // when the ingestion rate graph is refreshed
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [streamsRepositoryClient, definition, stats]
   );
