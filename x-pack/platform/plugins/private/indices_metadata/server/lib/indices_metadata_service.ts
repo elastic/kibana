@@ -22,8 +22,8 @@ import type {
   IndicesStats,
 } from './indices_metadata_service.types';
 
-import { type IMetadataReceiver, MetadataReceiver } from './receiver';
-import { type IMetadataSender, MetadataSender } from './sender';
+import { type IMetadataReceiver } from './receiver';
+import { type IMetadataSender } from './sender';
 import {
   DATA_STREAM_EVENT,
   ILM_POLICY_EVENT,
@@ -37,13 +37,11 @@ const INTERVAL = '1m';
 
 export class IndicesMetadataService {
   private readonly logger: Logger;
-  private receiver?: IMetadataReceiver;
-  private sender?: IMetadataSender;
+  private _receiver?: IMetadataReceiver;
+  private _sender?: IMetadataSender;
 
   constructor(logger: Logger) {
     this.logger = logger.get(IndicesMetadataService.name);
-    this.receiver = new MetadataReceiver(logger);
-    this.sender = new MetadataSender(logger);
   }
 
   public setup(setup: IndicesMetadataServiceSetup) {
@@ -54,8 +52,8 @@ export class IndicesMetadataService {
   public async start(start: IndicesMetadataServiceStart) {
     this.logger.debug('Starting indices metadata service');
 
-    this.receiver = start.receiver;
-    this.sender = start.sender;
+    this._receiver = start.receiver;
+    this._sender = start.sender;
 
     await this.scheduleIndicesMetadataTask(start.taskManager)
       .catch((error) => {
@@ -71,8 +69,8 @@ export class IndicesMetadataService {
 
     // 1. Get cluster stats and list of indices and datastreams
     const [indices, dataStreams] = await Promise.all([
-      this.receiver.getIndices(),
-      this.receiver.getDataStreams(),
+      this.receiver().getIndices(),
+      this.receiver().getDataStreams(),
     ]);
 
     // 2. Publish datastreams stats
@@ -95,7 +93,7 @@ export class IndicesMetadataService {
     // 4. Get ILM stats and publish them
     let ilmNames = new Set<string>();
 
-    if (await this.receiver.isIlmStatsAvailable()) {
+    if (await this.receiver().isIlmStatsAvailable()) {
       ilmNames = await this.publishIlmStats(indices.slice(0, 1000)) // TODO threshold should be configured somewhere
         .then((names) => {
           return names;
@@ -130,7 +128,7 @@ export class IndicesMetadataService {
     const events: DataStreams = {
       items: stats,
     };
-    this.sender.reportEBT(DATA_STREAM_EVENT, events);
+    this.sender().reportEBT(DATA_STREAM_EVENT, events);
     this.logger.debug('Data streams events sent', { count: events.items.length } as LogMeta);
     return events.items.length;
   }
@@ -195,15 +193,30 @@ export class IndicesMetadataService {
     }
   }
 
+  private receiver(): IMetadataReceiver {
+    if (!this._receiver) {
+      throw new Error('Receiver is not initialized');
+    }
+
+    return this._receiver;
+  }
+
+  private sender(): IMetadataSender {
+    if (!this._sender) {
+      throw new Error('Sender is not initialized');
+    }
+    return this._sender;
+  }
+
   private async publishIndicesStats(indices: string[]): Promise<number> {
     const indicesStats: IndicesStats = {
       items: [],
     };
 
-    for await (const stat of this.receiver.getIndicesStats(indices)) {
+    for await (const stat of this.receiver().getIndicesStats(indices)) {
       indicesStats.items.push(stat);
     }
-    this.sender.reportEBT(INDEX_STATS_EVENT, indicesStats);
+    this.sender().reportEBT(INDEX_STATS_EVENT, indicesStats);
     this.logger.debug('Indices stats sent', { count: indicesStats.items.length } as LogMeta);
     return indicesStats.items.length;
   }
@@ -214,14 +227,14 @@ export class IndicesMetadataService {
       items: [],
     };
 
-    for await (const stat of this.receiver.getIlmsStats(indices)) {
+    for await (const stat of this.receiver().getIlmsStats(indices)) {
       if (stat.policy_name !== undefined) {
         ilmNames.add(stat.policy_name);
         ilmsStats.items.push(stat);
       }
     }
 
-    this.sender.reportEBT(ILM_STATS_EVENT, ilmsStats);
+    this.sender().reportEBT(ILM_STATS_EVENT, ilmsStats);
     this.logger.debug('ILM stats sent', { count: ilmNames.size } as LogMeta);
 
     return ilmNames;
@@ -232,10 +245,10 @@ export class IndicesMetadataService {
       items: [],
     };
 
-    for await (const policy of this.receiver.getIlmsPolicies(Array.from(ilmNames.values()))) {
+    for await (const policy of this.receiver().getIlmsPolicies(Array.from(ilmNames.values()))) {
       ilmPolicies.items.push(policy);
     }
-    this.sender.reportEBT(ILM_POLICY_EVENT, ilmPolicies);
+    this.sender().reportEBT(ILM_POLICY_EVENT, ilmPolicies);
     this.logger.debug('ILM policies sent', { count: ilmPolicies.items.length } as LogMeta);
     return ilmPolicies.items.length;
   }
