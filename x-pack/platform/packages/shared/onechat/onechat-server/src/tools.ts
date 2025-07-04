@@ -111,7 +111,7 @@ export interface EsqlTool<RunInput extends ZodObject<any> = ZodObject<any>, RunO
     string,
     {
       /**
-       * The data type of the parameter.
+       * The data types of the parameter.
        */
       type: FieldTypes;
 
