@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
+import type {
+  BulkActionsConfig,
+  BulkActionsPanelConfig,
+} from '@kbn/response-ops-alerts-table/types';
 import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import type { AlertClosingReason } from '../../../../common/constants';
+import { AlertClosingReasonValues } from '../../../../common/constants';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
@@ -20,6 +25,8 @@ import { FILTER_CLOSED, FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../com
 import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
+
+const ALERT_CLOSING_REASON_PANEL_ID = 'ALERT_CLOSING_REASON_PANEL_ID_BULK';
 
 interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
@@ -92,7 +99,7 @@ export const useBulkAlertActionItems = ({
   );
 
   const getOnAction = useCallback(
-    (status: AlertWorkflowStatus) => {
+    (status: AlertWorkflowStatus, reason?: AlertClosingReason) => {
       const onActionClick: BulkActionsConfig['onClick'] = async (
         items,
         isSelectAllChecked,
@@ -120,6 +127,7 @@ export const useBulkAlertActionItems = ({
             status,
             query,
             signalIds: ids,
+            reason,
           });
 
           setAlertLoading(false);
@@ -168,17 +176,71 @@ export const useBulkAlertActionItems = ({
         key: `${status}-alert-status`,
         'data-test-subj': `${status}-alert-status`,
         disableOnQuery: false,
-        onClick: getOnAction(status),
+        ...(status === FILTER_CLOSED
+          ? {
+              panel: ALERT_CLOSING_REASON_PANEL_ID,
+            }
+          : { onClick: getOnAction(status) }),
       };
     },
     [getOnAction]
   );
 
-  return useMemo(() => {
+  const items = useMemo(() => {
     return hasIndexWrite
       ? [FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED].map((status) => {
           return getUpdateAlertStatusAction(status as AlertWorkflowStatus);
         })
       : [];
   }, [getUpdateAlertStatusAction, hasIndexWrite]);
+
+  const panels = useMemo(
+    () =>
+      [
+        {
+          id: ALERT_CLOSING_REASON_PANEL_ID,
+          title: 'Choose one option to mark closed as',
+          items: [
+            {
+              key: 'a',
+              disableOnQuery: false,
+              label: 'None',
+              onClick: getOnAction(FILTER_CLOSED as AlertWorkflowStatus),
+            },
+            {
+              key: 'a',
+              disableOnQuery: false,
+              label: 'False positive',
+              onClick: getOnAction(
+                FILTER_CLOSED as AlertWorkflowStatus,
+                AlertClosingReasonValues.FALSE_POSITIVE
+              ),
+            },
+            {
+              key: 'a',
+              disableOnQuery: false,
+              label: 'Duplicate',
+              onClick: getOnAction(
+                FILTER_CLOSED as AlertWorkflowStatus,
+                AlertClosingReasonValues.DUPLICATE
+              ),
+            },
+            {
+              key: 'a',
+              disableOnQuery: false,
+              label: 'Investigation required',
+              onClick: getOnAction(
+                FILTER_CLOSED as AlertWorkflowStatus,
+                AlertClosingReasonValues.INVESTIGATION_REQUIRED
+              ),
+            },
+          ],
+        },
+      ] as BulkActionsPanelConfig[],
+    [getOnAction]
+  );
+
+  return useMemo(() => ({ items, panels }), [items, panels]);
 };
+
+/////
