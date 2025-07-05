@@ -253,6 +253,7 @@ describe('logsDataSourceProfileProvider', () => {
           },
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+        actions: {},
         dataView: dataViewWithLogLevel,
         isDocViewerEnabled: true,
       });
@@ -271,6 +272,7 @@ describe('logsDataSourceProfileProvider', () => {
           },
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+        actions: {},
         dataView: dataViewWithLogLevel,
         isDocViewerEnabled: false,
       });

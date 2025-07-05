@@ -21,7 +21,11 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
     (prev, { context }) =>
     (params) => {
       const additionalControls = prev(params) || [];
-      const { updateESQLQuery, query, setExpandedDoc, isDocViewerEnabled } = params;
+      const {
+        actions: { updateESQLQuery, setExpandedDoc },
+        query,
+        isDocViewerEnabled,
+      } = params;
 
       const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
         ? queryContainsMetadataIgnored(query)
