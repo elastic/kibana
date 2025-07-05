@@ -72,7 +72,7 @@ export const useInsightQuery = ({
           config: esQueryConfig,
           dataProviders,
           dataViewSpec: oldSourcererDataView,
-          newDataViewPickerEnabledDataView: experimentalDataView,
+          dataView: experimentalDataView,
           browserFields,
           filters,
           kqlQuery: {

@@ -134,7 +134,7 @@ export const useAddBulkToTimelineAction = ({
       config: esQueryConfig,
       dataProviders: [],
       dataViewSpec: oldSourcererDataViewSpec,
-      newDataViewPickerEnabledDataView: experimentalDataView,
+      dataView: experimentalDataView,
       filters: combinedFilters,
       kqlQuery: { query: '', language: 'kuery' },
       browserFields,

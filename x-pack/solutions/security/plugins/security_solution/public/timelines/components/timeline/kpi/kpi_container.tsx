@@ -103,7 +103,7 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
         config: esQueryConfig,
         dataProviders,
         dataViewSpec: oldSourcererDataViewSpec,
-        newDataViewPickerEnabledDataView: experimentalDataView,
+        dataView: experimentalDataView,
         browserFields,
         filters: filters ? filters : [],
         kqlQuery,

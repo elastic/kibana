@@ -126,7 +126,7 @@ const UsersComponent = () => {
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
         dataViewSpec: oldSourcererDataView,
-        newDataViewPickerEnabledDataView: experimentalDataView,
+        dataView: experimentalDataView,
         queries: [query],
         filters: globalFilters,
       }),
@@ -137,7 +137,7 @@ const UsersComponent = () => {
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
         dataViewSpec: oldSourcererDataView,
-        newDataViewPickerEnabledDataView: experimentalDataView,
+        dataView: experimentalDataView,
         queries: [query],
         filters: tabsFilters,
       }),

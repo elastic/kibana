@@ -125,7 +125,7 @@ const HostsComponent = () => {
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
         dataViewSpec: oldSourcererDataView,
-        newDataViewPickerEnabledDataView: experimentalDataView,
+        dataView: experimentalDataView,
         queries: [query],
         filters: globalFilters,
       }),
@@ -136,7 +136,7 @@ const HostsComponent = () => {
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
         dataViewSpec: oldSourcererDataView,
-        newDataViewPickerEnabledDataView: experimentalDataView,
+        dataView: experimentalDataView,
         queries: [query],
         filters: tabsFilters,
       }),

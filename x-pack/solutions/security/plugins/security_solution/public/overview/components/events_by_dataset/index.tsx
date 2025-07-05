@@ -48,7 +48,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   filters: Filter[];
   headerChildren?: React.ReactNode;
   dataViewSpec?: DataViewSpec;
-  newDataViewPickerEnabledDataView?: DataView;
+  dataView?: DataView;
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
@@ -79,7 +79,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   from,
   headerChildren,
   dataViewSpec,
-  newDataViewPickerEnabledDataView,
+  dataView,
   onlyField,
   paddingSize,
   query,
@@ -133,20 +133,13 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       return convertToBuildEsQuery({
         config: getEsQueryConfig(kibana.services.uiSettings),
         dataViewSpec,
-        newDataViewPickerEnabledDataView,
+        dataView,
         queries: [query],
         filters,
       });
     }
     return [filterQueryFromProps];
-  }, [
-    filterQueryFromProps,
-    kibana.services.uiSettings,
-    dataViewSpec,
-    newDataViewPickerEnabledDataView,
-    query,
-    filters,
-  ]);
+  }, [filterQueryFromProps, kibana.services.uiSettings, dataViewSpec, dataView, query, filters]);
 
   useInvalidFilterQuery({
     id: uniqueQueryId,

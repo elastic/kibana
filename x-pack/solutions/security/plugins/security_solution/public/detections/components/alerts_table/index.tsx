@@ -222,7 +222,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
         dataViewSpec: oldSourcererDataView,
-        newDataViewPickerEnabledDataView: experimentalDataView,
+        dataView: experimentalDataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,

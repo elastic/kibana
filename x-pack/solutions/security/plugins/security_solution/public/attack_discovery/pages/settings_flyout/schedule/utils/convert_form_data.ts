@@ -21,14 +21,14 @@ export const convertFormDataInBaseSchedule = (
   connector: AIConnector,
   dataViewSpec: DataViewSpec,
   uiSettings: IUiSettingsClient,
-  newDataViewPickerEnabledDataView?: DataView
+  dataView?: DataView
 ) => {
   const alertsSelectionSettings = scheduleData.alertsSelectionSettings;
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
     dataViewSpec,
-    newDataViewPickerEnabledDataView,
+    dataView,
     queries: [alertsSelectionSettings.query],
     filters: alertsSelectionSettings.filters,
   });

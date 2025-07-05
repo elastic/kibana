@@ -56,7 +56,7 @@ export const TopValuesPopover = React.memo(() => {
         field={data.fieldName}
         scopeId={data.scopeId}
         toggleTopN={onClose}
-        newDataViewPickerEnabledDataView={experimentalDataView}
+        dataView={experimentalDataView}
         dataViewSpec={oldSourcererDataView}
         browserFields={browserFields}
       />

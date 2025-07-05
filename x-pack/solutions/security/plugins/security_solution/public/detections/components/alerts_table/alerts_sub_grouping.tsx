@@ -119,7 +119,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
           config: getEsQueryConfig(uiSettings),
           dataProviders: [],
           dataViewSpec: sourcererDataView,
-          newDataViewPickerEnabledDataView: experimentalDataView,
+          dataView: experimentalDataView,
           browserFields,
           filters: [
             ...defaultFilters,

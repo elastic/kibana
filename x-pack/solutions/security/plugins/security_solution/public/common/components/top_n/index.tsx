@@ -78,7 +78,7 @@ export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
   dataViewSpec?: DataViewSpec;
-  newDataViewPickerEnabledDataView?: DataView;
+  dataView?: DataView;
   scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
@@ -98,7 +98,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   dataProviders,
   field,
   dataViewSpec,
-  newDataViewPickerEnabledDataView,
+  dataView,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,
@@ -122,7 +122,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
             dataProviders,
             filters: activeTimelineFilters,
             dataViewSpec,
-            newDataViewPickerEnabledDataView,
+            dataView,
             kqlMode,
             kqlQuery: {
               language: 'kuery',
@@ -137,7 +137,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       dataProviders,
       activeTimelineFilters,
       dataViewSpec,
-      newDataViewPickerEnabledDataView,
+      dataView,
       kqlMode,
       activeTimelineKqlQueryExpression,
     ]

@@ -31,10 +31,10 @@ export interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
   /**
-   * @deprecated Use `newDataViewPickerEnabledDataView` instead. Which accepts a DataView instance instead of a DataViewSpec.
+   * @deprecated Use `dataView` instead. Which accepts a DataView instance instead of a DataViewSpec.
    */
   dataViewSpec?: DataViewSpec;
-  newDataViewPickerEnabledDataView?: DataView;
+  dataView?: DataView;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;
@@ -210,15 +210,15 @@ export const dataViewSpecToViewBase = (dataViewSpec?: DataViewSpec): DataViewBas
 
 export const convertToBuildEsQuery = ({
   config,
-  newDataViewPickerEnabledDataView, // New dataview prepended with feature flag to enable easy cleanup
+  dataView, // New dataview prepended with feature flag to enable easy cleanup
   dataViewSpec, // Account for the case where sourcerer is active, but this can just use dataView
   queries,
   filters,
 }: {
   config: EsQueryConfig;
-  newDataViewPickerEnabledDataView?: DataView;
+  dataView?: DataView;
   /**
-   * @deprecated Use `newDataViewPickerEnabledDataView` instead. Which accepts a DataView instance instead of a DataViewSpec.
+   * @deprecated Use `dataView` instead. Which accepts a DataView instance instead of a DataViewSpec.
    */
   dataViewSpec?: DataViewSpec; // Ignored but kept for type compatibility
   queries: Query[];
@@ -228,7 +228,7 @@ export const convertToBuildEsQuery = ({
     return [
       JSON.stringify(
         buildEsQuery(
-          newDataViewPickerEnabledDataView ?? (dataViewSpecToViewBase(dataViewSpec) as DataView),
+          dataView ?? (dataViewSpecToViewBase(dataViewSpec) as DataView),
           queries,
           filters.filter((f) => f.meta.disabled === false),
           {
@@ -255,7 +255,7 @@ export const combineQueries = ({
   config,
   dataProviders = [],
   dataViewSpec,
-  newDataViewPickerEnabledDataView,
+  dataView,
   browserFields,
   filters = [],
   kqlQuery,
@@ -269,7 +269,7 @@ export const combineQueries = ({
       config,
       queries: [kuery],
       dataViewSpec,
-      newDataViewPickerEnabledDataView,
+      dataView,
       filters,
     });
 
@@ -298,7 +298,7 @@ export const combineQueries = ({
     config,
     queries: [kuery],
     dataViewSpec,
-    newDataViewPickerEnabledDataView,
+    dataView,
     filters,
   });
 

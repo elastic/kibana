@@ -199,7 +199,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
         dataViewSpec: oldSourcererDataView,
-        newDataViewPickerEnabledDataView: experimentalDataView,
+        dataView: experimentalDataView,
         queries: [query ?? getDefaultQuery()], // <-- search bar query
         filters: filters ?? [], // <-- search bar filters
       }),
