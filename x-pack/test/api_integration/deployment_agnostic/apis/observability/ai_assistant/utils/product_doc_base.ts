@@ -12,20 +12,26 @@ import {
 
 import type SuperTest from 'supertest';
 
-export async function installProductDoc(supertest: SuperTest.Agent) {
+export async function installProductDoc(supertest: SuperTest.Agent, inferenceId: string) {
   return supertest
     .post('/internal/product_doc_base/install')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
     .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .set('kbn-xsrf', 'foo')
+    .send({
+      inferenceId,
+    })
     .expect(200);
 }
 
-export async function uninstallProductDoc(supertest: SuperTest.Agent) {
+export async function uninstallProductDoc(supertest: SuperTest.Agent, inferenceId: string) {
   return supertest
     .post('/internal/product_doc_base/uninstall')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
     .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .set('kbn-xsrf', 'foo')
+    .send({
+      inferenceId,
+    })
     .expect(200);
 }
