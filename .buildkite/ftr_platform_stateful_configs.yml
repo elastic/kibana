@@ -410,4 +410,3 @@ enabled:
   - x-pack/platform/test/saved_object_api_integration/spaces_only/config.ts
   - x-pack/platform/test/saved_object_api_integration/low-level/config.ts
   - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts
-  - x-pack/platform/test/usage_collection/config.ts
