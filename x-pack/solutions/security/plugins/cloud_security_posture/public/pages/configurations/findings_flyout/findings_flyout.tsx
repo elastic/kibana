@@ -202,37 +202,6 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
   }
 };
 
-export const MissingFieldsCallout = ({
-  finding,
-}: {
-  finding: CspFinding | CspVulnerabilityFinding;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const vendor = getVendorName(finding);
-
-  return (
-    <EuiCallOut
-      style={{
-        borderRadius: 4,
-        overflow: 'hidden',
-      }}
-      size="s"
-      iconType="info"
-      title={
-        <span style={{ color: euiTheme.colors.text }}>
-          <FormattedMessage
-            id="xpack.csp.findings.findingsFlyout.calloutTitle"
-            defaultMessage="Some fields not provided by {vendor}"
-            values={{
-              vendor: vendor || 'the vendor',
-            }}
-          />
-        </span>
-      }
-    />
-  );
-};
-
 export const FindingsRuleFlyout = ({
   onClose,
   finding,
@@ -286,11 +255,6 @@ export const FindingsRuleFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody key={tab.id}>
-        {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
-          <div style={{ marginBottom: euiThemeVars.euiSize }}>
-            <MissingFieldsCallout finding={finding} />
-          </div>
-        )}
         <FindingsTab tab={tab} finding={finding} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
