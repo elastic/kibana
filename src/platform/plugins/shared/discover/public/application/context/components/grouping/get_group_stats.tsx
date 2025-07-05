@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GetGroupStats } from '@kbn/grouping/src';
+import type { GetGroupStats } from '@kbn/grouping/src';
 import { ALERT_INSTANCE_ID, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { DataByGroupingAgg } from './types';
+import type { DataByGroupingAgg } from './types';
 
 /**
  * A function that given the current grouping field and aggregation results, returns an array of

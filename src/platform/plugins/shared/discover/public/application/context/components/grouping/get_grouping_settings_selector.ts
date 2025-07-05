@@ -9,7 +9,7 @@
 
 import { useMemo, useCallback } from 'react';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useDataGroupingState } from './data_grouping_context';
 
 interface GetPersistentControlsParams {

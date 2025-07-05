@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GroupOption } from '@kbn/grouping';
+import type { GroupOption } from '@kbn/grouping';
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 

@@ -9,8 +9,9 @@
 
 import React from 'react';
 import { isArray } from 'lodash/fp';
-import { firstNonNullValue, GroupPanelRenderer } from '@kbn/grouping/src';
-import { DataByGroupingAgg } from '../types';
+import type { GroupPanelRenderer } from '@kbn/grouping/src';
+import { firstNonNullValue } from '@kbn/grouping/src';
+import type { DataByGroupingAgg } from '../types';
 import { InstanceIdGroupContent, RuleNameGroupContent } from './group_panels';
 
 /**

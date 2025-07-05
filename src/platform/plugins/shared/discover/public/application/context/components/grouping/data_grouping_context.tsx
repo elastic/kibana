@@ -7,17 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  createContext,
-  Dispatch,
-  PropsWithChildren,
-  SetStateAction,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
-import { DataGroupingState, GroupModel } from './types';
+import type { Dispatch, PropsWithChildren, SetStateAction } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import type { DataGroupingState, GroupModel } from './types';
 
 const initialActiveGroups = ['none'];
 
