@@ -278,8 +278,8 @@ enabled:
   - x-pack/platform/test/functional_cloud/config.ts
   - x-pack/platform/test/functional_cloud/saml.config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
-  - x-pack/test/licensing_plugin/config.public.ts
-  - x-pack/test/licensing_plugin/config.ts
+  - x-pack/platform/test/licensing_plugin/config.public.ts
+  - x-pack/platform/test/licensing_plugin/config.ts
   - x-pack/test/plugin_functional/config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
