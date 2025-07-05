@@ -8,13 +8,23 @@
  */
 
 import { Parser } from '@kbn/esql-ast';
+import {
+  isESQLAstBaseItem,
+  isESQLFunction,
+  type ESQLColumn,
+  type ESQLCommandOption,
+} from '@kbn/esql-ast/src/types';
+
+const isESQLCommandOption = (node: unknown): node is ESQLCommandOption =>
+  isESQLAstBaseItem(node) && (node as ESQLCommandOption).type === 'option';
+
+export interface AppliedStatsFunction {
+  identifier: string;
+  operator: string;
+}
 
 export const getESQLStatsQueryMeta = (queryString: string) => {
   const groupByFields: string[] = [];
-  interface AppliedStatsFunction {
-    identifier: string;
-    operator: string;
-  }
   const appliedFunctions: AppliedStatsFunction[] = [];
 
   const parser = new Parser(queryString, { withFormatting: false });
@@ -26,31 +36,31 @@ export const getESQLStatsQueryMeta = (queryString: string) => {
   }
 
   statsNode.args.forEach((statsArgNode) => {
-    if (statsArgNode.type === 'function') {
-      const appliedFunctionMeta: AppliedStatsFunction = {};
+    if (isESQLFunction(statsArgNode)) {
+      const appliedFunctionMeta: Partial<AppliedStatsFunction> = {};
 
       statsArgNode.args.forEach((argNode) => {
         if (
           Object.prototype.toString.call(argNode) === '[object Object]' &&
-          argNode.type === 'column'
+          (argNode as ESQLColumn).type === 'column'
         ) {
-          appliedFunctionMeta.identifier = argNode.text;
+          appliedFunctionMeta.identifier = (argNode as ESQLColumn).text;
         } else if (Array.isArray(argNode)) {
           argNode.forEach((node) => {
-            if (node.type === 'function') {
+            if (isESQLFunction(node)) {
               appliedFunctionMeta.operator = node.operator?.name;
             }
           });
         }
 
         if (Object.values(appliedFunctionMeta).length === 2) {
-          appliedFunctions.push(appliedFunctionMeta);
+          appliedFunctions.push(appliedFunctionMeta as AppliedStatsFunction);
         }
       });
-    } else if (statsArgNode.type === 'option' && statsArgNode.name === 'by') {
+    } else if (isESQLCommandOption(statsArgNode) && statsArgNode.name === 'by') {
       statsArgNode.args.forEach((byOptionNode) => {
-        if (byOptionNode.type === 'column') {
-          groupByFields.push(byOptionNode.text);
+        if ((byOptionNode as ESQLColumn).type === 'column') {
+          groupByFields.push((byOptionNode as ESQLColumn).text);
         }
       });
     }
