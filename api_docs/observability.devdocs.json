@@ -20301,7 +20301,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
+          "{ readonly enabled: boolean; readonly managedOtlpServiceUrl: string; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -21407,6 +21407,20 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableTableSearchBar.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -21533,6 +21547,20 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -21655,6 +21683,20 @@
                 "description": [],
                 "signature": [
                   "\"oblt\""
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21976,6 +22018,20 @@
                 "description": [],
                 "signature": [
                   "\"oblt\""
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.syntheticsThrottlingEnabled.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -23165,6 +23221,20 @@
                 "description": [],
                 "signature": [
                   "\"oblt\""
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.searchExcludedDataTiers.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,

@@ -4325,6 +4325,41 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isAsExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "isAsExpression",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          "ESQLBinaryExpression",
+          "<\"as\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isAsExpression.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.isBinaryExpression",
         "type": "Function",
         "tags": [],
@@ -4339,7 +4374,7 @@
           "BinaryExpressionOperator",
           ">"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4355,7 +4390,41 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isBooleanLiteral",
+        "type": "Function",
+        "tags": [],
+        "label": "isBooleanLiteral",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          "ESQLStringLiteral"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isBooleanLiteral.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4381,7 +4450,7 @@
             "text": "ESQLColumn"
           }
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4395,7 +4464,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4415,7 +4484,7 @@
           "(node: unknown) => node is ",
           "ESQLIntegerLiteral"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4429,7 +4498,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4450,7 +4519,7 @@
           "ESQLBinaryExpression",
           "<\"where\">"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4464,7 +4533,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4493,7 +4562,7 @@
           "FunctionSubtype",
           ", string>"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4507,7 +4576,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4527,7 +4596,7 @@
           "(node: unknown) => node is ",
           "ESQLIdentifier"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4541,7 +4610,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4561,7 +4630,7 @@
           "(node: unknown) => node is ",
           "ESQLIntegerLiteral"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4575,7 +4644,41 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isList",
+        "type": "Function",
+        "tags": [],
+        "label": "isList",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          "ESQLList"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isList.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4601,7 +4704,7 @@
             "text": "ESQLLiteral"
           }
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4615,7 +4718,61 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isOptionNode",
+        "type": "Function",
+        "tags": [],
+        "label": "isOptionNode",
+        "description": [],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstNode",
+            "text": "ESQLAstNode"
+          },
+          ") => node is ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommandOption",
+            "text": "ESQLCommandOption"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isOptionNode.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstNode",
+                "text": "ESQLAstNode"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4644,7 +4801,7 @@
           "ESQLParamKinds",
           ">"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4658,7 +4815,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4678,7 +4835,7 @@
           "(node: unknown) => node is ",
           "ESQLProperNode"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4692,7 +4849,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4718,7 +4875,7 @@
             "text": "ESQLSource"
           }
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4732,7 +4889,41 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isStringLiteral",
+        "type": "Function",
+        "tags": [],
+        "label": "isStringLiteral",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          "ESQLStringLiteral"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isStringLiteral.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4753,7 +4944,7 @@
           "ESQLBinaryExpression",
           "<\"where\">"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4767,7 +4958,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
