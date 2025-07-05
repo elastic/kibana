@@ -15,9 +15,7 @@
       "observability"
     ],
     "requiredPlugins": [
-      "aiops",
       "alerting",
-      "cases",
       "charts",
       "contentManagement",
       "controls",
@@ -41,13 +39,15 @@
       "visualizations",
       "dashboard",
       "expressions",
-      "logsShared",
+      "logsDataAccess",
       "licensing",
       "navigation",
       "fieldsMetadata",
       "esql"
     ],
     "optionalPlugins": [
+      "aiops",
+      "cases",
       "discover",
       "exploratoryView",
       "home",
@@ -61,8 +61,11 @@
       "streams"
     ],
     "requiredBundles": [
+      "aiops",
+      "cases",
       "data",
       "discover",
+      "logsShared",
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",

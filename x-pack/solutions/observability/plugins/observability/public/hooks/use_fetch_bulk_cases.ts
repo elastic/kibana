@@ -20,17 +20,17 @@ export const useFetchBulkCases = ({
   const { cases: casesService } = useKibana().services;
 
   useEffect(() => {
-    const getBulkCasesByIds = async () => {
-      return casesService.api.cases.bulkGet({ ids });
-    };
-    if (ids.length) {
+    if (ids.length && casesService) {
+      const getBulkCasesByIds = async () => {
+        return casesService.api.cases.bulkGet({ ids });
+      };
       setIsLoading(true);
       getBulkCasesByIds()
         .then((res) => setCases(res.cases))
         .catch((resError) => setError(resError))
         .finally(() => setIsLoading(false));
     }
-  }, [casesService.api.cases, ids]);
+  }, [casesService, casesService?.api.cases, ids]);
 
   return { cases, isLoading, error };
 };
