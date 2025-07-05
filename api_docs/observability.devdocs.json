@@ -1111,7 +1111,7 @@
         "label": "ObservabilityAlertsTable",
         "description": [],
         "signature": [
-          "(props: Omit<{ id: string; columns?: ",
+          "(props: { id: string; columns?: ",
           "EuiDataGridColumn",
           "[] | undefined; query: Pick<",
           "QueryDslQueryContainer",
@@ -1135,25 +1135,9 @@
             "section": "def-public.ObservabilityAlertsTableContext",
             "text": "ObservabilityAlertsTableContext"
           },
-          ">) => void) | undefined; onLoaded?: ((alerts: ",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.Alert",
-            "text": "Alert"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.UnknownAlertFields",
-            "text": "UnknownAlertFields"
-          },
-          ">[], columns: ",
-          "EuiDataGridColumn",
-          "[]) => void) | undefined; runtimeMappings?: ",
+          ">) => void) | undefined; onLoaded?: ((props: ",
+          "AlertsTableOnLoadedProps",
+          ") => void) | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
           " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
           "EuiDataGridToolBarVisibilityOptions",
@@ -1173,7 +1157,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -3383,7 +3367,7 @@
           "EuiDataGridRowHeightsOptions",
           " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
-          "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }, \"services\"> & { hideLazyLoader?: boolean | undefined; }) => React.JSX.Element"
+          "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; } & { hideLazyLoader?: boolean | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/public/components/alerts_table/alerts_table_lazy.tsx",
         "deprecated": false,
@@ -3397,7 +3381,7 @@
             "label": "props",
             "description": [],
             "signature": [
-              "Omit<{ id: string; columns?: ",
+              "{ id: string; columns?: ",
               "EuiDataGridColumn",
               "[] | undefined; query: Pick<",
               "QueryDslQueryContainer",
@@ -3421,25 +3405,9 @@
                 "section": "def-public.ObservabilityAlertsTableContext",
                 "text": "ObservabilityAlertsTableContext"
               },
-              ">) => void) | undefined; onLoaded?: ((alerts: ",
-              {
-                "pluginId": "@kbn/alerting-types",
-                "scope": "common",
-                "docId": "kibKbnAlertingTypesPluginApi",
-                "section": "def-common.Alert",
-                "text": "Alert"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/alerting-types",
-                "scope": "common",
-                "docId": "kibKbnAlertingTypesPluginApi",
-                "section": "def-common.UnknownAlertFields",
-                "text": "UnknownAlertFields"
-              },
-              ">[], columns: ",
-              "EuiDataGridColumn",
-              "[]) => void) | undefined; runtimeMappings?: ",
+              ">) => void) | undefined; onLoaded?: ((props: ",
+              "AlertsTableOnLoadedProps",
+              ") => void) | undefined; runtimeMappings?: ",
               "MappingRuntimeFields",
               " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
               "EuiDataGridToolBarVisibilityOptions",
@@ -3459,7 +3427,7 @@
                 "section": "def-common.UnknownAlertFields",
                 "text": "UnknownAlertFields"
               },
-              ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+              ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
               {
                 "pluginId": "observability",
                 "scope": "public",
@@ -5669,7 +5637,7 @@
               "EuiDataGridRowHeightsOptions",
               " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
               "AlertsTableImperativeApi",
-              "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }, \"services\"> & { hideLazyLoader?: boolean | undefined; }"
+              "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; } & { hideLazyLoader?: boolean | undefined; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/components/alerts_table/alerts_table_lazy.tsx",
             "deprecated": false,
@@ -7927,7 +7895,8 @@
                 "docId": "kibCasesPluginApi",
                 "section": "def-public.CasesPublicStart",
                 "text": "CasesPublicStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -8252,6 +8221,24 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.logsDataAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "logsDataAccess",
+            "description": [],
+            "signature": [
+              "{ services: { logSourcesService: ",
+              "LogSourcesService",
+              "; logDataService: ",
+              "LogDataService",
+              "; }; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.navigation",
             "type": "Object",
             "tags": [],
@@ -8290,13 +8277,15 @@
                 "section": "def-public.NavigationSection",
                 "text": "NavigationSection"
               },
-              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
+              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, pricing, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
               "AppDeepLink",
               "<string>[]; updater$: ",
               "Subject",
               "<",
               "AppUpdater",
-              ">; }) => void; }"
+              ">; pricing: ",
+              "PricingServiceStart",
+              "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -9716,25 +9705,9 @@
             "section": "def-public.ObservabilityAlertsTableContext",
             "text": "ObservabilityAlertsTableContext"
           },
-          ">) => void) | undefined; onLoaded?: ((alerts: ",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.Alert",
-            "text": "Alert"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.UnknownAlertFields",
-            "text": "UnknownAlertFields"
-          },
-          ">[], columns: ",
-          "EuiDataGridColumn",
-          "[]) => void) | undefined; runtimeMappings?: ",
+          ">) => void) | undefined; onLoaded?: ((props: ",
+          "AlertsTableOnLoadedProps",
+          ") => void) | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
           " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
           "EuiDataGridToolBarVisibilityOptions",
@@ -9754,7 +9727,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -11988,25 +11961,9 @@
             "section": "def-public.ObservabilityAlertsTableContext",
             "text": "ObservabilityAlertsTableContext"
           },
-          ">) => void) | undefined; onLoaded?: ((alerts: ",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.Alert",
-            "text": "Alert"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.UnknownAlertFields",
-            "text": "UnknownAlertFields"
-          },
-          ">[], columns: ",
-          "EuiDataGridColumn",
-          "[]) => void) | undefined; runtimeMappings?: ",
+          ">) => void) | undefined; onLoaded?: ((props: ",
+          "AlertsTableOnLoadedProps",
+          ") => void) | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
           " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
           "EuiDataGridToolBarVisibilityOptions",
@@ -12026,7 +11983,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -14345,25 +14302,9 @@
             "section": "def-public.ObservabilityAlertsTableContext",
             "text": "ObservabilityAlertsTableContext"
           },
-          ">) => void) | undefined; onLoaded?: ((alerts: ",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.Alert",
-            "text": "Alert"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.UnknownAlertFields",
-            "text": "UnknownAlertFields"
-          },
-          ">[], columns: ",
-          "EuiDataGridColumn",
-          "[]) => void) | undefined; runtimeMappings?: ",
+          ">) => void) | undefined; onLoaded?: ((props: ",
+          "AlertsTableOnLoadedProps",
+          ") => void) | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
           " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
           "EuiDataGridToolBarVisibilityOptions",
@@ -14383,7 +14324,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -20282,7 +20223,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
+          "{ readonly enabled: boolean; readonly managedOtlpServiceUrl: string; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -21388,6 +21329,20 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableTableSearchBar.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -21514,6 +21469,20 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -21636,6 +21605,20 @@
                 "description": [],
                 "signature": [
                   "\"oblt\""
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21957,6 +21940,20 @@
                 "description": [],
                 "signature": [
                   "\"oblt\""
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.syntheticsThrottlingEnabled.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -23146,6 +23143,20 @@
                 "description": [],
                 "signature": [
                   "\"oblt\""
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.searchExcludedDataTiers.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -24667,6 +24678,22 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.OBSERVABILITY_TIERED_FEATURES",
+        "type": "Array",
+        "tags": [],
+        "label": "OBSERVABILITY_TIERED_FEATURES",
+        "description": [],
+        "signature": [
+          "PricingProductFeature",
+          "[]"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.observabilityAlertFeatureIds",
         "type": "Array",
         "tags": [],
@@ -25097,6 +25124,58 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE",
+        "type": "Object",
+        "tags": [],
+        "label": "OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE",
+        "description": [
+          "\nTiered features"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE.products",
+            "type": "Array",
+            "tags": [],
+            "label": "products",
+            "description": [],
+            "signature": [
+              "{ name: \"observability\"; tier: \"complete\"; }[]"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-common.observabilityPaths",
