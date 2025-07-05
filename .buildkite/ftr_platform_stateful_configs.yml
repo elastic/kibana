@@ -23,7 +23,7 @@ disabled:
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
-  - x-pack/test/upgrade/config.ts
+  - x-pack/platform/test/upgrade/config.ts
   - src/platform/test/functional/config.edge.js
   - x-pack/platform/test/functional/config.edge.ts
   - x-pack/test/functional/config.edge.js
