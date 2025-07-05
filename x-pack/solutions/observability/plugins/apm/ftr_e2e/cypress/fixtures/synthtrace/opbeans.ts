@@ -42,8 +42,11 @@ export function opbeans({ from, to }: { from: number; to: number }) {
         .duration(1000)
         .failure()
         .errors(
-          opbeansJava.error({ message: '[MockError] Foo', type: `Exception` }).timestamp(timestamp)
+          opbeansJava
+            .error({ message: '[MockError] Foo', type: `Exception` })
+            .timestamp(timestamp + 50)
         )
+        .duration(1000)
         .children(
           opbeansJava
             .span({
