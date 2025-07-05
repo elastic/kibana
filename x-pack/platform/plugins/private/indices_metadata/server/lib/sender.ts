@@ -5,23 +5,12 @@
  * 2.0.
  */
 
-import type {
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
-  EventTypeOpts,
-  LogMeta,
-  Logger,
-} from '@kbn/core/server';
-
-export interface IMetadataSender {
-  setup(): void;
-  start(analytics: AnalyticsServiceStart): void;
-  reportEBT: <T>(eventTypeOpts: EventTypeOpts<T>, eventData: T) => void;
-}
+import type { AnalyticsServiceStart, EventTypeOpts, LogMeta, Logger } from '@kbn/core/server';
+import { IMetadataSender } from './sender.types';
 
 export class MetadataSender implements IMetadataSender {
   private readonly logger: Logger;
-  private analytics?: AnalyticsServiceSetup;
+  private analytics?: AnalyticsServiceStart;
 
   constructor(logger: Logger) {
     this.logger = logger.get(MetadataSender.name);
@@ -29,7 +18,7 @@ export class MetadataSender implements IMetadataSender {
 
   public setup() {}
 
-  public start(analytics: AnalyticsServiceSetup) {
+  public start(analytics: AnalyticsServiceStart) {
     this.logger.debug('Starting sender');
     this.analytics = analytics;
   }

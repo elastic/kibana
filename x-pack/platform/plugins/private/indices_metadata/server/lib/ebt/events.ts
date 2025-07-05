@@ -257,7 +257,5 @@ export const registerEbtEvents = (analytics: AnalyticsServiceSetup) => {
     ILM_POLICY_EVENT,
   ];
 
-  events.forEach((eventConfig) => {
-    analytics.registerEventType(eventConfig);
-  });
+  events.forEach((eventConfig) => analytics.registerEventType(eventConfig));
 };

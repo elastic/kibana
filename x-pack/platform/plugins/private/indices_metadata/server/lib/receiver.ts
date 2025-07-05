@@ -23,18 +23,7 @@ import type {
   IndexStats,
 } from './indices_metadata_service.types';
 import { chunkedBy } from './utils';
-
-export interface IMetadataReceiver {
-  setup(): void;
-  start(esClient: ElasticsearchClient): void;
-
-  getIndices(): Promise<string[]>;
-  getDataStreams(): Promise<DataStream[]>;
-  getIndicesStats(indices: string[]): AsyncGenerator<IndexStats, void, unknown>;
-  getIlmsStats(indices: string[]): AsyncGenerator<IlmStats, void, unknown>;
-  isIlmStatsAvailable(): Promise<boolean>;
-  getIlmsPolicies(ilms: string[]): AsyncGenerator<IlmPolicy, void, unknown>;
-}
+import { IMetadataReceiver } from './receiver.types';
 
 export class MetadataReceiver implements IMetadataReceiver {
   private readonly logger: Logger;

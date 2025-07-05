@@ -7,62 +7,52 @@
 
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import { IndicesMetadataService } from './lib/indices_metadata_service';
 import { registerEbtEvents } from './lib/ebt/events';
-import { IMetadataReceiver, MetadataReceiver } from './lib/receiver';
-import { IMetadataSender, MetadataSender } from './lib/sender';
-
-export interface IndicesMetadataPluginSetup {
-  taskManager: TaskManagerSetupContract;
-}
-
-export interface IndicesMetadataPluginStart {
-  taskManager: TaskManagerStartContract;
-}
+import { MetadataReceiver } from './lib/receiver';
+import { MetadataSender } from './lib/sender';
+import type { IndicesMetadataPluginSetup, IndicesMetadataPluginStart } from './lib/plugin.types';
+import type { IMetadataReceiver } from './lib/receiver.types';
+import type { IMetadataSender } from './lib/sender.types';
 
 export class IndicesMetadataPlugin {
   private readonly logger: Logger;
-  private indicesMetadataService: IndicesMetadataService;
+  private readonly indicesMetadataService: IndicesMetadataService;
   private readonly receiver: IMetadataReceiver;
   private readonly sender: IMetadataSender;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
-
-    this.indicesMetadataService = new IndicesMetadataService(this.logger);
     this.receiver = new MetadataReceiver(this.logger);
     this.sender = new MetadataSender(this.logger);
+    this.indicesMetadataService = new IndicesMetadataService({
+      sender: this.sender,
+      receiver: this.receiver,
+      logger: this.logger,
+    });
   }
 
   public setup(core: CoreSetup, plugin: IndicesMetadataPluginSetup) {
-    this.indicesMetadataService.setup({
-      taskManager: plugin.taskManager,
-    });
+    const { taskManager } = plugin;
 
-    registerEbtEvents(core.analytics);
-
+    this.indicesMetadataService.setup({ taskManager });
     this.sender.setup();
     this.receiver.setup();
+
+    registerEbtEvents(core.analytics);
   }
 
   public start(core: CoreStart, plugin: IndicesMetadataPluginStart) {
     this.sender.start(core.analytics);
     this.receiver.start(core.elasticsearch.client.asInternalUser);
-
-    const serviceStart = {
-      taskManager: plugin.taskManager,
-      sender: this.sender,
-      receiver: this.receiver,
-    };
-
-    this.indicesMetadataService.start(serviceStart).catch((error) => {
-      this.logger.error('Failed to start indices metadata service', {
-        error,
+    this.indicesMetadataService
+      .start({
+        taskManager: plugin.taskManager,
+      })
+      .catch((error) => {
+        this.logger.error('Failed to start indices metadata service', {
+          error,
+        });
       });
-    });
   }
 }

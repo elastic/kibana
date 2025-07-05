@@ -9,8 +9,15 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { IMetadataReceiver } from './receiver';
-import { IMetadataSender } from './sender';
+import type { Logger } from '@kbn/core/server';
+import { IMetadataSender } from './sender.types';
+import { IMetadataReceiver } from './receiver.types';
+
+export interface IndicesMetadataServiceInit {
+  logger: Logger;
+  sender: IMetadataSender;
+  receiver: IMetadataReceiver;
+}
 
 export interface IndicesMetadataServiceSetup {
   taskManager: TaskManagerSetupContract;
@@ -18,8 +25,6 @@ export interface IndicesMetadataServiceSetup {
 
 export interface IndicesMetadataServiceStart {
   taskManager: TaskManagerStartContract;
-  sender: IMetadataSender;
-  receiver: IMetadataReceiver;
 }
 
 export interface IlmPolicies {
