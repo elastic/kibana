@@ -119,7 +119,7 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
       config: esQueryConfig,
       dataProviders,
       dataViewSpec: sourcererDataView,
-      newDataViewPickerEnabledDataView: experimentalDataView,
+      dataView: experimentalDataView,
       browserFields,
       filters,
       kqlQuery,

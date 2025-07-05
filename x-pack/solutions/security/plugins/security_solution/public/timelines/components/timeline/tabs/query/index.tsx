@@ -163,7 +163,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       config: esQueryConfig,
       dataProviders,
       dataViewSpec: oldSourcererDataViewSpec,
-      newDataViewPickerEnabledDataView: experimentalDataView,
+      dataView: experimentalDataView,
       browserFields,
       filters,
       kqlQuery,

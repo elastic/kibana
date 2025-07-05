@@ -100,7 +100,7 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
         dataViewSpec: oldSourcererDataView,
-        newDataViewPickerEnabledDataView: experimentalDataView,
+        dataView: experimentalDataView,
         queries: [query],
         filters,
       }),

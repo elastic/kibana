@@ -28,7 +28,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters: Filter[];
   indexNames: string[];
   dataViewSpec?: DataViewSpec;
-  newDataViewPickerEnabledDataView?: DataView;
+  dataView?: DataView;
   query: Query;
 }
 
@@ -37,7 +37,7 @@ const EventCountsComponent: React.FC<Props> = ({
   from,
   indexNames,
   dataViewSpec,
-  newDataViewPickerEnabledDataView,
+  dataView,
   query,
   setQuery,
   to,
@@ -49,11 +49,11 @@ const EventCountsComponent: React.FC<Props> = ({
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
         dataViewSpec,
-        newDataViewPickerEnabledDataView,
+        dataView,
         queries: [query],
         filters: [...filters, ...fieldNameExistsFilter(SecurityPageName.hosts)],
       }),
-    [dataViewSpec, filters, newDataViewPickerEnabledDataView, query, uiSettings]
+    [dataViewSpec, filters, dataView, query, uiSettings]
   );
 
   const [networkFilterQuery] = useMemo(
@@ -61,11 +61,11 @@ const EventCountsComponent: React.FC<Props> = ({
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
         dataViewSpec,
-        newDataViewPickerEnabledDataView,
+        dataView,
         queries: [query],
         filters: [...filters, ...sourceOrDestinationIpExistsFilter],
       }),
-    [uiSettings, dataViewSpec, newDataViewPickerEnabledDataView, query, filters]
+    [uiSettings, dataViewSpec, dataView, query, filters]
   );
 
   useInvalidFilterQuery({

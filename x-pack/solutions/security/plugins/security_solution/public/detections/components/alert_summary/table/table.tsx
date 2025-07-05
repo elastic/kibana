@@ -218,7 +218,7 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
       config: getEsQueryConfig(uiSettings),
       dataProviders: [],
       dataViewSpec,
-      newDataViewPickerEnabledDataView: dataView,
+      dataView,
       browserFields,
       filters,
       kqlQuery: globalQuery,

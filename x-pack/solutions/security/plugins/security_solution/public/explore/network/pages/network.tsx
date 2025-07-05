@@ -133,7 +133,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         convertToBuildEsQuery({
           config: getEsQueryConfig(uiSettings),
           dataViewSpec: oldSourcererDataView,
-          newDataViewPickerEnabledDataView: dataView,
+          dataView,
           queries: [query],
           filters: globalFilters,
         }),
@@ -145,7 +145,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         convertToBuildEsQuery({
           config: getEsQueryConfig(uiSettings),
           dataViewSpec: oldSourcererDataView,
-          newDataViewPickerEnabledDataView: dataView,
+          dataView,
           queries: [query],
           filters: tabsFilters,
         }),

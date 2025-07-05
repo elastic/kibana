@@ -245,7 +245,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         filters: globalFilters,
         from: start,
         dataViewSpec: oldSourcererDataView,
-        newDataViewPickerEnabledDataView: experimentalDataView,
+        dataView: experimentalDataView,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,

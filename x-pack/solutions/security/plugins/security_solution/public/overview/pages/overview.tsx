@@ -141,7 +141,7 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       dataViewSpec={oldSourcererDataView}
-                      newDataViewPickerEnabledDataView={experimentalDataView}
+                      dataView={experimentalDataView}
                       query={query}
                       queryType="overview"
                       to={to}
@@ -154,7 +154,7 @@ const OverviewComponent = () => {
                       from={from}
                       indexNames={selectedPatterns}
                       dataViewSpec={oldSourcererDataView}
-                      newDataViewPickerEnabledDataView={experimentalDataView}
+                      dataView={experimentalDataView}
                       query={query}
                       setQuery={setQuery}
                       to={to}
