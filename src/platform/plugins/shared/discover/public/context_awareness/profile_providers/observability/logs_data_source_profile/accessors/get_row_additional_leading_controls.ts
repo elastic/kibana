@@ -15,6 +15,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { BasicPrettyPrinter, mutate, parse } from '@kbn/esql-ast';
 import { IGNORED_FIELD } from '@kbn/discover-utils/src/field_constants';
 import type { LogsDataSourceProfileProvider } from '../profile';
+import type { RowControlsExtensionParams } from '../../../../types';
 
 export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
 
@@ -24,7 +25,6 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
       const {
         actions: { updateESQLQuery, setExpandedDoc },
         query,
-        isDocViewerEnabled,
       } = params;
 
       const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
@@ -44,27 +44,27 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
         : undefined;
 
       const leadingControlClick =
-        (actionName: 'stacktrace' | 'quality_issues') => (props: RowControlRowProps) => {
-          if (!setExpandedDoc) {
-            return;
-          }
-
+        (
+          openDocViewer: NonNullable<RowControlsExtensionParams['actions']['setExpandedDoc']>,
+          actionName: 'stacktrace' | 'quality_issues'
+        ) =>
+        (props: RowControlRowProps) => {
           context.logOverviewContext$.next({
             recordId: props.record.id,
             initialAccordionSection: actionName,
           });
-          setExpandedDoc(props.record, { initialTabId: 'doc_view_logs_overview' });
+          openDocViewer(props.record, { initialTabId: 'doc_view_logs_overview' });
         };
 
-      return isDocViewerEnabled
+      return setExpandedDoc
         ? [
             ...additionalControls,
             createDegradedDocsControl({
               enabled: isDegradedDocsControlEnabled,
               addIgnoredMetadataToQuery,
-              onClick: leadingControlClick('quality_issues'),
+              onClick: leadingControlClick(setExpandedDoc, 'quality_issues'),
             }),
-            createStacktraceControl({ onClick: leadingControlClick('stacktrace') }),
+            createStacktraceControl({ onClick: leadingControlClick(setExpandedDoc, 'stacktrace') }),
           ]
         : additionalControls;
     };

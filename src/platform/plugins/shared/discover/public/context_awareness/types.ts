@@ -232,10 +232,6 @@ export interface RowControlsExtensionParams {
    * The current query
    */
   query?: DiscoverAppState['query'];
-  /**
-   * Indicates if the document viewer is enabled
-   */
-  isDocViewerEnabled: boolean;
 }
 
 /**

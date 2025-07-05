@@ -46,11 +46,10 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
       actions: {
         updateESQLQuery: onUpdateESQLQuery,
-        setExpandedDoc,
+        setExpandedDoc: renderDocumentView ? setExpandedDoc : undefined,
       },
       dataView,
       query,
-      isDocViewerEnabled: !!renderDocumentView,
     });
   }, [
     customRowAdditionalLeadingControls,
