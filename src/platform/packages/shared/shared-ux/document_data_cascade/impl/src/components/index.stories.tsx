@@ -23,7 +23,7 @@ export default {
   title: 'Data Cascade/Data Cascade',
 } satisfies Meta;
 
-export const GridImplementation: StoryObj<{ query: string }> = {
+export const CascadeGridImplementation: StoryObj<{ query: string }> = {
   render: function DataCascadeWrapper(args) {
     const initData = new Array(100).fill(null).map(() => {
       return {
