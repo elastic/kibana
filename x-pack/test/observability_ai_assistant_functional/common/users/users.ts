@@ -9,11 +9,8 @@ import { kbnTestConfig } from '@kbn/test';
 
 const password = kbnTestConfig.getUrlParts().password!;
 
-export const UNAUTHORIZED_USERNAME = 'unauthorized_user';
-export const UNAUTHORIZED_USER_PASSWORD = 'unauthorized_password';
-
 export interface User {
-  username: 'elastic' | 'editor' | 'viewer' | 'secondary_editor' | 'unauthorized_user';
+  username: 'elastic' | 'editor' | 'viewer' | 'secondary_editor';
   password: string;
   roles: string[];
 }
@@ -36,10 +33,4 @@ export const viewer: User = {
   roles: ['viewer'],
 };
 
-export const unauthorizedUser: User = {
-  username: UNAUTHORIZED_USERNAME,
-  password: UNAUTHORIZED_USER_PASSWORD,
-  roles: [],
-};
-
-export const allUsers = [editor, secondaryEditor, viewer, unauthorizedUser];
+export const allUsers = [editor, secondaryEditor, viewer];
