@@ -3398,6 +3398,30 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.allToolsSelection",
+        "type": "Array",
+        "tags": [],
+        "label": "allToolsSelection",
+        "description": [
+          "\nConstant tool selection to select all tools"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ByIdsToolSelection",
+            "text": "ByIdsToolSelection"
+          },
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_selection.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.allToolsSelectionWildcard",
         "type": "string",
         "tags": [],
