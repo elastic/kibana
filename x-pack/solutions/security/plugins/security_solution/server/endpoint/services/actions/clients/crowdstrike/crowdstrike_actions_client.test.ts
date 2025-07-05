@@ -51,9 +51,9 @@ describe('CrowdstrikeActionsClient class', () => {
     > = {}
   ) => responseActionsClientMock.createIsolateOptions({ ...overrides, agent_type: 'crowdstrike' });
 
-  const createCrowdstrikeRunscrtiptOptions = (
+  const createCrowdstrikeRunscriptOptions = (
     overrides: Omit<
-      Parameters<typeof responseActionsClientMock.createIsolateOptions>[0],
+      Parameters<typeof responseActionsClientMock.createRunScriptOptions>[0],
       'agent_type'
     > = {}
   ) =>
@@ -530,7 +530,7 @@ describe('CrowdstrikeActionsClient class', () => {
   describe('#runscript()', () => {
     it('should send action to Crowdstrike', async () => {
       await crowdstrikeActionsClient.runscript(
-        createCrowdstrikeRunscrtiptOptions({
+        createCrowdstrikeRunscriptOptions({
           actionId: '123-456-789',
           endpoint_ids: ['1-2-3'],
           comment: 'test runscript comment',
@@ -678,8 +678,9 @@ describe('CrowdstrikeActionsClient class', () => {
         (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
 
         await crowdstrikeActionsClient.runscript(
-          createCrowdstrikeRunscrtiptOptions({
+          createCrowdstrikeRunscriptOptions({
             actionId: '123-abc-678',
+            endpoint_ids: ['1-2-3'],
             comment: 'test runscript comment',
             parameters: {
               raw: 'echo "Hello World"',
@@ -723,7 +724,7 @@ describe('CrowdstrikeActionsClient class', () => {
         (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
 
         await crowdstrikeActionsClient.runscript(
-          createCrowdstrikeRunscrtiptOptions({
+          createCrowdstrikeRunscriptOptions({
             actionId: '456-pqr-789',
             endpoint_ids: ['1-2-3'],
             parameters: {
