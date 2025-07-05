@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { produce } from 'immer';
+import { castDraft, produce } from 'immer';
 
 type DocWithId = Record<string, any> & { id: string };
 
@@ -77,20 +77,17 @@ export const storeReducer = <G extends GroupNode = GroupNode, L extends LeafNode
   switch (action.type) {
     case 'SET_INITIAL_STATE': {
       return produce(state, (draft) => {
-        draft.groupNodes = [...action.payload];
-        return draft;
+        draft.groupNodes = [...castDraft(action.payload)];
       });
     }
     case 'SET_ACTIVE_CASCADE_GROUPS': {
       return produce(state, (draft) => {
         draft.currentGroupByColumns = action.payload;
-        return draft;
       });
     }
     case 'RESET_ACTIVE_CASCADE_GROUPS': {
       return produce(state, (draft) => {
         draft.currentGroupByColumns = state.groupByColumns.length ? [state.groupByColumns[0]] : [];
-        return draft;
       });
     }
     case 'UPDATE_ROW_GROUP_NODE_DATA': {
@@ -113,8 +110,7 @@ export const storeReducer = <G extends GroupNode = GroupNode, L extends LeafNode
     case 'UPDATE_ROW_GROUP_LEAF_DATA': {
       return produce(state, (draft) => {
         const { cacheKey, data } = action.payload;
-        draft.leafNodes.set(cacheKey, data);
-        return draft;
+        draft.leafNodes.set(cacheKey, castDraft(data));
       });
     }
     default:
