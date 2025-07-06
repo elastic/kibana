@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createNoRestrictedImportsOverride } from './no-restricted-imports';
+export { createNoRestrictedImportsOverride } from './src/no-restricted-imports';
 export type {
   RestrictedImportString,
   RestrictedImportPath,
@@ -16,4 +16,4 @@ export type {
   RestrictedImportOptions,
   NoRestrictedImportsRuleConfig,
   CreateOverrideOptions,
-} from './types';
+} from './src/types';

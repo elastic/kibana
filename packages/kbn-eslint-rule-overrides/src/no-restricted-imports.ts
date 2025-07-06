@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as path from 'path';
-import type { Linter } from 'eslint';
+import { execSync } from 'child_process';
+import path from 'path';
 import minimatch from 'minimatch';
+import type { Linter } from 'eslint';
 import type {
   RestrictedImportString,
   RestrictedImportPath,
@@ -19,204 +20,152 @@ import type {
 } from './types';
 
 /**
- * Creates ESLint override configuration for no-restricted-imports rule.
- * This function intelligently merges additional restrictions with existing ones
- * from the root config and filters overrides based on the calling directory.
+ * Creates an ESLint configuration override for no-restricted-imports rule
+ * that merges with existing root configuration and applies to the current directory context.
  */
 export function createNoRestrictedImportsOverride(
-  callingDirectory: string,
   options: CreateOverrideOptions = {}
-): Linter.Config {
-  const {
-    additionalRestrictedImports = [],
-    rootDir = process.cwd(),
-    rootConfigPath = path.join(rootDir, '.eslintrc.js'),
-    mergeWithExisting = true,
-    overrideFilter,
-  } = options;
+): Linter.ConfigOverride[] {
+  // Get root directory using git
+  const ROOT_DIR = execSync('git rev-parse --show-toplevel', {
+    encoding: 'utf8',
+    cwd: __dirname,
+  }).trim();
 
-  // Load and clone the root config
-  const rootConfig = loadRootConfig(rootConfigPath);
-  const clonedConfig = JSON.parse(JSON.stringify(rootConfig));
+  const ROOT_CLIMB_STRING = path.relative(__dirname, ROOT_DIR); // i.e. '../../..'
+
+  // Load and clone root config
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const rootConfig: Linter.Config = require(`${ROOT_CLIMB_STRING}/.eslintrc`);
+  const clonedRootConfig: Linter.Config = JSON.parse(JSON.stringify(rootConfig));
+
+  const { restrictedImports = [] } = options;
+
+  if (restrictedImports.length === 0) {
+    throw new Error(
+      'No restricted imports provided. Please specify at least one import to restrict.'
+    );
+  }
 
   // Find overrides with no-restricted-imports rule
-  const relevantOverrides = clonedConfig.overrides.filter(
-    (override: Linter.ConfigOverride<Linter.RulesRecord>) => {
-      if (overrideFilter) {
-        return overrideFilter(override);
-      }
-      return override.rules && 'no-restricted-imports' in override.rules;
-    }
+  const overridesWithNoRestrictedImportRule = (clonedRootConfig.overrides || []).filter(
+    (
+      override
+    ): override is Linter.ConfigOverride & {
+      // fixing bad eslint types that hardcode the optionality of rules type
+      rules: {
+        'no-restricted-imports': NoRestrictedImportsRuleConfig;
+        [key: string]: Linter.RuleEntry;
+      };
+    } => Boolean(override.rules && 'no-restricted-imports' in override.rules)
   );
 
   // Process each override
-  for (const override of relevantOverrides) {
-    const rule = override.rules!['no-restricted-imports'] as NoRestrictedImportsRuleConfig;
+  for (const override of overridesWithNoRestrictedImportRule) {
+    const noRestrictedImportsRule = override.rules['no-restricted-imports'];
 
-    if (Array.isArray(rule) && rule.length >= 2) {
-      const [severity, ...rawOptions] = rule;
-      const modernConfig = normalizeToModernConfig(rawOptions);
+    // if the rule has options, i.e. ['error', { paths: [...], patterns: [...] }]
+    // as opposed to just 'error'
+    if (Array.isArray(noRestrictedImportsRule) && noRestrictedImportsRule.length >= 2) {
+      const [severity, ...rawOptions] = noRestrictedImportsRule;
 
-      if (mergeWithExisting) {
-        // Merge additional restrictions, removing duplicates
-        const mergedPaths = mergeRestrictedPaths(
-          modernConfig.paths || [],
-          additionalRestrictedImports
-        );
-        modernConfig.paths = mergedPaths;
-      } else {
-        // Replace with only additional restrictions
-        modernConfig.paths = additionalRestrictedImports;
+      const modernConfig: Required<RestrictedImportOptions> = { paths: [], patterns: [] };
+
+      // Normalize all inputs into modern config format
+      for (const opt of rawOptions) {
+        if (typeof opt === 'string' || (typeof opt === 'object' && 'name' in opt)) {
+          modernConfig.paths.push(opt as RestrictedImportString | RestrictedImportPath);
+        } else if (typeof opt === 'object' && ('paths' in opt || 'patterns' in opt)) {
+          const optConfig = opt as RestrictedImportOptions;
+          if (optConfig.paths) modernConfig.paths.push(...optConfig.paths);
+          if (optConfig.patterns) modernConfig.patterns.push(...optConfig.patterns);
+        }
       }
 
-      // Update the rule configuration
-      override.rules!['no-restricted-imports'] = [severity, modernConfig];
+      // Remove duplicates and add new restricted imports
+      const existingPaths = modernConfig.paths.filter(
+        (existing) =>
+          !restrictedImports.some((restriction) =>
+            typeof existing === 'string'
+              ? typeof restriction === 'string'
+                ? existing === restriction
+                : existing === restriction.name
+              : typeof restriction === 'string'
+              ? existing.name === restriction
+              : existing.name === restriction.name
+          )
+      );
+
+      const newRuleConfig: NoRestrictedImportsRuleConfig = [
+        severity,
+        {
+          paths: [...existingPaths, ...restrictedImports],
+          patterns: modernConfig.patterns,
+        },
+      ];
+
+      override.rules['no-restricted-imports'] = newRuleConfig;
     }
   }
 
-  // Convert file paths to be relative to calling directory
-  const scopedOverrides = getScopedOverrides(relevantOverrides, rootDir, callingDirectory);
+  function getAssignableDifference(inputPath: string, targetDir: string): string | null {
+    const absoluteTarget = path.resolve(targetDir);
+    const isGlob = inputPath.includes('**');
 
-  return {
-    overrides: scopedOverrides,
-  };
-}
+    let base: string;
+    let remaining: string;
 
-/**
- * Loads the root ESLint configuration.
- */
-function loadRootConfig(configPath: string): Linter.Config {
-  try {
-    return require(configPath);
-  } catch (error) {
-    throw new Error(`Failed to load root ESLint config from ${configPath}: ${error}`);
-  }
-}
+    if (isGlob) {
+      const globIndex = inputPath.indexOf('**');
+      base = inputPath.slice(0, globIndex).replace(/[\\/]+$/, '');
+      remaining = inputPath.slice(globIndex);
+    } else {
+      base = inputPath;
+      remaining = '';
+    }
 
-/**
- * Normalizes various input formats into the modern RestrictedImportOptions format.
- */
-function normalizeToModernConfig(rawOptions: any[]): RestrictedImportOptions {
-  const modernConfig: RestrictedImportOptions = { paths: [], patterns: [] };
+    const absoluteBase = path.resolve(base);
 
-  for (const opt of rawOptions) {
-    if (typeof opt === 'string' || (typeof opt === 'object' && 'name' in opt)) {
-      // It's a path restriction
-      modernConfig.paths!.push(opt);
-    } else if (typeof opt === 'object' && ('paths' in opt || 'patterns' in opt)) {
-      // It's already in modern format
-      if (opt.paths) {
-        modernConfig.paths!.push(...opt.paths);
-      }
-      if (opt.patterns) {
-        modernConfig.patterns!.push(...opt.patterns);
-      }
-    } else if (typeof opt === 'object' && ('group' in opt || 'regex' in opt)) {
-      // It's a pattern restriction
-      modernConfig.patterns!.push(opt);
+    if (!absoluteTarget.startsWith(absoluteBase)) return null;
+
+    if (isGlob) {
+      return remaining || path.normalize('**/*');
+    } else {
+      const relative = path.relative(absoluteBase, absoluteTarget);
+      return relative || '.';
     }
   }
 
-  return modernConfig;
-}
+  // Convert file paths to absolute paths
+  const absOverrides = overridesWithNoRestrictedImportRule.map((override) => {
+    const overrideFiles = typeof override.files === 'string' ? [override.files] : override.files;
 
-/**
- * Merges additional restricted paths with existing ones, removing duplicates.
- */
-function mergeRestrictedPaths(
-  existingPaths: Array<RestrictedImportString | RestrictedImportPath>,
-  additionalPaths: Array<RestrictedImportString | RestrictedImportPath>
-): Array<RestrictedImportString | RestrictedImportPath> {
-  const getPathName = (restrictedPath: RestrictedImportString | RestrictedImportPath): string => {
-    return typeof restrictedPath === 'string' ? restrictedPath : restrictedPath.name;
-  };
+    return {
+      ...override,
+      files: overrideFiles.map((fileOrGlob) => {
+        return path.resolve(ROOT_DIR, fileOrGlob);
+      }),
+    };
+  });
 
-  const additionalPathNames = new Set(additionalPaths.map(getPathName));
+  // Filter overrides that apply to current directory
+  const inScopeOverrides = absOverrides.map((override) => {
+    return {
+      ...override,
+      files: override.files
+        .filter((absPath) => {
+          return minimatch(__dirname, path.dirname(absPath), {
+            matchBase: true,
+            dot: true,
+            nocase: true,
+          });
+        })
+        .map((absPath) => {
+          return getAssignableDifference(absPath, __dirname);
+        })
+        .filter((file): file is string => Boolean(file)),
+    };
+  });
 
-  // Filter out existing paths that would be duplicates
-  const filteredExisting = existingPaths.filter(
-    (existing) => !additionalPathNames.has(getPathName(existing))
-  );
-
-  return [...filteredExisting, ...additionalPaths];
-}
-
-/**
- * Filters and transforms overrides to be scoped to the calling directory.
- */
-function getScopedOverrides(
-  overrides: Array<Linter.ConfigOverride<Linter.RulesRecord>>,
-  rootDir: string,
-  callingDirectory: string
-): Array<Linter.ConfigOverride<Linter.RulesRecord>> {
-  const scopedOverrides: Array<Linter.ConfigOverride<Linter.RulesRecord>> = [];
-
-  for (const override of overrides) {
-    const files = Array.isArray(override.files) ? override.files : [override.files || ''];
-    const scopedFiles = getScopedFiles(files, rootDir, callingDirectory);
-
-    if (scopedFiles.length > 0) {
-      scopedOverrides.push({
-        ...override,
-        files: scopedFiles,
-      });
-    }
-  }
-
-  return scopedOverrides;
-}
-
-/**
- * Transforms file patterns to be relative to the calling directory.
- */
-function getScopedFiles(files: string[], rootDir: string, callingDirectory: string): string[] {
-  const absoluteFiles = files.map((fileOrGlob) => path.resolve(rootDir, fileOrGlob));
-
-  const scopedFiles = absoluteFiles
-    .filter((absPath) => {
-      // Check if calling directory matches the pattern's directory
-      return minimatch(callingDirectory, path.dirname(absPath), {
-        matchBase: true,
-        dot: true,
-        nocase: process.platform === 'win32',
-      });
-    })
-    .map((absPath) => getRelativePattern(absPath, callingDirectory))
-    .filter((pattern): pattern is string => pattern !== null);
-
-  return scopedFiles;
-}
-
-/**
- * Calculates the relative pattern from an absolute path to a target directory.
- */
-function getRelativePattern(inputPath: string, targetDir: string): string | null {
-  const absoluteTarget = path.resolve(targetDir);
-  const isGlob = inputPath.includes('**');
-
-  let base: string;
-  let remaining: string;
-
-  if (isGlob) {
-    const globIndex = inputPath.indexOf('**');
-    base = inputPath.slice(0, globIndex).replace(/[\\/]+$/, '');
-    remaining = inputPath.slice(globIndex);
-  } else {
-    base = inputPath;
-    remaining = '';
-  }
-
-  const absoluteBase = path.resolve(base);
-
-  // Check if target is within base path
-  if (!absoluteTarget.startsWith(absoluteBase)) {
-    return null;
-  }
-
-  if (isGlob) {
-    return remaining || path.normalize('**/*');
-  } else {
-    const relative = path.relative(absoluteBase, absoluteTarget);
-    return relative || '.';
-  }
+  return inScopeOverrides.filter((override) => override.files.length > 0);
 }
