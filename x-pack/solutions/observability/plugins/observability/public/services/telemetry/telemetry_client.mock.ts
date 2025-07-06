@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { ITelemetryClient } from './types';
 
-export default ({ loadTestFile }: FtrProviderContext): void => {
-  loadTestFile(require.resolve('./export_prebuilt_rules'));
-};
+export const createTelemetryClientMock = (): jest.Mocked<ITelemetryClient> => ({
+  reportRelatedAlertsLoaded: jest.fn(),
+});

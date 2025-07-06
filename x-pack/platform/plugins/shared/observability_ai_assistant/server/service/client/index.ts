@@ -503,6 +503,8 @@ export class ObservabilityAIAssistantClient {
       return defer(() =>
         this.dependencies.inferenceClient.chatComplete({
           ...options,
+          temperature: 0.25,
+          maxRetries: 0,
           stream: true,
         })
       ).pipe(
@@ -523,6 +525,8 @@ export class ObservabilityAIAssistantClient {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
         messages: convertMessagesForInference(messages, this.dependencies.logger),
+        temperature: 0.25,
+        maxRetries: 0,
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }
