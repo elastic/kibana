@@ -7,11 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { execSync } = require('child_process');
-const path = require('path');
-
-const minimatch = require('minimatch');
-
 /**
  * @typedef {string} RestrictedImportString
  * A string specifying a module name to restrict.
@@ -61,32 +56,33 @@ const minimatch = require('minimatch');
 /**
  * @typedef {Object} CreateOverrideOptions
  * Options for creating override configurations.
- * @property {Array<RestrictedImportString | RestrictedImportPath>} [restrictedImports] - Additional restricted imports to add.
+ * @property {string} childConfigDir - Directory path for nested eslint configuration
+ * @property {Array<RestrictedImportString | RestrictedImportPath>} restrictedImports - Additional restricted imports to add.
  */
+
+const path = require('path');
+
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+const rootConfig = require('../../../.eslintrc');
+
+const minimatch = require('minimatch');
+
+const ROOT_DIR = path.resolve(__dirname, '..', '..', '..');
 
 /**
  * Creates an ESLint configuration override for no-restricted-imports rule
  * that merges with existing root configuration and applies to the current directory context.
- * @param {CreateOverrideOptions} [options={}] - Configuration options
+ * @param {CreateOverrideOptions} options = {} - Configuration options
  * @returns {Array<Object>} Array of ESLint override configurations
  */
 function createNoRestrictedImportsOverride(options = {}) {
-  // Get root directory using git
-  const ROOT_DIR = execSync('git rev-parse --show-toplevel', {
-    encoding: 'utf8',
-    cwd: __dirname,
-  }).trim();
+  const { restrictedImports = [], childConfigDir } = options;
 
-  const ROOT_CLIMB_STRING = path.relative(__dirname, ROOT_DIR); // i.e. '../../..'
-
-  // Load and clone root config
-  /** @type {import('eslint').Linter.Config} */
-  // eslint-disable-next-line import/no-dynamic-require
-  const rootConfig = require(`${ROOT_CLIMB_STRING}/.eslintrc`);
-  /** @type {import('eslint').Linter.Config} */
-  const clonedRootConfig = JSON.parse(JSON.stringify(rootConfig));
-
-  const { restrictedImports = [] } = options;
+  if (!childConfigDir) {
+    throw new Error(
+      'No childConfigDir provided. Please pass __dirname in your nested .eslintrc.js file.'
+    );
+  }
 
   if (restrictedImports.length === 0) {
     throw new Error(
@@ -95,8 +91,8 @@ function createNoRestrictedImportsOverride(options = {}) {
   }
 
   // Find overrides with no-restricted-imports rule
-  const overridesWithNoRestrictedImportRule = (clonedRootConfig.overrides || []).filter(
-    (override) => Boolean(override.rules && 'no-restricted-imports' in override.rules)
+  const overridesWithNoRestrictedImportRule = (rootConfig.overrides || []).filter((override) =>
+    Boolean(override.rules && 'no-restricted-imports' in override.rules)
   );
 
   // Process each override
@@ -209,14 +205,14 @@ function createNoRestrictedImportsOverride(options = {}) {
       ...override,
       files: override.files
         .filter((absPath) => {
-          return minimatch(__dirname, path.dirname(absPath), {
+          return minimatch(childConfigDir, path.dirname(absPath), {
             matchBase: true,
             dot: true,
             nocase: true,
           });
         })
         .map((absPath) => {
-          return getAssignableDifference(absPath, __dirname);
+          return getAssignableDifference(absPath, childConfigDir);
         })
         .filter((file) => Boolean(file)),
     };
