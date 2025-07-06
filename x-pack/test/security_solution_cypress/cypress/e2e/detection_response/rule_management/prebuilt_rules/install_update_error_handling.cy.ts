@@ -37,6 +37,10 @@ import {
   assertRulesPresentInAddPrebuiltRulesTable,
   assertRuleUpgradeFailureToastShown,
   assertRulesPresentInRuleUpdatesTable,
+  interceptInstallationRequestToFailPartially,
+  assertRuleInstallationSuccessToastShown,
+  assertRuleUpgradeSuccessToastShown,
+  interceptUpgradeRequestToFailPartially,
 } from '../../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
@@ -111,6 +115,19 @@ describe(
         cy.get(INSTALL_ALL_RULES_BUTTON).click();
         assertInstallationRequestIsComplete([RULE_1, RULE_2]);
         assertRuleInstallationFailureToastShown([RULE_1, RULE_2]);
+        assertRulesPresentInAddPrebuiltRulesTable([RULE_1, RULE_2]);
+      });
+
+      it('installing all available rules at once with some rules succeeding', () => {
+        clickAddElasticRulesButton();
+        interceptInstallationRequestToFailPartially({
+          rulesToSucceed: [RULE_1],
+          rulesToFail: [RULE_2],
+        });
+        cy.get(INSTALL_ALL_RULES_BUTTON).click();
+        assertInstallationRequestIsComplete([RULE_1, RULE_2]);
+        assertRuleInstallationSuccessToastShown([RULE_1]);
+        assertRuleInstallationFailureToastShown([RULE_2]);
         assertRulesPresentInAddPrebuiltRulesTable([RULE_1, RULE_2]);
       });
     });
@@ -201,6 +218,21 @@ describe(
         cy.get(UPGRADE_ALL_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
         assertRuleUpgradeFailureToastShown([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+      });
+
+      it('upgrading all rules with available upgrades at once with some rules succeeding', () => {
+        interceptUpgradeRequestToFailPartially({
+          rulesToSucceed: [OUTDATED_RULE_1],
+          rulesToFail: [OUTDATED_RULE_2],
+        });
+
+        // Navigate to Rule Upgrade table
+        clickRuleUpdatesTab();
+
+        cy.get(UPGRADE_ALL_RULES_BUTTON).click();
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_1]);
+        assertRuleUpgradeFailureToastShown([OUTDATED_RULE_2]);
         assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
       });
     });
