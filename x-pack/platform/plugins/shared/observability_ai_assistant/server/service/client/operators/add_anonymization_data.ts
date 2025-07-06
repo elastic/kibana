@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { filter, map, takeLast, defaultIfEmpty, OperatorFunction } from 'rxjs';
-import type { Message } from '../../../../common/types';
+import { Dictionary, cloneDeep, keyBy } from 'lodash';
+import { OperatorFunction, defaultIfEmpty, filter, map, toArray } from 'rxjs';
 import {
   StreamingChatResponseEventType,
   type MessageAddEvent,
   type StreamingChatResponseEvent,
 } from '../../../../common/conversation_complete';
+import type { Message } from '../../../../common/types';
 
 /**
- * operator to process events with deanonymization data and format messages with deanonymizations.
+ * Operator to process events with deanonymization data and format messages with deanonymizations.
+ * Deanonymizations are matched based on `content`, as the Inference client's anonymization process
+ * only emits deanonymizations based on `content`. Message ordering is not reliable because not
+ * every MessageAddEvent is guaranteed to have the same messages as input as the source messages.
  *
  * @param allMessages The combined messages to use as a fallback if no deanonymization data is found
  * @returns An Observable that emits a single array of messages with deanonymization data added
@@ -30,35 +34,40 @@ export function addAnonymizationData(
           event.type === StreamingChatResponseEventType.MessageAdd &&
           !!(event.deanonymized_input || event.deanonymized_output)
       ),
-      takeLast(1),
-      map((event: MessageAddEvent) => {
-        // Create a copy of messages that we'll modify with deanonymization data
-        const result = [...messages];
+      toArray(),
+      map((events) => {
+        const clonedMessages = cloneDeep(messages);
 
-        // Extract the initial messages (before the current event's messages)
-        const initialMessagesCount = result.length - (event.deanonymized_input?.length || 0) - 1; // -1 for the current message
+        const messagesByContent: Dictionary<Message> = keyBy(
+          clonedMessages.filter(
+            (item): item is typeof item & { message: { content: string } } => !!item.message.content
+          ),
+          (item) => item.message.content
+        );
 
-        // Process messages from deanonymized_input - assign deanonymizations by order
-        if (event.deanonymized_input?.length) {
-          event.deanonymized_input.forEach((item, index) => {
-            // Calculate the corresponding index in our result array
-            const resultIndex = initialMessagesCount + index;
+        for (const event of events) {
+          event.deanonymized_input?.forEach((item) => {
+            const matchingMessage = item.message.content
+              ? messagesByContent[item.message.content]
+              : undefined;
 
-            // If there's a valid message at this index, add the deanonymizations to it
-            if (resultIndex >= 0 && resultIndex < result.length) {
-              // Add deanonymizations directly to the message
-              result[resultIndex].message.deanonymizations = item.deanonymizations;
+            if (matchingMessage) {
+              matchingMessage.message.deanonymizations = item.deanonymizations;
             }
           });
+
+          if (event.deanonymized_output?.message.content) {
+            const matchingMessage = event.deanonymized_output.message.content
+              ? messagesByContent[event.deanonymized_output.message.content]
+              : undefined;
+
+            if (matchingMessage) {
+              matchingMessage.message.deanonymizations = event.deanonymized_output.deanonymizations;
+            }
+          }
         }
 
-        // Add deanonymizations from deanonymized_output to the last message (current response)
-        if (event.deanonymized_output && result.length > 0) {
-          const lastIndex = result.length - 1;
-          result[lastIndex].message.deanonymizations = event.deanonymized_output.deanonymizations;
-        }
-
-        return result;
+        return clonedMessages;
       }),
       defaultIfEmpty(messages)
     );
