@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-const { createNoRestrictedImportsOverrides } = require('@kbn/eslint-rule-overrides');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { createNoRestrictedImportsOverride } = require('@kbn/eslint-rule-overrides');
 
 const RESTRICTED_IMPORTS = [
   {
@@ -14,9 +15,8 @@ const RESTRICTED_IMPORTS = [
   },
 ];
 
-const overrides = createNoRestrictedImportsOverrides(RESTRICTED_IMPORTS);
+const overrides = createNoRestrictedImportsOverride({ restrictedImports: RESTRICTED_IMPORTS });
 
-/** @type {import('eslint').Linter.Config} */
 module.exports = {
   overrides,
 };
