@@ -17,6 +17,7 @@ const RESTRICTED_IMPORTS = [
 
 const overrides = createNoRestrictedImportsOverride({ restrictedImports: RESTRICTED_IMPORTS });
 
+/** @type {import('eslint').Linter.Config} */
 module.exports = {
   overrides,
 };

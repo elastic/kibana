@@ -9,6 +9,7 @@
 
 const { execSync } = require('child_process');
 const path = require('path');
+
 const minimatch = require('minimatch');
 
 /**
@@ -79,8 +80,10 @@ function createNoRestrictedImportsOverride(options = {}) {
   const ROOT_CLIMB_STRING = path.relative(__dirname, ROOT_DIR); // i.e. '../../..'
 
   // Load and clone root config
+  /** @type {import('eslint').Linter.Config} */
   // eslint-disable-next-line import/no-dynamic-require
   const rootConfig = require(`${ROOT_CLIMB_STRING}/.eslintrc`);
+  /** @type {import('eslint').Linter.Config} */
   const clonedRootConfig = JSON.parse(JSON.stringify(rootConfig));
 
   const { restrictedImports = [] } = options;
@@ -155,6 +158,7 @@ function createNoRestrictedImportsOverride(options = {}) {
   function getAssignableDifference(inputPath, targetDir) {
     const absoluteTarget = path.resolve(targetDir);
     const isGlob = inputPath.includes('**');
+    const hasSingleStar = inputPath.includes('*');
 
     let base;
     let remaining;
@@ -163,6 +167,11 @@ function createNoRestrictedImportsOverride(options = {}) {
       const globIndex = inputPath.indexOf('**');
       base = inputPath.slice(0, globIndex).replace(/[\\/]+$/, '');
       remaining = inputPath.slice(globIndex);
+    } else if (hasSingleStar) {
+      // Handle single star globs like '*.js'
+      const lastSlash = inputPath.lastIndexOf('/');
+      base = inputPath.slice(0, lastSlash);
+      remaining = inputPath.slice(lastSlash + 1);
     } else {
       base = inputPath;
       remaining = '';
@@ -174,6 +183,8 @@ function createNoRestrictedImportsOverride(options = {}) {
 
     if (isGlob) {
       return remaining || path.normalize('**/*');
+    } else if (hasSingleStar) {
+      return remaining;
     } else {
       const relative = path.relative(absoluteBase, absoluteTarget);
       return relative || '.';

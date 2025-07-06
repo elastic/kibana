@@ -61,7 +61,7 @@ packages/kbn-eslint-plugin-eui-a11y @elastic/obs-ux-infra_services-team
 packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
-packages/kbn-eslint-rule-overrides @elastic/security-threat-hunting-investigations
+packages/kbn-eslint-rule-overrides @elastic/kibana-operations
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-generate @elastic/kibana-operations
