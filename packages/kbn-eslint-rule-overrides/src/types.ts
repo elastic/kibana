@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Linter } from 'eslint';
+import { Linter } from 'eslint';
 
 /**
  * A string specifying a module name to restrict.
@@ -79,9 +79,9 @@ export type RuleSeverity = 'error' | 'warn' | 'off' | 0 | 1 | 2;
  * Complete ESLint rule configuration for no-restricted-imports.
  */
 export type NoRestrictedImportsRuleConfig =
-  | RuleSeverity
+  | Linter.RuleLevel
   | [
-      RuleSeverity,
+      Linter.RuleLevel,
       ...Array<
         | RestrictedImportString
         | RestrictedImportPath
@@ -96,13 +96,5 @@ export type NoRestrictedImportsRuleConfig =
  */
 export interface CreateOverrideOptions {
   /** Additional restricted imports to add. */
-  additionalRestrictedImports?: Array<RestrictedImportString | RestrictedImportPath>;
-  /** Root directory of the project. Defaults to process.cwd() */
-  rootDir?: string;
-  /** Path to the root ESLint config. Defaults to .eslintrc.js in rootDir */
-  rootConfigPath?: string;
-  /** Whether to merge with existing restrictions or replace them. Defaults to true (merge) */
-  mergeWithExisting?: boolean;
-  /** Custom filter function for overrides */
-  overrideFilter?: (override: Linter.ConfigOverride<Linter.RulesRecord>) => boolean;
+  restrictedImports?: Array<RestrictedImportString | RestrictedImportPath>;
 }
