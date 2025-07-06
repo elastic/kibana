@@ -8,6 +8,6 @@
  */
 
 module.exports = {
-  createNoRestrictedImportsOverride: require('./src/no-restricted-imports')
+  createNoRestrictedImportsOverride: require('./src/create_no_restricted_imports_override')
     .createNoRestrictedImportsOverride,
 };
