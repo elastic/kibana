@@ -6,6 +6,7 @@
  */
 
 import { Message, Deanonymization, Anonymization } from '@kbn/inference-common';
+import { isEmpty } from 'lodash';
 import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
 
 export function deanonymize<TMessage extends Message>(
@@ -25,15 +26,19 @@ export function deanonymize<TMessage extends Message>(
     reversedAnonymizations.forEach(({ entity }) => {
       let index = next.indexOf(entity.mask);
 
+      let offset = 0;
+
       while (index !== -1) {
-        const start = index;
+        const start = index + offset;
         const end = start + entity.mask.length;
 
         deanonymizations.push({ start, end, entity });
 
-        next = next.slice(0, start) + entity.value + next.slice(start, end);
+        next = next.slice(0, start) + entity.value + next.slice(start + entity.mask.length);
 
         index = next.indexOf(entity.mask, end);
+
+        offset += entity.value.length;
       }
     });
 
@@ -45,10 +50,22 @@ export function deanonymize<TMessage extends Message>(
 
   const anonymized = getAnonymizableMessageParts(message);
 
-  const contentDeanonymization =
-    'content' in anonymized && anonymized.content && typeof anonymized.content === 'string'
-      ? replace(anonymized.content)
-      : undefined;
+  if (anonymized.content && typeof anonymized.content === 'string') {
+    const { content, ...rest } = anonymized;
+
+    const contentDeanonymization = replace(anonymized.content);
+
+    const unredaction = !isEmpty(rest) ? replace(JSON.stringify(rest)) : undefined;
+
+    return {
+      message: {
+        ...message,
+        ...(unredaction ? (JSON.parse(unredaction.output) as typeof anonymized) : {}),
+        content: contentDeanonymization.output,
+      },
+      deanonymizations: contentDeanonymization.deanonymizations,
+    };
+  }
 
   const unredaction = replace(JSON.stringify(anonymized));
 
@@ -57,6 +74,6 @@ export function deanonymize<TMessage extends Message>(
       ...message,
       ...(JSON.parse(unredaction.output) as typeof anonymized),
     },
-    deanonymizations: contentDeanonymization ? contentDeanonymization.deanonymizations : [],
+    deanonymizations: [],
   };
 }

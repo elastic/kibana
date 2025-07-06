@@ -32,8 +32,10 @@ export async function anonymizeMessages({
   }
 
   const toAnonymize = [
-    ...(system ? [{ system }] : []),
     ...messages.map(messageToAnonymizationRecords),
+    // put system message last so we can use position-based lookups
+    // when iterating over `records`
+    ...(system ? [{ system }] : []),
   ];
 
   const { records, anonymizations } = await anonymizeRecords({
