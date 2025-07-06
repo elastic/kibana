@@ -12,10 +12,9 @@ import {
   MessageCompleteEvent,
   ReasoningEvent,
   ToolCallEvent,
-  ToolCallEventData,
   ToolResultEvent,
-  ToolResultEventData,
 } from '@kbn/onechat-common/agents';
+import type { PlainIdToolIdentifier } from '@kbn/onechat-common';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;
@@ -41,17 +40,37 @@ export const hasTag = (event: LangchainStreamEvent, tag: string): boolean => {
   return (event.tags ?? []).includes(tag);
 };
 
-export const createToolCallEvent = (data: ToolCallEventData): ToolCallEvent => {
+export const createToolCallEvent = (data: {
+  toolCallId: string;
+  toolId: PlainIdToolIdentifier;
+  toolType: string;
+  args: Record<string, unknown>;
+}): ToolCallEvent => {
   return {
     type: ChatAgentEventType.toolCall,
-    data,
+    data: {
+      tool_call_id: data.toolCallId,
+      tool_id: data.toolId,
+      tool_type: data.toolType,
+      args: data.args,
+    },
   };
 };
 
-export const createToolResultEvent = (data: ToolResultEventData): ToolResultEvent => {
+export const createToolResultEvent = (data: {
+  toolCallId: string;
+  toolId: PlainIdToolIdentifier;
+  toolType: string;
+  result: string;
+}): ToolResultEvent => {
   return {
     type: ChatAgentEventType.toolResult,
-    data,
+    data: {
+      tool_call_id: data.toolCallId,
+      tool_id: data.toolId,
+      tool_type: data.toolType,
+      result: data.result,
+    },
   };
 };
 
