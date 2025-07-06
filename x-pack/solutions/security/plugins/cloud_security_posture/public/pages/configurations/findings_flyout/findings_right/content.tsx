@@ -7,17 +7,8 @@
 
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiPanel,
-  EuiTabs,
-  EuiTab,
-  EuiFlexGroup,
-  EuiFlyoutBody,
-} from '@elastic/eui';
-import {
-  CSP_MISCONFIGURATIONS_DATASET,
-  CspFinding,
-} from '@kbn/cloud-security-posture-common';
+import { EuiPanel, EuiTabs, EuiTab, EuiFlexGroup, EuiFlyoutBody } from '@elastic/eui';
+import { CSP_MISCONFIGURATIONS_DATASET, CspFinding } from '@kbn/cloud-security-posture-common';
 import { generatePath } from 'react-router-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
