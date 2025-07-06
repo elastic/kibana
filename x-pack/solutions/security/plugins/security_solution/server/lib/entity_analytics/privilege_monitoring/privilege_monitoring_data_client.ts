@@ -68,7 +68,7 @@ import { softDeleteOmittedUsers } from './users/soft_delete_omitted_users';
 import { privilegedUserParserTransform } from './users/privileged_user_parse_transform';
 import type { Accumulator } from './users/bulk/utils';
 import { accumulateUpsertResults } from './users/bulk/utils';
-import type { PrivMonBulkUser, PrivMonUserSource } from './types';
+import type { BulkOperation, PrivMonBulkUser, PrivMonUserSource } from './types';
 import type { MonitoringEntitySourceDescriptor } from './saved_objects';
 import {
   PrivilegeMonitoringEngineDescriptorClient,
@@ -448,7 +448,7 @@ export class PrivilegeMonitoringDataClient {
         }
       }
     }
-    if (allStaleUsers.length > 0) this.bulkDeleteStaleUsers(allStaleUsers);
+    if (allStaleUsers.length > 0) await this.bulkDeleteStaleUsers(allStaleUsers);
   }
 
   public async ingestUsersFromIndexSource(
@@ -640,8 +640,11 @@ export class PrivilegeMonitoringDataClient {
    * @param userIndexName - Name of the Elasticsearch index where user documents are stored.
    * @returns An array of bulk operations suitable for the Elasticsearch Bulk API.
    */
-  public buildBulkOperationsForUsers(users: PrivMonBulkUser[], userIndexName: string): object[] {
-    const ops: object[] = [];
+  public buildBulkOperationsForUsers(
+    users: PrivMonBulkUser[],
+    userIndexName: string
+  ): BulkOperation[] {
+    const ops: BulkOperation[] = [];
     this.log('info', `Building bulk operations for ${users.length} users`);
     for (const user of users) {
       if (user.existingUserId) {
@@ -754,7 +757,7 @@ export class PrivilegeMonitoringDataClient {
       index: indexName,
       size: batchSize,
       _source: ['user.name'],
-      sort: [{ 'user.name.keyword': 'asc' }],
+      sort: [{ 'user.name': 'asc' }],
       search_after: searchAfter,
       query,
     });
