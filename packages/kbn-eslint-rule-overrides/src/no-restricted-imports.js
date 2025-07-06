@@ -7,25 +7,69 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execSync } from 'child_process';
-import path from 'path';
-import minimatch from 'minimatch';
-import type { Linter } from 'eslint';
-import type {
-  RestrictedImportString,
-  RestrictedImportPath,
-  RestrictedImportOptions,
-  NoRestrictedImportsRuleConfig,
-  CreateOverrideOptions,
-} from './types';
+const { execSync } = require('child_process');
+const path = require('path');
+const minimatch = require('minimatch');
+
+/**
+ * @typedef {string} RestrictedImportString
+ * A string specifying a module name to restrict.
+ */
+
+/**
+ * @typedef {Object} RestrictedImportPath
+ * Configuration for restricting a specific import path.
+ * @property {string} name - The name of the module to restrict.
+ * @property {string} [message] - Custom message appended to the lint error.
+ * @property {string[]} [importNames] - Specific named imports to restrict.
+ * @property {string[]} [allowImportNames] - Named imports to allow (restricts all others).
+ */
+
+/**
+ * @typedef {Object} RestrictedImportPatternGroup
+ * Configuration for restricting imports using gitignore-style patterns.
+ * @property {string[]} group - Array of gitignore-style patterns to restrict.
+ * @property {string} [message] - Custom message.
+ * @property {string[]} [importNames] - Named imports to restrict within the group.
+ * @property {string[]} [allowImportNames] - Named imports to allow within the group.
+ * @property {boolean} [caseSensitive] - Whether the pattern is case-sensitive.
+ */
+
+/**
+ * @typedef {Object} RestrictedImportPatternRegex
+ * Configuration for restricting imports using regex patterns.
+ * @property {string} regex - Regex pattern string to restrict.
+ * @property {string} [message] - Custom message.
+ * @property {string[]} [importNames] - Named imports to restrict within the regex.
+ * @property {string[]} [allowImportNames] - Named imports to allow within the regex.
+ * @property {boolean} [caseSensitive] - Whether the regex is case-sensitive.
+ */
+
+/**
+ * @typedef {Object} RestrictedImportOptions
+ * Options for the no-restricted-imports rule.
+ * @property {Array<RestrictedImportString | RestrictedImportPath>} [paths] - List of module names or path configurations to restrict.
+ * @property {Array<string | RestrictedImportPatternGroup | RestrictedImportPatternRegex>} [patterns] - List of patterns to restrict.
+ */
+
+/**
+ * @typedef {'error' | 'warn' | 'off' | 0 | 1 | 2} RuleSeverity
+ * ESLint rule severity levels.
+ */
+
+/**
+ * @typedef {Object} CreateOverrideOptions
+ * Options for creating override configurations.
+ * @property {Array<RestrictedImportString | RestrictedImportPath>} [restrictedImports] - Additional restricted imports to add.
+ */
 
 /**
  * Creates an ESLint configuration override for no-restricted-imports rule
  * that merges with existing root configuration and applies to the current directory context.
+ * @param {CreateOverrideOptions} [options={}] - Configuration options
+ * @returns {Array<Object>} Array of ESLint override configurations
  */
-export function createNoRestrictedImportsOverride(
-  options: CreateOverrideOptions = {}
-): Linter.ConfigOverride[] {
+function createNoRestrictedImportsOverride(options = {}) {
   // Get root directory using git
   const ROOT_DIR = execSync('git rev-parse --show-toplevel', {
     encoding: 'utf8',
@@ -35,9 +79,9 @@ export function createNoRestrictedImportsOverride(
   const ROOT_CLIMB_STRING = path.relative(__dirname, ROOT_DIR); // i.e. '../../..'
 
   // Load and clone root config
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const rootConfig: Linter.Config = require(`${ROOT_CLIMB_STRING}/.eslintrc`);
-  const clonedRootConfig: Linter.Config = JSON.parse(JSON.stringify(rootConfig));
+  // eslint-disable-next-line import/no-dynamic-require
+  const rootConfig = require(`${ROOT_CLIMB_STRING}/.eslintrc`);
+  const clonedRootConfig = JSON.parse(JSON.stringify(rootConfig));
 
   const { restrictedImports = [] } = options;
 
@@ -49,15 +93,7 @@ export function createNoRestrictedImportsOverride(
 
   // Find overrides with no-restricted-imports rule
   const overridesWithNoRestrictedImportRule = (clonedRootConfig.overrides || []).filter(
-    (
-      override
-    ): override is Linter.ConfigOverride & {
-      // fixing bad eslint types that hardcode the optionality of rules type
-      rules: {
-        'no-restricted-imports': NoRestrictedImportsRuleConfig;
-        [key: string]: Linter.RuleEntry;
-      };
-    } => Boolean(override.rules && 'no-restricted-imports' in override.rules)
+    (override) => Boolean(override.rules && 'no-restricted-imports' in override.rules)
   );
 
   // Process each override
@@ -69,14 +105,14 @@ export function createNoRestrictedImportsOverride(
     if (Array.isArray(noRestrictedImportsRule) && noRestrictedImportsRule.length >= 2) {
       const [severity, ...rawOptions] = noRestrictedImportsRule;
 
-      const modernConfig: Required<RestrictedImportOptions> = { paths: [], patterns: [] };
+      const modernConfig = { paths: [], patterns: [] };
 
       // Normalize all inputs into modern config format
       for (const opt of rawOptions) {
         if (typeof opt === 'string' || (typeof opt === 'object' && 'name' in opt)) {
-          modernConfig.paths.push(opt as RestrictedImportString | RestrictedImportPath);
+          modernConfig.paths.push(opt);
         } else if (typeof opt === 'object' && ('paths' in opt || 'patterns' in opt)) {
-          const optConfig = opt as RestrictedImportOptions;
+          const optConfig = opt;
           if (optConfig.paths) modernConfig.paths.push(...optConfig.paths);
           if (optConfig.patterns) modernConfig.patterns.push(...optConfig.patterns);
         }
@@ -85,18 +121,20 @@ export function createNoRestrictedImportsOverride(
       // Remove duplicates and add new restricted imports
       const existingPaths = modernConfig.paths.filter(
         (existing) =>
-          !restrictedImports.some((restriction) =>
-            typeof existing === 'string'
-              ? typeof restriction === 'string'
+          !restrictedImports.some((restriction) => {
+            if (typeof existing === 'string') {
+              return typeof restriction === 'string'
                 ? existing === restriction
-                : existing === restriction.name
-              : typeof restriction === 'string'
-              ? existing.name === restriction
-              : existing.name === restriction.name
-          )
+                : existing === restriction.name;
+            } else {
+              return typeof restriction === 'string'
+                ? existing.name === restriction
+                : existing.name === restriction.name;
+            }
+          })
       );
 
-      const newRuleConfig: NoRestrictedImportsRuleConfig = [
+      const newRuleConfig = [
         severity,
         {
           paths: [...existingPaths, ...restrictedImports],
@@ -108,12 +146,18 @@ export function createNoRestrictedImportsOverride(
     }
   }
 
-  function getAssignableDifference(inputPath: string, targetDir: string): string | null {
+  /**
+   * Calculate the relative path difference for file pattern assignment.
+   * @param {string} inputPath - The input file path or glob pattern
+   * @param {string} targetDir - The target directory to resolve against
+   * @returns {string|null} The assignable difference or null if not applicable
+   */
+  function getAssignableDifference(inputPath, targetDir) {
     const absoluteTarget = path.resolve(targetDir);
     const isGlob = inputPath.includes('**');
 
-    let base: string;
-    let remaining: string;
+    let base;
+    let remaining;
 
     if (isGlob) {
       const globIndex = inputPath.indexOf('**');
@@ -163,9 +207,13 @@ export function createNoRestrictedImportsOverride(
         .map((absPath) => {
           return getAssignableDifference(absPath, __dirname);
         })
-        .filter((file): file is string => Boolean(file)),
+        .filter((file) => Boolean(file)),
     };
   });
 
   return inScopeOverrides.filter((override) => override.files.length > 0);
 }
+
+module.exports = {
+  createNoRestrictedImportsOverride,
+};

@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createNoRestrictedImportsOverride } from './src/no-restricted-imports';
-export type {
-  RestrictedImportString,
-  RestrictedImportPath,
-  RestrictedImportPatternGroup,
-  RestrictedImportPatternRegex,
-  RestrictedImportOptions,
-  NoRestrictedImportsRuleConfig,
-  CreateOverrideOptions,
-} from './src/types';
+module.exports = {
+  createNoRestrictedImportsOverride: require('./src/no-restricted-imports')
+    .createNoRestrictedImportsOverride,
+};
