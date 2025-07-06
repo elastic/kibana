@@ -64,7 +64,14 @@ export class InferencePlugin
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
       const soClient = core.savedObjects.getScopedClient(request);
       const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-      const settingsStr = await uiSettingsClient.get<string>(aiAssistantAnonymizationSettings);
+      const settingsStr = await uiSettingsClient.get<string | undefined>(
+        aiAssistantAnonymizationSettings
+      );
+
+      if (!settingsStr) {
+        return [];
+      }
+
       return (JSON.parse(settingsStr) as AnonymizationSettings).rules;
     };
     return {

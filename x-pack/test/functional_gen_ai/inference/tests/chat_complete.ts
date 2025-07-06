@@ -378,7 +378,7 @@ export const chatCompleteSuite = (
       describe('anonymization enabled', () => {
         before(async () => {
           await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationSettings]: JSON.stringify([emailRule], null, 2),
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [emailRule] }, null, 2),
           });
         });
         after(async () => {

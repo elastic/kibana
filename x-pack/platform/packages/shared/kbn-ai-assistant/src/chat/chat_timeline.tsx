@@ -152,7 +152,10 @@ export function ChatTimeline({
 
   const { anonymizationEnabled } = useMemo(() => {
     // the response is JSON but will be a string while the setting is hidden temporarily (unregistered)
-    const anonymizationRulesSettingsStr = uiSettings?.get<string>(aiAssistantAnonymizationSettings);
+    const anonymizationRulesSettingsStr = uiSettings?.get<string | undefined>(
+      aiAssistantAnonymizationSettings
+    );
+
     const settings = anonymizationRulesSettingsStr
       ? (JSON.parse(anonymizationRulesSettingsStr) as AnonymizationSettings)
       : undefined;
