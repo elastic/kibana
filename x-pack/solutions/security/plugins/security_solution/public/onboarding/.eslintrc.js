@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-const { createNoRestrictedImportsOverrides } = require('@kbn/eslint-rule-overrides');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { createNoRestrictedImportsOverride } = require('@kbn/eslint-rule-overrides');
 
 /**
  * @typedef {Object} RestrictedImportPath
@@ -22,9 +23,9 @@ const RESTRICTED_IMPORTS = [
     message: 'Please use @testing-library/react instead',
   },
 ];
-const overrides = createNoRestrictedImportsOverrides(RESTRICTED_IMPORTS);
 
-/** @type {import('eslint').Linter.Config} */
+const overrides = createNoRestrictedImportsOverride({ restrictedImports: RESTRICTED_IMPORTS });
+
 module.exports = {
   overrides,
 };
