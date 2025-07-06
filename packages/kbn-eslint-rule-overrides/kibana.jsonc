@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/eslint-rule-overrides",
+  "owner": "@elastic/security-threat-hunting-investigations",
+  "devOnly": true
+}

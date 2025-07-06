@@ -1571,6 +1571,7 @@
     "@kbn/evals-suite-obs-ai-assistant": "link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant",
     "@kbn/evals-suite-onechat": "link:x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat",
     "@kbn/evals-suite-streams": "link:x-pack/platform/packages/private/kbn-evals-suite-streams",
+    "@kbn/eslint-rule-overrides": "link:packages/kbn-eslint-rule-overrides",
     "@kbn/expect": "link:src/platform/packages/shared/kbn-expect",
     "@kbn/extract-plugin-translations": "link:packages/kbn-extract-plugin-translations",
     "@kbn/failed-test-reporter-cli": "link:packages/kbn-failed-test-reporter-cli",

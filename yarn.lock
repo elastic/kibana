@@ -5916,6 +5916,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eslint-rule-overrides@link:packages/kbn-eslint-rule-overrides":
+  version "0.0.0"
+  uid ""
+
 "@kbn/eso-model-version-example@link:examples/eso_model_version_example":
   version "0.0.0"
   uid ""
