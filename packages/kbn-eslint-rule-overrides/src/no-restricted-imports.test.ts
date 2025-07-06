@@ -115,6 +115,7 @@ describe('createNoRestrictedImportsOverride', () => {
     it('should handle string-based restrictions', () => {
       const callingDir = '/kibana/x-pack/plugins/ml';
       const result = createNoRestrictedImportsOverride(callingDir, {
+        rootDir: '/kibana',
         rootConfigPath: '/kibana/.eslintrc.js',
         additionalRestrictedImports: [
           'react-dom/server', // Simple string format
@@ -136,6 +137,7 @@ describe('createNoRestrictedImportsOverride', () => {
     it('should respect mergeWithExisting option', () => {
       const callingDir = '/kibana/src/core';
       const result = createNoRestrictedImportsOverride(callingDir, {
+        rootDir: '/kibana',
         rootConfigPath: '/kibana/.eslintrc.js',
         mergeWithExisting: false,
         additionalRestrictedImports: [
@@ -204,6 +206,7 @@ describe('createNoRestrictedImportsOverride', () => {
       jest.doMock('/kibana/.eslintrc.js', () => configWithGlobs, { virtual: true });
 
       const result = createNoRestrictedImportsOverride(callingDir, {
+        rootDir: '/kibana',
         rootConfigPath: '/kibana/.eslintrc.js',
         additionalRestrictedImports: [],
       });
@@ -218,6 +221,7 @@ describe('createNoRestrictedImportsOverride', () => {
 
       // This directory shouldn't match x-pack patterns
       const result = createNoRestrictedImportsOverride(callingDir, {
+        rootDir: '/kibana',
         rootConfigPath: '/kibana/.eslintrc.js',
         additionalRestrictedImports: [],
       });
