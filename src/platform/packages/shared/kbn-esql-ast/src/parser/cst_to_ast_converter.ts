@@ -11,7 +11,7 @@ import * as antlr from 'antlr4';
 import * as cst from '../antlr/esql_parser';
 import * as ast from '../types';
 import { type AstNodeParserFields, Builder } from '../builder';
-import { isCommand } from '../ast/helpers';
+import { isCommand } from '../ast/is';
 import { createLimitCommand } from './factories/limit';
 import {
   computeLocationExtends,
@@ -379,7 +379,7 @@ export class CstToAstConverter {
     const indexPatternCtx = ctx.indexPatternAndMetadataFields();
     const metadataCtx = indexPatternCtx.metadata();
     const sources = indexPatternCtx
-      .getTypedRuleContexts(cst.IndexPatternContext)
+      .getTypedRuleContexts(cst.IndexPatternContext as any)
       .map((sourceCtx) => visitSource(sourceCtx));
 
     command.args.push(...sources);
@@ -414,7 +414,7 @@ export class CstToAstConverter {
     const indexPatternCtx = ctx.indexPatternAndMetadataFields();
     const metadataCtx = indexPatternCtx.metadata();
     const sources = indexPatternCtx
-      .getTypedRuleContexts(cst.IndexPatternContext)
+      .getTypedRuleContexts(cst.IndexPatternContext as any)
       .map((sourceCtx) => visitSource(sourceCtx));
 
     command.args.push(...sources);
