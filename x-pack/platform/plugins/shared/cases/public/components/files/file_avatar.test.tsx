@@ -25,18 +25,16 @@ jest.mock('../cases_context/use_cases_context', () => ({
   }),
 }));
 
-const mockFile: Pick<FileJSON<unknown>, 'id' | 'name' | 'mimeType' | 'extension'> = {
+const mockFile: Pick<FileJSON<unknown>, 'id' | 'name' | 'mimeType'> = {
   id: 'test-file-id',
   name: 'test-file.png',
   mimeType: 'image/png',
-  extension: 'png',
 };
 
-const mockNonImageFile: Pick<FileJSON<unknown>, 'id' | 'name' | 'mimeType' | 'extension'> = {
+const mockNonImageFile: Pick<FileJSON<unknown>, 'id' | 'name' | 'mimeType'> = {
   id: 'test-doc-id',
   name: 'test-document.pdf',
   mimeType: 'application/pdf',
-  extension: 'pdf',
 };
 
 describe('FileAvatar', () => {

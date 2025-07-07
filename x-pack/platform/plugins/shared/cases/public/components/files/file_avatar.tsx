@@ -9,6 +9,11 @@ import React from 'react';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import { EuiAvatar } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
+import {
+  compressionMimeTypes,
+  pdfMimeTypes,
+  textMimeTypes,
+} from '../../../common/constants/mime_types';
 import type { Owner } from '../../../common/constants/types';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { useFilePreview } from './use_file_preview';
@@ -16,44 +21,27 @@ import { FilePreview } from './file_preview';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { isImage } from './utils';
 
-// eslint-disable-next-line complexity
-const getIcon = (extension: string) => {
-  switch (extension.toLowerCase()) {
-    case 'csv':
-    case 'xls':
-    case 'xlsx':
-      return 'visTable';
-    case 'png':
-    case 'jpg':
-    case 'jpeg':
-    case 'gif':
-    case 'svg':
-      return 'image';
-    case 'js':
-    case 'ts':
-    case 'json':
-    case 'xml':
-    case 'py':
-    case 'html':
-      return 'console';
-    case 'zip':
-    case 'rar':
-    case '7z':
-      return 'folderClosed';
-    case 'pdf':
-    case 'doc':
-    case 'docx':
-    case 'txt':
-      return 'document';
-    default:
-      return 'paperClip';
+const DEFAULT_ICON = 'paperClip';
+const getIcon = (mimeType: string | undefined) => {
+  if (typeof mimeType === 'undefined') {
+    return DEFAULT_ICON;
   }
+
+  if (textMimeTypes.includes(mimeType) || pdfMimeTypes.includes(mimeType)) {
+    return 'document';
+  }
+
+  if (compressionMimeTypes.includes(mimeType)) {
+    return 'folderClosed';
+  }
+
+  return DEFAULT_ICON;
 };
 
 export const FileAvatar = ({
   file,
 }: {
-  file: Pick<FileJSON<unknown>, 'id' | 'name' | 'mimeType' | 'extension'>;
+  file: Pick<FileJSON<unknown>, 'id' | 'name' | 'mimeType'>;
 }) => {
   const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
   const { client: filesClient } = useFilesContext();
@@ -69,7 +57,7 @@ export const FileAvatar = ({
         css: { cursor: 'pointer' },
       }
     : {
-        iconType: getIcon(file.extension || ''),
+        iconType: getIcon(file.mimeType),
         color: 'subdued',
         iconSize: 'l' as const,
       };
