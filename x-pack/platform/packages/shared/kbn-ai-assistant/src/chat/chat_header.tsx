@@ -27,6 +27,7 @@ import {
   getElasticManagedLlmConnector,
   ElasticLlmCalloutKey,
   useElasticLlmCalloutDismissed,
+  useObservabilityAIAssistantFlyoutStateContext,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
@@ -120,27 +121,7 @@ export function ChatHeader({
     false
   );
 
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-
-  useEffect(() => {
-    // Check if the AI Assistant flyout is open
-    const checkFlyoutContext = () => {
-      const aiAssistantFlyout = document.querySelector('[data-test-subj="aiAssistantChatFlyout"]');
-      if (aiAssistantFlyout) {
-        setIsFlyoutOpen(true);
-      } else {
-        setIsFlyoutOpen(false);
-      }
-    };
-
-    checkFlyoutContext();
-
-    // Set up a mutation observer to detect when flyouts are added/removed
-    const observer = new MutationObserver(checkFlyoutContext);
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    return () => observer.disconnect();
-  }, []);
+  const { isFlyoutOpen } = useObservabilityAIAssistantFlyoutStateContext();
 
   return (
     <EuiPanel

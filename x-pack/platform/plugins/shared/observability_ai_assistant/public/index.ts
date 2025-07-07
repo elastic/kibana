@@ -135,3 +135,10 @@ export {
   useElasticLlmCalloutDismissed,
   ElasticLlmCalloutKey,
 } from './hooks/use_elastic_llm_callout_dismissed';
+
+export { useFlyoutState } from './hooks/use_flyout_state';
+
+export {
+  ObservabilityAIAssistantFlyoutStateProvider,
+  useObservabilityAIAssistantFlyoutStateContext,
+} from './context/observability_ai_assistant_flyout_state_context';
