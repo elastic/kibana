@@ -98,11 +98,13 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         ...pick(item, 'id', 'label', 'duplicatedFromId'),
       };
 
-      const existingTabToDuplicateFrom =
-        item.duplicatedFromId && !existingTab
-          ? selectTab(currentState, item.duplicatedFromId)
-          : undefined;
-      if (item.duplicatedFromId && existingTabToDuplicateFrom) {
+      if (item.duplicatedFromId && !existingTab) {
+        const existingTabToDuplicateFrom = selectTab(currentState, item.duplicatedFromId);
+
+        if (!existingTabToDuplicateFrom) {
+          return tab;
+        }
+
         tab.initialAppState =
           selectTabRuntimeAppState(runtimeStateManager, item.duplicatedFromId) ??
           cloneDeep(existingTabToDuplicateFrom.initialAppState);

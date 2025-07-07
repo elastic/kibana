@@ -59,8 +59,8 @@ import {
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
+  type InitialUnifiedHistogramLayoutProps,
 } from '../../state_management/redux';
-import type { InitialUnifiedHistogramLayoutProps } from '../../state_management/redux/runtime_state';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];

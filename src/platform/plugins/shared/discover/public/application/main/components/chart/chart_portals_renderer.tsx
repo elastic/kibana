@@ -15,6 +15,7 @@ import {
   useInternalStateSelector,
   type RuntimeStateManager,
   selectTabRuntimeState,
+  selectRestorableTabRuntimeHistogramLayoutProps,
   useRuntimeState,
   CurrentTabProvider,
   RuntimeStateProvider,
@@ -135,10 +136,10 @@ const UnifiedHistogramChartWrapper = ({
 }: UnifiedHistogramChartProps) => {
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const [options] = useState(() => ({
-    initialLayoutProps: selectTabRuntimeState(
+    initialLayoutProps: selectRestorableTabRuntimeHistogramLayoutProps(
       stateContainer.runtimeStateManager,
       currentTabId
-    ).unifiedHistogramLayoutProps$.getValue(),
+    ),
   }));
   const { setUnifiedHistogramApi, ...unifiedHistogramProps } = useDiscoverHistogram(
     stateContainer,
