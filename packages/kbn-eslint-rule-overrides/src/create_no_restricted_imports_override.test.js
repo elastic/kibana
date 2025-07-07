@@ -7,20 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-new-func */
-
 const path = require('path');
 
 // Mock modules before requiring the module under test
-jest.mock('child_process');
 jest.mock('minimatch');
+jest.mock('path', () => ({
+  ...jest.requireActual('path'),
+  resolve: jest.fn((...args) => {
+    // TODO: too fragile, should be fixed
+    // Intercept ROOT_DIR calculation (when called with __dirname, '..', '..', '..')
+    if (args.length >= 4 && args[1] === '..' && args[2] === '..' && args[3] === '..') {
+      return '/kibana';
+    }
+    return jest.requireActual('path').resolve(...args);
+  }),
+}));
 
 describe('createNoRestrictedImportsOverride', () => {
-  let execSync;
   let minimatch;
   let createNoRestrictedImportsOverride;
 
-  const mockRootDir = '/kibana';
   const mockCurrentDir = '/kibana/x-pack/plugins/security';
 
   const DEFAULT_ROOT_CONFIG = {
@@ -55,46 +61,17 @@ describe('createNoRestrictedImportsOverride', () => {
     );
   };
 
-  const setupModuleMocks = (currentDir = mockCurrentDir, rootConfig = DEFAULT_ROOT_CONFIG) => {
+  const setupModuleMocks = (rootConfig = DEFAULT_ROOT_CONFIG) => {
     jest.resetModules();
     jest.clearAllMocks();
 
-    // Get mocked modules
-    execSync = require('child_process').execSync;
     minimatch = require('minimatch');
 
-    // Setup default mocks
-    execSync.mockReturnValue(`${mockRootDir}\n`);
     setupMinimatchMock();
 
-    // Mock the root config require
     jest.doMock('../../../.eslintrc', () => rootConfig, { virtual: true });
 
-    // Create a custom implementation that properly handles mocking
-    jest.doMock('./create_no_restricted_imports_override', () => {
-      const originalModule = jest.requireActual('./create_no_restricted_imports_override');
-      const originalFunc = originalModule.createNoRestrictedImportsOverride.toString();
-
-      // Create a new function with injected dependencies
-      const createFunction = new Function(
-        'execSync',
-        'path',
-        'minimatch',
-        '__dirname',
-        'require',
-        `return ${originalFunc}`
-      )(execSync, path, minimatch, currentDir, (requirePath) => {
-        if (requirePath.endsWith('.eslintrc')) {
-          return rootConfig;
-        }
-        return jest.requireActual(requirePath);
-      });
-
-      return {
-        createNoRestrictedImportsOverride: createFunction,
-      };
-    });
-
+    // Now require the module under test (it will use our mocked path.resolve)
     ({ createNoRestrictedImportsOverride } = require('./create_no_restricted_imports_override'));
   };
 
@@ -102,13 +79,27 @@ describe('createNoRestrictedImportsOverride', () => {
 
   beforeEach(() => {
     mockRootConfig = createMockRootConfig();
-    setupModuleMocks(mockCurrentDir, mockRootConfig);
+    setupModuleMocks(mockRootConfig);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  describe('when no childConfigDir is provided', () => {
+    it('should throw an error', () => {
+      expect(() => {
+        createNoRestrictedImportsOverride({ restrictedImports: ['lodash'] });
+      }).toThrow(
+        'No childConfigDir provided. Please pass __dirname in your nested .eslintrc.js file.'
+      );
+    });
   });
 
   describe('when no restricted imports are provided', () => {
     it('should throw an error', () => {
       expect(() => {
-        createNoRestrictedImportsOverride();
+        createNoRestrictedImportsOverride({ childConfigDir: mockCurrentDir });
       }).toThrow('No restricted imports provided. Please specify at least one import to restrict.');
     });
   });
@@ -116,7 +107,10 @@ describe('createNoRestrictedImportsOverride', () => {
   describe('when restricted imports key is provided with empty array', () => {
     it('should throw an error', () => {
       expect(() => {
-        createNoRestrictedImportsOverride({ restrictedImports: [] });
+        createNoRestrictedImportsOverride({
+          restrictedImports: [],
+          childConfigDir: mockCurrentDir,
+        });
       }).toThrow('No restricted imports provided. Please specify at least one import to restrict.');
     });
   });
@@ -130,12 +124,14 @@ describe('createNoRestrictedImportsOverride', () => {
             { paths: ['lodash'], patterns: [] },
           ]),
         ];
+        setupModuleMocks(mockRootConfig);
       });
 
       describe('and simple string restrictions are added', () => {
         it('should merge the restrictions', () => {
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['moment', 'jquery'],
+            childConfigDir: mockCurrentDir,
           });
 
           expect(result).toHaveLength(1);
@@ -163,6 +159,7 @@ describe('createNoRestrictedImportsOverride', () => {
                 message: 'Use @emotion/css instead',
               },
             ],
+            childConfigDir: mockCurrentDir,
           });
 
           expect(result).toHaveLength(1);
@@ -187,11 +184,13 @@ describe('createNoRestrictedImportsOverride', () => {
             'error',
             { paths: ['lodash', 'moment'], patterns: [] },
           ];
+          setupModuleMocks(mockRootConfig);
         });
 
         it('should deduplicate string restrictions', () => {
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['moment', 'jquery'],
+            childConfigDir: mockCurrentDir,
           });
 
           const paths = result[0].rules['no-restricted-imports'][1].paths;
@@ -208,6 +207,7 @@ describe('createNoRestrictedImportsOverride', () => {
                 patterns: [],
               },
             ];
+            setupModuleMocks(mockRootConfig);
           });
 
           it('should replace existing restrictions with new ones', () => {
@@ -216,6 +216,7 @@ describe('createNoRestrictedImportsOverride', () => {
                 { name: 'lodash', message: 'Different message' },
                 { name: 'moment', importNames: ['format'] },
               ],
+              childConfigDir: mockCurrentDir,
             });
 
             const paths = result[0].rules['no-restricted-imports'][1].paths;
@@ -232,11 +233,13 @@ describe('createNoRestrictedImportsOverride', () => {
         describe(description, () => {
           beforeEach(() => {
             mockRootConfig.overrides = [createRestrictedImportsOverride('**/*.js', legacyRule)];
+            setupModuleMocks(mockRootConfig);
           });
 
           it('should convert to modern format and merge', () => {
             const result = createNoRestrictedImportsOverride({
               restrictedImports: ['jquery'],
+              childConfigDir: mockCurrentDir,
             });
 
             const rule = result[0].rules['no-restricted-imports'];
@@ -262,11 +265,13 @@ describe('createNoRestrictedImportsOverride', () => {
               { paths: ['jquery'], patterns: ['react-*'] },
             ]),
           ];
+          setupModuleMocks(mockRootConfig);
         });
 
         it('should normalize all formats and merge', () => {
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['axios'],
+            childConfigDir: mockCurrentDir,
           });
 
           const rule = result[0].rules['no-restricted-imports'];
@@ -282,6 +287,7 @@ describe('createNoRestrictedImportsOverride', () => {
     describe('and file pattern filtering is applied', () => {
       const setupOverridesWithFiles = (overrides) => {
         mockRootConfig.overrides = overrides;
+        setupModuleMocks(mockRootConfig);
       };
 
       describe('and current directory matches override patterns', () => {
@@ -301,6 +307,7 @@ describe('createNoRestrictedImportsOverride', () => {
         it('should only return matching overrides', () => {
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['jquery'],
+            childConfigDir: mockCurrentDir,
           });
 
           expect(result).toHaveLength(1);
@@ -321,6 +328,7 @@ describe('createNoRestrictedImportsOverride', () => {
         it('should adjust file patterns relative to current directory', () => {
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['lodash'],
+            childConfigDir: mockCurrentDir,
           });
 
           expect(result).toHaveLength(1);
@@ -363,6 +371,7 @@ describe('createNoRestrictedImportsOverride', () => {
         it('should adjust file patterns to current directory', () => {
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['lodash'],
+            childConfigDir: mockCurrentDir,
           });
 
           expect(result).toHaveLength(1);
@@ -383,6 +392,7 @@ describe('createNoRestrictedImportsOverride', () => {
         it('should return an empty array', () => {
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['lodash'],
+            childConfigDir: mockCurrentDir,
           });
 
           expect(result).toEqual([]);
@@ -396,9 +406,11 @@ describe('createNoRestrictedImportsOverride', () => {
           mockRootConfig.overrides = [
             createRestrictedImportsOverride(files, ['error', { paths: [], patterns: [] }]),
           ];
+          setupModuleMocks(mockRootConfig);
 
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['lodash'],
+            childConfigDir: mockCurrentDir,
           });
 
           expect(result).toHaveLength(1);
@@ -442,10 +454,11 @@ describe('createNoRestrictedImportsOverride', () => {
           ]),
         ];
 
-        setupModuleMocks(subDir, mockRootConfig);
+        setupModuleMocks(mockRootConfig);
 
         const result = createNoRestrictedImportsOverride({
           restrictedImports: ['lodash'],
+          childConfigDir: subDir,
         });
 
         expect(result).toHaveLength(1);
@@ -475,11 +488,13 @@ describe('createNoRestrictedImportsOverride', () => {
             { paths: [], patterns: ['@emotion/*'] },
           ]),
         ];
+        setupModuleMocks(mockRootConfig);
       });
 
       it('should process all applicable overrides', () => {
         const result = createNoRestrictedImportsOverride({
           restrictedImports: ['jquery'],
+          childConfigDir: mockCurrentDir,
         });
 
         expect(result).toHaveLength(3);
@@ -513,11 +528,13 @@ describe('createNoRestrictedImportsOverride', () => {
               { paths: [], patterns: [] },
             ]),
           ];
+          setupModuleMocks(mockRootConfig);
         });
 
         it('should only return overrides with the rule', () => {
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['lodash'],
+            childConfigDir: mockCurrentDir,
           });
 
           expect(result).toHaveLength(1);
@@ -528,11 +545,13 @@ describe('createNoRestrictedImportsOverride', () => {
       describe('and rule has only severity without options', () => {
         beforeEach(() => {
           mockRootConfig.overrides = [createRestrictedImportsOverride('**/*.js', 'error')];
+          setupModuleMocks(mockRootConfig);
         });
 
         it('should not modify the rule', () => {
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['lodash'],
+            childConfigDir: mockCurrentDir,
           });
 
           expect(result[0].rules['no-restricted-imports']).toBe('error');
@@ -556,11 +575,13 @@ describe('createNoRestrictedImportsOverride', () => {
               },
             ]),
           ];
+          setupModuleMocks(mockRootConfig);
         });
 
         it('should preserve patterns when adding paths', () => {
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['moment'],
+            childConfigDir: mockCurrentDir,
           });
 
           const rule = result[0].rules['no-restricted-imports'];
@@ -577,8 +598,6 @@ describe('createNoRestrictedImportsOverride', () => {
 
       describe('and current directory is deeply nested', () => {
         beforeEach(() => {
-          const deepDir = '/kibana/x-pack/plugins/security/public/components/forms';
-
           mockRootConfig.overrides = [
             createRestrictedImportsOverride('x-pack/plugins/security/**/*.tsx', [
               'error',
@@ -586,12 +605,13 @@ describe('createNoRestrictedImportsOverride', () => {
             ]),
           ];
 
-          setupModuleMocks(deepDir, mockRootConfig);
+          setupModuleMocks(mockRootConfig);
         });
 
         it('should still match parent directory patterns', () => {
           const result = createNoRestrictedImportsOverride({
             restrictedImports: ['lodash'],
+            childConfigDir: '/kibana/x-pack/plugins/security/public/components/forms',
           });
 
           expect(result).toHaveLength(1);

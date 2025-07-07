@@ -62,12 +62,12 @@
 
 const path = require('path');
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+const rootDir = path.resolve(__dirname, '..', '..', '..');
+
+// eslint-disable-next-line import/no-dynamic-require, @kbn/imports/no_boundary_crossing
 const rootConfig = require('../../../.eslintrc');
 
 const minimatch = require('minimatch');
-
-const ROOT_DIR = path.resolve(__dirname, '..', '..', '..');
 
 /**
  * Creates an ESLint configuration override for no-restricted-imports rule
@@ -194,7 +194,7 @@ function createNoRestrictedImportsOverride(options = {}) {
     return {
       ...override,
       files: overrideFiles.map((fileOrGlob) => {
-        return path.resolve(ROOT_DIR, fileOrGlob);
+        return path.resolve(rootDir, fileOrGlob);
       }),
     };
   });
