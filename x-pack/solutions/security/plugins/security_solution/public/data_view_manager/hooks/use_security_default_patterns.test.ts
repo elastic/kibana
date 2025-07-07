@@ -21,8 +21,8 @@ describe('useSecurityDefaultPatterns', () => {
   it('should return the default data view', () => {
     const mockDataViews = [
       {
-        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, // This should be filtered out
-        title: 'logs-*, metrics-*',
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        title: 'logs-*,metrics-*',
         name: 'default_view',
       },
       {
@@ -38,7 +38,10 @@ describe('useSecurityDefaultPatterns', () => {
     });
 
     const { result } = renderHook(() => useSecurityDefaultPatterns());
-    expect(result.current).toEqual({ id: 'default', indexPatterns: ['logs-*', 'metrics-*'] });
+    expect(result.current).toEqual({
+      id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+      indexPatterns: ['logs-*', 'metrics-*'],
+    });
   });
 
   it('should return empty id and index patterns if no default data view is found', () => {

@@ -9,7 +9,21 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { sharedStateSelector } from '../redux/selectors';
 
-export const useSecurityDefaultPatterns = (): { id: string; indexPatterns: string[] } => {
+interface UseSecurityDefaultPatternsResult {
+  /**
+   * The default data view id.
+   */
+  id: string;
+  /**
+   * The index patterns of the default data view.
+   */
+  indexPatterns: string[];
+}
+
+/**
+ * Returns the default data view id and index patterns.
+ */
+export const useSecurityDefaultPatterns = (): UseSecurityDefaultPatternsResult => {
   const { dataViews: dataViewSpecs, defaultDataViewId } = useSelector(sharedStateSelector);
 
   const defaultDataViewSpec = useMemo(
