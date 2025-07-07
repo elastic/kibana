@@ -8,7 +8,7 @@
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
-} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
+} from '../../../../alerting_api_integration/common/lib/actions_simulations_utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -18,14 +18,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const actions = getService('actions');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  // const toasts = getService('toasts');
+  const toasts = getService('toasts');
+
   let simulatorUrl: string;
   let editSimulatorUrl: string;
 
-  describe('crowdstrike connector', function () {
+  describe('tines connector', function () {
     before(async () => {
       simulatorUrl = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.CROWDSTRIKE)
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.TINES)
       );
       editSimulatorUrl = simulatorUrl.replace('/elastic:changeme@', '/');
     });
@@ -35,19 +36,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('crowdstrike connector screenshots', async () => {
+    it('tines connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await actions.common.openNewConnectorForm('crowdstrike');
-      await testSubjects.setValue('nameInput', 'Crowdstrike test connector');
+      await actions.common.openNewConnectorForm('tines');
+      await testSubjects.setValue('nameInput', 'Tines test connector');
       await testSubjects.setValue('config.url-input', editSimulatorUrl);
-      await testSubjects.setValue('secrets.clientId-input', 'test');
-      await testSubjects.setValue('secrets.clientSecret-input', 'secret');
-      await commonScreenshots.takeScreenshot('crowdstrike-connector', screenshotDirectories);
-      // You cannot test the CrowdStrike connector
-      // await testSubjects.click('create-connector-flyout-save-test-btn');
-      // await toasts.dismissAll();
-      // await commonScreenshots.takeScreenshot('crowdstrike-params-test', screenshotDirectories);
+      await testSubjects.setValue('secrets.email-input', 'test@example.com');
+      await testSubjects.setValue('secrets.token-input', 'tester');
+      await commonScreenshots.takeScreenshot('tines-connector', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await toasts.dismissAll();
+      await commonScreenshots.takeScreenshot('tines-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });

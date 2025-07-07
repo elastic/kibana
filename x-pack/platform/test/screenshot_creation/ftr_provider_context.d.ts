@@ -7,7 +7,7 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 
-import { pageObjects } from '@kbn/test-suites-xpack-platform/screenshot_creation/page_objects';
-import { services } from '@kbn/test-suites-xpack-platform/screenshot_creation/services';
+import { pageObjects } from './page_objects';
+import { services } from './services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

@@ -16,6 +16,8 @@ import { CasesServiceProvider } from '@kbn/test-suites-xpack-platform/functional
 import { ActionsServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/actions';
 import { AiopsProvider } from '@kbn/test-suites-xpack-platform/functional/services/aiops';
 import { RulesServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/rules';
+import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
+import { TransformProvider } from '@kbn/test-suites-xpack-platform/functional/services/transform';
 import { ReportingFunctionalProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
@@ -65,8 +67,6 @@ import { CanvasElementProvider } from './canvas_element';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { LogsUiProvider } from './logs_ui';
-import { MachineLearningProvider } from './ml';
-import { TransformProvider } from './transform';
 import { ObservabilityProvider } from './observability';
 import { DataStreamProvider } from './data_stream';
 import { SloUiServiceProvider } from './slo';

@@ -8,7 +8,7 @@
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
-} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
+} from '../../../../alerting_api_integration/common/lib/actions_simulations_utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -18,15 +18,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const actions = getService('actions');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const toasts = getService('toasts');
-
+  // const toasts = getService('toasts');
   let simulatorUrl: string;
   let editSimulatorUrl: string;
 
-  describe('thehive connector', function () {
+  describe('crowdstrike connector', function () {
     before(async () => {
       simulatorUrl = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.THEHIVE)
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.CROWDSTRIKE)
       );
       editSimulatorUrl = simulatorUrl.replace('/elastic:changeme@', '/');
     });
@@ -36,20 +35,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('thehive connector screenshots', async () => {
+    it('crowdstrike connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await actions.common.openNewConnectorForm('thehive');
-      await testSubjects.setValue('nameInput', 'TheHive test connector');
-      await testSubjects.setValue('config.organisation-input', 'test');
+      await actions.common.openNewConnectorForm('crowdstrike');
+      await testSubjects.setValue('nameInput', 'Crowdstrike test connector');
       await testSubjects.setValue('config.url-input', editSimulatorUrl);
-      await testSubjects.setValue('secrets.apiKey-input', 'tester');
-      await commonScreenshots.takeScreenshot('thehive-connector', screenshotDirectories);
-      await testSubjects.click('create-connector-flyout-save-test-btn');
-      await toasts.dismissAll();
-      await commonScreenshots.takeScreenshot('thehive-params-case-test', screenshotDirectories);
-      await testSubjects.setValue('eventActionSelect', 'createAlert');
-      await commonScreenshots.takeScreenshot('thehive-params-alert-test', screenshotDirectories);
+      await testSubjects.setValue('secrets.clientId-input', 'test');
+      await testSubjects.setValue('secrets.clientSecret-input', 'secret');
+      await commonScreenshots.takeScreenshot('crowdstrike-connector', screenshotDirectories);
+      // You cannot test the CrowdStrike connector
+      // await testSubjects.click('create-connector-flyout-save-test-btn');
+      // await toasts.dismissAll();
+      // await commonScreenshots.takeScreenshot('crowdstrike-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });
