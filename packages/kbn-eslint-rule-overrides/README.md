@@ -54,11 +54,11 @@ module.exports = {
 
 ## How It Works
 
-1. **Discovers Root Config**: Uses git to find the repository root and loads the main `.eslintrc.js`
-2. **Finds Applicable Rules**: Identifies existing `no-restricted-imports` rules in the root config
-3. **Merges Restrictions**: Adds your additional restricted imports to the existing ones
-4. **Filters by Directory**: Returns only the overrides that apply to your current directory
-5. **Preserves Configuration**: Maintains all other ESLint settings from the root config
+1. Parses `.eslintrc.js`
+2. Identifies existing `no-restricted-imports` rules in the root config overrides
+3. Adds your additional restricted imports to the existing ones
+4. Returns only the overrides that apply to your current directory (i.e., where the `.eslintrc.js` is located)
+5. Maintains all other ESLint settings from the root config
 
 ## API
 
@@ -76,6 +76,7 @@ Creates ESLint override configurations that extend the root `no-restricted-impor
       - `message` (string, optional) - Custom error message
       - `importNames` (string[], optional) - Specific named imports to restrict
       - `allowImportNames` (string[], optional) - Named imports to allow (restricts all others)
+  - `childConfigDir` (string, required) - The directory where the local `.eslintrc.js` is located. This is used to determine which overrides apply to your current directory.
 
 #### Returns
 
@@ -134,8 +135,6 @@ module.exports = {
 
 ## Important Notes
 
-- This package requires the repository to be a git repository (uses `git rev-parse`)
-- The root `.eslintrc.js` must be in the repository root
 - Only overrides that apply to your current directory will be returned
 - Duplicate restrictions are automatically deduplicated
 - The package preserves the severity level (error/warn) from the root configuration
@@ -145,6 +144,5 @@ module.exports = {
 If you encounter issues:
 
 1. Ensure you've run `yarn kbn bootstrap`
-2. Verify you're in a git repository
-3. Check that the root `.eslintrc.js` exists and is valid
-4. Ensure you're providing at least one restricted import
+2. Check that the root `.eslintrc.js` exists and is valid
+3. Ensure you're providing at least one restricted import
