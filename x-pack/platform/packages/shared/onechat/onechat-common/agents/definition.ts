@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PlainIdAgentIdentifier } from './identifiers';
+import type { PlainIdAgentIdentifier } from './identifiers';
+import type { ToolSelection } from '../tools';
 
 /**
  * The type of an agent.
@@ -43,14 +44,6 @@ export enum AgentMode {
 export const oneChatDefaultAgentId: PlainIdAgentIdentifier = 'default';
 
 /**
- * IDs of the onechat default agent providers.
- */
-export const oneChatAgentProviderIds = {
-  default: 'onechat',
-  profile: 'profile',
-};
-
-/**
  * Base descriptor for an agent.
  */
 export interface AgentDescriptor {
@@ -58,4 +51,35 @@ export interface AgentDescriptor {
   agentId: PlainIdAgentIdentifier;
   providerId: string;
   description: string;
+}
+
+/**
+ * Definition of a onechat agent.
+ */
+export interface AgentDefinition {
+  /**
+   * Id of the agent
+   */
+  id: PlainIdAgentIdentifier;
+  /**
+   * The type of the agent (only for type for now, here for future-proofing)
+   */
+  type: AgentType;
+  /**
+   * Human-readable name for the agent.
+   */
+  name: string;
+  /**
+   * Human-readable description for the agent.
+   */
+  description: string;
+  /**
+   * Configuration associated with this agent
+   */
+  configuration: AgentConfiguration;
+}
+
+export interface AgentConfiguration {
+  additional_prompt?: string;
+  tools: ToolSelection[]; // TODO: change shape too.
 }

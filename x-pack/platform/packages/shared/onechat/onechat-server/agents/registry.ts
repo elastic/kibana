@@ -5,31 +5,18 @@
  * 2.0.
  */
 
-import { AgentType, AgentDescriptor } from '@kbn/onechat-common/agents';
+import type { AgentDescriptor } from '@kbn/onechat-common/agents';
 import type { RunAgentParams, RunAgentReturn } from './runner';
-import { ConversationalAgentParams, ConversationalAgentResponse, AgentProvider } from './provider';
+import type { AgentProvider } from './provider';
 
-export interface ExecutableAgentBase<TType extends AgentType, TParams, TResult>
-  extends AgentDescriptor {
-  type: TType;
-  execute: ExecutableAgentHandlerFn<TParams, TResult>;
+export type ExecutableAgentHandlerParams = Omit<RunAgentParams, 'agentId' | 'request'>;
+
+export type ExecutableAgentHandlerFn = (
+  params: ExecutableAgentHandlerParams
+) => Promise<RunAgentReturn>;
+
+export interface ExecutableAgent extends AgentDescriptor {
+  execute: ExecutableAgentHandlerFn;
 }
-
-export type ExecutableAgentHandlerParams<TParams = Record<string, unknown>> = Omit<
-  RunAgentParams<TParams>,
-  'agentId' | 'request'
->;
-
-export type ExecutableAgentHandlerFn<TParams, TResponse> = (
-  params: ExecutableAgentHandlerParams<TParams>
-) => Promise<RunAgentReturn<TResponse>>;
-
-export type ExecutableConversationalAgent = ExecutableAgentBase<
-  AgentType.conversational,
-  ConversationalAgentParams,
-  ConversationalAgentResponse
->;
-
-export type ExecutableAgent = ExecutableConversationalAgent;
 
 export type AgentRegistry = AgentProvider<ExecutableAgent>;

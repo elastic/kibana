@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type {
   AgentProvider,
   AgentRegistry,
-  AgentDefinition,
+  ProvidedAgent,
   RunAgentFn,
 } from '@kbn/onechat-server';
 import type { AgentClient } from './client';
@@ -29,7 +29,7 @@ export type AgentProviderWithId = AgentProvider & {
   id: string;
 };
 
-export type AgentDefinitionWithProviderId = AgentDefinition & {
+export type AgentDefinitionWithProviderId = ProvidedAgent & {
   providerId: string;
 };
 

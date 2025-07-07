@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-export {
-  AgentType,
-  AgentMode,
-  oneChatDefaultAgentId,
-  oneChatAgentProviderIds,
-  type AgentDescriptor,
-} from './descriptor';
+export { AgentType, AgentMode, oneChatDefaultAgentId, type AgentDescriptor } from './definition';
 export {
   ChatAgentEventType,
   type ChatAgentEvent,
@@ -46,4 +40,3 @@ export {
   toSerializedAgentIdentifier,
   toStructuredAgentIdentifier,
 } from './identifiers';
-export type { AgentProfile } from './profiles';

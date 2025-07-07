@@ -8,7 +8,7 @@
 import { AgentType } from '@kbn/onechat-common';
 import type {
   AgentRegistry,
-  AgentDefinition,
+  ProvidedAgent,
   ConversationalAgentHandlerFn,
   AgentProvider,
 } from '@kbn/onechat-server';
@@ -24,7 +24,7 @@ export type AgentsServiceStartMock = AgentsServiceStart & {
   registry: InternalAgentRegistryMock;
 };
 
-export type MockedAgent = Omit<AgentDefinition, 'handler'> & {
+export type MockedAgent = Omit<ProvidedAgent, 'handler'> & {
   handler: jest.MockedFn<ConversationalAgentHandlerFn>;
   providerId: string;
 };

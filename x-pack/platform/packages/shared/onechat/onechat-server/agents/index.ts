@@ -10,13 +10,8 @@ export type {
   AgentHandlerContext,
   AgentHandlerReturn,
   AgentHandlerFn,
-  ConversationalAgentParams,
-  ConversationalAgentHandlerFn,
-  ConversationalAgentResponse,
   AgentEventEmitter,
-  AgentDefinitionBase,
-  ConversationalAgentDefinition,
-  AgentDefinition,
+  ProvidedAgent,
   AgentProvider,
 } from './provider';
 export type {
@@ -31,7 +26,5 @@ export type {
   ExecutableAgent,
   ExecutableAgentHandlerFn,
   ExecutableAgentHandlerParams,
-  ExecutableAgentBase,
-  ExecutableConversationalAgent,
   AgentRegistry,
 } from './registry';
