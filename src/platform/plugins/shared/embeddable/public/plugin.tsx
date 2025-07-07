@@ -28,6 +28,7 @@ import {
   EmbeddableStart,
   EmbeddableStartDependencies,
 } from './types';
+import { getTransforms, registerTransforms } from './transforms_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -43,6 +44,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
+      registerTransforms,
       registerEnhancement: this.enhancementsRegistry.registerEnhancement,
     };
   }
@@ -68,6 +70,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
               storage
             )
           : this.stateTransferService,
+      getTransforms,
       getEnhancement: this.enhancementsRegistry.getEnhancement,
     };
 
