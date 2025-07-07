@@ -6,7 +6,7 @@
  */
 
 import { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { last } from 'lodash';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
