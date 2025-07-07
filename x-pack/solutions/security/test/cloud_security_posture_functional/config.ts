@@ -67,7 +67,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
         `--xpack.fleet.internal.fleetServerStandalone=true`,
         `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
-        `--xpack.cloudSecurityPosture.enableExperimental=["cloudSecurityNamespaceSupportEnabled"]`,
         // Required for telemetry e2e tests
         `--plugin-path=${resolve(
           __dirname,
