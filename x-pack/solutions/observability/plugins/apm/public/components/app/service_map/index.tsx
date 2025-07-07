@@ -40,9 +40,6 @@ import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { isLogsOnlySignal } from '../../../utils/get_signal_type';
-import { ServiceTabEmptyState } from '../service_tab_empty_state';
 import { useServiceMap } from './use_service_map';
 import { TryItButton } from '../../shared/try_it_button';
 
@@ -92,14 +89,7 @@ export function ServiceMapServiceDetail() {
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { serviceEntitySummary } = useApmServiceContext();
 
-  const hasLogsOnlySignal =
-    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
-
-  if (hasLogsOnlySignal) {
-    return <ServiceTabEmptyState id="serviceMap" />;
-  }
   return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
 }
 

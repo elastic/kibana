@@ -43,6 +43,11 @@ export interface WalkerOptions {
     parent: types.ESQLProperNode | undefined,
     walker: WalkerVisitorApi
   ) => void;
+  visitOrder?: (
+    node: types.ESQLOrderExpression,
+    parent: types.ESQLProperNode | undefined,
+    walker: WalkerVisitorApi
+  ) => void;
   visitLiteral?: (
     node: types.ESQLLiteral,
     parent: types.ESQLProperNode | undefined,
@@ -516,6 +521,26 @@ export class Walker {
     this.walkList(node.values, node);
   }
 
+  public walkSource(node: types.ESQLSource, parent: types.ESQLProperNode | undefined): void {
+    const { options } = this;
+
+    (options.visitSource ?? options.visitAny)?.(node, parent, this);
+
+    const children: types.ESQLStringLiteral[] = [];
+
+    if (node.prefix) {
+      children.push(node.prefix);
+    }
+    if (node.index) {
+      children.push(node.index);
+    }
+    if (node.selector) {
+      children.push(node.selector);
+    }
+
+    this.walkList(children, node);
+  }
+
   public walkColumn(node: types.ESQLColumn, parent: types.ESQLProperNode | undefined): void {
     const { options } = this;
     const { args } = node;
@@ -525,6 +550,17 @@ export class Walker {
     if (args) {
       this.walkList(args, node);
     }
+  }
+
+  public walkOrder(
+    node: types.ESQLOrderExpression,
+    parent: types.ESQLProperNode | undefined
+  ): void {
+    const { options } = this;
+
+    (options.visitOrder ?? options.visitAny)?.(node, parent, this);
+
+    this.walkList(node.args, node);
   }
 
   public walkInlineCast(
@@ -607,11 +643,15 @@ export class Walker {
         break;
       }
       case 'source': {
-        (options.visitSource ?? options.visitAny)?.(node, parent, this);
+        this.walkSource(node, parent);
         break;
       }
       case 'column': {
         this.walkColumn(node, parent);
+        break;
+      }
+      case 'order': {
+        this.walkOrder(node, parent);
         break;
       }
       case 'literal': {

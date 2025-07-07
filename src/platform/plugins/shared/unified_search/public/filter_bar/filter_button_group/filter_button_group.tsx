@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './filter_button_group.scss';
-
 import React, { FC, ReactNode } from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '../../use_memo_css';
 
 interface Props {
   items: ReactNode[];
@@ -26,6 +26,7 @@ interface Props {
 }
 
 export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 'm', ...rest }: Props) => {
+  const styles = useMemoCss(filterButtonStyles);
   return (
     <EuiFlexGroup
       className={classNames('kbnFilterButtonGroup', {
@@ -34,6 +35,7 @@ export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 'm', ...r
       })}
       gutterSize="none"
       responsive={false}
+      css={styles.wrapper}
       {...rest}
     >
       {items.map((item, i) =>
@@ -45,4 +47,36 @@ export const FilterButtonGroup: FC<Props> = ({ items, attached, size = 'm', ...r
       )}
     </EuiFlexGroup>
   );
+};
+
+const filterButtonStyles = {
+  wrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'relative',
+      height: euiTheme.size.xxl,
+      backgroundColor: euiTheme.colors.backgroundBaseFormsPrepend,
+      borderRadius: euiTheme.border.radius.medium,
+      '&::after': {
+        content: "''",
+        position: 'absolute',
+        inset: 0,
+        border: `${euiTheme.border.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        borderRadius: 'inherit',
+        pointerEvents: 'none',
+      },
+      // Targets any interactable elements
+      '*:enabled': {
+        transform: 'none !important',
+      },
+      '&.kbnFilterButtonGroup--s': {
+        height: euiTheme.size.xl,
+      },
+      ' &.kbnFilterButtonGroup--attached': {
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+      },
+      '> *:not(:last-of-type)': {
+        borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
+      },
+    }),
 };

@@ -48,7 +48,7 @@ class Package {
   }
 
   /**
-   * @private
+   * @internal
    */
   constructor(
     /**

@@ -77,7 +77,10 @@ import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
-import { getFilteredInstallPackages } from '../filtered_packages';
+import {
+  getAllowedSearchAiLakeInstallPackagesIfEnabled,
+  getFilteredInstallPackages,
+} from '../filtered_packages';
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
@@ -663,6 +666,12 @@ export async function installPackageWithStateMachine(options: {
       throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
     }
 
+    const allowlistPackages = getAllowedSearchAiLakeInstallPackagesIfEnabled();
+    // This will only trigger if xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
+    if (allowlistPackages && !allowlistPackages.includes(pkgName)) {
+      throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
+    }
+
     // if the requested version is the same as installed version, check if we allow it based on
     // current installed package status and force flag, if we don't allow it,
     // just return the asset references from the existing installation
@@ -1129,8 +1138,16 @@ export async function restartInstallation(options: {
   pkgVersion: string;
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
+  previousVersion?: string;
 }) {
-  const { savedObjectsClient, pkgVersion, pkgName, installSource, verificationResult } = options;
+  const {
+    savedObjectsClient,
+    pkgVersion,
+    pkgName,
+    installSource,
+    verificationResult,
+    previousVersion,
+  } = options;
 
   let savedObjectUpdate: Partial<Installation> = {
     install_version: pkgVersion,
@@ -1145,6 +1162,10 @@ export async function restartInstallation(options: {
       verification_key_id: null, // unset any previous verification key id
       ...formatVerificationResultForSO(verificationResult),
     };
+  }
+
+  if (previousVersion) {
+    savedObjectUpdate.previous_version = previousVersion;
   }
 
   auditLoggingService.writeCustomSoAuditLog({

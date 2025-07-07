@@ -5,8 +5,22 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import {
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  type PluginInitializerContext,
+} from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import { registerApp } from './register';
+import {
+  AgentService,
+  ChatService,
+  ConversationsService,
+  OnechatInternalService,
+  ToolsService,
+  AgentProfilesService,
+} from './services';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -14,13 +28,7 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import {
-  AgentService,
-  ChatService,
-  ConversationsService,
-  ToolsService,
-  OnechatInternalService,
-} from './services';
+import { ONECHAT_UI_SETTING_ID } from '../common/constants';
 
 export class OnechatPlugin
   implements
@@ -32,16 +40,25 @@ export class OnechatPlugin
     >
 {
   logger: Logger;
-  // @ts-expect-error unused for now
   private internalServices?: OnechatInternalService;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
-  setup(
-    coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
-    pluginsSetup: OnechatSetupDependencies
-  ): OnechatPluginSetup {
+  setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
+    const isOnechatUiEnabled = core.uiSettings.get<boolean>(ONECHAT_UI_SETTING_ID, false);
+
+    if (isOnechatUiEnabled) {
+      registerApp({
+        core,
+        getServices: () => {
+          if (!this.internalServices) {
+            throw new Error('getServices called before plugin start');
+          }
+          return this.internalServices;
+        },
+      });
+    }
     return {};
   }
 
@@ -50,12 +67,14 @@ export class OnechatPlugin
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
+    const agentProfilesService = new AgentProfilesService({ http });
 
     this.internalServices = {
       agentService,
       chatService,
       conversationsService,
       toolsService,
+      agentProfilesService,
     };
 
     return {};

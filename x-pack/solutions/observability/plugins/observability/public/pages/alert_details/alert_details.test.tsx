@@ -27,6 +27,7 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { AlertDetails } from './alert_details';
 import { alertDetail, alertWithNoData } from './mock/alert';
+import { createTelemetryClientMock } from '../../services/telemetry/telemetry_client.mock';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -107,6 +108,7 @@ const mockKibana = () => {
       theme: {},
       dashboard: {},
       spaces: mockSpaces,
+      telemetryClient: createTelemetryClientMock(),
     },
   });
 };
@@ -204,6 +206,7 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('alert-summary-container')).toBeFalsy();
     expect(alertDetails.queryByTestId('overviewTab')).toBeTruthy();
     expect(alertDetails.queryByTestId('metadataTab')).toBeTruthy();
+    expect(alertDetails.queryByTestId('relatedAlertsTab')).toBeTruthy();
   });
 
   it('should show Metadata tab', async () => {

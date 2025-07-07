@@ -17,7 +17,6 @@ const secrets = {
   apiKey: 'token12345',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function theHiveTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
@@ -244,7 +243,7 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
             simulator.close();
           });
 
-          it('should send a formatted JSON object', async () => {
+          it('should create a case', async () => {
             const { body } = await supertest
               .post(`/api/actions/connector/${theHiveActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
@@ -282,6 +281,67 @@ export default function theHiveTest({ getService }: FtrProviderContext) {
                 url: `${url}/cases/~172064/details`,
                 pushedDate: new Date(1712128153041).toISOString(),
               },
+            });
+          });
+
+          it('should create an alert', async () => {
+            const { body } = await supertest
+              .post(`/api/actions/connector/${theHiveActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'createAlert',
+                  subActionParams: {
+                    title: 'title',
+                    description: 'description',
+                    tlp: 2,
+                    source: 'source',
+                    type: 'type',
+                    sourceRef: 'sourceRef',
+                    isRuleSeverity: false,
+                    severity: 1,
+                    tags: ['tags1', 'tags2'],
+                    body: '{"observables":[{"dataType":"url","data":"http://example.com"},{"dataType":"mail","data":"foo@example.org"},{"dataType":"ip","data":"127.0.0.1"}],"procedures":[{"patternId":"T1132","occurDate":1640000000000}]}',
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(simulator.requestData).to.eql({
+              title: 'title',
+              description: 'description',
+              type: 'type',
+              source: 'source',
+              sourceRef: 'sourceRef',
+              severity: 1,
+              tags: ['tags1', 'tags2'],
+              tlp: 2,
+              observables: [
+                {
+                  dataType: 'url',
+                  data: 'http://example.com',
+                },
+                {
+                  dataType: 'mail',
+                  data: 'foo@example.org',
+                },
+                {
+                  dataType: 'ip',
+                  data: '127.0.0.1',
+                },
+              ],
+              procedures: [
+                {
+                  patternId: 'T1132',
+                  occurDate: 1640000000000,
+                },
+              ],
+            });
+
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: theHiveActionId,
+              data: {},
             });
           });
         });

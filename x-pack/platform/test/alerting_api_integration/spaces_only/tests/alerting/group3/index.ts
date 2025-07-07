@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { buildUp, tearDown } from '../../helpers';
 
-// eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Alerting', function () {
     this.tags('skipFIPS');
@@ -18,5 +17,6 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./builtin_alert_types'));
     loadTestFile(require.resolve('./maintenance_window_flows'));
     loadTestFile(require.resolve('./maintenance_window_scoped_query'));
+    loadTestFile(require.resolve('./dangerously_create_alerts_in_all_spaces'));
   });
 }

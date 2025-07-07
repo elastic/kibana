@@ -48,6 +48,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.MONITOR_QUERY_ID]: null,
   retest_on_failure: null,
   [ConfigKey.MAX_ATTEMPTS]: maxAttemptsFormatter,
+  [ConfigKey.KIBANA_SPACES]: null,
   [ConfigKey.TIMEOUT]: secondsToCronFormatter,
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,

@@ -8,7 +8,7 @@
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { i18n } from '@kbn/i18n';
-import { CONNECTORS_LABEL, WEB_CRAWLERS_LABEL } from '../common/i18n_string';
+import { CONNECTORS_LABEL } from '../common/i18n_string';
 
 export const navigationTree = ({ isAppRegistered }: ApplicationStart): NavigationTreeDefinition => {
   function isAvailable<T>(appId: string, content: T): T[] {
@@ -27,27 +27,49 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
-            id: 'analyze',
-            title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
-              defaultMessage: 'Analyze',
+            id: 'home',
+            title: i18n.translate('xpack.serverlessSearch.nav.home', {
+              defaultMessage: 'Home',
             }),
+            link: 'searchHomepage',
             spaceBefore: 'm',
+            getIsActive: ({ pathNameSerialized, prepend }) => {
+              return (
+                pathNameSerialized.startsWith(prepend('/app/elasticsearch/home')) ||
+                pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
+              );
+            },
+          },
+          {
+            link: 'discover',
+          },
+          {
+            link: 'dashboards',
+            getIsActive: ({ pathNameSerialized, prepend }) => {
+              return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+            },
+          },
+          {
+            title: i18n.translate('xpack.serverlessSearch.nav.chat', {
+              defaultMessage: 'Chat',
+            }),
+            renderAs: 'accordion',
             children: [
               {
-                link: 'discover',
+                link: 'onechat:conversations',
               },
               {
-                link: 'dashboards',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-                },
+                link: 'onechat:agents',
+              },
+              {
+                link: 'onechat:tools',
               },
             ],
           },
           {
-            id: 'data',
-            title: i18n.translate('xpack.serverlessSearch.nav.data', {
-              defaultMessage: 'Data',
+            id: 'build',
+            title: i18n.translate('xpack.serverlessSearch.nav.build', {
+              defaultMessage: 'Build',
             }),
             spaceBefore: 'm',
             children: [
@@ -62,37 +84,8 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   return (
                     pathNameSerialized.startsWith(
                       prepend('/app/elasticsearch/index_management/indices')
-                    ) ||
-                    pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices')) ||
-                    pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
+                    ) || pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices'))
                   );
-                },
-              },
-              {
-                title: CONNECTORS_LABEL,
-                link: 'serverlessConnectors',
-              },
-              {
-                title: WEB_CRAWLERS_LABEL,
-                link: 'serverlessWebCrawlers',
-              },
-            ],
-          },
-          {
-            id: 'build',
-            title: i18n.translate('xpack.serverlessSearch.nav.build', {
-              defaultMessage: 'Build',
-            }),
-            spaceBefore: 'm',
-            children: [
-              {
-                id: 'dev_tools',
-                title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
-                  defaultMessage: 'Dev Tools',
-                }),
-                link: 'dev_tools:console',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
                 },
               },
               ...isAvailable('searchPlayground', {
@@ -103,6 +96,10 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 link: 'searchPlayground' as AppDeepLinkId,
                 breadcrumbStatus: 'hidden' as 'hidden',
               }),
+              {
+                title: CONNECTORS_LABEL,
+                link: 'serverlessConnectors',
+              },
             ],
           },
           {
@@ -112,16 +109,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             }),
             spaceBefore: 'm',
             children: [
-              {
-                id: 'searchInferenceEndpoints',
-                title: i18n.translate(
-                  'xpack.serverlessSearch.nav.relevance.searchInferenceEndpoints',
-                  {
-                    defaultMessage: 'Inference Endpoints',
-                  }
-                ),
-                link: 'searchInferenceEndpoints',
-              },
               {
                 id: 'searchSynonyms',
                 title: i18n.translate('xpack.serverlessSearch.nav.relevance.searchSynonyms', {
@@ -136,15 +123,17 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 }),
                 link: 'searchQueryRules',
               },
+              {
+                id: 'searchInferenceEndpoints',
+                title: i18n.translate(
+                  'xpack.serverlessSearch.nav.relevance.searchInferenceEndpoints',
+                  {
+                    defaultMessage: 'Inference Endpoints',
+                  }
+                ),
+                link: 'searchInferenceEndpoints',
+              },
             ],
-          },
-          {
-            id: 'otherTools',
-            title: i18n.translate('xpack.serverlessSearch.nav.otherTools', {
-              defaultMessage: 'Other tools',
-            }),
-            spaceBefore: 'm',
-            children: [{ link: 'maps' }],
           },
         ],
       },
@@ -155,12 +144,15 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         id: 'search_project_nav_footer',
         children: [
           {
-            id: 'gettingStarted',
-            title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-              defaultMessage: 'Getting Started',
+            id: 'dev_tools',
+            title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
+              defaultMessage: 'Developer Tools',
             }),
-            link: 'serverlessElasticsearch',
-            icon: 'launch',
+            icon: 'console',
+            link: 'dev_tools:console',
+            getIsActive: ({ pathNameSerialized, prepend }) => {
+              return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+            },
           },
           {
             id: 'project_settings_project_nav',

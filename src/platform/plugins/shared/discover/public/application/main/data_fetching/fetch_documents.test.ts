@@ -25,7 +25,10 @@ import { selectTabRuntimeState } from '../state_management/redux';
 const getDeps = (): CommonFetchParams => {
   const { appState, internalState, dataState, runtimeStateManager, getCurrentTab } =
     getDiscoverStateMock({});
-  const { scopedProfilesManager$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
+  const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
+    runtimeStateManager,
+    getCurrentTab().id
+  );
   appState.update({ sampleSize: 100 });
   return {
     dataSubjects: dataState.data$,
@@ -38,6 +41,7 @@ const getDeps = (): CommonFetchParams => {
     internalState,
     appStateContainer: appState,
     scopedProfilesManager: scopedProfilesManager$.getValue(),
+    scopedEbtManager: scopedEbtManager$.getValue(),
   };
 };
 

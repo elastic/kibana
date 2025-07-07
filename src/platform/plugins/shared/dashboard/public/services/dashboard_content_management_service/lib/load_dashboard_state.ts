@@ -13,7 +13,6 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { has } from 'lodash';
 
 import { getDashboardContentManagementCache } from '..';
-import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
@@ -28,7 +27,6 @@ import type {
   LoadDashboardFromSavedObjectProps,
   LoadDashboardReturn,
 } from '../types';
-import { convertNumberToDashboardVersion } from './dashboard_versioning';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -136,17 +134,8 @@ export const loadDashboardState = async ({
   const query = migrateLegacyQuery(
     searchSource?.getOwnField('query') || queryString.getDefaultQuery() // TODO SAVED DASHBOARDS determine if migrateLegacyQuery is still needed
   );
-  const {
-    refreshInterval,
-    description,
-    timeRestore,
-    options,
-    panels,
-    timeFrom,
-    version,
-    timeTo,
-    title,
-  } = attributes;
+  const { refreshInterval, description, timeRestore, options, panels, timeFrom, timeTo, title } =
+    attributes;
 
   const timeRange =
     timeRestore && timeFrom && timeTo
@@ -155,10 +144,6 @@ export const loadDashboardState = async ({
           to: timeTo,
         }
       : undefined;
-
-  const { panels: panelMap, sections: sectionsMap } = convertPanelsArrayToPanelSectionMaps(
-    panels ?? []
-  );
 
   return {
     managed,
@@ -172,18 +157,13 @@ export const loadDashboardState = async ({
       description,
       timeRange,
       filters,
-      panels: panelMap,
+      panels,
       query,
       title,
-      sections: sectionsMap,
-
-      viewMode: 'view', // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags:
         savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
 
       controlGroupInput: attributes.controlGroupInput,
-
-      ...(version && { version: convertNumberToDashboardVersion(version) }),
     },
     dashboardFound: true,
     dashboardId: savedObjectId,

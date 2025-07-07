@@ -188,7 +188,11 @@ describe('Walker static methods', () => {
       });
     });
 
-    test('can find RERANK command by inference ID', () => {
+    /**
+     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+     * get back to it after 9.1 release.
+     */
+    test.skip('can find RERANK command by inference ID', () => {
       const query =
         'FROM b | RERANK "query" ON field WITH abc | RERANK "query" ON field WITH my_id | LIMIT 10';
       const command = Walker.find(parse(query).root, (node) => {

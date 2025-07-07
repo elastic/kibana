@@ -88,6 +88,22 @@ const inferenceEndpoints = [
       model_id: 'rainbow-sprinkles',
     },
   },
+  {
+    inference_id: '.elser-2-elastic',
+    task_type: 'sparse_embedding',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'elser_model_2',
+    },
+  },
+  {
+    inference_id: 'custom-inference-id',
+    task_type: 'sparse_embedding',
+    service: 'elastic',
+    service_settings: {
+      model_id: 'elser_model_2',
+    },
+  },
 ] as InferenceAPIConfigResponse[];
 
 jest.mock('../../hooks/use_delete_endpoint', () => ({
@@ -101,39 +117,47 @@ describe('When the tabular page is loaded', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('.elser-2-elasticsearch');
-    expect(rows[2]).toHaveTextContent('.multilingual-e5-small-elasticsearch');
-    expect(rows[3]).toHaveTextContent('.sparkles');
-    expect(rows[4]).toHaveTextContent('elastic-rerank');
-    expect(rows[5]).toHaveTextContent('local-model');
-    expect(rows[6]).toHaveTextContent('my-elser-model-05');
-    expect(rows[7]).toHaveTextContent('third-party-model');
+    expect(rows[1]).toHaveTextContent('.elser-2-elastic');
+    expect(rows[2]).toHaveTextContent('.elser-2-elasticsearch');
+    expect(rows[3]).toHaveTextContent('.multilingual-e5-small-elasticsearch');
+    expect(rows[4]).toHaveTextContent('.sparkles');
+    expect(rows[5]).toHaveTextContent('custom-inference-id');
+    expect(rows[6]).toHaveTextContent('elastic-rerank');
+    expect(rows[7]).toHaveTextContent('local-model');
+    expect(rows[8]).toHaveTextContent('my-elser-model-05');
+    expect(rows[9]).toHaveTextContent('third-party-model');
   });
 
   it('should display all service and model ids in the table', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).toHaveTextContent('Elasticsearch');
-    expect(rows[1]).toHaveTextContent('.elser_model_2');
+    expect(rows[1]).toHaveTextContent('Elastic');
+    expect(rows[1]).toHaveTextContent('.elser-2-elastic');
 
     expect(rows[2]).toHaveTextContent('Elasticsearch');
-    expect(rows[2]).toHaveTextContent('.multilingual-e5-small');
+    expect(rows[2]).toHaveTextContent('.elser_model_2');
 
-    expect(rows[3]).toHaveTextContent('Elastic');
-    expect(rows[3]).toHaveTextContent('rainbow-sprinkles');
+    expect(rows[3]).toHaveTextContent('Elasticsearch');
+    expect(rows[3]).toHaveTextContent('.multilingual-e5-small');
 
-    expect(rows[4]).toHaveTextContent('Elasticsearch');
-    expect(rows[4]).toHaveTextContent('.rerank-v1');
+    expect(rows[4]).toHaveTextContent('Elastic');
+    expect(rows[4]).toHaveTextContent('rainbow-sprinkles');
 
-    expect(rows[5]).toHaveTextContent('Elasticsearch');
-    expect(rows[5]).toHaveTextContent('.own_model');
+    expect(rows[5]).toHaveTextContent('Elastic');
+    expect(rows[5]).toHaveTextContent('elser_model_2');
 
     expect(rows[6]).toHaveTextContent('Elasticsearch');
-    expect(rows[6]).toHaveTextContent('.elser_model_2');
+    expect(rows[6]).toHaveTextContent('.rerank-v1');
 
-    expect(rows[7]).toHaveTextContent('OpenAI');
+    expect(rows[7]).toHaveTextContent('Elasticsearch');
     expect(rows[7]).toHaveTextContent('.own_model');
+
+    expect(rows[8]).toHaveTextContent('Elasticsearch');
+    expect(rows[8]).toHaveTextContent('.elser_model_2');
+
+    expect(rows[9]).toHaveTextContent('OpenAI');
+    expect(rows[9]).toHaveTextContent('.own_model');
   });
 
   it('should only disable delete action for preconfigured endpoints', () => {
@@ -169,23 +193,28 @@ describe('When the tabular page is loaded', () => {
     expect(rows[1]).toHaveTextContent(preconfigured);
     expect(rows[2]).toHaveTextContent(preconfigured);
     expect(rows[3]).toHaveTextContent(preconfigured);
-    expect(rows[4]).not.toHaveTextContent(preconfigured);
+    expect(rows[4]).toHaveTextContent(preconfigured);
     expect(rows[5]).not.toHaveTextContent(preconfigured);
     expect(rows[6]).not.toHaveTextContent(preconfigured);
+    expect(rows[7]).not.toHaveTextContent(preconfigured);
+    expect(rows[8]).not.toHaveTextContent(preconfigured);
+    expect(rows[9]).not.toHaveTextContent(preconfigured);
   });
 
-  it('should show tech preview badge only for reranker-v1 model', () => {
+  it('should show tech preview badge only for reranker-v1 model, rainbow-sprinkles, and preconfigured elser_model_2', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const techPreview = 'TECH PREVIEW';
 
     const rows = screen.getAllByRole('row');
-    expect(rows[1]).not.toHaveTextContent(techPreview);
+    expect(rows[1]).toHaveTextContent(techPreview);
     expect(rows[2]).not.toHaveTextContent(techPreview);
-    expect(rows[3]).toHaveTextContent(techPreview);
+    expect(rows[3]).not.toHaveTextContent(techPreview);
     expect(rows[4]).toHaveTextContent(techPreview);
     expect(rows[5]).not.toHaveTextContent(techPreview);
-    expect(rows[6]).not.toHaveTextContent(techPreview);
+    expect(rows[6]).toHaveTextContent(techPreview);
     expect(rows[7]).not.toHaveTextContent(techPreview);
+    expect(rows[8]).not.toHaveTextContent(techPreview);
+    expect(rows[9]).not.toHaveTextContent(techPreview);
   });
 });

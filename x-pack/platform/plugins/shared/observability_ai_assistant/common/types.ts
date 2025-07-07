@@ -29,31 +29,56 @@ export interface PendingMessage {
   aborted?: boolean;
   error?: any;
 }
-export interface DetectedEntity {
-  entity: string;
-  class_name: string;
-  start_pos: number;
-  end_pos: number;
-  hash: string;
-  type: 'ner' | 'regex';
+
+export interface Deanonymization {
+  start: number;
+  end: number;
+  entity: {
+    class_name: string;
+    value: string;
+    mask: string;
+  };
 }
 
-export type DetectedEntityType = DetectedEntity['type'];
-export interface Unredaction {
-  entity: string;
-  class_name: string;
-  start_pos: number;
-  end_pos: number;
-  type: 'ner' | 'regex';
+export interface DeanonymizationItem {
+  message: {
+    role: MessageRole;
+    content?: string;
+    toolCalls?: Array<{
+      function: {
+        name: string;
+        arguments: Record<string, any> | {};
+      };
+    }>;
+    name?: string;
+    response?: Record<string, any>;
+    toolCallId?: string;
+  };
+  deanonymizations: Deanonymization[];
 }
 
-export type UnredactionType = Unredaction['type'];
+export type DeanonymizationInput = DeanonymizationItem[];
+
+export interface DeanonymizationOutput {
+  message: {
+    content?: string;
+    toolCalls?: Array<{
+      toolCallId: string;
+      function: {
+        name: string;
+        arguments: Record<string, any>;
+      };
+    }>;
+    role: MessageRole;
+  };
+  deanonymizations: Deanonymization[];
+}
 
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
-    unredactions?: Unredaction[];
+    deanonymizations?: Deanonymization[];
     name?: string;
     role: MessageRole;
     function_call?: {
@@ -180,22 +205,3 @@ export enum ConversationAccess {
   SHARED = 'shared',
   PRIVATE = 'private',
 }
-
-export interface InferenceChunk {
-  chunkText: string;
-  charStartOffset: number;
-}
-
-export interface NerAnonymizationRule {
-  type: 'ner';
-  enabled: boolean;
-}
-
-export interface RegexAnonymizationRule {
-  type: 'regex';
-  entityClass: string;
-  pattern: string;
-  enabled: boolean;
-}
-
-export type AnonymizationRule = NerAnonymizationRule | RegexAnonymizationRule;
