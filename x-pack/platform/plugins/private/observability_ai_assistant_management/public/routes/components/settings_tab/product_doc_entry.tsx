@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,6 +30,8 @@ export function ProductDocEntry() {
 
   const knowledgeBase = useKnowledgeBase();
   const selectedInferenceId: string | undefined = knowledgeBase.status.value?.currentInferenceId;
+
+  const canInstallProductDoc = selectedInferenceId !== undefined;
 
   const [isInstalled, setInstalled] = useState<boolean>(false);
   const [isInstalling, setInstalling] = useState<boolean>(false);
@@ -132,19 +135,49 @@ export function ProductDocEntry() {
         </EuiFlexGroup>
       );
     }
+
+    const installButton = (
+      <EuiButton
+        data-test-subj="settingsTabInstallProductDocButton"
+        onClick={onClickInstall}
+        disabled={!canInstallProductDoc}
+      >
+        {i18n.translate(
+          'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocButtonLabel',
+          { defaultMessage: 'Install' }
+        )}
+      </EuiButton>
+    );
+
     return (
       <EuiFlexGroup justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="settingsTabInstallProductDocButton" onClick={onClickInstall}>
-            {i18n.translate(
-              'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocButtonLabel',
-              { defaultMessage: 'Install' }
-            )}
-          </EuiButton>
+          {canInstallProductDoc ? (
+            installButton
+          ) : (
+            <EuiToolTip
+              position="top"
+              content={i18n.translate(
+                'xpack.observabilityAiAssistantManagement.settingsPage.installDissabledTooltip',
+                {
+                  defaultMessage: 'Knowledge Base has to be installed first.',
+                }
+              )}
+            >
+              {installButton}
+            </EuiToolTip>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [isInstalled, isInstalling, isStatusLoading, onClickInstall, onClickUninstall]);
+  }, [
+    canInstallProductDoc,
+    isInstalled,
+    isInstalling,
+    isStatusLoading,
+    onClickInstall,
+    onClickUninstall,
+  ]);
 
   return (
     <EuiDescribedFormGroup
