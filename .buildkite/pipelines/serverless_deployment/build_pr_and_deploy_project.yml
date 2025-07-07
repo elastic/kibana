@@ -5,7 +5,7 @@ env:
 
 steps:
   - group: 'Notify if missing labels'
-    if: "build.env('GITHUB_PR_LABELS') !~ /ci:project-deploy-(elasticsearch|observability|security)/"
+    if: "build.env('GITHUB_PR_LABELS') !~ /ci:project-deploy-(elasticsearch|observability|log_essentials|security)/"
 
     steps:
       - command: |
@@ -22,7 +22,7 @@ steps:
         timeout_in_minutes: 5
 
   - group: 'Project Deployment'
-    if: "build.env('GITHUB_PR_LABELS') =~ /ci:project-deploy-(elasticsearch|observability|security)/"
+    if: "build.env('GITHUB_PR_LABELS') =~ /ci:project-deploy-(elasticsearch|observability|log_essentials|security)/"
 
     steps:
       - command: .buildkite/scripts/lifecycle/pre_build.sh
