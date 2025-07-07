@@ -47,12 +47,12 @@ import {
 } from '@kbn/test-suites-xpack-platform/functional/services/monitoring';
 import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services/ml';
 import { TransformProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services/transform';
-import { ObservabilityProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services/observability';
 import { CasesServiceProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services/cases';
 import { ActionsServiceProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services/actions';
 import { RulesServiceProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services/rules';
 import { AiopsProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services/aiops';
 import { CanvasElementProvider } from '@kbn/test-suites-xpack-platform/functional/services/canvas_element';
+import { ObservabilityProvider } from './observability';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 

@@ -46,7 +46,6 @@ import { SampleDataServiceProvider } from './sample_data';
 import { GrokDebuggerProvider } from './grok_debugger';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
-import { ObservabilityProvider } from './observability';
 import { CasesServiceProvider } from './cases';
 import { ActionsServiceProvider } from './actions';
 import { RulesServiceProvider } from './rules';
@@ -100,7 +99,6 @@ export const services = {
   ml: MachineLearningProvider,
   transform: TransformProvider,
   serchSessions: SearchSessionsService,
-  observability: ObservabilityProvider,
   cases: CasesServiceProvider,
   actions: ActionsServiceProvider,
   rules: RulesServiceProvider,
