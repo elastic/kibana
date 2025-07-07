@@ -11,7 +11,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Rules Management - Prebuilt Rules (ML Disabled)', function () {
     // ML disabled is not a valid configuration for FIPS, as it applies only to the basic license tier
     this.tags('skipFIPS');
-    
+
     loadTestFile(require.resolve('./review_installation'));
     loadTestFile(require.resolve('./perform_installation'));
     loadTestFile(require.resolve('./review_upgrade'));
