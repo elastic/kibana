@@ -10,28 +10,11 @@ import { setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
   describe('FUSE', () => {
-    it('does not suggest FUSE in the general list of commands', async () => {
+    // ToDo: Enable when FUSE is on tech preview
+    it.skip('suggests FUSE in the general list of commands', async () => {
       const { suggest } = await setup();
       const suggestedCommands = (await suggest('FROM index | /')).map((s) => s.text);
-      expect(suggestedCommands).not.toContain('FUSE ');
-    });
-
-    // ToDo:n Enable when FUSE is on tech preview
-    it.skip('suggests FUSE immediately after a FORK command', async () => {
-      const { suggest } = await setup();
-      const suggestedCommands = (await suggest('FROM a | FORK (LIMIT 1) (LIMIT 2) | /')).map(
-        (s) => s.text
-      );
       expect(suggestedCommands).toContain('FUSE ');
-    });
-
-    it('does not suggests FUSE if FORK is not immediately before', async () => {
-      const { suggest } = await setup();
-      const suggestedCommands = (
-        await suggest('FROM a | FORK (LIMIT 1) (LIMIT 2) | LIMIT 1 | /')
-      ).map((s) => s.text);
-      expect(suggestedCommands).not.toContain('FUSE ');
-      expect(suggestedCommands).toContain('LIMIT ');
     });
 
     it('suggests pipe after complete command', async () => {

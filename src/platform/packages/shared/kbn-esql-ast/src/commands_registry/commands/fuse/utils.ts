@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand, ESQLMessage, ESQLAst } from '../../../types';
+import type { ESQLCommand, ESQLMessage } from '../../../types';
 
 export function buildMissingMetadataMessage(
   command: ESQLCommand,
@@ -22,11 +22,4 @@ export function buildMissingMetadataMessage(
     type: 'error',
     code: `fuseMissingMetadata`,
   };
-}
-
-export function isFuseImmediatelyAfterFork(ast: ESQLAst): boolean {
-  const forkIndex = ast.findIndex((cmd) => cmd.name === 'fork');
-  const fuseIndex = ast.findIndex((cmd) => cmd.name === 'fuse');
-
-  return forkIndex !== -1 && fuseIndex === forkIndex + 1;
 }

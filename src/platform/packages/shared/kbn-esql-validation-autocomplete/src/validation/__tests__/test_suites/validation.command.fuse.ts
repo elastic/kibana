@@ -26,28 +26,6 @@ export const validationFuseCommandTestSuite = (setup: helpers.Setup) => {
           );
         });
 
-        test('requires to be preceded by a FORK command', async () => {
-          const { expectErrors } = await setup();
-
-          await expectErrors(`FROM index METADATA _id, _score, _index | FUSE`, [
-            '[FUSE] Must be immediately preceded by a FORK command.',
-          ]);
-        });
-
-        test('requires to be immediately preceded by a FORK command', async () => {
-          const { expectErrors } = await setup();
-
-          await expectErrors(
-            `FROM index METADATA _id, _score, _index
-                    | FORK
-                      (WHERE keywordField != "" | LIMIT 100)
-                      (SORT doubleField ASC NULLS LAST)
-                    | SORT _id
-                    | FUSE`,
-            ['[FUSE] Must be immediately preceded by a FORK command.']
-          );
-        });
-
         test('requires _id, _index and _score metadata to be selected in the FROM command', async () => {
           const { expectErrors } = await setup();
 
