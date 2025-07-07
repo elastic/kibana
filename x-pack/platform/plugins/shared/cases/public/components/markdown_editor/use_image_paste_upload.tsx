@@ -14,7 +14,11 @@ import { createUploadState, type UploadState } from '@kbn/shared-ux-file-upload/
 import { type FileKindBase } from '@kbn/files-plugin/common/types';
 import { useUploadDone } from '../files/use_upload_done';
 import type { MarkdownEditorRef } from './editor';
-import { NO_SIMULTANEOUS_UPLOADS_MESSAGE, UNSUPPORTED_MIME_TYPE_MESSAGE } from './translations';
+import {
+  MAX_IMAGE_SIZE_MESSAGE,
+  NO_SIMULTANEOUS_UPLOADS_MESSAGE,
+  UNSUPPORTED_MIME_TYPE_MESSAGE,
+} from './translations';
 
 interface UseImagePasteUploadArgs {
   editorRef: React.ForwardedRef<MarkdownEditorRef | null>;
@@ -22,7 +26,7 @@ interface UseImagePasteUploadArgs {
   caseId?: string;
   owner: string;
   fileKindId: string;
-  setErrors: (errors: string[]) => void;
+  setErrors: React.Dispatch<React.SetStateAction<Array<string | Error>>>;
 }
 
 /**
@@ -45,6 +49,9 @@ function generateMarkdownLink(
     kind.id
   }/${id}/blob)`;
 }
+
+// 5MB
+const MAX_IMAGE_SIZE = 1024 * 1024 * 5;
 
 export function useImagePasteUpload({
   editorRef,
@@ -71,7 +78,7 @@ export function useImagePasteUpload({
   );
 
   const [isUploading, setIsUploading] = useState(false);
-  const [placeholderInserted, setPlaceholderInserted] = useState(false);
+  const [uploadPlaceholder, setUploadPlaceholder] = useState<string | null>(null);
   const [uploadingFile, setUploadingFile] = useState<FileState | null>(null);
   const textarea =
     editorRef === null || typeof editorRef === 'function'
@@ -83,21 +90,21 @@ export function useImagePasteUpload({
       if (!textarea) return;
 
       const newText = textarea.value.replace(
-        getUploadPlaceholderCopy(file.fileJSON.name, file.fileJSON.extension),
+        uploadPlaceholder ?? '',
         generateMarkdownLink(file.fileJSON.name, file.id, kind, file.fileJSON.extension)
       );
       field.setValue(newText);
     },
-    [textarea, field, kind]
+    [textarea, uploadPlaceholder, kind, field]
   );
-
   const onDone = useUploadDone({
     caseId,
     onSuccess: () => {
       setUploadingFile(null);
-      setPlaceholderInserted(false);
+      setUploadPlaceholder(null);
     },
-    onFailure: () => {
+    onFailure: (err) => {
+      setErrors((cur) => [...cur, err]);
       setUploadingFile(null);
       setIsUploading(false);
     },
@@ -117,8 +124,11 @@ export function useImagePasteUpload({
           setUploadingFile(null);
           onDone(files);
         }),
-        uploadState.error$.subscribe((_err) => {
+        uploadState.error$.subscribe((err) => {
           setIsUploading(false);
+          if (err) {
+            setErrors((cur) => [...cur, err]);
+          }
         }),
         uploadState.uploading$.subscribe((uploading) => setIsUploading(uploading))
       );
@@ -127,36 +137,36 @@ export function useImagePasteUpload({
     return () => {
       subscriptions.forEach((s) => s.unsubscribe?.());
     };
-  }, [uploadState, replacePlaceholder, onDone]);
+  }, [uploadState, replacePlaceholder, onDone, setErrors]);
 
   // Insert the temporary placeholder whilst the file is uploading
   useEffect(() => {
     if (
       !textarea ||
       uploadingFile === null ||
-      placeholderInserted ||
+      uploadPlaceholder ||
       !caseId ||
       !uploadingFile.file
-    )
+    ) {
       return;
+    }
 
     const { selectionStart, selectionEnd } = textarea;
     const placeholder = getUploadPlaceholderCopy(uploadingFile.file.name);
     const before = field.value.slice(0, selectionStart);
     const after = field.value.slice(selectionEnd);
     field.setValue(before + placeholder + after);
-    setPlaceholderInserted(true);
-  }, [uploadingFile, placeholderInserted, textarea, field, caseId]);
+    setUploadPlaceholder(placeholder);
+  }, [uploadingFile, uploadPlaceholder, textarea, field, caseId]);
 
-  // Attach paste listener once the textarea is available
-  const listenerRef = useRef<(e: ClipboardEvent) => void>();
+  const pasteListenerRef = useRef<(e: ClipboardEvent) => void>();
 
   useEffect(() => {
     if (!textarea || !caseId) return;
 
     const handlePaste: (e: ClipboardEvent) => void = (e) => {
       const items = e.clipboardData?.items;
-      if (!items) return;
+      if (!items || items.length === 0) return;
       if (items.length > 1) {
         setErrors([NO_SIMULTANEOUS_UPLOADS_MESSAGE]);
         return;
@@ -164,8 +174,14 @@ export function useImagePasteUpload({
       for (const item of items) {
         const file = item.getAsFile();
         if (file) {
+          // don't modify textarea value when receiving files
+          e.preventDefault();
           if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
             setErrors([UNSUPPORTED_MIME_TYPE_MESSAGE]);
+            return;
+          }
+          if (file.size > MAX_IMAGE_SIZE) {
+            setErrors([MAX_IMAGE_SIZE_MESSAGE]);
             return;
           }
           uploadState.setFiles([file]);
@@ -180,7 +196,7 @@ export function useImagePasteUpload({
       }
     };
 
-    listenerRef.current = handlePaste;
+    pasteListenerRef.current = handlePaste;
     textarea.addEventListener('paste', handlePaste);
     return () => {
       textarea.removeEventListener('paste', handlePaste);
