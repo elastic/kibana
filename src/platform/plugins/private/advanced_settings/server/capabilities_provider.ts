@@ -9,7 +9,7 @@
 
 import { AdvancedSettingsConfig } from './config';
 
-export const capabilitiesProvider = (config: AdvancedSettingsConfig) => ({
+export const capabilitiesProvider = (config: AdvancedSettingsConfig, isServerless: boolean) => ({
   globalSettings: {
     show: config.globalSettingsEnabled,
     save: true,
@@ -17,5 +17,8 @@ export const capabilitiesProvider = (config: AdvancedSettingsConfig) => ({
   advancedSettings: {
     show: config.advancedSettingsEnabled,
     save: true,
+  },
+  filterSettings: {
+    bySolutionView: !isServerless,
   },
 });
