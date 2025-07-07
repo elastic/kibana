@@ -36,7 +36,7 @@ interface DeleteTestDefinition {
 export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
-  const spacesRoleScopedSupertest = getService('spacesRoleScopedSupertest');
+  const spacesSupertest = getService('spacesSupertest');
   const retry = getService('retry');
 
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
@@ -227,7 +227,7 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         let supertest: SupertestWithRoleScopeType;
 
         before(async () => {
-          supertest = await spacesRoleScopedSupertest.getSupertestWithRoleScope(user!);
+          supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
         });
         after(async () => {
           await supertest.destroy();

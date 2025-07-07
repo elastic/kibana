@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RoleScopedSupertestProvider } from './role_scoped_supertest';
+import { SpacesSupertestProvider } from './spaces_supertest';
 import { services } from '../../../api_integration_deployment_agnostic/services';
-export type { SupertestWithRoleScopeType } from './role_scoped_supertest';
+export type { SupertestWithRoleScopeType } from './spaces_supertest';
 
 export const deploymentAgnosticSpacesServices = {
   ...services,
-  spacesRoleScopedSupertest: RoleScopedSupertestProvider,
+  spacesSupertest: SpacesSupertestProvider,
 };
 
 export type DeploymentAgnosticSpacesCommonServices = typeof deploymentAgnosticSpacesServices;

@@ -6,7 +6,7 @@
  */
 
 import { services as apiIntegrationServices } from '../../api_integration/services';
-import { RoleScopedSupertestProvider } from '../deployment_agnostic/services/role_scoped_supertest';
+import { SpacesSupertestProvider } from '../deployment_agnostic/services/spaces_supertest';
 
 export const services = {
   es: apiIntegrationServices.es,
@@ -18,5 +18,5 @@ export const services = {
   usageAPI: apiIntegrationServices.usageAPI,
   spaces: apiIntegrationServices.spaces,
   // custom role scoped service for spaces API integration tests
-  spacesRoleScopedSupertest: RoleScopedSupertestProvider,
+  spacesSupertest: SpacesSupertestProvider,
 };
