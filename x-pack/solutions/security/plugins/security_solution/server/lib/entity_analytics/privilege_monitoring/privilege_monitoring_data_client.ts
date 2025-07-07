@@ -69,7 +69,6 @@ import { privilegedUserParserTransform } from './users/privileged_user_parse_tra
 import type { Accumulator } from './users/bulk/utils';
 import { accumulateUpsertResults } from './users/bulk/utils';
 import type { PrivMonBulkUser, PrivMonUserSource } from './types';
-import type { MonitoringEntitySourceDescriptor } from './saved_objects';
 import {
   PrivilegeMonitoringEngineDescriptorClient,
   MonitoringEntitySourceDescriptorClient,
@@ -435,8 +434,7 @@ export class PrivilegeMonitoringDataClient {
    */
   public async plainIndexSync() {
     // get all monitoring index source saved objects of type 'index'
-    const indexSources: MonitoringEntitySourceDescriptor[] =
-      await this.monitoringIndexSourceClient.findByIndex();
+    const indexSources = await this.monitoringIndexSourceClient.findByIndex();
     if (indexSources.length === 0) {
       this.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
