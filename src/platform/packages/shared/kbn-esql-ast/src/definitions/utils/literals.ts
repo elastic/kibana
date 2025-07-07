@@ -8,10 +8,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLLiteral } from '../../types';
+import { FunctionParameterType } from '../types';
 import { ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { getControlSuggestion } from './autocomplete';
-import { timeUnitsToSuggest } from '../constants';
+import { timeUnits, timeUnitsToSuggest } from '../constants';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 
@@ -134,4 +136,73 @@ export function getCompatibleLiterals(
     ); // i.e. year, month, ...
   }
   return suggestions;
+}
+
+export function inKnownTimeInterval(timeIntervalUnit: string): boolean {
+  return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
+}
+
+/**
+ * Compares two types, taking into account literal types
+ * @TODO strengthen typing here (remove `string`)
+ * @TODO — clean up time duration and date period
+ */
+export const compareTypesWithLiterals = (
+  a: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval' | string,
+  b: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval' | string
+) => {
+  if (a === b) {
+    return true;
+  }
+  // In Elasticsearch function definitions, time_duration and date_period are used
+  // time_duration is seconds/min/hour interval
+  // date_period is day/week/month/year interval
+  // So they are equivalent AST's 'timeInterval' (a date unit constant: e.g. 1 year, 15 month)
+  if (a === 'time_duration' || a === 'date_period') return b === 'timeInterval';
+  if (b === 'time_duration' || b === 'date_period') return a === 'timeInterval';
+
+  return false;
+};
+
+/**
+ * Checks if both types are string types.
+ *
+ * Functions in ES|QL accept `text` and `keyword` types interchangeably.
+ * @param type1
+ * @param type2
+ * @returns
+ */
+function bothStringTypes(type1: string, type2: string): boolean {
+  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
+}
+
+export function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
+  if (item.literalType === argType) {
+    return true;
+  }
+
+  if (bothStringTypes(argType, item.literalType)) {
+    // all functions accept keyword literals for text parameters
+    return true;
+  }
+
+  if (item.literalType === 'null') {
+    // all parameters accept null, but this is not yet reflected
+    // in our function definitions so we let it through here
+    return true;
+  }
+
+  // some parameters accept string literals because of ES auto-casting
+  if (
+    item.literalType === 'keyword' &&
+    (argType === 'date' ||
+      argType === 'date_period' ||
+      argType === 'version' ||
+      argType === 'ip' ||
+      argType === 'boolean')
+  ) {
+    return true;
+  }
+
+  return false;
 }

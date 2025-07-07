@@ -83,7 +83,7 @@ export const getOperatorsSuggestionsAfterNot = (): ISuggestionItem[] => {
     .map(getOperatorSuggestion);
 };
 
-function isArrayType(type: string): type is ArrayType {
+export function isArrayType(type: string): type is ArrayType {
   return type.endsWith('[]');
 }
 
