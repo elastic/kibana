@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  transformControlGroupOut,
-  transformOptionsOut,
-  transformPanelsOut,
-  transformSearchSourceOut,
-} from './out';
-
+export { transformDashboardOut } from './out';
 export { transformDashboardIn } from './in';

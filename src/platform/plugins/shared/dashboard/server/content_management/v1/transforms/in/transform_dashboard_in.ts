@@ -8,7 +8,7 @@
  */
 
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { DashboardAttributes } from "../../types";
+import { DashboardAttributes } from '../../types';
 import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
 import { transformControlGroupIn } from './transform_control_group_in';
@@ -21,26 +21,36 @@ export const transformDashboardIn = async ({
 }: {
   dashboardState: DashboardAttributes;
   incomingReferences?: SavedObjectReference[];
-  replaceTagReferencesByName?: ({ references, newTagNames }: {
+  replaceTagReferencesByName?: ({
+    references,
+    newTagNames,
+  }: {
     references: SavedObjectReference[];
     newTagNames: string[];
   }) => Promise<SavedObjectReference[]>;
-}): Promise<{
-  attributes: DashboardSavedObjectAttributes;
-  references: SavedObjectReference[];
-  error: null;
-} | {
-  attributes: null;
-  references: null;
-  error: Error;
-}> => {
+}): Promise<
+  | {
+      attributes: DashboardSavedObjectAttributes;
+      references: SavedObjectReference[];
+      error: null;
+    }
+  | {
+      attributes: null;
+      references: null;
+      error: Error;
+    }
+> => {
   try {
     const tagReferences =
       replaceTagReferencesByName && dashboardState.tags && dashboardState.tags.length
-        ? await replaceTagReferencesByName({ references: incomingReferences, newTagNames: dashboardState.tags })
+        ? await replaceTagReferencesByName({
+            references: incomingReferences,
+            newTagNames: dashboardState.tags,
+          })
         : incomingReferences;
 
-    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } = dashboardState;
+    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } =
+      dashboardState;
     const { panelsJSON, sections } = transformPanelsIn(panels);
 
     const attributes = {
