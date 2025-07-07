@@ -33,6 +33,10 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
     // height of the project header app action menu which is part of the application area
     --kbnProjectHeaderAppActionMenuHeight: var(--kbn-application--top-bar-height, 0px);
+
+    // for backward compatibility with legacy fixed layout,
+    // this variable can be used for sticky headers offset relative to the top of the application area
+    --kbn-application--sticky-headers-offset: var(--kbn-application--top-bar-height, 0px);
   }
 
   #kibana-body {
