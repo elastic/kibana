@@ -286,10 +286,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
     const { getTagsUpdatedBy } = useGetUpdatedTags(item);
-    const [basicFormConditions, setBasicFormConditions] =
-      useState<ArtifactFormComponentProps['item']['entries']>(!isFormAdvancedMode ? item.entries : []);
-    const [advancedFormConditions, setAdvancedFormConditions] =
-      useState<ArtifactFormComponentProps['item']['entries']>(isFormAdvancedMode ? item.entries : []);
+    const [basicFormConditions, setBasicFormConditions] = useState<
+      ArtifactFormComponentProps['item']['entries']
+    >(!isFormAdvancedMode ? item.entries : []);
+    const [advancedFormConditions, setAdvancedFormConditions] = useState<
+      ArtifactFormComponentProps['item']['entries']
+    >(isFormAdvancedMode ? item.entries : []);
 
     // Combine related state into a single object to reduce re-renders
     const [conditionsState, setConditionsState] = useState({
@@ -363,10 +365,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           isValid: updatedValidationResult.isValid && conditionsState.areValid,
           confirmModalLabels: updatedValidationResult.extraWarning
             ? CONFIRM_WARNING_MODAL_LABELS(
-              i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
-                defaultMessage: 'trusted application',
-              })
-            )
+                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                  defaultMessage: 'trusted application',
+                })
+              )
             : undefined,
         });
       },
@@ -417,7 +419,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       (selectedId: string) => {
         // save current form to relevant state before switching
         const currentItem = itemRef.current;
-        if (selectedId === "advancedMode") {
+        if (selectedId === 'advancedMode') {
           setBasicFormConditions(currentItem.entries);
         } else {
           setAdvancedFormConditions(currentItem.entries);
@@ -614,18 +616,18 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         const updatedItem: ArtifactFormComponentProps['item'] =
           arg.exceptionItems[0] !== undefined
             ? ({
-              ...arg.exceptionItems[0],
-              name: currentItem?.name ?? '',
-              description: currentItem?.description ?? '',
-              comments: currentItem?.comments ?? [],
-              os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
-              tags: currentItem?.tags ?? [],
-              meta: currentItem.meta,
-            } as ArtifactFormComponentProps['item'])
+                ...arg.exceptionItems[0],
+                name: currentItem?.name ?? '',
+                description: currentItem?.description ?? '',
+                comments: currentItem?.comments ?? [],
+                os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
+                tags: currentItem?.tags ?? [],
+                meta: currentItem.meta,
+              } as ArtifactFormComponentProps['item'])
             : {
-              ...currentItem,
-              entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
-            };
+                ...currentItem,
+                entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
+              };
 
         processChanged(updatedItem);
         if (!hasFormChanged) {
@@ -799,11 +801,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
               onVisited={handleConditionBuilderOnVisited}
               data-test-subj={getTestId('conditionsBuilder')}
             />
-          ) : (<>
-            {exceptionBuilderComponentMemo}
-            {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
-            {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
-          </>
+          ) : (
+            <>
+              {exceptionBuilderComponentMemo}
+              {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+              {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+            </>
           )}
         </EuiFormRow>
         {showAssignmentSection ? (

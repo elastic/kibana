@@ -13,7 +13,7 @@ export const BY_POLICY_ARTIFACT_TAG_PREFIX = 'policy:';
 
 export const GLOBAL_ARTIFACT_TAG = `${BY_POLICY_ARTIFACT_TAG_PREFIX}all`;
 
-export const ADVANCED_MODE_TAG = 'form_mode:advanced'
+export const ADVANCED_MODE_TAG = 'form_mode:advanced';
 
 export const FILTER_PROCESS_DESCENDANTS_TAG = 'filter_process_descendants';
 
