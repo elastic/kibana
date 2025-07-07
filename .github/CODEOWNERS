@@ -1669,7 +1669,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/api_integration_basic/apis/transform/ @elastic/ml-ui @elastic/kibana-management
 /x-pack/test/api_integration/services/aiops.ts @elastic/ml-ui
 /x-pack/test/api_integration/services/transform.ts @elastic/ml-ui @elastic/kibana-management
-/x-pack/test/functional/apps/aiops @elastic/ml-ui
+/x-pack/platform/test/functional/apps/aiops @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui @elastic/kibana-management
 /x-pack/test/functional/es_archives/large_arrays @elastic/ml-ui # Assigned per usages
 /x-pack/test/functional/services/transform/ @elastic/ml-ui @elastic/kibana-management

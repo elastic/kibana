@@ -14,7 +14,6 @@ import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 
 import { UsageAPIProvider } from './usage_api';
 
-import { AiopsProvider } from './aiops';
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { TransformProvider } from './transform';
@@ -30,7 +29,6 @@ export const services = {
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   supertest: kibanaApiIntegrationServices.supertest,
 
-  aiops: AiopsProvider,
   dataViewApi: DataViewApiProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
