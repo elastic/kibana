@@ -75,7 +75,7 @@ export const useTable = (nameSpace: string) => {
 
   const { data: anonymizationAllFields, refetch: refetchAll } = useFetchAnonymizationFields({
     page: QUERY_ALL.page, // EUI uses 0-based index, while API uses 1-based index
-    perPage: QUERY_ALL.per_page, // Continue use in-memory paging till the new design will be ready
+    perPage: QUERY_ALL.perPage, // Continue use in-memory paging till the new design will be ready
     sortField: sorting.sort?.field,
     sortOrder: sorting.sort?.direction,
   });

@@ -32,16 +32,15 @@ export interface FetchAnonymizationFields {
   isLoading: boolean;
 }
 
-export const DEFAULTS = {
-  page: 0,
-  perPage: 10,
-  sortField: 'field',
-  sortOrder: 'asc',
-};
-
 export const QUERY_ALL = {
   page: 0,
-  per_page: 1000,
+  perPage: 1000,
+};
+
+export const DEFAULTS = {
+  ...QUERY_ALL,
+  sortField: 'field',
+  sortOrder: 'asc',
 };
 
 const getFilter = (f: string): string | null => {
