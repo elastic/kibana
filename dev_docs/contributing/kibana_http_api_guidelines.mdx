@@ -77,6 +77,7 @@ Getting your HTTP APIs into a stable state is a process based on feedback from a
  - Rename or delete an API
  - Rename or delete a path, query or body parameter
  - Modifying the type of a property (including expanding to a union type!)
+ - Add a new required property
  - Set an existing property as required
  - Add or delete a security requirement
  - In some cases, changing a default
@@ -153,11 +154,21 @@ See the section on [versioning](#versioning) for more details.
 
 **POST is for creating a resource**
 
-Sometimes `POST` can be used for an action against a resource or for actions like `GET` but with a body.
+Sometimes `POST` can be used for an action against a resource or for actions like a `GET` but with a body. If you expect you need to support a lot of input for searching or listing resources it might be good to reserve `POST` for this purposes. For example:
+
+```
+POST /api/my_resources
+{
+  search_after: "<a_really_long_id>",
+  size: 10000
+}
+```
 
 **PUT or PATCH are for updating a resource**
 
-`PATCH` is typically used for partial updates and should not result in something being created, while `PUT` might create a resource.
+`PUT` is a bit special in that it should _create_ the resource if it does not exist. As a result it should expect a **full** resources to be provided in body of the call.
+
+`PATCH` is used for partial updates and should never create a resource that does not already exist.
 
 **DELETE is for deleting a resource**
 
@@ -202,11 +213,22 @@ Use a body parameter for long strings instead and consider using validation to l
 
 ### Bodies
 
-**Should contain camelCase keys**
+**Should contain snake case keys**
 
-While this diverges from the path, in JavaScript the convention to use `camelCase`
-in our request and response bodies provides a better developer experience while
-maintaining a solid API user experience.
+```
+POST /api/my_api
+{
+  "snake_case": true
+}
+```
+
+<DocCallOut title="Snakes and camels">
+  In Kibana's TypeScript code it is considered a formatting issue to use snake case variable names. This clashes with the convenient [object destructuring assignments](https://www.typescriptlang.org/docs/handbook/variable-declarations.html#object-destructuring) that are common in throughout the codebase.
+
+  If you would like to use object destructuring in your code:
+  - Convert to camel case by renaming inline `const { snake_case: camelCase } = body`
+  - Consider opting-out of this eslint rule about naming conventions `// eslint-disable-next-line @typescript-eslint/naming-convention` or disable the lint rule for a section `/* eslint-disable @typescript-eslint/naming-convention */` and re-enabling with `/* eslint-enable ... */`.
+</DocCallOut>
 
 **Use JSON**
 
@@ -254,7 +276,7 @@ If you are in doubt, rather go with stricter validation. Make a requirement more
 
 **Should not be used to specify behavior**
 
-Outside of exceptional cases, you should always use the parameters, query parameters or body of the request to specify behavior.
+Outside of exceptional cases, you should always use parameters, query parameters or the body of the request to specify behavior.
 
 ### Response codes
 
@@ -263,6 +285,10 @@ Outside of exceptional cases, you should always use the parameters, query parame
 See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status).
 
 ### Pagination and sorting
+
+<DocCallOut>
+  For objects stored in ES (which is the case for most Kibana HTTP API resources) you can use [ES pagination API](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results) from your route handler.
+</DocCallOut>
 
 **Page-based request**
 
@@ -281,9 +307,25 @@ See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/S
 
 **Cursor based request**
 
-`GET /api/resources?pit_id=abc&search_after="valueA.valueB"&size=10`
+<DocCallOut title="Required for 10,000 or more" color="warning">
+  You will need to implement cursor-based pagination for paging across resources that exceed 10,000 instances in ES. See [the docs](https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules#index-max-result-window) and the [ES search after API](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after).
+</DocCallOut>
 
-Where `valueA` and `valueB` identify the last hit. See [ES docs](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after). Note: cursor pagination is only needed for resources exceeding 1000 instances.
+```
+GET /api/resources?search_after="pitId.valueA.valueB",size=10
+```
+
+**OR** if you have reserved `POST` and expect sophisticated search use cases with a lot of inputs:
+
+```
+POST /api/resources
+{
+  search_after: "pitId.valueA.valueB"
+  size: 10,
+}
+```
+
+Where `pitId` is the PIT ID ([docs](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after)) and `valueA` and `valueB` are the sort values that identify the last hit.
 
 **Cursor based response**
 
@@ -291,8 +333,7 @@ Where `valueA` and `valueB` identify the last hit. See [ES docs](https://www.ela
 {
   "items": [...],
   "total": 100,
-  "pit": "abc",
-  "search_after": "valueA1.valueB1",
+  "search_after": "pitId.valueA1.valueB1", // The next search_after value
   "size": 10
 }
 ```
@@ -315,6 +356,8 @@ Where `field_name` is the name of the field to sort by in ascending order and `-
 `GET /api/my_resources?filter=field_name:value`
 
 Use [simple KQL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/kql) to cover most of your filtering needs.
+
+Utilities for working with KQL queries are available in the `@kbn/es-query` package.
 
 <DocCallOut title="Beware of leaky filters!" color="warning">
   Do not let API consumers directly query based on the schema of your database (saved) objects. This is leaking implementation detail that will make your API unversionable!
@@ -389,7 +432,7 @@ Kibana's public HTTP APIs are versioned with the entire Elastic organization usi
 </DocCallOut>
 
 <DocCallOut title="What about Kibana public APIs that are not explicitly versioned?">
-  You may see some routes using `router.get` instead of `router.versioned.get`. Routes registered in the former fashion are assumed to be part of the oldest, `2023-10-31` API surface area and will be included as-is in future version surface areas as well, unless they are explicitly versioned. This is to prevent the need for a wide-spread refactor.
+  You may see some routes using `router.get` instead of `router.versioned.get`. Routes registered in the former fashion are assumed to be part of the oldest, `2023-10-31` API surface area and will be included as-is in future version surface areas as well, unless they are explicitly versioned. This was done to prevent the need for a wide-spread refactor.
 </DocCallOut>
 
 Kibana's internal HTTP APIs can be versioned too, but for a very different purpose! With serverless, we continually roll out code changes _without_ asking browsers to refresh. That means, for a time, browser clients might expect old internal API behavior. It is up to route authors and UI developers to consider how to handle breaking changes of internal routes. Note: you are free to version internal APIs at will to mitigate any unfortunate browser client breakages!

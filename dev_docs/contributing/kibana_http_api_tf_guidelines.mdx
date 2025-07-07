@@ -146,6 +146,7 @@ GET    /api/resources              # List - retrieve all resources (with paginat
 
 4. **HTTP status codes**: Use appropriate HTTP status codes:
    - `200/201` for successful operations
+   - `204` for successful delete operations
    - `404` when a resource doesn't exist
    - `409` for conflicts (e.g., resource already exists)
    - `400` for validation errors
@@ -196,7 +197,7 @@ router.delete(
   },
   async (context, request, response) => {
     // Implementation...
-    return response.ok();
+    return response.noContent();
   }
 );
 
