@@ -12,13 +12,19 @@ import { InfraLogsPageProvider } from './infra_logs_page';
 import { InfraMetricsExplorerProvider } from './infra_metrics_explorer';
 import { InfraSavedViewsProvider } from './infra_saved_views';
 import { AssetDetailsProvider } from './asset_details';
+import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
+import { ObservabilityPageProvider } from './observability_page';
+import { DatasetQualityPageObject } from './dataset_quality';
 
 export const pageObjects = {
   ...platformPageObjectsServices,
   assetDetails: AssetDetailsProvider,
+  datasetQuality: DatasetQualityPageObject,
   infraHome: InfraHomePageProvider,
   infraHostsView: InfraHostsViewProvider,
   infraLogs: InfraLogsPageProvider,
   infraMetricsExplorer: InfraMetricsExplorerProvider,
   infraSavedViews: InfraSavedViewsProvider,
+  observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
+  observability: ObservabilityPageProvider,
 };

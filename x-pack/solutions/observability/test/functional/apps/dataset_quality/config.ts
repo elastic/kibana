@@ -36,7 +36,7 @@ interface DatasetQualityConfig {
 export default async function createTestConfig({
   readConfigFile,
 }: FtrConfigProviderContext): Promise<DatasetQualityConfig> {
-  const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
+  const functionalConfig = await readConfigFile(require.resolve('../../config.base.ts'));
   const services = functionalConfig.get('services');
   const pageObjects = functionalConfig.get('pageObjects');
 
