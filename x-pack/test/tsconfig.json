@@ -153,5 +153,6 @@
     "@kbn/event-log-plugin",
     "@kbn/management-settings-ids",
     "@kbn/intercepts-plugin",
+    "@kbn/core-provider-plugin",
   ]
 }
