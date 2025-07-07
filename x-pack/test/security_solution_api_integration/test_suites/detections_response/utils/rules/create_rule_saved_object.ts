@@ -8,10 +8,9 @@
 import type SuperTest from 'supertest';
 
 import { Rule } from '@kbn/alerting-plugin/common';
-import {
-  BaseRuleParams,
-  InternalRuleCreate,
-} from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import { RuleParamsWithDefaultValue } from '@kbn/response-ops-rule-params';
+import { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
 
 /**
  * Creates a rule using the alerting APIs directly.
@@ -22,7 +21,7 @@ import {
  */
 export const createRuleThroughAlertingEndpoint = async (
   supertest: SuperTest.Agent,
-  rule: InternalRuleCreate
+  rule: CreateRuleRequestBody<RuleParamsWithDefaultValue>
 ): Promise<Rule<BaseRuleParams>> => {
   const { body } = await supertest
     .post('/api/alerting/rule')
