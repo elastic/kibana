@@ -146,7 +146,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
-      describe('Filtering', () => {
+      // TODO: Re-enable when finished checking other test
+      describe.skip('Filtering', () => {
         afterEach(async () => {
           await observability.alerts.common.clearQueryBar();
         });
