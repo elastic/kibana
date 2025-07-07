@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, useEuiScrollBar } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useChat } from '../../hooks/use_chat';
@@ -17,13 +17,9 @@ import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { ConversationContent } from './conversation_grid';
 
-const fullHeightStyles = css`
+const conversationContainerStyles = css`
+  width: 100%;
   height: 100%;
-`;
-const roundsContainerStyles = css`
-  min-height: 100%;
-  margin-left: auto;
-  margin-right: auto;
 `;
 
 interface ConversationProps {
@@ -64,10 +60,16 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId }) => {
   }
 
   return (
-    <>
+    <EuiFlexGroup
+      css={conversationContainerStyles}
+      direction="column"
+      gutterSize="l"
+      justifyContent="center"
+      responsive={false}
+    >
       <EuiFlexItem grow css={scrollContainerStyles}>
-        <div ref={scrollContainerRef} css={fullHeightStyles}>
-          <ConversationContent css={roundsContainerStyles}>
+        <div ref={scrollContainerRef}>
+          <ConversationContent>
             <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
           </ConversationContent>
         </div>
@@ -77,6 +79,6 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId }) => {
           <ConversationInputForm disabled={!agentId} loading={false} onSubmit={onSubmit} />
         </ConversationContent>
       </EuiFlexItem>
-    </>
+    </EuiFlexGroup>
   );
 };

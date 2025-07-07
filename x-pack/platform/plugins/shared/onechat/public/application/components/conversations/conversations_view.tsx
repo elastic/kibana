@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
-import { useConversation } from '../../hooks/use_conversation';
 import { Conversation } from './conversation';
 import { ConversationActions } from './conversation_actions';
 import { ConversationGrid } from './conversation_grid';
@@ -19,38 +18,24 @@ import { ConversationSidebarToggle } from './conversation_sidebar_toggle';
 import { ConversationTitle } from './conversation_title';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
-  const { conversation } = useConversation();
-  const hasActiveConversation = Boolean(conversation);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
   const backgroundStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
-  const fullSizeStyles = css`
-    width: 100%;
-    height: 100%;
-  `;
-
   const headerHeight = `calc(${euiTheme.size.xxl} * 2)`;
   const headerStyles = css`
+    ${backgroundStyles}
     display: flex;
     justify-content: center;
-    align-items: stretch;
-    position: relative;
     border: none;
     max-block-size: ${headerHeight};
-    ${backgroundStyles}
   `;
   const mainContentStyles = css`
-    ${fullSizeStyles}
     ${backgroundStyles}
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  `;
-  const conversationContainerStyles = css`
-    ${fullSizeStyles}
+    width: 100%;
+    height: 100%;
     max-block-size: calc(
       100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) - ${headerHeight}
     );
@@ -70,20 +55,18 @@ export const OnechatConversationsView: React.FC<{}> = () => {
         </KibanaPageTemplate.Sidebar>
       )}
 
-      {hasActiveConversation && (
-        <KibanaPageTemplate.Header css={headerStyles} bottomBorder={false}>
-          <ConversationGrid>
-            <ConversationSidebarToggle
-              isSidebarOpen={isSidebarOpen}
-              onToggle={() => {
-                setIsSidebarOpen((open) => !open);
-              }}
-            />
-            <ConversationTitle />
-            <ConversationActions />
-          </ConversationGrid>
-        </KibanaPageTemplate.Header>
-      )}
+      <KibanaPageTemplate.Header css={headerStyles} bottomBorder={false}>
+        <ConversationGrid>
+          <ConversationSidebarToggle
+            isSidebarOpen={isSidebarOpen}
+            onToggle={() => {
+              setIsSidebarOpen((open) => !open);
+            }}
+          />
+          <ConversationTitle />
+          <ConversationActions />
+        </ConversationGrid>
+      </KibanaPageTemplate.Header>
       <KibanaPageTemplate.Section
         paddingSize="none"
         grow
@@ -91,15 +74,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
           css: mainContentStyles,
         }}
       >
-        <EuiFlexGroup
-          css={conversationContainerStyles}
-          direction="column"
-          gutterSize="l"
-          justifyContent="center"
-          responsive={false}
-        >
-          <Conversation agentId={oneChatDefaultAgentId} />
-        </EuiFlexGroup>
+        <Conversation agentId={oneChatDefaultAgentId} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

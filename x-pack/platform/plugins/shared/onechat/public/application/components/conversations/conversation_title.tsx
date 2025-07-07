@@ -14,15 +14,16 @@ import { conversationsCommonLabels } from './i18n';
 export const ConversationTitle: React.FC<{}> = () => {
   const { conversation } = useConversation();
   const { euiTheme } = useEuiTheme();
+
+  if (!conversation) {
+    return null;
+  }
+
   const sectionStyles = css`
     display: flex;
     flex-direction: row;
     gap: ${euiTheme.size.s};
   `;
-
-  if (!conversation) {
-    return null;
-  }
   const { title } = conversation;
 
   return (
