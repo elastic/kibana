@@ -90,7 +90,12 @@ export class SampleDataManager {
       );
       throw error;
     } finally {
-      archive?.close();
+      try {
+        archive?.close();
+      } catch (e) {
+        this.log.error(`Failed to close archive: ${e?.message || e}`);
+      }
+
       await this.artifactManager.cleanup();
     }
   }
