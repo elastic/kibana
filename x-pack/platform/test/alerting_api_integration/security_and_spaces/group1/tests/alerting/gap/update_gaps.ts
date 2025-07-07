@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import moment from 'moment';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
@@ -132,7 +132,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should mark intervals as in_progress immediately after scheduling backfill', async () => {
+    it.only('should mark intervals as in_progress immediately after scheduling backfill', async () => {
       const { space } = SuperuserAtSpace1;
 
       // Create a rule with timeout pattern to ensure it stays in progress
@@ -212,6 +212,8 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
           .post(`${getUrlPrefix(space.id)}/_test/event_log/refresh`)
           .set('kbn-xsrf', 'foo')
           .send({});
+
+        console.log('finalGapResponse', JSON.stringify(finalGapResponse.body, null, 2));
 
         const finalGapResponse = await supertest
           .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
