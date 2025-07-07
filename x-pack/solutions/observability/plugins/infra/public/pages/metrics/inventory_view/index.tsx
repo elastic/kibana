@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
@@ -33,7 +33,7 @@ export const SnapshotPage = () => {
   ]);
 
   return (
-    <EuiErrorBoundary>
+    <KibanaErrorBoundary>
       <WaffleOptionsProvider>
         <WaffleTimeProvider>
           <WaffleFiltersProvider>
@@ -59,6 +59,6 @@ export const SnapshotPage = () => {
           </WaffleFiltersProvider>
         </WaffleTimeProvider>
       </WaffleOptionsProvider>
-    </EuiErrorBoundary>
+    </KibanaErrorBoundary>
   );
 };
