@@ -208,6 +208,7 @@ export class StreamsPlugin
     const isObservabilityServerless =
       plugins.cloud?.isServerlessEnabled &&
       plugins.cloud?.serverless.projectType === 'observability';
+
     core.uiSettings.register({
       [OBSERVABILITY_ENABLE_STREAMS_UI]: {
         category: ['observability'],

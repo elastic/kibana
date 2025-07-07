@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiBadgeGroup, EuiButton } from '@elastic/eui';
+import { EuiBadgeGroup, EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { StatefulStreamsAppRouter, useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { StreamsFeatures, useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { RedirectTo } from '../redirect_to';
 import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
@@ -21,9 +22,11 @@ import { StreamDescription } from './description';
 const getStreamDetailTabs = ({
   definition,
   router,
+  features,
 }: {
   definition: Streams.ingest.all.GetResponse;
   router: StatefulStreamsAppRouter;
+  features: StreamsFeatures;
 }) =>
   ({
     overview: {
@@ -52,7 +55,7 @@ export type StreamDetailTabs = ReturnType<typeof getStreamDetailTabs>;
 export type StreamDetailTabName = keyof StreamDetailTabs;
 
 function isValidStreamDetailTab(value: string): value is StreamDetailTabName {
-  return ['overview', 'dashboards'].includes(value as StreamDetailTabName);
+  return ['overview', 'dashboards', 'significant_events'].includes(value as StreamDetailTabName);
 }
 
 export function StreamDetailView() {
@@ -62,6 +65,8 @@ export function StreamDetailView() {
 
   const { definition } = useStreamDetail();
 
+  const { features } = useStreamsPrivileges();
+
   if (tab === 'management') {
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />;
   }
@@ -70,9 +75,12 @@ export function StreamDetailView() {
     return <RedirectTo path="/{key}/{tab}" params={{ path: { key, tab: 'overview' } }} />;
   }
 
-  const tabs = getStreamDetailTabs({ definition, router });
+  const tabs =
+    features.significantEvents !== undefined
+      ? getStreamDetailTabs({ definition, router, features })
+      : undefined;
 
-  const selectedTabObject = tabs[tab as StreamDetailTabName];
+  const selectedTabObject = tabs?.[tab as StreamDetailTabName];
 
   return (
     <>
@@ -88,7 +96,7 @@ export function StreamDetailView() {
             </EuiBadgeGroup>
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabs).map(([tabName, { label, href }]) => {
+        tabs={Object.entries(tabs ?? {}).map(([tabName, { label, href }]) => {
           return {
             label,
             href,
@@ -108,8 +116,8 @@ export function StreamDetailView() {
           </EuiButton>,
         ]}
       />
-      <StreamsAppPageTemplate.Body color={selectedTabObject.background ? 'plain' : 'subdued'}>
-        {selectedTabObject.content}
+      <StreamsAppPageTemplate.Body color={selectedTabObject?.background ? 'plain' : 'subdued'}>
+        {selectedTabObject?.content}
       </StreamsAppPageTemplate.Body>
     </>
   );
