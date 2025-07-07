@@ -6,30 +6,31 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import {
+  DEFAULT_ELSER,
+  getSemanticTextMapping,
+  type SemanticTextMapping,
+} from '../tasks/create_index';
 
-export const getArtifactMappings = (inferenceEndpoint: string): MappingTypeMapping => {
+export const getArtifactMappings = (
+  customSemanticTextMapping?: SemanticTextMapping
+): MappingTypeMapping => {
+  const semanticTextMapping = customSemanticTextMapping
+    ? customSemanticTextMapping
+    : getSemanticTextMapping(DEFAULT_ELSER);
   return {
     dynamic: 'strict',
     properties: {
       content_title: { type: 'text' },
-      content_body: {
-        type: 'semantic_text',
-        inference_id: inferenceEndpoint,
-      },
+      content_body: semanticTextMapping,
       product_name: { type: 'keyword' },
       root_type: { type: 'keyword' },
       slug: { type: 'keyword' },
       url: { type: 'keyword' },
       version: { type: 'version' },
       ai_subtitle: { type: 'text' },
-      ai_summary: {
-        type: 'semantic_text',
-        inference_id: inferenceEndpoint,
-      },
-      ai_questions_answered: {
-        type: 'semantic_text',
-        inference_id: inferenceEndpoint,
-      },
+      ai_summary: semanticTextMapping,
+      ai_questions_answered: semanticTextMapping,
       ai_tags: { type: 'keyword' },
     },
   };
