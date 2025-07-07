@@ -25,13 +25,21 @@ import {
   getModelOptionsForInferenceEndpoints,
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
 import { useInferenceEndpoints, UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
-import { KnowledgeBaseState, useKibana } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  ELSER_ON_ML_NODE_INFERENCE_ID,
+  KnowledgeBaseState,
+  LEGACY_CUSTOM_INFERENCE_ID,
+  useKibana,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
 
 export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
 
-  const currentlyDeployedInferenceId = knowledgeBase.status.value?.currentInferenceId;
+  let currentlyDeployedInferenceId =
+    knowledgeBase.status.value?.currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID
+      ? ELSER_ON_ML_NODE_INFERENCE_ID
+      : knowledgeBase.status.value?.currentInferenceId;
 
   const [selectedInferenceId, setSelectedInferenceId] = useState<string>(
     currentlyDeployedInferenceId || ''
@@ -224,6 +232,8 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
             isDisabled={
               !selectedInferenceId ||
               isKnowledgeBaseInLoadingState ||
+              (knowledgeBase.status?.value?.endpoint?.inference_id === LEGACY_CUSTOM_INFERENCE_ID &&
+                selectedInferenceId === ELSER_ON_ML_NODE_INFERENCE_ID) ||
               (knowledgeBase.status?.value?.kbState !== KnowledgeBaseState.NOT_INSTALLED &&
                 selectedInferenceId === knowledgeBase.status?.value?.endpoint?.inference_id &&
                 !doesModelNeedRedeployment)
