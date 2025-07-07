@@ -8,7 +8,7 @@
  */
 import { monaco } from '@kbn/monaco';
 import { ESQLVariableType, ESQLControlVariable, VariableNamePrefix } from '@kbn/esql-types';
-import { timeUnits } from '@kbn/esql-validation-autocomplete';
+import { timeUnits } from '@kbn/esql-ast';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
   return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());

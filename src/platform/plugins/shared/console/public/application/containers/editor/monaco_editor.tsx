@@ -17,7 +17,7 @@ import { getESQLSources } from '@kbn/esql-editor/src/helpers';
 import { isEqual } from 'lodash';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { FieldType } from '@kbn/esql-ast/src/definitions/types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';

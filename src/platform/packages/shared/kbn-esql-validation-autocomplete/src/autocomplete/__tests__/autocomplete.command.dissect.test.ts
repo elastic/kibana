@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQL_STRING_TYPES } from '../../shared/esql_types';
+import { ESQL_STRING_TYPES } from '@kbn/esql-ast';
 import { attachTriggerCommand, getFieldNamesByType, setup } from './helpers';
 
 describe('autocomplete.suggest', () => {

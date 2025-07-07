@@ -7,32 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLLiteral, ESQLNumericLiteralType } from '@kbn/esql-ast/src/types';
-import { FunctionParameterType } from '../definitions/types';
-
-export const ESQL_COMMON_NUMERIC_TYPES = ['double', 'long', 'integer'] as const;
-export const ESQL_NUMERIC_DECIMAL_TYPES = [
-  'double',
-  'unsigned_long',
-  'long',
-  'counter_long',
-  'counter_double',
-] as const;
-export const ESQL_NUMBER_TYPES = [
-  'integer',
-  'counter_integer',
-  ...ESQL_NUMERIC_DECIMAL_TYPES,
-] as const;
-
-export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;
-export const ESQL_DATE_TYPES = ['datetime', 'date_period'] as const;
-
-export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
-  return (
-    typeof type === 'string' &&
-    [...ESQL_NUMBER_TYPES, 'decimal'].includes(type as (typeof ESQL_NUMBER_TYPES)[number])
-  );
-}
+import { ESQLLiteral } from '@kbn/esql-ast/src/types';
+import { FunctionParameterType } from '@kbn/esql-ast';
 
 /**
  * Compares two types, taking into account literal types

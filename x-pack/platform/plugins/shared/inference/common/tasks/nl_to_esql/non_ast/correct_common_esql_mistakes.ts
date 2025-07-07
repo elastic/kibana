@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { scalarFunctionDefinitions } from '@kbn/esql-validation-autocomplete/src/definitions/generated/scalar_functions';
-import { groupingFunctionDefinitions } from '@kbn/esql-validation-autocomplete/src/definitions/generated/grouping_functions';
-import { aggFunctionDefinitions } from '@kbn/esql-validation-autocomplete/src/definitions/generated/aggregation_functions';
-import type { FunctionDefinition } from '@kbn/esql-validation-autocomplete';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import type { FunctionDefinition } from '@kbn/esql-ast';
 import { memoize } from 'lodash';
 
 const STRING_DELIMITER_TOKENS = ['`', "'", '"'];

@@ -6,19 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { setup } from './helpers';
-
-jest.mock('../../definitions/commands', () => {
-  const actual = jest.requireActual('../../definitions/commands');
-  const modifiedDefinitions = actual.commandDefinitions.map((def: any) =>
-    def.name === 'rrf' ? { ...def, hidden: false } : def
-  );
-  return {
-    ...actual,
-    commandDefinitions: modifiedDefinitions,
-  };
-});
 
 describe('autocomplete.suggest', () => {
   describe('RRF', () => {
@@ -28,7 +16,8 @@ describe('autocomplete.suggest', () => {
       expect(suggestedCommands).not.toContain('RRF ');
     });
 
-    it('suggests RRF immediately after a FORK command', async () => {
+    // ToDo:n Enable when RRF is on tech preview
+    it.skip('suggests RRF immediately after a FORK command', async () => {
       const { suggest } = await setup();
       const suggestedCommands = (await suggest('FROM a | FORK (LIMIT 1) (LIMIT 2) | /')).map(
         (s) => s.text

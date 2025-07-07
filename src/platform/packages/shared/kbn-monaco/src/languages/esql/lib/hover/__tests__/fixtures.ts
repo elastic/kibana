@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLFieldWithMetadata } from '@kbn/esql-validation-autocomplete';
-import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import { FieldType } from '@kbn/esql-ast';
 import { monaco } from '../../../../../monaco_imports';
 import { HoverMonacoModel } from '../hover';
 

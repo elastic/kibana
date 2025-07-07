@@ -17,13 +17,15 @@ import {
   type ESQLSingleAstItem,
   type ESQLSource,
   type ESQLCommand,
+  type FunctionDefinition,
   Walker,
 } from '@kbn/esql-ast';
 import { mutate, synth } from '@kbn/esql-ast';
-import { FunctionDefinition } from '../definitions/types';
+import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
+import { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
+
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
-import { getMessageFromId } from './errors';
-import type { ESQLPolicy, ReferenceMaps } from './types';
+import type { ReferenceMaps } from './types';
 
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
   const firstCommand = ast[0];
