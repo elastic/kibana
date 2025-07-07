@@ -17,10 +17,10 @@ import { OnboardingRouter } from './onboarding_router';
 import { OnboardingFooter } from './onboarding_footer';
 import { useOnboardingStyles } from './onboarding.styles';
 
-export const OnboardingPage = () => {
-  // current home page
+export const OnboardingPage = React.memo(() => {
   const spaceId = useSpaceId();
   const styles = useOnboardingStyles();
+
   if (!spaceId) {
     return (
       <PluginTemplateWrapper>
@@ -55,5 +55,5 @@ export const OnboardingPage = () => {
       </PluginTemplateWrapper>
     </OnboardingContextProvider>
   );
-};
+});
 OnboardingPage.displayName = 'OnboardingPage';
