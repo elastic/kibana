@@ -26,4 +26,21 @@ describe('getApmDataViewIndexPattern', () => {
       'apm-*,logs-*.otel-*,logs-apm*,metrics-*.otel-*,metrics-apm*,remote_cluster:apm-*,remote_cluster:logs-*.otel-*,remote_cluster:logs-apm*,remote_cluster:metrics-*.otel-*,remote_cluster:metrics-apm*,remote_cluster:traces-*.otel-*,remote_cluster:traces-apm*,traces-*.otel-*,traces-apm*'
     );
   });
+
+  it('handles falsy values', () => {
+    const title = getApmDataViewIndexPattern({
+      error: null,
+      onboarding: undefined,
+      span: '',
+      transaction:
+        'remote_cluster:apm-*,remote_cluster:traces-apm*,remote_cluster:traces-*.otel-*,apm-*,traces-apm*,traces-*.otel-*',
+      metric:
+        'remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*',
+      sourcemap: 'remote_cluster:apm-*,apm-*',
+    } as unknown as APMIndices);
+
+    expect(title).toBe(
+      'apm-*,metrics-*.otel-*,metrics-apm*,remote_cluster:apm-*,remote_cluster:metrics-*.otel-*,remote_cluster:metrics-apm*,remote_cluster:traces-*.otel-*,remote_cluster:traces-apm*,traces-*.otel-*,traces-apm*'
+    );
+  });
 });
