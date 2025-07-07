@@ -36,7 +36,7 @@ export interface AgentFormProps {
   agentId?: string;
 }
 
-type AgentFormData = AgentProfile;
+type AgentFormData = Omit<AgentProfile, 'createdAt' | 'updatedAt'>;
 
 export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
   const { navigateToOnechatUrl } = useNavigation();
