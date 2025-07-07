@@ -5,17 +5,60 @@
  * 2.0.
  */
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { useCallback, useMemo } from 'react';
 import {
-  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
+  API_VERSIONS,
+  FindAnonymizationFieldsResponse,
 } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../../assistant_context';
 
 export interface UseFetchAnonymizationFieldsParams {
-  signal?: AbortSignal | undefined;
+  page?: number; // API uses 1-based index
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+  signal?: AbortSignal;
+  filter?: string;
 }
+
+export interface FetchAnonymizationFields {
+  refetch: () => void;
+  data: FindAnonymizationFieldsResponse; // Adjust type as per your data structure
+  isFetched: boolean;
+  isFetching: boolean;
+}
+
+const DEFAULTS = {
+  page: 0,
+  perPage: 10,
+  sortField: 'field',
+  sortOrder: 'asc',
+};
+
+export const QUERY_ALL = {
+  page: 0,
+  per_page: 1000,
+};
+
+const getFilter = (f: string): string => {
+  if (!f || f.length === 0) {
+    return '';
+  }
+  return f
+    .split(' ')
+    .map((word, i) => {
+      if (word === 'is:allowed') {
+        return 'allowed: true';
+      } else if (word === 'is:anonymized') {
+        return 'anonymized: true';
+      } else {
+        return `field: ${word}*`;
+      }
+    })
+    .join(' AND ');
+};
 
 /**
  * API call for fetching anonymization fields for current spaceId
@@ -24,51 +67,107 @@ export interface UseFetchAnonymizationFieldsParams {
  * @param {HttpSetup} options.http - HttpSetup
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {useQuery} hook for getting the status of the anonymization fields
+ * @returns {useInfiniteQuery} hook for getting the status of the anonymization fields
  */
 
-const QUERY = {
-  page: 1,
-  per_page: 1000, // Continue use in-memory paging till the new design will be ready
-};
-
-export const CACHING_KEYS = [
-  ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
-  QUERY.page,
-  QUERY.per_page,
-  API_VERSIONS.public.v1,
-];
-
-export const useFetchAnonymizationFields = (payload?: UseFetchAnonymizationFieldsParams) => {
+export const useFetchAnonymizationFields = (
+  params?: UseFetchAnonymizationFieldsParams
+): FetchAnonymizationFields => {
   const {
-    assistantAvailability: { isAssistantEnabled },
+    page = DEFAULTS.page,
+    perPage = DEFAULTS.perPage,
+    sortField = DEFAULTS.sortField,
+    sortOrder = DEFAULTS.sortOrder,
+    signal,
+    filter,
+  } = params || {};
+
+  const {
     http,
+    assistantAvailability: { isAssistantEnabled },
   } = useAssistantContext();
 
-  return useQuery<FindAnonymizationFieldsResponse, unknown, FindAnonymizationFieldsResponse>(
-    CACHING_KEYS,
-    async () =>
-      http.fetch(ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND, {
-        method: 'GET',
-        version: API_VERSIONS.public.v1,
-        query: QUERY,
-        signal: payload?.signal,
-      }),
-    {
-      initialData: {
-        data: [],
-        page: 1,
-        perPage: 5,
-        total: 0,
-      },
-      placeholderData: {
-        data: [],
-        page: 1,
-        perPage: 5,
-        total: 0,
-      },
-      keepPreviousData: true,
-      enabled: isAssistantEnabled,
-    }
+  const fetchPage = useCallback(
+    async ({ pageParam = { page, perPage, sortField, sortOrder, filter } }) => {
+      const {
+        page: p = page,
+        perPage: pp = perPage,
+        sortField: sf = sortField,
+        sortOrder: so = sortOrder,
+        filter: f = '',
+      } = pageParam;
+
+      return http.fetch<FindAnonymizationFieldsResponse>(
+        ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
+        {
+          method: 'GET',
+          version: API_VERSIONS.public.v1,
+          query: {
+            page: p + 1, // EUI uses 0-based index, while API uses 1-based index
+            per_page: pp,
+            sort_field: sf,
+            sort_order: so,
+            filter: getFilter(f),
+          },
+          signal,
+        }
+      );
+    },
+    [page, perPage, sortField, sortOrder, http, signal, filter]
   );
+
+  // Next page param: include current sorting in next request
+  const getNextPageParam = useCallback(
+    (lastPage: FindAnonymizationFieldsResponse) => {
+      const totalPages = Math.ceil(lastPage.total / lastPage.perPage);
+      if (lastPage.page < totalPages) {
+        return {
+          page: lastPage.page + 1,
+          sortField,
+          sortOrder,
+        };
+      }
+      return undefined;
+    },
+    [sortField, sortOrder]
+  );
+
+  // Query key must include everything that can change the response
+  const CACHING_KEYS = [
+    sortField,
+    sortOrder,
+    perPage,
+    API_VERSIONS.public.v1,
+    ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
+    page,
+    filter,
+  ];
+
+  const { refetch, data, isFetched, isFetching } = useInfiniteQuery<
+    FindAnonymizationFieldsResponse,
+    unknown,
+    FindAnonymizationFieldsResponse
+  >(CACHING_KEYS, fetchPage, {
+    getNextPageParam,
+    enabled: isAssistantEnabled,
+    refetchOnWindowFocus: true,
+  });
+
+  const currentPageItems: FindAnonymizationFieldsResponse = useMemo(() => {
+    return (
+      data?.pages.at(-1) ?? {
+        page,
+        perPage,
+        total: 0,
+        data: [],
+      }
+    );
+  }, [data?.pages, page, perPage]);
+
+  return {
+    refetch,
+    data: currentPageItems,
+    isFetched,
+    isFetching,
+  };
 };

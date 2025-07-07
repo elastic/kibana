@@ -10,9 +10,22 @@ import React from 'react';
 
 import styled from 'styled-components';
 
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
 import { BulkActions } from '../bulk_actions';
 import * as i18n from '../translations';
-import { BatchUpdateListItem, ContextEditorRow, FIELDS } from '../types';
+import { ContextEditorRow, FIELDS } from '../types';
+import { InputCheckbox, PageSelectionCheckbox } from '../selection/table_selection_checkbox';
+import {
+  HandlePageChecked,
+  HandlePageUnchecked,
+  HandleRowChecked,
+  HandleRowUnChecked,
+} from '../selection/types';
+import type {
+  HandlePageReset,
+  HandleRowReset,
+  OnListUpdated,
+} from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';
 
 const AnonymizedButton = styled(EuiButtonEmpty)`
   max-height: 24px;
@@ -23,12 +36,59 @@ export const getColumns = ({
   hasUpdateAIAssistantAnonymization,
   onListUpdated,
   rawData,
+  anonymizationPageFields,
+  selectedFields,
+  handlePageChecked,
+  handlePageUnchecked,
+  handleRowChecked,
+  handleRowUnChecked,
+  totalItemCount,
+  isSelectAll,
+  anonymizationAllFields,
+  handleRowReset,
+  handlePageReset,
 }: {
   compressed?: boolean;
   hasUpdateAIAssistantAnonymization: boolean;
-  onListUpdated: (updates: BatchUpdateListItem[]) => void;
+  onListUpdated: OnListUpdated;
   rawData: Record<string, string[]> | null;
+  anonymizationPageFields: FindAnonymizationFieldsResponse['data'];
+  selectedFields: string[];
+  handlePageChecked: HandlePageChecked;
+  handlePageUnchecked: HandlePageUnchecked;
+  handleRowChecked: HandleRowChecked;
+  handleRowUnChecked: HandleRowUnChecked;
+  totalItemCount: number;
+  isSelectAll: boolean;
+  anonymizationAllFields: FindAnonymizationFieldsResponse;
+  handleRowReset: HandleRowReset;
+  handlePageReset: HandlePageReset;
 }): Array<EuiBasicTableColumn<ContextEditorRow>> => {
+  const selectionColumn: EuiBasicTableColumn<ContextEditorRow> = {
+    field: '',
+    name: (
+      <PageSelectionCheckbox
+        handlePageChecked={handlePageChecked}
+        handlePageUnchecked={handlePageUnchecked}
+        anonymizationPageFields={anonymizationPageFields}
+        selectedFields={selectedFields}
+        totalItemCount={totalItemCount}
+        handlePageReset={handlePageReset}
+      />
+    ),
+    render: (row: ContextEditorRow) => (
+      <InputCheckbox
+        row={row}
+        selectedFields={selectedFields}
+        handleRowChecked={handleRowChecked}
+        handleRowUnChecked={handleRowUnChecked}
+        handleRowReset={handleRowReset}
+      />
+    ),
+    width: '70px',
+    sortable: false,
+  };
+
   const actionsColumn: EuiBasicTableColumn<ContextEditorRow> = {
     field: FIELDS.ACTIONS,
     name: '',
@@ -42,7 +102,10 @@ export const getColumns = ({
           disableAnonymize={!row.allowed || (row.allowed && row.anonymized)}
           disableUnanonymize={!row.allowed || (row.allowed && !row.anonymized)}
           onListUpdated={onListUpdated}
-          selected={[row]}
+          selected={anonymizationAllFields.data.filter((item) => item.field === row.field) ?? []}
+          isSelectAll={isSelectAll}
+          anonymizationAllFields={anonymizationAllFields}
+          handleRowChecked={handleRowChecked}
         />
       );
     },
@@ -72,6 +135,7 @@ export const getColumns = ({
           showLabel={false}
           compressed={compressed}
           onChange={() => {
+            handleRowChecked(field);
             onListUpdated([
               {
                 field,
@@ -96,15 +160,16 @@ export const getColumns = ({
           flush="both"
           iconType={anonymized ? 'eyeClosed' : 'eye'}
           isSelected={anonymized ? true : false}
-          onClick={() =>
+          onClick={() => {
+            handleRowChecked(field);
             onListUpdated([
               {
                 field,
                 operation: anonymized ? 'remove' : 'add',
                 update: rawData == null ? 'defaultAllowReplacement' : 'allowReplacement',
               },
-            ])
-          }
+            ]);
+          }}
         >
           <EuiText size="xs">{anonymized ? i18n.YES : i18n.NO}</EuiText>
         </AnonymizedButton>
@@ -121,6 +186,15 @@ export const getColumns = ({
   ];
 
   return rawData == null
-    ? [...baseColumns, ...(hasUpdateAIAssistantAnonymization ? [actionsColumn] : [])]
-    : [...baseColumns, valuesColumn, ...(hasUpdateAIAssistantAnonymization ? [actionsColumn] : [])];
+    ? [
+        ...(hasUpdateAIAssistantAnonymization ? [selectionColumn] : []),
+        ...baseColumns,
+        ...(hasUpdateAIAssistantAnonymization ? [actionsColumn] : []),
+      ]
+    : [
+        ...(hasUpdateAIAssistantAnonymization ? [selectionColumn] : []),
+        ...baseColumns,
+        valuesColumn,
+        ...(hasUpdateAIAssistantAnonymization ? [actionsColumn] : []),
+      ];
 };

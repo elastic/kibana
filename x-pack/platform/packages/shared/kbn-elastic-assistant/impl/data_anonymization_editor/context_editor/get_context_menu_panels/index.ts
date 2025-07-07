@@ -7,8 +7,11 @@
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from '../translations';
-import { BatchUpdateListItem, ContextEditorRow } from '../types';
+import type { BatchUpdateListItem } from '../types';
+import type { OnListUpdated } from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';
+import type { HandleRowChecked } from '../selection/types';
 
 export const PRIMARY_PANEL_ID = 'primary-panel-id';
 
@@ -20,14 +23,16 @@ export const getContextMenuPanels = ({
   closePopover,
   onListUpdated,
   selected,
+  handleRowChecked,
 }: {
   disableAllow: boolean;
   disableAnonymize: boolean;
   disableDeny: boolean;
   disableUnanonymize: boolean;
   closePopover: () => void;
-  onListUpdated: (updates: BatchUpdateListItem[]) => void;
-  selected: ContextEditorRow[];
+  onListUpdated: OnListUpdated;
+  selected: FindAnonymizationFieldsResponse['data'];
+  handleRowChecked: HandleRowChecked;
 }): EuiContextMenuPanelDescriptor[] => {
   const nonDefaultsPanelId = PRIMARY_PANEL_ID;
 
@@ -42,12 +47,16 @@ export const getContextMenuPanels = ({
           onClick: () => {
             closePopover();
 
-            const updates = selected.map<BatchUpdateListItem>(({ field }) => ({
-              field,
-              operation: 'add',
-              update: 'allow',
-            }));
-
+            const updates: BatchUpdateListItem[] = selected.map<BatchUpdateListItem>(
+              ({ field }) => ({
+                field,
+                operation: 'add',
+                update: 'allow',
+              })
+            );
+            if (updates.length === 1) {
+              handleRowChecked(updates[0].field);
+            }
             onListUpdated(updates);
           },
         },
@@ -58,12 +67,16 @@ export const getContextMenuPanels = ({
           onClick: () => {
             closePopover();
 
-            const updates = selected.map<BatchUpdateListItem>(({ field }) => ({
-              field,
-              operation: 'remove',
-              update: 'allow',
-            }));
-
+            const updates: BatchUpdateListItem[] = selected.map<BatchUpdateListItem>(
+              ({ field }) => ({
+                field,
+                operation: 'remove',
+                update: 'allow',
+              })
+            );
+            if (updates.length === 1) {
+              handleRowChecked(updates[0].field);
+            }
             onListUpdated(updates);
           },
         },
@@ -74,12 +87,16 @@ export const getContextMenuPanels = ({
           onClick: () => {
             closePopover();
 
-            const updates = selected.map<BatchUpdateListItem>(({ field }) => ({
-              field,
-              operation: 'add',
-              update: 'allowReplacement',
-            }));
-
+            const updates: BatchUpdateListItem[] = selected.map<BatchUpdateListItem>(
+              ({ field }) => ({
+                field,
+                operation: 'add',
+                update: 'allowReplacement',
+              })
+            );
+            if (updates.length === 1) {
+              handleRowChecked(updates[0].field);
+            }
             onListUpdated(updates);
           },
         },
@@ -90,12 +107,16 @@ export const getContextMenuPanels = ({
           onClick: () => {
             closePopover();
 
-            const updates = selected.map<BatchUpdateListItem>(({ field }) => ({
-              field,
-              operation: 'remove',
-              update: 'allowReplacement',
-            }));
-
+            const updates: BatchUpdateListItem[] = selected.map<BatchUpdateListItem>(
+              ({ field }) => ({
+                field,
+                operation: 'remove',
+                update: 'allowReplacement',
+              })
+            );
+            if (updates.length === 1) {
+              handleRowChecked(updates[0].field);
+            }
             onListUpdated(updates);
           },
         },

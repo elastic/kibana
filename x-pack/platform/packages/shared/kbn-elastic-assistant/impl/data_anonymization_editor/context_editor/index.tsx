@@ -5,23 +5,30 @@
  * 2.0.
  */
 
-import { EuiInMemoryTable } from '@elastic/eui';
-import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import { EuiBasicTable, EuiSearchBar } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiSearchBarOnChangeArgs,
+  EuiSearchBarProps,
+  EuiTableSortingType,
+} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import { getColumns } from './get_columns';
 import { getRows } from './get_rows';
 import { Toolbar } from './toolbar';
-import * as i18n from './translations';
-import { BatchUpdateListItem, ContextEditorRow, FIELDS } from './types';
+import { ContextEditorRow, FIELDS } from './types';
 import { useAssistantContext } from '../../assistant_context';
-import {
-  getDefaultTableOptions,
-  useSessionPagination,
-} from '../../assistant/common/components/assistant_settings_management/pagination/use_session_pagination';
-import { ANONYMIZATION_TABLE_SESSION_STORAGE_KEY } from '../../assistant_context/constants';
+import { ServerSidePagination } from '../../assistant/common/components/assistant_settings_management/pagination/use_session_pagination';
+import type { UseSelectionReturn } from './selection/use_selection';
+import type {
+  HandlePageReset,
+  HandleRowReset,
+  OnListUpdated,
+} from '../../assistant/settings/use_settings_updater/use_anonymization_updater';
 
 const Wrapper = styled.div`
   > div > .euiSpacer {
@@ -30,116 +37,160 @@ const Wrapper = styled.div`
 `;
 
 export interface Props {
-  anonymizationFields: FindAnonymizationFieldsResponse;
+  anonymizationAllFields: FindAnonymizationFieldsResponse;
+  anonymizationPageFields: FindAnonymizationFieldsResponse;
   compressed?: boolean;
-  onListUpdated: (updates: BatchUpdateListItem[]) => void;
+  onListUpdated: OnListUpdated;
   rawData: Record<string, string[]> | null;
+  onTableChange: (param: CriteriaWithPagination<ContextEditorRow>) => void;
+  pagination: ServerSidePagination;
+  sorting: EuiTableSortingType<ContextEditorRow>;
+  search: EuiSearchBarProps;
+  handleSearch: (query: EuiSearchBarOnChangeArgs) => void;
+  handleRowReset: HandleRowReset;
+  handlePageReset: HandlePageReset;
+  selectionState: UseSelectionReturn['selectionState'];
+  selectionActions: UseSelectionReturn['selectionActions'];
 }
 
-const search: EuiSearchBarProps = {
-  box: {
-    incremental: true,
-  },
-  filters: [
-    {
-      field: FIELDS.ALLOWED,
-      type: 'is',
-      name: i18n.ALLOWED,
-    },
-    {
-      field: FIELDS.ANONYMIZED,
-      type: 'is',
-      name: i18n.ANONYMIZED,
-    },
-  ],
-};
-
 const ContextEditorComponent: React.FC<Props> = ({
-  anonymizationFields,
+  anonymizationAllFields,
+  anonymizationPageFields,
   compressed = true,
   onListUpdated,
   rawData,
+  onTableChange,
+  pagination,
+  sorting,
+  search,
+  handleSearch,
+  handleRowReset,
+  handlePageReset,
+  selectionState,
+  selectionActions,
 }) => {
-  const isAllSelected = useRef(false); // Must be a ref and not state in order not to re-render `selectionValue`, which fires `onSelectionChange` twice
   const {
     assistantAvailability: { hasUpdateAIAssistantAnonymization },
-    nameSpace,
   } = useAssistantContext();
-  const [selected, setSelection] = useState<ContextEditorRow[]>([]);
-  const selectionValue: EuiTableSelectionType<ContextEditorRow> = useMemo(
-    () => ({
-      selectable: () => true,
-      onSelectionChange: (newSelection) => {
-        if (isAllSelected.current === true) {
-          // If passed every possible row (including non-visible ones), EuiInMemoryTable
-          // will fire `onSelectionChange` with only the visible rows - we need to
-          // ignore this call when that happens and continue to pass all rows
-          isAllSelected.current = false;
-        } else {
-          setSelection(newSelection);
-        }
-      },
-      selected,
-    }),
-    [selected]
-  );
 
-  const columns = useMemo(
-    () => getColumns({ onListUpdated, rawData, hasUpdateAIAssistantAnonymization, compressed }),
-    [hasUpdateAIAssistantAnonymization, onListUpdated, rawData, compressed]
+  const tablePagination = useMemo(
+    () => ({
+      pageSize: pagination.pageSize,
+      pageIndex: pagination.pageIndex,
+      showPerPageOptions: true,
+      totalItemCount: anonymizationPageFields.total,
+    }),
+    [anonymizationPageFields.total, pagination.pageIndex, pagination.pageSize]
   );
 
   const rows = useMemo(
     () =>
       getRows({
-        anonymizationFields,
+        anonymizationFields: anonymizationPageFields,
         rawData,
       }),
-    [anonymizationFields, rawData]
+    [anonymizationPageFields, rawData]
   );
 
-  const onSelectAll = useCallback(() => {
-    isAllSelected.current = true;
-    setSelection(rows);
-  }, [rows]);
+  const handleTableChange = useCallback(
+    ({ page, sort }: CriteriaWithPagination<ContextEditorRow>) => {
+      onTableChange?.({ page, sort });
+    },
+    [onTableChange]
+  );
 
-  const { onTableChange, pagination, sorting } = useSessionPagination<ContextEditorRow, true>({
-    defaultTableOptions: getDefaultTableOptions<ContextEditorRow>({
-      pageSize: 10,
-      sortDirection: 'asc',
-      sortField: 'field',
-    }),
-    nameSpace,
-    storageKey: ANONYMIZATION_TABLE_SESSION_STORAGE_KEY,
-  });
+  const { selectedFields, totalSelectedItems, isSelectAll } = selectionState;
+  const {
+    handleSelectAll,
+    handleUnselectAll,
+    handlePageUnchecked,
+    handlePageChecked,
+    handleRowUnChecked,
+    handleRowChecked,
+  } = selectionActions;
+
+  const columns = useMemo(
+    () =>
+      getColumns({
+        compressed,
+        handlePageChecked,
+        handlePageUnchecked,
+        handleRowChecked,
+        handleRowUnChecked,
+        hasUpdateAIAssistantAnonymization,
+        onListUpdated,
+        rawData,
+        anonymizationPageFields: anonymizationPageFields.data || [],
+        anonymizationAllFields,
+        selectedFields,
+        isSelectAll,
+        handleRowReset,
+        handlePageReset,
+        totalItemCount: anonymizationPageFields.total,
+      }),
+    [
+      compressed,
+      handlePageChecked,
+      handlePageUnchecked,
+      handleRowChecked,
+      handleRowUnChecked,
+      hasUpdateAIAssistantAnonymization,
+      onListUpdated,
+      rawData,
+      anonymizationPageFields.data,
+      anonymizationPageFields.total,
+      anonymizationAllFields,
+      selectedFields,
+      isSelectAll,
+      handleRowReset,
+      handlePageReset,
+    ]
+  );
 
   const toolbar = useMemo(
     () => (
       <Toolbar
+        isSelectAll={isSelectAll}
+        anonymizationAllFields={anonymizationAllFields}
         onListUpdated={onListUpdated}
-        onSelectAll={onSelectAll}
-        selected={selected}
-        totalFields={rawData == null ? anonymizationFields.total : Object.keys(rawData).length}
+        onSelectAll={handleSelectAll}
+        handleUnselectAll={handleUnselectAll}
+        selected={selectedFields}
+        totalFields={rawData == null ? anonymizationAllFields.total : totalSelectedItems}
+        rows={rows}
+        handleRowChecked={handleRowChecked}
       />
     ),
-    [anonymizationFields.total, onListUpdated, onSelectAll, rawData, selected]
+    [
+      anonymizationAllFields,
+      handleRowChecked,
+      handleSelectAll,
+      handleUnselectAll,
+      isSelectAll,
+      onListUpdated,
+      rawData,
+      rows,
+      selectedFields,
+      totalSelectedItems,
+    ]
   );
 
   return (
     <Wrapper>
-      <EuiInMemoryTable
-        allowNeutralSort={false}
-        childrenBetween={hasUpdateAIAssistantAnonymization ? toolbar : undefined}
+      <EuiSearchBar box={search.box} filters={search.filters} onChange={handleSearch} />
+      {hasUpdateAIAssistantAnonymization ? toolbar : undefined}
+      <EuiBasicTable
         columns={columns}
         compressed={compressed}
         data-test-subj="contextEditor"
         itemId={FIELDS.FIELD}
         items={rows}
-        pagination={pagination}
-        search={search}
-        selection={selectionValue}
+        pagination={tablePagination}
+        onChange={handleTableChange}
         sorting={sorting}
-        onTableChange={onTableChange}
+        css={css`
+          min-height: 455px;
+        `}
       />
     </Wrapper>
   );

@@ -28,12 +28,23 @@ interface Params {
   toasts?: IToasts;
 }
 
+export type OnListUpdated = (
+  updates: BatchUpdateListItem[],
+  isSelectAll?: boolean,
+  anonymizationAllFields?: FindAnonymizationFieldsResponse
+) => void;
+
+export type HandleRowReset = (field: string) => void;
+export type HandlePageReset = (fields: string[]) => void;
+
 interface AnonymizationUpdater {
   hasPendingChanges: boolean;
-  onListUpdated: (updates: BatchUpdateListItem[]) => Promise<void>;
+  onListUpdated: OnListUpdated;
   resetAnonymizationSettings: () => void;
   saveAnonymizationSettings: () => Promise<boolean>;
   updatedAnonymizationData: FindAnonymizationFieldsResponse;
+  handleRowReset: HandleRowReset;
+  handlePageReset: HandlePageReset;
 }
 
 export const useAnonymizationUpdater = ({
@@ -48,22 +59,45 @@ export const useAnonymizationUpdater = ({
     useState<FindAnonymizationFieldsResponse>(anonymizationFields);
 
   useEffect(() => {
-    if (
-      !(
-        anonymizationFieldsBulkActions.create?.length ||
-        anonymizationFieldsBulkActions.update?.length ||
-        anonymizationFieldsBulkActions.delete?.ids?.length
-      )
-    ) {
-      setUpdatedAnonymizationData(anonymizationFields);
-    }
+    setUpdatedAnonymizationData(() => {
+      if (
+        !(
+          anonymizationFieldsBulkActions.create?.length ||
+          anonymizationFieldsBulkActions.update?.length ||
+          anonymizationFieldsBulkActions.delete?.ids?.length
+        )
+      ) {
+        // Update the page data when no pending changes
+        return anonymizationFields;
+      } else {
+        // If there are pending changes, merge the bulk actions status with the existing data
+        return {
+          ...anonymizationFields,
+          data: (anonymizationFields.data ?? []).map((f) => {
+            const bulkActionField = anonymizationFieldsBulkActions.update?.find(
+              (pf) => pf.id === f.id
+            );
+            return {
+              ...f,
+              allowed: bulkActionField?.allowed ?? f.allowed,
+              anonymized: bulkActionField?.anonymized ?? f.anonymized,
+            };
+          }),
+        };
+      }
+    });
   }, [
     anonymizationFields,
     anonymizationFieldsBulkActions.create?.length,
     anonymizationFieldsBulkActions.delete?.ids?.length,
-    anonymizationFieldsBulkActions.update?.length,
+    anonymizationFieldsBulkActions.update,
   ]);
+
   const resetAnonymizationSettings = useCallback(() => {
+    setAnonymizationFieldsBulkActions((prev) => ({
+      ...prev,
+      update: [],
+    }));
     setHasPendingChanges(false);
     setUpdatedAnonymizationData(anonymizationFields);
   }, [anonymizationFields]);
@@ -86,10 +120,27 @@ export const useAnonymizationUpdater = ({
   }, [anonymizationFields, anonymizationFieldsBulkActions, http, toasts]);
 
   const onListUpdated = useCallback(
-    async (updates: BatchUpdateListItem[]) => {
-      const updatedFieldsKeys = updates.map((u) => u.field);
-      const updatedFields = updates.map((u) => ({
-        ...(updatedAnonymizationData.data.find((f) => f.field === u.field) ?? {
+    (
+      updates: BatchUpdateListItem[],
+      isSelectAll?: boolean,
+      anonymizationAllFields?: FindAnonymizationFieldsResponse
+    ) => {
+      // when isSelectAll is true, we use anonymizationAllFields to find the field
+      // otherwise, we use `updates` to find the field
+      const batchUpdatedFields = isSelectAll
+        ? (anonymizationAllFields?.data ?? []).map((f) => ({
+            field: f.field,
+            operation: updates[0].operation,
+            update: updates[0].update,
+          }))
+        : updates;
+      const updatedFieldsKeys = batchUpdatedFields.map((u) => u.field);
+      const updatedFields = batchUpdatedFields.map((u) => ({
+        // when isSelectAll is true, we use anonymizationAllFields to find the field
+        // otherwise, we use updatedAnonymizationData (anonymizationPageFields) to find the field
+        ...((isSelectAll ? anonymizationAllFields?.data ?? [] : updatedAnonymizationData.data).find(
+          (f) => f.field === u.field
+        ) ?? {
           id: '',
           field: '',
         }),
@@ -101,20 +152,93 @@ export const useAnonymizationUpdater = ({
           : {}),
       }));
       setHasPendingChanges(true);
-      setAnonymizationFieldsBulkActions({
-        ...anonymizationFieldsBulkActions,
-        // Only update makes sense now, as long as we don't have an add new field design/UX
-        update: [...(anonymizationFieldsBulkActions?.update ?? []), ...updatedFields],
+      setAnonymizationFieldsBulkActions(() => {
+        return {
+          ...anonymizationFieldsBulkActions,
+          // Only update makes sense now, as long as we don't have an add new field design/UX
+          update: [...updatedFields].reduce(
+            (acc, curr) => {
+              // This is to ensure that we don't have duplicate fields in the update array
+              const existingIndex = acc.findIndex((item) => item.id === curr.id);
+              if (existingIndex !== -1) {
+                acc[existingIndex] = curr;
+              } else {
+                acc.push(curr);
+              }
+              return acc;
+            },
+            [...(anonymizationFieldsBulkActions?.update ?? [])]
+          ),
+        };
       });
-      setUpdatedAnonymizationData({
-        ...updatedAnonymizationData,
-        data: [
-          ...updatedAnonymizationData.data.filter((f) => !updatedFieldsKeys.includes(f.field)),
-          ...updatedFields,
-        ],
+      setUpdatedAnonymizationData(() => {
+        // Update the anonymization data with the updated fields and keep the existing order
+        const newAnonymizationData = {
+          ...updatedAnonymizationData,
+          data: [...updatedAnonymizationData.data].reduce<FindAnonymizationFieldsResponse['data']>(
+            (acc, field) => {
+              const fieldUpdatedIndex = updatedFieldsKeys.indexOf(field.field);
+              if (fieldUpdatedIndex !== -1) {
+                acc.push(updatedFields[fieldUpdatedIndex]);
+              } else {
+                acc.push(field);
+              }
+              return acc;
+            },
+            []
+          ),
+        };
+        return newAnonymizationData;
       });
     },
     [updatedAnonymizationData, anonymizationFieldsBulkActions]
+  );
+
+  const handleRowReset = useCallback(
+    (field: string) => {
+      const originalRow = anonymizationFields.data.find((f) => f.field === field);
+      const updatedRowsCount = (anonymizationFieldsBulkActions.update ?? []).length;
+      setAnonymizationFieldsBulkActions((prev) => {
+        const updatedFields = prev.update?.filter((f) => f.id !== originalRow?.id) ?? [];
+        return {
+          ...prev,
+          update: updatedFields,
+        };
+      });
+      setUpdatedAnonymizationData((prev) => ({
+        ...prev,
+        data: prev.data.map((d) => {
+          return d.id === originalRow?.id ? originalRow : d;
+        }, []),
+      }));
+      setHasPendingChanges(updatedRowsCount - 1 > 0);
+    },
+    [anonymizationFields.data, anonymizationFieldsBulkActions.update]
+  );
+
+  const handlePageReset = useCallback(
+    (fields: string[]) => {
+      const updatedRowsIds = anonymizationFields.data.reduce<string[]>((acc, curr) => {
+        if (fields.includes(curr.field)) {
+          acc.push(curr.id);
+        }
+        return acc;
+      }, []);
+      const updatedRowsCount = (anonymizationFieldsBulkActions.update ?? []).length;
+      setAnonymizationFieldsBulkActions((prev) => {
+        const updatedFields = prev.update?.filter((f) => !updatedRowsIds.includes(f.id)) ?? [];
+        return {
+          ...prev,
+          update: updatedFields,
+        };
+      });
+      setUpdatedAnonymizationData((prev) => ({
+        ...prev,
+        data: anonymizationFields.data,
+      }));
+      setHasPendingChanges(updatedRowsCount - fields.length > 0);
+    },
+    [anonymizationFields.data, anonymizationFieldsBulkActions.update]
   );
 
   return {
@@ -123,5 +247,7 @@ export const useAnonymizationUpdater = ({
     resetAnonymizationSettings,
     saveAnonymizationSettings,
     updatedAnonymizationData,
+    handleRowReset,
+    handlePageReset,
   };
 };

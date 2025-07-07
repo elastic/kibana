@@ -15,9 +15,11 @@ import {
 } from '@elastic/eui';
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
 import { getContextMenuPanels, PRIMARY_PANEL_ID } from '../get_context_menu_panels';
 import * as i18n from '../translations';
-import { BatchUpdateListItem, ContextEditorRow } from '../types';
+import type { OnListUpdated } from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';
+import type { HandleRowChecked } from '../selection/types';
 
 export interface Props {
   appliesTo: 'multipleRows' | 'singleRow';
@@ -26,8 +28,11 @@ export interface Props {
   disableAnonymize?: boolean;
   disableDeny?: boolean;
   disableUnanonymize?: boolean;
-  onListUpdated: (updates: BatchUpdateListItem[]) => void;
-  selected: ContextEditorRow[];
+  onListUpdated: OnListUpdated;
+  selected: FindAnonymizationFieldsResponse['data'];
+  isSelectAll: boolean;
+  anonymizationAllFields: FindAnonymizationFieldsResponse;
+  handleRowChecked: HandleRowChecked;
 }
 
 const BulkActionsComponent: React.FC<Props> = ({
@@ -39,6 +44,9 @@ const BulkActionsComponent: React.FC<Props> = ({
   disableUnanonymize = false,
   onListUpdated,
   selected,
+  isSelectAll,
+  anonymizationAllFields,
+  handleRowChecked,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -48,7 +56,9 @@ const BulkActionsComponent: React.FC<Props> = ({
 
   const closePopover = useCallback(() => setPopover(false), []);
 
-  const onButtonClick = useCallback(() => setPopover((isOpen) => !isOpen), []);
+  const onButtonClick = useCallback(() => {
+    setPopover((isOpen) => !isOpen);
+  }, []);
 
   const button = useMemo(
     () => (
@@ -78,6 +88,7 @@ const BulkActionsComponent: React.FC<Props> = ({
         closePopover,
         onListUpdated,
         selected,
+        handleRowChecked,
       }),
     [
       closePopover,
@@ -85,6 +96,7 @@ const BulkActionsComponent: React.FC<Props> = ({
       disableAnonymize,
       disableDeny,
       disableUnanonymize,
+      handleRowChecked,
       onListUpdated,
       selected,
     ]
