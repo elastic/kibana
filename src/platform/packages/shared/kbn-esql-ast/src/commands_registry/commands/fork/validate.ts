@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { ICommandContext } from '../../types';
+import { esqlCommandRegistry } from '../..';
 
 export const validate = (
   command: ESQLCommand,
@@ -32,6 +33,17 @@ export const validate = (
     name: '_fork',
     type: 'keyword',
   });
+
+  for (const arg of command.args.flat()) {
+    if (!Array.isArray(arg) && arg.type === 'query') {
+      // all the args should be commands
+      arg.commands.forEach((subCommand) => {
+        const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
+        const validationMessages = subCommandMethods?.validate?.(subCommand, ast, context);
+        messages.push(...(validationMessages || []));
+      });
+    }
+  }
 
   return messages;
 };
