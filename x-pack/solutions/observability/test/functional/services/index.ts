@@ -10,6 +10,7 @@ import { services as obltApiIntegrationServices } from '../../api_integration/se
 import { ObservabilityProvider } from './observability';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { LogsUiProvider } from './logs_ui';
+import { SloUiServiceProvider } from './slo';
 
 export const services = {
   ...platformFunctionalServices,
@@ -17,4 +18,5 @@ export const services = {
   logsUi: LogsUiProvider,
   observability: ObservabilityProvider,
   infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
+  sloUi: SloUiServiceProvider,
 };

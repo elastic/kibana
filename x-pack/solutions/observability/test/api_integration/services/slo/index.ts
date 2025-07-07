@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
 import { TOTAL_INDEX_PRIVILEGE_SET_EDITOR } from '@kbn/slo-plugin/server/services/get_diagnosis';
 import {
@@ -13,8 +14,8 @@ import {
   FindSLODefinitionsResponse,
 } from '@kbn/slo-schema';
 import * as t from 'io-ts';
-import { waitForIndexToBeEmpty } from '../apis/slos/helper/wait_for_index_state';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { waitForIndexToBeEmpty } from './helpers/wait_for_index_state';
 
 type FetchHistoricalSummaryParams = t.OutputOf<
   typeof fetchHistoricalSummaryParamsSchema.props.body

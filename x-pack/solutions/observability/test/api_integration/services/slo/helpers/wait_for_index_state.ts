@@ -8,7 +8,6 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
-
 import { ToolingLog } from '@kbn/tooling-log';
 
 const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
