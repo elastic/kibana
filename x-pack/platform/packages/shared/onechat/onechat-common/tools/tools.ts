@@ -28,7 +28,7 @@ export const serializedPartsSeparator = '::';
 /**
  * The singleton providerId used for all builtIn tools.
  */
-export const builtinToolProviderId = 'builtIn';
+export const builtinToolProviderId = 'built_in';
 /**
  * The singleton providerId used for all Esql tools.
  */

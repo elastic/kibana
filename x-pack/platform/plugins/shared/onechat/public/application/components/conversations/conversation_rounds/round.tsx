@@ -18,7 +18,7 @@ interface RoundProps {
 export const Round: React.FC<RoundProps> = ({ round }) => {
   const { euiTheme } = useEuiTheme();
 
-  const { userInput } = round;
+  const { input } = round;
 
   const rootPanelClass = css`
     margin-bottom: ${euiTheme.size.xl};
@@ -47,7 +47,7 @@ export const Round: React.FC<RoundProps> = ({ round }) => {
     >
       <div className={userTextContainerClass}>
         <EuiText color="subdued" size="m" className={userMessageTextClass}>
-          “{userInput.message}“
+          “{input.message}“
         </EuiText>
       </div>
 
