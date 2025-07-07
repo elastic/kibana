@@ -51,7 +51,7 @@ export interface JobSummarySet {
   failed?: JobSummary[];
 }
 
-export type ReportTypeId = 'pngV2' | 'printablePdfV2' | 'csv_searchsource';
+export type ReportTypeId = 'pngV2' | 'printablePdfV2' | 'csv_searchsource' | 'csv_v2';
 
 export interface ScheduledReport {
   title: string;

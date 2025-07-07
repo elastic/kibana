@@ -59,6 +59,7 @@ export const createEngineDescription = (params: EngineDescriptionParams) => {
     docsPerSecond: options.docsPerSecond,
     lookbackPeriod: options.lookbackPeriod,
     timestampField: options.timestampField,
+    maxPageSearchSize: options.maxPageSearchSize,
   };
 
   const defaults = {

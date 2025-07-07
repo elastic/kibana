@@ -178,6 +178,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-log_essentials') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-security')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
@@ -224,7 +225,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
-        /^x-pack\/test\/defend_workflows_cypress/,
+        /^x-pack\/solutions\/security\/test\/defend_workflows_cypress/,
         /^x-pack\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
       ])) ||
