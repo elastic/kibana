@@ -885,6 +885,7 @@
   ],
   "product-doc-install-status": [
     "index_name",
+    "inference_id",
     "installation_status",
     "last_installation_date",
     "product_name",

@@ -29,6 +29,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useStoreEntityTypes } from '../hooks/use_enabled_entity_types';
+import { PageLoader } from '../../common/components/page_loader';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
@@ -59,6 +60,10 @@ const EntityAnalyticsComponent = () => {
   const isRiskScoreModuleLicenseAvailable = useHasSecurityCapability('entity-analytics');
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const entityTypes = useStoreEntityTypes();
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <>

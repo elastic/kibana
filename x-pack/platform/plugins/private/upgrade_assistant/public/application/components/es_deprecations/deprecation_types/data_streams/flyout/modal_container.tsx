@@ -26,10 +26,12 @@ import { ConfirmMigrationReadonlyFlyoutStep } from './steps/confirm';
 import { ChecklistModalStep } from './steps/checklist';
 import { MigrationCompletedModalStep } from './steps/completed/completed_step';
 import { useMigrationStep } from '../use_migration_step';
+import { DeleteModal } from '../../../common/delete_step_modal';
 
 interface Props extends MigrationStateContext {
   deprecation: EnrichedDeprecationInfo;
   closeModal: () => void;
+  modalType: 'readonly' | 'delete';
 }
 
 const DATE_FORMAT = 'dddd, MMMM Do YYYY, h:mm:ss a';
@@ -40,10 +42,12 @@ export const DataStreamReadonlyModal: React.FunctionComponent<Props> = ({
   startReadonly,
   cancelReadonly,
   closeModal,
+  startDelete,
   deprecation,
+  modalType,
 }) => {
   const { status, migrationWarnings, errorMessage, resolutionType, meta } = migrationState;
-  const [modalStep, setModalStep] = useMigrationStep(status, loadDataStreamMetadata);
+  const [modalStep, setModalStep] = useMigrationStep(status, loadDataStreamMetadata, modalType);
   const { index } = deprecation;
 
   const onStartReadonly = useCallback(async () => {
@@ -55,6 +59,11 @@ export const DataStreamReadonlyModal: React.FunctionComponent<Props> = ({
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_STOP_READONLY_CLICK);
     await cancelReadonly();
   }, [cancelReadonly]);
+
+  const onDeleteIndex = useCallback(async () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_STOP_READONLY_CLICK);
+    await startDelete();
+  }, [startDelete]);
 
   const { lastIndexCreationDateFormatted } = useMemo(() => {
     if (!meta) {
@@ -75,6 +84,15 @@ export const DataStreamReadonlyModal: React.FunctionComponent<Props> = ({
     switch (modalStep) {
       case 'initializing':
         return <InitializingStep errorMessage={errorMessage} type="dataStream" mode="modal" />;
+      case 'confirmDelete':
+        return (
+          <DeleteModal
+            closeModal={closeModal}
+            targetName={index}
+            deleteIndex={onDeleteIndex}
+            type="dataStream"
+          />
+        );
       case 'confirm': {
         if (!meta || !resolutionType) {
           return (
@@ -145,12 +163,13 @@ export const DataStreamReadonlyModal: React.FunctionComponent<Props> = ({
     onStopReadonly,
     resolutionType,
     setModalStep,
+    onDeleteIndex,
   ]);
 
   return (
     <EuiModal
       onClose={closeModal}
-      data-test-subj="updateIndexModal"
+      data-test-subj="updateDataStreamModal"
       maxWidth={true}
       css={{ minWidth: 750 }}
     >
