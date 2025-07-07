@@ -10,22 +10,31 @@
 import { EsqlQuery } from '../../query';
 import { Walker } from '../../walker';
 
-describe('RENAME', () => {
+describe('DROP', () => {
   describe('correctly formatted', () => {
-    it('parses basic example from documentation', () => {
+    it('parses basic example', () => {
       const src = `
         FROM employees
-        | KEEP first_name, last_name, still_hired
-        | RENAME still_hired AS employed`;
+        | DROP height*, weight, age`;
       const { ast, errors } = EsqlQuery.fromSrc(src);
-      const rename = Walker.match(ast, { type: 'command', name: 'rename' });
+      const drop = Walker.match(ast, { type: 'command', name: 'drop' });
 
       expect(errors.length).toBe(0);
-      expect(rename).toMatchObject({
+      expect(drop).toMatchObject({
         type: 'command',
-        name: 'rename',
-        args: [{}],
+        name: 'drop',
+        args: [{ name: 'height*' }, { name: 'weight' }, { name: 'age' }],
       });
+    });
+  });
+
+  describe('invalid query', () => {
+    it('no source command specified and no DROP args specified', () => {
+      const src = `DROP`;
+      const { errors } = EsqlQuery.fromSrc(src);
+
+      expect(errors.length).toBe(1);
+      expect(errors[0].message.startsWith('SyntaxError:')).toBe(true);
     });
   });
 });

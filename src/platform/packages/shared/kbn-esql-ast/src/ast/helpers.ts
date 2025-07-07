@@ -13,6 +13,7 @@ import type {
   ESQLAstNode,
   ESQLBinaryExpression,
   ESQLColumn,
+  ESQLCommand,
   ESQLFunction,
   ESQLIdentifier,
   ESQLIntegerLiteral,
@@ -31,6 +32,9 @@ export const isProperNode = (node: unknown): node is ESQLProperNode =>
   !Array.isArray(node) &&
   typeof (node as ESQLProperNode).type === 'string' &&
   !!(node as ESQLProperNode).type;
+
+export const isCommand = (node: unknown): node is ESQLCommand =>
+  isProperNode(node) && node.type === 'command';
 
 export const isFunctionExpression = (node: unknown): node is ESQLFunction =>
   isProperNode(node) && node.type === 'function';
