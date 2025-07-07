@@ -44,7 +44,7 @@ export const createToolCallEvent = (data: {
   toolCallId: string;
   toolId: PlainIdToolIdentifier;
   toolType: string;
-  args: Record<string, unknown>;
+  params: Record<string, unknown>;
 }): ToolCallEvent => {
   return {
     type: ChatAgentEventType.toolCall,
@@ -52,7 +52,7 @@ export const createToolCallEvent = (data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
       tool_type: data.toolType,
-      args: data.args,
+      params: data.params,
     },
   };
 };

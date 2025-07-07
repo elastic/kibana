@@ -99,7 +99,7 @@ export const convertGraphEvents = ({
                   toolId: toolId.toolId,
                   toolType: toolId.providerId,
                   toolCallId,
-                  args,
+                  params: args,
                 })
               );
             }

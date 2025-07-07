@@ -76,7 +76,7 @@ export const RoundAnswer: React.FC<RoundAnswerProps> = ({ round }) => {
                       isCopyable={false}
                       transparentBackground
                     >
-                      {JSON.stringify(step.args, null, 2)}
+                      {JSON.stringify(step.params, null, 2)}
                     </EuiCodeBlock>
                   </div>
                 </EuiAccordion>

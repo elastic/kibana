@@ -20,13 +20,13 @@ describe('conversationLangchainMessages', () => {
   const makeToolCallWithResult = (
     id: string,
     toolId: string,
-    args: any,
+    params: any,
     result: string
   ): ToolCallWithResult => ({
     tool_call_id: id,
     tool_id: toolId,
     tool_type: 'provider-1',
-    args,
+    params,
     result,
   });
   const makeToolCallStep = (toolCall: ToolCallWithResult): ToolCallStep => ({

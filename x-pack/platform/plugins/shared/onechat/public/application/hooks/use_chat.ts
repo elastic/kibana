@@ -70,7 +70,7 @@ export const useChat = ({ conversationId, agentId, connectorId, onError }: UseCh
           } else if (isToolCallEvent(event)) {
             actions.addToolCall({
               step: createToolCallStep({
-                args: event.data.args,
+                params: event.data.params,
                 result: '',
                 tool_call_id: event.data.tool_call_id,
                 tool_id: event.data.tool_id,
