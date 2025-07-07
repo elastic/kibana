@@ -253,8 +253,10 @@ describe('logsDataSourceProfileProvider', () => {
           },
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+        actions: {
+          setExpandedDoc: jest.fn(),
+        },
         dataView: dataViewWithLogLevel,
-        isDocViewerEnabled: true,
       });
 
       expect(rowAdditionalLeadingControls).toHaveLength(2);
@@ -271,8 +273,8 @@ describe('logsDataSourceProfileProvider', () => {
           },
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+        actions: {},
         dataView: dataViewWithLogLevel,
-        isDocViewerEnabled: false,
       });
 
       expect(rowAdditionalLeadingControls).toHaveLength(0);
