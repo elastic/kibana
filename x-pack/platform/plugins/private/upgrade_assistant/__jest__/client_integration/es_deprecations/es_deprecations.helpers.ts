@@ -49,7 +49,7 @@ const createActions = (testBed: TestBed) => {
         | 'dataStream'
         | 'unfreeze';
       index: number;
-      action?: 'reindex' | 'readonly' | 'unfreeze';
+      action?: 'reindex' | 'readonly' | 'unfreeze' | 'delete';
     }) => {
       const { deprecationType, index, action } = config;
       await act(async () => {
@@ -201,6 +201,13 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
+    clickDeleteButton: async () => {
+      await act(async () => {
+        find('startDeleteButton').simulate('click');
+      });
+
+      component.update();
+    },
     checkMigrationWarningCheckbox: async () => {
       await act(async () => {
         find('warninStepCheckbox')
@@ -211,6 +218,18 @@ const createActions = (testBed: TestBed) => {
             },
           });
       });
+      component.update();
+    },
+
+    fillDeleteInputText: async (value: string = 'delete') => {
+      await act(async () => {
+        find('deleteIndexInput').simulate('change', {
+          target: {
+            value,
+          },
+        });
+      });
+
       component.update();
     },
   };

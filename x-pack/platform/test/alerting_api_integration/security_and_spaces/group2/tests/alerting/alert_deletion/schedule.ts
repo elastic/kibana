@@ -15,6 +15,7 @@ import {
   createEsDocument,
 } from '../../../../../spaces_only/tests/alerting/create_test_data';
 import type { Space } from '../../../../../common/types';
+import type { Scenario } from '../../../../scenarios';
 import {
   Space1,
   Space2,
@@ -80,6 +81,23 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
       });
       expect((results?.deleted ?? 0) > 0).to.eql(true);
     });
+  };
+
+  const doSchedule = async (
+    scenario: Scenario,
+    body: {
+      active_alert_deletion_threshold?: number;
+      inactive_alert_delete_threshold?: number;
+      category_ids: string[];
+    }
+  ) => {
+    return await await supertestWithoutAuth
+      .post(
+        `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_delete_schedule`
+      )
+      .auth(scenario.user.username, scenario.user.password)
+      .set('kbn-xsrf', 'foo')
+      .send(body);
   };
 
   const testExpectedAlertsAreDeleted = async (
@@ -198,23 +216,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
     for (const scenario of UserAtSpaceScenarios) {
       describe(scenario.id, () => {
         it('should delete the correct of alerts - all category active alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: 90,
-              inactive_alert_delete_threshold: undefined,
-              category_ids: ['management', 'securitySolution', 'observability'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: 90,
+            inactive_alert_delete_threshold: undefined,
+            category_ids: ['management', 'securitySolution', 'observability'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -226,6 +237,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -235,7 +247,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -267,23 +282,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - all category inactive alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: undefined,
-              inactive_alert_delete_threshold: 90,
-              category_ids: ['management', 'securitySolution', 'observability'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: undefined,
+            inactive_alert_delete_threshold: 90,
+            category_ids: ['management', 'securitySolution', 'observability'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -295,6 +303,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -304,7 +313,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -336,23 +348,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - all category active and inactive alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: 90,
-              inactive_alert_delete_threshold: 90,
-              category_ids: ['management', 'securitySolution', 'observability'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: 90,
+            inactive_alert_delete_threshold: 90,
+            category_ids: ['management', 'securitySolution', 'observability'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -364,6 +369,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -373,7 +379,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -405,23 +414,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - observability active alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: 90,
-              inactive_alert_delete_threshold: undefined,
-              category_ids: ['observability'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: 90,
+            inactive_alert_delete_threshold: undefined,
+            category_ids: ['observability'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -433,6 +435,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -442,7 +445,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -472,23 +478,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - observability inactive alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: undefined,
-              inactive_alert_delete_threshold: 90,
-              category_ids: ['observability'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: undefined,
+            inactive_alert_delete_threshold: 90,
+            category_ids: ['observability'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -500,6 +499,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -509,7 +509,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -539,23 +542,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - observability active and inactive alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: 90,
-              inactive_alert_delete_threshold: 90,
-              category_ids: ['observability'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: 90,
+            inactive_alert_delete_threshold: 90,
+            category_ids: ['observability'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -567,6 +563,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -576,7 +573,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -608,23 +608,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - security active alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: 90,
-              inactive_alert_delete_threshold: undefined,
-              category_ids: ['securitySolution'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: 90,
+            inactive_alert_delete_threshold: undefined,
+            category_ids: ['securitySolution'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -636,6 +629,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -645,7 +639,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -675,23 +672,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - security inactive alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: undefined,
-              inactive_alert_delete_threshold: 90,
-              category_ids: ['securitySolution'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: undefined,
+            inactive_alert_delete_threshold: 90,
+            category_ids: ['securitySolution'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -703,6 +693,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -712,7 +703,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -742,23 +736,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - security active and inactive alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: 90,
-              inactive_alert_delete_threshold: 90,
-              category_ids: ['securitySolution'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: 90,
+            inactive_alert_delete_threshold: 90,
+            category_ids: ['securitySolution'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -770,6 +757,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -779,7 +767,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -811,23 +802,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - management active alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: 90,
-              inactive_alert_delete_threshold: undefined,
-              category_ids: ['management'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: 90,
+            inactive_alert_delete_threshold: undefined,
+            category_ids: ['management'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -839,6 +823,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -848,7 +833,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -878,23 +866,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - management inactive alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: undefined,
-              inactive_alert_delete_threshold: 90,
-              category_ids: ['management'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: undefined,
+            inactive_alert_delete_threshold: 90,
+            category_ids: ['management'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -906,6 +887,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -915,7 +897,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -945,23 +930,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - management active and inactive alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: 90,
-              inactive_alert_delete_threshold: 90,
-              category_ids: ['management'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: 90,
+            inactive_alert_delete_threshold: 90,
+            category_ids: ['management'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -973,6 +951,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -982,7 +961,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -1014,23 +996,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - multi-category active alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: 90,
-              inactive_alert_delete_threshold: undefined,
-              category_ids: ['observability', 'management'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: 90,
+            inactive_alert_delete_threshold: undefined,
+            category_ids: ['observability', 'management'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -1042,6 +1017,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -1051,7 +1027,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -1083,23 +1062,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - multi-category inactive alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: undefined,
-              inactive_alert_delete_threshold: 90,
-              category_ids: ['observability', 'securitySolution'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: undefined,
+            inactive_alert_delete_threshold: 90,
+            category_ids: ['observability', 'securitySolution'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -1111,6 +1083,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -1120,7 +1093,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsOlderThan90,
@@ -1152,23 +1128,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - multi-category active and inactive alerts', async () => {
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: 90,
-              inactive_alert_delete_threshold: 90,
-              category_ids: ['securitySolution', 'management'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: 90,
+            inactive_alert_delete_threshold: 90,
+            category_ids: ['securitySolution', 'management'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -1180,6 +1149,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -1189,7 +1159,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -1281,23 +1254,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
           });
           await es.bulk({ refresh: 'wait_for', operations });
 
-          // schedule the task
-          const scheduleResponse = await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}/internal/alerting/rules/settings/_alert_delete_schedule`
-            )
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              active_alert_delete_threshold: 90,
-              inactive_alert_delete_threshold: 90,
-              category_ids: ['management', 'observability', 'securitySolution'],
-            });
+          let scheduleResponse;
+          const taskBody = {
+            active_alert_delete_threshold: 90,
+            inactive_alert_delete_threshold: 90,
+            category_ids: ['management', 'observability', 'securitySolution'],
+          };
 
           switch (scenario.id) {
             case 'global_read at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -1309,6 +1275,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'space_1_all_alerts_none_actions at space1':
+              scheduleResponse = await doSchedule(scenario, taskBody);
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
@@ -1318,7 +1285,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
-              expect(scheduleResponse.status).to.eql(204);
+              await retry.try(async () => {
+                scheduleResponse = await doSchedule(scenario, taskBody);
+                expect(scheduleResponse.status).to.eql(204);
+              });
 
               const expectedAlerts = [
                 ...inactiveStackAlertsNewerThan90,
@@ -1368,18 +1338,20 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         await es.bulk({ refresh: 'wait_for', operations });
 
         // schedule the task
-        await supertest
-          .post(
-            `${getUrlPrefix(Space1.id)}/internal/alerting/rules/settings/_alert_delete_schedule`
-          )
-          .set('kbn-xsrf', 'foo')
-          .send({
-            active_alert_delete_threshold: undefined,
-            inactive_alert_delete_threshold: 90,
-            space_ids: [Space1.id, 'default'],
-            category_ids: ['management', 'observability', 'securitySolution'],
-          })
-          .expect(204);
+        await retry.try(async () => {
+          await supertest
+            .post(
+              `${getUrlPrefix(Space1.id)}/internal/alerting/rules/settings/_alert_delete_schedule`
+            )
+            .set('kbn-xsrf', 'foo')
+            .send({
+              active_alert_delete_threshold: undefined,
+              inactive_alert_delete_threshold: 90,
+              space_ids: [Space1.id, 'default'],
+              category_ids: ['management', 'observability', 'securitySolution'],
+            })
+            .expect(204);
+        });
 
         const expectedAlerts = [
           ...inactiveStackAlertsNewerThan90,

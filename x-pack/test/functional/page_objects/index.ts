@@ -55,6 +55,7 @@ import { UptimePageObject } from './uptime_page';
 import { UserProfilePageProvider } from './user_profile_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
+import { SearchQueryRulesPageProvider } from './search_query_rules_page';
 import { SearchClassicNavigationProvider } from './search_classic_navigation';
 
 // just like services, PageObjects are defined as a map of
@@ -99,6 +100,7 @@ export const pageObjects = {
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchSynonyms: SearchSynonymsPageProvider,
+  searchQueryRules: SearchQueryRulesPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
