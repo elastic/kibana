@@ -47,7 +47,7 @@ export const researcherTool = (): RegisteredTool<typeof researcherSchema, Resear
       );
 
       return {
-        answer: searchAgentResult.round.assistantResponse.message,
+        result: { answer: searchAgentResult.round.assistantResponse.message },
       };
     },
     meta: {
