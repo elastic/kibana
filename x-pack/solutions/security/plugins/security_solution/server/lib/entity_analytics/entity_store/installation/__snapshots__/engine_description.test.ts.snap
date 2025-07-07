@@ -625,8 +625,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "generic.risk.calculated_level",
-      "source": "generic.risk.calculated_level",
+      "destination": "entity.risk.calculated_level",
+      "source": "entity.risk.calculated_level",
     },
     Object {
       "aggregation": Object {
@@ -635,8 +635,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "generic.risk.calculated_score",
-      "source": "generic.risk.calculated_score",
+      "destination": "entity.risk.calculated_score",
+      "source": "entity.risk.calculated_score",
     },
     Object {
       "aggregation": Object {
@@ -645,8 +645,8 @@ Object {
         },
         "type": "top_value",
       },
-      "destination": "generic.risk.calculated_score_norm",
-      "source": "generic.risk.calculated_score_norm",
+      "destination": "entity.risk.calculated_score_norm",
+      "source": "entity.risk.calculated_score_norm",
     },
   ],
   "name": "Security 'generic' Entity Store Definition",
@@ -703,6 +703,15 @@ Object {
     "entity.name": Object {
       "type": "keyword",
     },
+    "entity.risk.calculated_level": Object {
+      "type": "keyword",
+    },
+    "entity.risk.calculated_score": Object {
+      "type": "float",
+    },
+    "entity.risk.calculated_score_norm": Object {
+      "type": "float",
+    },
     "entity.source": Object {
       "type": "keyword",
     },
@@ -714,15 +723,6 @@ Object {
     },
     "entity.url": Object {
       "type": "keyword",
-    },
-    "generic.risk.calculated_level": Object {
-      "type": "keyword",
-    },
-    "generic.risk.calculated_score": Object {
-      "type": "float",
-    },
-    "generic.risk.calculated_score_norm": Object {
-      "type": "float",
     },
     "host.architecture": Object {
       "type": "keyword",
