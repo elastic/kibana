@@ -60,7 +60,7 @@ const getPrivilegedUserColumn = (fieldName: string) => ({
           // Issue to extend SecurityCellActions to support this: https://github.com/elastic/security-team/issues/12712
           fieldName,
           idPrefix: 'privileged-user-monitoring-privileged-user',
-          render: (item) => <UserName userName={item} />,
+          render: (item) => <UserName userName={item} scopeId={SCOPE_ID} />,
           displayCount: 1,
         })
       : getEmptyTagValue(),
@@ -80,7 +80,7 @@ const getTargetUserColumn = (fieldName: string) => ({
           values: isArray(user) ? user : [user],
           fieldName,
           idPrefix: 'privileged-user-monitoring-target-user',
-          render: (item) => <UserName userName={item} />,
+          render: (item) => <UserName userName={item} scopeId={SCOPE_ID} />,
           displayCount: 1,
         })
       : getEmptyTagValue(),
