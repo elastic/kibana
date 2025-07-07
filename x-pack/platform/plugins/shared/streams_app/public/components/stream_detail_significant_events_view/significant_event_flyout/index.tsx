@@ -50,6 +50,9 @@ export function SignificantEventFlyoutContents({
 }: SignificantEventFlyoutProps) {
   const [queryValues, setQueryValues] = useState<{ id: string } & Partial<StreamQueryKql>>({
     id: v4(),
+    kql: {
+      query: '',
+    },
     ...query,
   });
 
