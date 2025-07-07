@@ -17,6 +17,7 @@ import { mockNow } from '../../utils/test_helpers/mock_now';
 const timestamp = 1570720000123; // Oct 10, 2019, 08:06:40.123 (UTC-7)
 const absoluteTimeMilis = 'Oct 10, 2019 @ 08:06:40.123 (UTC-7)';
 const relativeTime = '5 hours ago';
+const tooltipTestId = 'apmUiSharedTimestampTooltip';
 
 describe('Timestamp', () => {
   beforeAll(() => {
@@ -47,8 +48,8 @@ describe('Timestamp', () => {
 
       await user.hover(relativeTimeElement);
 
-      const tooltipElement = await screen.findByText(absoluteTimeMilis);
-      expect(tooltipElement).toBeInTheDocument();
+      const tooltipElement = await screen.findByTestId(tooltipTestId);
+      expect(tooltipElement).toHaveTextContent(absoluteTimeMilis);
     });
 
     it('should format with precision in milliseconds by default', async () => {
@@ -57,8 +58,8 @@ describe('Timestamp', () => {
 
       await user.hover(screen.getByText(relativeTime));
 
-      const tooltipElement = await screen.findByText(absoluteTimeMilis);
-      expect(tooltipElement).toBeInTheDocument();
+      const tooltipElement = await screen.findByTestId(tooltipTestId);
+      expect(tooltipElement).toHaveTextContent(absoluteTimeMilis);
     });
 
     it('should format with precision in seconds', async () => {
@@ -67,8 +68,8 @@ describe('Timestamp', () => {
 
       await user.hover(screen.getByText(relativeTime));
 
-      const tooltipElement = await screen.findByText('Oct 10, 2019 @ 08:06:40 (UTC-7)');
-      expect(tooltipElement).toBeInTheDocument();
+      const tooltipElement = await screen.findByTestId(tooltipTestId);
+      expect(tooltipElement).toHaveTextContent('Oct 10, 2019 @ 08:06:40 (UTC-7)');
     });
 
     it('should format with precision in minutes', async () => {
@@ -77,8 +78,8 @@ describe('Timestamp', () => {
 
       await user.hover(screen.getByText(relativeTime));
 
-      const tooltipElement = await screen.findByText('Oct 10, 2019 @ 08:06 (UTC-7)');
-      expect(tooltipElement).toBeInTheDocument();
+      const tooltipElement = await screen.findByTestId(tooltipTestId);
+      expect(tooltipElement).toHaveTextContent('Oct 10, 2019 @ 08:06 (UTC-7)');
     });
   });
 });
