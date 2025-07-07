@@ -92,7 +92,7 @@ yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/ob
 
 ### Playwright tests (Scout)
 
-See [./test/scout/ui/README.md](./test/scout/ui/README.md)
+See [./test/scout/README.md](./test/scout/README.md)
 
 ### Playwright tests (Ensemble)
 
