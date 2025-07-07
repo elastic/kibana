@@ -11,31 +11,26 @@ import React, { useCallback } from 'react';
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
 import { BulkActions } from '../bulk_actions';
 import * as i18n from '../translations';
-import { ContextEditorRow } from '../types';
 import type { OnListUpdated } from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';
 import type { HandleRowChecked } from '../selection/types';
 
 export interface Props {
-  isSelectAll: boolean;
-  anonymizationAllFields: FindAnonymizationFieldsResponse;
+  anonymizationAllFieldsData: FindAnonymizationFieldsResponse['data'];
+  handleRowChecked: HandleRowChecked;
+  handleUnselectAll: () => void;
   onListUpdated: OnListUpdated;
   onSelectAll: (totalCount: number) => void;
-  handleUnselectAll: () => void;
   selected: string[];
   totalFields: number;
-  rows?: ContextEditorRow[];
-  handleRowChecked: HandleRowChecked;
 }
 
 const ToolbarComponent: React.FC<Props> = ({
-  isSelectAll,
-  anonymizationAllFields,
+  anonymizationAllFieldsData,
   onListUpdated,
   onSelectAll,
   handleUnselectAll,
   selected,
   totalFields,
-  rows = [],
   handleRowChecked,
 }) => {
   const onSelectAllClicked = useCallback(() => {
@@ -73,12 +68,10 @@ const ToolbarComponent: React.FC<Props> = ({
 
       <EuiFlexItem grow={false}>
         <BulkActions
-          isSelectAll={isSelectAll}
-          anonymizationAllFields={anonymizationAllFields}
           appliesTo="multipleRows"
           disabled={selected.length === 0}
           onListUpdated={onListUpdated}
-          selected={anonymizationAllFields.data.filter((r) => selected.includes(r.field))}
+          selected={anonymizationAllFieldsData.filter((r) => selected.includes(r.field))}
           handleRowChecked={handleRowChecked}
         />
       </EuiFlexItem>

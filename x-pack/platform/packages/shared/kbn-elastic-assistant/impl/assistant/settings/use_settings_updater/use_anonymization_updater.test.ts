@@ -129,7 +129,7 @@ describe('useAnonymizationUpdater', () => {
     expect(result.current.hasPendingChanges).toBe(true);
     expect(result.current.updatedAnonymizationData).toEqual({
       ...mockAnonymizationFields,
-      data: [mockField2, { ...mockField, anonymized: true }],
+      data: [{ ...mockField, anonymized: true }, mockField2],
     });
     await act(async () => {
       await result.current.onListUpdated(update2);

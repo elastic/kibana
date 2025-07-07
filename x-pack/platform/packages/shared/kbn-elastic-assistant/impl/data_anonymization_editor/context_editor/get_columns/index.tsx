@@ -43,7 +43,6 @@ export const getColumns = ({
   handleRowChecked,
   handleRowUnChecked,
   totalItemCount,
-  isSelectAll,
   anonymizationAllFields,
   handleRowReset,
   handlePageReset,
@@ -59,8 +58,7 @@ export const getColumns = ({
   handleRowChecked: HandleRowChecked;
   handleRowUnChecked: HandleRowUnChecked;
   totalItemCount: number;
-  isSelectAll: boolean;
-  anonymizationAllFields: FindAnonymizationFieldsResponse;
+  anonymizationAllFields: FindAnonymizationFieldsResponse['data'];
   handleRowReset: HandleRowReset;
   handlePageReset: HandlePageReset;
 }): Array<EuiBasicTableColumn<ContextEditorRow>> => {
@@ -102,9 +100,7 @@ export const getColumns = ({
           disableAnonymize={!row.allowed || (row.allowed && row.anonymized)}
           disableUnanonymize={!row.allowed || (row.allowed && !row.anonymized)}
           onListUpdated={onListUpdated}
-          selected={anonymizationAllFields.data.filter((item) => item.field === row.field) ?? []}
-          isSelectAll={isSelectAll}
-          anonymizationAllFields={anonymizationAllFields}
+          selected={anonymizationAllFields.filter((item) => item.field === row.field) ?? []}
           handleRowChecked={handleRowChecked}
         />
       );

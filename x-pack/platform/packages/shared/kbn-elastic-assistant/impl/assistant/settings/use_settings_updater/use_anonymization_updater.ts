@@ -119,12 +119,8 @@ export const useAnonymizationUpdater = ({
     return bulkAnonymizationFieldsResult?.success ?? false;
   }, [anonymizationFields, anonymizationFieldsBulkActions, http, toasts]);
 
-  const onListUpdated = useCallback(
-    (
-      updates: BatchUpdateListItem[],
-      isSelectAll?: boolean,
-      anonymizationAllFields?: FindAnonymizationFieldsResponse
-    ) => {
+  const onListUpdated: OnListUpdated = useCallback(
+    (updates, isSelectAll, anonymizationAllFields) => {
       // when isSelectAll is true, we use anonymizationAllFields to find the field
       // otherwise, we use `updates` to find the field
       const batchUpdatedFields = isSelectAll

@@ -30,7 +30,7 @@ export interface FetchAnonymizationFields {
   isFetching: boolean;
 }
 
-const DEFAULTS = {
+export const DEFAULTS = {
   page: 0,
   perPage: 10,
   sortField: 'field',
@@ -42,13 +42,13 @@ export const QUERY_ALL = {
   per_page: 1000,
 };
 
-const getFilter = (f: string): string => {
+const getFilter = (f: string): string | null => {
   if (!f || f.length === 0) {
-    return '';
+    return null;
   }
   return f
     .split(' ')
-    .map((word, i) => {
+    .map((word) => {
       if (word === 'is:allowed') {
         return 'allowed: true';
       } else if (word === 'is:anonymized') {
@@ -96,6 +96,7 @@ export const useFetchAnonymizationFields = (
         sortOrder: so = sortOrder,
         filter: f = '',
       } = pageParam;
+      const queryFilter = getFilter(f);
 
       return http.fetch<FindAnonymizationFieldsResponse>(
         ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
@@ -107,7 +108,7 @@ export const useFetchAnonymizationFields = (
             per_page: pp,
             sort_field: sf,
             sort_order: so,
-            filter: getFilter(f),
+            ...(queryFilter ? { filter: queryFilter } : {}),
           },
           signal,
         }

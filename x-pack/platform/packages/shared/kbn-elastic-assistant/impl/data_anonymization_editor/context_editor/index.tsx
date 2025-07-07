@@ -99,7 +99,7 @@ const ContextEditorComponent: React.FC<Props> = ({
     [onTableChange]
   );
 
-  const { selectedFields, totalSelectedItems, isSelectAll } = selectionState;
+  const { selectedFields, totalSelectedItems } = selectionState;
   const {
     handleSelectAll,
     handleUnselectAll,
@@ -121,9 +121,8 @@ const ContextEditorComponent: React.FC<Props> = ({
         onListUpdated,
         rawData,
         anonymizationPageFields: anonymizationPageFields.data || [],
-        anonymizationAllFields,
+        anonymizationAllFields: anonymizationAllFields.data || [],
         selectedFields,
-        isSelectAll,
         handleRowReset,
         handlePageReset,
         totalItemCount: anonymizationPageFields.total,
@@ -141,7 +140,6 @@ const ContextEditorComponent: React.FC<Props> = ({
       anonymizationPageFields.total,
       anonymizationAllFields,
       selectedFields,
-      isSelectAll,
       handleRowReset,
       handlePageReset,
     ]
@@ -150,14 +148,12 @@ const ContextEditorComponent: React.FC<Props> = ({
   const toolbar = useMemo(
     () => (
       <Toolbar
-        isSelectAll={isSelectAll}
-        anonymizationAllFields={anonymizationAllFields}
+        anonymizationAllFieldsData={anonymizationAllFields.data || []}
         onListUpdated={onListUpdated}
         onSelectAll={handleSelectAll}
         handleUnselectAll={handleUnselectAll}
         selected={selectedFields}
         totalFields={rawData == null ? anonymizationAllFields.total : totalSelectedItems}
-        rows={rows}
         handleRowChecked={handleRowChecked}
       />
     ),
@@ -166,10 +162,8 @@ const ContextEditorComponent: React.FC<Props> = ({
       handleRowChecked,
       handleSelectAll,
       handleUnselectAll,
-      isSelectAll,
       onListUpdated,
       rawData,
-      rows,
       selectedFields,
       totalSelectedItems,
     ]

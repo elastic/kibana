@@ -10,31 +10,8 @@ import { render, fireEvent } from '@testing-library/react';
 
 import { Toolbar } from '.';
 import * as i18n from '../translations';
-import { ContextEditorRow } from '../types';
 
-const selected: ContextEditorRow[] = [
-  {
-    allowed: true,
-    anonymized: false,
-    denied: false,
-    field: 'event.action',
-    rawValues: ['process_stopped', 'stop'],
-  },
-  {
-    allowed: false,
-    anonymized: false,
-    denied: true,
-    field: 'event.category',
-    rawValues: ['process'],
-  },
-  {
-    allowed: true,
-    anonymized: true,
-    denied: false,
-    field: 'user.name',
-    rawValues: ['max'],
-  },
-];
+const selected = ['event.action', 'event.category', 'user.name'];
 
 describe('Toolbar', () => {
   const defaultProps = {
@@ -43,6 +20,12 @@ describe('Toolbar', () => {
     onSelectAll: jest.fn(),
     selected: [], // no rows selected
     totalFields: 5,
+    anonymizationAllFieldsData: [
+      { id: '1', field: 'event.action', allowed: true, anonymized: false },
+      { id: '2', field: 'event.category', allowed: true, anonymized: false },
+    ],
+    handleRowChecked: jest.fn(),
+    handleUnselectAll: jest.fn(),
   };
 
   it('displays the number of selected fields', () => {

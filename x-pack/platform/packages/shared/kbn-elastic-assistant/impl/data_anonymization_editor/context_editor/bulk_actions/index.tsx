@@ -30,8 +30,6 @@ export interface Props {
   disableUnanonymize?: boolean;
   onListUpdated: OnListUpdated;
   selected: FindAnonymizationFieldsResponse['data'];
-  isSelectAll: boolean;
-  anonymizationAllFields: FindAnonymizationFieldsResponse;
   handleRowChecked: HandleRowChecked;
 }
 
@@ -44,8 +42,6 @@ const BulkActionsComponent: React.FC<Props> = ({
   disableUnanonymize = false,
   onListUpdated,
   selected,
-  isSelectAll,
-  anonymizationAllFields,
   handleRowChecked,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
