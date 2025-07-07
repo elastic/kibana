@@ -29,7 +29,7 @@ export interface ToolCallEventData {
   tool_call_id: string;
   tool_id: PlainIdToolIdentifier;
   tool_type: string;
-  args: Record<string, unknown>;
+  params: Record<string, unknown>;
 }
 
 export type ToolCallEvent = ChatAgentEventBase<ChatAgentEventType.toolCall, ToolCallEventData>;

@@ -64,7 +64,7 @@ export interface ToolCallWithResult {
   /**
    * Arguments the tool was called with.
    */
-  args: Record<string, any>;
+  params: Record<string, any>;
   /**
    * Result of the tool, serialized as string.
    */
