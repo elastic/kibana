@@ -27,7 +27,9 @@ const generateMockTool = (id: string, providerId: string): RegisteredToolWithMet
     description: '',
     meta: { providerId, tags: [] },
     schema: z.object({}),
-    handler: () => undefined,
+    handler: () => {
+      return { result: {} };
+    },
   };
 };
 
