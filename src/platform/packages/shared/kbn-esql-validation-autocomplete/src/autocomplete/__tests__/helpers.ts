@@ -8,30 +8,32 @@
  */
 
 import { camelCase } from 'lodash';
-import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '../../definitions/all_operators';
-import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
-import { aggFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
-import { timeSeriesAggFunctionDefinitions } from '../../definitions/generated/time_series_agg_functions';
-import { timeUnitsToSuggest } from '../../definitions/literals';
 import {
-  FunctionDefinitionTypes,
-  Location,
-  getLocationFromCommandOrOptionName,
-} from '../../definitions/types';
-import { groupingFunctionDefinitions } from '../../definitions/generated/grouping_functions';
-import * as autocomplete from '../autocomplete';
-import type { ESQLCallbacks } from '../../shared/types';
-import type { EditorContext, SuggestionRawDefinition } from '../types';
-import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { ESQLFieldWithMetadata } from '../../validation/types';
-import {
-  FieldType,
+  TRIGGER_SUGGESTION_COMMAND,
+  timeUnitsToSuggest,
   fieldTypes,
+  FieldType,
+  SupportedDataType,
   FunctionParameterType,
   FunctionReturnType,
-  SupportedDataType,
-} from '../../definitions/types';
+  FunctionDefinitionTypes,
+} from '@kbn/esql-ast';
+import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
+import {
+  Location,
+  ESQLFieldWithMetadata,
+  ISuggestionItem,
+} from '@kbn/esql-ast/src/commands_registry/types';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
+import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
+import { getLocationFromCommandOrOptionName } from '../../shared/types';
+import * as autocomplete from '../autocomplete';
+import type { ESQLCallbacks } from '../../shared/types';
+import type { EditorContext } from '../types';
 import {
   joinIndices,
   timeseriesIndices,
@@ -49,7 +51,7 @@ export interface Integration {
   }>;
 }
 
-export type PartialSuggestionWithText = Partial<SuggestionRawDefinition> & { text: string };
+export type PartialSuggestionWithText = Partial<ISuggestionItem> & { text: string };
 
 export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
   text: '',
@@ -273,11 +275,6 @@ export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]
   return [];
 }
 
-export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType[]) {
-  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
-}
-
 export function createCustomCallbackMocks(
   /**
    * Columns that will come from Elasticsearch since the last command
@@ -363,10 +360,7 @@ export type AssertSuggestionOrderFn = (
   order: string
 ) => Promise<void>;
 
-export type SuggestFn = (
-  query: string,
-  opts?: SuggestOptions
-) => Promise<SuggestionRawDefinition[]>;
+export type SuggestFn = (query: string, opts?: SuggestOptions) => Promise<ISuggestionItem[]>;
 
 export const setup = async (caret = '/') => {
   if (caret.length !== 1) {
