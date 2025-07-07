@@ -27,13 +27,12 @@ const configSchema = schema.object({
     ],
     { defaultValue: AIAssistantType.Default }
   ),
-  serverlessUiSettingsKey: schema.oneOf(
-    [
+  serverlessUiSettingsKey: schema.maybe(
+    schema.oneOf([
       schema.literal(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY),
       schema.literal(OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY),
       schema.literal(SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY),
-    ],
-    { defaultValue: PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY }
+    ])
   ),
 });
 
