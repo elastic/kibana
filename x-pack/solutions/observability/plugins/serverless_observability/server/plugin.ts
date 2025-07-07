@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
-
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import {
   OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS,
   OBSERVABILITY_PROJECT_SETTINGS,
@@ -29,7 +28,11 @@ export class ServerlessObservabilityPlugin
       StartDependencies
     >
 {
-  constructor(_initializerContext: PluginInitializerContext) {}
+  private logger: Logger;
+
+  constructor(context: PluginInitializerContext) {
+    this.logger = context.logger.get();
+  }
 
   public setup(
     coreSetup: CoreSetup<StartDependencies, ServerlessObservabilityPluginStart>,
@@ -45,6 +48,9 @@ export class ServerlessObservabilityPlugin
             ? OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS
             : []),
         ]);
+      })
+      .catch((error) => {
+        this.logger.error(`Error setup serverless project settings: ${error}`);
       });
 
     coreSetup.pricing.registerProductFeatures([
