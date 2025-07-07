@@ -11,7 +11,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Rules Management - Prebuilt Rules - Prebuilt Rule (Customization Disabled)', function () {
     this.tags('skipFIPS');
     loadTestFile(require.resolve('./customization'));
-    loadTestFile(require.resolve('./export'));
     loadTestFile(require.resolve('./upgrade_prebuilt_rules'));
   });
 };
