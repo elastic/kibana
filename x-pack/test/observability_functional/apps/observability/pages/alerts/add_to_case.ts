@@ -25,7 +25,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    describe('When user has all privileges for cases', () => {
+    describe('When user has all privileges for cases ', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
