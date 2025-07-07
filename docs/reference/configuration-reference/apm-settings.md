@@ -1,7 +1,6 @@
 ---
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/apm-settings-kb.html
-  - https://github.com/elastic/cloud/blob/master/docs/cloud-enterprise/ce-apm-settings.asciidoc
 applies_to:
   deployment:
     ess: all
@@ -90,19 +89,3 @@ More settings are available in the [Observability advanced settings](/reference/
 
 `xpack.apm.latestAgentVersionsUrl` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specifies the URL of a self hosted file that contains latest agent versions. Defaults to `https://apm-agent-versions.elastic.co/versions.json`. Set to `''` to disable requesting latest agent versions.
-
-## Logging settings [logging-settings]
-
-The following APM logging (legacy) settings are a subset of the valid settings:
-
-`logging.level`
-:   Specifies the minimum log level. One of debug, info, warning, or error. Defaults to info.
-
-`logging.selectors`
-:   The list of debugging-only selector tags used by different APM Server components. Use * to enable debug output for all components. For example, add publish to display all the debug messages related to event publishing.
-
-`logging.metrics.enabled`
-:   If enabled, APM Server periodically logs its internal metrics that have changed in the last period. Defaults to true.
-
-`logging.metrics.period`
-:   The period after which to log the internal metrics. Defaults to 30s.
