@@ -15,11 +15,10 @@ Object {
     "test*",
   ],
   "latest": Object {
-    "lookbackPeriod": "3h",
+    "lookbackPeriod": "24h",
     "settings": Object {
-      "docsPerSecond": -1,
+      "docsPerSecond": undefined,
       "frequency": "1m",
-      "maxPageSearchSize": 500,
       "syncDelay": "1m",
       "syncField": "@timestamp",
       "timeout": "180s",
