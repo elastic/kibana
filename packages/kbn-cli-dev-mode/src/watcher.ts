@@ -67,7 +67,19 @@ export class Watcher {
     Pw.subscribe(
       this.repoRoot,
       (error, events) => {
+        // if (error) {
+        //   subscriber.error(error);
+        //   return;
+        // }
+
         if (error) {
+          // skip runtime errors like FS Events dropped
+          if (error.message && error.message.includes('Events were dropped by the FSEvents client')) {
+            console.log(`FS Events were dropped on watcher for ${this.repoRoot}`);
+            return;
+          }
+
+          // Other runtime errors should still fail
           subscriber.error(error);
           return;
         }
