@@ -10,7 +10,6 @@ import type { FtrProviderContext } from '../../../../../common/ftr_provider_cont
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function getScheduleFrequencyTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
