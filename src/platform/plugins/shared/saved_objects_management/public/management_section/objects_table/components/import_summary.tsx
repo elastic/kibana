@@ -21,14 +21,15 @@ import {
   EuiHorizontalRule,
   EuiTitle,
   EuiSpacer,
-  useEuiTheme,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
+import {
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
   IBasePath,
+  useMemoizedStyles,
 } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
@@ -84,7 +85,7 @@ const mapImportSuccess = (obj: SavedObjectsImportSuccess): ImportItem => {
 };
 
 const CountIndicators: FC<{ importItems: ImportItem[] }> = ({ importItems }) => {
-  const styles = useStyles();
+  const styles = useMemoizedStyles(componentStyles);
 
   if (!importItems.length) {
     return null;
@@ -260,7 +261,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
       ),
     [successfulImports, failedImports]
   );
-  const styles = useStyles();
+  const styles = useMemoizedStyles(componentStyles);
 
   return (
     <Fragment>
@@ -318,24 +319,10 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
   );
 };
 
-const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  const styles = {
-    row: css({
-      marginBottom: euiTheme.size.xs,
-    }),
-    title: css({
-      minWidth: 0,
-    }),
-    createdCount: css({
-      color: euiTheme.colors.textSuccess,
-    }),
-    errorCount: css({
-      color: euiTheme.colors.textDanger,
-    }),
-    icon: css({
-      marginLeft: euiTheme.size.xs,
-    }),
-  };
-  return styles;
+const componentStyles = {
+  row: ({ euiTheme }: UseEuiTheme) => css({ marginBottom: euiTheme.size.xs }),
+  title: css({ minWidth: 0 }),
+  createdCount: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textSuccess }),
+  errorCount: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textDanger }),
+  icon: ({ euiTheme }: UseEuiTheme) => css({ marginLeft: euiTheme.size.xs }),
 };
