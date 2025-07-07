@@ -76,7 +76,7 @@ describe('RedirectApp', () => {
     );
 
     await waitFor(() => {
-      expect(mockApiClient.getScheduledReportInfo).toHaveBeenCalledWith('happy', '2', '50');
+      expect(mockApiClient.getScheduledReportInfo).toHaveBeenCalledWith('happy', 2, 50);
       expect(mockShare.navigate).toHaveBeenCalledWith(locatorParams);
     });
   });
