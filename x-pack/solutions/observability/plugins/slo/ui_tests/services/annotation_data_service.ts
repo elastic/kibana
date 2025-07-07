@@ -16,10 +16,6 @@ export class AnnotationDataService {
         index: 'observability-annotations',
         ignore_unavailable: true,
       });
-      await this.esClient.indices.delete({
-        index: 'observability-annotations',
-        ignore_unavailable: true,
-      });
     } catch (e) {
       // ignore
     }

@@ -16,7 +16,6 @@ export class SLODataService {
   ) {}
 
   async generateSloData() {
-    console.log(this.kibanaUrl, 'this.kibanaUrl');
     await cli({
       kibanaUrl: this.kibanaUrl,
       elasticsearchHost: this.elasticsearchUrl,
@@ -71,7 +70,7 @@ export class SLODataService {
     };
     try {
       const { data } = await this.kbnClient.request({
-        description: 'get monitor by id',
+        description: 'Create SLOs',
         path: '/api/observability/slos',
         body: example,
         method: 'POST',
