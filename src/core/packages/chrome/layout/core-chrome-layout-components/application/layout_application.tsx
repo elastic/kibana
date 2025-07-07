@@ -31,7 +31,7 @@ export const LayoutApplication = ({
   const overflow = useEuiOverflowScroll('y');
 
   return (
-    <main css={[styles.root, overflow]}>
+    <main css={[styles.root, overflow]} id={'app-main-scroll'}>
       {topBar && <div css={styles.topBar}>{topBar}</div>}
       <div css={[styles.content]}>{children}</div>
       {bottomBar && <div css={styles.bottomBar}>{bottomBar}</div>}

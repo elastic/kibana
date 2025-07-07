@@ -44,7 +44,10 @@ import { SearchBox } from './search_box';
 
 const StickySidebar = styled(EuiFlexItem)`
   position: sticky;
-  top: 120px;
+  top: calc(
+    var(--kbn-application--sticky-headers-offset, 96px) +
+      ${(props) => props.theme.eui.euiSizeL /* 24px */}
+  );
 `;
 
 export interface PackageListGridProps {
