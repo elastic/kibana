@@ -31,7 +31,7 @@ export const useFilesTableColumns = ({
       field: 'name',
       'data-test-subj': 'cases-files-table-filename',
       render: (name: string, file: FileJSON) => (
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center">
           <FileAvatar file={file} />
           <FileNameLink file={file} showPreview={() => showPreview(file)} />
         </EuiFlexGroup>

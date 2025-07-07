@@ -71,6 +71,7 @@ export const FileAvatar = ({
     : {
         iconType: getIcon(file.extension || ''),
         color: 'subdued',
+        iconSize: 'l' as const,
       };
 
   return (
