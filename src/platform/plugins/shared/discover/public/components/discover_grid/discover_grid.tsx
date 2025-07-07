@@ -67,10 +67,10 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     }))();
   }, [getPaginationConfigAccessor]);
 
-  const getColumnConfigurationAccessor = useProfileAccessor('getColumnConfiguration');
+  const getColumnsConfigurationAccessor = useProfileAccessor('getColumnsConfiguration');
   const customGridColumnsConfiguration = useMemo(() => {
-    return getColumnConfigurationAccessor(() => ({}))();
-  }, [getColumnConfigurationAccessor]);
+    return getColumnsConfigurationAccessor(() => ({}))();
+  }, [getColumnsConfigurationAccessor]);
 
   return (
     <UnifiedDataTable

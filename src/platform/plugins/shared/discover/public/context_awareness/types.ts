@@ -412,5 +412,5 @@ export interface Profile {
    * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
    * Example use case is to overwrite the column header display name or to add icons to the column headers.
    */
-  getColumnConfiguration: () => CustomGridColumnsConfiguration;
+  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
 }

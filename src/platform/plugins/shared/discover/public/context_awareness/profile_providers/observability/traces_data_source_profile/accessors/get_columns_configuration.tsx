@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ColumnHeaderTruncateContainer } from '@kbn/unified-data-table';
+import React from 'react';
+import { UnifiedDataTableSummaryColumnHeader } from '@kbn/unified-data-table';
 import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
-import { EuiIconTip } from '@elastic/eui';
-import React from 'react';
 import type { DataSourceProfileProvider } from '../../../..';
 
-export const getColumnConfiguration: DataSourceProfileProvider['profile']['getColumnConfiguration'] =
+export const getColumnsConfiguration: DataSourceProfileProvider['profile']['getColumnsConfiguration'] =
   (prev) => () => ({
     ...(prev ? prev() : {}),
     _source: ({ column, headerRowHeight }: CustomGridColumnProps) => ({
@@ -50,14 +49,12 @@ export const DataTableSummaryColumnHeaderTracesContext = ({
   );
 
   return (
-    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-      {columnDisplayName}{' '}
-      <EuiIconTip
-        data-test-subj="logs-summary-icon"
-        type="questionInCircle"
-        content={tooltipContent}
-        title={tooltipTitle}
-      />
-    </ColumnHeaderTruncateContainer>
+    <UnifiedDataTableSummaryColumnHeader
+      columnDisplayName={columnDisplayName}
+      headerRowHeight={headerRowHeight}
+      tooltipTitle={tooltipTitle}
+      tooltipContent={tooltipContent}
+      iconTipDataTestSubj="traces-summary-icon"
+    />
   );
 };

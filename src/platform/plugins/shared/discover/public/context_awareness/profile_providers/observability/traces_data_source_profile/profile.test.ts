@@ -108,16 +108,16 @@ describe('tracesDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
-  describe('getColumnConfiguration', () => {
+  describe('getColumnsConfiguration', () => {
     it('should return custom configuration for the "_source" column', () => {
-      const getColumnConfiguration =
-        tracesDataSourceProfileProvider.profile.getColumnConfiguration?.(() => ({}), {
+      const getColumnsConfiguration =
+        tracesDataSourceProfileProvider.profile.getColumnsConfiguration?.(() => ({}), {
           context: {
             category: DataSourceCategory.Traces,
           },
         });
 
-      const columnConfiguration = getColumnConfiguration?.();
+      const columnConfiguration = getColumnsConfiguration?.();
       expect(columnConfiguration).toBeDefined();
       expect(columnConfiguration).toHaveProperty('_source');
 

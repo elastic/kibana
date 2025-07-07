@@ -175,30 +175,3 @@ export const DataTableScoreColumnHeader = ({
     </ColumnHeaderTruncateContainer>
   );
 };
-
-export const DataTableSummaryColumnHeader = ({
-  headerRowHeight = 1,
-  columnDisplayName,
-}: {
-  headerRowHeight?: number;
-  columnDisplayName: string;
-}) => {
-  const tooltipTitle = i18n.translate('unifiedDataTable.tableHeader.sourceFieldIconTooltipTitle', {
-    defaultMessage: 'Summary',
-  });
-  const tooltipContent = i18n.translate('unifiedDataTable.tableHeader.sourceFieldIconTooltip', {
-    defaultMessage: 'Shows a quick view of the document using its key:value pairs.',
-  });
-
-  return (
-    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-      {columnDisplayName}{' '}
-      <EuiIconTip
-        data-test-subj="default-summary-icon"
-        type="questionInCircle"
-        content={tooltipContent}
-        title={tooltipTitle}
-      />
-    </ColumnHeaderTruncateContainer>
-  );
-};

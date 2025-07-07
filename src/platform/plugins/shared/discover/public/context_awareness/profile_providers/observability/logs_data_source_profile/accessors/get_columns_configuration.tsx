@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
-import { ColumnHeaderTruncateContainer } from '@kbn/unified-data-table';
-import { EuiIconTip } from '@elastic/eui';
-import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { UnifiedDataTableSummaryColumnHeader } from '@kbn/unified-data-table';
 import type { DataSourceProfileProvider } from '../../../..';
 
-export const getColumnConfiguration: DataSourceProfileProvider['profile']['getColumnConfiguration'] =
+const SUMMARY_COLUMN_NAME = i18n.translate('discover.unifiedDataTable.tableHeader.summary', {
+  defaultMessage: 'Summary',
+});
+
+export const getColumnsConfiguration: DataSourceProfileProvider['profile']['getColumnsConfiguration'] =
   (prev) => () => ({
     ...(prev ? prev() : {}),
     _source: ({ column, headerRowHeight }: CustomGridColumnProps) => ({
       ...column,
       display: (
         <DataTableSummaryColumnHeaderLogsContext
-          columnDisplayName={column.displayAsText ?? 'Summary'}
+          columnDisplayName={column.displayAsText ?? SUMMARY_COLUMN_NAME}
           headerRowHeight={headerRowHeight}
         />
       ),
@@ -41,24 +45,21 @@ export const DataTableSummaryColumnHeaderLogsContext = ({
       defaultMessage: 'Summary including the following fields',
     }
   );
-  const tooltipContent = i18n.translate(
-    'discover.unifiedDataTable.tableHeader.logsContext.sourceFieldIconTooltip',
-    {
-      defaultMessage:
-        'Displays the most relevant resource identifiers (service.name, host.name, kubernetes.pod.name, etc.)' +
-        ' followed by the log or error message; if no message fields are present, it shows the full document instead',
-    }
+  const tooltipContent = (
+    <FormattedMessage
+      id="discover.unifiedDataTable.tableHeader.logsContext.sourceFieldIconTooltip"
+      defaultMessage="Displays the most relevant resource identifiers -{br}{br}service.name{br}host.name{br}kubernetes.pod.name{br}etc.{br}{br}followed by the log or error message;{br}if no message fields are present, it shows the full document instead"
+      values={{ br: <br /> }}
+    />
   );
 
   return (
-    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-      {columnDisplayName}{' '}
-      <EuiIconTip
-        data-test-subj="logs-summary-icon"
-        type="questionInCircle"
-        content={tooltipContent}
-        title={tooltipTitle}
-      />
-    </ColumnHeaderTruncateContainer>
+    <UnifiedDataTableSummaryColumnHeader
+      columnDisplayName={columnDisplayName}
+      headerRowHeight={headerRowHeight}
+      tooltipTitle={tooltipTitle}
+      tooltipContent={tooltipContent}
+      iconTipDataTestSubj="logs-summary-icon"
+    />
   );
 };

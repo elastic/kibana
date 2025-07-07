@@ -22,6 +22,7 @@ import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { SOURCE_COLUMN } from '../utils/columns';
 import { ExpandButton } from './data_table_expand_button';
 import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
@@ -40,9 +41,9 @@ import {
   DataTableColumnHeader,
   DataTableScoreColumnHeader,
   DataTableTimeColumnHeader,
-  DataTableSummaryColumnHeader,
 } from './data_table_column_header';
 import { UnifiedDataTableProps } from './data_table';
+import UnifiedDataTableSummaryColumnHeader from './data_table_summary_column_header';
 
 export const getColumnDisplayName = (
   columnName: string,
@@ -65,7 +66,7 @@ export const getColumnDisplayName = (
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 const DataTableScoreColumnHeaderMemoized = React.memo(DataTableScoreColumnHeader);
-const DataTableSummaryColumnHeaderMemoized = React.memo(DataTableSummaryColumnHeader);
+const DataTableSummaryColumnHeaderMemoized = React.memo(UnifiedDataTableSummaryColumnHeader);
 
 export const OPEN_DETAILS = 'openDetails';
 export const SELECT_ROW = 'select';
@@ -258,7 +259,7 @@ function buildEuiGridColumn({
     displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
   };
 
-  if (column.id === '_source') {
+  if (column.id === SOURCE_COLUMN) {
     column.display = (
       <DataTableSummaryColumnHeaderMemoized
         columnDisplayName={columnDisplayName}

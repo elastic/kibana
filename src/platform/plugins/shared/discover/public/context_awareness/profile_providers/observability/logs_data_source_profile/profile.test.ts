@@ -279,19 +279,17 @@ describe('logsDataSourceProfileProvider', () => {
     });
   });
 
-  describe('getColumnConfiguration', () => {
+  describe('getColumnsConfiguration', () => {
     it('should return custom configuration for the "_source" column', () => {
-      const getColumnConfiguration = logsDataSourceProfileProvider.profile.getColumnConfiguration?.(
-        () => ({}),
-        {
+      const getColumnsConfiguration =
+        logsDataSourceProfileProvider.profile.getColumnsConfiguration?.(() => ({}), {
           context: {
             category: DataSourceCategory.Logs,
             logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
           },
-        }
-      );
+        });
 
-      const columnConfiguration = getColumnConfiguration?.();
+      const columnConfiguration = getColumnsConfiguration?.();
 
       expect(columnConfiguration).toBeDefined();
       expect(columnConfiguration).toHaveProperty('_source');
