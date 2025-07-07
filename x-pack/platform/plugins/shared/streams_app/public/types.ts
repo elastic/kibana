@@ -27,6 +27,7 @@ import type {
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
+import { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -67,6 +68,7 @@ export interface StreamsAppStartDependencies {
   share: SharePublicStart;
   streams: StreamsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  unifiedDocViewer: UnifiedDocViewerStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
