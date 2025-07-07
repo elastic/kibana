@@ -116,8 +116,8 @@ describe('Service Overview', () => {
         'https://otel-demo-blue-adservice-edot-synth:8080/some/path'
       );
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').contains('OK');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
     });
     it('shows waterfall and transaction details flyout', () => {
       cy.visitKibana(transactionUrl);
@@ -140,8 +140,8 @@ describe('Service Overview', () => {
         'https://otel-demo-blue-adservice-edot-synth:8080/some/path'
       );
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').contains('OK');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
     });
   });
 
@@ -168,8 +168,8 @@ describe('Service Overview', () => {
         'https://otel-demo-blue-adservice-edot-synth:8080/some/path'
       );
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').contains('OK');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
     });
   });
 });
