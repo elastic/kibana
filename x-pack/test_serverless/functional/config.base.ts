@@ -41,16 +41,6 @@ export function createTestConfig<TServices extends {} = typeof services>(
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
           ...(options.kbnServerArgs ?? []),
-          ...(options.serverlessProject === 'oblt'
-            ? [
-                '--aiAssistantManagementSelection.serverlessUiSettingsKey=aiAssistant:preferredAIAssistantType:oblt',
-              ]
-            : []),
-          ...(options.serverlessProject === 'security'
-            ? [
-                '--aiAssistantManagementSelection.serverlessUiSettingsKey=aiAssistant:preferredAIAssistantType:security',
-              ]
-            : []),
         ],
       },
       testFiles: options.testFiles,
