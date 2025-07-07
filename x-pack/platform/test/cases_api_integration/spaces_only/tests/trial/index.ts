@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { createSpaces, deleteSpaces } from '../../../common/lib/authentication';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('cases spaces only enabled: trial', function () {
     this.tags('skipFIPS');
