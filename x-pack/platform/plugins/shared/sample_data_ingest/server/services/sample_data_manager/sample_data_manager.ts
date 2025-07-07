@@ -43,12 +43,12 @@ export class SampleDataManager {
       artifactsFolder,
       artifactRepositoryUrl,
       kibanaVersion,
-      logger: this.log.get('artifact-manager'),
+      logger: this.log,
     });
 
     this.indexManager = new IndexManager({
       elserInferenceId: elserInferenceId || defaultInferenceEndpoints.ELSER,
-      logger: this.log.get('index-manager'),
+      logger: this.log,
     });
   }
 

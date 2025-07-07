@@ -51,7 +51,7 @@ export class SampleDataIngestPlugin
       artifactsFolder: Path.join(getDataPath(), 'sample-data-artifacts'),
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
-      logger: this.logger.get('sample-data-ingest'),
+      logger: this.logger,
       indexPrefixName: 'sample-data',
     });
 
