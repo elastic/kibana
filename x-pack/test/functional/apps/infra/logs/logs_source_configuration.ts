@@ -28,8 +28,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const testSubjects = getService('testSubjects');
-  const dataGrid = getService('dataGrid');
 
   describe('Logs Source Configuration', function () {
     before(async () => {
