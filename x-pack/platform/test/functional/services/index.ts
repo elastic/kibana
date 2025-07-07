@@ -51,6 +51,7 @@ import { CasesServiceProvider } from './cases';
 import { ActionsServiceProvider } from './actions';
 import { RulesServiceProvider } from './rules';
 import { AiopsProvider } from './aiops';
+import { SearchSessionsService } from './search_sessions';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here

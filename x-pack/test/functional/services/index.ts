@@ -11,6 +11,7 @@ import { AceEditorProvider } from '@kbn/test-suites-xpack-platform/functional/se
 import { UserMenuProvider } from '@kbn/test-suites-xpack-platform/functional/services/user_menu';
 import { SampleDataServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/sample_data';
 import { GrokDebuggerProvider } from '@kbn/test-suites-xpack-platform/functional/services/grok_debugger';
+import { SearchSessionsService } from '@kbn/test-suites-xpack-platform/functional/services/search_sessions';
 import { ReportingFunctionalProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services';
 import {
   MonitoringNoDataProvider,
@@ -67,7 +68,6 @@ import { CanvasElementProvider } from './canvas_element';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { LogsUiProvider } from './logs_ui';
-import { SearchSessionsService } from './search_sessions';
 import { DataStreamProvider } from './data_stream';
 import { SloUiServiceProvider } from './slo';
 // define the name and providers for services that should be
