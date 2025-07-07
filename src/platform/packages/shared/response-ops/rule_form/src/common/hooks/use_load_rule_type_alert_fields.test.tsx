@@ -33,19 +33,20 @@ const fieldsMetadataMock = {
 
 describe('useLoadRuleTypeAlertFields', () => {
   beforeEach(() => {
-    http.get.mockResolvedValue([
-      {
-        name: '@timestamp',
-        deprecated: false,
-        useWithTripleBracesInTemplates: false,
-        usesPublicBaseUrl: false,
-      },
-    ]);
+    http.get.mockResolvedValue({
+      fields: [
+        {
+          name: '@timestamp',
+          deprecated: false,
+          useWithTripleBracesInTemplates: false,
+          usesPublicBaseUrl: false,
+        },
+      ],
+    });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    queryClient.clear();
   });
 
   test('should call API endpoint with the correct parameters', async () => {
@@ -79,52 +80,5 @@ describe('useLoadRuleTypeAlertFields', () => {
         },
       ]
     `);
-  });
-
-  test('handles dataViewFields as object with fields property', async () => {
-    http.get.mockResolvedValue({
-      fields: [
-        {
-          name: 'rule.category',
-          deprecated: false,
-          useWithTripleBracesInTemplates: false,
-          usesPublicBaseUrl: false,
-        },
-        {
-          name: 'rule.name',
-          deprecated: false,
-          useWithTripleBracesInTemplates: false,
-          usesPublicBaseUrl: false,
-        },
-      ],
-      browserFields: {},
-    });
-
-    const { result } = renderHook(
-      () =>
-        useLoadRuleTypeAlertFields({
-          http,
-          fieldsMetadata: fieldsMetadataMock,
-          ruleTypeId: 'ruleTypeId',
-          enabled: true,
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => {
-      expect(result.current.isInitialLoading).toBe(false);
-    });
-
-    expect(result.current.data).toEqual([
-      {
-        description:
-          'A categorization value keyword used by the entity using the rule for detection of this event.',
-        name: 'rule.category',
-      },
-      {
-        description: 'The name of the rule or signature generating the event.',
-        name: 'rule.name',
-      },
-    ]);
   });
 });
