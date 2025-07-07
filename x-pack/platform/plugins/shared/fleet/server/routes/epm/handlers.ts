@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
-import type { HttpResponseOptions } from '@kbn/core/server';
+import { SavedObjectsClient, type HttpResponseOptions } from '@kbn/core/server';
 
 import { omit, pick } from 'lodash';
 
@@ -33,6 +33,7 @@ import type {
   GetBulkAssetsResponse,
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
+  RollbackPackageResponse,
   AssetSOObject,
   PackageSpecCategory,
 } from '../../../common/types';
@@ -54,6 +55,7 @@ import type {
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
   CustomIntegrationRequestSchema,
+  RollbackPackageRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -73,6 +75,7 @@ import type { BulkInstallResponse } from '../../services/epm/packages';
 import { fleetErrorToResponseOptions, FleetError, FleetTooManyRequestsError } from '../../errors';
 import { appContextService, checkAllowedPackages, packagePolicyService } from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
+import { PackageRollbackError, rollbackInstallation } from '../../services/epm/packages/rollback';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
@@ -663,4 +666,45 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
     };
   }
   return pkg;
+};
+
+export const rollbackPackageHandler: FleetRequestHandler<
+  TypeOf<typeof RollbackPackageRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName } = request.params;
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const fleetContext = await context.fleet;
+  // Need a less restrictive client than fleetContext.internalSoClient for SO operations in multiple spaces.
+  const savedObjectsClient = new SavedObjectsClient(
+    appContextService.getSavedObjects().createInternalRepository()
+  );
+  const spaceId = fleetContext.spaceId;
+  const allSpaces = await fleetContext.getAllSpaces();
+  const logger = appContextService.getLogger();
+  try {
+    const body: RollbackPackageResponse = await rollbackInstallation({
+      esClient,
+      savedObjectsClient,
+      pkgName,
+      spaceId,
+      spaceIds: allSpaces.map((space) => space.id),
+    });
+    return response.ok({ body });
+  } catch (error) {
+    const message = `Failed to rollback package ${pkgName}: ${error.message}`;
+    if (error instanceof PackageRollbackError) {
+      logger.warn(message);
+      return response.customError({
+        statusCode: 400,
+        body: { message },
+      });
+    } else {
+      logger.error(message);
+      return response.customError({
+        statusCode: 500,
+        body: { message },
+      });
+    }
+  }
 };

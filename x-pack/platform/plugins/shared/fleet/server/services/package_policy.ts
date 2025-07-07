@@ -20,6 +20,8 @@ import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
   SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -138,6 +140,7 @@ import type {
   PackagePolicyClientGetByIdsOptions,
   PackagePolicyClientGetOptions,
   PackagePolicyClientListIdsOptions,
+  PackagePolicyClientRollbackOptions,
   PackagePolicyService,
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
@@ -164,6 +167,7 @@ import {
   _packagePoliciesBulkUpgrade,
   _packagePoliciesUpgrade,
 } from './package_policies/upgrade';
+import { PackageRollbackError } from './epm/packages/rollback';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -2477,6 +2481,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         )}]`
     );
 
+    const filter = _normalizePackagePolicyKuery(
+      savedObjectType,
+      kuery
+        ? `${savedObjectType}.attributes.latest_revision:true AND ${kuery}`
+        : `${savedObjectType}.attributes.latest_revision:true`
+    );
+
     return createSoFindIterable<{}>({
       soClient,
       findRequest: {
@@ -2485,7 +2496,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         sortField: 'created_at',
         sortOrder: 'asc',
         fields: [],
-        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
+        filter,
         namespaces,
       },
       resultsMapper: (data) => {
@@ -2518,6 +2529,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const isSpacesEnabled = await isSpaceAwarenessEnabled();
     const namespaces = isSpacesEnabled ? spaceIds : undefined;
 
+    const filter = _normalizePackagePolicyKuery(
+      savedObjectType,
+      kuery
+        ? `${savedObjectType}.attributes.latest_revision:true AND ${kuery}`
+        : `${savedObjectType}.attributes.latest_revision:true`
+    );
+
     return createSoFindIterable<PackagePolicySOAttributes>({
       soClient,
       findRequest: {
@@ -2525,7 +2543,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         sortField,
         sortOrder,
         perPage,
-        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
+        filter,
         namespaces,
       },
       resultsMapper(data) {
@@ -2541,6 +2559,118 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
       },
     });
+  }
+
+  public async getPackagePolicySavedObjects(
+    soClient: SavedObjectsClientContract,
+    options: PackagePolicyClientRollbackOptions = {}
+  ): Promise<SavedObjectsFindResponse<PackagePolicySOAttributes, unknown>> {
+    const { perPage = SO_SEARCH_LIMIT, spaceIds } = options;
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+    const namespaces = isSpacesEnabled ? spaceIds : undefined;
+
+    const packagePolicies = await soClient
+      .find<PackagePolicySOAttributes>({
+        ...(options || {}),
+        type: savedObjectType,
+        perPage,
+        namespaces,
+      })
+      .catch(catchAndSetErrorStackTrace.withMessage('failed to find package policies'));
+
+    for (const packagePolicy of packagePolicies?.saved_objects ?? []) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        name: packagePolicy.attributes.name,
+        savedObjectType,
+      });
+    }
+
+    return packagePolicies;
+  }
+
+  public async rollback(
+    soClient: SavedObjectsClientContract,
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+  ): Promise<void> {
+    const savedObjectType = await getPackagePolicySavedObjectType();
+
+    // Need to break down policies by namespace for bulk operations.
+    const policiesToUpdate = packagePolicies.reduce((acc, policy) => {
+      if (!policy.id.endsWith(':prev')) {
+        const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
+        const namespace = policy.namespaces?.[0];
+        if (namespace && previousRevision?.attributes) {
+          if (!acc[namespace]) {
+            acc[namespace] = [];
+          }
+          acc[namespace].push({
+            ...policy,
+            attributes: {
+              ...previousRevision?.attributes,
+              revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
+              latest_revision: true,
+            },
+          });
+        }
+      }
+      return acc;
+    }, {} as Record<string, Array<SavedObjectsFindResult<PackagePolicySOAttributes>>>);
+
+    const policiesToDelete = packagePolicies.reduce((acc, policy) => {
+      if (policy.id.endsWith(':prev')) {
+        const namespace = policy.namespaces?.[0];
+        if (namespace) {
+          if (!acc[namespace]) {
+            acc[namespace] = [];
+          }
+          acc[namespace].push({ id: policy.id, type: savedObjectType });
+        }
+      }
+      return acc;
+    }, {} as Record<string, Array<{ id: string; type: string }>>);
+
+    // Delete saved previous revisions.
+    for (const [namespace, policies] of Object.entries(policiesToDelete)) {
+      const { statuses } = await soClient
+        .bulkDelete(policies, { force: true, namespace })
+        .catch(
+          catchAndSetErrorStackTrace.withMessage(
+            `Bulk delete of package policies [${policies.map((p) => p.id).join(', ')}] failed`
+          )
+        );
+      for (const policy of policies) {
+        auditLoggingService.writeCustomSoAuditLog({
+          action: 'delete',
+          id: policy.id,
+          savedObjectType,
+        });
+      }
+      if (statuses.some((status) => !status.success)) {
+        throw new PackageRollbackError(
+          `Failed to delete some previous package policy revisions: ${statuses
+            .filter((status) => !status.success)
+            .map((status) => status.error?.message || 'Unknown error')
+            .join(', ')}`
+        );
+      }
+    }
+
+    // Update policies with previous revision data.
+    for (const [namespace, policies] of Object.entries(policiesToUpdate)) {
+      await soClient
+        .bulkUpdate<PackagePolicySOAttributes>(policies, { namespace })
+        .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed]`));
+      for (const policy of policies) {
+        auditLoggingService.writeCustomSoAuditLog({
+          action: 'update',
+          id: policy.id,
+          savedObjectType,
+        });
+      }
+    }
   }
 }
 
