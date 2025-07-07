@@ -1645,6 +1645,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/functional/apps/ml/  @elastic/ml-ui
 /x-pack/test/functional/es_archives/ml/  @elastic/ml-ui
 /x-pack/test/functional/services/ml/  @elastic/ml-ui
+/x-pack/platform/test/functional/services/ml @elastic/ml-ui
 /x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
 /x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/config.ts @elastic/ml-ui
 /x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/ml/ @elastic/ml-ui
