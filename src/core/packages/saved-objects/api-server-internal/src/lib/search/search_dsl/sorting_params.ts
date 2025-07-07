@@ -8,7 +8,11 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SortCombinations, SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import {
+  MappingRuntimeFields,
+  SortCombinations,
+  SortOrder,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server/src/apis';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
@@ -22,7 +26,7 @@ export function getSortingParams(
   sortField?: string,
   sortOrder?: SortOrder,
   pit?: SavedObjectsPitParams
-): { sort?: SortCombinations[]; runtime_mappings?: Record<string, any> } {
+): { sort?: SortCombinations[]; runtime_mappings?: MappingRuntimeFields } {
   if (!sortField) {
     // if we are performing a PIT search, we must sort by some criteria
     // in order to get the 'sort' property for each of the results.

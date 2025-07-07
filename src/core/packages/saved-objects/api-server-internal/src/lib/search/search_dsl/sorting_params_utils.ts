@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
+import { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 
 // Priority: numeric > date > keyword > text > others
 const TYPE_PRIORITY = [
@@ -58,7 +59,9 @@ export const getKeywordField = (fieldMapping?: SavedObjectsFieldMapping): string
  * Helper to determine the merged type for runtime field.
  * Maps unsupported runtime types to supported equivalents.
  */
-export const getMergedFieldType = (fields?: SavedObjectsFieldMapping[]): string => {
+export const getMergedFieldType = (
+  fields?: SavedObjectsFieldMapping[]
+): MappingRuntimeFieldType => {
   if (!fields) return 'keyword';
   const types = fields
     .map((f) => {
