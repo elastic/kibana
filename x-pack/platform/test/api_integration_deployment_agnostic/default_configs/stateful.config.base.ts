@@ -26,9 +26,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH, LOCAL_PRODUCT_DOC_PATH } from './common_paths';
-import { updateKbnServerArguments } from './helpers';
 
-interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
+interface CreateTestConfigOptions<T> {
   esServerArgs?: string[];
   kbnServerArgs?: string[];
   services?: T;
@@ -37,20 +36,22 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   suiteTags?: { include?: string[]; exclude?: string[] };
 }
 
-export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnosticCommonServices>(
+export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
   options: CreateTestConfigOptions<T>
 ) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
+    if (options.esServerArgs || options.kbnServerArgs) {
+      throw new Error(
+        `FTR doesn't provision custom ES/Kibana server arguments into the ESS deployment.
+  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
+      );
+    }
+
     // if config is executed on CI or locally
     const isRunOnCI = process.env.CI;
 
     const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-    let kbnServerArgs: string[] = [];
-
-    if (options.kbnServerArgs) {
-      kbnServerArgs = await updateKbnServerArguments(options.kbnServerArgs);
-    }
 
     /**
      * This is used by CI to set the docker registry port
@@ -60,7 +61,9 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
      */
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
-    const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
+    const xPackAPITestsConfig = await readConfigFile(
+      require.resolve('../../api_integration/config.ts')
+    );
 
     // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
     const idpPath = require.resolve(
@@ -68,7 +71,7 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
     );
     const samlIdPPlugin = path.resolve(
       __dirname,
-      '../../../security_api_integration/plugins/saml_provider'
+      '../../../../test/security_api_integration/plugins/saml_provider'
     );
 
     const servers = {
@@ -95,7 +98,7 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
       testFiles: options.testFiles,
@@ -124,7 +127,6 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
           `path.repo=${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`,
-          ...(options.esServerArgs || []),
         ],
         files: [
           // Passing the roles that are equivalent to the ones we have in serverless
@@ -161,7 +163,8 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
           ...(dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
-          ...kbnServerArgs,
+          // @ts-expect-error
+          ...(options?.kbnTestServer?.serverArgs ?? []),
         ],
       },
     };

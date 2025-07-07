@@ -38,7 +38,6 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/config.telemetry.ts
   # serverless config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.logs_essentials.serverless.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts

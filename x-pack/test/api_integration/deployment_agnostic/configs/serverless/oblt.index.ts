@@ -10,19 +10,14 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('Serverless Observability - Deployment-agnostic API integration tests', function () {
     this.tags(['esGate']);
 
-    // load new oblt and platform deployment-agnostic test here
+    // load new oblt deployment-agnostic test here
     // Note: if your tests runtime is over 5 minutes, create a new index and config file
-    loadTestFile(require.resolve('../../apis/console'));
-    loadTestFile(require.resolve('../../apis/core'));
-    loadTestFile(require.resolve('../../apis/management'));
+
     loadTestFile(require.resolve('../../apis/observability/infra'));
     loadTestFile(require.resolve('../../apis/observability/alerting'));
     loadTestFile(require.resolve('../../apis/observability/dataset_quality'));
-    loadTestFile(require.resolve('../../apis/painless_lab'));
-    loadTestFile(require.resolve('../../apis/saved_objects_management'));
     loadTestFile(require.resolve('../../apis/observability/slo'));
     loadTestFile(require.resolve('../../apis/observability/onboarding'));
     loadTestFile(require.resolve('../../apis/observability/incident_management'));
-    loadTestFile(require.resolve('../../apis/intercepts'));
   });
 }
