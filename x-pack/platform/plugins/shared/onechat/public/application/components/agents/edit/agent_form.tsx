@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -13,208 +13,35 @@ import {
   EuiTextArea,
   EuiButton,
   EuiSpacer,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCheckbox,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiText,
   EuiTitle,
-  EuiHeader,
+  EuiCallOut,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ToolSelection, ToolDescriptor } from '@kbn/onechat-common';
 import { useForm, Controller, FormProvider } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
+import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { queryKeys } from '../../../query_keys';
+import { ToolsSelection } from './tools_selection';
 
 export interface AgentFormProps {
   mode: 'edit' | 'create';
   agentId?: string;
 }
 
-// Component for tools selection
-const ToolsSelection: React.FC<{
-  tools: ToolDescriptor[];
-  toolsLoading: boolean;
-  selectedTools: ToolSelection[];
-  onToolsChange: (tools: ToolSelection[]) => void;
-}> = ({ tools, toolsLoading, selectedTools, onToolsChange }) => {
-  // Group tools by provider
-  const toolsByProvider = useMemo(() => {
-    const grouped: Record<string, ToolDescriptor[]> = {};
-    tools.forEach((tool) => {
-      const providerId = tool.meta.providerId;
-      if (!grouped[providerId]) {
-        grouped[providerId] = [];
-      }
-      grouped[providerId].push(tool);
-    });
-    return grouped;
-  }, [tools]);
-
-  // Check if all tools from a provider are selected
-  const isAllToolsSelectedForProvider = (providerId: string) => {
-    const providerTools = toolsByProvider[providerId] || [];
-    return providerTools.every((tool) =>
-      selectedTools.some(
-        (selection) =>
-          selection.toolIds.includes(tool.id) &&
-          (!selection.provider || selection.provider === providerId)
-      )
-    );
-  };
-
-  // Check if a specific tool is selected
-  const isToolSelected = (toolId: string, providerId: string) => {
-    return selectedTools.some(
-      (selection) =>
-        selection.toolIds.includes(toolId) &&
-        (!selection.provider || selection.provider === providerId)
-    );
-  };
-
-  // Toggle all tools for a provider
-  const toggleProviderTools = (providerId: string) => {
-    const providerTools = toolsByProvider[providerId] || [];
-    const allSelected = isAllToolsSelectedForProvider(providerId);
-
-    if (allSelected) {
-      // Remove all tools from this provider
-      const newSelection = selectedTools.filter(
-        (selection) =>
-          !(
-            selection.provider === providerId ||
-            selection.toolIds.some((toolId) => providerTools.some((tool) => tool.id === toolId))
-          )
-      );
-      onToolsChange(newSelection);
-    } else {
-      // Add all tools from this provider
-      const existingSelection = selectedTools.filter(
-        (selection) =>
-          !(
-            selection.provider === providerId ||
-            selection.toolIds.some((toolId) => providerTools.some((tool) => tool.id === toolId))
-          )
-      );
-
-      const newProviderSelection: ToolSelection = {
-        provider: providerId,
-        toolIds: providerTools.map((tool) => tool.id),
-      };
-
-      onToolsChange([...existingSelection, newProviderSelection]);
-    }
-  };
-
-  // Toggle individual tool
-  const toggleTool = (toolId: string, providerId: string) => {
-    const isSelected = isToolSelected(toolId, providerId);
-
-    if (isSelected) {
-      // Remove this specific tool
-      const newSelection = selectedTools
-        .map((selection) => {
-          if (selection.toolIds.includes(toolId)) {
-            const newToolIds = selection.toolIds.filter((id) => id !== toolId);
-            return newToolIds.length > 0 ? { ...selection, toolIds: newToolIds } : null;
-          }
-          return selection;
-        })
-        .filter(Boolean) as ToolSelection[];
-
-      onToolsChange(newSelection);
-    } else {
-      // Add this specific tool
-      const existingSelection = selectedTools.filter(
-        (selection) => !selection.toolIds.includes(toolId)
-      );
-
-      const newToolSelection: ToolSelection = {
-        toolIds: [toolId],
-      };
-
-      onToolsChange([...existingSelection, newToolSelection]);
-    }
-  };
-
-  if (toolsLoading) {
-    return <EuiText>Loading tools...</EuiText>;
-  }
-
-  return (
-    <div>
-      {Object.entries(toolsByProvider).map(([providerId, providerTools]) => {
-        const columns: Array<EuiBasicTableColumn<ToolDescriptor>> = [
-          {
-            field: 'id',
-            name: i18n.translate('xpack.onechat.tools.toolIdLabel', { defaultMessage: 'Tool' }),
-            valign: 'top',
-            render: (id: string, tool: ToolDescriptor) => (
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiCheckbox
-                    id={`tool-${tool.id}`}
-                    checked={isToolSelected(tool.id, providerId)}
-                    onChange={() => toggleTool(tool.id, providerId)}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <strong>{id}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-          },
-          {
-            field: 'description',
-            name: i18n.translate('xpack.onechat.tools.toolDescriptionLabel', {
-              defaultMessage: 'Description',
-            }),
-            width: '60%',
-            valign: 'top',
-            render: (description: string) => <EuiText size="s">{description}</EuiText>,
-          },
-        ];
-
-        return (
-          <div key={providerId}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiCheckbox
-                  id={`provider-${providerId}`}
-                  checked={isAllToolsSelectedForProvider(providerId)}
-                  onChange={() => toggleProviderTools(providerId)}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h4>{providerId} Tools</h4>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="s" />
-
-            <EuiBasicTable
-              columns={columns}
-              items={providerTools}
-              itemId="id"
-              noItemsMessage="No tools available"
-            />
-
-            <EuiSpacer size="m" />
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+interface AgentFormData {
+  id: string;
+  name: string;
+  description: string;
+  customInstructions: string;
+  toolSelection: any[];
+}
 
 export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
   const { navigateToOnechatUrl } = useNavigation();
@@ -222,22 +49,61 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
     services: { notifications },
   } = useKibana();
 
-  // Success/error handlers
   const onSaveSuccess = () => {
     notifications.toasts.addSuccess(
-      i18n.translate('xpack.onechat.agents.createSuccessMessage', {
-        defaultMessage: 'Agent created successfully',
-      })
+      mode === 'create'
+        ? i18n.translate('xpack.onechat.agents.createSuccessMessage', {
+            defaultMessage: 'Agent created successfully',
+          })
+        : i18n.translate('xpack.onechat.agents.updateSuccessMessage', {
+            defaultMessage: 'Agent updated successfully',
+          })
     );
     navigateToOnechatUrl(appPaths.agents.list);
   };
+
   const onSaveError = (err: Error) => {
+    const errorMessage =
+      mode === 'create'
+        ? i18n.translate('xpack.onechat.agents.createErrorMessage', {
+            defaultMessage: 'Failed to create agent',
+          })
+        : i18n.translate('xpack.onechat.agents.updateErrorMessage', {
+            defaultMessage: 'Failed to update agent',
+          });
     notifications.toasts.addError(err, {
-      title: i18n.translate('xpack.onechat.agents.createErrorMessage', {
-        defaultMessage: 'Failed to create agent',
-      }),
+      title: errorMessage,
     });
   };
+
+  const { agentProfilesService } = useOnechatServices();
+  const queryClient = useQueryClient();
+
+  const deleteAgentMutation = useMutation({
+    mutationFn: (id: string) => {
+      if (!id) {
+        throw new Error('Agent ID is required for delete');
+      }
+      return agentProfilesService.delete(id);
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId!) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.onechat.agents.deleteSuccessMessage', {
+          defaultMessage: 'Agent deleted successfully',
+        })
+      );
+      navigateToOnechatUrl(appPaths.agents.list);
+    },
+    onError: (err: Error) => {
+      notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.onechat.agents.deleteErrorMessage', {
+          defaultMessage: 'Failed to delete agent',
+        }),
+      });
+    },
+  });
 
   const {
     state: agentState,
@@ -252,147 +118,232 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
     onSaveError,
   });
 
-  const formMethods = useForm({
+  const formMethods = useForm<AgentFormData>({
     defaultValues: { ...agentState },
+    mode: 'onChange',
   });
   const { control, handleSubmit, reset, formState, setValue, watch } = formMethods;
 
-  // Reset form when agent data loads
   useEffect(() => {
     if (agentState && !isLoading) {
       reset(agentState);
     }
   }, [agentState, isLoading, reset]);
 
-  // Watch the toolSelection field
   const toolSelection = watch('toolSelection');
 
-  // Error message helper
-  const getErrorMessage = (err: unknown) => {
-    if (!err) return undefined;
-    if (typeof err === 'object' && 'message' in err) {
-      return (err as Error).message;
-    }
-    return String(err);
-  };
+  // Show loading spinner when data is being fetched
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '200px' }}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
-  const onSubmit = (data: any) => {
+  // Handle any error that occurred while loading
+  if (error) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.onechat.agents.errorTitle', {
+          defaultMessage: 'Error loading agent',
+        })}
+        color="danger"
+        iconType="error"
+      >
+        <p>
+          {i18n.translate('xpack.onechat.agents.errorMessage', {
+            defaultMessage: 'Unable to load the agent. {errorMessage}',
+            values: {
+              errorMessage: (error as Error)?.message || String(error),
+            },
+          })}
+        </p>
+        <EuiSpacer size="m" />
+        <EuiButton onClick={() => navigateToOnechatUrl(appPaths.agents.list)}>
+          {i18n.translate('xpack.onechat.agents.backToListButton', {
+            defaultMessage: 'Back to agents list',
+          })}
+        </EuiButton>
+      </EuiCallOut>
+    );
+  }
+
+  const onSubmit = (data: AgentFormData) => {
     submit(data);
   };
 
-  // Handle tools selection change
-  const handleToolsChange = (newToolSelection: ToolSelection[]) => {
+  const handleToolsChange = (newToolSelection: any[]) => {
     setValue('toolSelection', newToolSelection);
   };
 
-  // Compose error message
-  const errorMessage =
-    getErrorMessage(error) ||
-    (formState.errors.name && 'Name is required') ||
-    (formState.errors.description && 'Description is required') ||
-    (formState.errors.id && 'ID is required');
+  const isFormDisabled = isLoading || isSubmitting || deleteAgentMutation.isLoading;
 
   return (
     <FormProvider {...formMethods}>
-      <EuiForm component="form" onSubmit={handleSubmit(onSubmit)} isInvalid={!!errorMessage}>
+      <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
         <EuiFormRow
-          label="Agent ID"
+          label={i18n.translate('xpack.onechat.agents.form.idLabel', {
+            defaultMessage: 'Agent ID',
+          })}
           isInvalid={!!formState.errors.id}
-          error={formState.errors.id && 'ID is required'}
+          error={formState.errors.id?.message}
         >
           <Controller
             name="id"
             control={control}
-            rules={{ required: true }}
+            rules={{
+              required: i18n.translate('xpack.onechat.agents.form.idRequired', {
+                defaultMessage: 'Agent ID is required',
+              }),
+            }}
             render={({ field }) => (
               <EuiFieldText
                 {...field}
-                disabled={isLoading || isSubmitting || mode === 'edit'}
-                placeholder={mode === 'create' ? 'Enter agent ID' : ''}
+                disabled={isFormDisabled || mode === 'edit'}
+                placeholder={
+                  mode === 'create'
+                    ? i18n.translate('xpack.onechat.agents.form.idPlaceholder', {
+                        defaultMessage: 'Enter agent ID',
+                      })
+                    : ''
+                }
+                isInvalid={!!formState.errors.id}
               />
             )}
           />
         </EuiFormRow>
         <EuiFormRow
-          label="Agent Name"
+          label={i18n.translate('xpack.onechat.agents.form.nameLabel', {
+            defaultMessage: 'Agent Name',
+          })}
           isInvalid={!!formState.errors.name}
-          error={formState.errors.name && 'Name is required'}
+          error={formState.errors.name?.message}
         >
           <Controller
             name="name"
             control={control}
-            rules={{ required: true }}
-            render={({ field }) => <EuiFieldText {...field} disabled={isLoading || isSubmitting} />}
+            rules={{
+              required: i18n.translate('xpack.onechat.agents.form.nameRequired', {
+                defaultMessage: 'Agent name is required',
+              }),
+            }}
+            render={({ field }) => (
+              <EuiFieldText
+                {...field}
+                disabled={isFormDisabled}
+                isInvalid={!!formState.errors.name}
+              />
+            )}
           />
         </EuiFormRow>
-        <EuiFormRow label="Description">
+        <EuiFormRow
+          label={i18n.translate('xpack.onechat.agents.form.descriptionLabel', {
+            defaultMessage: 'Description',
+          })}
+          isInvalid={!!formState.errors.description}
+          error={formState.errors.description?.message}
+        >
           <Controller
             name="description"
             control={control}
-            render={({ field }) => <EuiFieldText {...field} disabled={isLoading || isSubmitting} />}
+            render={({ field }) => (
+              <EuiFieldText
+                {...field}
+                disabled={isFormDisabled}
+                isInvalid={!!formState.errors.description}
+              />
+            )}
           />
         </EuiFormRow>
-        <EuiFormRow label="Extra Instructions">
+        <EuiFormRow
+          label={i18n.translate('xpack.onechat.agents.form.customInstructionsLabel', {
+            defaultMessage: 'Extra Instructions',
+          })}
+          isInvalid={!!formState.errors.customInstructions}
+          error={formState.errors.customInstructions?.message}
+        >
           <Controller
             name="customInstructions"
             control={control}
             render={({ field }) => (
-              <EuiTextArea {...field} rows={4} disabled={isLoading || isSubmitting} />
+              <EuiTextArea
+                {...field}
+                rows={4}
+                disabled={isFormDisabled}
+                isInvalid={!!formState.errors.customInstructions}
+              />
             )}
           />
         </EuiFormRow>
 
         <EuiSpacer size="l" />
-        <EuiHeader>
-          <EuiTitle size="s">
-            <h4>Select Agent Tools</h4>
-          </EuiTitle>
-        </EuiHeader>
+        <EuiTitle size="m">
+          <h4>
+            {i18n.translate('xpack.onechat.agents.form.toolsSelectionTitle', {
+              defaultMessage: 'Configure Agent Tools',
+            })}
+          </h4>
+        </EuiTitle>
         <EuiSpacer size="l" />
         <ToolsSelection
           tools={tools}
           toolsLoading={isLoading}
           selectedTools={toolSelection || []}
           onToolsChange={handleToolsChange}
+          disabled={isFormDisabled}
         />
 
-        {errorMessage && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut color="danger" title="Error">
-              {errorMessage}
-            </EuiCallOut>
-          </>
-        )}
         <EuiSpacer size="m" />
-        <EuiFlexGroup>
+        <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              type="submit"
-              fill
-              isLoading={isSubmitting}
-              disabled={
-                isLoading || isSubmitting || !formMethods.watch('name') || !formMethods.watch('id')
-              }
-            >
-              {mode === 'create' ? 'Create Agent' : 'Save Changes'}
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  type="submit"
+                  fill
+                  iconType="save"
+                  isLoading={isSubmitting}
+                  disabled={isFormDisabled || !formState.isValid}
+                >
+                  {mode === 'create'
+                    ? i18n.translate('xpack.onechat.agents.form.createButton', {
+                        defaultMessage: 'Create Agent',
+                      })
+                    : i18n.translate('xpack.onechat.agents.form.saveButton', {
+                        defaultMessage: 'Save Changes',
+                      })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={() => navigateToOnechatUrl(appPaths.agents.list)}
+                  disabled={isFormDisabled}
+                >
+                  {i18n.translate('xpack.onechat.agents.form.cancelButton', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           {mode === 'edit' && (
             <EuiFlexItem grow={false}>
-              <EuiButton color="danger" onClick={() => {}} disabled={isSubmitting}>
-                Delete
+              <EuiButton
+                color="danger"
+                iconType="trash"
+                onClick={() => deleteAgentMutation.mutate(agentId!)}
+                disabled={isFormDisabled}
+                isLoading={deleteAgentMutation.isLoading}
+              >
+                {i18n.translate('xpack.onechat.agents.form.deleteButton', {
+                  defaultMessage: 'Delete',
+                })}
               </EuiButton>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={() => navigateToOnechatUrl(appPaths.agents.list)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </EuiButton>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>
     </FormProvider>

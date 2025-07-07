@@ -42,7 +42,6 @@ export function useAgentEdit({
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
-  // Use the tools hook instead of manual fetching
   const { tools, isLoading: toolsLoading, error: toolsError } = useOnechatTools();
 
   const { agent, isLoading: agentLoading, error: agentError } = useOnechatAgentById(agentId || '');
@@ -58,7 +57,6 @@ export function useAgentEdit({
     },
   });
 
-  // Update mutation
   const updateMutation = useMutation({
     mutationFn: (data: Omit<AgentEditState, 'id'>) => {
       if (!agentId) {
@@ -77,7 +75,6 @@ export function useAgentEdit({
     },
   });
 
-  // Update state when agent data is loaded
   useEffect(() => {
     if (!agentId) {
       setState(emptyState());
