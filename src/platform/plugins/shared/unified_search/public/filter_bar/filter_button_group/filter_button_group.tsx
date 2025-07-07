@@ -60,7 +60,7 @@ const filterButtonStyles = {
         content: "''",
         position: 'absolute',
         inset: 0,
-        border: `${euiTheme.border.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
         borderRadius: 'inherit',
         pointerEvents: 'none',
       },
