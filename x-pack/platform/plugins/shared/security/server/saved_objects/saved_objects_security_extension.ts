@@ -29,7 +29,6 @@ import type {
   AuthorizeBulkGetParams,
   AuthorizeBulkUpdateParams,
   AuthorizeChangeAccessModeParams,
-  AuthorizeChangeOwnershipParams,
   AuthorizeCheckConflictsParams,
   AuthorizeCreateParams,
   AuthorizeDeleteParams,
@@ -713,7 +712,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       typeRegistry.supportsAccessControl(type)
     );
     const { typesRequiringAccessControl } =
-      this.accessControlService.getTypesRequiringAccessControlPrivilegeCheck({
+      this.accessControlService.getTypesRequiringPrivilegeCheck({
         objects: accessControlObjects || [],
         typeRegistry,
       });
@@ -1128,16 +1127,20 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return preAuthorizationResult;
   }
 
-  async authorizeChangeOwnership<A extends string>({
-    namespace,
-    objects,
-  }: AuthorizeChangeOwnershipParams): Promise<CheckAuthorizationResult<A>> {
+  async authorizeChangeAccessControl<A extends string>(
+    params: AuthorizeChangeAccessModeParams,
+    operation: 'changeAccessMode' | 'changeOwnership'
+  ): Promise<CheckAuthorizationResult<A>> {
+    const action =
+      operation === 'changeAccessMode'
+        ? SecurityAction.CHANGE_ACCESS_MODE
+        : SecurityAction.CHANGE_OWNERSHIP;
     return await this.internalAuthorizeChangeAccessControl(
       {
-        namespace,
-        objects,
+        namespace: params.namespace,
+        objects: params.objects,
       },
-      SecurityAction.CHANGE_OWNERSHIP
+      action
     );
   }
 
@@ -1167,7 +1170,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const spacesToAuthorize = new Set<string>([namespaceString]);
 
     const { typesRequiringAccessControl } =
-      this.accessControlService.getTypesRequiringAccessControlPrivilegeCheck({
+      this.accessControlService.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
       });
@@ -1209,19 +1212,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       status: 'fully_authorized',
       typeMap: new Map(),
     };
-  }
-
-  async authorizeChangeAccessMode<A extends string>({
-    namespace,
-    objects,
-  }: AuthorizeChangeAccessModeParams): Promise<CheckAuthorizationResult<A>> {
-    return await this.internalAuthorizeChangeAccessControl(
-      {
-        namespace,
-        objects,
-      },
-      SecurityAction.CHANGE_ACCESS_MODE
-    );
   }
 
   auditClosePointInTime() {

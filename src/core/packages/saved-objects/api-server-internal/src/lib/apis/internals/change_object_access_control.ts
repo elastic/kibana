@@ -9,7 +9,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import {
-  CheckAuthorizationResult,
   ISavedObjectTypeRegistry,
   ISavedObjectsSecurityExtension,
   ISavedObjectsSerializer,
@@ -86,6 +85,15 @@ export const changeObjectAccessControl = async <T>(
     );
   }
 
+  if (actionType === 'changeOwnership' && owner) {
+    const esUserProfile = await client.security?.getUserProfile({ uid: owner });
+    if (esUserProfile?.errors) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `Failed to get user profile for owner: ${owner}`
+      );
+    }
+  }
+
   let bulkGetRequestIndexCounter = 0;
   const expectedBulkGetResults: Array<
     Either<
@@ -159,18 +167,13 @@ export const changeObjectAccessControl = async <T>(
     };
   });
 
-  let authorizationResult: CheckAuthorizationResult<string> | undefined;
-  if (actionType === 'changeOwnership') {
-    authorizationResult = await securityExtension?.authorizeChangeOwnership({
+  const authorizationResult = await securityExtension?.authorizeChangeAccessControl(
+    {
       namespace,
       objects: authObjects,
-    });
-  } else {
-    authorizationResult = await securityExtension?.authorizeChangeAccessMode({
-      namespace,
-      objects: authObjects,
-    });
-  }
+    },
+    actionType
+  );
 
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;

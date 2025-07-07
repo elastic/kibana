@@ -58,7 +58,7 @@ const typeRegistry: Partial<ISavedObjectTypeRegistry> = {
 
 const accessControlServiceMock = {
   setUserForOperation: jest.fn(),
-  getTypesRequiringAccessControlPrivilegeCheck: jest
+  getTypesRequiringPrivilegeCheck: jest
     .fn()
     .mockReturnValue({ typesRequiringAccessControl: new Set() }),
   enforceAccessControl: jest.fn(),
@@ -6407,7 +6407,7 @@ describe('access control', () => {
     addAuditEventSpy.mockClear();
   });
 
-  describe('#authorizeChangeOwnership', () => {
+  describe('#authorizeChangeAccessControl', () => {
     const objectsWithExistingNamespaces = [
       {
         type: 'dashboard',
@@ -6426,7 +6426,7 @@ describe('access control', () => {
     beforeEach(() => {
       // Reset spies and mocks
       accessControlServiceMock.setUserForOperation.mockClear();
-      accessControlServiceMock.getTypesRequiringAccessControlPrivilegeCheck.mockClear();
+      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockClear();
       accessControlServiceMock.enforceAccessControl.mockClear();
       checkAuthorizationSpy.mockClear();
 
@@ -6440,10 +6440,13 @@ describe('access control', () => {
     test('throws an error when `namespace` is empty', async () => {
       const { securityExtension, checkPrivileges } = setup();
       await expect(
-        securityExtension.authorizeChangeOwnership({
-          namespace: '',
-          objects: objectsWithExistingNamespaces,
-        })
+        securityExtension.authorizeChangeAccessControl(
+          {
+            namespace: '',
+            objects: objectsWithExistingNamespaces,
+          },
+          'changeOwnership'
+        )
       ).rejects.toThrowError('namespace cannot be an empty string');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
@@ -6451,10 +6454,13 @@ describe('access control', () => {
     test('throws an error when objects array is empty', async () => {
       const { securityExtension, checkPrivileges } = setup();
       await expect(
-        securityExtension.authorizeChangeOwnership({
-          namespace,
-          objects: [],
-        })
+        securityExtension.authorizeChangeAccessControl(
+          {
+            namespace,
+            objects: [],
+          },
+          'changeOwnership'
+        )
       ).rejects.toThrowError('No objects specified for manage_access_control authorization');
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
@@ -6462,15 +6468,18 @@ describe('access control', () => {
     test('throws an error when checkAuthorization fails', async () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
-      accessControlServiceMock.getTypesRequiringAccessControlPrivilegeCheck.mockReturnValueOnce({
+      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValueOnce({
         typesRequiringAccessControl: new Set(['dashboard']),
       });
 
       await expect(
-        securityExtension.authorizeChangeOwnership({
-          namespace,
-          objects: objectsWithExistingNamespaces,
-        })
+        securityExtension.authorizeChangeAccessControl(
+          {
+            namespace,
+            objects: objectsWithExistingNamespaces,
+          },
+          'changeOwnership'
+        )
       ).rejects.toThrowError('Oh no!');
     });
 
@@ -6481,15 +6490,16 @@ describe('access control', () => {
 
       setupSimpleCheckPrivsMockResolve(checkPrivileges, 'dashboard', 'manage_access_control', true);
 
-      await securityExtension.authorizeChangeOwnership({
-        namespace,
-        objects: objectsWithExistingNamespaces,
-      });
+      await securityExtension.authorizeChangeAccessControl(
+        {
+          namespace,
+          objects: objectsWithExistingNamespaces,
+        },
+        'changeOwnership'
+      );
       expect(accessControlServiceMock.setUserForOperation).toHaveBeenCalledWith(mockUser);
 
-      expect(
-        accessControlServiceMock.getTypesRequiringAccessControlPrivilegeCheck
-      ).toHaveBeenCalledWith({
+      expect(accessControlServiceMock.getTypesRequiringPrivilegeCheck).toHaveBeenCalledWith({
         objects: objectsWithExistingNamespaces,
         typeRegistry: expect.any(Object),
       });
@@ -6497,7 +6507,7 @@ describe('access control', () => {
 
     test('checks authorization with expected options when types require access control', async () => {
       const { securityExtension } = setup();
-      accessControlServiceMock.getTypesRequiringAccessControlPrivilegeCheck.mockReturnValueOnce({
+      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValueOnce({
         typesRequiringAccessControl: new Set(['dashboard']),
       });
       checkAuthorizationSpy.mockResolvedValue({
@@ -6505,10 +6515,13 @@ describe('access control', () => {
         typeMap: new Map(),
       });
 
-      await securityExtension.authorizeChangeOwnership({
-        namespace,
-        objects: objectsWithExistingNamespaces,
-      });
+      await securityExtension.authorizeChangeAccessControl(
+        {
+          namespace,
+          objects: objectsWithExistingNamespaces,
+        },
+        'changeOwnership'
+      );
 
       expect(checkAuthorizationSpy).toHaveBeenCalledWith({
         types: new Set(['dashboard']),
@@ -6523,7 +6536,7 @@ describe('access control', () => {
 
     test('throws forbidden error when access is unauthorized', async () => {
       const { securityExtension } = setup();
-      accessControlServiceMock.getTypesRequiringAccessControlPrivilegeCheck.mockReturnValueOnce({
+      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValueOnce({
         typesRequiringAccessControl: new Set(['dashboard']),
       });
       checkAuthorizationSpy.mockResolvedValue({
@@ -6532,10 +6545,13 @@ describe('access control', () => {
       });
 
       await expect(
-        securityExtension.authorizeChangeOwnership({
-          namespace,
-          objects: objectsWithExistingNamespaces,
-        })
+        securityExtension.authorizeChangeAccessControl(
+          {
+            namespace,
+            objects: objectsWithExistingNamespaces,
+          },
+          'changeOwnership'
+        )
       ).rejects.toThrow();
 
       expect(addAuditEventSpy).toHaveBeenCalledWith(
@@ -6558,10 +6574,13 @@ describe('access control', () => {
       setupSimpleCheckPrivsMockResolve(checkPrivileges, 'dashboard', 'manage_access_control', true);
 
       expect(
-        await securityExtension.authorizeChangeOwnership({
-          namespace,
-          objects: objectsWithExistingNamespaces,
-        })
+        await securityExtension.authorizeChangeAccessControl(
+          {
+            namespace,
+            objects: objectsWithExistingNamespaces,
+          },
+          'changeOwnership'
+        )
       ).toEqual({
         status: 'fully_authorized',
         typeMap: new Map(),
@@ -6583,10 +6602,13 @@ describe('access control', () => {
       );
 
       expect(
-        await securityExtension.authorizeChangeOwnership({
-          namespace,
-          objects: objectsWithExistingNamespaces,
-        })
+        await securityExtension.authorizeChangeAccessControl(
+          {
+            namespace,
+            objects: objectsWithExistingNamespaces,
+          },
+          'changeOwnership'
+        )
       ).toEqual({
         status: 'fully_authorized',
         typeMap: new Map(),
@@ -6611,10 +6633,13 @@ describe('access control', () => {
       ];
 
       await expect(
-        securityExtension.authorizeChangeOwnership({
-          namespace,
-          objects,
-        })
+        securityExtension.authorizeChangeAccessControl(
+          {
+            namespace,
+            objects,
+          },
+          'changeOwnership'
+        )
       ).rejects.toMatchObject({
         output: {
           payload: {
