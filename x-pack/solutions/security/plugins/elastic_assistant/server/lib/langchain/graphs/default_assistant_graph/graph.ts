@@ -89,7 +89,7 @@ export const getDefaultAssistantGraph = ({
       )
       .addNode(NodeType.GENERATE_CHAT_TITLE, async (state: AgentState) => {
         const model = await createLlmInstance();
-        return generateChatTitle({ ...nodeParams, state, model, telemetry });
+        return generateChatTitle({ ...nodeParams, state, model, telemetryParams, telemetry });
       })
       .addNode(NodeType.PERSIST_CONVERSATION_CHANGES, (state: AgentState) =>
         persistConversationChanges({
@@ -109,7 +109,14 @@ export const getDefaultAssistantGraph = ({
         })
       )
       .addNode(NodeType.TOOLS, (state: AgentState) =>
-        executeTools({ ...nodeParams, config: { signal }, state, tools, telemetry })
+        executeTools({
+          ...nodeParams,
+          config: { signal },
+          state,
+          tools,
+          telemetryParams,
+          telemetry,
+        })
       )
       .addNode(NodeType.RESPOND, async (state: AgentState) => {
         const model = await createLlmInstance();
