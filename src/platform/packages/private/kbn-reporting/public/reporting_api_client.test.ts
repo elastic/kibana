@@ -131,15 +131,21 @@ describe('ReportingAPIClient', () => {
     });
 
     it('should send a get request', async () => {
-      await apiClient.getScheduledReportInfo('scheduled-report-1');
+      await apiClient.getScheduledReportInfo('scheduled-report-1', 2, 50);
 
-      expect(httpClient.get).toHaveBeenCalledWith(
-        expect.stringContaining('/internal/reporting/scheduled/list')
-      );
+      expect(httpClient.get).toHaveBeenCalledWith('/internal/reporting/scheduled/list', {
+        query: { page: 2, size: 50 },
+      });
     });
 
     it('should return a report', async () => {
-      await expect(apiClient.getScheduledReportInfo('scheduled-report-1')).resolves.toEqual({
+      const res = await apiClient.getScheduledReportInfo('scheduled-report-1');
+
+      expect(httpClient.get).toHaveBeenCalledWith('/internal/reporting/scheduled/list', {
+        query: { page: 0, size: 50 },
+      });
+
+      expect(res).toEqual({
         id: 'scheduled-report-1',
         title: 'Scheduled Report 1',
       });
