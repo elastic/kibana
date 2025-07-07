@@ -39,8 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/124681
-    describe.skip('Stat counters', () => {
+    describe('Stat counters', () => {
       beforeEach(async () => {
         const uniqueKey = generateUniqueKey();
 
