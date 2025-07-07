@@ -20,7 +20,7 @@ export const featureFlagUiSettings: Record<string, UiSettingsParams> = {
     name: i18n.translate('xpack.logsShared.newLogsOverviewSettingName', {
       defaultMessage: 'New logs overview',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.logsShared.newLogsOverviewSettingDescription', {
       defaultMessage: '{technicalPreviewLabel} Enable the new logs overview experience.',
 
