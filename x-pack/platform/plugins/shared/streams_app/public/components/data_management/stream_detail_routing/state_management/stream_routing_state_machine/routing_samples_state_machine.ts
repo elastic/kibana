@@ -88,12 +88,9 @@ export const routingSamplesMachine = setup({
     updateCondition: assign((_, params: { condition?: Condition }) => ({
       condition: params.condition,
     })),
-    storeDocuments: assign((_, params: { documents: SampleDocument[] }) => {
-      return {
-        documents: params.documents,
-        documentsError: undefined,
-      };
-    }),
+    storeDocuments: assign((_, params: { documents: SampleDocument[] }) => ({
+      documents: params.documents,
+    })),
     storeDocumentsError: assign((_, params: { error: Error | undefined }) => ({
       documentsError: params.error,
     })),
@@ -180,7 +177,7 @@ export const routingSamplesMachine = setup({
                   actions: [
                     {
                       type: 'storeDocuments',
-                      params: { documents: [] },
+                      params: { documents: [] as SampleDocument[] },
                     },
                     {
                       type: 'storeDocumentsError',

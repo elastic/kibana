@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export function getPercentageFormatter(opts?: { precision: number }): Intl.NumberFormat {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat(i18n.getLocale(), {
     style: 'percent',
     maximumFractionDigits: opts?.precision ?? 1,
   });

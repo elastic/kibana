@@ -97,7 +97,7 @@ const EditingPanel = () => (
         <p>
           {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
             defaultMessage:
-              'You will find here the result from the conditions you have made once you save the changes',
+              'Once you save your changes, the results of your conditions will appear here.',
           })}
         </p>
         <p>
