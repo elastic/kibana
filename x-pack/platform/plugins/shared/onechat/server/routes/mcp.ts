@@ -13,9 +13,9 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/kibana_mcp_http_transport';
 import { ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../../common/constants';
+import { getTechnicalPreviewWarning } from './utils';
 
-const TECHNICAL_PREVIEW_WARNING =
-  'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
+const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic MCP Server');
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';

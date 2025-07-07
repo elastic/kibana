@@ -24,6 +24,9 @@ import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
+import { getTechnicalPreviewWarning } from './utils';
+
+const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Chat API');
 
 export function registerChatRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -79,6 +82,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
       },
       access: 'public',
       summary: 'Converse with an agent',
+      description: TECHNICAL_PREVIEW_WARNING,
       options: {
         availability: {
           stability: 'experimental',
@@ -127,6 +131,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
 
       access: 'public',
       summary: 'Converse with an agent and stream events',
+      description: TECHNICAL_PREVIEW_WARNING,
       options: {
         availability: {
           stability: 'experimental',
