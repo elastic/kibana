@@ -89,7 +89,13 @@ export const getDefaultAssistantGraph = ({
       )
       .addNode(NodeType.GENERATE_CHAT_TITLE, async (state: AgentState) => {
         const model = await createLlmInstance();
-        return generateChatTitle({ ...nodeParams, state, model, telemetry });
+        return generateChatTitle({
+          ...nodeParams,
+          conversationsDataClient: dataClients?.conversationsDataClient,
+          state,
+          model,
+          telemetry,
+        });
       })
       .addNode(NodeType.PERSIST_CONVERSATION_CHANGES, (state: AgentState) =>
         persistConversationChanges({
@@ -115,18 +121,17 @@ export const getDefaultAssistantGraph = ({
         const model = await createLlmInstance();
         return respond({ ...nodeParams, config: { signal }, state, model });
       })
+      .addEdge(NodeType.GET_PERSISTED_CONVERSATION, NodeType.PERSIST_CONVERSATION_CHANGES)
+      .addEdge(NodeType.PERSIST_CONVERSATION_CHANGES, NodeType.AGENT)
       .addNode(NodeType.MODEL_INPUT, (state: AgentState) => modelInput({ ...nodeParams, state }))
       .addEdge(START, NodeType.MODEL_INPUT)
       .addEdge(NodeType.RESPOND, END)
-      .addEdge(NodeType.GENERATE_CHAT_TITLE, NodeType.PERSIST_CONVERSATION_CHANGES)
-      .addEdge(NodeType.PERSIST_CONVERSATION_CHANGES, NodeType.AGENT)
       .addEdge(NodeType.TOOLS, NodeType.AGENT)
       .addConditionalEdges(NodeType.MODEL_INPUT, stepRouter, {
         [NodeType.GET_PERSISTED_CONVERSATION]: NodeType.GET_PERSISTED_CONVERSATION,
         [NodeType.AGENT]: NodeType.AGENT,
       })
       .addConditionalEdges(NodeType.GET_PERSISTED_CONVERSATION, stepRouter, {
-        [NodeType.PERSIST_CONVERSATION_CHANGES]: NodeType.PERSIST_CONVERSATION_CHANGES,
         [NodeType.GENERATE_CHAT_TITLE]: NodeType.GENERATE_CHAT_TITLE,
       })
       .addConditionalEdges(NodeType.AGENT, stepRouter, {

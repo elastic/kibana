@@ -10,6 +10,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../../telemetry/event_based_telemetry';
 import { getPrompt, promptDictionary } from '../../../../prompt';
 import { AgentState, NodeParamsBase } from '../types';
@@ -32,12 +33,14 @@ export const GENERATE_CHAT_TITLE_PROMPT = ({
 export interface GenerateChatTitleParams extends NodeParamsBase {
   state: AgentState;
   model: BaseChatModel;
+  conversationsDataClient?: AIAssistantConversationsDataClient;
   telemetryParams?: TelemetryParams;
   telemetry: AnalyticsServiceSetup;
 }
 
 export async function generateChatTitle({
   actionsClient,
+  conversationsDataClient,
   logger,
   savedObjectsClient,
   state,
@@ -67,6 +70,15 @@ export async function generateChatTitle({
       input: JSON.stringify(state.input, null, 2),
     });
     logger.debug(`chatTitle: ${chatTitle}`);
+
+    if (state.conversation?.title !== chatTitle) {
+      await conversationsDataClient?.updateConversation({
+        conversationUpdateProps: {
+          id: state.conversationId,
+          title: chatTitle,
+        },
+      });
+    }
 
     return {
       chatTitle,

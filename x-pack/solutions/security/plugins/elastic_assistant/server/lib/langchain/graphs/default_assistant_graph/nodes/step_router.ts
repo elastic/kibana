@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Send } from '@langchain/langgraph';
 import { NodeType } from '../constants';
 import { AgentState } from '../types';
 import { NEW_CHAT } from '../../../../../routes/helpers';
@@ -15,7 +16,7 @@ import { NEW_CHAT } from '../../../../../routes/helpers';
  * or to a new node that's been added to the graph.
  * More routers could always be added later when needed.
  */
-export function stepRouter(state: AgentState): string {
+export function stepRouter(state: AgentState): string | Send {
   switch (state.lastNode) {
     case NodeType.AGENT:
       if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
@@ -25,9 +26,12 @@ export function stepRouter(state: AgentState): string {
 
     case NodeType.GET_PERSISTED_CONVERSATION:
       if (state.conversation?.title?.length && state.conversation?.title !== NEW_CHAT) {
-        return NodeType.PERSIST_CONVERSATION_CHANGES;
+        // since empty string is not a valid edge, nothing will happen
+        return '';
       }
-      return NodeType.GENERATE_CHAT_TITLE;
+      return new Send(NodeType.GENERATE_CHAT_TITLE, {
+        ...state,
+      });
 
     case NodeType.MODEL_INPUT:
       return state.conversationId ? NodeType.GET_PERSISTED_CONVERSATION : NodeType.AGENT;
