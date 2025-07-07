@@ -50,7 +50,7 @@ describe('Dependency operation', () => {
 
   it('opens Span link flyout', () => {
     cy.visitKibana(dependencyOperationHref);
-    cy.contains('2 Span links').click();
+    cy.contains('Span links').click();
     cy.contains('Span Details');
     cy.contains('Span B');
   });
