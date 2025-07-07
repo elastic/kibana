@@ -117,7 +117,11 @@ export class CstToAstConverter {
     if (ctx instanceof cst.CompositeQueryContext) {
       return this.fromCompositeQuery(ctx);
     } else {
-      return this.fromQuery(ctx);
+      if (ctx instanceof cst.QueryContext) {
+        return this.fromQuery(ctx);
+      } else {
+        return undefined;
+      }
     }
   }
 
@@ -183,8 +187,15 @@ export class CstToAstConverter {
     return undefined;
   }
 
-  private fromSubqueryExpression(ctx: cst.SubqueryExpressionContext): ast.ESQLAstQueryExpression {
-    return this.fromQuery(ctx.query())!;
+  private fromSubqueryExpression(
+    ctx: cst.SubqueryExpressionContext
+  ): ast.ESQLAstQueryExpression | undefined {
+    const queryCtx = ctx.query();
+    if (queryCtx instanceof cst.QueryContext) {
+      return this.fromQuery(queryCtx);
+    } else {
+      return undefined;
+    }
   }
 
   // ----------------------------------------------------------------- commands
@@ -367,7 +378,9 @@ export class CstToAstConverter {
     const command = this.createCommand('explain', ctx);
     const arg = this.fromSubqueryExpression(ctx.subqueryExpression());
 
-    command.args.push(arg);
+    if (arg) {
+      command.args.push(arg);
+    }
 
     return command;
   }

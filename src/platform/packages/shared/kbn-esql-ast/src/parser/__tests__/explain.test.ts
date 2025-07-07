@@ -12,7 +12,7 @@ import { EsqlQuery } from '../../query';
 describe('EXPLAIN', () => {
   describe('correctly formatted', () => {
     it('parses basic command', () => {
-      const query = 'EXPLAIN [FROM index]';
+      const query = 'EXPLAIN (FROM index)';
       const { ast } = EsqlQuery.fromSrc(query);
 
       expect(ast.commands).toMatchObject([
@@ -35,7 +35,7 @@ describe('EXPLAIN', () => {
     });
 
     it('can parse subqueries recursively', () => {
-      const query = 'EXPLAIN [ EXPLAIN [FROM index] ]';
+      const query = 'EXPLAIN ( EXPLAIN ( FROM index ) )';
       const { ast } = EsqlQuery.fromSrc(query);
 
       expect(ast.commands).toMatchObject([
