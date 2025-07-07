@@ -168,6 +168,7 @@ export class ObservabilityPlugin
       },
       alertDetailsContextualInsightsService,
       alertsLocator,
+      managedOtlpServiceUrl: config.managedOtlpServiceUrl,
     };
   }
 

@@ -27,7 +27,6 @@
     "optionalPlugins": [
       "cloud",
       "usageCollection",
-      "apm"
     ],
     "requiredBundles": [
       "kibanaReact"
