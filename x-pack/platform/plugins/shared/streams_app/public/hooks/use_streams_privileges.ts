@@ -51,7 +51,8 @@ export function useStreamsPrivileges(): StreamsPrivileges {
   const uiEnabled = uiSettings.get<boolean>(OBSERVABILITY_ENABLE_STREAMS_UI);
 
   const significantEventsEnabled = uiSettings.get<boolean>(
-    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS
+    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+    false // Default to false if the setting is not defined or not available
   );
 
   const significantEventsAvailableForTier = pricing.isFeatureAvailable(
