@@ -14,6 +14,14 @@ export const userEntityEngineDescription: EntityDescription = {
   entityType: 'user',
   version: USER_DEFINITION_VERSION,
   identityField: USER_IDENTITY_FIELD,
+  identityFieldMapping: {
+    type: 'keyword',
+    fields: {
+      text: {
+        type: 'match_only_text',
+      },
+    },
+  },
   settings: {
     timestampField: '@timestamp',
   },
