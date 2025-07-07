@@ -22,7 +22,7 @@
         "label": "PricingServiceContract",
         "description": [],
         "signature": [
-          "{ start: () => { isFeatureAvailable: <TFeatureId extends string>(featureId: TFeatureId) => boolean; }; setup: ({ http }: SetupDeps) => Promise<{ registerProductFeatures: (features: ",
+          "{ start: () => { isFeatureAvailable: <TFeatureId extends string>(featureId: TFeatureId) => boolean; }; setup: ({ http }: SetupDeps) => Promise<{ evaluateProductFeatures: () => void; isFeatureAvailable: (featureId: string) => Promise<boolean>; registerProductFeatures: (features: ",
           "PricingProductFeature",
           "[]) => void; }>; preboot: ({ http }: PrebootDeps) => void; }"
         ],
