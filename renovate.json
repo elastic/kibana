@@ -4352,8 +4352,7 @@
         "@opentelemetry/exporter-metrics-otlp-grpc",
         "@opentelemetry/exporter-prometheus",
         "@opentelemetry/exporter-trace-otlp-http",
-        "@opentelemetry/exporter-trace-otlp-proto",
-        "@opentelemetry/sdk-metrics"
+        "@opentelemetry/exporter-trace-otlp-proto"
       ],
       "reviewers": [
         "team:stack-monitoring",
