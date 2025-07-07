@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-
-export default ({ loadTestFile }: FtrProviderContext): void => {
-  loadTestFile(require.resolve('./export_prebuilt_rules'));
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-streamlang'],
 };
