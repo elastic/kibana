@@ -14,6 +14,7 @@ import { createUploadState, type UploadState } from '@kbn/shared-ux-file-upload/
 import { type FileKindBase } from '@kbn/files-plugin/common/types';
 import { useUploadDone } from '../files/use_upload_done';
 import type { MarkdownEditorRef } from './editor';
+import { NO_SIMULTANEOUS_UPLOADS_MESSAGE, UNSUPPORTED_MIME_TYPE_MESSAGE } from './translations';
 
 interface UseImagePasteUploadArgs {
   editorRef: React.ForwardedRef<MarkdownEditorRef | null>;
@@ -21,6 +22,7 @@ interface UseImagePasteUploadArgs {
   caseId?: string;
   owner: string;
   fileKindId: string;
+  setErrors: (errors: string[]) => void;
 }
 
 /**
@@ -50,6 +52,7 @@ export function useImagePasteUpload({
   caseId,
   owner,
   fileKindId,
+  setErrors,
 }: UseImagePasteUploadArgs): {
   isUploading: boolean;
   uploadState: UploadState;
@@ -114,7 +117,7 @@ export function useImagePasteUpload({
           setUploadingFile(null);
           onDone(files);
         }),
-        uploadState.error$.subscribe(() => {
+        uploadState.error$.subscribe((_err) => {
           setIsUploading(false);
         }),
         uploadState.uploading$.subscribe((uploading) => setIsUploading(uploading))
@@ -154,11 +157,20 @@ export function useImagePasteUpload({
     const handlePaste: (e: ClipboardEvent) => void = (e) => {
       const items = e.clipboardData?.items;
       if (!items) return;
+      if (items.length > 1) {
+        setErrors([NO_SIMULTANEOUS_UPLOADS_MESSAGE]);
+        return;
+      }
       for (const item of items) {
         const file = item.getAsFile();
         if (file) {
+          if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+            setErrors([UNSUPPORTED_MIME_TYPE_MESSAGE]);
+            return;
+          }
           uploadState.setFiles([file]);
           if (uploadState.hasFiles()) {
+            setErrors([]);
             uploadState.upload({
               caseIds: [caseId],
               owner,
@@ -173,7 +185,7 @@ export function useImagePasteUpload({
     return () => {
       textarea.removeEventListener('paste', handlePaste);
     };
-  }, [textarea, uploadState, caseId, owner]);
+  }, [textarea, uploadState, caseId, owner, setErrors]);
 
   return { isUploading, uploadState };
 }
