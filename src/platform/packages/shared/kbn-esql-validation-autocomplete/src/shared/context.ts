@@ -17,18 +17,12 @@ import {
   type ESQLCommand,
   type ESQLFunction,
   type ESQLSingleAstItem,
+  FunctionDefinitionTypes,
 } from '@kbn/esql-ast';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
+import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
 import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
-import { FunctionDefinitionTypes } from '../definitions/types';
-import { EDITOR_MARKER } from './constants';
-import {
-  isColumnItem,
-  isSourceItem,
-  pipePrecedesCurrentWord,
-  getFunctionDefinition,
-  isOptionItem,
-  within,
-} from './helpers';
+import { isColumnItem, isSourceItem, getFunctionDefinition, isOptionItem, within } from './helpers';
 
 function findCommand(ast: ESQLAst, offset: number) {
   const commandIndex = ast.findIndex(
