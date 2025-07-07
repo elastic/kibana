@@ -11,12 +11,51 @@ import {
   MessageRole as InferenceMessageRole,
 } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
+import { takeWhile } from 'lodash';
 import { Message, MessageRole } from '.';
+
+export function collapseInternalToolCalls(messages: Message[]) {
+  const collapsed: Message[] = [];
+
+  for (let i = 0; i < messages.length; i++) {
+    const message = messages[i];
+
+    if (message.message.role === MessageRole.User && message.message.name === 'query') {
+      const messagesToCollapse = takeWhile(messages.slice(i + 1), (msg) => {
+        const name = msg.message.name || msg.message.function_call?.name;
+        return name && ['query', 'visualize_query', 'execute_query'].includes(name);
+      });
+
+      if (messagesToCollapse.length) {
+        const content = JSON.parse(message.message.content!);
+        collapsed.push({
+          ...message,
+          message: {
+            ...message.message,
+            content: JSON.stringify({
+              ...content,
+              steps: convertMessagesForInference(messagesToCollapse),
+            }),
+          },
+        });
+
+        i += messagesToCollapse.length;
+        continue;
+      }
+    }
+
+    collapsed.push(message);
+  }
+
+  return collapsed;
+}
 
 export function convertMessagesForInference(messages: Message[]): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];
 
-  messages.forEach((message) => {
+  const collapsedMessages: Message[] = collapseInternalToolCalls(messages);
+
+  collapsedMessages.forEach((message, idx) => {
     if (message.message.role === MessageRole.Assistant) {
       inferenceMessages.push({
         role: InferenceMessageRole.Assistant,
