@@ -35,9 +35,6 @@ const coreStart = coreMock.createStart();
 const dataStart = dataPluginMock.createStartContract();
 const dataViewsStart = dataViewPluginMocks.createStartContract();
 
-// Replace mock to support syntax using `.then()` as used in transform code.
-coreStart.savedObjects.client.find = jest.fn().mockResolvedValue({ savedObjects: [] });
-
 // Replace mock to support tests for `use_index_data`.
 dataStart.search.search = jest.fn(({ params }: IKibanaSearchRequest) => {
   const hits = [];
