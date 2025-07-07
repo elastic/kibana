@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -356,17 +356,18 @@ const OutcomePreviewTable = () => {
     }
   }, [currentDoc, hits]);
 
-  const onRowSelected = useCallback(
-    (rowIndex: number) => {
-      if (currentDoc && hits[rowIndex] === currentDoc) {
-        // If the same row is clicked, we collapse the flyout
-        setExpandedDoc(undefined);
-        return;
-      }
-      setExpandedDoc(hits[rowIndex]);
-    },
-    [currentDoc, hits]
-  );
+  const currentDocRef = useRef<DataTableRecordWithIndex | undefined>(currentDoc);
+  currentDocRef.current = currentDoc;
+  const hitsRef = useRef<DataTableRecordWithIndex[]>(hits);
+  hitsRef.current = hits;
+  const onRowSelected = useCallback((rowIndex: number) => {
+    if (currentDocRef.current && hitsRef.current[rowIndex] === currentDocRef.current) {
+      // If the same row is clicked, we collapse the flyout
+      setExpandedDoc(undefined);
+      return;
+    }
+    setExpandedDoc(hitsRef.current[rowIndex]);
+  }, []);
 
   const docViewerContext = useMemo(
     () => ({
