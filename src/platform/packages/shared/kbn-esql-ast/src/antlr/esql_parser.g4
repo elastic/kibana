@@ -67,6 +67,7 @@ processingCommand
     | {this.isDevVersion()}? insistCommand
     | {this.isDevVersion()}? rerankCommand
     | {this.isDevVersion()}? rrfCommand
+    | {this.isDevVersion()}? fuseCommand
     ;
 
 whereCommand
@@ -307,6 +308,10 @@ forkSubQueryProcessingCommand
 rrfCommand
    : DEV_RRF
    ;
+
+fuseCommand
+    : DEV_FUSE
+    ;
 
 inferenceCommandOptions
     : inferenceCommandOption (COMMA inferenceCommandOption)*
