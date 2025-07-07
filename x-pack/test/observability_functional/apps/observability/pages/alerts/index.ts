@@ -76,8 +76,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     },
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/217739
-  // Failing: See https://github.com/elastic/kibana/issues/217739
+  // FLAKY: https://github.com/elastic/kibana/issues/217739
   describe.skip('Observability alerts >', function () {
     this.tags('includeFirefox');
     const testSubjects = getService('testSubjects');
@@ -231,7 +230,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
               const titleText = await (
                 await observability.alerts.common.getAlertsFlyoutTitle()
               ).getVisibleText();
-              expect(titleText).to.contain('APM Failed Transaction Rate (one)');
+              expect(titleText).to.contain('Failed transaction rate threshold breached');
             });
           });
 

@@ -95,7 +95,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                               />
                             }
                           >
-                            <EuiIcon type="questionInCircle" />
+                            <EuiIcon type="question" />
                           </EuiToolTip>
                         </>
                       }
@@ -132,7 +132,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                               />
                             }
                           >
-                            <EuiIcon type="questionInCircle" />
+                            <EuiIcon type="question" />
                           </EuiToolTip>
                         </>
                       }

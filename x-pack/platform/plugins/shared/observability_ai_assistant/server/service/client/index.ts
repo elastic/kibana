@@ -59,7 +59,7 @@ import {
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
 } from '../../../common/types';
-import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
+import { CONTEXT_FUNCTION_NAME } from '../../functions/context/context';
 import type { ChatFunctionClient } from '../chat_function_client';
 import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { AnonymizationService } from '../anonymization';
@@ -509,7 +509,9 @@ export class ObservabilityAIAssistantClient {
               this.dependencies.inferenceClient
                 .chatComplete({
                   ...options,
+                  temperature: 0.25,
                   stream: true,
+                  maxRetries: 0,
                   messages: convertMessagesForInference(redactedMessages, this.dependencies.logger),
                 })
                 // unredact complete assistant response event
@@ -535,6 +537,8 @@ export class ObservabilityAIAssistantClient {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
         messages: convertMessagesForInference(messages, this.dependencies.logger),
+        temperature: 0.25,
+        maxRetries: 0,
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }

@@ -12,7 +12,13 @@ import {
 import expect from '@kbn/expect';
 import type { Agent } from 'supertest';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import type {
+  GraphRequest,
+  NodeDataModel,
+  EntityNodeDataModel,
+  LabelNodeDataModel,
+  EdgeDataModel,
+} from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
@@ -164,15 +170,23 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: any) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
             'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
+
+          if (node.shape === 'label') {
+            expect(node.documentsData).to.have.length(1);
+            expect(node.documentsData?.[0]).to.have.property(
+              'type',
+              node.shape === 'label' ? 'event' : 'entity'
+            );
+          }
         });
 
-        response.body.edges.forEach((edge: any) => {
+        response.body.edges.forEach((edge: EdgeDataModel) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
             'subdued',
@@ -195,15 +209,23 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: any) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
             node.shape === 'label' ? 'danger' : 'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
+
+          if (node.shape === 'label') {
+            expect(node.documentsData).to.have.length(1);
+            expect(node.documentsData?.[0]).to.have.property(
+              'type',
+              node.shape === 'label' ? 'event' : 'entity'
+            );
+          }
         });
 
-        response.body.edges.forEach((edge: any) => {
+        response.body.edges.forEach((edge: EdgeDataModel) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
             'danger',
@@ -226,15 +248,22 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: any) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
             'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
+          if (node.shape === 'label') {
+            expect(node.documentsData).to.have.length(1);
+            expect(node.documentsData?.[0]).to.have.property(
+              'type',
+              node.shape === 'label' ? 'event' : 'entity'
+            );
+          }
         });
 
-        response.body.edges.forEach((edge: any) => {
+        response.body.edges.forEach((edge: EdgeDataModel) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
             'subdued',
@@ -257,15 +286,22 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: any) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
             node.shape === 'label' ? 'danger' : 'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
+          if (node.shape === 'label') {
+            expect(node.documentsData).to.have.length(1);
+            expect(node.documentsData?.[0]).to.have.property(
+              'type',
+              node.shape === 'label' ? 'event' : 'entity'
+            );
+          }
         });
 
-        response.body.edges.forEach((edge: any) => {
+        response.body.edges.forEach((edge: EdgeDataModel) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
             'danger',
@@ -275,7 +311,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('color of event of failed event should be subdued', async () => {
+      it('color of event of failed event should be primary', async () => {
         const response = await postGraph(supertest, {
           query: {
             originEventIds: [],
@@ -299,16 +335,22 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: any) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
           expect(node).to.have.property('color');
-
           expect(node.color).equal(
             'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
+          if (node.shape === 'label') {
+            expect(node.documentsData).to.have.length(1);
+            expect(node.documentsData?.[0]).to.have.property(
+              'type',
+              node.shape === 'label' ? 'event' : 'entity'
+            );
+          }
         });
 
-        response.body.edges.forEach((edge: any) => {
+        response.body.edges.forEach((edge: EdgeDataModel) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
             'subdued',
@@ -344,17 +386,24 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body.nodes[0].shape).equal('group', 'Groups should be the first nodes');
 
-        response.body.nodes.forEach((node: any) => {
+        response.body.nodes.forEach((node: NodeDataModel) => {
           if (node.shape !== 'group') {
             expect(node).to.have.property('color');
             expect(node.color).equal(
               'primary',
               `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
             );
+            if (node.shape === 'label') {
+              expect(node.documentsData).to.have.length(1);
+              expect(node.documentsData?.[0]).to.have.property(
+                'type',
+                node.shape === 'label' ? 'event' : 'entity'
+              );
+            }
           }
         });
 
-        response.body.edges.forEach((edge: any) => {
+        response.body.edges.forEach((edge: EdgeDataModel) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
             'subdued',
@@ -380,15 +429,22 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(4);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: any) => {
+        response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
             node.shape === 'label' ? 'danger' : 'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
+          if (node.shape === 'label') {
+            expect(node.documentsData).to.have.length(1);
+            expect(node.documentsData?.[0]).to.have.property(
+              'type',
+              node.shape === 'label' ? 'event' : 'entity'
+            );
+          }
         });
 
-        response.body.edges.forEach((edge: any) => {
+        response.body.edges.forEach((edge: EdgeDataModel) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
             'danger',
@@ -422,17 +478,26 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(4);
         expect(response.body).not.to.have.property('messages');
 
-        response.body.nodes.forEach((node: any, idx: number) => {
-          expect(node).to.have.property('color');
-          expect(node.color).equal(
-            idx === 2 // Only the label should be marked as danger (ORDER MATTERS, alerts are expected to be first)
-              ? 'danger'
-              : 'primary',
-            `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
-          );
-        });
+        response.body.nodes.forEach(
+          (node: EntityNodeDataModel | LabelNodeDataModel, idx: number) => {
+            expect(node).to.have.property('color');
+            expect(node.color).equal(
+              idx === 2 // Only the label should be marked as danger (ORDER MATTERS, alerts are expected to be first)
+                ? 'danger'
+                : 'primary',
+              `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
+            );
+            if (node.shape === 'label') {
+              expect(node.documentsData).to.have.length(1);
+              expect(node.documentsData?.[0]).to.have.property(
+                'type',
+                node.shape === 'label' ? 'event' : 'entity'
+              );
+            }
+          }
+        );
 
-        response.body.edges.forEach((edge: any, idx: number) => {
+        response.body.edges.forEach((edge: EdgeDataModel, idx: number) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
             idx <= 1 ? 'danger' : 'subdued',
