@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { createStatefulTestConfig } from '../../default_configs/stateful.config.base';
+import { createStatefulTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/stateful.config.base';
+import { services } from '../../services';
 
-export default createStatefulTestConfig({
+export default createStatefulTestConfig<typeof services>({
+  services,
   testFiles: [require.resolve('./oblt.index.ts')],
   junit: {
     reportName: 'Stateful Observability - Deployment-agnostic API Integration Tests',

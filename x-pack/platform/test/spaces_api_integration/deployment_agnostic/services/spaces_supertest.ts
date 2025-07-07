@@ -14,7 +14,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_conte
 
 export type SupertestWithRoleScopeType = SupertestWithBasicAuth | SupertestWithRoleScope;
 
-export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
+export function SpacesSupertestProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
   const config = getService('config');

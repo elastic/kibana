@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { createServerlessTestConfig } from '../../default_configs/serverless.config.base';
+import { createServerlessTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/serverless.config.base';
+import { services } from '../../services';
 
-export default createServerlessTestConfig({
+export default createServerlessTestConfig<typeof services>({
+  services,
   serverlessProject: 'oblt',
   testFiles: [require.resolve('./oblt.synthetics.index.ts')],
   junit: {

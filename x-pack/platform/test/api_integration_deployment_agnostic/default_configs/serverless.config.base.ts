@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import path from 'path';
+import {
+  fleetPackageRegistryDockerImage,
+  FtrConfigProviderContext,
+  Config,
+  defineDockerServersConfig,
+} from '@kbn/test';
 
-import type { ServerlessProjectType } from '@kbn/es';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import type { Config, FtrConfigProviderContext } from '@kbn/test';
-import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
+import { ServerlessProjectType } from '@kbn/es';
+import path from 'path';
+import { DeploymentAgnosticCommonServices, services } from '../services';
+import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 
-import type { DeploymentAgnosticCommonServices } from '../services';
-import { services } from '../services';
-
-interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
+interface CreateTestConfigOptions<T> {
   serverlessProject: ServerlessProjectType;
   esServerArgs?: string[];
   kbnServerArgs?: string[];
@@ -81,7 +84,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const svlSharedConfig = await readConfigFile(
-      require.resolve('../../../serverless/config.base.ts')
+      require.resolve('@kbn/test-suites-serverless/shared/config.base')
     );
 
     return {
@@ -126,8 +129,25 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
+          ...(options.serverlessProject === 'oblt'
+            ? [
+                // defined in MKI control plane. Necessary for Synthetics app testing
+                '--xpack.uptime.service.password=test',
+                '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+                '--xpack.uptime.service.devUrl=mockDevUrl',
+                '--xpack.uptime.service.manifestUrl=mockDevUrl',
+                `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
+              ]
+            : []),
           ...(dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
+          ...(options.tier && options.tier === 'oblt_logs_essentials'
+            ? [
+                `--pricing.tiers.products=${JSON.stringify([
+                  { name: 'observability', tier: 'logs_essentials' },
+                ])}`,
+              ]
             : []),
         ],
       },
