@@ -42,7 +42,7 @@ import { selectDraftProcessor } from './state_management/stream_enrichment_state
 import { WithUIAttributes } from './types';
 import { AssetImage } from '../../asset_image';
 import { docViewJson } from './doc_viewer_json';
-import { DocViewerContext, docViewDiff } from './doc_viewer_diff';
+import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
 import { DataTableRecordWithIndex, PreviewFlyout } from './preview_flyout';
 
 export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
@@ -368,19 +368,21 @@ const OutcomePreviewTable = () => {
     [currentDoc, hits]
   );
 
-  const originalSample = useMemo(
-    () => (originalSamples && currentDoc ? originalSamples[currentDoc.index] : undefined),
+  const docViewerContext = useMemo(
+    () => ({
+      originalSample: originalSamples && currentDoc ? originalSamples[currentDoc.index] : undefined,
+    }),
     [currentDoc, originalSamples]
   );
 
   useEffect(() => {
-    if (originalSample) {
+    if (docViewerContext.originalSample) {
       // If the original sample is available, enable the diff tab - otherwise disable it
-      docViewsRegistry.enableById('doc_view_diff');
+      docViewsRegistry.enableById(DOC_VIEW_DIFF_ID);
     } else {
-      docViewsRegistry.disableById('doc_view_diff');
+      docViewsRegistry.disableById(DOC_VIEW_DIFF_ID);
     }
-  }, [originalSample, docViewsRegistry]);
+  }, [docViewerContext, docViewsRegistry]);
 
   if (isEmpty(previewDocuments)) {
     return (
@@ -442,7 +444,7 @@ const OutcomePreviewTable = () => {
             : undefined
         }
       />
-      <DocViewerContext.Provider value={{ originalSample }}>
+      <DocViewerContext.Provider value={docViewerContext}>
         <PreviewFlyout currentDoc={currentDoc} hits={hits} setExpandedDoc={setExpandedDoc} />
       </DocViewerContext.Provider>
     </>

@@ -11,8 +11,10 @@ import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { DEFAULT_MARGIN_BOTTOM, getTabContentAvailableHeight } from './get_height';
 
+export const DOC_VIEW_JSON_ID = 'doc_view_json';
+
 export const docViewJson = {
-  id: 'doc_view_json',
+  id: DOC_VIEW_JSON_ID,
   title: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.docViews.json.jsonTitle',
     {

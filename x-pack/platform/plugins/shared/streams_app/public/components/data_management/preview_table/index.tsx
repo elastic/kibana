@@ -156,7 +156,15 @@ export function PreviewTable({
                 onRowSelected(rowIndex);
               }
             }}
+            aria-label={i18n.translate(
+              'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
+              {
+                defaultMessage: 'Select row {rowIndex}',
+                values: { rowIndex: rowIndex + 1 },
+              }
+            )}
             iconType={selectedRowIndex === rowIndex && selectableRow ? 'minimize' : 'expand'}
+            color={selectedRowIndex === rowIndex && selectableRow ? 'primary' : 'text'}
           />
         ),
       },
@@ -181,7 +189,7 @@ export function PreviewTable({
           ? {
               rowClasses: {
                 [String(selectedRowIndex)]: css`
-                  background-color: ${theme.colors.backgroundBasePrimary};
+                  background-color: ${theme.colors.highlight};
                 `,
               },
             }

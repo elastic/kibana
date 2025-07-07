@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { DataTableRecord } from '@kbn/discover-utils';
 import useAsync from 'react-use/lib/useAsync';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSimulatorSelector } from './state_management/stream_enrichment_state_machine';
-import { selectOriginalPreviewRecords } from './state_management/simulation_state_machine/selectors';
 import { docViewJson } from './doc_viewer_json';
 import { docViewDiff } from './doc_viewer_diff';
 
@@ -32,10 +31,6 @@ export const PreviewFlyout = ({
   setExpandedDoc: (doc?: DataTableRecordWithIndex) => void;
 }) => {
   const streamName = useSimulatorSelector((state) => state.context.streamName);
-  const originalSamples = useSimulatorSelector((snapshot) =>
-    selectOriginalPreviewRecords(snapshot.context)
-  );
-
   const { core, dependencies } = useKibana();
   const { data, unifiedDocViewer } = dependencies.start;
 
@@ -56,21 +51,6 @@ export const PreviewFlyout = ({
     })
   );
 
-  const additionalDocViewerProps = useMemo(() => {
-    return {
-      originalSample: originalSamples && currentDoc ? originalSamples[currentDoc.index] : undefined,
-    };
-  }, [currentDoc, originalSamples]);
-
-  useEffect(() => {
-    if (additionalDocViewerProps.originalSample) {
-      // If the original sample is available, enable the diff tab - otherwise disable it
-      docViewsRegistry.enableById('doc_view_diff');
-    } else {
-      docViewsRegistry.disableById('doc_view_diff');
-    }
-  }, [additionalDocViewerProps.originalSample, docViewsRegistry]);
-
   return (
     currentDoc &&
     streamDataView && (
@@ -83,7 +63,6 @@ export const PreviewFlyout = ({
         }}
         isEsqlQuery={false}
         hit={currentDoc}
-        additionalDocViewerProps={additionalDocViewerProps}
         hits={hits}
         dataView={streamDataView}
         docViewsRegistry={docViewsRegistry}

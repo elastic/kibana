@@ -45,8 +45,10 @@ function orderObjectKeys(obj: unknown): unknown {
   return obj;
 }
 
+export const DOC_VIEW_DIFF_ID = 'doc_view_diff';
+
 export const docViewDiff = {
-  id: 'doc_view_diff',
+  id: DOC_VIEW_DIFF_ID,
   title: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.docViews.diff.diffTitle',
     {
