@@ -22,6 +22,8 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbnHeaderOffsetWithBanner: calc(var(--kbnHeaderBannerHeight) + var(--kbnHeaderOffset));
     // height of the action menu in the header in serverless projects
     --kbnProjectHeaderAppActionMenuHeight: ${euiTheme.base * 3}px;
+    // total height of all fixed headers + the sticky action menu toolbar, dynamically updated depending on the presence of the elements
+    --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0px);
   }
 
   #kibana-body {
