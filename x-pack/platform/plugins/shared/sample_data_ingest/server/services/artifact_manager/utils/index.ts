@@ -10,3 +10,10 @@ export { fetchArtifactVersions } from './fetch_artifact_versions';
 export { download } from './download';
 export { openZipArchive } from './open_zip_archive';
 export { loadMappingFile, loadManifestFile } from './archive_accessors';
+export {
+  validatePath,
+  validateUrl,
+  validateMimeType,
+  validateFileSignature,
+  type MimeType,
+} from './validators';

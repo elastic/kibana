@@ -12,6 +12,7 @@ import * as Path from 'path';
 import { URL } from 'url';
 import { parseString } from 'xml2js';
 import { resolveLocalPath } from './resolve_local_path';
+import { validateMimeType, validateUrl } from './validators';
 
 type ArtifactAvailableVersions = Record<ProductName, string[]>;
 
@@ -20,6 +21,8 @@ export const fetchArtifactVersions = async ({
 }: {
   artifactRepositoryUrl: string;
 }): Promise<ArtifactAvailableVersions> => {
+  validateUrl(artifactRepositoryUrl);
+
   const parsedUrl = new URL(artifactRepositoryUrl);
 
   let xml: string;
@@ -29,6 +32,8 @@ export const fetchArtifactVersions = async ({
   } else {
     const res = await fetch(`${artifactRepositoryUrl}?max-keys=1000`);
     xml = await res.text();
+
+    validateMimeType(res.headers.get('content-type'), 'application/xml');
   }
 
   return new Promise((resolve, reject) => {
