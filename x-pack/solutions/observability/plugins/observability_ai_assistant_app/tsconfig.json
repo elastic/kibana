@@ -85,7 +85,7 @@
     "@kbn/i18n-react",
     "@kbn/utility-types",
     "@kbn/alerts-ui-shared",
-    "@kbn/traced-es-client"
+    "@kbn/traced-es-client",
   ],
   "exclude": ["target/**/*"]
 }
