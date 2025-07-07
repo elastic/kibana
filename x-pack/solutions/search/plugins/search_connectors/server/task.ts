@@ -167,7 +167,6 @@ export class AgentlessConnectorDeploymentsSyncService {
   ): Promise<TaskInstance | null> {
     this.logger.info(`Scheduling ${AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_ID}`);
     try {
-      await taskManager.removeIfExists(AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_ID);
       const taskInstance = await taskManager.ensureScheduled({
         id: AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_ID,
         taskType: AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE,
