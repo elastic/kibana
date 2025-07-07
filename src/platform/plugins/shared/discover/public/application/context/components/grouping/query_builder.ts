@@ -40,7 +40,7 @@ export const getDataGroupingQuery = ({
 }: DataGroupingQueryParams) =>
   getGroupingQuery({
     additionalFilters: additionalFilters ?? [],
-    from,
+    // from,
     groupByField: selectedGroup,
     statsAggregations: !isNoneGroup([selectedGroup])
       ? getAggregationsByGroupField(selectedGroup)
@@ -50,7 +50,7 @@ export const getDataGroupingQuery = ({
     uniqueValue,
     size: pageSize,
     sort: [{ unitsCount: { order: 'desc' } }],
-    to,
+    // to,
   });
 
 const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
