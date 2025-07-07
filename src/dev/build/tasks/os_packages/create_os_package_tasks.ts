@@ -214,7 +214,6 @@ export const CreateDockerCloudARM64: Task = {
   },
 };
 
-
 const dockerFipsDesc = 'Creating Docker FIPS image';
 export const CreateDockerFIPSX64: Task = {
   description: `${dockerFipsDesc} ${X64}`,
