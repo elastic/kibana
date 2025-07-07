@@ -20,6 +20,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AgentProfile, ToolSelection } from '@kbn/onechat-common';
 import { useForm, Controller, FormProvider } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
@@ -35,13 +36,7 @@ export interface AgentFormProps {
   agentId?: string;
 }
 
-interface AgentFormData {
-  id: string;
-  name: string;
-  description: string;
-  customInstructions: string;
-  toolSelection: any[];
-}
+type AgentFormData = AgentProfile;
 
 export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
   const { navigateToOnechatUrl } = useNavigation();
@@ -173,7 +168,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
     submit(data);
   };
 
-  const handleToolsChange = (newToolSelection: any[]) => {
+  const handleToolsChange = (newToolSelection: ToolSelection[]) => {
     setValue('toolSelection', newToolSelection);
   };
 
