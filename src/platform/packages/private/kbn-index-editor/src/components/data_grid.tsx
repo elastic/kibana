@@ -12,14 +12,16 @@ import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { css } from '@emotion/react';
 import {
   CustomCellRenderer,
   DataLoadingState,
   UnifiedDataTable,
   type SortOrder,
 } from '@kbn/unified-data-table';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { difference, intersection } from 'lodash';
 import { KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './value_input_control';
 
@@ -62,6 +64,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
   );
+  const hiddenColumns = useRef<string[]>([]);
   const [rowHeight, setRowHeight] = useState<number>(
     props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
   );
@@ -73,9 +76,38 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     col: null,
   });
 
-  const onSetColumns = useCallback((columns: string[]) => {
-    setActiveColumns(columns);
-  }, []);
+  const onSetColumns = useCallback(
+    (columns: string[]) => {
+      setActiveColumns(columns);
+
+      const columnsDiff = props.columns
+        .map((c) => c.name)
+        .filter((name) => !columns.includes(name));
+      if (columnsDiff.length !== hiddenColumns.current.length) {
+        hiddenColumns.current = columnsDiff;
+      }
+    },
+    [props.columns]
+  );
+
+  // Visible columns are calculated based on 3 sources:
+  // - The columns provided by the props, they provide the initial columns set, and any new column added by the user.
+  // - The activeColumns state, which is the list of columns that are currently visible in the grid. But most importantly, it preserves the order of the columns.
+  // - The hiddenColumns ref, which tracks the columns that are currently hidden.
+  // The visible columns are determined by:
+  // - Filter out hidden columns from the props.columns
+  // - Ensure the order is preserved based on activeColumns
+  // - Add any new columns that are not in the preserved order to the beginning
+  const visibleColumns = useMemo(() => {
+    const currentColumnNames = props.columns
+      .map((c) => c.name)
+      .filter((name) => !hiddenColumns.current.includes(name));
+
+    const preservedOrder = intersection(activeColumns, currentColumnNames);
+    const newColumns = difference(currentColumnNames, preservedOrder);
+
+    return [...newColumns, ...preservedOrder];
+  }, [props.columns, hiddenColumns, activeColumns]);
 
   const columnsMeta = useMemo(() => {
     return props.columns.reduce((acc, column) => {
@@ -124,16 +156,16 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [rows, props.columns, editingCell, setEditingCell, onValueChange, savingDocs]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
-    return activeColumns.reduce((acc, columnId) => {
+    return visibleColumns.reduce((acc, columnId) => {
       acc[columnId] = CellValueRenderer;
       return acc;
     }, {} as CustomCellRenderer);
-  }, [CellValueRenderer, activeColumns]);
+  }, [CellValueRenderer, visibleColumns]);
 
   return (
     <>
       <UnifiedDataTable
-        columns={activeColumns}
+        columns={visibleColumns}
         rows={rows}
         columnsMeta={columnsMeta}
         services={services}
@@ -167,6 +199,14 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         controlColumnIds={props.controlColumnIds}
         disableCellActions
         disableCellPopover
+        css={css`
+          .euiDataGridRowCell__content > div,
+          .unifiedDataTable__cellValue {
+            height: 100%;
+            width: 100%;
+            display: block;
+          }
+        `}
       />
     </>
   );

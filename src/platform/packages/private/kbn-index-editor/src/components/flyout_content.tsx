@@ -17,6 +17,7 @@ import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
+import { UnsavedChangesModal } from './unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { CustomPanel } from './custom_panel';
 import { FileDropzone } from './file_drop_zone';
@@ -103,7 +104,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
 
                 {dataViewColumns ? (
                   <EuiFlexItem grow={false}>
-                    <RowColumnCreator columns={dataViewColumns} />
+                    <RowColumnCreator />
                   </EuiFlexItem>
                 ) : null}
 
@@ -125,6 +126,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
           <FlyoutFooter indexUpdateService={deps.indexUpdateService} onClose={props.onClose} />
         </FileUploadContext.Provider>
       </CellActionsProvider>
+      <UnsavedChangesModal onClose={props.onClose} />
     </KibanaContextProvider>
   );
 };

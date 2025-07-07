@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
-import { distinctUntilChanged, from, skip, takeUntil } from 'rxjs';
+import { distinctUntilChanged, firstValueFrom, from, skip, takeUntil } from 'rxjs';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 
 export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentContext) {
@@ -38,11 +38,23 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
     };
   });
 
-  const onFlyoutClose = () => {
+  const onFlyoutClose = async () => {
+    indexUpdateService.discardUnsavedChanges();
+
+    const pendingColumnsToBeSaved = await firstValueFrom(
+      indexUpdateService.pendingColumnsToBeSaved$
+    );
+
+    if (pendingColumnsToBeSaved.length) {
+      deps.indexUpdateService.setExitAttemptWithUnsavedFields(true);
+      return;
+    }
+
     props.onClose?.({
       indexName: indexUpdateService.getIndexName()!,
       indexCreatedDuringFlyout: props.doesIndexExist ? false : indexUpdateService.getIndexCreated(),
     });
+
     indexUpdateService.destroy();
     flyoutSession.close();
   };
