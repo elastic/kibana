@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInServerlessMKI Prebuilt rules installation review', function () {
+  describe('@ess @serverless @skipInServerlessMKI Prebuilt rules installation review', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
