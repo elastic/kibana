@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { AgentType, PlainIdAgentIdentifier, AgentDescriptor } from '@kbn/onechat-common/agents';
+import { AgentType, AgentDescriptor } from '@kbn/onechat-common/agents';
 import type { RunAgentParams, RunAgentReturn } from './runner';
 import { ConversationalAgentParams, ConversationalAgentResponse, AgentProvider } from './provider';
 
 export interface ExecutableAgentBase<TType extends AgentType, TParams, TResult>
   extends AgentDescriptor {
   type: TType;
-  agentId: PlainIdAgentIdentifier;
-  providerId: string;
-  description: string;
   execute: ExecutableAgentHandlerFn<TParams, TResult>;
 }
 

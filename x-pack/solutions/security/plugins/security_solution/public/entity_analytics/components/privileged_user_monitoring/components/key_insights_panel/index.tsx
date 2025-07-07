@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 import { ActivePrivilegedUsersTile } from './active_privileged_users_tile';
@@ -17,58 +16,41 @@ import { GrantedRightsTile } from './granted_rights_tile';
 import { AccountSwitchesTile } from './account_switches_tile';
 import { AuthenticationsTile } from './authentications_tile';
 
-const tileStyles = css`
-  border: 1px solid #d3dae6;
-  border-radius: 6px;
-  padding: 12px;
-  height: 100%;
-`;
-
 export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: DataViewSpec }> = ({
   spaceId,
   sourcerDataView,
 }) => {
   return (
-    <EuiFlexGroup
-      wrap
-      css={css`
-        width: 100%;
-        gap: 16px;
-        & > * {
-          min-width: calc(33.33% - 11px) !important;
-          max-width: calc(33.33% - 11px) !important;
-        }
-      `}
-    >
-      <EuiFlexItem grow={false}>
-        <div css={tileStyles}>
+    <EuiFlexGroup wrap gutterSize="l" responsive={false}>
+      <EuiFlexItem>
+        <EuiPanel hasBorder>
           <ActivePrivilegedUsersTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
-        </div>
+        </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <div css={tileStyles}>
+      <EuiFlexItem>
+        <EuiPanel hasBorder>
           <AlertsTriggeredTile spaceId={spaceId} />
-        </div>
+        </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <div css={tileStyles}>
+      <EuiFlexItem>
+        <EuiPanel hasBorder>
           <AnomaliesDetectedTile spaceId={spaceId} />
-        </div>
+        </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <div css={tileStyles}>
+      <EuiFlexItem>
+        <EuiPanel hasBorder>
           <GrantedRightsTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
-        </div>
+        </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <div css={tileStyles}>
+      <EuiFlexItem>
+        <EuiPanel hasBorder>
           <AccountSwitchesTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
-        </div>
+        </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <div css={tileStyles}>
+      <EuiFlexItem>
+        <EuiPanel hasBorder>
           <AuthenticationsTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
-        </div>
+        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

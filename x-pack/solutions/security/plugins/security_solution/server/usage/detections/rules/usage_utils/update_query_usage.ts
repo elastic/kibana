@@ -50,6 +50,9 @@ export const updateQueryUsage = ({
       ? usage[ruleType].legacy_investigation_fields + 1
       : usage[ruleType].legacy_investigation_fields,
     alert_suppression: updateAlertSuppressionUsage({ usage: usage[ruleType], detectionRuleMetric }),
+    has_exceptions: detectionRuleMetric.has_exceptions
+      ? usage[ruleType].has_exceptions + 1
+      : usage[ruleType].has_exceptions,
     response_actions: updateResponseActionsUsage({
       usage: usage[ruleType],
       detectionRuleMetric,
