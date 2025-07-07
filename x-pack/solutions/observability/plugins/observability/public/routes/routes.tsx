@@ -83,6 +83,20 @@ const completeRoutes = {
     params: {},
     exact: true,
   },
+  [ANNOTATIONS_PATH]: {
+    handler: () => {
+      return <AnnotationsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [EXPLORATORY_VIEW_PATH]: {
+    handler: () => {
+      return <SimpleRedirect to="/" redirectToApp="exploratory-view" />;
+    },
+    params: {},
+    exact: true,
+  },
   [CASES_PATH]: {
     handler: () => {
       return <CasesPage />;
@@ -108,13 +122,6 @@ const routes = {
   [ALERTS_PATH]: {
     handler: () => {
       return <AlertsPage />;
-    },
-    params: {},
-    exact: true,
-  },
-  [EXPLORATORY_VIEW_PATH]: {
-    handler: () => {
-      return <SimpleRedirect to="/" redirectToApp="exploratory-view" />;
     },
     params: {},
     exact: true,
@@ -192,13 +199,6 @@ const routes = {
   [OLD_SLO_EDIT_PATH]: {
     handler: () => {
       return <SimpleRedirect to="/:sloId" redirectToApp="slo" />;
-    },
-    params: {},
-    exact: true,
-  },
-  [ANNOTATIONS_PATH]: {
-    handler: () => {
-      return <AnnotationsPage />;
     },
     params: {},
     exact: true,
