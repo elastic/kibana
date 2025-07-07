@@ -7,7 +7,9 @@
 
 import { renderHook } from '@testing-library/react';
 import { useCasePageViewEbt } from './use_case_page_view_ebt';
-import { CASE_PAGE_VIEW_EVENT_TYPE } from '../../../common/constants';
+import { CASE_PAGE_VIEW_EVENT_TYPE, OBSERVABILITY_OWNER } from '../../../common/constants';
+import { useKibana } from '../../common/lib/kibana';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 // Mocks
 jest.mock('../../common/lib/kibana', () => ({
@@ -17,13 +19,6 @@ jest.mock('../../common/lib/kibana', () => ({
 jest.mock('../cases_context/use_cases_context', () => ({
   useCasesContext: jest.fn(),
 }));
-
-jest.mock('../../files', () => ({
-  isRegisteredOwner: jest.fn().mockReturnValue(true),
-}));
-
-import { useKibana } from '../../common/lib/kibana';
-import { useCasesContext } from '../cases_context/use_cases_context';
 
 const getMockServices = (reportEvent: jest.Mock) => ({
   services: {
@@ -37,12 +32,24 @@ describe('useCasePageViewEbt', () => {
   it('reports analytics event with valid owner', () => {
     const reportEvent = jest.fn();
     (useKibana as jest.Mock).mockReturnValue(getMockServices(reportEvent));
-    (useCasesContext as jest.Mock).mockReturnValue({ owner: ['observability'] });
+    (useCasesContext as jest.Mock).mockReturnValue({ owner: [OBSERVABILITY_OWNER] });
 
     renderHook(() => useCasePageViewEbt());
 
     expect(reportEvent).toHaveBeenCalledWith(CASE_PAGE_VIEW_EVENT_TYPE, {
-      owner: 'observability',
+      owner: OBSERVABILITY_OWNER,
+    });
+  });
+
+  it('reports analytics event with invalid owner', () => {
+    const reportEvent = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue(getMockServices(reportEvent));
+    (useCasesContext as jest.Mock).mockReturnValue({ owner: ['invalid'] });
+
+    renderHook(() => useCasePageViewEbt());
+
+    expect(reportEvent).toHaveBeenCalledWith(CASE_PAGE_VIEW_EVENT_TYPE, {
+      owner: 'unknown',
     });
   });
 });
