@@ -63,13 +63,15 @@ describe('ReportingAPIClient', () => {
     });
 
     it('should send job IDs in query parameters', async () => {
-      await apiClient.list(1, ['123', '456']);
+      await apiClient.list(1, 10, ['123', '456']);
 
       expect(httpClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/list'),
         expect.objectContaining({
+          asSystemRequest: true,
           query: {
             page: 1,
+            size: 10,
             ids: '123,456',
           },
         })
