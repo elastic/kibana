@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { SourceConfigurationSettings } from './settings/source_configuration_settings';
 
 export const MetricsSettingsPage = () => {
   const { application, http } = useKibana().services;
   return (
-    <EuiErrorBoundary>
+    <KibanaErrorBoundary>
       <SourceConfigurationSettings
         shouldAllowEdit={application?.capabilities?.infrastructure?.configureSource as boolean}
         http={http}
       />
-    </EuiErrorBoundary>
+    </KibanaErrorBoundary>
   );
 };
