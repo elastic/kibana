@@ -21,7 +21,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const config = getService('config');
   const basic = config.get('esTestCluster.license') === 'basic';
-  
 
   describe('@ess @serverless @skipInServerlessMKI Prebuilt rules installation review', function () {
     if (basic) {
