@@ -995,6 +995,8 @@ x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consume
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/platform/test/functional_execution_context/plugins/alerts @elastic/kibana-core
+x-pack/platform/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
+x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
@@ -1118,8 +1120,6 @@ x-pack/solutions/security/test
 x-pack/test
 x-pack/test_serverless
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
-x-pack/platform/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
-x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
