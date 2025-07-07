@@ -716,4 +716,187 @@ describe('Data streams deprecation', () => {
       });
     });
   });
+  describe('delete modal', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
+        MOCK_DS_DEPRECATION_READ_ONLY.index!,
+        defaultMigrationResponse
+      );
+      httpRequestsMockHelpers.setDataStreamMetadataResponse(
+        MOCK_DS_DEPRECATION_READ_ONLY.index!,
+        defaultMetaResponse
+      );
+
+      await act(async () => {
+        testBed = await setupElasticsearchPage(httpSetup);
+      });
+
+      testBed.component.update();
+    });
+
+    it('renders a modal with data stream confirm step for delete', async () => {
+      const { actions, find, exists } = testBed;
+
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'dataStream',
+        index: 1,
+        action: 'delete',
+      });
+
+      expect(exists('updateDataStreamModal')).toBe(true);
+      expect(find('dataStreamModalTitle').text()).toContain('Delete data stream');
+
+      expect(exists('startDeleteButton')).toBe(true);
+      expect(find('startDeleteButton').props().disabled).toBe(true);
+      await actions.reindexDeprecationFlyout.fillDeleteInputText('bad input');
+      expect(find('startDeleteButton').props().disabled).toBe(true);
+      await actions.reindexDeprecationFlyout.fillDeleteInputText('delete');
+
+      expect(find('startDeleteButton').props().disabled).toBe(false);
+    });
+    describe('read-only progress', () => {
+      it('pending', async () => {
+        httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
+          MOCK_DS_DEPRECATION_READ_ONLY.index!,
+          {
+            hasRequiredPrivileges: true,
+            migrationOp: {
+              resolutionType: 'delete',
+              status: DataStreamMigrationStatus.inProgress,
+              taskPercComplete: 1,
+              progressDetails: {
+                startTimeMs: Date.now() - 10000,
+                successCount: 0,
+                pendingCount: 1,
+                inProgressCount: 0,
+                errorsCount: 0,
+              },
+            },
+            warnings: [
+              {
+                warningType: 'incompatibleDataStream',
+                resolutionType: 'readonly',
+              },
+            ],
+          }
+        );
+        await act(async () => {
+          testBed = await setupElasticsearchPage(httpSetup);
+        });
+
+        testBed.component.update();
+        const { actions, find, exists } = testBed;
+
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'delete',
+        });
+
+        expect(find('dataStreamModalTitle').text()).toContain('Deleting data stream');
+        expect(exists('dataStreamMigrationChecklistModal')).toBe(true);
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          `Deleting ${MOCK_DS_DEPRECATION_READ_ONLY.index} in progress…`
+        );
+        expect(exists('startDataStreamMigrationButton')).toBe(true);
+        expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
+        expect(exists('cancelDataStreamMigrationButton')).toBe(false);
+      });
+      it('deleting in progress', async () => {
+        httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
+          MOCK_DS_DEPRECATION_READ_ONLY.index!,
+          {
+            hasRequiredPrivileges: true,
+            migrationOp: {
+              resolutionType: 'delete',
+              status: DataStreamMigrationStatus.inProgress,
+              taskPercComplete: 1,
+              progressDetails: {
+                startTimeMs: Date.now() - 10000, // now - 10 seconds
+                successCount: 0,
+                pendingCount: 0,
+                inProgressCount: 1,
+                errorsCount: 0,
+              },
+            },
+            warnings: [
+              {
+                warningType: 'incompatibleDataStream',
+                resolutionType: 'readonly',
+              },
+            ],
+          }
+        );
+        await act(async () => {
+          testBed = await setupElasticsearchPage(httpSetup);
+        });
+
+        testBed.component.update();
+        const { actions, find, exists } = testBed;
+
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'delete',
+        });
+
+        expect(find('dataStreamModalTitle').text()).toContain('Deleting data stream');
+        expect(exists('dataStreamMigrationChecklistModal')).toBe(true);
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          `Deleting ${MOCK_DS_DEPRECATION_READ_ONLY.index} in progress…`
+        );
+        expect(exists('startDataStreamMigrationButton')).toBe(true);
+        expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
+      });
+      it('delete success', async () => {
+        httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
+          MOCK_DS_DEPRECATION_READ_ONLY.index!,
+          {
+            hasRequiredPrivileges: true,
+            migrationOp: {
+              resolutionType: 'delete',
+              status: DataStreamMigrationStatus.completed,
+              taskPercComplete: 1,
+              progressDetails: {
+                startTimeMs: Date.now() - 10000, // now - 10 seconds
+                successCount: 1,
+                pendingCount: 0,
+                inProgressCount: 0,
+                errorsCount: 0,
+              },
+            },
+            warnings: [
+              {
+                warningType: 'incompatibleDataStream',
+                resolutionType: 'readonly',
+              },
+            ],
+          }
+        );
+        await act(async () => {
+          testBed = await setupElasticsearchPage(httpSetup);
+        });
+
+        testBed.component.update();
+        const { actions, find, exists } = testBed;
+
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'delete',
+        });
+        await act(async () => {
+          jest.advanceTimersByTime(1500); // advance time to simulate completion
+        });
+        testBed.component.update();
+
+        expect(exists('updateDataStreamModal')).toBe(true);
+        expect(find('dataStreamModalTitle').text()).toContain('Deleting data stream completed');
+        expect(exists('dataStreamMigrationCompletedDescription')).toBe(true);
+        expect(find('dataStreamMigrationCompletedDescription').text()).toContain(
+          `Success! Data stream ${MOCK_DS_DEPRECATION_READ_ONLY.index} successfully deleted.`
+        );
+      });
+    });
+  });
 });
