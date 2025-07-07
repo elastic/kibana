@@ -53,7 +53,7 @@ describe('loadRuleTypes', () => {
               "read": true,
             },
           },
-          "autoRecoverAlerts": undefined,
+          "autoRecoverAlerts": false,
           "category": "management",
           "defaultActionGroupId": "default",
           "enabledInLicense": true,
@@ -192,6 +192,7 @@ function getApiRuleType() {
         },
       ],
     },
+    auto_recover_alerts: false,
     authorized_consumers: {
       alerts: {
         read: true,
@@ -243,6 +244,7 @@ function getRuleType(): RuleType {
         },
       ],
     },
+    autoRecoverAlerts: false,
     authorizedConsumers: {
       alerts: {
         read: true,

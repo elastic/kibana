@@ -1042,6 +1042,7 @@ describe('Create Lifecycle', () => {
           context: 'test',
           mappings: { fieldMap: { foo: { type: 'keyword', required: false } } },
         },
+        autoRecoverAlerts: false,
       });
       const result = registry.list();
       expect(result).toMatchInlineSnapshot(`
@@ -1073,7 +1074,7 @@ describe('Create Lifecycle', () => {
                 },
               },
             },
-            "autoRecoverAlerts": undefined,
+            "autoRecoverAlerts": false,
             "category": "test",
             "defaultActionGroupId": "testActionGroup",
             "defaultScheduleInterval": undefined,
