@@ -10,7 +10,6 @@ import { UserAtSpaceScenarios } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
