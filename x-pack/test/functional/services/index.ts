@@ -59,17 +59,13 @@ import { CanvasElementProvider } from './canvas_element';
 // @ts-ignore not ts yet
 // @ts-ignore not ts yet
 import { UptimeProvider } from './uptime';
-import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
-import { LogsUiProvider } from './logs_ui';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
-import { ObservabilityProvider } from './observability';
 import { CasesServiceProvider } from './cases';
 import { ActionsServiceProvider } from './actions';
 import { RulesServiceProvider } from './rules';
 import { AiopsProvider } from './aiops';
 import { DataStreamProvider } from './data_stream';
-import { SloUiServiceProvider } from './slo';
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
 // only the built-in services will be available
@@ -117,20 +113,15 @@ export const services = {
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
   uptime: UptimeProvider,
-  infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
-  logsUi: LogsUiProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
   sampleData: SampleDataServiceProvider,
   searchSessions: SearchSessionsService,
-  observability: ObservabilityProvider,
   actions: ActionsServiceProvider,
   rules: RulesServiceProvider,
   cases: CasesServiceProvider,
   aiops: AiopsProvider,
   dataStreams: DataStreamProvider,
-  slo: kibanaXPackApiIntegrationServices.slo,
   dataViewApi: kibanaXPackApiIntegrationServices.dataViewApi,
-  sloUi: SloUiServiceProvider,
 };

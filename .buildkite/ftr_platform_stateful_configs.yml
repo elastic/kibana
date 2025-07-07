@@ -218,7 +218,6 @@ enabled:
   - x-pack/test/functional/apps/home/config.ts
   - x-pack/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/test/functional/apps/index_management/config.ts
-  - x-pack/test/functional/apps/infra/config.ts
   - x-pack/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/test/functional/apps/lens/group1/config.ts
   - x-pack/test/functional/apps/lens/group2/config.ts
@@ -271,7 +270,6 @@ enabled:
   - x-pack/platform/test/functional/apps/watcher/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/test/functional/config.ccs.ts
-  - x-pack/test/functional/config.firefox.js
   - x-pack/platform/test/functional/config.firefox.ts
   - x-pack/platform/test/functional/config.upgrade_assistant.ts
   - x-pack/platform/test/functional_cloud/config.ts

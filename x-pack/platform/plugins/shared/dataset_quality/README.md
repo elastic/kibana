@@ -87,39 +87,47 @@ export set FLEET_PACKAGE_REGISTRY_PORT=12345
 To unset the variable, and run the tests against the real endpoint again, execute
 
 ```
-unset FLEET_PACKAGE_REGISTRY_PORT 
+unset FLEET_PACKAGE_REGISTRY_PORT
 ```
 
 ### Functional Tests
 
 #### Stateful
+
 ##### FTR Server
+
 ```
-yarn test:ftr:server --config ./x-pack/test/functional/apps/dataset_quality/config.ts
+yarn test:ftr:server --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts
 ```
 
 ##### FTR Runner
+
 ```
-yarn test:ftr:runner --config ./x-pack/test/functional/apps/dataset_quality/config.ts --include ./x-pack/test/functional/apps/dataset_quality/index.ts
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts --include ./x-pack/solutions/observability/test/functional/apps/dataset_quality/index.ts
 ```
 
 ##### Running Individual Tests
+
 ```
-yarn test:ftr:runner --config ./x-pack/test/functional/apps/dataset_quality/config.ts --include ./x-pack/test/functional/apps/dataset_quality/$1
+yarn test:ftr:runner --config ./x-pack/solutions/observability/test/functional/apps/dataset_quality/config.ts --include ./x-pack/solutions/observability/test/functional/apps/dataset_quality/$1
 ```
 
 #### Serverless
 
 ##### Server
+
 ```
 yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
 ```
 
 ##### Runner
+
 ```
 yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/index.ts
 ```
+
 ##### Running Individual Tests
+
 ```
 yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/$1
 ```
