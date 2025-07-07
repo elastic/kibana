@@ -16,12 +16,16 @@ import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 interface DependencyNameLinkProps {
   dependencyName: string;
+  spanType?: string;
+  spanSubtype?: string;
   environment: string;
   formattedDependencyName?: React.ReactNode;
 }
 
 export function DependencyNameLink({
   dependencyName,
+  spanType,
+  spanSubtype,
   environment,
   formattedDependencyName,
 }: DependencyNameLinkProps) {
@@ -66,7 +70,7 @@ export function DependencyNameLink({
   const content = (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem>
-        <SpanIcon type="db" subtype="elasticsearch" size="m" />
+        <SpanIcon type={spanType} subtype={spanSubtype} size="m" />
       </EuiFlexItem>
       <EuiFlexItem>{formattedDependencyName}</EuiFlexItem>
     </EuiFlexGroup>
