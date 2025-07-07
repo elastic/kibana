@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import { InferenceMessage } from '@elastic/elasticsearch/lib/api/types';
+import { Message as InferenceMessage } from '@kbn/inference-common';
 import { collapseInternalToolCalls } from './convert_messages_for_inference';
 import { Message, MessageRole } from './types';
-
-const mockLogger = {
-  error: jest.fn(),
-  debug: jest.fn(),
-  warn: jest.fn(),
-  trace: jest.fn(),
-};
 
 const userMessage: (msg: string) => Message = (msg: string) => ({
   '@timestamp': '2025-07-02T10:00:00Z',
