@@ -213,8 +213,6 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({});
 
-        console.log('finalGapResponse', JSON.stringify(finalGapResponse.body, null, 2));
-
         const finalGapResponse = await supertest
           .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
           .set('kbn-xsrf', 'foo')
@@ -224,6 +222,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
             end: gapEnd,
           });
 
+        console.log('finalGapResponse', JSON.stringify(finalGapResponse.body, null, 2));
         expect(finalGapResponse.statusCode).to.eql(200);
         expect(finalGapResponse.body.total).to.eql(1);
         const finalGap = finalGapResponse.body.data[0];
