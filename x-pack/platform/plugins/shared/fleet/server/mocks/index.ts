@@ -259,6 +259,8 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
       });
     }),
     removeOutputFromAll: jest.fn(),
+    getPackagePolicySavedObjects: jest.fn(),
+    rollback: jest.fn(),
   };
 };
 
