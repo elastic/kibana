@@ -13,7 +13,7 @@ export const DraggableProcessorListItem = ({
   idx,
   disableDrag,
   ...props
-}: EditProcessorPanelProps & { idx: number; disableDrag: boolean }) => (
+}: Omit<EditProcessorPanelProps, 'dragHandleProps'> & { idx: number; disableDrag: boolean }) => (
   <EuiDraggable
     index={idx}
     spacing="m"
