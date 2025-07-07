@@ -128,7 +128,7 @@ describe('searchDsl/getSortParams', () => {
             merged_title: {
               script: {
                 source:
-                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(null); }",
+                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(\"\"); }",
               },
               type: 'keyword',
             },
@@ -186,7 +186,7 @@ describe('searchDsl/getSortParams', () => {
             'merged_title.raw': {
               script: {
                 source:
-                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(null); }",
+                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(\"\"); }",
               },
               type: 'keyword',
             },
@@ -251,7 +251,7 @@ describe('searchDsl/getSortParams', () => {
             merged_title: {
               script: {
                 source:
-                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(null); }",
+                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(\"\"); }",
               },
               type: 'keyword',
             },
@@ -301,7 +301,7 @@ describe('searchDsl/getSortParams', () => {
             'merged_title.raw': {
               script: {
                 source:
-                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(null); }",
+                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(\"\"); }",
               },
               type: 'keyword',
             },
@@ -331,7 +331,7 @@ describe('searchDsl/getSortParams', () => {
           merged_count: {
             script: {
               source:
-                "if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } else if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } else { emit(null); }",
+                "if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } else if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } else { emit(\"\"); }",
             },
             type: 'long',
           },
@@ -346,7 +346,7 @@ describe('searchDsl/getSortParams', () => {
           merged_price: {
             script: {
               source:
-                "if (doc.containsKey('numeric.price') && doc['numeric.price'].size() != 0) { emit(doc['numeric.price'].value); } else if (doc.containsKey('mixed.price') && doc['mixed.price'].size() != 0) { emit(doc['mixed.price'].value); } else { emit(null); }",
+                "if (doc.containsKey('numeric.price') && doc['numeric.price'].size() != 0) { emit(doc['numeric.price'].value); } else if (doc.containsKey('mixed.price') && doc['mixed.price'].size() != 0) { emit(doc['mixed.price'].value); } else { emit(\"\"); }",
             },
             type: 'float',
           },
@@ -361,7 +361,7 @@ describe('searchDsl/getSortParams', () => {
           merged_created: {
             script: {
               source:
-                "if (doc.containsKey('numeric.created') && doc['numeric.created'].size() != 0) { emit(doc['numeric.created'].value); } else if (doc.containsKey('mixed.created') && doc['mixed.created'].size() != 0) { emit(doc['mixed.created'].value); } else { emit(null); }",
+                "if (doc.containsKey('numeric.created') && doc['numeric.created'].size() != 0) { emit(doc['numeric.created'].value); } else if (doc.containsKey('mixed.created') && doc['mixed.created'].size() != 0) { emit(doc['mixed.created'].value); } else { emit(\"\"); }",
             },
             type: 'date',
           },
@@ -376,7 +376,7 @@ describe('searchDsl/getSortParams', () => {
           merged_title: {
             script: {
               source:
-                "if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else { emit(null); }",
+                "if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else { emit(\"\"); }",
             },
             type: 'keyword',
           },
