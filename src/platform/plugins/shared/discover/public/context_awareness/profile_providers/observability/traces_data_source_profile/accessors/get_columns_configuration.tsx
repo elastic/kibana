@@ -11,6 +11,7 @@ import React from 'react';
 import { UnifiedDataTableSummaryColumnHeader } from '@kbn/unified-data-table';
 import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataSourceProfileProvider } from '../../../..';
 
 export const getColumnsConfiguration: DataSourceProfileProvider['profile']['getColumnsConfiguration'] =
@@ -40,12 +41,12 @@ export const DataTableSummaryColumnHeaderTracesContext = ({
       defaultMessage: 'Summary including the following fields',
     }
   );
-  const tooltipContent = i18n.translate(
-    'discover.unifiedDataTable.tableHeader.tracesContext.sourceFieldIconTooltip',
-    {
-      defaultMessage:
-        'Displays the most relevant resource identifiers (service.name, event.outcome, transaction.name, etc.).',
-    }
+  const tooltipContent = (
+    <FormattedMessage
+      id="discover.unifiedDataTable.tableHeader.tracesContext.sourceFieldIconTooltip"
+      defaultMessage="Displays the most relevant resource identifiers like:{br}{br}service.name{br}event.outcome{br}transaction.name{br}etc."
+      values={{ br: <br /> }}
+    />
   );
 
   return (
