@@ -46,7 +46,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = () => {
         <EuiFlexItem grow={0}>
           <EuiBadge data-test-subj="apiKeyFormNoUserPrivileges">
             {i18n.translate('xpack.searchHomepage.apiKeyForm.noUserPrivileges', {
-              defaultMessage: "You don't have access to manage API keys",
+              defaultMessage: 'Contact an administrator to manage API keys',
             })}
           </EuiBadge>
         </EuiFlexItem>
