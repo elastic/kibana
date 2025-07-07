@@ -84,9 +84,6 @@ export function getObservabilitySystemPrompt({
       ` If essential information like a time range is missing for tools like ${toolsWithTimeRange.join(
         ' or '
       )}` +
-      (isFunctionAvailable(GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME)
-        ? ` (**but NOT \`${GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME}\` - see Function Usage Guidelines**),`
-        : ',') +
       `${
         isFunctionAvailable(CONTEXT_FUNCTION_NAME)
           ? ' first attempt to retrieve it using the `context` tool response. If the context does not provide it,'
@@ -97,11 +94,7 @@ export function getObservabilitySystemPrompt({
 
   // Core Principles: Ask When Necessary
   corePrinciples.push(
-    `2. **Ask Only When Necessary:** If key information is missing or ambiguous, or if using a default seems inappropriate for the specific request${
-      isFunctionAvailable(GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME)
-        ? ` (and especially for time ranges with \`${GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME}\`)`
-        : ''
-    }, ask the user for clarification. **Exception:**  as mentioned, time range can be missing and you can assume the default time range.`
+    `2. **Ask Only When Necessary:** If key information is missing or ambiguous, or if using a default seems inappropriate for the specific request, ask the user for clarification. **Exception:**  as mentioned, time range can be missing and you can assume the default time range.`
   );
 
   // Core Principles: Confirm Tool Use
@@ -234,7 +227,7 @@ export function getObservabilitySystemPrompt({
       isFunctionAvailable(ALERTS_FUNCTION_NAME)
     ) {
       usage.push(
-        `**Alerts:** Use \`${GET_ALERTS_DATASET_INFO_FUNCTION_NAME}\` first if needed to find fields, then \`${ALERTS_FUNCTION_NAME}\` (using general time range handling) to fetch details.`
+        `**Alerts:** Always use the \`${GET_ALERTS_DATASET_INFO_FUNCTION_NAME}\` tool first to find fields, then the \`${ALERTS_FUNCTION_NAME}\` tool (using general time range handling) to fetch details. The \`${ALERTS_FUNCTION_NAME}\` tool returns only "active" alerts by default. `
       );
     }
 
@@ -243,7 +236,7 @@ export function getObservabilitySystemPrompt({
         `**Elasticsearch API:** Use the \`${ELASTICSEARCH_FUNCTION_NAME}\` tool to call Elasticsearch APIs on behalf of the user\n
            * **When to use:** Whenever the user asks for information or an action that maps directly to an Elasticsearch REST API **(e.g. cluster health, license, index statistics, index creation, adding documents, etc.)** you **MUST** call the \`${ELASTICSEARCH_FUNCTION_NAME}\` tool. You have to derive which endpoint to call without explicitly asking the user. **NEVER** ask for permission to proceed with GET requests. You **MUST** call the \`${ELASTICSEARCH_FUNCTION_NAME}\` tool with the appropriate method and path. Only call the \`${ELASTICSEARCH_FUNCTION_NAME}\` tool with the DELETE method when the user specifically asks to do a delete operation. Don't call the API for any destructive action if the user has not asked you to do so.\n
            * **Path parameter tips:** When requesting index stats, append the **specific path paramater** to the API endpoint if the user mentions it (example: \`{index}/_stats/store\` for *store stats*) instead of the generic \`{index}/_stats\`. Always populate the path with the index name if the user is referring to a specific index.\n
-           * **Follow-up requests:** If the user subsequently asks for more information about an index **without explicitly repeating the index name**, assume they mean the **same index you just used** in the prior Elasticsearch call and build the path accordingly. Do **not** ask the user to re-state the index name in such follow-up questions.`
+           * **Follow-up requests:** If the user subsequently asks for more information about an index **without explicitly repeating the index name**, ALWAYS assume they mean the **same index you just used** in the prior Elasticsearch call and build the path accordingly. Do **not** ask the user to re-state the index name in such follow-up questions.`
       );
     }
 
@@ -252,7 +245,6 @@ export function getObservabilitySystemPrompt({
         `**Service/APM Dependencies:** Use \`${GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME}\`. Extract the \`service.name\` correctly from the user query. Follow these steps:
           *  **Prioritize User-Specified Time:** First, you **MUST** scan the user's query for any statement of time (e.g., "last hour," "past 30 minutes," "between 2pm and 4pm yesterday"). 
           *  **Override Defaults:** If a time range is found in the query, you **MUST** use it. This user-provided time range **ALWAYS** takes precedence over and replaces any default or contextual time range (like \`now-15m\`).
-          *  **Handle Missing Time:** If, and only if, the user provides no time range information in their query, you **MUST** ask them for the desired start and end times before proceeding. Do not use any default time range in this scenario.
           *  **Extract Service Name:** Correctly extract the \`service.name\` from the user query.`
       );
     }
