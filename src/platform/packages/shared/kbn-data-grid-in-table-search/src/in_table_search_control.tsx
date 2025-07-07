@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
-import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import useEvent from 'react-use/lib/useEvent';
 import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
@@ -23,7 +23,11 @@ import {
 } from './constants';
 import { getHighlightColors } from './get_highlight_colors';
 
-const innerCss = css`
+const innerCss = ({ euiTheme }: UseEuiTheme) => css`
+  /* ensure nested search input borders are visible */
+  position: relative;
+  z-index: 1;
+
   .dataGridInTableSearch__matchesCounter {
     font-variant-numeric: tabular-nums;
   }
@@ -34,7 +38,7 @@ const innerCss = css`
   }
 
   .euiFormControlLayout__append {
-    padding-inline: 0 !important;
+    padding-inline-end: 0 !important;
     background: none;
   }
 
@@ -44,6 +48,10 @@ const innerCss = css`
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     border-right: 0;
+
+    &::after {
+      border-right: 0;
+    }
   }
 `;
 
@@ -68,12 +76,15 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   onChangeToExpectedPage,
   ...props
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const colors = useMemo(() => getHighlightColors(euiTheme), [euiTheme]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const shouldReturnFocusToButtonRef = useRef<boolean>(false);
   const [isInputVisible, setIsInputVisible] = useState<boolean>(Boolean(props.inTableSearchTerm));
+
+  const cssStyles = innerCss(euiThemeContext);
 
   const onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'] = useCallback(
     ({ rowIndex, columnId, matchIndexWithinCell }) => {
@@ -170,7 +181,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   }, [isInputVisible]);
 
   return (
-    <div ref={(node) => (containerRef.current = node)} css={innerCss}>
+    <div ref={(node) => (containerRef.current = node)} css={cssStyles}>
       {isInputVisible ? (
         <>
           <InTableSearchInput
