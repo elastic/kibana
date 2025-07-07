@@ -67,6 +67,9 @@ const rootDir = path.resolve(__dirname, '..', '..', '..');
 // eslint-disable-next-line import/no-dynamic-require, @kbn/imports/no_boundary_crossing
 const rootConfig = require('../../../.eslintrc');
 
+/** @type {typeof rootConfig} */
+const clonedRootConfig = JSON.parse(JSON.stringify(rootConfig));
+
 const minimatch = require('minimatch');
 
 /**
@@ -91,8 +94,8 @@ function createNoRestrictedImportsOverride(options = {}) {
   }
 
   // Find overrides with no-restricted-imports rule
-  const overridesWithNoRestrictedImportRule = (rootConfig.overrides || []).filter((override) =>
-    Boolean(override.rules && 'no-restricted-imports' in override.rules)
+  const overridesWithNoRestrictedImportRule = (clonedRootConfig.overrides || []).filter(
+    (override) => Boolean(override.rules && 'no-restricted-imports' in override.rules)
   );
 
   // Process each override

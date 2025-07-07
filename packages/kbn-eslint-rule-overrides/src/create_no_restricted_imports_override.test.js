@@ -14,8 +14,8 @@ jest.mock('minimatch');
 jest.mock('path', () => ({
   ...jest.requireActual('path'),
   resolve: jest.fn((...args) => {
-    // TODO: too fragile, should be fixed
-    // Intercept ROOT_DIR calculation (when called with __dirname, '..', '..', '..')
+    // TODO: fragile, can be fixed by using memfs or similar
+    // Intercept ROOT_DIR calculation (when called with path.resolve(__dirname, '..', '..', '..'))
     if (args.length >= 4 && args[1] === '..' && args[2] === '..' && args[3] === '..') {
       return '/kibana';
     }
@@ -84,6 +84,53 @@ describe('createNoRestrictedImportsOverride', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it('should not mutate the original root config', () => {
+    const originalRootConfig = {
+      extends: ['@kbn/eslint-config-base'],
+      rules: { 'no-console': 'error' },
+      overrides: [
+        {
+          files: ['x-pack/**/*.js'],
+          rules: {
+            'no-restricted-imports': [
+              'error',
+              {
+                paths: ['lodash', { name: 'moment', message: 'Use date-fns' }],
+                patterns: ['@internal/*'],
+              },
+            ],
+            'no-console': 'warn',
+          },
+        },
+      ],
+    };
+
+    // Create a deep copy to compare against later
+    const rootConfigSnapshot = JSON.parse(JSON.stringify(originalRootConfig));
+
+    // Setup mocks with the original config
+    setupModuleMocks(originalRootConfig);
+
+    // Call the function which should work with a clone, not the original
+    createNoRestrictedImportsOverride({
+      restrictedImports: ['jquery', { name: 'axios', message: 'Use fetch' }],
+      childConfigDir: mockCurrentDir,
+    });
+
+    // Verify the original config hasn't been mutated
+    expect(originalRootConfig).toEqual(rootConfigSnapshot);
+
+    // Specifically check that the paths array wasn't mutated
+    expect(originalRootConfig.overrides[0].rules['no-restricted-imports'][1].paths).toHaveLength(2);
+    expect(originalRootConfig.overrides[0].rules['no-restricted-imports'][1].paths[0]).toBe(
+      'lodash'
+    );
+    expect(originalRootConfig.overrides[0].rules['no-restricted-imports'][1].paths[1]).toEqual({
+      name: 'moment',
+      message: 'Use date-fns',
+    });
   });
 
   describe('when no childConfigDir is provided', () => {
