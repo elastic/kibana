@@ -104,7 +104,14 @@ export const getDefaultAssistantGraph = ({
         })
       )
       .addNode(NodeType.TOOLS, (state: AgentState) =>
-        executeTools({ ...nodeParams, config: { signal }, state, tools, telemetry })
+        executeTools({
+          ...nodeParams,
+          config: { signal },
+          state,
+          tools,
+          telemetryParams,
+          telemetry,
+        })
       )
       .addNode(NodeType.RESPOND, async (state: AgentState) => {
         const model = await createLlmInstance();

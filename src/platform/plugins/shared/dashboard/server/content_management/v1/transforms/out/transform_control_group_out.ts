@@ -19,7 +19,7 @@ import {
 } from '@kbn/controls-plugin/common';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
 import type { ControlGroupAttributes } from '../../types';
-import { transformControlsState } from './control_state_out_transforms';
+import { transformControlsState } from './transform_controls_state';
 
 export const transformControlGroupOut: (
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
