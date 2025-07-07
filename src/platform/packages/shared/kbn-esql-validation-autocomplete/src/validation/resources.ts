@@ -8,6 +8,7 @@
  */
 
 import type { ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata, ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
 import { createMapFromList, isSourceItem, nonNullable } from '../shared/helpers';
 import {
   getFieldsByTypeHelper,
@@ -21,7 +22,6 @@ import {
   buildQueryForFieldsInPolicies,
   getEnrichCommands,
 } from './helpers';
-import type { ESQLFieldWithMetadata, ESQLPolicy } from './types';
 
 export async function retrieveFields(
   queryString: string,
