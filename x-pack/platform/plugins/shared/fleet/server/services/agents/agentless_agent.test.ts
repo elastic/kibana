@@ -634,6 +634,81 @@ describe('Agentless Agent service', () => {
     );
   });
 
+  it('should create agentless agent when fleet_server_host_id is not provided', async () => {
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
+    const soClient = getAgentPolicyCreateMock();
+    // ignore unrelated unique name constraint
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    jest
+      .spyOn(appContextService, 'getKibanaVersion')
+      .mockReturnValue('mocked-kibana-version-infinite');
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
+
+    const createAgentlessAgentReturnValue = await agentlessAgentService.createAgentlessAgent(
+      esClient,
+      soClient,
+      {
+        id: 'mocked-agentless-agent-policy-id',
+        name: 'agentless agent policy',
+        namespace: 'default',
+        data_output_id: 'mock-fleet-default-output',
+        supports_agentless: true,
+      } as AgentPolicy
+    );
+
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          fleet_token: 'mocked-fleet-enrollment-api-key',
+          fleet_url: 'http://fleetserver:8220',
+          policy_id: 'mocked-agentless-agent-policy-id',
+          stack_version: 'mocked-kibana-version-infinite',
+        }),
+        headers: expect.anything(),
+        httpsAgent: expect.anything(),
+        method: 'POST',
+        url: 'http://api.agentless.com/api/v1/ess/deployments',
+      })
+    );
+  });
+
   it('should delete agentless agent for ESS', async () => {
     const returnValue = {
       id: 'mocked',
