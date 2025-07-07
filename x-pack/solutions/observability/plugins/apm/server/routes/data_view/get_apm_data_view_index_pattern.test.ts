@@ -9,23 +9,21 @@ import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { getApmDataViewIndexPattern } from './get_apm_data_view_index_pattern';
 
 describe('getApmDataViewIndexPattern', () => {
-  it('returns a data view index pattern by combining existing indices', () => {
-    const indexPattern = getApmDataViewIndexPattern({
-      transaction: 'apm-*-transaction-*',
-      span: 'apm-*-span-*',
-      error: 'apm-*-error-*',
-      metric: 'apm-*-metrics-*',
-    } as APMIndices);
-    expect(indexPattern).toBe('apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*');
-  });
-
-  it('removes duplicates', () => {
+  it('combines, sorts and removes duplicates', () => {
     const title = getApmDataViewIndexPattern({
-      transaction: 'apm-*',
-      span: 'apm-*',
-      error: 'apm-*',
-      metric: 'apm-*',
+      error:
+        'remote_cluster:apm-*,remote_cluster:logs-apm*,remote_cluster:logs-*.otel-*,apm-*,logs-apm*,logs-*.otel-*',
+      onboarding: 'remote_cluster:apm-*,apm-*',
+      span: 'remote_cluster:apm-*,remote_cluster:traces-apm*,remote_cluster:traces-*.otel-*,apm-*,traces-apm*,traces-*.otel-*',
+      transaction:
+        'remote_cluster:apm-*,remote_cluster:traces-apm*,remote_cluster:traces-*.otel-*,apm-*,traces-apm*,traces-*.otel-*',
+      metric:
+        'remote_cluster:apm-*,remote_cluster:metrics-apm*,remote_cluster:metrics-*.otel-*,apm-*,metrics-apm*,metrics-*.otel-*',
+      sourcemap: 'remote_cluster:apm-*,apm-*',
     } as APMIndices);
-    expect(title).toBe('apm-*');
+
+    expect(title).toBe(
+      'apm-*,logs-*.otel-*,logs-apm*,metrics-*.otel-*,metrics-apm*,remote_cluster:apm-*,remote_cluster:logs-*.otel-*,remote_cluster:logs-apm*,remote_cluster:metrics-*.otel-*,remote_cluster:metrics-apm*,remote_cluster:traces-*.otel-*,remote_cluster:traces-apm*,traces-*.otel-*,traces-apm*'
+    );
   });
 });
