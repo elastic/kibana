@@ -13,31 +13,40 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
 } from '@kbn/management-settings-ids';
 import { StreamsPluginSetupDependencies, StreamsPluginStartDependencies } from './types';
+import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 
 export function registerFeatureFlags(
   core: CoreSetup<StreamsPluginStartDependencies>,
   plugins: StreamsPluginSetupDependencies
 ) {
+  core.getStartServices().then(([coreStart]) => {
+    const isFeatureAvailableForTier = coreStart.pricing.isFeatureAvailable(
+      STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
+    );
+
+    if (isFeatureAvailableForTier) {
+      core.uiSettings.register({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: {
+          category: ['observability'],
+          name: i18n.translate('xpack.streams.significantEventsSettingsName', {
+            defaultMessage: 'Streams significant events',
+          }) as string,
+          value: false,
+          description: i18n.translate('xpack.streams.significantEventsSettingsDescription', {
+            defaultMessage: 'Enable streams significant events.',
+          }),
+          type: 'boolean',
+          schema: schema.boolean(),
+          requiresPageReload: true,
+          solution: 'oblt',
+          technicalPreview: true,
+        },
+      });
+    }
+  });
+
   const isObservabilityServerless =
     plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'observability';
-
-  core.uiSettings.register({
-    [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: {
-      category: ['observability'],
-      name: i18n.translate('xpack.streams.significantEventsSettingsName', {
-        defaultMessage: 'Streams significant events',
-      }) as string,
-      value: false,
-      description: i18n.translate('xpack.streams.significantEventsSettingsDescription', {
-        defaultMessage: 'Enable streams significant events.',
-      }),
-      type: 'boolean',
-      schema: schema.boolean(),
-      requiresPageReload: true,
-      solution: 'oblt',
-      technicalPreview: true,
-    },
-  });
 
   core.uiSettings.register({
     [OBSERVABILITY_ENABLE_STREAMS_UI]: {
