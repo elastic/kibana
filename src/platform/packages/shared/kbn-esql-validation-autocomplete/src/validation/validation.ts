@@ -233,6 +233,7 @@ function validateCommand(
   // ToDo: Move this to the commands registry
   switch (commandDefinition.name) {
     case 'join':
+    case 'fork':
       break;
     default: {
       // Now validate arguments
