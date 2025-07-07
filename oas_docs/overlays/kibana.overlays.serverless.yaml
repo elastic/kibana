@@ -22,6 +22,10 @@ actions:
       description: >
         Streams is a new and experimental way to manage your data in Kibana. The API is currently not considered stable and can change at any point.
       x-displayName: "Streams"
+  - target: '$.tags[?(@.name=="dashboards")]'
+    description: Change displayName
+    update:
+      x-displayName: "Dashboards"
   - target: '$.tags[?(@.name=="data views")]'
     description: Change displayName
     update:

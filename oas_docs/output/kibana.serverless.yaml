@@ -76,6 +76,7 @@ tags:
     x-displayName: Connectors
   - description: Dashboards APIs enable you to manage and interact with Kibana dashboards.
     name: dashboards
+    x-displayName: Dashboards
   - name: Data streams
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
     name: data views
