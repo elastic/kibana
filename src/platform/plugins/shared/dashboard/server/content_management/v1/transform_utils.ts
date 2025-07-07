@@ -12,20 +12,14 @@ import { pick } from 'lodash';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import {
-  transformControlGroupIn,
   transformControlGroupOut,
   transformOptionsOut,
-  transformPanelsIn,
   transformPanelsOut,
-  transformSearchSourceIn,
   transformSearchSourceOut,
 } from './transforms';
 import type {
   DashboardAttributes,
   DashboardItem,
-  ItemAttrsToSavedObjectParams,
-  ItemAttrsToSavedObjectReturn,
-  ItemAttrsToSavedObjectWithTagsParams,
   PartialDashboardItem,
   SavedObjectToItemReturn,
 } from './types';
@@ -78,52 +72,7 @@ export function dashboardAttributesOut(
   };
 }
 
-export const itemAttrsToSavedObject = ({
-  attributes,
-  incomingReferences = [],
-}: ItemAttrsToSavedObjectParams): ItemAttrsToSavedObjectReturn => {
-  try {
-    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } = attributes;
-    const { panelsJSON, sections } = transformPanelsIn(panels);
 
-    const soAttributes = {
-      ...rest,
-      ...(controlGroupInput && {
-        controlGroupInput: transformControlGroupIn(controlGroupInput),
-      }),
-      ...(options && {
-        optionsJSON: JSON.stringify(options),
-      }),
-      ...(panels && {
-        panelsJSON,
-      }),
-      ...(sections?.length && { sections }),
-      ...(kibanaSavedObjectMeta && {
-        kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
-      }),
-    };
-    return { attributes: soAttributes, references: incomingReferences, error: null };
-  } catch (e) {
-    return { attributes: null, references: null, error: e };
-  }
-};
-
-export const itemAttrsToSavedObjectWithTags = async ({
-  attributes,
-  replaceTagReferencesByName,
-  incomingReferences = [],
-}: ItemAttrsToSavedObjectWithTagsParams): Promise<ItemAttrsToSavedObjectReturn> => {
-  const { tags, ...restAttributes } = attributes;
-  // Tags can be specified as an attribute or in the incomingReferences.
-  const soReferences =
-    replaceTagReferencesByName && tags && tags.length
-      ? await replaceTagReferencesByName({ references: incomingReferences, newTagNames: tags })
-      : incomingReferences;
-  return itemAttrsToSavedObject({
-    attributes: restAttributes,
-    incomingReferences: soReferences,
-  });
-};
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;

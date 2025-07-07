@@ -14,4 +14,4 @@ export {
   transformSearchSourceOut,
 } from './out';
 
-export { transformControlGroupIn, transformPanelsIn, transformSearchSourceIn } from './in';
+export { transformDashboardIn } from './in';
