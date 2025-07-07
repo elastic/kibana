@@ -39,7 +39,7 @@ export const GroupingPreviewDark: React.FC = () => (
 );
 
 const groupingPreviewImageDescription = i18n.translate(
-  'xpack.logsOverview.groupingPreviewImageDescription',
+  'xpack.observabilityLogsOverview.groupingPreviewImageDescription',
   {
     defaultMessage: 'Preview of the grouping feature in the Logs Overview',
   }

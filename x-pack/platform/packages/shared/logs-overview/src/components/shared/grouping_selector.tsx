@@ -71,12 +71,15 @@ export const GroupingSelector: React.FC<GroupingSelectorProps> = ({
   );
 };
 
-const groupingItemEventsTitle = i18n.translate('xpack.logsOverview.groupingSelector.events', {
-  defaultMessage: 'Log Events',
-});
+const groupingItemEventsTitle = i18n.translate(
+  'xpack.observabilityLogsOverview.groupingSelector.events',
+  {
+    defaultMessage: 'Log Events',
+  }
+);
 
 const groupingItemCategoriesTitle = i18n.translate(
-  'xpack.logsOverview.groupingSelector.categories',
+  'xpack.observabilityLogsOverview.groupingSelector.categories',
   {
     defaultMessage: 'Log Patterns',
   }

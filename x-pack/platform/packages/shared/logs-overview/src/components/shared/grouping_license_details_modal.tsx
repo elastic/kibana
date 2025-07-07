@@ -74,7 +74,9 @@ export const GroupingLicenseDetailsModal = React.memo<GroupingLicenseDetailsModa
         <EuiModalFooter>
           <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+              <EuiButtonEmpty onClick={onClose}>
+                {groupingLicenseDetailsModalCancelButtonLabel}
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <GroupingLicenseCtaMessageTrialButton dependencies={dependencies} />
@@ -87,14 +89,14 @@ export const GroupingLicenseDetailsModal = React.memo<GroupingLicenseDetailsModa
 );
 
 const groupingLicenseDetailsModalTitle = i18n.translate(
-  'xpack.logsOverview.groupingLicenseDetailsModal.title',
+  'xpack.observabilityLogsOverview.groupingLicenseDetailsModal.title',
   {
     defaultMessage: 'Make sense of your logs, faster',
   }
 );
 
 const groupingLicenseDetailsModalDescription = i18n.translate(
-  'xpack.logsOverview.groupingLicenseDetailsModal.description',
+  'xpack.observabilityLogsOverview.groupingLicenseDetailsModal.description',
   {
     defaultMessage:
       "Advanced log insights organize your logs into clear, structured patterns so you don't have to sift through endless logs to find important information. Start a free trial to experience the difference.",
@@ -102,9 +104,16 @@ const groupingLicenseDetailsModalDescription = i18n.translate(
 );
 
 const groupingLicenseDetailsModalSubscriptionsLinkText = i18n.translate(
-  'xpack.logsOverview.groupingLicenseDetailsModal.subscriptionsLinkText',
+  'xpack.observabilityLogsOverview.groupingLicenseDetailsModal.subscriptionsLinkText',
   {
     defaultMessage: 'Explore commercial licenses',
+  }
+);
+
+const groupingLicenseDetailsModalCancelButtonLabel = i18n.translate(
+  'xpack.observabilityLogsOverview.groupingLicenseDetailsModal.cancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
   }
 );
 

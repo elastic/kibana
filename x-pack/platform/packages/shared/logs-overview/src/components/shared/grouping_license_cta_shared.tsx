@@ -50,14 +50,14 @@ export const GroupingLicenseCtaMessageTrialButton: React.FC<
 };
 
 export const groupingLicenseCtaMessageTitle = i18n.translate(
-  'xpack.logsOverview.groupingLicenseCtaMessageTitle',
+  'xpack.observabilityLogsOverview.groupingLicenseCtaMessageTitle',
   {
     defaultMessage: 'Unlock advanced log insights',
   }
 );
 
 export const groupingLicenseCtaMessageDescription = i18n.translate(
-  'xpack.logsOverview.groupingLicenseCtaMessageDescription',
+  'xpack.observabilityLogsOverview.groupingLicenseCtaMessageDescription',
   {
     defaultMessage:
       'Get instant access to machine learning patterns that group and highlight your most important logs.',
@@ -65,14 +65,14 @@ export const groupingLicenseCtaMessageDescription = i18n.translate(
 );
 
 export const groupingLicenseCtaMessageDetailsButtonTitle = i18n.translate(
-  'xpack.logsOverview.groupingLicenseCtaMessageDetailsButtonTitle',
+  'xpack.observabilityLogsOverview.groupingLicenseCtaMessageDetailsButtonTitle',
   {
     defaultMessage: 'See how it works',
   }
 );
 
 export const groupingLicenseCtaMessageTrialButtonTitle = i18n.translate(
-  'xpack.logsOverview.groupingLicenseCtaMessageTrialButtonTitle',
+  'xpack.observabilityLogsOverview.groupingLicenseCtaMessageTrialButtonTitle',
   {
     defaultMessage: 'Start free trial',
   }

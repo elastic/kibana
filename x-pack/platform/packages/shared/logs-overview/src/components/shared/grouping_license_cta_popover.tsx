@@ -80,7 +80,7 @@ export const GroupingLicenseCtaPopover = React.memo<GroupingLicenseCtaPopoverPro
 );
 
 const groupingCtaPopoverButtonTitle = i18n.translate(
-  'xpack.logsOverview.groupingLicenseCtaPopoverButtonTitle',
+  'xpack.observabilityLogsOverview.groupingLicenseCtaPopoverButtonTitle',
   {
     defaultMessage: 'Log Patterns',
   }
