@@ -118,5 +118,8 @@
     "@kbn/lens-plugin",
     "@kbn/mock-idp-utils",
     "@kbn/es",
+    "@kbn/test-suites-xpack-platform",
+    "@kbn/ml-category-validator",
+    "@kbn/datemath",
   ]
 }
