@@ -17,6 +17,8 @@ import { CasesServiceProvider } from './cases';
 import { ActionsServiceProvider } from './actions';
 import { AiopsProvider } from './aiops';
 import { RulesServiceProvider } from './rules';
+import { CanvasElementProvider } from './canvas_element';
+import { MachineLearningProvider } from './ml';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -25,6 +27,7 @@ export const services = {
   ...kibanaFunctionalServices,
   actions: ActionsServiceProvider,
   aiops: AiopsProvider,
+  canvasElement: CanvasElementProvider,
   cases: CasesServiceProvider,
   supertest: kibanaApiIntegrationServices.supertest,
   supertestWithoutAuth: kibanaXPackApiIntegrationServices.supertestWithoutAuth,
@@ -37,4 +40,5 @@ export const services = {
   sampleData: SampleDataServiceProvider,
   grokDebugger: GrokDebuggerProvider,
   searchSessions: SearchSessionsService,
+  ml: MachineLearningProvider,
 };
