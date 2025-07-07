@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { EntityECSField } from '../../../../../../common/api/entity_analytics/entity_store';
+import type { BaseECSEntityField } from '../../../../../../common/api/entity_analytics/entity_store';
 import type { FieldDescription } from '../../installation/types';
 
 import { oldestValue, newestValue } from './field_utils';
 
-export const getCommonFieldDescriptions = (ecsField: EntityECSField): FieldDescription[] => {
+export const getCommonFieldDescriptions = (ecsField: BaseECSEntityField): FieldDescription[] => {
   return [
     oldestValue({
       source: '_index',

@@ -13,7 +13,7 @@ components:
         - host
         - service
         - generic
-    EntityECSField:
+    BaseECSEntityField:
       type: string
       enum:
         - user
