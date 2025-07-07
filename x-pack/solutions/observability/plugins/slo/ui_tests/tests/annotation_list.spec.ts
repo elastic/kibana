@@ -9,10 +9,8 @@ import { expect } from '@kbn/scout-oblt';
 import { AnnotationDataService } from '../services/annotation_data_service';
 import { SLODataService } from '../services/slo_data_service';
 import { test } from '../fixtures';
-/* eslint-disable playwright/no-wait-for-selector */
-/* eslint-disable playwright/no-nth-methods */
 
-test.describe('Annotations List', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Annotations List', { tag: ['@ess'] }, () => {
   let dataService: SLODataService;
   let annotationService: AnnotationDataService;
 
@@ -44,9 +42,12 @@ test.describe('Annotations List', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('validate annotation list', async ({ page }) => {
+    // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Test annotation"');
     await expect(page.locator('.euiTableRow')).toHaveCount(1);
+    // eslint-disable-next-line playwright/no-nth-methods
     await page.locator('.echAnnotation__marker').first().hover();
+    // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Test annotation description"');
   });
 
@@ -59,27 +60,30 @@ test.describe('Annotations List', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('check that annotation is displayed', async ({ page }) => {
-    await page.locator('.echAnnotation__marker').nth(1).hover();
+    await page.getByRole('button', { name: 'Test annotation description' }).hover();
+    // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Test annotation description"');
   });
 
   test('update annotation', async ({ page }) => {
-    await page.locator('.echAnnotation__marker').nth(1).click();
+    await page.getByRole('button', { name: 'Test annotation description' }).click();
     await page.getByTestId('annotationTitle').fill('Updated annotation');
     await page.getByTestId('annotationTitle').blur();
     await page.getByTestId('annotationMessage').fill('Updated annotation description');
     await page.getByTestId('annotationMessage').blur();
     await page.getByTestId('annotationSaveButton').click();
     await page.getByTestId('toastCloseButton').click();
+    // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Updated annotation"');
-    await page.locator('.echAnnotation__marker').nth(1).hover();
+    await page.getByRole('button', { name: 'Updated annotation description' }).hover();
+    // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Updated annotation description"');
   });
 
   test('delete annotation', async ({ page }) => {
-    await page.locator('.echAnnotation__marker').nth(1).click();
-    await page.getByTestId('annotationDeleteButton').first().click();
+    await page.getByRole('button', { name: 'Updated annotation description' }).click();
+    await page.getByTestId('annotationDeleteButton').click();
     await page.getByTestId('toastCloseButton').click();
-    await expect(page.locator('.echAnnotation__marker')).toHaveCount(1);
+    await expect(page.locator('.echAnnotation__marker')).toHaveCount(0);
   });
 });

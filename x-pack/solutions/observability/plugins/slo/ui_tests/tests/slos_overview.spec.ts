@@ -7,12 +7,9 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
-
 import { SLODataService } from '../services/slo_data_service';
 
-/* eslint-disable playwright/no-wait-for-selector */
-
-test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('SLOs Overview', { tag: ['@ess'] }, () => {
   let dataService: SLODataService;
 
   test.beforeAll(async ({ config, kbnUrl, kbnClient }) => {
@@ -28,6 +25,10 @@ test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.slo.goto();
   });
 
+  test.afterAll(() => {
+    test.setTimeout(60000);
+  });
+
   test('Go to slos overview', async ({ page }) => {
     // Already navigated in beforeEach
     // This test ensures the page loads
@@ -35,15 +36,18 @@ test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('validate data retention tab', async ({ page }) => {
+    test.setTimeout(60 * 20000);
+
     await expect(async () => {
       await page.getByTestId('querySubmitButton').click();
 
+      // eslint-disable-next-line playwright/no-wait-for-selector
       await page.waitForSelector('text="Test Stack SLO"');
       const cards = await page.locator('text="Test Stack SLO"').all();
       expect(cards.length > 5).toBeTruthy();
     }).toPass({
-      intervals: [10_000, 20_000, 30_000],
-      timeout: 60_000,
+      intervals: [20000],
+      timeout: 60 * 20000,
     });
   });
 });

@@ -27,5 +27,3 @@ export const test = baseTest.extend<StreamsTestFixtures, ObltWorkerFixtures>({
     await use(extendedPageObjects);
   },
 });
-
-export * as testData from './constants';
