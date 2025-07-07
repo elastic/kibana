@@ -98,7 +98,10 @@ export function getSortingParams(
           const prefix = idx === 0 ? 'if' : 'else if';
           return `${prefix} (doc.containsKey('${scriptField}') && doc['${scriptField}'].size() != 0) { emit(doc['${scriptField}'].value); }`;
         });
-        scriptLines.push('else { emit(""); }');
+        // Only emit else { emit("") } for keyword type, otherwise omit else for proper sorting
+        if (mergedFieldType === 'keyword') {
+          scriptLines.push('else { emit(""); }');
+        }
         const scriptSource = scriptLines.join(' ');
 
         return {
