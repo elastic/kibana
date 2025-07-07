@@ -36,7 +36,8 @@ import {
  *    Matched domains ending with dot (.) as they are valid domains
  *    @see https://datatracker.ietf.org/doc/html/rfc1034#:~:text=When%20a%20user,ISI.EDU%20domain
  */
-const DOMAIN_REGEX = /^(?=.{1,253}$)((?!.*--)([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)\.)+[a-zA-Z]{2,63}\.?$/;
+const DOMAIN_REGEX =
+  /^(?=.{1,253}$)((?!.*--)([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)\.)+[a-zA-Z]{2,63}\.?$/;
 const GENERIC_REGEX = /^[a-zA-Z0-9._:/\\-]+$/;
 
 export interface ValidationError {
