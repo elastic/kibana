@@ -122,6 +122,15 @@ export default function ({
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
+
+        expect(
+          await reporting.comparePdfToSnapshot(
+            res.body,
+            REPORTS_FOLDER,
+            'Ecom_Dashboard_PDF_print_export_output_snapshot'
+          )
+        ).to.be(true);
+
         await exports.closeExportFlyout();
       });
 
@@ -228,6 +237,15 @@ export default function ({
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
+
+        expect(
+          await reporting.comparePdfToSnapshot(
+            res.body,
+            REPORTS_FOLDER,
+            'Ecom_Dashboard_PDF_export_output_snapshot'
+          )
+        ).to.be(true);
+
         await kibanaServer.uiSettings.replace({});
       });
 

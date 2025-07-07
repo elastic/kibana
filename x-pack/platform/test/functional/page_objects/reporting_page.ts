@@ -10,6 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import type SuperTest from 'supertest';
 import { format as formatUrl } from 'url';
+import { comparePdfToSnapshot } from 'pdf-visual-diff';
 import { promisify } from 'util';
 
 import { INTERNAL_ROUTES, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
@@ -262,5 +263,16 @@ export class ReportingPageObject extends FtrService {
 
   async copyReportingPOSTURLValueToClipboard() {
     await this.exports.copyExportAssetText();
+  }
+
+  /**
+   * @see {@link https://moshensky.github.io/pdf-visual-diff/functions/comparePdfToSnapshot.html} for arguments
+   */
+  comparePdfToSnapshot(...args: Parameters<typeof comparePdfToSnapshot>) {
+    const [pdf, folder, fileName, options] = args;
+    return comparePdfToSnapshot(pdf, folder, fileName, {
+      ...options,
+      failOnMissingSnapshot: true,
+    });
   }
 }

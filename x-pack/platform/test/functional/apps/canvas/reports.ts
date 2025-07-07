@@ -64,6 +64,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'attachment; filename=The%20Very%20Cool%20Workpad%20for%20PDF%20Tests.pdf'
         );
 
+        expect(
+          await reporting.comparePdfToSnapshot(
+            res.body,
+            __dirname,
+            'The_Very_Cool_Workpad_for_PDF_Tests_snapshot'
+          )
+        ).to.be(true);
+
         const jobId = await reporting.getReportJobId(60000);
         const reportInfo = await reporting.getReportInfo(jobId);
 
