@@ -70,7 +70,7 @@ export const MonitorList = ({
       loadPage({
         pageIndex: index,
         pageSize: size,
-        sortField: (field === 'enabled' ? field : `${field}.keyword`) as MonitorListSortField,
+        sortField: (field === 'enabled' ? field : `${field}`) as MonitorListSortField,
         sortOrder: direction,
       });
     },

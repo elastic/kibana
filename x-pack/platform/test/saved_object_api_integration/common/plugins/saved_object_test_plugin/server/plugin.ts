@@ -94,6 +94,7 @@ export class Plugin {
               keyword: { type: 'keyword' },
             },
           },
+          missingData: { type: 'keyword' },
         },
       },
     });
@@ -113,6 +114,7 @@ export class Plugin {
               keyword: { type: 'keyword' },
             },
           },
+          missingData: { type: 'keyword' },
         },
       },
     });

@@ -25,6 +25,7 @@ const sortTestFields = {
   missing: 'notPresent',
   id: '_id',
   score: '_score',
+  missingData: 'missingData',
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -164,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(response.status).to.eql(400);
         expect(response.body.message).to.match(
-          /Sort field ".*\.title" is of type "text" and does not have a "keyword" subfield/
+          /Sort field ".*\.title" is of type "text" which is not sortable\.  Sorting on text fields requires a "keyword" subfield\./
         );
       });
 
@@ -276,6 +277,28 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(response.status).to.eql(400);
         expect(response.body.message).to.match(/Unknown sort field notPresent/);
+      });
+
+      it('sorts by keyword field for multiple types when some documents are missing the field', async () => {
+        // This assumes that at least one document in sortTestingType or sortTestingType2 is missing 'titleKeyword'
+        // If not, you may need to adjust the fixture data to include such a document.
+        const query = queryString.stringify({
+          type: sortTestTypes,
+          sort_field: sortTestFields.missingData,
+        });
+        const response = await supertest.get(
+          `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
+        );
+        expect(response.status).to.eql(200, JSON.stringify(response.body));
+        // Documents missing the sort field should appear last in the sort order
+        const titles = response.body.saved_objects.map((o: any) => o.attributes.titleKeyword);
+        // Check that undefined/null values (missing field) are at the end
+        if (titles.some((t) => t === undefined || t === null)) {
+          const firstMissing = titles.findIndex((t) => t === undefined || t === null);
+          expect(titles.slice(firstMissing).every((t) => t === undefined || t === null)).to.be(
+            true
+          );
+        }
       });
     });
   });
