@@ -93,12 +93,10 @@ function createNoRestrictedImportsOverride(options = {}) {
     );
   }
 
-  // Find overrides with no-restricted-imports rule
   const overridesWithNoRestrictedImportRule = (clonedRootConfig.overrides || []).filter(
     (override) => Boolean(override.rules && 'no-restricted-imports' in override.rules)
   );
 
-  // Process each override
   for (const override of overridesWithNoRestrictedImportRule) {
     const noRestrictedImportsRule = override.rules['no-restricted-imports'];
 
