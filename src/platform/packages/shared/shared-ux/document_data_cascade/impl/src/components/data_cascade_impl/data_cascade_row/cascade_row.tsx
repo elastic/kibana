@@ -39,6 +39,7 @@ export function CascadeRow<G extends GroupNode>({
   innerRef,
   populateGroupNodeDataFn,
   rowInstance,
+  rowGapSize,
   virtualRow,
   virtualRowStyle,
 }: CascadeRowProps<G>) {
@@ -75,7 +76,7 @@ export function CascadeRow<G extends GroupNode>({
         display: 'flex',
         position: 'absolute',
         width: '100%',
-        padding: euiTheme.size.s,
+        padding: euiTheme.size[rowGapSize],
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
         borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
         borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
@@ -108,9 +109,9 @@ export function CascadeRow<G extends GroupNode>({
           position: 'relative',
           ...(rowInstance.parentId && rowInstance.getIsAllParentsExpanded()
             ? {
-                padding: `${euiTheme.base / 2}px ${
-                  (euiTheme.base / 2) * (rowInstance.depth + 1)
-                }px`,
+                padding: `${euiTheme.size[rowGapSize]} calc(${euiTheme.size[rowGapSize]} * ${
+                  rowInstance.depth + 1
+                })`,
                 borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
                 borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
                 borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
@@ -122,7 +123,7 @@ export function CascadeRow<G extends GroupNode>({
             borderTopRightRadius: euiTheme.border.radius.small,
           },
           '[data-row-type="sub-group"]:has(+ [data-row-type="root"]) &': {
-            marginBottom: euiTheme.size.s,
+            marginBottom: euiTheme.size[rowGapSize],
             borderBottomLeftRadius: euiTheme.border.radius.small,
             borderBottomRightRadius: euiTheme.border.radius.small,
             borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
