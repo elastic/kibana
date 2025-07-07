@@ -24,7 +24,6 @@ import {
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { removeEuiFocusRing, passDownFocusRing } from '@kbn/css-utils/public/focus_ring_css';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
 
 const DRAG_ICON = <EuiIcon type="grabOmnidirectional" size="m" />;
@@ -311,11 +310,28 @@ const componentStyles = {
       borderRadius: euiTheme.border.radius.medium,
       '&.kbnFieldButton': {
         '&:focus-within, &-isActive': {
-          removeEuiFocusRing,
+          outline: 'none',
+          '&:focus-visible': {
+            outlineStyle: 'none', // Prevents the default EUI focus ring
+          },
         },
       },
       '.kbnFieldButton__button:focus': {
-        ...passDownFocusRing(euiTheme, '.kbnFieldButton__nameInner'),
+        outline: 'none',
+        '&:focus-visible': {
+          outlineStyle: 'none', // Prevents the default EUI focus ring
+        },
+        '.kbnFieldButton__nameInner': {
+          // Safari & Firefox
+          outline: `${euiTheme.focus.width} solid currentColor`,
+        },
+        '&:focus-visible .kbnFieldButton__nameInner': {
+          // Chrome
+          outlineStyle: 'auto',
+        },
+        '&:not(:focus-visible) .kbnFieldButton__nameInner': {
+          outline: 'none',
+        },
       },
       '& button .kbnFieldButton__nameInner:hover': {
         textDecoration: 'underline',
