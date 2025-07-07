@@ -427,7 +427,7 @@ export class AdHocTaskRunner implements CancellableTask {
         (s: AdHocRunSchedule) => s.status === adHocRunStatus.PENDING
       );
       if (this.scheduleToRunIndex > -1) {
-        this.logger.debug(
+        this.logger.warn(
           `Executing ad hoc run for rule ${ruleType.id}:${rule.id} for runAt ${
             this.adHocRunSchedule[this.scheduleToRunIndex].runAt
           }`
@@ -658,6 +658,9 @@ export class AdHocTaskRunner implements CancellableTask {
       this.taskInstance.params.spaceId,
       this.apiKeyToUse
     );
+
+    this.logger.warn('this.adHocRunSchedule');
+    this.logger.warn(JSON.stringify(this.adHocRunSchedule));
 
     const eventLogClient = await this.context.getEventLogClient(fakeRequest);
     const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
