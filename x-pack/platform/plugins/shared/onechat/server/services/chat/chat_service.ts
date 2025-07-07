@@ -38,7 +38,7 @@ import {
   isOnechatError,
   createInternalError,
 } from '@kbn/onechat-common';
-import type { ExecutableConversationalAgent } from '@kbn/onechat-server';
+import type { ExecutableAgent } from '@kbn/onechat-server';
 import { getConnectorList, getDefaultConnector } from '../runner/utils';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
@@ -299,7 +299,7 @@ const getExecutionEvents$ = ({
   conversation$: Observable<Conversation>;
   mode: AgentMode;
   nextInput: RoundInput;
-  agent: ExecutableConversationalAgent;
+  agent: ExecutableAgent;
 }): Observable<ChatAgentEvent> => {
   return conversation$.pipe(
     switchMap((conversation) => {

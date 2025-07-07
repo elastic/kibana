@@ -7,7 +7,7 @@
 
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import {
-  ChatAgentEventType,
+  ChatEventType,
   MessageChunkEvent,
   MessageCompleteEvent,
   ReasoningEvent,
@@ -15,7 +15,7 @@ import {
   ToolCallEventData,
   ToolResultEvent,
   ToolResultEventData,
-} from '@kbn/onechat-common/agents';
+} from '@kbn/onechat-common';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;
@@ -43,14 +43,14 @@ export const hasTag = (event: LangchainStreamEvent, tag: string): boolean => {
 
 export const createToolCallEvent = (data: ToolCallEventData): ToolCallEvent => {
   return {
-    type: ChatAgentEventType.toolCall,
+    type: ChatEventType.toolCall,
     data,
   };
 };
 
 export const createToolResultEvent = (data: ToolResultEventData): ToolResultEvent => {
   return {
-    type: ChatAgentEventType.toolResult,
+    type: ChatEventType.toolResult,
     data,
   };
 };
@@ -60,7 +60,7 @@ export const createTextChunkEvent = (
   { messageId = 'unknown' }: { messageId?: string } = {}
 ): MessageChunkEvent => {
   return {
-    type: ChatAgentEventType.messageChunk,
+    type: ChatEventType.messageChunk,
     data: {
       messageId,
       textChunk: chunk,
@@ -73,7 +73,7 @@ export const createMessageEvent = (
   { messageId = 'unknown' }: { messageId?: string } = {}
 ): MessageCompleteEvent => {
   return {
-    type: ChatAgentEventType.messageComplete,
+    type: ChatEventType.messageComplete,
     data: {
       messageId,
       messageContent: content,
@@ -83,7 +83,7 @@ export const createMessageEvent = (
 
 export const createReasoningEvent = (reasoning: string): ReasoningEvent => {
   return {
-    type: ChatAgentEventType.reasoning,
+    type: ChatEventType.reasoning,
     data: {
       reasoning,
     },

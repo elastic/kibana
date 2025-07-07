@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import {
   type UserIdAndName,
-  type AgentProfile,
+  type AgentDefinition,
   type ToolSelection,
   createAgentNotFoundError,
   createBadRequestError,
@@ -22,11 +22,11 @@ import {
   oneChatDefaultAgentId,
 } from '@kbn/onechat-common';
 import type {
-  AgentProfileListOptions,
-  AgentProfileCreateRequest,
-  AgentProfileUpdateRequest,
-  AgentProfileDeleteRequest,
-} from '../../../../common/agent_profiles';
+  AgentListOptions,
+  AgentCreateRequest,
+  AgentUpdateRequest,
+  AgentDeleteRequest,
+} from '../../../../common/agents';
 import type { ToolsServiceStart } from '../../tools';
 import { AgentProfileStorage, createStorage } from './storage';
 import { fromEs, createRequestToEs, updateProfile, type Document } from './converters';
@@ -34,11 +34,11 @@ import { ensureValidId, validateToolSelection } from './utils';
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
-  get(agentId: string): Promise<AgentProfile>;
-  create(profile: AgentProfileCreateRequest): Promise<AgentProfile>;
-  update(profile: AgentProfileUpdateRequest): Promise<AgentProfile>;
-  list(options?: AgentProfileListOptions): Promise<AgentProfile[]>;
-  delete(options: AgentProfileDeleteRequest): Promise<boolean>;
+  get(agentId: string): Promise<AgentDefinition>;
+  create(profile: AgentCreateRequest): Promise<AgentDefinition>;
+  update(profile: AgentUpdateRequest): Promise<AgentDefinition>;
+  list(options?: AgentListOptions): Promise<AgentDefinition[]>;
+  delete(options: AgentDeleteRequest): Promise<boolean>;
 }
 
 export const createClient = async ({
@@ -89,7 +89,7 @@ class AgentClientImpl implements AgentClient {
     this.user = user;
   }
 
-  async get(agentId: string): Promise<AgentProfile> {
+  async get(agentId: string): Promise<AgentDefinition> {
     let document: Document;
     try {
       document = await this.storage.getClient().get({ id: agentId });
@@ -120,7 +120,7 @@ class AgentClientImpl implements AgentClient {
     }
   }
 
-  async list(options: AgentProfileListOptions = {}): Promise<AgentProfile[]> {
+  async list(options: AgentListOptions = {}): Promise<AgentDefinition[]> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
@@ -133,7 +133,7 @@ class AgentClientImpl implements AgentClient {
     return response.hits.hits.map((hit) => fromEs(hit as Document));
   }
 
-  async create(profile: AgentProfileCreateRequest): Promise<AgentProfile> {
+  async create(profile: AgentCreateRequest): Promise<AgentDefinition> {
     const now = new Date();
 
     ensureValidId(profile.id);
@@ -157,7 +157,7 @@ class AgentClientImpl implements AgentClient {
     return this.get(profile.id);
   }
 
-  async update(profileUpdate: AgentProfileUpdateRequest): Promise<AgentProfile> {
+  async update(profileUpdate: AgentUpdateRequest): Promise<AgentDefinition> {
     const now = new Date();
     const document = await this.storage.getClient().get({ id: profileUpdate.id });
 
@@ -183,7 +183,7 @@ class AgentClientImpl implements AgentClient {
     return this.get(profileUpdate.id);
   }
 
-  async delete(options: AgentProfileDeleteRequest): Promise<boolean> {
+  async delete(options: AgentDeleteRequest): Promise<boolean> {
     const { id } = options;
     let document: Document;
     try {

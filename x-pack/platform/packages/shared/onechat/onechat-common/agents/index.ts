@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export { AgentType, AgentMode, oneChatDefaultAgentId, type AgentDescriptor } from './definition';
+export {
+  AgentType,
+  AgentMode,
+  oneChatDefaultAgentId,
+  type AgentDescriptor,
+  type AgentDefinition,
+} from './definition';
 export {
   type AgentIdentifier,
   type PlainIdAgentIdentifier,

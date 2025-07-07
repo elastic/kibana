@@ -34,7 +34,7 @@ export async function validateToolSelection({
   const allProviders = new Set(allTools.map((t: any) => t.meta.providerId));
 
   for (const selection of toolSelection) {
-    const { provider, toolIds } = selection;
+    const { provider, tool_ids: toolIds } = selection;
     if (!provider) {
       // If provider is not specified, check for ambiguity
       for (const toolId of toolIds) {

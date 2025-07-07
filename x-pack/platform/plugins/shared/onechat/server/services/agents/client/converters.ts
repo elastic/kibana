@@ -6,18 +6,15 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { type AgentProfile, AgentType } from '@kbn/onechat-common';
-import type {
-  AgentProfileCreateRequest,
-  AgentProfileUpdateRequest,
-} from '../../../../common/agent_profiles';
+import { type AgentDefinition, AgentType } from '@kbn/onechat-common';
+import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../common/agents';
 import { AgentProfileProperties } from './storage';
 
 export type Document = Pick<GetResponse<AgentProfileProperties>, '_source' | '_id'>;
 
 const defaultAgentType = AgentType.chat;
 
-export const fromEs = (document: Document): AgentProfile => {
+export const fromEs = (document: Document): AgentDefinition => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -38,7 +35,7 @@ export const createRequestToEs = ({
   profile,
   creationDate,
 }: {
-  profile: AgentProfileCreateRequest;
+  profile: AgentCreateRequest;
   creationDate: Date;
 }): AgentProfileProperties => {
   return {
@@ -60,7 +57,7 @@ export const updateProfile = ({
   updateDate,
 }: {
   profile: AgentProfileProperties;
-  update: AgentProfileUpdateRequest;
+  update: AgentUpdateRequest;
   updateDate: Date;
 }): AgentProfileProperties => {
   const updated: AgentProfileProperties = {

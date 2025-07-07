@@ -106,7 +106,7 @@ describe('Onechat runner', () => {
 
       const params: ScopedRunnerRunAgentParams = {
         agentId: 'test-tool',
-        agentParams: { foo: 'bar' },
+        agentParams: { nextInput: { message: 'dolly' } },
       };
 
       const runner = createScopedRunner(runnerDeps);
@@ -134,7 +134,7 @@ describe('Onechat runner', () => {
 
       const params: RunAgentParams = {
         agentId: 'test-tool',
-        agentParams: { foo: 'bar' },
+        agentParams: { nextInput: { message: 'dolly' } },
         request,
       };
 

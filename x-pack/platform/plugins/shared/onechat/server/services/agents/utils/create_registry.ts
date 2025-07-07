@@ -76,7 +76,7 @@ export const toExecutableAgent = ({
   };
 };
 
-export const createExecuteHandler = <TParams = unknown, TResult = unknown>({
+export const createExecuteHandler = ({
   agentId,
   request,
   getRunner,
@@ -84,7 +84,7 @@ export const createExecuteHandler = <TParams = unknown, TResult = unknown>({
   agentId: string;
   getRunner: () => Runner;
   request: KibanaRequest;
-}): ExecutableAgentHandlerFn<TParams, TResult> => {
+}): ExecutableAgentHandlerFn => {
   return (params) => {
     return getRunner().runAgent({
       ...params,

@@ -6,12 +6,7 @@
  */
 
 import type { StructuredToolIdentifier } from '../tools/tools';
-import {
-  oneChatDefaultAgentId,
-  toSerializedAgentIdentifier,
-  type SerializedAgentIdentifier,
-  oneChatAgentProviderIds,
-} from '../agents';
+import { oneChatDefaultAgentId, type PlainIdAgentIdentifier } from '../agents';
 import type { UserIdAndName } from '../base/users';
 
 /**
@@ -119,7 +114,7 @@ export interface ConversationRound {
 
 export interface Conversation {
   id: string;
-  agentId: SerializedAgentIdentifier;
+  agentId: PlainIdAgentIdentifier;
   user: UserIdAndName;
   title: string;
   createdAt: string;
@@ -131,10 +126,7 @@ export const createEmptyConversation = (): Conversation => {
   const now = new Date().toISOString();
   return {
     id: 'new',
-    agentId: toSerializedAgentIdentifier({
-      agentId: oneChatDefaultAgentId,
-      providerId: oneChatAgentProviderIds.default,
-    }),
+    agentId: oneChatDefaultAgentId,
     user: { id: '', username: '' },
     title: '',
     createdAt: now,

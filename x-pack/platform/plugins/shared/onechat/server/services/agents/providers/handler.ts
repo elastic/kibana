@@ -6,7 +6,7 @@
  */
 
 import { AgentMode, ToolSelection } from '@kbn/onechat-common';
-import type { ConversationalAgentHandlerFn } from '@kbn/onechat-server';
+import type { AgentHandlerFn } from '@kbn/onechat-server';
 import { runAgent } from '../modes';
 
 export interface CreateConversationalAgentHandlerParams {
@@ -22,7 +22,7 @@ export const createHandler = ({
   agentId,
   toolSelection,
   customInstructions,
-}: CreateConversationalAgentHandlerParams): ConversationalAgentHandlerFn => {
+}: CreateConversationalAgentHandlerParams): AgentHandlerFn => {
   return async (
     { agentParams: { nextInput, conversation = [], agentMode = AgentMode.normal }, runId },
     context

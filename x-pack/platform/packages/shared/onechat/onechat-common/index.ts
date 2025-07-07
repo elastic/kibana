@@ -64,6 +64,7 @@ export {
   AgentMode,
   type AgentDescriptor,
   type AgentIdentifier,
+  type AgentDefinition,
   type PlainIdAgentIdentifier,
   type SerializedAgentIdentifier,
   type StructuredAgentIdentifier,

@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import { createAgentProfileService } from './service';
-import type { AgentProfileCreateRequest } from '../../../../common/agent_profiles';
+import type { AgentCreateRequest } from '../../../../common/agent_profiles';
 import { createMockedAgentProfileClient } from '../../../test_utils/agents';
 import { RegisteredToolWithMeta } from '../../tools/types';
 import { createToolsServiceStartMock } from '../../../test_utils/tools';
@@ -33,7 +33,7 @@ const generateMockTool = (id: string, providerId: string): RegisteredToolWithMet
   };
 };
 
-const baseProfile: Omit<AgentProfileCreateRequest, 'toolSelection'> = {
+const baseProfile: Omit<AgentCreateRequest, 'toolSelection'> = {
   id: 'agent-1',
   name: 'Agent',
   description: 'desc',

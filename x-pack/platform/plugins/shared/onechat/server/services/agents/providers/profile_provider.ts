@@ -8,65 +8,60 @@
 import {
   AgentType,
   toStructuredAgentIdentifier,
-  AgentProfile,
-  oneChatAgentProviderIds,
+  AgentDefinition,
   builtinToolProviderId,
   allToolsSelectionWildcard as allTools,
 } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ConversationalAgentDefinition } from '@kbn/onechat-server';
+import type { ProvidedAgent } from '@kbn/onechat-server';
 import type { AgentProviderWithId } from '../types';
 import { createHandler } from './handler';
-import type { AgentProfileClient } from '../profiles/client';
+import type { AgentClient } from '../client';
 
 /**
  * Returns an agent provider exposing profile-based agents.
  */
 export const creatProfileProvider = ({
-  getProfileClient,
+  getScopedClient,
 }: {
-  getProfileClient: (request: KibanaRequest) => Promise<AgentProfileClient>;
+  getScopedClient: (request: KibanaRequest) => Promise<AgentClient>;
 }): AgentProviderWithId => {
   const provider: AgentProviderWithId = {
-    id: oneChatAgentProviderIds.profile,
+    id: 'profile',
     has: async (options) => {
-      const profileClient = await getProfileClient(options.request);
+      const agentClient = await getScopedClient(options.request);
       const { agentId } = toStructuredAgentIdentifier(options.agentId);
-      return profileClient.has(agentId);
+      return agentClient.has(agentId);
     },
     get: async (options) => {
-      const profileClient = await getProfileClient(options.request);
+      const agentClient = await getScopedClient(options.request);
       const { agentId } = toStructuredAgentIdentifier(options.agentId);
-      const profile = await profileClient.get(agentId);
-      return profileToDescriptor({ profile });
+      const agent = await agentClient.get(agentId);
+      return profileToDescriptor({ agent });
     },
     list: async (options) => {
-      const profileClient = await getProfileClient(options.request);
-      const agentProfiles = await profileClient.list();
-      return agentProfiles.map((profile) => profileToDescriptor({ profile }));
+      const agentClient = await getScopedClient(options.request);
+      const agentProfiles = await agentClient.list();
+      return agentProfiles.map((agent) => profileToDescriptor({ agent }));
     },
   };
 
   return provider;
 };
 
-const profileToDescriptor = ({
-  profile,
-}: {
-  profile: AgentProfile;
-}): ConversationalAgentDefinition => {
+const profileToDescriptor = ({ agent }: { agent: AgentDefinition }): ProvidedAgent => {
   return {
-    type: AgentType.conversational,
-    id: profile.id,
-    description: profile.description,
+    type: AgentType.chat,
+    id: agent.id,
+    description: agent.description,
     handler: createHandler({
-      agentId: profile.id,
+      agentId: agent.id,
       toolSelection: [
-        ...(profile.toolSelection ?? []),
-        // built-in tools are included by default
-        { provider: builtinToolProviderId, toolIds: [allTools] },
+        ...(agent.configuration.tools ?? [
+          { provider: builtinToolProviderId, tool_ids: [allTools] },
+        ]),
       ],
-      customInstructions: profile.customInstructions,
+      customInstructions: agent.configuration.additional_prompt,
     }),
   };
 };

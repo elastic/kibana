@@ -39,7 +39,7 @@ describe('runAgent', () => {
 
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
-      agentParams: { foo: 'bar' },
+      agentParams: { nextInput: { message: 'bar' } },
     };
 
     await runAgent({
@@ -57,7 +57,7 @@ describe('runAgent', () => {
   it('calls the agent handler with the expected parameters', async () => {
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
-      agentParams: { hello: 'dolly' },
+      agentParams: { nextInput: { message: 'dolly' } },
     };
 
     await runAgent({
@@ -78,7 +78,7 @@ describe('runAgent', () => {
   it('returns the expected value', async () => {
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
-      agentParams: { over: '9000' },
+      agentParams: { nextInput: { message: 'dolly' } },
     };
 
     agent.handler.mockResolvedValue({

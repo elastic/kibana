@@ -7,13 +7,12 @@
 
 import {
   oneChatDefaultAgentId,
-  oneChatAgentProviderIds,
   allToolsSelectionWildcard as allTools,
   AgentType,
   createAgentNotFoundError,
   toSerializedAgentIdentifier,
 } from '@kbn/onechat-common';
-import type { ConversationalAgentDefinition } from '@kbn/onechat-server';
+import type { ProvidedAgent } from '@kbn/onechat-server';
 import type { AgentProviderWithId } from '../types';
 import { createHandler } from './handler';
 
@@ -22,7 +21,7 @@ import { createHandler } from './handler';
  */
 export const createDefaultAgentProvider = (): AgentProviderWithId => {
   const provider: AgentProviderWithId = {
-    id: oneChatAgentProviderIds.default,
+    id: 'default',
     has: ({ agentId }) => {
       return agentId === oneChatDefaultAgentId;
     },
@@ -40,14 +39,14 @@ export const createDefaultAgentProvider = (): AgentProviderWithId => {
   return provider;
 };
 
-const createDefaultAgentDescriptor = (): ConversationalAgentDefinition => {
+const createDefaultAgentDescriptor = (): ProvidedAgent => {
   return {
-    type: AgentType.conversational,
+    type: AgentType.chat,
     id: oneChatDefaultAgentId,
     description: 'Default onechat agent',
     handler: createHandler({
       agentId: oneChatDefaultAgentId,
-      toolSelection: [{ toolIds: [allTools] }],
+      toolSelection: [{ tool_ids: [allTools] }],
     }),
   };
 };

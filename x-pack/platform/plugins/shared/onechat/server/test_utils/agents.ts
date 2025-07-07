@@ -9,11 +9,11 @@ import { AgentType } from '@kbn/onechat-common';
 import type {
   AgentRegistry,
   ProvidedAgent,
-  ConversationalAgentHandlerFn,
+  AgentHandlerFn,
   AgentProvider,
 } from '@kbn/onechat-server';
 import type { AgentsServiceStart, InternalAgentRegistry } from '../services/agents';
-import type { AgentProfileClient, AgentProfileService } from '../services/agents/profiles';
+import type { AgentClient } from '../services/agents/client';
 
 export type AgentProviderMock = jest.Mocked<AgentProvider> & {
   id: string;
@@ -25,24 +25,12 @@ export type AgentsServiceStartMock = AgentsServiceStart & {
 };
 
 export type MockedAgent = Omit<ProvidedAgent, 'handler'> & {
-  handler: jest.MockedFn<ConversationalAgentHandlerFn>;
+  handler: jest.MockedFn<AgentHandlerFn>;
   providerId: string;
 };
-export type AgentProfileClientMock = jest.Mocked<AgentProfileClient>;
-export type AgentProfileServiceMock = jest.Mocked<AgentProfileService>;
+export type AgentClientMock = jest.Mocked<AgentClient>;
 
-export const createMockedAgentProfileService = (): AgentProfileServiceMock => {
-  return {
-    has: jest.fn(),
-    get: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    list: jest.fn(),
-    delete: jest.fn(),
-  };
-};
-
-export const createMockedAgentProfileClient = (): AgentProfileClientMock => {
+export const createMockedAgentClient = (): AgentClientMock => {
   return {
     has: jest.fn(),
     get: jest.fn(),
@@ -55,7 +43,7 @@ export const createMockedAgentProfileClient = (): AgentProfileClientMock => {
 
 export const createMockedAgent = (parts: Partial<MockedAgent> = {}): MockedAgent => {
   return {
-    type: AgentType.conversational,
+    type: AgentType.chat,
     id: 'test_agent',
     providerId: 'provider_id',
     description: 'My test agent',
@@ -94,6 +82,6 @@ export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
   return {
     registry: createInternalAgentRegistryMock(),
     execute: jest.fn(),
-    getProfileService: jest.fn().mockImplementation(() => createMockedAgentProfileService()),
+    getScopedClient: jest.fn().mockImplementation(() => createMockedAgentClient()),
   };
 };

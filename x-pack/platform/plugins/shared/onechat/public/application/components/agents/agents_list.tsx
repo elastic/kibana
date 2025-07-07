@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AgentProfile } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/onechat-common';
 import { useOnechatAgents } from '../../hooks/use_agents';
 
-const columns: Array<EuiBasicTableColumn<AgentProfile>> = [
+const columns: Array<EuiBasicTableColumn<AgentDefinition>> = [
   {
     field: 'name',
     name: i18n.translate('xpack.onechat.agents.nameLabel', { defaultMessage: 'Name' }),
@@ -31,7 +31,7 @@ const columns: Array<EuiBasicTableColumn<AgentProfile>> = [
     render: (description: string) => <EuiText size="s">{description}</EuiText>,
   },
   {
-    field: 'customInstructions',
+    field: 'configuration.additional_prompt',
     name: i18n.translate('xpack.onechat.agents.customInstructionsLabel', {
       defaultMessage: 'Custom Instructions',
     }),
