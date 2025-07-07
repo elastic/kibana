@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
@@ -52,6 +52,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
+  dataView: DataView;
   dataViewSpec?: DataViewSpec;
   options: TopNOption[];
   paddingSize?: 's' | 'm' | 'l' | 'none';
@@ -70,6 +71,7 @@ const TopNComponent: React.FC<Props> = ({
   filters,
   field,
   from,
+  dataView,
   dataViewSpec,
   options,
   paddingSize,
@@ -123,6 +125,7 @@ const TopNComponent: React.FC<Props> = ({
             filters={applicableFilters}
             from={from}
             headerChildren={headerChildren}
+            dataView={dataView}
             dataViewSpec={dataViewSpec}
             onlyField={field}
             paddingSize={paddingSize}

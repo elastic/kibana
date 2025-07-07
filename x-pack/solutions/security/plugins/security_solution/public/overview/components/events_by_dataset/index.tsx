@@ -7,26 +7,23 @@
 
 import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import type { Filter, Query } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { EuiButton } from '@elastic/eui';
 import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
+import { APP_UI_ID, DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
-import type {
-  MatrixHistogramConfigs,
-  MatrixHistogramOption,
-} from '../../../common/components/matrix_histogram/types';
+import type { MatrixHistogramConfigs, MatrixHistogramOption } from '../../../common/components/matrix_histogram/types';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
-  eventsStackByOptions,
   eventsHistogramConfig,
+  eventsStackByOptions,
   NO_BREAKDOWN_STACK_BY_VALUE,
 } from '../../../common/components/events_tab/histogram_configurations';
 import { HostsTableType } from '../../../explore/hosts/store/model';
@@ -48,7 +45,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   filters: Filter[];
   headerChildren?: React.ReactNode;
   dataViewSpec?: DataViewSpec;
-  dataView?: DataView;
+  dataView: DataView;
   onlyField?: string;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;

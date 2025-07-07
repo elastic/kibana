@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Filter, EsQueryConfig, Query, DataViewBase } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import {
+  buildEsQuery,
+  FilterStateStore,
   fromKueryExpression,
   toElasticsearchQuery,
-  FilterStateStore,
-  buildEsQuery,
 } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
@@ -34,7 +34,7 @@ export interface CombineQueries {
    * @deprecated Use `dataView` instead. Which accepts a DataView instance instead of a DataViewSpec.
    */
   dataViewSpec?: DataViewSpec;
-  dataView?: DataView;
+  dataView: DataView;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;
@@ -216,7 +216,7 @@ export const convertToBuildEsQuery = ({
   filters,
 }: {
   config: EsQueryConfig;
-  dataView?: DataView;
+  dataView: DataView;
   /**
    * @deprecated Use `dataView` instead. Which accepts a DataView instance instead of a DataViewSpec.
    */

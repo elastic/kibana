@@ -21,7 +21,7 @@ export const convertFormDataInBaseSchedule = (
   connector: AIConnector,
   dataViewSpec: DataViewSpec,
   uiSettings: IUiSettingsClient,
-  dataView?: DataView
+  dataView: DataView
 ) => {
   const alertsSelectionSettings = scheduleData.alertsSelectionSettings;
 
