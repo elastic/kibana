@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformControlGroupIn } from './control_group_in_transforms';
+import { transformControlGroupIn } from './transform_control_group_in';
 import { ControlGroupAttributes } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from '@kbn/controls-plugin/common';
 
