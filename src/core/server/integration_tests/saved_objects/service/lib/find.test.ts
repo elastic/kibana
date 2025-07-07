@@ -99,6 +99,7 @@ describe('SOR - find API', () => {
   });
 
   afterAll(async () => {
+    await root?.shutdown();
     await esServer?.stop();
   });
 
