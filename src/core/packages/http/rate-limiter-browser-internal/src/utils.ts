@@ -9,6 +9,8 @@
 
 import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 
+const RATE_LIMITER_POLICY = 'elu';
+
 export function isRateLimiterError(error: unknown): error is IHttpFetchError {
   return !!(
     isHttpFetchError(error) &&
@@ -16,8 +18,8 @@ export function isRateLimiterError(error: unknown): error is IHttpFetchError {
     error.response.headers
       .get('RateLimit')
       ?.split(';')
-      .map((g) => g.replace(/^['"]?(.*?)['"]?$/, '$1'))
-      .includes('elu')
+      .map((chunk) => chunk.replace(/^['"]?(.*?)['"]?$/, '$1'))
+      .includes(RATE_LIMITER_POLICY)
   );
 }
 

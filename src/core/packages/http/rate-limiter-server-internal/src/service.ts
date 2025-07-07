@@ -24,6 +24,8 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { EluMetrics } from '@kbn/core-metrics-server';
 import { EluTerm, type InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 
+const RATE_LIMITER_POLICY = 'elu';
+
 /** @internal */
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -61,7 +63,7 @@ export class HttpRateLimiterService
       body: 'Server is overloaded',
       headers: {
         'Retry-After': `${timeout}`,
-        RateLimit: `"elu";r=0;t=${timeout}`,
+        RateLimit: `"${RATE_LIMITER_POLICY}";r=0;t=${timeout}`,
       },
     });
   };
