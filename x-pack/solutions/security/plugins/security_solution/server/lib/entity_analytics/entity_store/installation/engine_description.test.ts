@@ -88,4 +88,29 @@ describe('getUnitedEntityDefinition', () => {
       expect(entityManagerDefinition).toMatchSnapshot();
     });
   });
+  describe('generic', () => {
+    const description = createEngineDescription({
+      entityType: 'generic',
+      namespace: 'test',
+      requestParams: defaultOptions,
+      defaultIndexPatterns,
+      config: {
+        syncDelay: duration(60, 'seconds'),
+        frequency: duration(60, 'seconds'),
+        developer: { pipelineDebugMode: false },
+      },
+    });
+
+    it('mapping', () => {
+      expect(description.indexMappings).toMatchSnapshot();
+    });
+
+    it('entityManagerDefinition', () => {
+      const entityManagerDefinition = convertToEntityManagerDefinition(description, {
+        namespace: 'test',
+        filter: '',
+      });
+      expect(entityManagerDefinition).toMatchSnapshot();
+    });
+  });
 });

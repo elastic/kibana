@@ -2409,6 +2409,7 @@ x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1 @elastic/entit
 x-pack/platform/plugins/shared/entity_manager/server/lib/entities @elastic/entity-store
 x-pack/platform/plugins/shared/entity_manager/server/lib/auth @elastic/entity-store
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/entity-store
+x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store @elastic/entity-store
 x-pack/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/ @elastic/entity-store
 
 ## Security Solution sub teams - Threat Hunting
