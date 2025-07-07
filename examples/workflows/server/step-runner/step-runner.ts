@@ -1,3 +1,4 @@
+import nunjucks from 'nunjucks';
 import { WorkflowStep, Provider } from '../models';
 
 export interface RunStepResult {
@@ -20,8 +21,17 @@ export class StepRunner {
 
     const providerInputs = step.inputs || {};
 
+    const renderedInputs = Object.entries(providerInputs).reduce((accumulator, [key, value]) => {
+      if (typeof value === 'string') {
+        accumulator[key] = nunjucks.renderString(String(value), context);
+      } else {
+        accumulator[key] = value;
+      }
+      return accumulator;
+    }, {} as Record<string, any>);
+
     try {
-      const stepOutput = await stepProvider.action(providerInputs, context);
+      const stepOutput = await stepProvider.action(renderedInputs);
       return {
         output: stepOutput || undefined,
         error: undefined,

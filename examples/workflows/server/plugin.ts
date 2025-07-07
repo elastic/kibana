@@ -10,6 +10,8 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+import { Client } from '@elastic/elasticsearch';
+import { v4 as generateUuid } from 'uuid';
 import type {
   WorkflowsPluginSetup,
   WorkflowsPluginSetupDeps,
@@ -27,9 +29,7 @@ import {
 } from './models';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { providers, workflows } from './mock';
-import { StepRunner, StepRunnerResult } from './step-runner/step-runner';
-import { v4 as generateUuid } from 'uuid';
-import { Client } from '@elastic/elasticsearch';
+import { StepRunner } from './step-runner/step-runner';
 
 interface SetupDeps {
   taskManager: TaskManagerSetupContract;

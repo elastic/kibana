@@ -3,31 +3,9 @@ import { Workflow, Provider } from './models';
 export const providers: Record<string, Provider> = {
   console: {
     type: 'console',
-    action: async (stepInputs?: Record<string, any>, context?: Record<string, any>) => {
-      function getValueByPath(path: string, obj: Record<string, any>): any {
-        return path.split('.').reduce((acc, key) => {
-          if (acc && typeof acc === 'object' && key in acc) {
-            return acc[key];
-          }
-          return undefined;
-        }, obj);
-      }
-
-      function injectVariables(template: string, context: Record<string, any>): string {
-        return template.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_, path) => {
-          const value = getValueByPath(path.trim(), context);
-          return value !== undefined ? String(value) : '';
-        });
-      }
-
-      // Usage
-      const messageTemplate = stepInputs?.message as string;
-      const contextObject = context || {};
-
-      const finalMessage = injectVariables(messageTemplate, contextObject);
-
+    action: async (stepInputs?: Record<string, any>) => {
       // eslint-disable-next-line no-console
-      console.log(finalMessage);
+      console.log(stepInputs?.message);
     },
     inputsDefinition: {
       message: {
@@ -39,33 +17,10 @@ export const providers: Record<string, Provider> = {
   },
   'slow-console': {
     type: 'slow-console',
-    action: async (stepInputs?: Record<string, any>, context?: Record<string, any>) => {
+    action: async (stepInputs?: Record<string, any>) => {
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
-      function getValueByPath(path: string, obj: Record<string, any>): any {
-        return path.split('.').reduce((acc, key) => {
-          if (acc && typeof acc === 'object' && key in acc) {
-            return acc[key];
-          }
-          return undefined;
-        }, obj);
-      }
-
-      function injectVariables(template: string, ctx: Record<string, any>): string {
-        return template.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_, path) => {
-          const value = getValueByPath(path.trim(), ctx);
-          return value !== undefined ? String(value) : '';
-        });
-      }
-
-      // Usage
-      const messageTemplate = stepInputs?.message as string;
-      const contextObject = context || {};
-
-      const finalMessage = injectVariables(messageTemplate, contextObject);
-
-      // eslint-disable-next-line no-console
-      console.log(finalMessage);
+      console.log(stepInputs?.message);
     },
     inputsDefinition: {
       message: {

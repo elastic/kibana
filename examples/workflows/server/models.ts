@@ -6,10 +6,7 @@ export interface ProviderInput {
 
 export interface Provider {
   type: string;
-  action: (
-    stepInputs?: Record<string, any>,
-    context?: Record<string, any>
-  ) => Promise<Record<string, any> | void>;
+  action: (stepInputs?: Record<string, any>) => Promise<Record<string, any> | void>;
   inputsDefinition: Record<string, ProviderInput>;
 }
 
