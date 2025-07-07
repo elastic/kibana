@@ -31,7 +31,7 @@ export function Timestamp({
   const absoluteTime = asAbsoluteDateTime(timestamp, timeUnit);
 
   return absoluteTimeType === 'inline' ? (
-    <EuiText size={size} data-test-subj="unifiedDocViewerObservabilityTracesTimestamp">
+    <EuiText size={size} data-test-subj="apmUiSharedTimestamp">
       {absoluteTime} ({relativeTime})
     </EuiText>
   ) : (
