@@ -8,7 +8,6 @@
 import { Send } from '@langchain/langgraph';
 import { NodeType } from '../constants';
 import { AgentState } from '../types';
-import { NEW_CHAT } from '../../../../../routes/helpers';
 
 /*
  * We use a single router endpoint for common conditional edges.
@@ -23,15 +22,6 @@ export function stepRouter(state: AgentState): string | Send {
         return state.hasRespondStep ? NodeType.RESPOND : NodeType.END;
       }
       return NodeType.TOOLS;
-
-    case NodeType.GET_PERSISTED_CONVERSATION:
-      if (state.conversation?.title?.length && state.conversation?.title !== NEW_CHAT) {
-        // since empty string is not a valid edge, nothing will happen
-        return '';
-      }
-      return new Send(NodeType.GENERATE_CHAT_TITLE, {
-        ...state,
-      });
 
     case NodeType.MODEL_INPUT:
       return state.conversationId ? NodeType.GET_PERSISTED_CONVERSATION : NodeType.AGENT;
