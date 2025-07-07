@@ -15,6 +15,7 @@ x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/appex-ai-infra
 x-pack/platform/packages/private/ml/aiops_change_point_detection @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_components @elastic/ml-ui
@@ -69,6 +70,7 @@ packages/kbn-bazel-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-bfetch-error @elastic/appex-sharedux
 examples/bfetch_explorer @elastic/appex-sharedux
 src/platform/plugins/shared/bfetch @elastic/appex-sharedux
+src/platform/packages/shared/kbn-cache-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
@@ -559,6 +561,7 @@ x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/respon
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
+x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/appex-ai-infra
 x-pack/platform/packages/private/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
@@ -708,6 +711,8 @@ src/platform/test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-tea
 src/platform/packages/shared/kbn-openapi-bundler @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-rule-management
+src/platform/packages/shared/kbn-opentelemetry-attributes @elastic/kibana-core
+src/platform/packages/shared/kbn-opentelemetry-utils @elastic/kibana-core
 packages/kbn-optimizer @elastic/kibana-operations
 src/platform/packages/private/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
@@ -979,6 +984,7 @@ src/platform/packages/shared/kbn-std @elastic/kibana-core
 src/platform/packages/private/kbn-stdio-dev-helpers @elastic/kibana-operations
 src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui
 src/platform/packages/shared/kbn-storybook @elastic/kibana-operations
+x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-program-team
 x-pack/platform/plugins/shared/streams_app @elastic/streams-program-team
 x-pack/solutions/observability/plugins/observability_streams_wrapper @elastic/streams-program-team
 x-pack/platform/plugins/shared/streams @simianhacker @flash1293 @dgieselaar
@@ -1023,6 +1029,7 @@ src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-tooling-log @elastic/kibana-operations
 src/platform/packages/shared/kbn-traced-es-client @elastic/observability-ui
 src/platform/packages/shared/kbn-tracing @elastic/kibana-core @elastic/obs-ai-assistant
+src/platform/packages/shared/kbn-tracing-config @elastic/kibana-core
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
 src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
@@ -2436,6 +2443,9 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
+
+# Token tracking
+x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-generative-ai
 
 ## Defend Workflows owner connectors
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows

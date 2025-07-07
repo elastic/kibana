@@ -585,13 +585,14 @@ describe('ES deprecations table', () => {
         });
         testBed.component.update();
       });
-      it('it displays reindexing and unfreeze button for frozen index', async () => {
+      it('it displays reindexing unfreeze and delete button for frozen index', async () => {
         const { find, exists } = testBed;
 
         expect(find('reindexTableCell-actions').length).toBe(1);
 
         expect(exists('deprecation-unfreeze-unfreeze')).toBe(true);
         expect(exists('deprecation-unfreeze-reindex')).toBe(true);
+        expect(exists('deprecation-unfreeze-delete')).toBe(true);
       });
       it('it only displays reindexing button if reindex in progress', async () => {
         httpRequestsMockHelpers.setReindexStatusResponse(
@@ -625,6 +626,7 @@ describe('ES deprecations table', () => {
 
         expect(exists('deprecation-unfreeze-unfreeze')).toBe(false);
         expect(exists('deprecation-unfreeze-reindex')).toBe(true);
+        expect(exists('deprecation-unfreeze-delete')).toBe(false);
       });
       it('it only displays unfreeze button if unfreezing in progress', async () => {
         const { find, exists, actions } = testBed;
@@ -640,6 +642,25 @@ describe('ES deprecations table', () => {
 
         expect(exists('deprecation-unfreeze-unfreeze')).toBe(true);
         expect(exists('deprecation-unfreeze-reindex')).toBe(false);
+        expect(exists('deprecation-unfreeze-delete')).toBe(false);
+      });
+      it('it only displays delete button if deleting in progress', async () => {
+        const { find, exists, actions } = testBed;
+
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'unfreeze',
+          index: 0,
+          action: 'delete',
+        });
+
+        await actions.reindexDeprecationFlyout.fillDeleteInputText();
+        await actions.reindexDeprecationFlyout.clickDeleteButton();
+
+        expect(find('reindexTableCell-actions').length).toBe(1);
+
+        expect(exists('deprecation-unfreeze-unfreeze')).toBe(false);
+        expect(exists('deprecation-unfreeze-reindex')).toBe(false);
+        expect(exists('deprecation-unfreeze-delete')).toBe(true);
       });
     });
     describe('reindexing indices', () => {
@@ -702,28 +723,31 @@ describe('ES deprecations table', () => {
         testBed.component.update();
       };
 
-      it('it displays reindexing and readonly for indices if both are valid', async () => {
+      it('it displays reindexing, readonly and delete for indices if all are valid', async () => {
         await setupReindexingTest();
         const { find, exists } = testBed;
         expect(find('reindexTableCell-actions').length).toBe(1);
         expect(exists('deprecation-reindex-readonly')).toBe(true);
         expect(exists('deprecation-reindex-reindex')).toBe(true);
+        expect(exists('deprecation-reindex-delete')).toBe(true);
       });
-      it('only displays read-only button if reindexing is excluded', async () => {
+      it('only displays read-only button and delete if reindexing is excluded', async () => {
         await setupReindexingTest({ excludedActions: ['readOnly'] });
         const { find, exists } = testBed;
         expect(find('reindexTableCell-actions').length).toBe(1);
         expect(exists('deprecation-reindex-readonly')).toBe(false);
         expect(exists('deprecation-reindex-reindex')).toBe(true);
+        expect(exists('deprecation-reindex-delete')).toBe(true);
       });
-      it('only displays read-only button if index is a follower index', async () => {
+      it('only displays read-only button and delete if index is a follower index', async () => {
         await setupReindexingTest({ metaOverrides: { isFollowerIndex: true } });
         const { find, exists } = testBed;
         expect(find('reindexTableCell-actions').length).toBe(1);
         expect(exists('deprecation-reindex-readonly')).toBe(true);
         expect(exists('deprecation-reindex-reindex')).toBe(false);
+        expect(exists('deprecation-reindex-delete')).toBe(true);
       });
-      it('only displays reindex button if read-only is excluded', async () => {
+      it('only displays reindex button and delete if read-only is excluded', async () => {
         await setupReindexingTest({
           excludedActions: ['reindex'],
           index: 'readonly_index',
@@ -732,6 +756,7 @@ describe('ES deprecations table', () => {
         expect(find('reindexTableCell-actions').length).toBe(1);
         expect(exists('deprecation-reindex-readonly')).toBe(true);
         expect(exists('deprecation-reindex-reindex')).toBe(false);
+        expect(exists('deprecation-reindex-delete')).toBe(true);
       });
       it('it only displays readonly button if readonly in progress', async () => {
         const { exists, actions } = testBed;
@@ -744,6 +769,21 @@ describe('ES deprecations table', () => {
 
         expect(exists('deprecation-reindex-readonly')).toBe(true);
         expect(exists('deprecation-reindex-reindex')).toBe(false);
+        expect(exists('deprecation-reindex-delete')).toBe(false);
+      });
+      it('it only displays delete button if delete in progress', async () => {
+        const { exists, actions } = testBed;
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'reindex',
+          index: 0,
+          action: 'delete',
+        });
+        await actions.reindexDeprecationFlyout.fillDeleteInputText();
+        await actions.reindexDeprecationFlyout.clickDeleteButton();
+
+        expect(exists('deprecation-reindex-readonly')).toBe(false);
+        expect(exists('deprecation-reindex-reindex')).toBe(false);
+        expect(exists('deprecation-reindex-delete')).toBe(true);
       });
     });
   });
@@ -783,7 +823,7 @@ describe('ES deprecations table', () => {
       testBed.component.update();
     });
 
-    it('displays read-only and reindex depending if both are valid', async () => {
+    it('displays read-only, reindex and delete if all are valid', async () => {
       const { find } = testBed;
       const actionsCell = find('dataStreamReindexTableCell-actions').at(0);
 
@@ -791,6 +831,9 @@ describe('ES deprecations table', () => {
         true
       );
       expect(actionsCell.find('[data-test-subj="deprecation-dataStream-readonly"]').exists()).toBe(
+        true
+      );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-delete"]').exists()).toBe(
         true
       );
     });
@@ -806,6 +849,9 @@ describe('ES deprecations table', () => {
       expect(actionsCell.find('[data-test-subj="deprecation-dataStream-readonly"]').exists()).toBe(
         false
       );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-delete"]').exists()).toBe(
+        true
+      );
     });
 
     it('recommends readonly if reindex is excluded', async () => {
@@ -817,6 +863,9 @@ describe('ES deprecations table', () => {
         false
       );
       expect(actionsCell.find('[data-test-subj="deprecation-dataStream-readonly"]').exists()).toBe(
+        true
+      );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-delete"]').exists()).toBe(
         true
       );
     });
@@ -857,6 +906,9 @@ describe('ES deprecations table', () => {
       expect(actionsCell.find('[data-test-subj="deprecation-dataStream-readonly"]').exists()).toBe(
         false
       );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-delete"]').exists()).toBe(
+        false
+      );
     });
     it('only displays readonly button if setting read-only is in progress', async () => {
       httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(MOCK_DS_DEPRECATION.index!, {
@@ -893,6 +945,50 @@ describe('ES deprecations table', () => {
         false
       );
       expect(actionsCell.find('[data-test-subj="deprecation-dataStream-readonly"]').exists()).toBe(
+        true
+      );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-delete"]').exists()).toBe(
+        false
+      );
+    });
+    it('only displays delete button if deleting is in progress', async () => {
+      httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(MOCK_DS_DEPRECATION.index!, {
+        hasRequiredPrivileges: true,
+        migrationOp: {
+          resolutionType: 'delete',
+          status: DataStreamMigrationStatus.inProgress,
+          taskPercComplete: 1,
+          progressDetails: {
+            startTimeMs: Date.now() - 10000, // now - 10 seconds
+            successCount: 0,
+            pendingCount: 1,
+            inProgressCount: 0,
+            errorsCount: 0,
+          },
+        },
+        warnings: [
+          {
+            warningType: 'incompatibleDataStream',
+            resolutionType: 'readonly',
+          },
+        ],
+      });
+      await act(async () => {
+        testBed = await setupElasticsearchPage(httpSetup);
+      });
+
+      testBed.component.update();
+      const { find } = testBed;
+
+      const actionsCell = find('dataStreamReindexTableCell-actions').at(0);
+
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-reindex"]').exists()).toBe(
+        false
+      );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-readonly"]').exists()).toBe(
+        false
+      );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-delete"]').exists()).toBe(
         true
       );
     });

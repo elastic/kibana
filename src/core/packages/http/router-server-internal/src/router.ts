@@ -30,6 +30,7 @@ import type {
   IKibanaResponse,
 } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
+import { context, defaultTextMapGetter, propagation } from '@opentelemetry/api';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest, getProtocolFromRequest } from './request';
 import { kibanaResponseFactory } from './response';
@@ -183,8 +184,20 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   public registerRoute(route: InternalRouterRoute) {
     this.routes.push({
       ...route,
-      handler: async (request, responseToolkit) =>
-        await this.handle({ request, responseToolkit, handler: route.handler }),
+      handler: async (request, responseToolkit) => {
+        /**
+         * Read incoming traceparent headers and create a new context with the traceparent set.
+         * This allows OpenTelemetry spans created in the next context to re-use the traceparent
+         * headers (and thus belonging to the same trace). It does not interfere with Elastic APM,
+         * and is temporary until we fully migrate to [OpenTelemetry
+         * tracing](https://github.com/elastic/kibana/issues/220914).
+         */
+        const ctx = propagation.extract(context.active(), request.headers, defaultTextMapGetter);
+        return context.with(
+          ctx,
+          async () => await this.handle({ request, responseToolkit, handler: route.handler })
+        );
+      },
     });
   }
 
