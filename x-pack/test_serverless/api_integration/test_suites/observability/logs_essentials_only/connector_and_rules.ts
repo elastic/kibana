@@ -49,5 +49,30 @@ export default function ({ getService }: FtrProviderContext) {
         '.resilient',
       ]);
     });
+
+    it('limit set of available rules', async () => {
+      const resp = await supertestAdminWithCookieCredentials
+        .get('/api/alerting/rule_types')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .expect(200);
+      const listIds = resp.body.map((item: { id: string; enabled: boolean }) => item.id);
+      expect(listIds).to.eql([
+        '.es-query',
+        'observability.rules.custom_threshold',
+        'datasetQuality.degradedDocs',
+      ]);
+    });
+
+    it('does not register annotations API', async () => {
+      await supertestAdminWithCookieCredentials
+        .post('/api/observability/annotation')
+        .send({})
+        .set(svlCommonApi.getInternalRequestHeader())
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Not Found',
+        });
+    });
   });
 }
