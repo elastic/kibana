@@ -59,9 +59,3 @@ export type CustomGridColumnsConfiguration = Record<
 >;
 
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
-
-export enum DataLoadingState {
-  loading = 'loading',
-  loadingMore = 'loadingMore',
-  loaded = 'loaded',
-}

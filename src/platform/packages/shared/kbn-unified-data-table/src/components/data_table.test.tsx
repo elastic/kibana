@@ -33,8 +33,7 @@ import {
   generateEsHits,
 } from '@kbn/discover-utils/src/__mocks__';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { UnifiedDataTable, UnifiedDataTableProps } from './data_table';
-import { DataLoadingState } from '../types';
+import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from './data_table';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';

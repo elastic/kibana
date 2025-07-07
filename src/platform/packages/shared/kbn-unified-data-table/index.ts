@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { UnifiedDataTable } from './src/components/data_table';
+export { UnifiedDataTable, DataLoadingState } from './src/components/data_table';
 export type { UnifiedDataTableProps, SortOrder } from './src/components/data_table';
 export {
   RowHeightSettings,
