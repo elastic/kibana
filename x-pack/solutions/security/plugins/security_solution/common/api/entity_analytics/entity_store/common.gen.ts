@@ -21,6 +21,11 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 export type EntityTypeEnum = typeof EntityType.enum;
 export const EntityTypeEnum = EntityType.enum;
 
+export type EntityECSField = z.infer<typeof EntityECSField>;
+export const EntityECSField = z.enum(['user', 'host', 'service', 'entity']);
+export type EntityECSFieldEnum = typeof EntityECSField.enum;
+export const EntityECSFieldEnum = EntityECSField.enum;
+
 export type IndexPattern = z.infer<typeof IndexPattern>;
 export const IndexPattern = z.string();
 
