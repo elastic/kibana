@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const basic = config.get('esTestCluster.license') === 'basic';
   
 
-  describe('@ess @serverless @skipInServerlessMKI Prebuilt rules installation review', funciton () {
+  describe('@ess @serverless @skipInServerlessMKI Prebuilt rules installation review', function () {
     if (basic) {
       this.tags('skipFIPS');
     }
