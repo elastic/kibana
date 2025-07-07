@@ -7,35 +7,37 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { BoolQuery } from '@kbn/es-query';
 import { APMSection } from './sections/apm/apm_section';
 import { LogsSection } from './sections/logs/logs_section';
+import { AlertsSection } from './sections/alerts/alerts_section';
 import { MetricsSection } from './sections/metrics/metrics_section';
 import { UXSection } from './sections/ux/ux_section';
-import { HasDataMap } from '../../../context/has_data_context/has_data_context';
 import type { BucketSize } from '../helpers/calculate_bucket_size';
 
 interface Props {
   bucketSize: BucketSize;
-  hasData?: Partial<HasDataMap>;
+  esQuery: { bool: BoolQuery };
 }
 
-export function DataSections({ bucketSize }: Props) {
+export function DataSections({ bucketSize, esQuery }: Props) {
   return (
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <LogsSection bucketSize={bucketSize} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <MetricsSection bucketSize={bucketSize} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <APMSection bucketSize={bucketSize} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <UXSection bucketSize={bucketSize} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <AlertsSection bucketSize={bucketSize} esQuery={esQuery} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <LogsSection bucketSize={bucketSize} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <MetricsSection bucketSize={bucketSize} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <APMSection bucketSize={bucketSize} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <UXSection bucketSize={bucketSize} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
