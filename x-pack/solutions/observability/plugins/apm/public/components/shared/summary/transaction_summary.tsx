@@ -44,7 +44,7 @@ function getTransactionResultSummaryItem(transaction: Transaction) {
 
 function TransactionSummary({ transaction, totalDuration, errorCount, coldStartBadge }: Props) {
   const items = [
-    <Timestamp timestamp={transaction.timestamp.us / 1000} absoluteTimeType="tooltip" />,
+    <Timestamp timestamp={transaction.timestamp.us / 1000} renderMode="tooltip" />,
     <Duration
       duration={transaction.transaction.duration.us}
       parent={{

@@ -57,7 +57,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
       }),
       sortable: true,
       render: (value: number) => (
-        <Timestamp timestamp={value} timeUnit="minutes" absoluteTimeType="tooltip" />
+        <Timestamp timestamp={value} timeUnit="minutes" renderMode="tooltip" />
       ),
     },
     {

@@ -15,14 +15,14 @@ import { TimeUnit, asAbsoluteDateTime } from '../../utils/formatters/datetime';
 
 interface TimestampProps {
   timestamp: number;
-  absoluteTimeType?: 'tooltip' | 'inline';
+  renderMode?: 'tooltip' | 'inline';
   timeUnit?: TimeUnit;
   size?: EuiInlineEditTextSizes;
 }
 
 export function Timestamp({
   timestamp,
-  absoluteTimeType = 'inline',
+  renderMode = 'inline',
   timeUnit = 'milliseconds',
   size = 's',
 }: TimestampProps) {
@@ -30,7 +30,7 @@ export function Timestamp({
   const relativeTime = momentTime.fromNow();
   const absoluteTime = asAbsoluteDateTime(timestamp, timeUnit);
 
-  return absoluteTimeType === 'inline' ? (
+  return renderMode === 'inline' ? (
     <EuiText size={size} data-test-subj="apmUiSharedTimestamp">
       {absoluteTime} ({relativeTime})
     </EuiText>

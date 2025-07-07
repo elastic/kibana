@@ -54,7 +54,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete, canManage }: Props) {
       mobileOptions: {
         show: false,
       },
-      render: (date: number) => <Timestamp timestamp={date} absoluteTimeType="tooltip" />,
+      render: (date: number) => <Timestamp timestamp={date} renderMode="tooltip" />,
     },
   ];
 

@@ -173,7 +173,7 @@ export function getInstanceColumns({
       width: `${unit * 16}px`,
       sortable: true,
       render: (_, { lastReport }) => (
-        <Timestamp timestamp={lastReport as unknown as number} absoluteTimeType="tooltip" />
+        <Timestamp timestamp={lastReport as unknown as number} renderMode="tooltip" />
       ),
     },
   ];

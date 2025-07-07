@@ -105,7 +105,7 @@ export function getColumns({
       render: (_, { lastSeen }) => {
         return (
           <span style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
-            <Timestamp timestamp={lastSeen} timeUnit="minutes" absoluteTimeType="tooltip" />
+            <Timestamp timestamp={lastSeen} timeUnit="minutes" renderMode="tooltip" />
           </span>
         );
       },

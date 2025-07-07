@@ -28,7 +28,7 @@ describe('Timestamp', () => {
     moment.tz.setDefault('');
   });
 
-  describe('default absoluteTimeType', () => {
+  describe('default renderMode', () => {
     it('should render both absolute and relative time correctly', async () => {
       render(<Timestamp timestamp={timestamp} />);
 
@@ -37,10 +37,10 @@ describe('Timestamp', () => {
     });
   });
 
-  describe('absoluteTimeType as tooltip', () => {
+  describe('renderMode as tooltip', () => {
     it('should render relative time in body and absolute time in tooltip', async () => {
       const user = userEvent.setup();
-      render(<Timestamp timestamp={timestamp} absoluteTimeType="tooltip" />);
+      render(<Timestamp timestamp={timestamp} renderMode="tooltip" />);
 
       const relativeTimeElement = screen.getByText(relativeTime);
       expect(relativeTimeElement).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe('Timestamp', () => {
 
     it('should format with precision in milliseconds by default', async () => {
       const user = userEvent.setup();
-      render(<Timestamp timestamp={timestamp} absoluteTimeType="tooltip" />);
+      render(<Timestamp timestamp={timestamp} renderMode="tooltip" />);
 
       await user.hover(screen.getByText(relativeTime));
 
@@ -63,7 +63,7 @@ describe('Timestamp', () => {
 
     it('should format with precision in seconds', async () => {
       const user = userEvent.setup();
-      render(<Timestamp timestamp={timestamp} timeUnit="seconds" absoluteTimeType="tooltip" />);
+      render(<Timestamp timestamp={timestamp} timeUnit="seconds" renderMode="tooltip" />);
 
       await user.hover(screen.getByText(relativeTime));
 
@@ -73,7 +73,7 @@ describe('Timestamp', () => {
 
     it('should format with precision in minutes', async () => {
       const user = userEvent.setup();
-      render(<Timestamp timestamp={timestamp} timeUnit="minutes" absoluteTimeType="tooltip" />);
+      render(<Timestamp timestamp={timestamp} timeUnit="minutes" renderMode="tooltip" />);
 
       await user.hover(screen.getByText(relativeTime));
 

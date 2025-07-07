@@ -265,7 +265,7 @@ function SpanFlyoutBody({
       <EuiSpacer size="m" />
       <Summary
         items={[
-          <Timestamp timestamp={span.timestamp.us / 1000} absoluteTimeType="tooltip" />,
+          <Timestamp timestamp={span.timestamp.us / 1000} renderMode="tooltip" />,
           <>
             <Duration
               duration={span.span.duration.us}

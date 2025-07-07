@@ -170,7 +170,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
       }),
       sortable: true,
       render: (_, item) => (
-        <Timestamp timestamp={item['@timestamp']} timeUnit="minutes" absoluteTimeType="tooltip" />
+        <Timestamp timestamp={item['@timestamp']} timeUnit="minutes" renderMode="tooltip" />
       ),
     },
     ...(canSave

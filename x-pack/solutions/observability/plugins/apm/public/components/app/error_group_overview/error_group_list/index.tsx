@@ -248,7 +248,7 @@ export function ErrorGroupList({
         align: RIGHT_ALIGNMENT,
         render: (_, { lastSeen }) =>
           lastSeen ? (
-            <Timestamp timestamp={lastSeen} timeUnit="minutes" absoluteTimeType="tooltip" />
+            <Timestamp timestamp={lastSeen} timeUnit="minutes" renderMode="tooltip" />
           ) : (
             NOT_AVAILABLE_LABEL
           ),

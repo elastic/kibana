@@ -227,7 +227,7 @@ export function ErrorSampleDetails({
           items={[
             <Timestamp
               timestamp={errorData ? error.timestamp.us / 1000 : 0}
-              absoluteTimeType="tooltip"
+              renderMode="tooltip"
             />,
             errorUrl ? (
               <HttpInfoSummaryItem url={errorUrl} method={method} status={status} />
