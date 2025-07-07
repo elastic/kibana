@@ -13,6 +13,9 @@ project:
 
 # These will be root level tasks, invoked with `moon run kibana:<task-name>`
 tasks:
+  build:
+    options:
+      cache: false
   bootstrap:
     script: yarn kbn bootstrap
     inputs:
