@@ -384,5 +384,28 @@ describe('searchDsl/getSortParams', () => {
         sort: [{ merged_title: { order: undefined } }],
       });
     });
+
+    it('throws error if sort field has different mapping types across types', () => {
+      // Add a new mapping with a different type for 'count'
+      const MAPPINGS_WITH_MISMATCH = {
+        ...MAPPINGS,
+        properties: {
+          ...MAPPINGS.properties,
+          mismatch: {
+            properties: {
+              count: {
+                type: 'float',
+              },
+            },
+          },
+        },
+      } as const;
+
+      expect(() =>
+        getSortingParams(MAPPINGS_WITH_MISMATCH, ['numeric', 'mismatch'], 'count')
+      ).toThrow(
+        'Sort field "count" has different mapping types across types: [long, float]. Sorting requires the field to have the same type in all types.'
+      );
+    });
   });
 });

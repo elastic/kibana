@@ -16,7 +16,12 @@ import {
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server/src/apis';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
-import { getKeywordField, getMergedFieldType, isValidSortingField } from './sorting_params_utils';
+import {
+  getKeywordField,
+  getMergedFieldType,
+  isValidSortingField,
+  validateSameFieldTypeForAllTypes,
+} from './sorting_params_utils';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
 
@@ -81,11 +86,17 @@ export function getSortingParams(
             );
           }
         }
-        const mergedFieldName = `merged_${sortField}`;
         // Collect field mappings for type detection
         const fieldMappings = types
           .map((t) => getProperty(mappings, `${t}.${sortField}`))
           .filter(Boolean) as SavedObjectsFieldMapping[];
+        // Validate that all field mappings have the same type
+        try {
+          validateSameFieldTypeForAllTypes(sortField, fieldMappings);
+        } catch (e) {
+          throw Boom.badRequest(e.message);
+        }
+        const mergedFieldName = `merged_${sortField}`;
         const mergedFieldType = getMergedFieldType(fieldMappings);
 
         // Instead of emitting only the first found value, emit all possible values for the field across types

@@ -56,6 +56,25 @@ export const getKeywordField = (fieldMapping?: SavedObjectsFieldMapping): string
 };
 
 /**
+ * Validates that all field mappings have the same type.
+ * Throws an error if types are not the same.
+ */
+export function validateSameFieldTypeForAllTypes(
+  sortField: string,
+  fieldMappings: SavedObjectsFieldMapping[]
+): void {
+  const fieldTypes = fieldMappings.map((fm) => fm.type);
+  const uniqueTypes = Array.from(new Set(fieldTypes));
+  if (uniqueTypes.length > 1) {
+    throw new Error(
+      `Sort field "${sortField}" has different mapping types across types: [${uniqueTypes.join(
+        ', '
+      )}]. Sorting requires the field to have the same type in all types.`
+    );
+  }
+}
+
+/**
  * Helper to determine the merged type for runtime field.
  * Maps unsupported runtime types to supported equivalents.
  */
