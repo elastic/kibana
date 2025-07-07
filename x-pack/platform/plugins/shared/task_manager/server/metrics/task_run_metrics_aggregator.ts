@@ -26,7 +26,7 @@ enum TaskRunKeys {
   NOT_TIMED_OUT = 'not_timed_out',
   TOTAL = 'total',
   TOTAL_ERRORS = 'total_errors',
-  RESCHEDULED_FAILURES = 'recheduled_failures',
+  RESCHEDULED_FAILURES = 'rescheduled_failures',
   USER_ERRORS = 'user_errors',
   FRAMEWORK_ERRORS = 'framework_errors',
 }
