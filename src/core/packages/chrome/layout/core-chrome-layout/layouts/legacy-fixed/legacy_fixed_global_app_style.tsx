@@ -60,6 +60,15 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbn-application--content-height: calc(
       100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))
     );
+    // forward compatibility with new grid layout variables,
+    // this current height of project header app action menu, 0 or the height of the top bar when it is present
+    --kbn-application--top-bar-height: 0px;
+
+    // for forward compatibility with grid layout,
+    // this variable can be used for sticky headers offset relative to the top of the application area
+    --kbn-application--sticky-headers-offset: calc(
+      var(--euiFixedHeadersOffset, 0px) + var(--kbn-application--top-bar-height, 0px)
+    );
   }
 
   // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`
@@ -91,6 +100,9 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
         var(--kbnHeaderOffsetWithBanner) + var(--kbnProjectHeaderAppActionMenuHeight)
       );
     }
+
+    // forward compatibility with new grid layout variables,
+    --kbn-application--top-bar-height: var(--kbnProjectHeaderAppActionMenuHeight);
   }
 
   .kbnBody--chromeHidden {
