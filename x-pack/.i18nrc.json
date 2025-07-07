@@ -109,6 +109,7 @@
     "xpack.observabilityLogsOverview": [
       "platform/packages/shared/logs-overview/src/components"
     ],
+    "xpack.onechat": ["platform/plugins/shared/onechat"],
     "xpack.osquery": [
       "platform/plugins/shared/osquery"
     ],
@@ -129,7 +130,7 @@
     "xpack.searchSharedUI": "solutions/search/packages/shared-ui",
     "xpack.searchHomepage": "solutions/search/plugins/search_homepage",
     "xpack.searchIndices": "solutions/search/plugins/search_indices",
-    "xpack.searchNavigation": "solutions/search/plugins/search_solution/search_navigation",
+    "xpack.searchNavigation": "solutions/search/plugins/search_navigation",
     "xpack.searchNotebooks": "solutions/search/plugins/search_notebooks",
     "xpack.searchPlayground": "solutions/search/plugins/search_playground",
     "xpack.searchInferenceEndpoints": "solutions/search/plugins/search_inference_endpoints",

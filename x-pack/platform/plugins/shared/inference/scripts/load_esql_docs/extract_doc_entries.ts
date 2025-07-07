@@ -60,9 +60,10 @@ export async function extractDocEntries({
   log: ToolingLog;
   inferenceClient: ScriptInferenceClient;
 }): Promise<ExtractionOutput> {
-  const files = await fastGlob(`${builtDocsDir}/html/en/elasticsearch/reference/master/esql*.html`);
+  const path = `${builtDocsDir}/html/en/elasticsearch/reference/current/esql*.html`;
+  const files = await fastGlob(path);
   if (!files.length) {
-    throw new Error('No files found');
+    throw new Error(`No files found at path: ${path}`);
   }
 
   const output: ExtractionOutput = {

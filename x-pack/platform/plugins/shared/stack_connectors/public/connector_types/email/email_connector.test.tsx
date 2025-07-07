@@ -7,22 +7,34 @@
 
 import React, { Suspense } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import EmailActionConnectorFields from './email_connector';
-import * as hooks from './use_email_config';
 import {
   AppMockRenderer,
   ConnectorFormTestProvider,
   createAppMockRenderer,
   waitForComponentToUpdate,
 } from '../lib/test_utils';
+import { getServiceConfig } from './api';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
+jest.mock('./api', () => {
+  return {
+    getServiceConfig: jest.fn(),
+  };
+});
+
 describe('EmailActionConnectorFields', () => {
+  const enabledEmailServices = ['*'];
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('all connector fields are rendered', async () => {
     const actionConnector = {
       secrets: {
@@ -170,12 +182,11 @@ describe('EmailActionConnectorFields', () => {
   });
 
   test('host, port and secure fields should be disabled when service field is set to well known service', async () => {
-    const getEmailServiceConfig = jest
-      .fn()
-      .mockResolvedValue({ host: 'https://example.com', port: 80, secure: false });
-    jest
-      .spyOn(hooks, 'useEmailConfig')
-      .mockImplementation(() => ({ isLoading: false, getEmailServiceConfig }));
+    (getServiceConfig as jest.Mock).mockResolvedValue({
+      host: 'https://example.com',
+      port: 80,
+      secure: false,
+    });
 
     const actionConnector = {
       secrets: {
@@ -214,12 +225,11 @@ describe('EmailActionConnectorFields', () => {
   });
 
   test('host, port and secure fields should not be disabled when service field is set to other', async () => {
-    const getEmailServiceConfig = jest
-      .fn()
-      .mockResolvedValue({ host: 'https://example.com', port: 80, secure: false });
-    jest
-      .spyOn(hooks, 'useEmailConfig')
-      .mockImplementation(() => ({ isLoading: false, getEmailServiceConfig }));
+    (getServiceConfig as jest.Mock).mockResolvedValue({
+      host: 'https://example.com',
+      port: 80,
+      secure: false,
+    });
 
     const actionConnector = {
       secrets: {
@@ -292,7 +302,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
@@ -356,7 +366,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
@@ -415,7 +425,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
@@ -463,7 +473,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
@@ -509,7 +519,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
@@ -554,7 +564,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <Suspense fallback={null}>
             <EmailActionConnectorFields
@@ -603,7 +613,7 @@ describe('EmailActionConnectorFields', () => {
           <ConnectorFormTestProvider
             connector={actionConnector}
             onSubmit={onSubmit}
-            connectorServices={{ validateEmailAddresses }}
+            connectorServices={{ validateEmailAddresses, enabledEmailServices }}
           >
             <EmailActionConnectorFields
               readOnly={false}
@@ -649,7 +659,7 @@ describe('EmailActionConnectorFields', () => {
         <ConnectorFormTestProvider
           connector={actionConnector}
           onSubmit={onSubmit}
-          connectorServices={{ validateEmailAddresses }}
+          connectorServices={{ validateEmailAddresses, enabledEmailServices }}
         >
           <EmailActionConnectorFields
             readOnly={false}
@@ -687,5 +697,104 @@ describe('EmailActionConnectorFields', () => {
         isValid: true,
       });
     });
+  });
+});
+
+describe('when not all email services are enabled', () => {
+  const enabledEmailServices = ['amazon-ses', 'other', 'microsoft-exchange'];
+  let appMockRenderer: AppMockRenderer;
+  const onSubmit = jest.fn();
+  const validateEmailAddresses = jest.fn();
+
+  beforeEach(() => {
+    appMockRenderer = createAppMockRenderer();
+    validateEmailAddresses.mockReturnValue([{ valid: true }]);
+    (getServiceConfig as jest.Mock).mockResolvedValue({
+      host: 'https://example.com',
+      port: 2255,
+      secure: true,
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('only allows enabled services to be selected only', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {},
+      isDeprecated: false,
+    };
+
+    appMockRenderer.render(
+      <ConnectorFormTestProvider
+        connector={actionConnector}
+        onSubmit={onSubmit}
+        connectorServices={{ validateEmailAddresses, enabledEmailServices }}
+      >
+        <EmailActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const emailServiceSelect = screen.getByTestId('emailServiceSelectInput') as HTMLSelectElement;
+
+    const options = within(emailServiceSelect).getAllByRole('option');
+    expect(options).toHaveLength(3);
+    expect(options[0].textContent).toBe('Amazon SES');
+    expect(options[1].textContent).toBe('MS Exchange Server');
+    expect(options[2].textContent).toBe('Other');
+  });
+
+  it('adds the current connector service to the service list even if not enabled', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        test: 'test',
+        service: 'gmail', // not enabled
+        secure: true,
+      },
+      isDeprecated: false,
+    };
+
+    appMockRenderer.render(
+      <ConnectorFormTestProvider
+        connector={actionConnector}
+        onSubmit={onSubmit}
+        connectorServices={{ validateEmailAddresses, enabledEmailServices }}
+      >
+        <EmailActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const emailServiceSelect = screen.getByTestId('emailServiceSelectInput') as HTMLSelectElement;
+
+    const options = within(emailServiceSelect).getAllByRole('option');
+    expect(options).toHaveLength(4);
+    expect(options[0].textContent).toBe('Gmail');
+    expect(options[1].textContent).toBe('Amazon SES');
+    expect(options[2].textContent).toBe('MS Exchange Server');
+    expect(options[3].textContent).toBe('Other');
   });
 });

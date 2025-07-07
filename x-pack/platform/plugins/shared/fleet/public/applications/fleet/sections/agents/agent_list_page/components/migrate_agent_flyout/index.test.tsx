@@ -17,6 +17,9 @@ describe('MigrateAgentFlyout', () => {
   let component: ReturnType<typeof renderer.render>;
 
   beforeEach(() => {
+    // Reset the mocks before each test
+    jest.clearAllMocks();
+
     component = renderer.render(
       <AgentMigrateFlyout
         onClose={jest.fn()}
@@ -32,6 +35,7 @@ describe('MigrateAgentFlyout', () => {
             enrolled_at: new Date().toISOString(),
           },
         ]}
+        protectedAndFleetAgents={[]}
       />
     );
   });
@@ -59,5 +63,77 @@ describe('MigrateAgentFlyout', () => {
     const submitButton = component.getByTestId('migrateAgentFlyoutSubmitButton');
 
     expect(submitButton).not.toBeDisabled();
+  });
+
+  it('replace token button should be visible when there is one agent', () => {
+    const replaceTokenButton = component.getByTestId('migrateAgentFlyoutReplaceTokenButton');
+    expect(replaceTokenButton).toBeInTheDocument();
+  });
+  it('replace token button should not be visible when there is more than one agent', () => {
+    component.rerender(
+      <AgentMigrateFlyout
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+        agents={[
+          {
+            active: true,
+            status: 'online',
+            local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+            id: '1',
+            packages: [],
+            type: 'PERMANENT',
+            enrolled_at: new Date().toISOString(),
+          },
+          {
+            active: true,
+            status: 'online',
+            local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+            id: '2',
+            packages: [],
+            type: 'PERMANENT',
+            enrolled_at: new Date().toISOString(),
+          },
+        ]}
+        protectedAndFleetAgents={[]}
+      />
+    );
+    const replaceTokenButton = component.queryByTestId('migrateAgentFlyoutReplaceTokenButton');
+    expect(replaceTokenButton).not.toBeInTheDocument();
+  });
+  it('alert panel should be visible and show protected and or fleet-server agents when there are any', () => {
+    component.rerender(
+      <AgentMigrateFlyout
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+        agents={[
+          {
+            active: true,
+            status: 'online',
+            local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+            id: '1',
+            packages: [],
+            type: 'PERMANENT',
+            enrolled_at: new Date().toISOString(),
+          },
+        ]}
+        protectedAndFleetAgents={[
+          {
+            active: true,
+            status: 'online',
+            local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+            id: '2',
+            packages: [],
+            type: 'PERMANENT',
+            enrolled_at: new Date().toISOString(),
+          },
+        ]}
+      />
+    );
+    const alertPanel = component.getByTestId('migrateAgentFlyoutAlertPanel');
+    expect(alertPanel).toBeInTheDocument();
+  });
+  it('alert panel should not be visible when there are no protected or fleet-server agents', () => {
+    const alertPanel = component.queryByTestId('migrateAgentFlyoutAlertPanel');
+    expect(alertPanel).not.toBeInTheDocument();
   });
 });

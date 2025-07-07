@@ -207,6 +207,30 @@ export interface MigrateSingleAgentRequest {
 export interface MigrateSingleAgentResponse {
   actionId: string;
 }
+export interface BulkMigrateAgentsRequest {
+  body: {
+    agents: string[];
+    enrollment_token: string;
+    uri: string;
+    settings?: {
+      ca_sha256?: string;
+      certificate_authorities?: string;
+      elastic_agent_cert?: string;
+      elastic_agent_cert_key?: string;
+      elastic_agent_cert_key_passphrase?: string;
+      headers?: Record<string, string>;
+      insecure?: boolean;
+      proxy_disabled?: boolean;
+      proxy_headers?: Record<string, string>;
+      proxy_url?: string;
+      staging?: boolean;
+      tags?: string;
+    };
+  };
+}
+export interface BulkMigrateAgentsResponse {
+  actionId: string;
+}
 export interface UpdateAgentRequest {
   params: {
     agentId: string;

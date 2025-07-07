@@ -20,6 +20,7 @@ import { Actions } from './actions';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../user_privileges';
 import { useHiddenByFlyout } from '../guided_onboarding_tour/use_hidden_by_flyout';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 const useHiddenByFlyoutMock = useHiddenByFlyout as jest.Mock;
 jest.mock('../guided_onboarding_tour/use_hidden_by_flyout', () => ({
@@ -52,30 +53,32 @@ jest.mock('./add_note_icon_item', () => {
   };
 });
 
+const mockUseKibanaReturnValue = {
+  services: {
+    application: {
+      navigateToApp: jest.fn(),
+      getUrlForApp: jest.fn(),
+      capabilities: {
+        [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+      },
+    },
+    cases: mockCasesContract(),
+    savedObjects: {
+      client: {},
+    },
+  },
+};
 jest.mock('../../lib/kibana', () => {
   const originalKibanaLib = jest.requireActual('../../lib/kibana');
 
   return {
     ...originalKibanaLib,
-    useKibana: () => ({
-      services: {
-        application: {
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
-          capabilities: {
-            siemV2: { crud_alerts: true, read_alerts: true },
-          },
-        },
-        cases: mockCasesContract(),
-        savedObjects: {
-          client: {},
-        },
-      },
-    }),
+    useKibana: () => mockUseKibanaReturnValue,
     useToasts: jest.fn().mockReturnValue({
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
     useNavigateTo: jest.fn().mockReturnValue({

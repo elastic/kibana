@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ESQLEditorProps } from './src/types';
+export type { ESQLEditorProps, DataErrorsControl } from './src/types';
 export { fetchFieldsFromESQL } from './src/fetch_fields_from_esql';
 import { ESQLEditor } from './src/esql_editor';
 

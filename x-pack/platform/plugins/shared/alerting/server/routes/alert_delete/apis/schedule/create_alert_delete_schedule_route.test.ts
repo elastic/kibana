@@ -104,6 +104,44 @@ describe('alertDeleteScheduleRoute', () => {
     expect(res.noContent).toHaveBeenCalled();
   });
 
+  it('returns message if defined', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    alertDeleteScheduleRoute(router, licenseState, coreMock);
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(
+      `"/internal/alerting/rules/settings/_alert_delete_schedule"`
+    );
+
+    (rulesClient.getSpaceId as jest.Mock).mockResolvedValueOnce('default');
+    (alertDeletionClient.scheduleTask as jest.Mock).mockResolvedValueOnce(`already running!`);
+
+    const [context, req, res] = mockHandlerArguments(
+      {
+        alertDeletionClient,
+        rulesClient,
+      },
+      {
+        body: {
+          active_alert_delete_threshold: 100,
+          inactive_alert_delete_threshold: 100,
+          categoryIds: ['management'],
+        },
+      },
+      ['ok']
+    );
+
+    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
+      Object {
+        "body": "already running!",
+      }
+    `);
+    expect(res.ok).toHaveBeenCalledWith({ body: 'already running!' });
+  });
+
   it('returns badRequest if both thresholds are undefined', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

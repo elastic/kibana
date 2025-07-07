@@ -33,7 +33,6 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
-import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
 import { TransactionNameIcon } from './icons/transaction_name_icon';
 
 type FieldKey = keyof DataTableRecord['flattened'];
@@ -92,10 +91,6 @@ const getResourceBadgeComponent = (
   share?: SharePluginStart
 ): React.ComponentType<FieldBadgeWithActionsProps> => {
   switch (name) {
-    case SERVICE_NAME_FIELD:
-      return (props: FieldBadgeWithActionsProps) => (
-        <ServiceNameBadgeWithActions {...props} share={share} core={core} />
-      );
     case EVENT_OUTCOME_FIELD:
       return EventOutcomeBadge;
     default:

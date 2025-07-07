@@ -45,7 +45,7 @@ describe('useSpan', () => {
 
   describe('when parameters are NOT missing', () => {
     it('should fetch span data successfully', async () => {
-      const mockHit = { _source: { name: 'test-span' }, _id: 'test-id' };
+      const mockHit = { fields: { name: 'test-span' }, _id: 'test-id' };
 
       mockSearch.mockReturnValue(
         of({
@@ -61,7 +61,7 @@ describe('useSpan', () => {
       await waitFor(() => !result.current.loading);
 
       expect(result.current.loading).toBe(false);
-      expect(result.current.span).toEqual(mockHit._source);
+      expect(result.current.span).toEqual(mockHit.fields);
       expect(result.current.docId).toEqual(mockHit._id);
     });
   });

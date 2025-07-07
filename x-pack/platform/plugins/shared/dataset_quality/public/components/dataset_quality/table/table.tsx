@@ -75,7 +75,7 @@ export const Table = () => {
         </EuiFlexGroup>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiHorizontalRule margin="none" style={{ height: 2 }} />
+      <EuiHorizontalRule margin="none" css={{ height: 2 }} />
       <EuiBasicTable
         tableLayout="auto"
         sorting={sort}

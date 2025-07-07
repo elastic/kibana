@@ -30,6 +30,24 @@ export type CreateConversationRequestBodyInput = z.input<typeof CreateConversati
 export type CreateConversationResponse = z.infer<typeof CreateConversationResponse>;
 export const CreateConversationResponse = ConversationResponse;
 
+export type DeleteAllConversationsRequestBody = z.infer<typeof DeleteAllConversationsRequestBody>;
+export const DeleteAllConversationsRequestBody = z.object({
+  /**
+   * Optional list of conversation IDs to delete.
+   */
+  excludedIds: z.array(z.string()).optional(),
+});
+export type DeleteAllConversationsRequestBodyInput = z.input<
+  typeof DeleteAllConversationsRequestBody
+>;
+
+export type DeleteAllConversationsResponse = z.infer<typeof DeleteAllConversationsResponse>;
+export const DeleteAllConversationsResponse = z.object({
+  success: z.boolean().optional(),
+  totalDeleted: z.number().optional(),
+  failures: z.array(z.string()).optional(),
+});
+
 export type DeleteConversationRequestParams = z.infer<typeof DeleteConversationRequestParams>;
 export const DeleteConversationRequestParams = z.object({
   /**

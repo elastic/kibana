@@ -40,7 +40,8 @@ import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import type { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
-import { BaseAppWrapper, ScopedProfilesManagerProvider } from '../context_awareness';
+import { BaseAppWrapper } from '../context_awareness';
+import { ScopedServicesProvider } from '../components/scoped_services_provider';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -73,7 +74,10 @@ export const getSearchEmbeddableFactory = ({
         solutionNavId,
       });
       const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
-      const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager();
+      const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
+      const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
+        scopedEbtManager,
+      });
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(runtimeState?.savedObjectId);
@@ -95,7 +99,7 @@ export const getSearchEmbeddableFactory = ({
         discoverServices.embeddableEnhanced?.initializeEmbeddableDynamicActions(
           uuid,
           () => titleManager.api.title$.getValue(),
-          initialState.rawState
+          initialState
         );
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
       const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
@@ -129,7 +133,7 @@ export const getSearchEmbeddableFactory = ({
           savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
-          serializeDynamicActions: dynamicActionsManager?.getLatestState,
+          serializeDynamicActions: dynamicActionsManager?.serializeState,
           savedObjectId,
         });
 
@@ -315,7 +319,10 @@ export const getSearchEmbeddableFactory = ({
           return (
             <KibanaRenderContextProvider {...discoverServices.core}>
               <KibanaContextProvider services={discoverServices}>
-                <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
+                <ScopedServicesProvider
+                  scopedProfilesManager={scopedProfilesManager}
+                  scopedEBTManager={scopedEbtManager}
+                >
                   <AppWrapper>
                     {renderAsFieldStatsTable ? (
                       <SearchEmbeddablFieldStatsTableComponent
@@ -353,7 +360,7 @@ export const getSearchEmbeddableFactory = ({
                       </CellActionsProvider>
                     )}
                   </AppWrapper>
-                </ScopedProfilesManagerProvider>
+                </ScopedServicesProvider>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>
           );

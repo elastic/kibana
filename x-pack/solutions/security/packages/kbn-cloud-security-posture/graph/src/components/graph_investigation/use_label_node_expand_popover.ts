@@ -12,6 +12,7 @@ import { useNodeExpandGraphPopover } from './use_node_expand_graph_popover';
 import type { NodeProps } from '../../..';
 import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
+  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
 } from '../test_ids';
 import {
@@ -20,6 +21,7 @@ import {
 } from './list_group_graph_popover';
 import { EVENT_ACTION } from '../../common/constants';
 import { addFilter, containsFilter, removeFilter } from './search_filters';
+import { getNodeDocumentMode } from '../utils';
 
 type NodeToggleAction = 'show' | 'hide';
 
@@ -36,7 +38,8 @@ type NodeToggleAction = 'show' | 'hide';
 export const useLabelNodeExpandPopover = (
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
   dataViewId: string,
-  searchFilters: Filter[]
+  searchFilters: Filter[],
+  onShowEventDetailsClick?: (node: NodeProps) => void
 ) => {
   const onShowEventsWithThisActionClick = useCallback(
     (node: NodeProps, action: NodeToggleAction) => {
@@ -63,28 +66,62 @@ export const useLabelNodeExpandPopover = (
         ? 'hide'
         : 'show';
 
+      const shouldShowEventDetailsListItem =
+        onShowEventDetailsClick &&
+        (getNodeDocumentMode(node.data) === 'single-alert' ||
+          getNodeDocumentMode(node.data) === 'single-event');
+
       return [
         {
           type: 'item',
-          iconType: 'users',
+          iconType: 'analyzeEvent',
           testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
           label:
             eventsWithThisActionToggleAction === 'show'
               ? i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventsWithThisAction',
-                  { defaultMessage: 'Show events with this action' }
+                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showRelatedEvents',
+                  { defaultMessage: 'Show related events' }
                 )
               : i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideEventsWithThisAction',
-                  { defaultMessage: 'Hide events with this action' }
+                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideRelatedEvents',
+                  { defaultMessage: 'Hide related events' }
                 ),
           onClick: () => {
             onShowEventsWithThisActionClick(node, eventsWithThisActionToggleAction);
           },
         },
+        ...(shouldShowEventDetailsListItem
+          ? ([
+              {
+                type: 'separator',
+              },
+              {
+                type: 'item',
+                iconType: 'expand',
+                testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
+                label:
+                  getNodeDocumentMode(node.data) === 'single-alert'
+                    ? i18n.translate(
+                        'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showAlertDetails',
+                        {
+                          defaultMessage: 'Show alert details',
+                        }
+                      )
+                    : i18n.translate(
+                        'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
+                        {
+                          defaultMessage: 'Show event details',
+                        }
+                      ),
+                onClick: () => {
+                  onShowEventDetailsClick(node);
+                },
+              },
+            ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>)
+          : []),
       ];
     },
-    [onShowEventsWithThisActionClick, searchFilters]
+    [onShowEventDetailsClick, onShowEventsWithThisActionClick, searchFilters]
   );
   const labelNodeExpandPopover = useNodeExpandGraphPopover({
     id: 'label-node-expand-popover',

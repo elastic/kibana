@@ -6,7 +6,7 @@
  */
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { useAssistantOverlay } from '@kbn/elastic-assistant';
+import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
@@ -22,7 +22,6 @@ import {
 import {
   PROMPT_CONTEXT_ALERT_CATEGORY,
   PROMPT_CONTEXT_EVENT_CATEGORY,
-  PROMPT_CONTEXTS,
 } from '../../../../assistant/content/prompt_contexts';
 
 const SUMMARY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.summaryView', {
@@ -68,6 +67,15 @@ export const useAssistant = ({
   isAlert,
 }: UseAssistantParams): UseAssistantResult => {
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
+  const { basePromptContexts } = useAssistantContext();
+  const suggestedUserPrompt = useMemo(
+    () =>
+      basePromptContexts.find(
+        ({ category }) =>
+          category === (isAlert ? PROMPT_CONTEXT_ALERT_CATEGORY : PROMPT_CONTEXT_EVENT_CATEGORY)
+      )?.suggestedUserPrompt,
+    [basePromptContexts, isAlert]
+  );
   const useAssistantHook = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
   const getPromptContext = useCallback(
     async () => getRawData(dataFormattedForFieldBrowser ?? []),
@@ -93,9 +101,7 @@ export const useAssistant = ({
       : EVENT_SUMMARY_CONTEXT_DESCRIPTION(SUMMARY_VIEW),
     getPromptContext,
     null,
-    isAlert
-      ? PROMPT_CONTEXTS[PROMPT_CONTEXT_ALERT_CATEGORY].suggestedUserPrompt
-      : PROMPT_CONTEXTS[PROMPT_CONTEXT_EVENT_CATEGORY].suggestedUserPrompt,
+    suggestedUserPrompt,
     isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
     isAssistantEnabled
   );

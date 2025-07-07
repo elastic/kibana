@@ -18,6 +18,7 @@ import { licenseStateMock } from './lib/license_state.mock';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
+import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 
 const mockTaskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
@@ -34,7 +35,12 @@ describe('actionTypeRegistry', () => {
       licensing: licensingMock.createSetup(),
       taskManager: mockTaskManager,
       taskRunnerFactory: new TaskRunnerFactory(
-        new ActionExecutor({ isESOCanEncrypt: true }),
+        new ActionExecutor({
+          isESOCanEncrypt: true,
+          connectorRateLimiter: new ConnectorRateLimiter({
+            config: { email: { limit: 100, lookbackWindow: '1m' } },
+          }),
+        }),
         inMemoryMetrics
       ),
       actionsConfigUtils: mockedActionsConfig,

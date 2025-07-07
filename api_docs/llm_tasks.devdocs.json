@@ -154,6 +154,19 @@
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "llmTasks",
+            "id": "def-server.RetrieveDocumentationParams.inferenceId",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [
+              "\nInferece ID to route the request to the right index to perform the search."
+            ],
+            "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

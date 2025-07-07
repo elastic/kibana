@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { RuleMigrationIndexMigrator } from '.';
 import * as RuleMigrationSpaceIndexMigratorModule from './rule_migrations_per_space_index_migrator';
 import type { Adapters } from '../types';
 import { IndexPatternAdapter } from '@kbn/index-adapter';
+import { loggerMock } from '@kbn/logging-mocks';
 
 const rulesIndexName = '.kibana-siem-rule-migrations-rules';
 const esClientMock = {
@@ -28,9 +29,7 @@ const ruleMigrationIndexAdapters = {
   }),
 } as unknown as Adapters;
 
-const loggerMock = {
-  info: jest.fn(),
-} as unknown as Logger;
+const mockLogger = loggerMock.create();
 
 const mockPerSpaceIndexMigrator = jest.spyOn(
   RuleMigrationSpaceIndexMigratorModule,
@@ -53,21 +52,21 @@ describe('Index migrator', () => {
       const migrator = new RuleMigrationIndexMigrator(
         ruleMigrationIndexAdapters,
         esClientMock,
-        loggerMock
+        mockLogger
       );
       await migrator.run();
       expect(mockPerSpaceIndexMigrator).toHaveBeenNthCalledWith(
         1,
         'space1',
         esClientMock,
-        loggerMock,
+        mockLogger,
         ruleMigrationIndexAdapters
       );
       expect(mockPerSpaceIndexMigrator).toHaveBeenNthCalledWith(
         2,
         'space2',
         esClientMock,
-        loggerMock,
+        mockLogger,
         ruleMigrationIndexAdapters
       );
 
@@ -75,7 +74,7 @@ describe('Index migrator', () => {
         3,
         'space3',
         esClientMock,
-        loggerMock,
+        mockLogger,
         ruleMigrationIndexAdapters
       );
     });
@@ -84,10 +83,10 @@ describe('Index migrator', () => {
       const migrator = new RuleMigrationIndexMigrator(
         ruleMigrationIndexAdapters,
         esClientMock,
-        loggerMock
+        mockLogger
       );
       await migrator.run();
-      expect(loggerMock.info).toHaveBeenCalledWith('No spaces or index found for index migration');
+      expect(mockLogger.debug).toHaveBeenCalledWith('No spaces or index found for index migration');
       expect(mockPerSpaceIndexMigrator).not.toHaveBeenCalled();
     });
   });

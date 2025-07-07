@@ -477,6 +477,32 @@ export function defineRoutes(
     }
   );
 
+  router.post(
+    {
+      path: `/api/alerts_fixture/maintenance_window_events_generation/_run_soon`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
+    async function (
+      _: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const taskId = `maintenance-window:generate-events-generator`;
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
   router.get(
     {
       path: '/api/alerts_fixture/rule/{id}/_get_api_key',

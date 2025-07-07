@@ -62,7 +62,7 @@ const APPEND_CANNOT_SELECT = (
       defaultMessage: 'You need additional privileges to select this space.',
     })}
     position="left"
-    type="iInCircle"
+    type="info"
   />
 );
 const APPEND_CANNOT_DESELECT = (
@@ -71,7 +71,7 @@ const APPEND_CANNOT_DESELECT = (
       defaultMessage: 'You need additional privileges to deselect this space.',
     })}
     position="left"
-    type="iInCircle"
+    type="info"
   />
 );
 const APPEND_PROHIBITED = (
@@ -83,7 +83,7 @@ const APPEND_PROHIBITED = (
       defaultMessage: 'A copy of this saved object or a related object exists in this space.',
     })}
     position="left"
-    type="iInCircle"
+    type="info"
   />
 );
 const APPEND_FEATURE_IS_DISABLED = (

@@ -12,6 +12,7 @@ import {
   isDslLifecycle,
   isIlmLifecycle,
 } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -22,16 +23,23 @@ import { disableStreams, enableStreams, getStream, putStream } from './helpers/r
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
   let apiClient: StreamsSupertestRepositoryClient;
 
-  describe('Significant Events', () => {
+  describe('Significant Events', function () {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+      });
     });
 
     after(async () => {
       await disableStreams(apiClient);
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
+      });
     });
 
     describe('Wired streams update', () => {

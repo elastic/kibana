@@ -1580,6 +1580,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
+            "id": "def-common.TryWithRetriesOptions.initialDelay",
+            "type": "number",
+            "tags": [],
+            "label": "initialDelay",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-common-functional-services/services/retry/retry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-services",
             "id": "def-common.TryWithRetriesOptions.retryCount",
             "type": "number",
             "tags": [],

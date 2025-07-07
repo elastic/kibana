@@ -26,6 +26,7 @@ import {
   EuiProgress,
   PrettyDuration,
   EuiSelectableProps,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
@@ -34,11 +35,11 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
-import './saved_query_management_list.scss';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { debounce } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { css } from '@emotion/react';
+import { useMemoCss } from '../use_memo_css';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { strings as queryBarMenuPanelsStrings } from '../query_string_input/query_bar_menu_panels';
 import { PanelTitle } from '../query_string_input/panel_title';
@@ -163,7 +164,7 @@ const itemLabel = (attributes: SavedQueryAttributes) => {
   if (attributes.description) {
     label = (
       <>
-        {label} <EuiIcon type="iInCircle" color="subdued" size="s" />
+        {label} <EuiIcon type="info" color="subdued" size="s" />
       </>
     );
   }
@@ -220,6 +221,8 @@ export const SavedQueryManagementList = ({
   const [selectedSavedQuery, setSelectedSavedQuery] = useState(loadedSavedQuery);
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState<SavedQuery | null>(null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
+
+  const styles = useMemoCss(savedQueryListStyles);
 
   const debouncedSetSearchTerm = useMemo(() => {
     return debounce((newSearchTerm: string) => {
@@ -373,7 +376,7 @@ export const SavedQueryManagementList = ({
         <>
           {option.attributes ? itemLabel(option.attributes) : option.label}
           {option.value === loadedSavedQuery?.id && (
-            <EuiBadge color="hollow" css={{ marginLeft: euiThemeVars.euiSizeS }}>
+            <EuiBadge color="hollow" css={styles.activeBadge}>
               {i18n.translate('unifiedSearch.search.searchBar.savedQueryActiveBadgeText', {
                 defaultMessage: 'Active',
               })}
@@ -382,7 +385,7 @@ export const SavedQueryManagementList = ({
         </>
       );
     },
-    [loadedSavedQuery?.id]
+    [loadedSavedQuery?.id, styles]
   );
 
   const countDisplay = useMemo(() => {
@@ -412,9 +415,10 @@ export const SavedQueryManagementList = ({
         gutterSize="none"
         responsive={false}
         className="kbnSavedQueryManagement__listWrapper"
+        css={styles.listWrapper}
         data-test-subj="saved-query-management-list"
       >
-        <EuiFlexItem grow={false} css={{ position: 'relative' }}>
+        <EuiFlexItem grow={false} css={styles.listWrapperInner}>
           {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
           <EuiSelectable<SelectableProps>
             ref={selectableRef}
@@ -451,16 +455,11 @@ export const SavedQueryManagementList = ({
             }
             onChange={handleSelect}
             renderOption={renderOption}
-            css={{
-              '.euiSelectableList__list': {
-                WebkitMaskImage: 'unset',
-                maskImage: 'unset',
-              },
-            }}
+            css={styles.option}
           >
             {(list, search) => (
               <>
-                <EuiPanel color="transparent" paddingSize="s" css={{ paddingBottom: 0 }}>
+                <EuiPanel color="transparent" paddingSize="s" css={styles.search}>
                   {search}
                 </EuiPanel>
                 <EuiPanel color="transparent" paddingSize="s">
@@ -475,7 +474,7 @@ export const SavedQueryManagementList = ({
           </EuiSelectable>
         </EuiFlexItem>
         {totalQueryCount > SAVED_QUERY_PAGE_SIZE && (
-          <EuiFlexItem grow={false} css={{ padding: euiThemeVars.euiSizeS }}>
+          <EuiFlexItem grow={false} css={styles.pagination}>
             <EuiFlexGroup responsive={false} justifyContent="center">
               <EuiFlexItem grow={false}>
                 <EuiPagination
@@ -489,10 +488,7 @@ export const SavedQueryManagementList = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiPopoverFooter
-        paddingSize="s"
-        css={{ backgroundColor: euiThemeVars.euiColorLightestShade }}
-      >
+      <EuiPopoverFooter paddingSize="s" css={styles.footer}>
         <EuiFlexGroup
           responsive={false}
           gutterSize="xs"
@@ -642,4 +638,37 @@ const ListTitle = ({ queryBarMenuRef }: { queryBarMenuRef: RefObject<EuiContextM
       }
     />
   );
+};
+
+const savedQueryListStyles = {
+  footer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.lightestShade,
+    }),
+  option: css({
+    '.euiSelectableList__list': {
+      WebkitMaskImage: 'unset',
+      maskImage: 'unset',
+    },
+  }),
+  activeBadge: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginLeft: euiTheme.size.s,
+    }),
+  listWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      // Addition height will ensure one item is "cutoff" to indicate more below the scroll
+      maxHeight: `${euiTheme.base * 26}px `,
+      'overflow-y': 'hidden',
+    }),
+  listWrapperInner: css({
+    position: 'relative',
+  }),
+  search: css({
+    paddingBottom: 0,
+  }),
+  pagination: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.s,
+    }),
 };

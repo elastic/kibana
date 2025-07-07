@@ -9,14 +9,11 @@ import React, { useMemo, useEffect, useCallback } from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
-import {
-  getActionTypeTitle,
-  getGenAiConfig,
-  isElasticManagedLlmConnector,
-} from '@kbn/elastic-assistant/impl/connectorland/helpers';
+import { isElasticManagedLlmConnector } from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { AIConnector } from './types';
 import * as i18n from './translations';
+import { getConnectorDescription } from '../../../../../../common/utils/connectors/get_connector_description';
 
 interface ConnectorSelectorPanelProps {
   connectors: AIConnector[];
@@ -50,14 +47,10 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
     const connectorOptions = useMemo(
       () =>
         connectors.map((connector) => {
-          let description: string;
-          if (connector.isPreconfigured) {
-            description = i18n.PRECONFIGURED_CONNECTOR;
-          } else {
-            description =
-              getGenAiConfig(connector)?.apiProvider ??
-              getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
-          }
+          const description = getConnectorDescription({
+            connector,
+            actionTypeRegistry,
+          });
           return { id: connector.id, name: connector.name, description };
         }),
       [actionTypeRegistry, connectors]

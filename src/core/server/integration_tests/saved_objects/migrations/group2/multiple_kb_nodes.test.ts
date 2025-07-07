@@ -22,9 +22,9 @@ import {
   startElasticsearch,
 } from '../kibana_migrator_test_kit';
 import {
-  BASELINE_COMPLEX_DOCUMENTS_500K_AFTER,
-  BASELINE_DOCUMENTS_PER_TYPE_500K,
-  BASELINE_TEST_ARCHIVE_500K,
+  BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER,
+  BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+  BASELINE_TEST_ARCHIVE_LARGE,
 } from '../kibana_migrator_archive_utils';
 import {
   getRelocatingMigratorTestKit,
@@ -52,7 +52,7 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
     }
     await clearLog(logFileSecondRun);
 
-    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_500K });
+    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_LARGE });
     client = await getEsClient();
     await checkBeforeState();
   });
@@ -91,13 +91,14 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
 
   async function checkBeforeState() {
     await expect(getAggregatedTypesCount(client, [defaultKibanaIndex])).resolves.toEqual({
-      basic: BASELINE_DOCUMENTS_PER_TYPE_500K,
-      complex: BASELINE_DOCUMENTS_PER_TYPE_500K,
-      deprecated: BASELINE_DOCUMENTS_PER_TYPE_500K,
-      server: BASELINE_DOCUMENTS_PER_TYPE_500K,
+      basic: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+      complex: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+      deprecated: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+      old: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+      server: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
     });
     await expect(getAggregatedTypesCount(client, [defaultKibanaTaskIndex])).resolves.toEqual({
-      task: BASELINE_DOCUMENTS_PER_TYPE_500K,
+      task: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
     });
     await expect(getAggregatedTypesCount(client, [kibanaSplitIndex])).resolves.toEqual({});
   }
@@ -139,19 +140,20 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
 
     const typesMap =
       indicesInfo[`${defaultKibanaIndex}_${nextMinor}_001`].mappings?._meta?.indexTypesMap;
-    expect(typesMap[defaultKibanaIndex]).toEqual(['complex', 'recent']); // 'deprecated' and 'server' no longer present
+    expect(typesMap[defaultKibanaIndex]).toEqual(['complex', 'old', 'recent']); // 'deprecated' and 'server' no longer present
     expect(typesMap[kibanaSplitIndex]).toEqual(['basic', 'task']);
   }
 
   async function checkSavedObjectDocuments() {
     // check documents have been migrated
     await expect(getAggregatedTypesCount(client, [defaultKibanaIndex])).resolves.toEqual({
-      complex: BASELINE_COMPLEX_DOCUMENTS_500K_AFTER,
+      complex: BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER,
+      old: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
     });
     await expect(getAggregatedTypesCount(client, [defaultKibanaTaskIndex])).resolves.toEqual({});
     await expect(getAggregatedTypesCount(client, [kibanaSplitIndex])).resolves.toEqual({
-      basic: BASELINE_DOCUMENTS_PER_TYPE_500K,
-      task: BASELINE_DOCUMENTS_PER_TYPE_500K,
+      basic: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+      task: BASELINE_DOCUMENTS_PER_TYPE_LARGE,
     });
     await expectDocumentsMigratedToHighestVersion(client, [defaultKibanaIndex, kibanaSplitIndex]);
   }
@@ -161,7 +163,8 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
     // '.kibana_migrator_split' is a new index, all nodes' migrators must attempt to create it
     expect(logs).toContainLogEntries(
       [
-        `[${kibanaSplitIndex}] INIT -> CREATE_REINDEX_TEMP.`,
+        `[${kibanaSplitIndex}] INIT -> RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION.`,
+        `[${kibanaSplitIndex}] RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_REINDEX_TEMP.`,
         `[${kibanaSplitIndex}] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.`,
         // no docs to reindex, as source index did NOT exist
         `[${kibanaSplitIndex}] READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC.`,
@@ -174,8 +177,8 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
       expect(logs).toContainLogEntries(
         [
           `[${index}] INIT -> WAIT_FOR_YELLOW_SOURCE.`,
-          `[${index}] WAIT_FOR_YELLOW_SOURCE -> CHECK_CLUSTER_ROUTING_ALLOCATION.`,
-          `[${index}] CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.`,
+          `[${index}] WAIT_FOR_YELLOW_SOURCE -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION.`,
+          `[${index}] REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.`,
           `[${index}] CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.`,
           `[${index}] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.`,
           `[${index}] CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP.`,

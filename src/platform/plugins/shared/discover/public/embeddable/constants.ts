@@ -23,6 +23,8 @@ export const SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER: Trigger = {
     'This trigger is used to replace the cell actions for Discover session embeddable grid.',
 } as const;
 
+export const LEGACY_LOG_STREAM_EMBEDDABLE = 'LOG_STREAM_EMBEDDABLE';
+
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
 export const DEFAULT_HEADER_ROW_HEIGHT_LINES = 3;

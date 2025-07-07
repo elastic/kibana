@@ -116,7 +116,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
                     defaultMessage: 'Fields',
                   }
                 )}{' '}
-                <EuiIcon type="questionInCircle" color="subdued" />
+                <EuiIcon type="question" color="subdued" />
               </span>
             </EuiToolTip>
           }
@@ -166,7 +166,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
                     defaultMessage: 'Available levels',
                   }
                 )}{' '}
-                <EuiIcon type="questionInCircle" color="subdued" />
+                <EuiIcon type="question" color="subdued" />
               </span>
             </EuiToolTip>
           }

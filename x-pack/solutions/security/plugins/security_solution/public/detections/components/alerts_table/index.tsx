@@ -421,6 +421,8 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     [count, isEventRenderedView]
   );
 
+  const onLoaded = useCallback(({ alerts }: { alerts: Alert[] }) => onLoad(alerts), [onLoad]);
+
   if (isLoading) {
     return null;
   }
@@ -448,7 +450,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
               columns={finalColumns}
               browserFields={finalBrowserFields}
               onUpdate={onUpdate}
-              onLoaded={onLoad}
+              onLoaded={onLoaded}
               additionalContext={additionalContext}
               height={alertTableHeight}
               initialPageSize={50}

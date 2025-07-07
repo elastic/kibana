@@ -49,10 +49,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     for (const dataStream of dataStreams.data_streams) {
       if (isDslLifecycle(expectedLifecycle)) {
         expect(dataStream.lifecycle?.data_retention).to.eql(expectedLifecycle.dsl.data_retention);
-        expect(dataStream.indices.every((index) => !index.ilm_policy)).to.eql(
-          true,
-          'backing indices should not specify an ilm_policy'
-        );
+        expect(
+          dataStream.indices.every((index) => index.managed_by === 'Data stream lifecycle')
+        ).to.eql(true, 'backing indices should be managed by DSL');
+
         if (!isServerless) {
           expect(dataStream.prefer_ilm).to.eql(
             false,
@@ -71,9 +71,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(dataStream.ilm_policy).to.eql(expectedLifecycle.ilm.policy);
         expect(
           dataStream.indices.every(
-            (index) => index.prefer_ilm && index.ilm_policy === expectedLifecycle.ilm.policy
+            (index) =>
+              index.prefer_ilm &&
+              index.ilm_policy === expectedLifecycle.ilm.policy &&
+              index.managed_by === 'Index Lifecycle Management'
           )
-        ).to.eql(true, 'backing indices should specify prefer_ilm and ilm_policy');
+        ).to.eql(true, 'backing indices should be managed by ILM');
       }
     }
   }
@@ -151,6 +154,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           400
         );
+      });
+
+      it('inherits on creation', async () => {
+        const rootDefinition = await getStream(apiClient, 'logs');
+        await putStream(apiClient, 'logs', {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              lifecycle: { dsl: { data_retention: '50d' } },
+            },
+          },
+        });
+        await putStream(apiClient, 'logs.inheritsatcreation', wiredPutBody);
+
+        await expectLifecycle(['logs.inheritsatcreation'], {
+          dsl: { data_retention: '50d' },
+          from: 'logs',
+        });
       });
 
       it('inherits dsl', async () => {

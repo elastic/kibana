@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { pipeCompleteItem, ESQL_COMMON_NUMERIC_TYPES } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { getDateLiterals } from '@kbn/esql-ast/src/definitions/utils';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
-import { pipeCompleteItem } from '../complete_items';
-import { getDateLiterals } from '../factories';
 import { log10ParameterTypes, powParameterTypes } from './constants';
 import {
   attachTriggerCommand,
@@ -18,8 +18,6 @@ import {
   getFunctionSignaturesByReturnType,
   setup,
 } from './helpers';
-import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../shared/constants';
-import { Location } from '../../definitions/types';
 
 const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
@@ -51,7 +49,7 @@ describe('WHERE <expression>', () => {
           .map((name) => `${name} `)
           .map(attachTriggerCommand),
         attachTriggerCommand('col0 '),
-        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'KQL'),
+        ...allEvalFns,
       ],
       {
         callbacks: {
@@ -166,13 +164,6 @@ describe('WHERE <expression>', () => {
           .map(attachTriggerCommand),
         ...allEvalFns,
       ]);
-
-      await assertSuggestions('from a | limit 3 | where / ', [
-        ...getFieldNamesByType('any')
-          .map((field) => `${field} `)
-          .map(attachTriggerCommand),
-        ...allEvalFns.filter((fn) => !FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.label!.toLowerCase())),
-      ]);
     });
 
     test('suggests operators after a field name', async () => {
@@ -285,6 +276,7 @@ describe('WHERE <expression>', () => {
         'IS NOT NULL',
         'IS NULL',
         'NOT',
+        'NOT IN $0',
         'OR $0',
       ]);
 
@@ -296,6 +288,7 @@ describe('WHERE <expression>', () => {
         'IS NOT NULL',
         'IS NULL',
         'NOT',
+        'NOT IN $0',
         'OR $0',
       ]);
     });

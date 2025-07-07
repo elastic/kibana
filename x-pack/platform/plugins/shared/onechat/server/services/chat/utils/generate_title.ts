@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ConversationRound, RoundInput } from '@kbn/onechat-common';
-import { conversationLangchainMessages } from '../../agents/conversational/utils';
+import { conversationToLangchainMessages } from '../../agents/modes/utils';
 
 export const generateConversationTitle = async ({
   previousRounds,
@@ -31,7 +31,7 @@ export const generateConversationTitle = async ({
       'system',
       "'You are a helpful assistant. Assume the following messages is the start of a conversation between you and a user; give this conversation a title based on the content below",
     ],
-    ...conversationLangchainMessages({ previousRounds, nextInput }),
+    ...conversationToLangchainMessages({ previousRounds, nextInput }),
   ];
 
   const { title } = await structuredModel.invoke(prompt);

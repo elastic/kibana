@@ -14,14 +14,15 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { createConfigService } from '@kbn/core-http-server-mocks';
 import {
   HttpService,
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
-import { createConfigService, createHttpService } from '@kbn/core-http-server-mocks';
 import { PricingService } from '@kbn/core-pricing-server-internal';
 import type { PricingProductFeature, PricingProduct } from '@kbn/core-pricing-common';
+import { createInternalHttpService } from '../utilities';
 
 const coreId = Symbol('core');
 
@@ -38,7 +39,7 @@ describe('PricingService', () => {
   let serviceSetup: Awaited<ReturnType<PricingService['setup']>>;
 
   beforeEach(async () => {
-    server = createHttpService();
+    server = createInternalHttpService();
     httpPreboot = await server.preboot({ context: contextServiceMock.createPrebootContract() });
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),

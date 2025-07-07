@@ -9,6 +9,7 @@
 import React, { lazy, Suspense, Fragment } from 'react';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -22,6 +23,7 @@ interface Context {
   queryString: string;
   core: CoreStart;
   search: ISearchGeneric;
+  timefilter: TimefilterContract;
   variableType: ESQLVariableType;
   esqlVariables: ESQLControlVariable[];
   onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
@@ -44,6 +46,7 @@ export async function executeAction({
   queryString,
   core,
   search,
+  timefilter,
   variableType,
   esqlVariables,
   onSaveControl,
@@ -61,6 +64,8 @@ export async function executeAction({
       default: ESQLControlsFlyout,
     };
   });
+
+  const timeRange = timefilter.getTime();
 
   const deps = await untilPluginStartServicesReady();
   const handle = core.overlays.openFlyout(
@@ -85,6 +90,7 @@ export async function executeAction({
                 cursorPosition={cursorPosition}
                 initialState={initialState}
                 esqlVariables={esqlVariables}
+                timeRange={timeRange}
               />
             </Suspense>
           </KibanaContextProvider>

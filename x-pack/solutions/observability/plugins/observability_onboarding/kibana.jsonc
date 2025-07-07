@@ -23,11 +23,11 @@
       "share",
       "fleet",
       "customIntegrations",
-      "apm"
     ],
     "optionalPlugins": [
       "cloud",
-      "usageCollection"
+      "usageCollection",
+      "apm"
     ],
     "requiredBundles": [
       "kibanaReact"

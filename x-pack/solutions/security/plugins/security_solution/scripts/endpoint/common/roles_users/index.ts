@@ -19,7 +19,7 @@ import {
   getEndpointSecurityPolicyManagementReadRole,
   getEndpointSecurityPolicyManager,
 } from './endpoint_security_policy_manager';
-import { getDetectionsEngineer } from './detections_engineer';
+import { getDetectionsAdmin } from './detections_admin';
 import { getWithResponseActionsRole } from './with_response_actions_role';
 import { getNoResponseActionsRole } from './without_response_actions_role';
 import { getWithArtifactReadPrivilegesRole } from './with_artifact_read_privileges_role';
@@ -35,7 +35,7 @@ export * from './soc_manager';
 export * from './platform_engineer';
 export * from './endpoint_operations_analyst';
 export * from './endpoint_security_policy_manager';
-export * from './detections_engineer';
+export * from './detections_admin';
 
 export type EndpointSecurityRoleNames = keyof typeof ENDPOINT_SECURITY_ROLE_NAMES;
 
@@ -105,7 +105,7 @@ export const getAllEndpointSecurityRoles = (): EndpointSecurityRoleDefinitions =
       name: 'soc_manager',
     },
     detections_admin: {
-      ...getDetectionsEngineer(),
+      ...getDetectionsAdmin(),
       name: 'detections_admin',
     },
     platform_engineer: {

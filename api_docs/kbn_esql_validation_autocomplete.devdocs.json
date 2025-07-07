@@ -37,11 +37,11 @@
             "section": "def-common.ESQLSingleAstItem",
             "text": "ESQLSingleAstItem"
           },
-          ", parameterDefinition: { name: string; type: ",
-          "FunctionParameterType",
-          "; optional?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; fieldsOnly?: boolean | undefined; acceptedValues?: string[] | undefined; literalSuggestions?: string[] | undefined; mapParams?: string | undefined; }, references: ",
+          ", parameterDefinition: ",
+          "FunctionParameter",
+          ", references: ",
           "ReferenceMaps",
-          ", parentCommand: string | undefined) => boolean | undefined"
+          ", parentCommand: string | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
@@ -76,9 +76,7 @@
             "label": "parameterDefinition",
             "description": [],
             "signature": [
-              "{ name: string; type: ",
-              "FunctionParameterType",
-              "; optional?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; fieldsOnly?: boolean | undefined; acceptedValues?: string[] | undefined; literalSuggestions?: string[] | undefined; mapParams?: string | undefined; }"
+              "FunctionParameter"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
@@ -697,7 +695,7 @@
         "label": "getRecommendedQueries",
         "description": [],
         "signature": [
-          "({ fromCommand, timeField, }: { fromCommand: string; timeField?: string | undefined; }) => ({ label: string; description: string; queryString: string; sortText?: undefined; } | { label: string; description: string; queryString: string; sortText: string; })[]"
+          "({ fromCommand, timeField, categorizationField, }: { fromCommand: string; timeField?: string | undefined; categorizationField?: string | undefined; }) => ({ label: string; description: string; queryString: string; sortText?: undefined; } | { label: string; description: string; queryString: string; sortText: string; })[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
         "deprecated": false,
@@ -708,7 +706,7 @@
             "id": "def-common.getRecommendedQueries.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  fromCommand,\n  timeField,\n}",
+            "label": "{\n  fromCommand,\n  timeField,\n  categorizationField,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
             "deprecated": false,
@@ -731,6 +729,20 @@
                 "type": "string",
                 "tags": [],
                 "label": "timeField",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-validation-autocomplete",
+                "id": "def-common.getRecommendedQueries.$1.categorizationField",
+                "type": "string",
+                "tags": [],
+                "label": "categorizationField",
                 "description": [],
                 "signature": [
                   "string | undefined"
@@ -2249,6 +2261,14 @@
                 "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.RecommendedQuery",
                 "text": "RecommendedQuery"
+              },
+              "[]; recommendedFields: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.RecommendedField",
+                "text": "RecommendedField"
               },
               "[]; }>) | undefined"
             ],

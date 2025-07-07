@@ -56,8 +56,8 @@ export class DeploymentParamsMapper {
    */
   private readonly serverlessVCPUBreakpoints: VCPUBreakpoints = {
     low: { min: this.minAllowedNumberOfAllocation, max: 2, static: 2 },
-    medium: { min: 1, max: 32, static: 32 },
-    high: { min: 1, max: 512, static: 512 },
+    medium: { min: 0, max: 32, static: 32 },
+    high: { min: 0, max: 512, static: 512 },
   };
 
   /**
@@ -75,7 +75,7 @@ export class DeploymentParamsMapper {
    * Gets the min allowed number of allocations.
    * - 0 for serverless and ESS with enabled autoscaling.
    * - 1 otherwise
-   * @private
+   * @internal
    */
   private get minAllowedNumberOfAllocation(): number {
     return !this.showNodeInfo || this.cloudInfo.isMlAutoscalingEnabled ? 0 : 1;
@@ -133,7 +133,7 @@ export class DeploymentParamsMapper {
   /**
    * Returns allocation values accounting for the number of threads per allocation.
    * @param params
-   * @private
+   * @internal
    */
   private getAllocationsParams(
     params: DeploymentParamsUI
@@ -152,8 +152,11 @@ export class DeploymentParamsMapper {
       number_of_allocations: maxValue,
       min_number_of_allocations:
         Math.floor(levelValues.min / threadsPerAllocation) ||
-        // in any env, allow scale down to 0 only for "low" vCPU usage
-        (params.vCPUUsage === 'low' ? this.minAllowedNumberOfAllocation : 1),
+        // For serverless env, always allow scale down to 0
+        // For other envs, allow scale down to 0 only for "low" vCPU usage
+        (this.showNodeInfo === false || params.vCPUUsage === 'low'
+          ? this.minAllowedNumberOfAllocation
+          : 1),
       max_number_of_allocations: maxValue,
     };
   }

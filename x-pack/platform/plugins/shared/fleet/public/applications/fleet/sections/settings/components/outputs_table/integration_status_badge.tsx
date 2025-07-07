@@ -99,7 +99,7 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
               defaultMessage: 'Integration syncing only applies to remote outputs.',
             })}
           >
-            <EuiIcon type="iInCircle" color="subdued" />
+            <EuiIcon type="info" color="subdued" />
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -121,7 +121,7 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
                 'Integration syncing is disabled for this remote output. Enable it by clicking the edit icon and updating the output settings.',
             })}
           >
-            <EuiIcon type="iInCircle" color="subdued" />
+            <EuiIcon type="info" color="subdued" />
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>

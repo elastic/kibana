@@ -21,7 +21,9 @@ describe('bulkGet', () => {
       unauthorized: [],
     });
 
-    clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+    clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map()
+    );
 
     beforeEach(() => {
       jest.clearAllMocks();

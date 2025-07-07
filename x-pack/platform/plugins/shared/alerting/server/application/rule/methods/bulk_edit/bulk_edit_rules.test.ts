@@ -10,7 +10,6 @@
 import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import {
@@ -31,14 +30,6 @@ import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/se
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import {
-  enabledRule1,
-  enabledRule2,
-  siemRule1,
-  siemRule2,
-} from '../../../../rules_client/tests/test_helpers';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
-import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ConnectorAdapter } from '../../../../connector_adapters/types';
 import type { SavedObject } from '@kbn/core/server';
@@ -46,17 +37,6 @@ import { bulkEditOperationsSchema } from './schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import type { RawRule } from '../../../../types';
-
-jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
-  return {
-    migrateLegacyActions: jest.fn(),
-  };
-});
-(migrateLegacyActions as jest.Mock).mockResolvedValue({
-  hasLegacyActions: false,
-  resultedActions: [],
-  resultedReferences: [],
-});
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -272,8 +252,6 @@ describe('bulkEdit()', () => {
         params: { validate: (params) => params },
       },
     });
-
-    (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
 
     rulesClientParams.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
     actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
@@ -3767,55 +3745,6 @@ describe('bulkEdit()', () => {
       });
 
       expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions', async () => {
-      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
-        .fn()
-        .mockResolvedValueOnce({
-          close: jest.fn(),
-          find: function* asyncGenerator() {
-            yield { saved_objects: [enabledRule1, enabledRule2, siemRule1, siemRule2] };
-          },
-        });
-
-      await rulesClient.bulkEdit({
-        operations: [
-          {
-            field: 'tags',
-            operation: 'set',
-            value: ['test-tag'],
-          },
-        ],
-      });
-
-      expect(migrateLegacyActions).toHaveBeenCalledTimes(4);
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: enabledRule1.attributes,
-        ruleId: enabledRule1.id,
-        actions: [],
-        references: [],
-      });
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: enabledRule2.attributes,
-        ruleId: enabledRule2.id,
-        actions: [],
-        references: [],
-      });
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
-        ruleId: siemRule1.id,
-        actions: [],
-        references: [],
-      });
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
-        ruleId: siemRule2.id,
-        actions: [],
-        references: [],
-      });
     });
   });
 });

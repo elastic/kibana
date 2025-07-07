@@ -15,8 +15,8 @@ import {
   EuiPanel,
   EuiProgress,
   EuiDelayRender,
-  useEuiTheme,
   useEuiBreakpoint,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -32,7 +32,8 @@ import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { kibanaFullBodyHeightCss } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -58,9 +59,17 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
+import {
+  internalStateActions,
+  useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
+  useInternalStateDispatch,
+} from '../../state_management/redux';
 import { TABS_ENABLED } from '../../../../constants';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
+import { useScopedServices } from '../../../../components/scoped_services_provider';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -88,11 +97,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
-    ebtManager,
     fieldsMetadata,
   } = useDiscoverServices();
-  const { euiTheme } = useEuiTheme();
-  const pageBackgroundColor = euiTheme.colors.backgroundBasePlain;
+  const { scopedEBTManager } = useScopedServices();
+  const styles = useMemoCss(componentStyles);
+
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
@@ -161,17 +170,17 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtManager, fieldsMetadata]
+    [onAddColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtManager, fieldsMetadata]
+    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
   // The assistant is getting the state from the url correctly
@@ -195,14 +204,22 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
-      void ebtManager.trackFilterAddition({
+      void scopedEBTManager.trackFilterAddition({
         fieldName: fieldName === '_exists_' ? String(values) : fieldName,
         filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
         fieldsMetadata,
       });
       return filterManager.addFilters(newFilters);
     },
-    [filterManager, dataView, dataViews, trackUiMetric, capabilities, ebtManager, fieldsMetadata]
+    [
+      dataView,
+      dataViews,
+      capabilities,
+      filterManager,
+      trackUiMetric,
+      scopedEBTManager,
+      fieldsMetadata,
+    ]
   );
 
   const onPopulateWhereClause = useCallback<DocViewFilterFn>(
@@ -232,13 +249,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
       }
-      void ebtManager.trackFilterAddition({
+      void scopedEBTManager.trackFilterAddition({
         fieldName: fieldName === '_exists_' ? String(values) : fieldName,
         filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
         fieldsMetadata,
       });
     },
-    [data.query.queryString, query, trackUiMetric, ebtManager, fieldsMetadata]
+    [query, data.query.queryString, trackUiMetric, scopedEBTManager, fieldsMetadata]
   );
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
@@ -367,20 +384,33 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
+  const dispatch = useInternalStateDispatch();
+  const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
+  const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
+  const onInitialStateChange = useCallback(
+    (newLayoutUiState: Partial<DiscoverLayoutRestorableState>) => {
+      dispatch(
+        setLayoutUiState({
+          layoutUiState: newLayoutUiState,
+        })
+      );
+    },
+    [dispatch, setLayoutUiState]
+  );
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
       data-fetch-counter={fetchCounter.current}
       direction="column"
-      css={css`
-        overflow: hidden;
-        padding: 0;
-        background-color: ${pageBackgroundColor};
-
-        ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-          ${kibanaFullBodyHeightCss(TABS_ENABLED ? '32px' : undefined)}
-        }
-      `}
+      css={[
+        styles.dscPage,
+        css`
+          ${useEuiBreakpoint(['m', 'l', 'xl'])} {
+            ${kbnFullBodyHeightCss(TABS_ENABLED ? '32px' : undefined)}
+          }
+        `,
+      ]}
     >
       <h1
         id="savedSearchTitle"
@@ -407,19 +437,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         isLoading={isLoading}
         onCancelClick={onCancelClick}
       />
-      <EuiPageBody
-        aria-describedby="savedSearchTitle"
-        css={css`
-          overflow: hidden;
-        `}
-      >
-        <div
-          ref={setSidebarContainer}
-          css={css`
-            width: 100%;
-            height: 100%;
-          `}
-        >
+      <EuiPageBody aria-describedby="savedSearchTitle" css={styles.savedSearchTitle}>
+        <div ref={setSidebarContainer} css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
               <EuiProgress size="xs" color="accent" position="absolute" />
@@ -450,15 +469,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               />
             }
             mainPanel={
-              <div css={dscPageContentWrapperCss}>
+              <div css={styles.dscPageContentWrapper}>
                 {resultState === 'none' ? (
                   <>
                     {React.isValidElement(panelsToggle) ? (
-                      <div
-                        css={css`
-                          padding: ${euiTheme.size.s};
-                        `}
-                      >
+                      <div css={styles.mainPanel}>
                         {React.cloneElement(panelsToggle, {
                           renderedFor: 'prompt',
                           isChartAvailable: false,
@@ -496,13 +511,15 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                     hasShadow={false}
                     hasBorder={false}
                     color="transparent"
-                    css={[dscPageContentCss, contentCentered && dscPageContentCenteredCss]}
+                    css={[styles.dscPageContent, contentCentered && styles.dscPageContentCentered]}
                   >
                     {mainDisplay}
                   </EuiPanel>
                 )}
               </div>
             }
+            initialState={layoutUiState}
+            onInitialStateChange={onInitialStateChange}
           />
         </div>
       </EuiPageBody>
@@ -525,24 +542,41 @@ const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') =
   return operation;
 };
 
-const dscPageContentWrapperCss = css`
-  overflow: hidden; // Ensures horizontal scroll of table
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-`;
-
-const dscPageContentCss = css`
-  position: relative;
-  overflow: hidden;
-  height: 100%;
-`;
-
-const dscPageContentCenteredCss = css`
-  width: auto;
-  height: auto;
-  align-self: center;
-  margin-top: auto;
-  margin-bottom: auto;
-  flex-grow: 0;
-`;
+const componentStyles = {
+  dscPage: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      overflow: 'hidden',
+      padding: 0,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+    }),
+  savedSearchTitle: css({
+    overflow: 'hidden',
+  }),
+  sidebarContainer: css({
+    width: '100%',
+    height: '100%',
+  }),
+  mainPanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.s,
+    }),
+  dscPageContentWrapper: css({
+    overflow: 'hidden', // Ensures horizontal scroll of table
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  }),
+  dscPageContent: css({
+    position: 'relative',
+    overflow: 'hidden',
+    height: '100%',
+  }),
+  dscPageContentCentered: css({
+    width: 'auto',
+    height: 'auto',
+    alignSelf: 'center',
+    marginTop: 'auto',
+    marginBottom: 'auto',
+    flexGrow: 0,
+  }),
+};

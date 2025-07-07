@@ -72,7 +72,7 @@ export function MLCallout({
         text: i18n.translate('xpack.apm.mlCallout.noJobsCalloutText', {
           defaultMessage: `Pinpoint anomalous transactions and see the health of upstream and downstream services with APM's anomaly detection integration. Get started in just a few minutes.`,
         }),
-        icon: 'iInCircle',
+        icon: 'info',
         color: 'primary',
         primaryAction: isOnSettingsPage ? (
           <EuiButton
@@ -134,7 +134,7 @@ export function MLCallout({
           defaultMessage:
             'We have discovered legacy Machine Learning jobs from our previous integration which are no longer being used in the APM app',
         }),
-        icon: 'iInCircle',
+        icon: 'info',
         color: 'primary',
         primaryAction: (
           <EuiButton data-test-subj="apmMLCalloutReviewJobsButton" href={mlManageJobsHref}>

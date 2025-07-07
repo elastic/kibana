@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
-import { MaintenanceWindowStatus } from '../../../../../common';
 import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import { findMaintenanceWindowSo } from '../../../../data/maintenance_window';
 import type {
@@ -18,23 +17,16 @@ import type {
   MaintenanceWindowsStatus,
 } from './types';
 import { findMaintenanceWindowsParamsSchema } from './schemas';
+import { getMaintenanceWindowStatus } from '../../lib/get_maintenance_window_status';
 
 export const getStatusFilter = (
   status?: MaintenanceWindowsStatus[]
 ): KueryNode | string | undefined => {
   if (!status || status.length === 0) return undefined;
-
-  const statusToQueryMapping = {
-    [MaintenanceWindowStatus.Running]: '(maintenance-window.attributes.events: "now")',
-    [MaintenanceWindowStatus.Upcoming]:
-      '(not maintenance-window.attributes.events: "now" and maintenance-window.attributes.events > "now")',
-    [MaintenanceWindowStatus.Finished]:
-      '(not maintenance-window.attributes.events >= "now" and maintenance-window.attributes.expirationDate >"now")',
-    [MaintenanceWindowStatus.Archived]: '(maintenance-window.attributes.expirationDate < "now")',
-  };
+  const mwStatusQuery = getMaintenanceWindowStatus();
 
   const fullQuery = status
-    .map((value) => statusToQueryMapping[value])
+    .map((value) => mwStatusQuery[value])
     .filter(Boolean)
     .join(' or ');
 

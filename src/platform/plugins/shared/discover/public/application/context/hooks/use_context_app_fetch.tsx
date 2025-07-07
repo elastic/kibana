@@ -28,7 +28,7 @@ import {
   getTieBreakerFieldName,
   getEsQuerySort,
 } from '../../../../common/utils/sorting/get_es_query_sort';
-import { useScopedProfilesManager } from '../../../context_awareness';
+import { useScopedServices } from '../../../components/scoped_services_provider';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
@@ -41,7 +41,7 @@ export interface ContextAppFetchProps {
 }
 
 export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppFetchProps) {
-  const scopedProfilesManager = useScopedProfilesManager();
+  const { scopedProfilesManager } = useScopedServices();
   const services = useDiscoverServices();
   const { uiSettings: config, data, toastNotifications, filterManager } = services;
 

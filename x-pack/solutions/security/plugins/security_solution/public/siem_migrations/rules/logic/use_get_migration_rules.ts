@@ -9,7 +9,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { useCallback } from 'react';
 import type { RuleMigrationFilters } from '../../../../common/siem_migrations/types';
-import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/constants';
+import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 import { getMigrationRules } from '../api';
@@ -26,7 +26,7 @@ export const useGetMigrationRules = (params: {
   const { addError } = useAppToasts();
 
   const { migrationId } = params;
-  const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_PATH, {
+  const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, {
     migration_id: migrationId,
   });
 
@@ -42,6 +42,7 @@ export const useGetMigrationRules = (params: {
       onError: (error) => {
         addError(error, { title: i18n.GET_MIGRATION_RULES_FAILURE });
       },
+      cacheTime: 2 * 1000,
     }
   );
 };
@@ -57,7 +58,7 @@ export const useInvalidateGetMigrationRules = () => {
 
   return useCallback(
     (migrationId: string) => {
-      const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_PATH, {
+      const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, {
         migration_id: migrationId,
       });
 

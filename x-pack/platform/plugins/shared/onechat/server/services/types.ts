@@ -12,6 +12,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
+import { EsqlToolRegistry } from './tools/esql/esql_registry';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
@@ -26,6 +27,7 @@ export interface InternalStartServices {
   agents: AgentsServiceStart;
   conversations: ConversationService;
   chat: ChatService;
+  esql: EsqlToolRegistry;
   runnerFactory: RunnerFactory;
 }
 

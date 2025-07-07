@@ -596,7 +596,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const selectedDataView = await dataViews.getSelectedName();
       expect(selectedDataView).to.be.equal('search-source-*');
 
-      const documentCell = await dataGrid.getCellElement(0, 3);
+      const documentCell = await dataGrid.getCellElementByColumnName(0, '_source');
       const firstRowContent = await documentCell.getVisibleText();
       expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
 
@@ -610,7 +610,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const selectedDataView = await dataViews.getSelectedName();
       expect(selectedDataView).to.be.equal('search-source-*');
 
-      const documentCell = await dataGrid.getCellElement(0, 3);
+      const documentCell = await dataGrid.getCellElementByColumnName(0, '_source');
       const firstRowContent = await documentCell.getVisibleText();
       expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
     });

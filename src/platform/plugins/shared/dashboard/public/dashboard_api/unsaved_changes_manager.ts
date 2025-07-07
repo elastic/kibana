@@ -25,7 +25,10 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { getDashboardBackupService } from '../services/dashboard_backup_service';
+import {
+  DashboardBackupState,
+  getDashboardBackupService,
+} from '../services/dashboard_backup_service';
 import { initializeLayoutManager } from './layout_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions } from './types';
@@ -122,13 +125,13 @@ export function initializeUnsavedChangesManager({
 
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
-        const dashboardStateToBackup: Partial<DashboardState> = omit(dashboardChanges ?? {}, [
+        const dashboardBackupState: DashboardBackupState = omit(dashboardChanges ?? {}, [
           'timeRange',
           'refreshInterval',
         ]);
 
         // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
-        dashboardStateToBackup.viewMode = viewMode;
+        dashboardBackupState.viewMode = viewMode;
         // Backup latest state from children that have unsaved changes
         if (hasPanelChanges || hasControlGroupChanges) {
           const { panels, references } = layoutManager.internalApi.serializeLayout();
@@ -137,12 +140,12 @@ export function initializeUnsavedChangesManager({
           // dashboardStateToBackup.references will be used instead of savedObjectResult.references
           // To avoid missing references, make sure references contains all references
           // even if panels or control group does not have unsaved changes
-          dashboardStateToBackup.references = [...references, ...controlGroupReferences];
-          if (hasPanelChanges) dashboardStateToBackup.panels = panels;
-          if (hasControlGroupChanges) dashboardStateToBackup.controlGroupInput = controlGroupInput;
+          dashboardBackupState.references = [...(references ?? []), ...controlGroupReferences];
+          if (hasPanelChanges) dashboardBackupState.panels = panels;
+          if (hasControlGroupChanges) dashboardBackupState.controlGroupInput = controlGroupInput;
         }
 
-        getDashboardBackupService().setState(savedObjectId$.value, dashboardStateToBackup);
+        getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
     });
 
@@ -158,18 +161,14 @@ export function initializeUnsavedChangesManager({
         : undefined;
     }
 
-    if (!lastSavedDashboardState.panels[childId]) return;
-    return {
-      rawState: lastSavedDashboardState.panels[childId].explicitInput,
-      references: getReferences(childId),
-    };
+    return layoutManager.internalApi.getLastSavedStateForPanel(childId);
   };
 
   return {
     api: {
       asyncResetToLastSavedState: async () => {
         const savedState = lastSavedState$.value;
-        layoutManager.internalApi.reset(savedState);
+        layoutManager.internalApi.reset();
         unifiedSearchManager.internalApi.reset(savedState);
         settingsManager.internalApi.reset(savedState);
 

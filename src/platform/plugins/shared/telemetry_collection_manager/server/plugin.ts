@@ -99,7 +99,7 @@ export class TelemetryCollectionManagerPlugin
    * Checks if Kibana is in a healthy state to attempt the Telemetry report generation:
    * - Elasticsearch is active.
    * - SavedObjects client is active.
-   * @private
+   * @internal
    */
   private async shouldGetTelemetry() {
     const { elasticsearch, savedObjects } = await firstValueFrom(this.coreStatus$);
@@ -142,7 +142,7 @@ export class TelemetryCollectionManagerPlugin
    * It may return undefined if the ES and SO clients are not initialised yet.
    * @param config {@link StatsGetterConfig}
    * @param usageCollection {@link UsageCollectionSetup}
-   * @private
+   * @internal
    */
   private getStatsCollectionConfig(
     config: StatsGetterConfig,
@@ -163,7 +163,7 @@ export class TelemetryCollectionManagerPlugin
    * depending on whether the request is encrypted or not:
    * If the request is unencrypted, we intentionally scope the results to "what the user can see".
    * @param config {@link StatsGetterConfig}
-   * @private
+   * @internal
    */
   private getElasticsearchClient(config: StatsGetterConfig): ElasticsearchClient | undefined {
     return this.elasticsearchClient?.asInternalUser;
@@ -174,7 +174,7 @@ export class TelemetryCollectionManagerPlugin
    * depending on whether the request is encrypted or not:
    * If the request is unencrypted, we intentionally scope the results to "what the user can see"
    * @param config {@link StatsGetterConfig}
-   * @private
+   * @internal
    */
   private getSavedObjectsClient(config: StatsGetterConfig): SavedObjectsClientContract | undefined {
     if (this.savedObjectsService) {

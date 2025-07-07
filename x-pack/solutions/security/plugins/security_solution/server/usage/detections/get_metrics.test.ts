@@ -34,7 +34,11 @@ import {
 } from './rules/get_metrics.mocks';
 import { getInitialDetectionMetrics } from './get_initial_usage';
 import { getDetectionsMetrics } from './get_metrics';
-import { getInitialRulesUsage, initialAlertSuppression } from './rules/get_initial_usage';
+import {
+  getInitialRulesUsage,
+  initialAlertSuppression,
+  initialResponseActionsUsage,
+} from './rules/get_initial_usage';
 
 describe('Detections Usage and Metrics', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -110,6 +114,10 @@ describe('Detections Usage and Metrics', () => {
               has_alert_suppression_per_rule_execution: false,
               has_alert_suppression_per_time_period: false,
               alert_suppression_fields_count: 0,
+              has_exceptions: false,
+              has_response_actions: false,
+              has_response_actions_endpoint: false,
+              has_response_actions_osquery: false,
             },
           ],
           detection_rule_usage: {
@@ -125,6 +133,8 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
+              response_actions: initialResponseActionsUsage,
             },
             elastic_total: {
               alerts: 3400,
@@ -137,6 +147,8 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
+              response_actions: initialResponseActionsUsage,
             },
           },
         },
@@ -185,6 +197,8 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
+              response_actions: initialResponseActionsUsage,
             },
             query: {
               alerts: 800,
@@ -197,6 +211,22 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
+              response_actions: initialResponseActionsUsage,
+            },
+            query_custom: {
+              alerts: 800,
+              cases: 1,
+              disabled: 1,
+              enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+              response_actions: initialResponseActionsUsage,
+              has_exceptions: 0,
             },
           },
         },
@@ -251,6 +281,10 @@ describe('Detections Usage and Metrics', () => {
               has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
               has_alert_suppression_per_rule_execution: false,
               has_alert_suppression_per_time_period: false,
+              has_exceptions: false,
+              has_response_actions: false,
+              has_response_actions_endpoint: false,
+              has_response_actions_osquery: false,
             },
           ],
           detection_rule_usage: {
@@ -266,6 +300,8 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
+              response_actions: initialResponseActionsUsage,
             },
             query: {
               alerts: 0,
@@ -278,6 +314,8 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
+              response_actions: initialResponseActionsUsage,
             },
           },
         },

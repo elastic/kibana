@@ -149,7 +149,7 @@ export const ColumnHeaderWithToolTip = ({ id }: { id: string }) => {
           content={columnsWithToolTipMap[id].toolTip}
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
         />
       </EuiFlexItem>

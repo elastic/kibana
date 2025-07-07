@@ -31,7 +31,7 @@ import type {
   FleetServerAgentMetadata,
 } from '../../common/types';
 
-import { agentPolicyService, appContextService } from '../services';
+import { agentPolicyService, appContextService, licenseService } from '../services';
 import {
   fetchAllAgentsByKuery,
   getAgentsByKuery,
@@ -138,6 +138,12 @@ export class AutomaticAgentUpgradeTask {
     if (!appContextService.getExperimentalFeatures().enableAutomaticAgentUpgrades) {
       this.logger.debug(
         '[AutomaticAgentUpgradeTask] Aborting runTask: automatic upgrades feature is disabled'
+      );
+      return;
+    }
+    if (!licenseService.isEnterprise()) {
+      this.logger.debug(
+        '[AutomaticAgentUpgradeTask] Aborting runTask: automatic upgrades feature requires at least Enterprise license'
       );
       return;
     }
@@ -376,6 +382,9 @@ export class AutomaticAgentUpgradeTask {
 
     numberOfAgentsForUpgrade -= numberOfRetriedAgents;
     if (numberOfAgentsForUpgrade <= 0) {
+      this.logger.debug(
+        `[AutomaticAgentUpgradeTask] Number of agents ${numberOfAgentsForUpgrade}: no candidate agents found for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
+      );
       return;
     }
 

@@ -426,6 +426,7 @@ export default function (providerContext: FtrProviderContext) {
                 package: {
                   name: 'system',
                 },
+                latest_revision: true,
               },
             })
           ),
@@ -464,6 +465,7 @@ export default function (providerContext: FtrProviderContext) {
             package: {
               name: 'system',
             },
+            latest_revision: true,
           },
         });
         packagePoliciesToDeleteIds.push('package-policy-1');
@@ -476,6 +478,7 @@ export default function (providerContext: FtrProviderContext) {
             package: {
               name: 'system',
             },
+            latest_revision: true,
           },
         });
         packagePoliciesToDeleteIds.push('package-policy-2');
@@ -880,6 +883,7 @@ export default function (providerContext: FtrProviderContext) {
               package: {
                 name: 'system',
               },
+              latest_revision: true,
             },
           }),
         ]);
@@ -964,6 +968,7 @@ export default function (providerContext: FtrProviderContext) {
               package: {
                 name: 'system',
               },
+              latest_revision: true,
             },
           }),
         ]);

@@ -642,7 +642,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Overview Tab', () => {
         before(async () => {
-          await pageObjects.assetDetails.clickOverviewTab();
+          // Close the metric popover if it is open
+          await browser.pressKeys(browser.keys.ESCAPE);
+          const overviewTab = await pageObjects.assetDetails.getOverviewTab();
+          // Use clickMouseButton to ensure the tab is visible
+          await overviewTab.clickMouseButton();
         });
 
         [
@@ -651,23 +655,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'memoryUsage' },
           { metric: 'diskUsage' },
         ].forEach(({ metric }) => {
-          it(`${metric} tile should not be shown`, async () => {
-            await pageObjects.assetDetails.assetDetailsKPITileMissing(metric);
+          it(`${metric} tile should be shown`, async () => {
+            const titleValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
+            expect(titleValue).to.be('N/A');
           });
-        });
-
-        it('should show add metrics callout', async () => {
-          await pageObjects.assetDetails.addMetricsCalloutExists();
-        });
-      });
-
-      describe('Processes Tab', () => {
-        before(async () => {
-          await pageObjects.assetDetails.clickProcessesTab();
-        });
-
-        it('should show add metrics callout', async () => {
-          await pageObjects.assetDetails.addMetricsCalloutExists();
         });
       });
     });
@@ -833,7 +824,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metadata Tab', () => {
           before(async () => {
-            await pageObjects.assetDetails.clickMetadataTab();
+            // Close the metric popover if it is open
+            await browser.pressKeys(browser.keys.ESCAPE);
+            const metadataTab = await pageObjects.assetDetails.getMetadataTab();
+            // Use clickMouseButton to ensure the tab is visible
+            await metadataTab.clickMouseButton();
           });
 
           it('should show metadata table', async () => {

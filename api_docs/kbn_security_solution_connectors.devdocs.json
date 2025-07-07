@@ -52,6 +52,18 @@
         "tags": [],
         "label": "ConnectorSelectorProps",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-solution-connectors",
+            "scope": "public",
+            "docId": "kibKbnSecuritySolutionConnectorsPluginApi",
+            "section": "def-public.ConnectorSelectorProps",
+            "text": "ConnectorSelectorProps"
+          },
+          " extends Partial<Pick<",
+          "EuiSuperSelectProps",
+          "<string>, \"isLoading\" | \"isInvalid\">>"
+        ],
         "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -142,6 +154,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-connectors",
+            "id": "def-public.ConnectorSelectorProps.mode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "\"default\" | \"combobox\" | undefined"
             ],
             "path": "x-pack/solutions/security/packages/connectors/src/connector_selector.tsx",
             "deprecated": false,

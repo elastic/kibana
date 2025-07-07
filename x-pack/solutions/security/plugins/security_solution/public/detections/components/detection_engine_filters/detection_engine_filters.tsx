@@ -57,18 +57,32 @@ export const DetectionEngineFilters = ({
     [urlStorage]
   );
 
-  const dataViewSpec = useMemo(
-    () =>
-      indexPattern
-        ? {
-            id: SECURITY_ALERT_DATA_VIEW.id,
-            name: SECURITY_ALERT_DATA_VIEW.name,
-            allowNoIndex: true,
-            title: indexPattern.title,
-            timeFieldName: '@timestamp',
-          }
-        : null,
-    [indexPattern]
+  const dataViewSpec = useMemo(() => {
+    // NOTE: index pattern should have a title or an id to be considered valid
+    // it is possible that the empty id or title are set temporarily during page load (compatibility reasons as we support adhoc data views now).
+    // to be removed after the cleanup work in scope of https://github.com/elastic/security-team/issues/11959
+    // is done.
+    const isIndexPatternValid = indexPattern && (indexPattern.title || indexPattern.id);
+
+    return isIndexPatternValid
+      ? {
+          id: SECURITY_ALERT_DATA_VIEW.id,
+          name: SECURITY_ALERT_DATA_VIEW.name,
+          allowNoIndex: true,
+          title: indexPattern.title,
+          timeFieldName: '@timestamp',
+        }
+      : null;
+  }, [indexPattern]);
+
+  const services = useMemo(
+    () => ({
+      http,
+      notifications,
+      dataViews,
+      storage: Storage,
+    }),
+    [dataViews, http, notifications]
   );
 
   if (!spaceId || !dataViewSpec) {
@@ -85,12 +99,7 @@ export const DetectionEngineFilters = ({
       chainingSystem="HIERARCHICAL"
       defaultControls={DEFAULT_DETECTION_PAGE_FILTERS}
       dataViewSpec={dataViewSpec}
-      services={{
-        http,
-        notifications,
-        dataViews,
-        storage: Storage,
-      }}
+      services={services}
       ControlGroupRenderer={ControlGroupRenderer}
       maxControls={4}
       {...props}

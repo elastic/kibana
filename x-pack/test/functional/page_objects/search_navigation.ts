@@ -25,6 +25,14 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
         });
       });
     },
+    async navigateToElasticsearchSearchHomePage(basePath?: string) {
+      await retry.tryForTime(60 * 1000, async () => {
+        await common.navigateToApp('searchHomepage', {
+          shouldLoginIfPrompted: false,
+          basePath,
+        });
+      });
+    },
     async navigateToElasticsearchStartPage(expectRedirect: boolean = false, basePath?: string) {
       await retry.tryForTime(60 * 1000, async () => {
         await common.navigateToApp('elasticsearchStart', {

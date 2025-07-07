@@ -15,6 +15,7 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessObservabilityPublicSetup {}
@@ -37,4 +38,5 @@ export interface ServerlessObservabilityPublicStartDependencies {
   management: ManagementStart;
   security: SecurityPluginStart;
   streams?: StreamsPluginStart;
+  cases?: CasesPublicStart;
 }

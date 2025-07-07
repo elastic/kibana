@@ -11,8 +11,12 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useCallback, useMemo } from 'react';
+import { BulkFillRuleGapsEventTypes } from '../../../../../common/lib/telemetry/events/bulk_fill_rule_gaps/types';
 import { ML_RULES_UNAVAILABLE } from './translations';
-import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
+import {
+  MAX_BULK_FILL_RULE_GAPS_BULK_SIZE,
+  MAX_MANUAL_RULE_RUN_BULK_SIZE,
+} from '../../../../../../common/constants';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
@@ -48,6 +52,10 @@ import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
 import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useUpsellingMessage } from '../../../../../common/hooks/use_upselling';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../../common/detection_engine/constants';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -58,7 +66,9 @@ interface UseBulkActionsArgs {
   ) => Promise<boolean>;
   showBulkDuplicateConfirmation: () => Promise<string | null>;
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
+  showBulkFillRuleGapsConfirmation: () => Promise<TimeRange | null>;
   showManualRuleRunLimitError: () => void;
+  showBulkFillRuleGapsRuleLimitError: () => void;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
@@ -71,7 +81,9 @@ export const useBulkActions = ({
   showBulkActionConfirmation,
   showBulkDuplicateConfirmation,
   showManualRuleRunConfirmation,
+  showBulkFillRuleGapsConfirmation,
   showManualRuleRunLimitError,
+  showBulkFillRuleGapsRuleLimitError,
   completeBulkEditForm,
   executeBulkActionsDryRun,
 }: UseBulkActionsArgs) => {
@@ -103,6 +115,14 @@ export const useBulkActions = ({
       ...(gapRange && { gapRange }),
     };
   }, [kql, filterOptions]);
+
+  const isBulkEditAlertSuppressionFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'bulkEditAlertSuppressionEnabled'
+  );
+  const isBulkFillRuleGapsEnabled = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
+  const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
+  const license = useLicense();
+  const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
@@ -276,6 +296,111 @@ export const useBulkActions = ({
         });
       };
 
+      const handleScheduleFillGapsAction = async () => {
+        let longTimeWarningToast: Toast;
+        let isBulkFillGapsFinished = false;
+
+        startTransaction({ name: BULK_RULE_ACTIONS.FILL_GAPS });
+        closePopover();
+
+        setIsPreflightInProgress(true);
+
+        const dryRunResult = await executeBulkActionsDryRun({
+          type: BulkActionTypeEnum.fill_gaps,
+          ...(isAllSelected
+            ? { query: convertRulesFilterToKQL(filterOptions) }
+            : { ids: selectedRuleIds }),
+          fillGapsPayload: {
+            start_date: new Date(Date.now() - 1000).toISOString(),
+            end_date: new Date().toISOString(),
+          },
+        });
+
+        setIsPreflightInProgress(false);
+
+        if ((dryRunResult?.succeededRulesCount ?? 0) > MAX_BULK_FILL_RULE_GAPS_BULK_SIZE) {
+          showBulkFillRuleGapsRuleLimitError();
+          return;
+        }
+
+        const hasActionBeenConfirmed = await showBulkActionConfirmation(
+          dryRunResult,
+          BulkActionTypeEnum.fill_gaps
+        );
+        if (hasActionBeenConfirmed === false) {
+          return;
+        }
+
+        const modalBulkFillRuleGapsConfirmationResult = await showBulkFillRuleGapsConfirmation();
+        startServices.telemetry.reportEvent(BulkFillRuleGapsEventTypes.BulkFillRuleGapsOpenModal, {
+          type: 'bulk',
+        });
+
+        if (modalBulkFillRuleGapsConfirmationResult === null) {
+          return;
+        }
+
+        const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
+
+        const hideWarningToast = () => {
+          if (longTimeWarningToast) {
+            toasts.api.remove(longTimeWarningToast);
+          }
+        };
+
+        // show warning toast only if bulk fill gaps action exceeds 5s
+        // if bulkAction already finished, we won't show toast at all (hence flag "isBulkFillGapsFinished")
+        setTimeout(() => {
+          if (isBulkFillGapsFinished) {
+            return;
+          }
+          longTimeWarningToast = toasts.addWarning(
+            {
+              title: i18n.BULK_FILL_RULE_GAPS_WARNING_TOAST_TITLE,
+              text: toMountPoint(
+                <>
+                  <p>
+                    {i18n.BULK_FILL_RULE_GAPS_WARNING_TOAST_DESCRIPTION(
+                      dryRunResult?.succeededRulesCount ?? 0
+                    )}
+                  </p>
+                  <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton color="warning" size="s" onClick={hideWarningToast}>
+                        {i18n.BULK_FILL_RULE_GAPS_WARNING_TOAST_NOTIFY}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>,
+                startServices
+              ),
+              iconType: undefined,
+            },
+            { toastLifeTimeMs: 10 * 60 * 1000 }
+          );
+        }, 5 * 1000);
+
+        await executeBulkAction({
+          type: BulkActionTypeEnum.fill_gaps,
+          ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
+          fillGapsPayload: {
+            start_date: modalBulkFillRuleGapsConfirmationResult.startDate.toISOString(),
+            end_date: modalBulkFillRuleGapsConfirmationResult.endDate.toISOString(),
+          },
+        });
+
+        isBulkFillGapsFinished = true;
+        hideWarningToast();
+
+        startServices.telemetry.reportEvent(BulkFillRuleGapsEventTypes.BulkFillRuleGapsExecute, {
+          rangeInMs: modalBulkFillRuleGapsConfirmationResult.endDate.diff(
+            modalBulkFillRuleGapsConfirmationResult.startDate
+          ),
+          status: 'success',
+          rulesCount: enabledIds.length,
+        });
+      };
+
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
         let longTimeWarningToast: Toast;
         let isBulkEditFinished = false;
@@ -365,6 +490,7 @@ export const useBulkActions = ({
       const isDeleteDisabled = containsLoading || selectedRuleIds.length === 0;
       const isEditDisabled =
         missingActionPrivileges || containsLoading || selectedRuleIds.length === 0;
+      const isAlertSuppressionDisabled = isEditDisabled || !isAlertSuppressionLicenseValid;
 
       return [
         {
@@ -417,6 +543,20 @@ export const useBulkActions = ({
               disabled: isEditDisabled,
               panel: 3,
             },
+            ...(isBulkEditAlertSuppressionFeatureEnabled
+              ? [
+                  {
+                    key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+                    name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+                    'data-test-subj': 'alertSuppressionBulkEditRule',
+                    disabled: isAlertSuppressionDisabled,
+                    toolTipContent: isAlertSuppressionLicenseValid
+                      ? undefined
+                      : alertSuppressionUpsellingMessage,
+                    panel: 4,
+                  },
+                ]
+              : []),
             {
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
@@ -469,6 +609,18 @@ export const useBulkActions = ({
               onClick: handleScheduleRuleRunAction,
               icon: undefined,
             },
+            ...(isBulkFillRuleGapsEnabled
+              ? [
+                  {
+                    key: i18n.BULK_ACTION_FILL_RULE_GAPS,
+                    name: i18n.BULK_ACTION_FILL_RULE_GAPS,
+                    'data-test-subj': 'scheduleFillGaps',
+                    disabled: containsLoading || (!containsEnabled && !isAllSelected),
+                    onClick: handleScheduleFillGapsAction,
+                    icon: undefined,
+                  },
+                ]
+              : []),
             {
               key: i18n.BULK_ACTION_DISABLE,
               name: i18n.BULK_ACTION_DISABLE,
@@ -581,6 +733,36 @@ export const useBulkActions = ({
             },
           ],
         },
+        {
+          id: 4,
+          title: i18n.BULK_ACTION_MENU_TITLE,
+          items: [
+            {
+              key: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION,
+              name: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION,
+              'data-test-subj': 'setAlertSuppressionBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.set_alert_suppression),
+              disabled: isAlertSuppressionDisabled,
+              toolTipProps: { position: 'right' },
+            },
+            {
+              key: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,
+              name: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,
+              'data-test-subj': 'setAlertSuppressionForThresholdBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.set_alert_suppression_for_threshold),
+              disabled: isAlertSuppressionDisabled,
+              toolTipProps: { position: 'right' },
+            },
+            {
+              key: i18n.BULK_ACTION_DELETE_ALERT_SUPPRESSION,
+              name: i18n.BULK_ACTION_DELETE_ALERT_SUPPRESSION,
+              'data-test-subj': 'deleteAlertSuppressionBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.delete_alert_suppression),
+              disabled: isAlertSuppressionDisabled,
+              toolTipProps: { position: 'right' },
+            },
+          ],
+        },
       ];
     },
     [
@@ -596,6 +778,7 @@ export const useBulkActions = ({
       showBulkDuplicateConfirmation,
       showManualRuleRunConfirmation,
       showManualRuleRunLimitError,
+      showBulkFillRuleGapsRuleLimitError,
       clearRulesSelection,
       confirmDeletion,
       bulkExport,
@@ -605,9 +788,15 @@ export const useBulkActions = ({
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
+      isBulkEditAlertSuppressionFeatureEnabled,
       startServices,
       canCreateTimelines,
+      isAlertSuppressionLicenseValid,
+      alertSuppressionUpsellingMessage,
       globalQuery,
+      kql,
+      showBulkFillRuleGapsConfirmation,
+      isBulkFillRuleGapsEnabled,
     ]
   );
 

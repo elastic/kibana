@@ -9,6 +9,7 @@
 
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import type {
+  SavedObjectMigration,
   SavedObjectModelUnsafeTransformFn,
   SavedObjectsType,
 } from '@kbn/core-saved-objects-server';
@@ -42,7 +43,6 @@ const defaultType: SavedObjectsType<any> = {
       changes: [],
     },
   },
-  switchToModelVersionAt: '8.10.0',
   migrations: {},
 };
 
@@ -61,6 +61,15 @@ interface ComplexTypeV1 {
 }
 
 export const baselineTypes: Array<SavedObjectsType<any>> = [
+  {
+    // an old type with no model versions defined
+    ...defaultType,
+    modelVersions: undefined,
+    name: 'old',
+    migrations: {
+      '8.8.0': ((doc) => doc) as SavedObjectMigration,
+    },
+  },
   {
     ...defaultType,
     name: 'server',
@@ -206,6 +215,20 @@ export const getReindexingBaselineTypes = (removedTypes: string[]) => {
           },
         },
       };
+    } else if (type.name === 'old') {
+      return {
+        ...type,
+        migrations: {
+          ...type.migrations,
+          '8.9.0': ((doc) => ({
+            ...doc,
+            attributes: {
+              ...(doc.attributes as any),
+              name: `${(doc.attributes as any).name}_8.9.0`,
+            },
+          })) as SavedObjectMigration,
+        },
+      };
     } else {
       return type;
     }
@@ -222,6 +245,12 @@ export const getBaselineDocuments = (
   const documentsPerType = params.documentsPerType ?? 4;
 
   return [
+    ...new Array(documentsPerType).fill(true).map((_, index) => ({
+      type: 'old',
+      attributes: {
+        name: `old-${index}`,
+      },
+    })),
     ...new Array(documentsPerType).fill(true).map((_, index) => ({
       type: 'server',
       attributes: {

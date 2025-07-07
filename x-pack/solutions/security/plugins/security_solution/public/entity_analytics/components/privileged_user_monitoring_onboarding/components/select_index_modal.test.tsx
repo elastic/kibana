@@ -6,9 +6,18 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IndexSelectorModal } from './select_index_modal';
 import { TestProviders } from '../../../../common/mock';
+
+const mockUpdatePrivMonMonitoredIndices = jest.fn().mockImplementation(() => Promise.resolve({}));
+const mockRegisterPrivMonMonitoredIndices = jest.fn().mockImplementation(() => Promise.resolve({}));
+jest.mock('../../../api/api', () => ({
+  useEntityAnalyticsRoutes: () => ({
+    updatePrivMonMonitoredIndices: () => mockUpdatePrivMonMonitoredIndices(),
+    registerPrivMonMonitoredIndices: () => mockRegisterPrivMonMonitoredIndices(),
+  }),
+}));
 
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
@@ -28,29 +37,22 @@ jest.mock('../hooks/use_fetch_privileged_user_indices', () => ({
 
 describe('IndexSelectorModal', () => {
   const onCloseMock = jest.fn();
+  const onImportMock = jest.fn();
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders the modal when isOpen is true', () => {
-    render(<IndexSelectorModal isOpen={true} onClose={onCloseMock} />, {
+    render(<IndexSelectorModal onClose={onCloseMock} onImport={onImportMock} />, {
       wrapper: TestProviders,
     });
 
     expect(screen.getByText('Select index')).toBeInTheDocument();
   });
 
-  it('does not render the modal when isOpen is false', () => {
-    render(<IndexSelectorModal isOpen={false} onClose={onCloseMock} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.queryByText('Select index')).not.toBeInTheDocument();
-  });
-
   it('calls onClose when the cancel button is clicked', () => {
-    render(<IndexSelectorModal isOpen={true} onClose={onCloseMock} />, {
+    render(<IndexSelectorModal onClose={onCloseMock} onImport={onImportMock} />, {
       wrapper: TestProviders,
     });
 
@@ -60,7 +62,7 @@ describe('IndexSelectorModal', () => {
   });
 
   it('displays the indices in the combo box', () => {
-    render(<IndexSelectorModal isOpen={true} onClose={onCloseMock} />, {
+    render(<IndexSelectorModal onClose={onCloseMock} onImport={onImportMock} />, {
       wrapper: TestProviders,
     });
 
@@ -77,7 +79,7 @@ describe('IndexSelectorModal', () => {
       error: new Error('Test error'),
     });
 
-    render(<IndexSelectorModal isOpen={true} onClose={onCloseMock} />, {
+    render(<IndexSelectorModal onClose={onCloseMock} onImport={onImportMock} />, {
       wrapper: TestProviders,
     });
 
@@ -91,10 +93,44 @@ describe('IndexSelectorModal', () => {
       error: null,
     });
 
-    render(<IndexSelectorModal isOpen={true} onClose={onCloseMock} />, {
+    render(<IndexSelectorModal onClose={onCloseMock} onImport={onImportMock} />, {
       wrapper: TestProviders,
     });
 
     expect(screen.queryByLabelText('Select index')).toBeInTheDocument();
+  });
+
+  it('pre-selects indices when editDataSource is provided', () => {
+    render(
+      <IndexSelectorModal
+        onClose={onCloseMock}
+        onImport={onImportMock}
+        editDataSource={{ id: '123', indexPattern: 'index1,index2' }}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    // The selected options should be visible in the combo box
+    expect(screen.getByText('index1')).toBeInTheDocument();
+    expect(screen.getByText('index2')).toBeInTheDocument();
+  });
+
+  it('calls updatePrivMonMonitoredIndices and onImport when editing and clicking add', async () => {
+    render(
+      <IndexSelectorModal
+        onClose={onCloseMock}
+        onImport={onImportMock}
+        editDataSource={{ id: 'edit-id', indexPattern: 'index1' }}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    // Add button should be enabled since index1 is preselected
+    fireEvent.click(screen.getByText('Add privileged users'));
+
+    waitFor(() => {
+      expect(mockUpdatePrivMonMonitoredIndices).toHaveBeenCalledWith('edit-id', 'index1');
+      expect(onImportMock).toHaveBeenCalledWith(0);
+    });
   });
 });

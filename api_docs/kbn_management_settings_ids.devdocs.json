@@ -39,6 +39,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE",
+        "description": [],
+        "signature": [
+          "\"aiAssistant:preferredAIAssistantType\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.AUTOCOMPLETE_USE_TIME_RANGE_ID",
         "type": "string",
         "tags": [],
@@ -1194,13 +1209,13 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE",
+        "id": "def-common.OBSERVABILITY_ENABLE_STREAMS_UI",
         "type": "string",
         "tags": [],
-        "label": "OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE",
+        "label": "OBSERVABILITY_ENABLE_STREAMS_UI",
         "description": [],
         "signature": [
-          "\"observability:entityCentricExperience\""
+          "\"observability:enableStreamsUI\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1261,6 +1276,21 @@
         "description": [],
         "signature": [
           "\"observability:searchExcludedDataTiers\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS",
+        "description": [],
+        "signature": [
+          "\"observability:streamsEnableSignificantEvents\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

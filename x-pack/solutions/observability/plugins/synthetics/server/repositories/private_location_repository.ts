@@ -12,6 +12,7 @@ import { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import { PrivateLocationObject } from '../routes/settings/private_locations/add_private_location';
 import { RouteContext } from '../routes/types';
 import { privateLocationSavedObjectName } from '../../common/saved_objects/private_locations';
+import { EditPrivateLocationAttributes } from '../routes/settings/private_locations/edit_private_location';
 
 export class PrivateLocationRepository {
   internalSOClient: ISavedObjectsRepository;
@@ -33,6 +34,26 @@ export class PrivateLocationRepository {
       }
     );
   }
+
+  async getPrivateLocation(locationId: string) {
+    const { savedObjectsClient } = this.routeContext;
+
+    return savedObjectsClient.get<PrivateLocationAttributes>(
+      privateLocationSavedObjectName,
+      locationId
+    );
+  }
+
+  async editPrivateLocation(locationId: string, newAttributes: EditPrivateLocationAttributes) {
+    const { savedObjectsClient } = this.routeContext;
+
+    return savedObjectsClient.update<PrivateLocationAttributes>(
+      privateLocationSavedObjectName,
+      locationId,
+      newAttributes
+    );
+  }
+
   async validatePrivateLocation() {
     const { response, request, server } = this.routeContext;
 

@@ -11,6 +11,7 @@ import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 
 export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_CREATED = 'siem_migration_created',
+  SIEM_MIGRATION_UPDATED = 'siem_migration_updated',
   SIEM_MIGRATION_RETRIEVED = 'siem_migration_retrieved',
   SIEM_MIGRATION_DELETED = 'siem_migration_deleted',
   SIEM_MIGRATION_ADDED_RULES = 'siem_migration_added_rules',
@@ -50,6 +51,7 @@ export const siemMigrationAuditEventType: Record<
   ArrayElement<EcsEvent['type']>
 > = {
   [SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED]: AUDIT_TYPE.CREATION,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_RESOURCES]: AUDIT_TYPE.CREATION,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RESOURCES]: AUDIT_TYPE.ACCESS,
@@ -119,6 +121,16 @@ export class SiemMigrationAuditLogger {
     const message = `User created a new SIEM migration`;
     return this.log({
       action: SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED,
+      message,
+      error,
+    });
+  }
+
+  public async logUpdateMigration(params: { migrationId: string; error?: Error }): Promise<void> {
+    const { migrationId, error } = params;
+    const message = `User updated the SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED,
       message,
       error,
     });

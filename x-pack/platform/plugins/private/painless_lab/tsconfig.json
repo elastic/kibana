@@ -23,6 +23,7 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/scout",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",

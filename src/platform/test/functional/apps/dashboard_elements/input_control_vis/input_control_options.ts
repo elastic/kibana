@@ -25,7 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const FIELD_NAME = 'machine.os.raw';
 
-  describe('input control options', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/225165
+  describe.skip('input control options', () => {
     before(async () => {
       await visualize.initTests();
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();

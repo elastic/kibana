@@ -56,6 +56,7 @@ export function getSystemMessageFromInstructions({
     // user instructions
     ...(allUserInstructions.length ? [USER_INSTRUCTIONS_HEADER, ...allUserInstructions] : []),
   ]
+
     .map((instruction) => {
       return typeof instruction === 'string' ? instruction : instruction.text;
     })

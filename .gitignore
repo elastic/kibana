@@ -106,6 +106,8 @@ npm-debug.log*
 # transpiled cypress config
 x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.js
+x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.d.ts
+x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.js
 x-pack/platform/plugins/shared/osquery/cypress.config.d.ts
 x-pack/platform/plugins/shared/osquery/cypress.config.js
 x-pack/solutions/search/plugins/enterprise_search/cypress.config.d.ts

@@ -107,7 +107,7 @@ export class InterceptUserInteractionService {
   // returns an id scoped to the current user
   private getSavedObjectId = (triggerId: string, userId: string) => `${triggerId}:${userId}`;
 
-  public async getUserInteractionSavedObject(
+  private async getUserInteractionSavedObject(
     userId: string,
     triggerId: string
   ): Promise<SavedObject<InterceptInteractionUserRecordAttributes> | null> {
@@ -131,7 +131,7 @@ export class InterceptUserInteractionService {
     }
   }
 
-  public async recordUserInteractionForTrigger(
+  private async recordUserInteractionForTrigger(
     userId: string,
     triggerId: string,
     data: InterceptInteractionUserRecordAttributes['metadata']

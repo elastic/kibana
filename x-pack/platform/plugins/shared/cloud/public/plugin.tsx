@@ -9,6 +9,7 @@ import React, { FC, PropsWithChildren } from 'react';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
+import { KibanaSolution } from '@kbn/projects-solutions-groups';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
@@ -42,7 +43,7 @@ export interface CloudConfigType {
   serverless?: {
     project_id: string;
     project_name?: string;
-    project_type?: string;
+    project_type?: KibanaSolution;
     orchestrator_target?: string;
   };
 }

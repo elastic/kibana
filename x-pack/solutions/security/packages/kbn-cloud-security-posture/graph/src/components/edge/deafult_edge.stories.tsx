@@ -64,6 +64,7 @@ const edgeTypes = {
 const Template = (args: EdgeViewModel) => {
   const isArrayOfObjectsEqual = (x: object[], y: object[]) =>
     size(x) === size(y) && isEmpty(xorWith(x, y, isEqual));
+  const edgeData = pick(args, ['id', 'label', 'interactive', 'source', 'target', 'color', 'type']);
 
   const nodes = useMemo(
     () => [
@@ -86,11 +87,14 @@ const Template = (args: EdgeViewModel) => {
       {
         id: args.id,
         type: 'label',
-        data: pick(args, ['id', 'label', 'interactive', 'source', 'target', 'color', 'type']),
+        data: {
+          ...edgeData,
+          color: edgeData.color === 'subdued' ? 'primary' : edgeData.color,
+        },
         position: { x: 230, y: 6 },
       },
     ],
-    [args]
+    [args, edgeData]
   );
 
   const edges = useMemo(
@@ -172,7 +176,7 @@ export default {
   render: Template,
   argTypes: {
     color: {
-      options: ['primary', 'danger', 'warning'],
+      options: ['primary', 'danger', 'warning', 'subdued'],
       control: { type: 'radio' },
     },
     type: {

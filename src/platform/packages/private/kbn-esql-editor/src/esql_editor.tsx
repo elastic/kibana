@@ -35,8 +35,8 @@ import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import { type ESQLFieldWithMetadata } from '@kbn/esql-validation-autocomplete';
-import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import { FieldType } from '@kbn/esql-ast';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -49,6 +49,7 @@ import {
   onMouseDownResizeHandler,
   getEditorOverwrites,
   type MonacoMessage,
+  filterDataErrors,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
@@ -106,6 +107,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   controlsContext,
   esqlVariables,
   expandToFitQueryOnMount,
+  dataErrorsControl,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -521,11 +523,12 @@ export const ESQLEditor = memo(function ESQLEditor({
             (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
               queryString,
               activeSolutionId
-            )) ?? { recommendedQueries: [] }
+            )) ?? { recommendedQueries: [], recommendedFields: [] }
           );
         }
         return {
           recommendedQueries: [],
+          recommendedFields: [],
         };
       },
       getInferenceEndpoints: kibana.services?.esql?.getInferenceEndpointsAutocomplete,
@@ -633,7 +636,11 @@ export const ESQLEditor = memo(function ESQLEditor({
       const markers = [];
 
       if (parserErrors.length) {
-        markers.push(...parserErrors);
+        if (dataErrorsControl?.enabled === false) {
+          markers.push(...filterDataErrors(parserErrors));
+        } else {
+          markers.push(...parserErrors);
+        }
       }
       if (active) {
         setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
@@ -641,7 +648,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         return;
       }
     },
-    [parseMessages]
+    [parseMessages, dataErrorsControl?.enabled]
   );
 
   useDebounceWithOptions(
@@ -668,7 +675,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     },
     { skipFirstRender: false },
     256,
-    [serverErrors, serverWarning, code]
+    [serverErrors, serverWarning, code, queryValidation]
   );
 
   const suggestionProvider = useMemo(
@@ -942,6 +949,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
+        dataErrorsControl={dataErrorsControl}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

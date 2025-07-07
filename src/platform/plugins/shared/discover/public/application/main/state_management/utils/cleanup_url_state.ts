@@ -17,6 +17,7 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
 /**
  * Takes care of the given url state, migrates legacy props and cleans up empty props
  * @param appStateFromUrl
+ * @param uiSettings
  */
 export function cleanupUrlState(
   appStateFromUrl: AppStateUrl | null | undefined,

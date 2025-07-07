@@ -20,6 +20,7 @@ import { login, ROLE } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../types';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 const loginWithPrivilegeAll = () => {
   login(ROLE.endpoint_policy_manager);
@@ -45,9 +46,9 @@ const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
         ...endpointSecurityPolicyManagerRole.kibana[0],
         feature: {
           ...endpointSecurityPolicyManagerRole.kibana[0].feature,
-          siemV2: endpointSecurityPolicyManagerRole.kibana[0].feature.siemV2.filter(
-            (privilege) => privilege !== `${privilegePrefix}all`
-          ),
+          [SECURITY_FEATURE_ID]: endpointSecurityPolicyManagerRole.kibana[0].feature[
+            SECURITY_FEATURE_ID
+          ].filter((privilege) => privilege !== `${privilegePrefix}all`),
         },
       },
     ],

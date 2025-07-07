@@ -32,7 +32,11 @@ import {
   transformESConnectorToExternalModel,
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
-import type { CasePersistedAttributes, CaseTransformedAttributes } from '../../common/types/case';
+import type {
+  CasePersistedAttributes,
+  CaseTransformedAttributes,
+  CaseTransformedAttributesWithAttachmentStats,
+} from '../../common/types/case';
 import type { ExternalServicePersisted } from '../../common/types/external_service';
 
 export function transformUpdateResponseToExternalModel(
@@ -89,10 +93,14 @@ export function transformAttributesToESModel(caseAttributes: CaseTransformedAttr
   attributes: CasePersistedAttributes;
   referenceHandler: ConnectorReferenceHandler;
 };
-export function transformAttributesToESModel(caseAttributes: Partial<CaseTransformedAttributes>): {
+
+export function transformAttributesToESModel(
+  caseAttributes: Partial<CaseTransformedAttributesWithAttachmentStats>
+): {
   attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 };
+
 export function transformAttributesToESModel(caseAttributes: Partial<CaseTransformedAttributes>): {
   attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;

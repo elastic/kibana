@@ -17,25 +17,28 @@ import {
   isIdentifier,
   parse,
   walk,
+  esqlCommandRegistry,
+  ErrorTypes,
 } from '@kbn/esql-ast';
-import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
+import { getMessageFromId, errors, sourceExists } from '@kbn/esql-ast/src/definitions/utils';
+import type { ESQLIdentifier } from '@kbn/esql-ast/src/types';
+import type {
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+} from '@kbn/esql-ast/src/commands_registry/types';
 import {
   areFieldAndUserDefinedColumnTypesCompatible,
   getColumnExists,
-  getCommandDefinition,
   hasWildcard,
   isColumnItem,
   isFunctionItem,
   isOptionItem,
   isParametrized,
-  isSingleItem,
   isSourceItem,
   isTimeIntervalItem,
-  sourceExists,
 } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
-import { errors, getMessageFromId } from './errors';
 import { validateFunction } from './function_validation';
 import {
   retrieveFields,
@@ -44,16 +47,7 @@ import {
   retrievePoliciesFields,
   retrieveSources,
 } from './resources';
-import type {
-  ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
-  ErrorTypes,
-  ReferenceMaps,
-  ValidationOptions,
-  ValidationResult,
-} from './types';
-
-import { validate as validateJoinCommand } from './commands/join';
+import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 
 /**
  * ES|QL validation public API
@@ -105,7 +99,7 @@ export async function validateQuery(
 }
 
 /**
- * @private
+ * @internal
  */
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
@@ -194,8 +188,15 @@ async function validateAst(
     messages.push(...commandMessages);
   }
 
+  const parserErrors = parsingResult.errors;
+
+  for (const error of parserErrors) {
+    error.message = error.message.replace(/\bLP\b/, "'('");
+    error.message = error.message.replace(/\bOPENING_BRACKET\b/, "'['");
+  }
+
   return {
-    errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
+    errors: [...parserErrors, ...messages.filter(({ type }) => type === 'error')],
     warnings: messages.filter(({ type }) => type === 'warning'),
   };
 }
@@ -211,31 +212,30 @@ function validateCommand(
     return messages;
   }
   // do not check the command exists, the grammar is already picking that up
-  const commandDef = getCommandDefinition(command.name);
+  const commandDefinition = esqlCommandRegistry.getCommandByName(command.name);
 
-  if (!commandDef) {
+  if (!commandDefinition) {
     return messages;
   }
 
-  if (commandDef.validate) {
-    messages.push(...commandDef.validate(command, references, ast));
+  const context = {
+    fields: references.fields,
+    policies: references.policies,
+    userDefinedColumns: references.userDefinedColumns,
+    sources: references.sources,
+    joinSources: references.joinIndices,
+  };
+
+  if (commandDefinition.methods.validate) {
+    messages.push(...commandDefinition.methods.validate(command, ast, context));
   }
 
-  switch (commandDef.name) {
-    case 'join': {
-      const join = command as ESQLAstJoinCommand;
-      const joinCommandErrors = validateJoinCommand(join, references);
-      messages.push(...joinCommandErrors);
+  switch (commandDefinition.name) {
+    case 'join':
       break;
-    }
     case 'fork': {
-      references.fields.set('_fork', {
-        name: '_fork',
-        type: 'keyword',
-      });
-
       for (const arg of command.args.flat()) {
-        if (isSingleItem(arg) && arg.type === 'query') {
+        if (!Array.isArray(arg) && arg.type === 'query') {
           // all the args should be commands
           arg.commands.forEach((subCommand) => {
             messages.push(...validateCommand(subCommand, references, ast, currentCommandIndex));

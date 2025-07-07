@@ -94,7 +94,7 @@ export const EmptyConnectorsPrompt = ({
             key="documentation-button"
             target="_blank"
             href={docLinks.links.alerting.connectors}
-            iconType="help"
+            iconType="question"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.actionsConnectorsList.documentationButtonLabel"

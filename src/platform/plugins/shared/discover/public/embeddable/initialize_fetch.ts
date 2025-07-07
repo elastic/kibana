@@ -64,7 +64,7 @@ const getExecutionContext = async (
   api: SavedSearchPartialFetchApi,
   discoverServices: DiscoverServices
 ) => {
-  const { editUrl } = await getAppTarget(api, discoverServices);
+  const { editUrl, urlWithoutLocationState } = await getAppTarget(api, discoverServices);
   const childContext: KibanaExecutionContext = {
     type: SEARCH_EMBEDDABLE_TYPE,
     name: 'discover',
@@ -72,14 +72,41 @@ const getExecutionContext = async (
     description: api.title$?.getValue() || api.defaultTitle$?.getValue() || '',
     url: editUrl,
   };
-  const executionContext =
-    apiHasParentApi(api) && apiHasExecutionContext(api.parentApi)
+  const generateExecutionContext = createExecutionContext(api);
+  const executionContext = generateExecutionContext(childContext);
+
+  if (isExecutionContextWithinLimits(executionContext)) {
+    return executionContext;
+  }
+
+  const newChildContext: KibanaExecutionContext = {
+    ...childContext,
+    url: urlWithoutLocationState,
+  };
+  return generateExecutionContext(newChildContext);
+};
+
+const createExecutionContext =
+  (api: SavedSearchPartialFetchApi) =>
+  (childContext: KibanaExecutionContext): KibanaExecutionContext => {
+    return apiHasParentApi(api) && apiHasExecutionContext(api.parentApi)
       ? {
           ...api.parentApi?.executionContext,
           child: childContext,
         }
       : childContext;
-  return executionContext;
+  };
+
+const isExecutionContextWithinLimits = (executionContext: KibanaExecutionContext) => {
+  const value = JSON.stringify(executionContext);
+  const encoded = encodeURIComponent(value);
+
+  // The max value is set to this arbitrary number because of the following reasons:
+  // 1. Maximum allowed length of the `baggage` header via which the execution context is passed is 4096 / 4 = 1024 characters.
+  // 2. The Execution Context Service adds labels (name, page and id) to the context additionally, which can increase the length
+  // Hence as a safe limit, we set the maximum length of the execution context to 900 characters.
+  const MAX_VALUE_ALLOWED = 900;
+  return encoded.length < MAX_VALUE_ALLOWED;
 };
 
 export function initializeFetch({

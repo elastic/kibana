@@ -25,7 +25,7 @@ import {
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { appendAssistantMessageToConversation, langChainExecute } from './helpers';
 import { getPrompt } from '../lib/prompt';
-import { ELASTICSEARCH_ELSER_INFERENCE_ID } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 const license = licensingMock.createLicenseMock();
 const actionsClient = actionsClientMock.create();
@@ -97,6 +97,9 @@ const mockContext = {
       }),
     },
     core: {
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
       elasticsearch: {
         client: elasticsearchServiceMock.createScopedClusterClient(),
       },
@@ -129,7 +132,7 @@ const mockResponse = {
   error: jest.fn().mockImplementation((x) => x),
 };
 const mockConfig = {
-  elserInferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID,
+  elserInferenceId: defaultInferenceEndpoints.ELSER,
   responseTimeout: 1000,
 };
 

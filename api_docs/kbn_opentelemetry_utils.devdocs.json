@@ -1,0 +1,188 @@
+{
+  "id": "@kbn/opentelemetry-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/opentelemetry-utils",
+        "id": "def-common.flattenToAttributes",
+        "type": "Function",
+        "tags": [],
+        "label": "flattenToAttributes",
+        "description": [
+          "\nFlattens a structured object in a way that is consistent with\nhow OpenTelemetry defines {@link Attributes}"
+        ],
+        "signature": [
+          "(obj: Record<string, any>, parentKey: string) => ",
+          "Attributes"
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/flatten_to_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/opentelemetry-utils",
+            "id": "def-common.flattenToAttributes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/flatten_to_attributes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/opentelemetry-utils",
+            "id": "def-common.flattenToAttributes.$2",
+            "type": "string",
+            "tags": [],
+            "label": "parentKey",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/flatten_to_attributes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/opentelemetry-utils",
+        "id": "def-common.fromTraceparent",
+        "type": "Function",
+        "tags": [],
+        "label": "fromTraceparent",
+        "description": [],
+        "signature": [
+          "(traceparent: string) => ",
+          "SpanContext",
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/from_traceparent.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/opentelemetry-utils",
+            "id": "def-common.fromTraceparent.$1",
+            "type": "string",
+            "tags": [],
+            "label": "traceparent",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/from_traceparent.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/opentelemetry-utils",
+        "id": "def-common.toTraceparent",
+        "type": "Function",
+        "tags": [],
+        "label": "toTraceparent",
+        "description": [],
+        "signature": [
+          "(sc: ",
+          "SpanContext",
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/to_traceparent.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/opentelemetry-utils",
+            "id": "def-common.toTraceparent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "sc",
+            "description": [],
+            "signature": [
+              "SpanContext"
+            ],
+            "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/to_traceparent.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/opentelemetry-utils",
+        "id": "def-common.unflattenAttributes",
+        "type": "Function",
+        "tags": [],
+        "label": "unflattenAttributes",
+        "description": [
+          "\nUnflattens attributes, according to the flattening heuristic\nin flattenToAttributes."
+        ],
+        "signature": [
+          "(flat: Record<string, ",
+          "AttributeValue",
+          " | undefined>) => Record<string, any>"
+        ],
+        "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/unflatten_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/opentelemetry-utils",
+            "id": "def-common.unflattenAttributes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "flat",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "AttributeValue",
+              " | undefined>"
+            ],
+            "path": "src/platform/packages/shared/kbn-opentelemetry-utils/src/unflatten_attributes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

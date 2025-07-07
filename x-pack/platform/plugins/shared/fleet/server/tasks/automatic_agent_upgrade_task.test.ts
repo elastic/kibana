@@ -13,7 +13,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
 import { createAppContextStartContractMock } from '../mocks';
-import { agentPolicyService, appContextService } from '../services';
+import { agentPolicyService, appContextService, licenseService } from '../services';
 import {
   fetchAllAgentsByKuery,
   getAgentsByKuery,
@@ -106,6 +106,8 @@ describe('AutomaticAgentUpgradeTask', () => {
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
 
   beforeEach(() => {
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+
     mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
     mockCore = coreSetupMock();
@@ -123,6 +125,7 @@ describe('AutomaticAgentUpgradeTask', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(licenseService, 'isEnterprise').mockClear();
   });
 
   describe('Task lifecycle', () => {
@@ -175,6 +178,14 @@ describe('AutomaticAgentUpgradeTask', () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ enableAutomaticAgentUpgrades: false } as any);
+
+      await runTask();
+
+      expect(mockAgentPolicyService.fetchAllAgentPolicies).not.toHaveBeenCalled();
+    });
+
+    it('Should exit if the license is not at least Enterprise', async () => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
 
       await runTask();
 

@@ -20,12 +20,12 @@ import {
 } from '@elastic/eui';
 import {
   getAnomalyScoreExplanationImpactValue,
-  getSeverityColor,
   showActualForFunction,
   showTypicalForFunction,
   type MlAnomaliesTableRecord,
   type MlAnomalyRecordDoc,
   ML_JOB_AGGREGATION,
+  useSeverityColor,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import type { EntityCellFilter } from '../entity_cell';
@@ -247,7 +247,7 @@ export const DetailsItems: FC<{
         <EuiIconTip
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
           position="left"
           content={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.recordScoreTooltip', {
@@ -270,7 +270,7 @@ export const DetailsItems: FC<{
         <EuiIconTip
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
           position="left"
           content={i18n.translate(
@@ -391,7 +391,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -432,7 +432,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={getImpactTooltip(
@@ -458,7 +458,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={getImpactTooltip(explanation.single_bucket_impact, 'single_bucket')}
@@ -480,7 +480,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={getImpactTooltip(explanation.multi_bucket_impact, 'multi_bucket')}
@@ -502,7 +502,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -530,7 +530,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -558,7 +558,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             position="left"
             content={i18n.translate(
@@ -641,13 +641,14 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
 };
 
 const RecordScore: FC<{ score: number }> = ({ score }) => {
+  const color = useSeverityColor(score);
   return (
     <div
       css={{
         borderBottom: '2px solid',
       }}
       style={{
-        borderBottomColor: getSeverityColor(score),
+        borderBottomColor: color,
       }}
     >
       {score}

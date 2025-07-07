@@ -89,7 +89,7 @@ export class AnalyticsService {
 
   /**
    * Enriches the events with a session_id, so we can correlate them and understand funnels.
-   * @private
+   * @internal
    */
   private registerSessionIdContext() {
     this.analyticsClient.registerContextProvider({
@@ -107,7 +107,7 @@ export class AnalyticsService {
   /**
    * Enriches the event with the build information.
    * @param core The core context.
-   * @private
+   * @internal
    */
   private registerBuildInfoAnalyticsContext(core: CoreContext) {
     this.analyticsClient.registerContextProvider({
@@ -142,7 +142,7 @@ export class AnalyticsService {
 
   /**
    * Enriches events with the current Browser's information
-   * @private
+   * @internal
    */
   private registerBrowserInfoAnalyticsContext() {
     this.analyticsClient.registerContextProvider({
@@ -175,7 +175,7 @@ export class AnalyticsService {
   /**
    * Enriches the events with the Elasticsearch info (cluster name, uuid and version).
    * @param injectedMetadata The injected metadata service.
-   * @private
+   * @internal
    */
   private registerElasticsearchInfoContext(injectedMetadata: InternalInjectedMetadataSetup) {
     this.analyticsClient.registerContextProvider({

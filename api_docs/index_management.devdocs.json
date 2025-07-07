@@ -2255,6 +2255,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.failureStoreEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "failureStoreEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.DataStream.lifecycle",
             "type": "CompoundType",
             "tags": [],
@@ -2477,7 +2491,7 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "{ delete_index: boolean; manage_data_stream_lifecycle: boolean; }"
+              "{ delete_index: boolean; manage_data_stream_lifecycle: boolean; read_failure_store: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,

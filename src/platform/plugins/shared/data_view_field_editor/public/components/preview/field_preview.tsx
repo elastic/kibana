@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiResizeObserver, EuiFieldSearch, EuiCallOut } from '@elastic/eui';
 
@@ -20,8 +21,6 @@ import { PreviewListItem } from './field_list/field_list_item';
 import { PreviewFieldList } from './field_list/field_list';
 import { useStateSelector } from '../../state_utils';
 import { PreviewState } from './types';
-
-import './field_preview.scss';
 
 const previewResponseSelector = (state: PreviewState) => state.previewResponse;
 const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
@@ -80,7 +79,7 @@ export const FieldPreview = () => {
 
   return (
     <div
-      className="indexPatternFieldEditor__previewPannel"
+      css={styles.previewPanel}
       // This tabIndex is for the scrollable area of the flyout panel.
       tabIndex={0}
     >
@@ -167,4 +166,12 @@ export const FieldPreview = () => {
       )}
     </div>
   );
+};
+
+const styles = {
+  previewPanel: css({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  }),
 };

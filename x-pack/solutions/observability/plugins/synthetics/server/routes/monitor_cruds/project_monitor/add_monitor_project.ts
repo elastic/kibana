@@ -7,6 +7,10 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+} from '../../../../common/types/saved_objects';
 import { validateSpaceId } from '../services/validate_space_id';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { ProjectMonitor } from '../../../../common/runtime_types';
@@ -20,6 +24,20 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE,
   validate: {
+    query: schema.object({
+      // primarily used for testing purposes, to specify the type of saved object
+      savedObjectType: schema.maybe(
+        schema.oneOf(
+          [
+            schema.literal(syntheticsMonitorSavedObjectType),
+            schema.literal(legacySyntheticsMonitorTypeSingle),
+          ],
+          {
+            defaultValue: syntheticsMonitorSavedObjectType,
+          }
+        )
+      ),
+    }),
     params: schema.object({
       projectName: schema.string(),
     }),

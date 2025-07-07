@@ -41,6 +41,7 @@ test.describe(
       page,
       pageObjects,
       perfTracker,
+      config,
     }) => {
       perfTracker.captureBundleResponses(cdp); // Start tracking
 
@@ -73,6 +74,7 @@ test.describe(
         'kbn-ui-shared-deps-npm',
         'lens',
         'maps',
+        ...(config.projectType === 'security' ? ['securitySolution'] : []),
         'unifiedSearch',
       ]);
       // Validate individual plugin bundle sizes

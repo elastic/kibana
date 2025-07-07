@@ -101,26 +101,6 @@ describe('ZDT with v2 compat - basic document migration', () => {
       },
     };
 
-    // legacyType -> we add a new migration
-
-    legacyType.mappings.properties = {
-      ...legacyType.mappings.properties,
-      newField: { type: 'text' },
-    };
-
-    legacyType.migrations = {
-      ...legacyType.migrations,
-      '8.0.0': (document) => {
-        return {
-          ...document,
-          attributes: {
-            ...document.attributes,
-            newField: `populated ${document.id}`,
-          },
-        };
-      },
-    };
-
     const { runMigrations, client, savedObjectsRepository } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
       logFilePath,
@@ -145,7 +125,9 @@ describe('ZDT with v2 compat - basic document migration', () => {
 
     expect(mappingMeta.docVersions).toEqual({
       sample_a: '10.2.0',
-      legacy: '8.0.0',
+      // legacy types are defaulted to 10.0.0 since 8.9.0
+      // https://github.com/elastic/kibana/pull/158267
+      legacy: '10.0.0',
     });
 
     const { saved_objects: sampleADocs } = await savedObjectsRepository.find({ type: 'sample_a' });
@@ -198,32 +180,32 @@ describe('ZDT with v2 compat - basic document migration', () => {
       {
         id: 'legacy-0',
         type: 'legacy',
-        attributes: { someField: `legacy 0`, newField: `populated legacy-0` },
+        attributes: { someField: `legacy 0` },
       },
       {
         id: 'legacy-1',
         type: 'legacy',
-        attributes: { someField: `legacy 1`, newField: `populated legacy-1` },
+        attributes: { someField: `legacy 1` },
       },
       {
         id: 'legacy-2',
         type: 'legacy',
-        attributes: { someField: `legacy 2`, newField: `populated legacy-2` },
+        attributes: { someField: `legacy 2` },
       },
       {
         id: 'legacy-3',
         type: 'legacy',
-        attributes: { someField: `legacy 3`, newField: `populated legacy-3` },
+        attributes: { someField: `legacy 3` },
       },
       {
         id: 'legacy-4',
         type: 'legacy',
-        attributes: { someField: `legacy 4`, newField: `populated legacy-4` },
+        attributes: { someField: `legacy 4` },
       },
     ]);
 
     const records = await parseLogFile(logFilePath);
-    expect(records).toContainLogEntry('Starting to process 10 documents');
+    expect(records).toContainLogEntry('Starting to process 5 documents');
     expect(records).toContainLogEntry('Migration completed');
   });
 });

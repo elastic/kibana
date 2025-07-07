@@ -7,8 +7,9 @@
 
 export {
   AgentType,
-  OneChatDefaultAgentId,
-  OneChatDefaultAgentProviderId,
+  AgentMode,
+  oneChatDefaultAgentId,
+  oneChatAgentProviderIds,
   type AgentDescriptor,
 } from './descriptor';
 export {
@@ -19,6 +20,8 @@ export {
   type ToolResultEventData,
   type ToolCallEvent,
   type ToolCallEventData,
+  type ReasoningEvent,
+  type ReasoningEventData,
   type MessageChunkEventData,
   type MessageChunkEvent,
   type MessageCompleteEventData,
@@ -27,6 +30,7 @@ export {
   type RoundCompleteEvent,
   isToolCallEvent,
   isToolResultEvent,
+  isReasoningEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
   isRoundCompleteEvent,
@@ -42,3 +46,4 @@ export {
   toSerializedAgentIdentifier,
   toStructuredAgentIdentifier,
 } from './identifiers';
+export type { AgentProfile } from './profiles';

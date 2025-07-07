@@ -16,6 +16,7 @@ import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '..
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { TimelineId } from '../../../../../common/types/timeline';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 jest.mock('../../../../common/components/user_privileges');
 
@@ -61,6 +62,30 @@ const props = {
   timelineId: 'alerts-page',
 };
 
+const mockUseKibanaReturnValue = {
+  services: {
+    timelines: { ...mockTimelines },
+    application: {
+      capabilities: { [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true } },
+    },
+    cases: {
+      ...mockCasesContract(),
+      helpers: {
+        canUseCases: jest.fn().mockReturnValue({
+          all: true,
+          create: true,
+          read: true,
+          update: true,
+          delete: true,
+          push: true,
+          createComment: true,
+          reopenCase: true,
+        }),
+        getRuleIdFromEvent: jest.fn(),
+      },
+    },
+  },
+};
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
 
@@ -70,32 +95,10 @@ jest.mock('../../../../common/lib/kibana', () => {
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
-    useKibana: () => ({
-      services: {
-        timelines: { ...mockTimelines },
-        application: {
-          capabilities: { siemV2: { crud_alerts: true, read_alerts: true } },
-        },
-        cases: {
-          ...mockCasesContract(),
-          helpers: {
-            canUseCases: jest.fn().mockReturnValue({
-              all: true,
-              create: true,
-              read: true,
-              update: true,
-              delete: true,
-              push: true,
-              createComment: true,
-              reopenCase: true,
-            }),
-            getRuleIdFromEvent: jest.fn(),
-          },
-        },
-      },
-    }),
+    useKibana: () => mockUseKibanaReturnValue,
   };
 });
 

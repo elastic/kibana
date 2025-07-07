@@ -75,6 +75,10 @@ const getAbleToModifyCase = () => {
   });
 
   it('should show error if api call crashes when modifying settings', () => {
+    cy.intercept('POST', '/internal/apm/settings/anomaly-detection/jobs', {
+      statusCode: 500,
+    });
+
     const { rangeFrom, rangeTo } = timeRange;
     const TEST_ENV =
       'Synthtrace: case scenario TEST-with-a-really-long-name ' + new Date().toISOString();

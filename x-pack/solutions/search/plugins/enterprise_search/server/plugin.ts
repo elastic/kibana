@@ -32,13 +32,13 @@ import {
   APPLICATIONS_PLUGIN,
   SEARCH_PRODUCT_NAME,
   SEARCH_INDICES,
+  SEARCH_HOMEPAGE,
   SEARCH_INDICES_START,
+  SEARCH_INDEX_MANAGEMENT,
 } from '../common/constants';
 
 import {
-  websiteSearchGuideId,
   databaseSearchGuideId,
-  websiteSearchGuideConfig,
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
@@ -114,8 +114,10 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       VECTOR_SEARCH_PLUGIN.ID,
       SEMANTIC_SEARCH_PLUGIN.ID,
       AI_SEARCH_PLUGIN.ID,
+      SEARCH_HOMEPAGE,
       SEARCH_INDICES,
       SEARCH_INDICES_START,
+      SEARCH_INDEX_MANAGEMENT,
     ];
 
     if (customIntegrations) {
@@ -303,10 +305,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     /**
      * Register a config for the search guide
      */
-    if (config.hasWebCrawler) {
-      // TODO: Do we remove this guide with the removal of native crawler?
-      guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
-    }
     if (config.hasConnectors) {
       guidedOnboarding?.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
     }

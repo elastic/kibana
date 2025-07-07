@@ -47,7 +47,6 @@ describe('ZDT with v2 compat - recovering from partially migrated state', () => 
 
   const typeFailingBetween = createType({
     ...typeBefore,
-    switchToModelVersionAt: '8.0.0',
     modelVersions: {
       1: {
         changes: [
@@ -72,7 +71,6 @@ describe('ZDT with v2 compat - recovering from partially migrated state', () => 
 
   const typeAfter = createType({
     ...typeBefore,
-    switchToModelVersionAt: '8.0.0',
     modelVersions: {
       1: {
         changes: [

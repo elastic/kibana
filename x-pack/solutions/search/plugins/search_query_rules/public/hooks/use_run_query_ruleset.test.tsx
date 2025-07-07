@@ -91,7 +91,7 @@ describe('UseRunQueryRuleset', () => {
     // Verify the request contains retriever structure
     expect(buttonProps.request).toContain('retriever');
     // Verify the request contains the expected query
-    expect(buttonProps.request).toContain('"query": "pugs"');
+    expect(buttonProps.request).toContain('"match_all": {}');
     // Verify ruleset_ids are included
     expect(buttonProps.request).toContain('test-ruleset');
   });

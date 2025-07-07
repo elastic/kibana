@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
-import { isStringLiteral } from '../ast/helpers';
+import { isStringLiteral } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import {
   ESQLAstComment,
@@ -317,6 +317,37 @@ export namespace Builder {
       fromParser?: Partial<AstNodeParserFields>
     ) => Builder.expression.func.binary('where', args, template, fromParser);
 
+    export namespace list {
+      export const literal = (
+        template: Omit<AstNodeTemplate<ESQLList>, 'name' | 'values'> &
+          Partial<Pick<ESQLList, 'values'>> = {},
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLList => {
+        return {
+          values: [],
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'list',
+          name: '',
+        };
+      };
+
+      export const tuple = (
+        template: Omit<AstNodeTemplate<ESQLList>, 'name' | 'values'> &
+          Partial<Pick<ESQLList, 'values'>> = {},
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLList => {
+        return {
+          values: [],
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'list',
+          subtype: 'tuple',
+          name: '',
+        };
+      };
+    }
+
     export namespace literal {
       /**
        * Constructs a NULL literal node.
@@ -461,18 +492,6 @@ export namespace Builder {
         };
 
         return node;
-      };
-
-      export const list = (
-        template: Omit<AstNodeTemplate<ESQLList>, 'name'>,
-        fromParser?: Partial<AstNodeParserFields>
-      ): ESQLList => {
-        return {
-          ...template,
-          ...Builder.parserFields(fromParser),
-          type: 'list',
-          name: '',
-        };
       };
     }
 

@@ -84,13 +84,13 @@ export interface InfraClientSetupDeps {
 }
 
 export interface InfraClientStartDeps {
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   dashboard: DashboardStart;
-  embeddable?: EmbeddableStart;
+  embeddable: EmbeddableStart;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
   logsDataAccess: LogsDataAccessPluginStart;

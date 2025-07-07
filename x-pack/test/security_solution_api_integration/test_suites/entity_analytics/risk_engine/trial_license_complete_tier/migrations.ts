@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const SPACE_TEST_SPACES = ['space1', 'space2', 'space3'];
 
-  describe('@ess @serverless @serverlessQA Entity Analytics Migrations', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Analytics Migrations', () => {
     beforeEach(async () => {
       for (const space of ['default', ...SPACE_TEST_SPACES]) {
         await cleanAssetCriticality({

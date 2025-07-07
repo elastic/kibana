@@ -169,6 +169,70 @@ export const processingCommands = {
   ),
   items: [
     {
+      label: i18n.translate('languageDocumentation.documentationESQL.changePoint', {
+        defaultMessage: 'CHANGE_POINT',
+      }),
+      preview: true,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'languageDocumentation.documentationESQL.changePoint.markdown',
+            {
+              defaultMessage: `### CHANGE POINT
+\`CHANGE POINT\`detects spikes, dips, and change points in a metric. 
+
+The command adds columns to the table with the change point type and p-value, that indicates how extreme the change point is (lower values indicate greater changes).
+
+The possible change point types are:
+
+* \`dip\`: a significant dip occurs at this change point
+* \`distribution_change\`: the overall distribution of the values has changed significantly
+* \`spike\`: a significant spike occurs at this point
+* \`step_change\`: the change indicates a statistically significant step up or down in value distribution
+* \`trend_change\`: there is an overall trend change occurring at this point
+
+Note that there must be at least 22 values for change point detection. Fewer than 1,000 is preferred.
+
+**Syntax**
+
+\`\`\` esql
+CHANGE_POINT value [ON key] [AS type_name, pvalue_name]
+\`\`\` 
+
+**Parameters**
+
+* \`value\`: The column with the metric in which you want to detect a change point.
+* \`key\`: The column with the key to order the values by. If not specified, @timestamp is used.
+* \`type_name\`: The name of the output column with the change point type. If not specified, type is used.
+* \`pvalue_name\`: The name of the output column with the p-value that indicates how extreme the change point is. If not specified, pvalue is used.
+
+**Example**
+
+The following example shows the detection of a step change:
+
+\`\`\` esql
+ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+| MV_EXPAND key
+| EVAL value = CASE(key<13, 0, 42)
+| CHANGE_POINT value ON key
+| WHERE type IS NOT NULL
+\`\`\` 
+
+| key:integer | value:integer | type:keyword | pvalue:double |
+|-------------|---------------|--------------|---------------|
+| 13          | 42            | step_change  | 0.0           |
+
+`,
+              ignoreTag: true,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
       label: i18n.translate('languageDocumentation.documentationESQL.dissect', {
         defaultMessage: 'DISSECT',
       }),
@@ -398,7 +462,7 @@ FROM employees
       label: i18n.translate('languageDocumentation.documentationESQL.lookupJoin', {
         defaultMessage: 'LOOKUP JOIN',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab={true}
@@ -502,6 +566,56 @@ FROM employees
 | RENAME first_name AS fn, last_name AS ln
 \`\`\`
             `,
+              ignoreTag: true,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate('languageDocumentation.documentationESQL.sampleCommand', {
+        defaultMessage: 'SAMPLE',
+      }),
+      preview: true,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'languageDocumentation.documentationESQL.sampleCommand.markdown',
+            {
+              defaultMessage: `### SAMPLE
+The \`SAMPLE\` command samples a fraction of the table rows. 
+
+**Syntax**
+
+\`\`\` esql
+SAMPLE probability
+\`\`\` 
+
+**Parameters**
+
+* \`probability\`: The probability that a row is included in the sample. The value must be between 0 and 1, exclusive.
+
+**Example**
+
+The following example shows the detection of a step change:
+
+\`\`\` esql
+FROM employees
+| KEEP emp_no
+| SAMPLE 0.05
+\`\`\` 
+
+| emp_no:integer |
+|----------------|
+| 10018          |
+| 10024          |
+| 10062          |
+| 10081          |
+
+`,
               ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',

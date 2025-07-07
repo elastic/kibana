@@ -279,7 +279,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       telemetry: mockTelemetry,
     });
 
-    const { id, ...restDiscovery } = mockAttackDiscoveries[0];
+    const { alertIds, timestamp, mitreAttackTactics } = mockAttackDiscoveries[0];
     expect(services.alertsClient.report).toHaveBeenCalledWith({
       id: 'c6f1252a8be68c4dc8d6181ef2c0b8da4288d7856ad7bbfccb888730023d9629',
       actionGroup: 'default',
@@ -348,7 +348,20 @@ describe('attackDiscoveryScheduleExecutor', () => {
         'kibana.alert.attack_discovery.title_with_replacements':
           'Critical Malware and Phishing Alerts on host Test-Host-1',
       },
-      context: { attack: restDiscovery },
+      context: {
+        attack: {
+          alertIds,
+          detailsMarkdown:
+            '- On `2023-06-19T00:28:38.061Z` a critical malware detection alert was triggered on host `Test-Host-1` running `macOS` version `13.4`.\n- The malware was identified as `unix1` with SHA256 hash `0b18d6880dc9670ab2b955914598c96fc3d0097dc40ea61157b8c79e75edf231`.\n- The process `My Go Application.app` was executed with command line `/private/var/folders/_b/rmcpc65j6nv11ygrs50ctcjr0000gn/T/AppTranslocation/6D63F08A-011C-4511-8556-EAEF9AFD6340/d/Setup.app/Contents/MacOS/My Go Application.app`.\n- The process was not trusted as its code signature failed to satisfy specified code requirements.\n- The user involved was `Test-User-1`.\n- Another critical alert was triggered for potential credentials phishing via `osascript` on the same host.\n- The phishing attempt involved displaying a dialog to capture the user\'s password.\n- The process `osascript` was executed with command line `osascript -e display dialog "MacOS wants to access System Preferences\\n\\nPlease enter your password." with title "System Preferences" with icon file "System:Library:CoreServices:CoreTypes.bundle:Contents:Resources:ToolbarAdvanced.icns" default answer "" giving up after 30 with hidden answer ¬`.\n- The MITRE ATT&CK tactics involved include Credential Access and Input Capture.',
+          entitySummaryMarkdown:
+            'Critical malware and phishing alerts detected on `Test-Host-1` involving user `Test-User-1`.',
+          mitreAttackTactics,
+          summaryMarkdown:
+            'Critical malware and phishing alerts detected on `Test-Host-1` involving user `Test-User-1`. Malware identified as `unix1` and phishing attempt via `osascript`.',
+          timestamp,
+          title: 'Critical Malware and Phishing Alerts on host Test-Host-1',
+        },
+      },
     });
   });
 
@@ -362,16 +375,14 @@ describe('attackDiscoveryScheduleExecutor', () => {
       telemetry: mockTelemetry,
     });
 
-    const { id, ...restDiscovery } = mockAttackDiscoveries[0];
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       id: expect.anything(),
       payload: expect.anything(),
       context: {
-        attack: {
-          ...restDiscovery,
+        attack: expect.objectContaining({
           detailsUrl:
             'http://fake-host.io/test/s/test-space/app/security/attack_discovery?id=fake-alert',
-        },
+        }),
       },
     });
   });
@@ -444,7 +455,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     // Check that the reported payloads are correct
     for (let i = 1; i < mockAttackDiscoveries.length; ++i) {
-      const { id, ...restDiscovery } = mockAttackDiscoveries[i];
+      const { alertIds, timestamp, mitreAttackTactics } = mockAttackDiscoveries[i];
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: expect.anything(),
         actionGroup: 'default',
@@ -453,7 +464,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: expect.anything(),
         payload: expect.any(Object),
-        context: { attack: restDiscovery },
+        context: { attack: expect.objectContaining({ alertIds, timestamp, mitreAttackTactics }) },
       });
     }
   });
@@ -473,7 +484,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     // Check that the reported payloads are correct
     for (let i = 0; i < mockAttackDiscoveries.length; ++i) {
-      const { id, ...restDiscovery } = mockAttackDiscoveries[i];
+      const { alertIds, timestamp, mitreAttackTactics } = mockAttackDiscoveries[i];
       expect(services.alertsClient.report).toHaveBeenCalledWith({
         id: expect.anything(),
         actionGroup: 'default',
@@ -482,7 +493,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
         id: expect.anything(),
         payload: expect.any(Object),
-        context: { attack: restDiscovery },
+        context: { attack: expect.objectContaining({ alertIds, timestamp, mitreAttackTactics }) },
       });
     }
   });

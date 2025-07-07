@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ESQLAst,
-  ESQLAstItem,
-  ESQLAstTimeseriesCommand,
-  ESQLAstQueryExpression,
-  ESQLColumn,
-  ESQLMessage,
-  ESQLSingleAstItem,
-  ESQLSource,
+import {
+  type ESQLAst,
+  type ESQLAstItem,
+  type ESQLAstTimeseriesCommand,
+  type ESQLAstQueryExpression,
+  type ESQLColumn,
+  type ESQLMessage,
+  type ESQLSingleAstItem,
+  type ESQLSource,
+  type ESQLCommand,
+  type FunctionDefinition,
+  Walker,
 } from '@kbn/esql-ast';
 import { mutate, synth } from '@kbn/esql-ast';
-import { FunctionDefinition } from '../definitions/types';
+import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
+import { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
+
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
-import { getMessageFromId } from './errors';
-import type { ESQLPolicy, ReferenceMaps } from './types';
+import type { ReferenceMaps } from './types';
 
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
   const firstCommand = ast[0];
@@ -140,3 +144,12 @@ export function collapseWrongArgumentTypeMessages(
 
   return messages;
 }
+
+/**
+ * Collects all 'enrich' commands from a list of ESQL commands.
+ * @param commands - The list of ESQL commands to search through.
+ * This function traverses the provided ESQL commands and collects all commands with the name 'enrich'.
+ * @returns {ESQLCommand[]} - An array of ESQLCommand objects that represent the 'enrich' commands found in the input.
+ */
+export const getEnrichCommands = (commands: ESQLCommand[]): ESQLCommand[] =>
+  Walker.matchAll(commands, { type: 'command', name: 'enrich' }) as ESQLCommand[];

@@ -10,10 +10,7 @@ import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/elasticsearch';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import {
   getMessageAddedEvents,
   invokeChatCompleteWithFunctionRequest,
@@ -25,7 +22,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const synthtrace = getService('synthtrace');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('elasticsearch', function () {
+  describe('tool: elasticsearch', function () {
     // LLM Proxy is not yet support in MKI: https://github.com/elastic/obs-ai-assistant-team/issues/199
     this.tags(['skipCloud']);
     let proxy: LlmProxy;

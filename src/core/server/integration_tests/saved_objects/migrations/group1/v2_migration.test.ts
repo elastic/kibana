@@ -25,9 +25,9 @@ import {
   nextMinor,
 } from '../kibana_migrator_test_kit';
 import {
-  BASELINE_COMPLEX_DOCUMENTS_500K_AFTER,
-  BASELINE_DOCUMENTS_PER_TYPE_500K,
-  BASELINE_TEST_ARCHIVE_500K,
+  BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER,
+  BASELINE_DOCUMENTS_PER_TYPE_LARGE,
+  BASELINE_TEST_ARCHIVE_LARGE,
 } from '../kibana_migrator_archive_utils';
 import {
   getReindexingBaselineTypes,
@@ -43,7 +43,7 @@ describe('v2 migration', () => {
   let esServer: TestElasticsearchUtils;
 
   beforeAll(async () => {
-    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_500K });
+    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_LARGE });
   });
 
   afterAll(async () => {
@@ -240,6 +240,12 @@ describe('v2 migration', () => {
       });
 
       describe('a migrator performing a compatible upgrade migration', () => {
+        it('updates mappings meta properties with the correct modelVersions (>=10.0.0)', async () => {
+          const res = await kit.client.indices.getMapping({ index: defaultKibanaTaskIndex });
+          const indexMeta = Object.values(res)[0].mappings._meta!;
+          expect(indexMeta.mappingVersions.task).toEqual('10.2.0');
+        });
+
         it('updates target mappings when mappings have changed', () => {
           expect(logs).toMatch(
             `[${defaultKibanaTaskIndex}] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.`
@@ -272,10 +278,10 @@ describe('v2 migration', () => {
               `[${defaultKibanaIndex}] WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES.`
             );
             expect(logs).toMatch(
-              `[${defaultKibanaIndex}] UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_CLUSTER_ROUTING_ALLOCATION.`
+              `[${defaultKibanaIndex}] UPDATE_SOURCE_MAPPINGS_PROPERTIES -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION.`
             );
             expect(logs).toMatch(
-              `[${defaultKibanaIndex}] CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.`
+              `[${defaultKibanaIndex}] REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.`
             );
             expect(logs).toMatch(
               `[${defaultKibanaIndex}] CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.`
@@ -292,6 +298,15 @@ describe('v2 migration', () => {
             expect(logs).not.toMatch(`[${defaultKibanaIndex}] CLEANUP_UNKNOWN_AND_EXCLUDED`);
             expect(logs).not.toMatch(`[${defaultKibanaIndex}] PREPARE_COMPATIBLE_MIGRATION`);
           });
+        });
+
+        it('updates mappings meta properties with the correct modelVersions (>=10.0.0)', async () => {
+          const res = await kit.client.indices.getMapping({ index: defaultKibanaIndex });
+          const indexMeta = Object.values(res)[0].mappings._meta!;
+          expect(indexMeta.mappingVersions.basic).toEqual('10.1.0');
+          expect(indexMeta.mappingVersions.complex).toEqual('10.2.0');
+          expect(indexMeta.mappingVersions.old).toEqual('10.0.0');
+          expect(indexMeta.mappingVersions.recent).toEqual('10.1.0');
         });
 
         describe('copies the right documents over to the target indices', () => {
@@ -324,12 +339,12 @@ describe('v2 migration', () => {
           });
 
           it('copies all of the documents', () => {
-            expect(primaryIndexCounts.basic).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K);
-            expect(taskIndexCounts.task).toEqual(BASELINE_DOCUMENTS_PER_TYPE_500K);
+            expect(primaryIndexCounts.basic).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE);
+            expect(taskIndexCounts.task).toEqual(BASELINE_DOCUMENTS_PER_TYPE_LARGE);
           });
 
           it('executes the excludeOnUpgrade hook', () => {
-            expect(primaryIndexCounts.complex).toEqual(BASELINE_COMPLEX_DOCUMENTS_500K_AFTER);
+            expect(primaryIndexCounts.complex).toEqual(BASELINE_COMPLEX_DOCUMENTS_LARGE_AFTER);
           });
         });
 

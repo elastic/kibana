@@ -1,6 +1,6 @@
-# COUNT
+## COUNT
 
-The COUNT function returns the total number of input values.
+The `COUNT` function returns the total number of input values. If no field is specified, it counts the number of rows.
 
 ## Syntax
 
@@ -8,20 +8,22 @@ The COUNT function returns the total number of input values.
 
 ### Parameters
 
-#### field
+#### `field`
 
-This is an expression that outputs values to be counted. If it's omitted, it's equivalent to `COUNT(*)`, which counts the number of rows.
+An expression that outputs values to be counted. If omitted, the function is equivalent to `COUNT(*)`, which counts the number of rows.
 
 ## Examples
 
-Count the number of specific field values:
+### Count specific field values
 
 ```esql
 FROM employees
 | STATS COUNT(height)
 ```
 
-Count the number of rows using `COUNT()` or `COUNT(*)`:
+Count the number of non-null values in the `height` field.
+
+### Count the number of rows
 
 ```esql
 FROM employees
@@ -29,14 +31,18 @@ FROM employees
 | SORT languages DESC
 ```
 
-The expression can use inline functions. In this example, a string is split into multiple values using the `SPLIT` function, and the values are counted:
+Count the total number of rows grouped by the `languages` field and sort the results in descending order.
+
+### Count values using inline functions
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
 | STATS word_count = COUNT(SPLIT(words, ";"))
 ```
 
-To count the number of times an expression returns `TRUE`, use a `WHERE` command to remove rows that shouldn’t be included:
+Count the number of elements in a string split by the `;` delimiter.
+
+### Count values based on a condition
 
 ```esql
 ROW n=1
@@ -44,9 +50,13 @@ ROW n=1
 | STATS COUNT(n)
 ```
 
-To count the same stream of data based on two different expressions, use the pattern `COUNT(<expression> OR NULL)`:
+Count the number of rows where the value of `n` is less than 0.
+
+### Count based on two different expressions
 
 ```esql
 ROW n=1
 | STATS COUNT(n > 0 OR NULL), COUNT(n < 0 OR NULL)
 ```
+
+Count the number of rows where `n > 0` and `n < 0` separately.

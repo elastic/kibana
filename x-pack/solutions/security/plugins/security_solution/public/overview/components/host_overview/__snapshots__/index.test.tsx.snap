@@ -166,7 +166,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                     >
                       <button
                         class="euiLink emotion-euiLink-primary"
-                        data-test-subj="network-details"
+                        data-test-subj="securitySolutionFlyoutLink"
                         type="button"
                       >
                         10.142.0.7
@@ -834,7 +834,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                     >
                       <button
                         class="euiLink emotion-euiLink-primary"
-                        data-test-subj="network-details"
+                        data-test-subj="securitySolutionFlyoutLink"
                         type="button"
                       >
                         10.142.0.7
