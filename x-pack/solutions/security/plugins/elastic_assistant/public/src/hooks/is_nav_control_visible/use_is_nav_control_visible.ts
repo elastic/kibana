@@ -10,14 +10,28 @@ import { combineLatest } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
+import { ChromeStyle } from '@kbn/core/packages/chrome/browser';
 
 function getVisibility(
-  appId: string | undefined,
-  applications: ReadonlyMap<string, PublicAppInfo>,
-  preferredAssistantType: AIAssistantType
+  {
+    appId,
+    applications,
+    preferredAssistantType,
+    chromeStyle
+  }:
+    {
+      appId: string | undefined,
+      applications: ReadonlyMap<string, PublicAppInfo>,
+      preferredAssistantType: AIAssistantType
+      chromeStyle: ChromeStyle
+    }
 ) {
+  if (chromeStyle === "project") {
+    return true;
+  }
+
   // The "Global assistant" stack management setting for the security assistant still needs to be developed.
-  // In the meantime, while testing, show the Security assistant everywhere except in Observability.
+  // In the meantime, the security assistant is only available in Security apps.
 
   const categoryId =
     (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
@@ -29,17 +43,18 @@ export function useIsNavControlVisible() {
   const {
     application: { currentAppId$, applications$ },
     aiAssistantManagementSelection,
+    chrome
   } = useKibana().services;
   const [isVisible, setIsVisible] = useState(false);
-
   useEffect(() => {
     const appSubscription = combineLatest([
       currentAppId$,
       applications$,
       aiAssistantManagementSelection.aiAssistantType$,
+      chrome.getChromeStyle$()
     ]).subscribe({
-      next: ([appId, applications, preferredAssistantType]) => {
-        setIsVisible(getVisibility(appId, applications, preferredAssistantType));
+      next: ([appId, applications, preferredAssistantType, chromeStyle]) => {
+        setIsVisible(getVisibility({ appId, applications, preferredAssistantType, chromeStyle }));
       },
     });
 

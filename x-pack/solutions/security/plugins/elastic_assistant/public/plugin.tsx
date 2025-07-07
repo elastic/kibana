@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -25,6 +25,7 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
+import { BuildFlavor } from '@kbn/config';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;

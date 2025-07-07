@@ -31,7 +31,7 @@ const ASSISTANT_TITLE = i18n.translate('xpack.elasticAssistantPlugin.assistant.t
 /**
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
  */
-export function AssistantProvider({ children }: { children: React.ReactElement }) {
+export function AssistantProvider({ children }: { children: React.ReactElement}) {
   const {
     application: { navigateToApp, currentAppId$, getUrlForApp },
     http,
