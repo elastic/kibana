@@ -12,6 +12,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
+import { excludeLicenseRestrictedRules, getPossibleUpgrades } from '../../logic/utils';
 
 export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -33,11 +34,12 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const ctx = await context.resolve(['core', 'alerting']);
+          const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
           const soClient = ctx.core.savedObjects.client;
           const rulesClient = await ctx.alerting.getRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
+          const mlAuthz = ctx.securitySolution.getMlAuthz();
 
           const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
           const latestRuleVersions = await ruleAssetsClient.fetchLatestVersions();
@@ -47,24 +49,39 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
           const latestRuleVersionsMap = new Map(
             latestRuleVersions.map((rule) => [rule.rule_id, rule])
           );
-          const installableRules = latestRuleVersions.filter(
+          const allInstallableRules = latestRuleVersions.filter(
             (rule) => !currentRuleVersionsMap.has(rule.rule_id)
           );
-          const upgradeableRules = currentRuleVersions.filter((rule) => {
-            const latestVersion = latestRuleVersionsMap.get(rule.rule_id);
-            return latestVersion != null && rule.version < latestVersion.version;
-          });
+
+          const installableRuleAssets = await excludeLicenseRestrictedRules(
+            allInstallableRules,
+            mlAuthz
+          );
+
+          const upgradableRules = await getPossibleUpgrades(
+            currentRuleVersions,
+            latestRuleVersionsMap,
+            mlAuthz
+          );
+
+          const upgradeableRulesTags = upgradableRules.reduce<string[]>((tags, rule) => {
+            const ruleTags = currentRuleVersionsMap.get(rule.rule_id)?.tags;
+            if (ruleTags) {
+              tags.push(...ruleTags);
+            }
+            return tags;
+          }, []);
 
           const body: GetPrebuiltRulesStatusResponseBody = {
             stats: {
               num_prebuilt_rules_installed: currentRuleVersions.length,
-              num_prebuilt_rules_to_install: installableRules.length,
-              num_prebuilt_rules_to_upgrade: upgradeableRules.length,
+              num_prebuilt_rules_to_install: installableRuleAssets.length,
+              num_prebuilt_rules_to_upgrade: upgradableRules.length,
               num_prebuilt_rules_total_in_package: latestRuleVersions.length,
             },
             aggregated_fields: {
               upgradeable_rules: {
-                tags: [...new Set(upgradeableRules.flatMap((rule) => rule.tags))],
+                tags: [...new Set(upgradeableRulesTags)],
               },
             },
           };

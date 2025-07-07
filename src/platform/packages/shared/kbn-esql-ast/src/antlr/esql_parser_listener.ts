@@ -75,6 +75,7 @@ import { SingleForkSubQueryCommandContext } from "./esql_parser.js";
 import { CompositeForkSubQueryContext } from "./esql_parser.js";
 import { ForkSubQueryProcessingCommandContext } from "./esql_parser.js";
 import { RrfCommandContext } from "./esql_parser.js";
+import { FuseCommandContext } from "./esql_parser.js";
 import { InferenceCommandOptionsContext } from "./esql_parser.js";
 import { InferenceCommandOptionContext } from "./esql_parser.js";
 import { InferenceCommandOptionValueContext } from "./esql_parser.js";
@@ -792,6 +793,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitRrfCommand?: (ctx: RrfCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.fuseCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterFuseCommand?: (ctx: FuseCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.fuseCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitFuseCommand?: (ctx: FuseCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.inferenceCommandOptions`.
 	 * @param ctx the parse tree

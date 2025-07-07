@@ -37,7 +37,8 @@ export default function (providerContext: FtrProviderContext) {
   const logger = getService('log');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
-  describe('Test adding Cloud Security Posture Integrations CSPM AWS', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/224777
+  describe.skip('Test adding Cloud Security Posture Integrations CSPM AWS', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_aws']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 

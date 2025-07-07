@@ -220,6 +220,10 @@ module.exports = {
         test: /\.peggy$/,
         use: require.resolve('@kbn/peggy-loader'),
       },
+      {
+        test: /\.text$/,
+        use: require.resolve('@kbn/dot-text-loader'),
+      },
     ],
   },
   plugins: [
