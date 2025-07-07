@@ -51,6 +51,7 @@ import {
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
+  SEARCH_HOMEPAGE,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
 import { ClientConfigType, InitialAppData } from '../common/types';
@@ -216,24 +217,14 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
       id: ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_HOME_PLUGIN.NAME);
-
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { EnterpriseSearchOverview } = await import(
-          './applications/enterprise_search_overview'
-        );
-
-        return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
+      mount: async () => {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp(SEARCH_HOMEPAGE);
+        return () => {};
       },
       order: 0,
       title: ENTERPRISE_SEARCH_HOME_PLUGIN.NAV_TITLE,
-      visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
+      visibleIn: ['home', 'kibanaOverview'],
     });
 
     core.application.register({
