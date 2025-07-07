@@ -10,7 +10,6 @@ import {
   OnechatError,
   OnechatErrorCode,
   isConversationCreatedEvent,
-  isConversationUpdatedEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
   isOnechatError,
@@ -79,13 +78,11 @@ export const useChat = ({ agentId, connectorId, onError }: UseChatProps) => {
               }),
             });
           } else if (isToolResultEvent(event)) {
-            actions.setToolCallResult({
-              result: event.data.result,
-              toolCallId: event.data.tool_call_id,
-            });
-          } else if (isConversationCreatedEvent(event) || isConversationUpdatedEvent(event)) {
+            const { tool_call_id: toolCallId, result } = event.data;
+            actions.setToolCallResult({ result, toolCallId });
+          } else if (isConversationCreatedEvent(event)) {
             const { conversation_id: id, title } = event.data;
-            actions.onConversationUpdate({ conversationId: id, title });
+            actions.onConversationCreated({ conversationId: id, title });
           }
         },
         complete: () => {

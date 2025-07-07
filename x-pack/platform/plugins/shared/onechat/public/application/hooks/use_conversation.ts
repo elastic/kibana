@@ -95,7 +95,7 @@ const createActions = ({
         round.response.message += messageChunk;
       });
     },
-    onConversationUpdate: ({
+    onConversationCreated: ({
       conversationId: id,
       title,
     }: {
