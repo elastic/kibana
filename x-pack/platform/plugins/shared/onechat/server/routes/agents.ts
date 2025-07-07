@@ -24,7 +24,7 @@ const TECHNICAL_PREVIEW_WARNING =
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object({
     provider: schema.maybe(schema.string()),
-    toolIds: schema.arrayOf(schema.string()),
+    tool_ids: schema.arrayOf(schema.string()),
   })
 );
 
@@ -130,8 +130,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
               id: schema.string(),
               name: schema.string(),
               description: schema.string(),
-              customInstructions: schema.string(),
-              toolSelection: TOOL_SELECTION_SCHEMA,
+              configuration: schema.object({
+                additional_prompt: schema.string(),
+                tools: TOOL_SELECTION_SCHEMA,
+              }),
             }),
           },
         },
@@ -175,8 +177,12 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
             body: schema.object({
               name: schema.maybe(schema.string()),
               description: schema.maybe(schema.string()),
-              customInstructions: schema.maybe(schema.string()),
-              toolSelection: schema.maybe(TOOL_SELECTION_SCHEMA),
+              configuration: schema.maybe(
+                schema.object({
+                  additional_prompt: schema.maybe(schema.string()),
+                  tools: schema.maybe(TOOL_SELECTION_SCHEMA),
+                })
+              ),
             }),
           },
         },

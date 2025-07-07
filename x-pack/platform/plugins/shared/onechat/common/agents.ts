@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition, AgentConfiguration } from '@kbn/onechat-common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentListOptions {}
@@ -13,6 +13,8 @@ export interface AgentListOptions {}
 export type AgentCreateRequest = Omit<AgentDefinition, 'type'>;
 
 export type AgentUpdateRequest = Pick<AgentDefinition, 'id'> &
-  Partial<Pick<AgentDefinition, 'name' | 'description' | 'configuration'>>;
+  Partial<Pick<AgentDefinition, 'name' | 'description'>> & {
+    configuration?: Partial<AgentConfiguration>;
+  };
 
 export type AgentDeleteRequest = Pick<AgentDefinition, 'id'>;

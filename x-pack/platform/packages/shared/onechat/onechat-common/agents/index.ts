@@ -11,6 +11,7 @@ export {
   oneChatDefaultAgentId,
   type AgentDescriptor,
   type AgentDefinition,
+  type AgentConfiguration,
 } from './definition';
 export {
   type AgentIdentifier,
