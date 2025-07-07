@@ -12,7 +12,11 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { monitoringEntitySourceTypeName } from './saved_objects';
-import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from '@kbn/core/server';
 
 describe('MonitoringEntitySourceDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
@@ -57,10 +61,12 @@ describe('MonitoringEntitySourceDataClient', () => {
         (err as Error & { output?: { statusCode: number } }).output = { statusCode: 404 };
         throw err;
       });
-      defaultOpts.soClient.find.mockResolvedValue({
-        total: 0,
-        saved_objects: [],
-      } as unknown as SavedObjectsFindResponse<unknown, unknown>);
+      defaultOpts.soClient.asScopedToNamespace.mockReturnValue({
+        find: jest.fn().mockResolvedValue({
+          total: 0,
+          saved_objects: [],
+        }),
+      } as unknown as SavedObjectsClientContract);
 
       defaultOpts.soClient.create.mockResolvedValue({
         id: 'temp-id', // TODO: update to use dynamic ID
@@ -108,9 +114,9 @@ describe('MonitoringEntitySourceDataClient', () => {
         managed: false,
       };
 
-      defaultOpts.soClient.find.mockResolvedValue(
-        existingDescriptor as unknown as SavedObjectsFindResponse<unknown, unknown>
-      );
+      defaultOpts.soClient.asScopedToNamespace.mockReturnValue({
+        find: jest.fn().mockResolvedValue(existingDescriptor),
+      } as unknown as SavedObjectsClientContract);
 
       defaultOpts.soClient.update.mockResolvedValue({
         id: 'entity-analytics-monitoring-entity-source-test-namespace-test-type-test-index-pattern',
@@ -138,10 +144,12 @@ describe('MonitoringEntitySourceDataClient', () => {
         attributes: testDescriptor,
       } as unknown as SavedObject<unknown>;
 
-      defaultOpts.soClient.find.mockResolvedValue({
-        total: 1,
-        saved_objects: [existingSavedObject],
-      } as unknown as SavedObjectsFindResponse<unknown, unknown>);
+      defaultOpts.soClient.asScopedToNamespace.mockReturnValue({
+        find: jest.fn().mockResolvedValue({
+          total: 1,
+          saved_objects: [existingSavedObject],
+        }),
+      } as unknown as SavedObjectsClientContract);
 
       await expect(dataClient.init(testDescriptor)).rejects.toThrow(
         `A monitoring entity source with the name "${testDescriptor.name}" already exists.`
@@ -176,10 +184,12 @@ describe('MonitoringEntitySourceDataClient', () => {
         id, // it preserves the id when updating
       };
 
-      defaultOpts.soClient.find.mockResolvedValue({
-        total: 0,
-        saved_objects: [],
-      } as unknown as SavedObjectsFindResponse<unknown, unknown>);
+      defaultOpts.soClient.asScopedToNamespace.mockReturnValue({
+        find: jest.fn().mockResolvedValue({
+          total: 0,
+          saved_objects: [],
+        }),
+      } as unknown as SavedObjectsClientContract);
 
       defaultOpts.soClient.update.mockResolvedValue({
         id,
