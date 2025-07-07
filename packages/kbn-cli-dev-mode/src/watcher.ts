@@ -105,6 +105,7 @@ export class Watcher {
           '**/*.{http,md,sh,txt,log,pid,swp,swo}',
           '**/*~',
           '**/.DS_Store',
+          '/data'
         ],
       }
     ).then(
