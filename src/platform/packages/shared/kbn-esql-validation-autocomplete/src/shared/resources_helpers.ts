@@ -8,8 +8,8 @@
  */
 
 import { parse } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLCallbacks } from './types';
-import type { ESQLFieldWithMetadata } from '../validation/types';
 import { getFieldsFromES, getCurrentQueryAvailableFields } from './helpers';
 import { removeLastPipe, processPipes, toSingleLine } from './query_string_utils';
 
