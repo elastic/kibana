@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CoreSetup } from '@kbn/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_ENABLE_STREAMS_UI,
@@ -17,7 +17,8 @@ import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 
 export function registerFeatureFlags(
   core: CoreSetup<StreamsPluginStartDependencies>,
-  plugins: StreamsPluginSetupDependencies
+  plugins: StreamsPluginSetupDependencies,
+  logger: Logger
 ) {
   core.pricing
     .isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
@@ -41,6 +42,9 @@ export function registerFeatureFlags(
           },
         });
       }
+    })
+    .catch((error) => {
+      logger.error(`Failed to register significant events ui settings: ${error}`);
     });
 
   const isObservabilityServerless =

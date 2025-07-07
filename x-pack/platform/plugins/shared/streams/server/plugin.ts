@@ -201,7 +201,7 @@ export class StreamsPlugin
       runDevModeChecks: this.isDev,
     });
 
-    registerFeatureFlags(core, plugins);
+    registerFeatureFlags(core, plugins, this.logger);
 
     return {};
   }
