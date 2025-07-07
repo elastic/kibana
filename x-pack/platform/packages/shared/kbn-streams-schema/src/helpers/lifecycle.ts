@@ -7,8 +7,7 @@
 
 import { Streams } from '../models/streams';
 import {
-  IngestStreamLifecycleDSL,
-  IngestStreamLifecycleILM,
+  WiredIngestStreamEffectiveLifecycle,
   isInheritLifecycle,
 } from '../models/ingest/lifecycle';
 import { isDescendantOf, isChildOf, getSegments } from '../shared/hierarchy';
@@ -16,7 +15,7 @@ import { isDescendantOf, isChildOf, getSegments } from '../shared/hierarchy';
 export function findInheritedLifecycle(
   definition: Streams.WiredStream.Definition,
   ancestors: Streams.WiredStream.Definition[]
-): (IngestStreamLifecycleDSL | IngestStreamLifecycleILM) & { from: string } {
+): WiredIngestStreamEffectiveLifecycle {
   const originDefinition = [...ancestors, definition]
     .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length)
     .findLast(({ ingest }) => !isInheritLifecycle(ingest.lifecycle));
