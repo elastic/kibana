@@ -27,6 +27,7 @@ import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { useAppRoutes } from '../routes/routes';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
+import { TelemetryServiceStart } from '../services/telemetry/types';
 
 export function App() {
   const allRoutes = useAppRoutes();
@@ -56,6 +57,7 @@ export const renderApp = ({
   appMountParameters,
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate,
+  telemetryClient,
   usageCollection,
   isDev,
   kibanaVersion,
@@ -67,6 +69,7 @@ export const renderApp = ({
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
+  telemetryClient: TelemetryServiceStart;
   usageCollection: UsageCollectionSetup;
   isDev?: boolean;
   kibanaVersion: string;
@@ -104,6 +107,7 @@ export const renderApp = ({
                 isDev,
                 kibanaVersion,
                 isServerless,
+                telemetryClient,
               }}
             >
               <PluginContext.Provider
