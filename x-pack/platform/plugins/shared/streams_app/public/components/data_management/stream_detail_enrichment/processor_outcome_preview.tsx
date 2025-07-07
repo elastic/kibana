@@ -7,27 +7,22 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
+  EuiEmptyPrompt,
   EuiFilterButton,
   EuiFilterGroup,
-  EuiEmptyPrompt,
-  EuiSpacer,
-  EuiProgress,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import { Sample } from '@kbn/grok-ui';
 import { GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import { useKibana } from '../../../hooks/use_kibana';
 import { PreviewTable } from '../preview_table';
-import {
-  useSimulatorSelector,
-  useStreamEnrichmentEvents,
-  useStreamEnrichmentSelector,
-} from './state_management/stream_enrichment_state_machine';
 import {
   PreviewDocsFilterOption,
   getTableColumns,
@@ -37,9 +32,14 @@ import {
   selectOriginalPreviewRecords,
   selectPreviewRecords,
 } from './state_management/simulation_state_machine/selectors';
-import { isGrokProcessor } from './utils';
+import {
+  useSimulatorSelector,
+  useStreamEnrichmentEvents,
+  useStreamEnrichmentSelector,
+} from './state_management/stream_enrichment_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 import { WithUIAttributes } from './types';
+import { isGrokProcessor } from './utils';
 import { AssetImage } from '../../asset_image';
 import { docViewJson } from './doc_viewer_json';
 import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
