@@ -122,5 +122,7 @@
     "@kbn/core-provider-plugin",
     "@kbn/reporting-plugin",
     "@kbn/kibana-usage-collection-plugin",
+    "@kbn/aiops-change-point-detection",
+    "@kbn/aiops-plugin",
   ]
 }
