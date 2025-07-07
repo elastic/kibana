@@ -19,6 +19,7 @@ import { CanvasPageProvider } from '@kbn/test-suites-xpack-platform/functional/p
 import { GisPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/gis_page';
 import { LensPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/lens_page';
 import { UpgradeAssistantFlyoutObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/upgrade_assistant_page';
+import { UserProfilePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/user_profile_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
@@ -52,9 +53,9 @@ import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { StatusPageObject } from './status_page';
 import { TagManagementPageObject } from './tag_management_page';
 import { UptimePageObject } from './uptime_page';
-import { UserProfilePageProvider } from './user_profile_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
+import { SearchQueryRulesPageProvider } from './search_query_rules_page';
 import { SearchClassicNavigationProvider } from './search_classic_navigation';
 
 // just like services, PageObjects are defined as a map of
@@ -99,6 +100,7 @@ export const pageObjects = {
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchSynonyms: SearchSynonymsPageProvider,
+  searchQueryRules: SearchQueryRulesPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,

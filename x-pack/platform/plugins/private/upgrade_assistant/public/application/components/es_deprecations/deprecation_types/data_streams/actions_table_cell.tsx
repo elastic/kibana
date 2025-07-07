@@ -32,12 +32,18 @@ const actionsI18nTexts = {
       defaultMessage: 'Loading actions…',
     }
   ),
+  deleteTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionTooltipDeleteLabel',
+    {
+      defaultMessage: 'Resolve this issue by deleting this data stream.',
+    }
+  ),
 };
 
 interface Props {
   correctiveAction: DataStreamsAction;
   openFlyout: () => void;
-  openModal: () => void;
+  openModal: (migrationType: 'delete' | 'readonly') => void;
 }
 
 export const DataStreamReindexActionsCell: React.FunctionComponent<Props> = ({
@@ -65,6 +71,11 @@ export const DataStreamReindexActionsCell: React.FunctionComponent<Props> = ({
     (!migrationInProgressOrCompleted ||
       (migrationInProgressOrCompleted && migrationState.resolutionType === 'reindex'))
   );
+  const canDisplayDelete = !!(
+    migrationState.hasRequiredPrivileges &&
+    (!migrationInProgressOrCompleted ||
+      (migrationInProgressOrCompleted && migrationState.resolutionType === 'delete'))
+  );
 
   const actions: ActionButtonConfig[] = [
     {
@@ -82,7 +93,16 @@ export const DataStreamReindexActionsCell: React.FunctionComponent<Props> = ({
       canDisplay: canDisplayReadOnly,
       resolutionType: 'readonly',
       onClick: () => {
-        openModal();
+        openModal('readonly');
+      },
+    },
+    {
+      tooltip: actionsI18nTexts.deleteTooltipLabel,
+      iconType: 'trash',
+      canDisplay: canDisplayDelete,
+      resolutionType: 'delete',
+      onClick: () => {
+        openModal('delete');
       },
     },
   ];

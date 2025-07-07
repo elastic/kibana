@@ -90,7 +90,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('the new record was found', async () => {
         await queryBar.submitQuery();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
-        return (await discover.getHitCountInt()) === 2;
+        return (
+          (await discover.getHitCountInt()) === 2 &&
+          (await unifiedFieldList.getSidebarSectionFieldNames('available')).length === 3
+        );
       });
 
       expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
