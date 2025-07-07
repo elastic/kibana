@@ -40,11 +40,7 @@ export const ASK_ABOUT_ESQL_TOOL: AssistantTool = {
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is ESQLToolParams => {
     const { inference, connectorId, assistantContext } = params;
-    return (
-      inference != null &&
-      connectorId != null &&
-      assistantContext != null
-    );
+    return inference != null && connectorId != null && assistantContext != null;
   },
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
