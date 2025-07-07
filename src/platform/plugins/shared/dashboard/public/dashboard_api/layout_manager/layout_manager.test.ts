@@ -183,7 +183,7 @@ describe('layout manager', () => {
         panels,
         {
           ...trackPanelMock,
-          expandedPanelId$: new BehaviorSubject<string | undefined>(undefined)
+          expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
         },
         () => []
       );
@@ -196,7 +196,7 @@ describe('layout manager', () => {
         panels,
         {
           ...trackPanelMock,
-          expandedPanelId$: new BehaviorSubject<string | undefined>('1')
+          expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
         },
         () => []
       );
