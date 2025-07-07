@@ -1595,9 +1595,9 @@ module.exports = {
         'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
-        'src/platform/plugins/**/test/scout/ui/**/*.ts',
-        'x-pack/platform/plugins/**/test/scout/ui/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/scout/ui/**/*.ts',
+        'src/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/scout/**/*.ts',
       ],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
@@ -2318,8 +2318,8 @@ module.exports = {
     },
     {
       files: [
-        'src/platform/plugins/**/test/scout/ui/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/scout/ui/**/*.ts',
+        'src/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
       ],
       rules: {
         'no-restricted-imports': [
@@ -2340,7 +2340,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/observability/plugins/**/test/scout/ui/**/*.ts'],
+      files: ['x-pack/solutions/observability/plugins/**/test/scout/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2367,7 +2367,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/security/plugins/**/test/scout/ui/**/*.ts'],
+      files: ['x-pack/solutions/security/plugins/**/test/scout/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
