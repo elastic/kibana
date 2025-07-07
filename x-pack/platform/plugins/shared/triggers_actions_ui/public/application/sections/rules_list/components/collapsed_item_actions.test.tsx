@@ -69,7 +69,6 @@ describe('CollapsedItemActions', () => {
           params: { message: 'test' },
         },
       ],
-      autoRecoverAlerts: true,
       params: { name: 'test rule type name' },
       createdBy: null,
       updatedBy: null,

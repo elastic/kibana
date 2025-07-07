@@ -66,10 +66,11 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
 
   const hasAutoRecoverAlertsRuleTypes = useMemo(() => {
     if (isAllSelected) {
-      return false;
+      // Show "untrack active alerts" confirmation modal if all alerts are selected
+      return true;
     }
-    return !!selectedItems.find((alertItem) => alertItem.autoRecoverAlerts);
-  }, [selectedItems, isAllSelected]);
+    return !!selectedItems.find((alertItem) => alertItem.autoRecoverAlerts !== false);
+  }, [isAllSelected, selectedItems]);
 
   async function deleteSelectedItems() {
     onPerformingAction();

@@ -53,6 +53,7 @@ describe('loadRuleTypes', () => {
               "read": true,
             },
           },
+          "autoRecoverAlerts": undefined,
           "category": "management",
           "defaultActionGroupId": "default",
           "enabledInLicense": true,

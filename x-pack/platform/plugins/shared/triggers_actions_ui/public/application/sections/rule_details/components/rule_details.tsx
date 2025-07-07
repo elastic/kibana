@@ -313,10 +313,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const onEnableDisable = (enable: boolean) => {
     if (enable) {
       onEnable();
-    } else if (ruleType.autoRecoverAlerts) {
-      onDisableModalOpen();
-    } else {
+    } else if (ruleType.autoRecoverAlerts === false) {
       onDisable(false);
+    } else {
+      onDisableModalOpen();
     }
   };
 

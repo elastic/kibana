@@ -90,7 +90,6 @@ const ruleType: RuleType = {
   enabledInLicense: true,
   category: 'my-category',
   isExportable: true,
-  autoRecoverAlerts: true,
 };
 
 describe('rule_details', () => {

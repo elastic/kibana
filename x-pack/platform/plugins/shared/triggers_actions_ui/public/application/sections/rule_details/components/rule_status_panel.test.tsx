@@ -121,7 +121,6 @@ describe('rule status panel', () => {
           statusMessage="Ok"
           requestRefresh={requestRefresh}
           bulkDisableRules={bulkDisableRules}
-          autoRecoverAlerts={true}
         />
       </IntlProvider>
     );
