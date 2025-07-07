@@ -48,7 +48,7 @@ import { AttributeService } from './attribute_service';
 import { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
-import { visualizeStyleClassName, visContainerStyle } from '../../vis.styles';
+import { visualizeClassName, visContainerStyle } from '../../vis.styles';
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<
@@ -423,7 +423,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.transferCustomizationsToUiState();
 
     const div = document.createElement('div');
-    div.className = `visualize panel-content panel-content--fullWidth ${visualizeStyleClassName}`;
+    div.className = `visualize panel-content panel-content--fullWidth ${visualizeClassName}`;
     domNode.appendChild(div);
 
     const warningDiv = document.createElement('div');

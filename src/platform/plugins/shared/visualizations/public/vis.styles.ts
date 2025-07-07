@@ -25,7 +25,7 @@ const visStyles = {
 };
 
 export const visualizeStyle = cssReact(visStyles.visualize);
-export const visualizeStyleClassName = cssClassName(visStyles.visualize);
+export const visualizeClassName = cssClassName(visStyles.visualize);
 
 export const visContainerStyle = cssReact(visStyles.visContainer);
 export const visContainerClassName = cssClassName(visStyles.visContainer);
