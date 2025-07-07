@@ -56,6 +56,7 @@ export const getKeywordField = (fieldMapping?: SavedObjectsFieldMapping): string
 
 /**
  * Helper to determine the merged type for runtime field.
+ * Maps unsupported runtime types to supported equivalents.
  */
 export const getMergedFieldType = (fields?: SavedObjectsFieldMapping[]): string => {
   if (!fields) return 'keyword';
@@ -71,7 +72,12 @@ export const getMergedFieldType = (fields?: SavedObjectsFieldMapping[]): string 
     .filter(Boolean);
 
   for (const t of TYPE_PRIORITY) {
-    if (types.includes(t)) return t;
+    if (types.includes(t)) {
+      // Map unsupported runtime types to supported equivalents
+      if (t === 'integer' || t === 'short' || t === 'byte') return 'long';
+      if (t === 'float' || t === 'half_float' || t === 'scaled_float') return 'double';
+      return t;
+    }
   }
   // fallback to keyword if unknown
   return 'keyword';

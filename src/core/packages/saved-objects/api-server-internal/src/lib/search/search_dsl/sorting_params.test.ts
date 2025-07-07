@@ -331,7 +331,7 @@ describe('searchDsl/getSortParams', () => {
           merged_count: {
             script: {
               source:
-                "if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } else if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } else { emit(\"\"); }",
+                "if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } else if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); }",
             },
             type: 'long',
           },
@@ -346,9 +346,9 @@ describe('searchDsl/getSortParams', () => {
           merged_price: {
             script: {
               source:
-                "if (doc.containsKey('numeric.price') && doc['numeric.price'].size() != 0) { emit(doc['numeric.price'].value); } else if (doc.containsKey('mixed.price') && doc['mixed.price'].size() != 0) { emit(doc['mixed.price'].value); } else { emit(\"\"); }",
+                "if (doc.containsKey('numeric.price') && doc['numeric.price'].size() != 0) { emit(doc['numeric.price'].value); } else if (doc.containsKey('mixed.price') && doc['mixed.price'].size() != 0) { emit(doc['mixed.price'].value); }",
             },
-            type: 'float',
+            type: 'double',
           },
         },
         sort: [{ merged_price: { order: undefined } }],
@@ -361,7 +361,7 @@ describe('searchDsl/getSortParams', () => {
           merged_created: {
             script: {
               source:
-                "if (doc.containsKey('numeric.created') && doc['numeric.created'].size() != 0) { emit(doc['numeric.created'].value); } else if (doc.containsKey('mixed.created') && doc['mixed.created'].size() != 0) { emit(doc['mixed.created'].value); } else { emit(\"\"); }",
+                "if (doc.containsKey('numeric.created') && doc['numeric.created'].size() != 0) { emit(doc['numeric.created'].value); } else if (doc.containsKey('mixed.created') && doc['mixed.created'].size() != 0) { emit(doc['mixed.created'].value); }",
             },
             type: 'date',
           },
