@@ -16,6 +16,7 @@ import { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
+import { updateKbnServerArguments } from './helpers';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   serverlessProject: ServerlessProjectType;
@@ -25,7 +26,6 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
-  tier?: 'oblt_logs_essentials';
 }
 
 // include settings from elasticsearch controller
@@ -61,19 +61,17 @@ const kbnServerArgsFromController = {
   chat: [],
 };
 
-export function createServerlessTestConfig<T extends DeploymentAgnosticCommonServices>(
+export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnosticCommonServices>(
   options: CreateTestConfigOptions<T>
 ) {
   return async ({ readConfigFile }: FtrConfigProviderContext): Promise<Config> => {
-    if (options.esServerArgs || options.kbnServerArgs) {
-      throw new Error(
-        `FTR doesn't provision custom ES/Kibana server arguments into the serverless project on MKI.
-  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
-      );
-    }
-
     const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+    let kbnServerArgs: string[] = [];
+
+    if (options.kbnServerArgs) {
+      kbnServerArgs = await updateKbnServerArguments(options.kbnServerArgs);
+    }
 
     /**
      * This is used by CI to set the docker registry port
@@ -84,7 +82,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const svlSharedConfig = await readConfigFile(
-      require.resolve('@kbn/test-suites-serverless/shared/config.base')
+      require.resolve('../../serverless/config.base.ts')
     );
 
     return {
@@ -103,24 +101,16 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
         },
       }),
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
-          // custom native roles are enabled only for search and security projects
-          ...(options.serverlessProject !== 'oblt'
-            ? ['xpack.security.authc.native_roles.enabled=true']
-            : []),
           ...esServerArgsFromController[options.serverlessProject],
-          ...(options.tier && options.tier === 'oblt_logs_essentials'
-            ? [
-                'serverless.project_type=observability',
-                'serverless.observability.tier=logs_essentials',
-              ]
-            : []),
+          ...(options.esServerArgs || []),
+          'xpack.security.authc.native_roles.enabled=true',
         ],
       },
       kbnTestServer: {
@@ -129,6 +119,8 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
+          // Enable custom roles
+          '--xpack.security.roleManagementEnabled=true',
           ...(options.serverlessProject === 'oblt'
             ? [
                 // defined in MKI control plane. Necessary for Synthetics app testing
@@ -142,13 +134,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...(dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
-          ...(options.tier && options.tier === 'oblt_logs_essentials'
-            ? [
-                `--pricing.tiers.products=${JSON.stringify([
-                  { name: 'observability', tier: 'logs_essentials' },
-                ])}`,
-              ]
-            : []),
+          ...kbnServerArgs,
         ],
       },
       testFiles: options.testFiles,
