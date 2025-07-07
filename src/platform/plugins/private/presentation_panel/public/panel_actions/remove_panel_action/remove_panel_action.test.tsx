@@ -60,7 +60,7 @@ describe('Remove panel action', () => {
     });
   });
 
-  describe('isCompatible', () => {
+  describe('execute', () => {
     it('calls the parent removePanel method on execute', async () => {
       action.execute(context);
       expect(context.embeddable.parentApi.removePanel).toHaveBeenCalled();
