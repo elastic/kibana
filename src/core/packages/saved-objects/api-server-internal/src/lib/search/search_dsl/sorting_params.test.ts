@@ -50,6 +50,32 @@ const MAPPINGS = {
         },
       },
     },
+    numeric: {
+      properties: {
+        count: {
+          type: 'long',
+        },
+        price: {
+          type: 'float',
+        },
+        created: {
+          type: 'date',
+        },
+      },
+    },
+    mixed: {
+      properties: {
+        count: {
+          type: 'float',
+        },
+        created: {
+          type: 'date',
+        },
+        price: {
+          type: 'float',
+        },
+      },
+    },
   },
 } as const;
 
@@ -102,16 +128,12 @@ describe('searchDsl/getSortParams', () => {
             merged_title: {
               script: {
                 source:
-                  "if (doc['saved.title'].size() != 0) { emit(doc['saved.title'].value); } else if (doc['pending.title'].size() != 0) { emit(doc['pending.title'].value); }",
+                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(null); }",
               },
               type: 'keyword',
             },
           },
-          sort: [
-            {
-              merged_title: {},
-            },
-          ],
+          sort: [{ merged_title: { order: undefined } }],
         });
       });
     });
@@ -164,14 +186,14 @@ describe('searchDsl/getSortParams', () => {
             'merged_title.raw': {
               script: {
                 source:
-                  "if (doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); }",
+                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(null); }",
               },
               type: 'keyword',
             },
           },
           sort: [
             {
-              'merged_title.raw': {},
+              'merged_title.raw': { order: undefined },
             },
           ],
         });
@@ -229,7 +251,7 @@ describe('searchDsl/getSortParams', () => {
             merged_title: {
               script: {
                 source:
-                  "if (doc['saved.title'].size() != 0) { emit(doc['saved.title'].value); } else if (doc['pending.title'].size() != 0) { emit(doc['pending.title'].value); }",
+                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(null); }",
               },
               type: 'keyword',
             },
@@ -279,16 +301,14 @@ describe('searchDsl/getSortParams', () => {
             'merged_title.raw': {
               script: {
                 source:
-                  "if (doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); }",
+                  "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(null); }",
               },
               type: 'keyword',
             },
           },
           sort: [
             {
-              'merged_title.raw': {
-                order: 'asc',
-              },
+              'merged_title.raw': { order: 'asc' },
             },
           ],
         });
@@ -300,6 +320,68 @@ describe('searchDsl/getSortParams', () => {
     it('defaults to natural storage order sorting', () => {
       expect(getSortingParams(MAPPINGS, 'saved', undefined, undefined, { id: 'abc123' })).toEqual({
         sort: ['_shard_doc'],
+      });
+    });
+  });
+
+  describe('runtime field type detection', () => {
+    it('sets runtime field type to long for all long fields', () => {
+      expect(getSortingParams(MAPPINGS, ['numeric', 'numeric'], 'count')).toEqual({
+        runtime_mappings: {
+          merged_count: {
+            script: {
+              source:
+                "if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } else if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } else { emit(null); }",
+            },
+            type: 'long',
+          },
+        },
+        sort: [{ merged_count: { order: undefined } }],
+      });
+    });
+
+    it('sets runtime field type to float if any field is float', () => {
+      expect(getSortingParams(MAPPINGS, ['numeric', 'mixed'], 'price')).toEqual({
+        runtime_mappings: {
+          merged_price: {
+            script: {
+              source:
+                "if (doc.containsKey('numeric.price') && doc['numeric.price'].size() != 0) { emit(doc['numeric.price'].value); } else if (doc.containsKey('mixed.price') && doc['mixed.price'].size() != 0) { emit(doc['mixed.price'].value); } else { emit(null); }",
+            },
+            type: 'float',
+          },
+        },
+        sort: [{ merged_price: { order: undefined } }],
+      });
+    });
+
+    it('sets runtime field type to date if any field is date', () => {
+      expect(getSortingParams(MAPPINGS, ['numeric', 'mixed'], 'created')).toEqual({
+        runtime_mappings: {
+          merged_created: {
+            script: {
+              source:
+                "if (doc.containsKey('numeric.created') && doc['numeric.created'].size() != 0) { emit(doc['numeric.created'].value); } else if (doc.containsKey('mixed.created') && doc['mixed.created'].size() != 0) { emit(doc['mixed.created'].value); } else { emit(null); }",
+            },
+            type: 'date',
+          },
+        },
+        sort: [{ merged_created: { order: undefined } }],
+      });
+    });
+
+    it('sets runtime field type to keyword if all fields are keyword/text with keyword', () => {
+      expect(getSortingParams(MAPPINGS, ['pending', 'saved'], 'title')).toEqual({
+        runtime_mappings: {
+          merged_title: {
+            script: {
+              source:
+                "if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else { emit(null); }",
+            },
+            type: 'keyword',
+          },
+        },
+        sort: [{ merged_title: { order: undefined } }],
       });
     });
   });

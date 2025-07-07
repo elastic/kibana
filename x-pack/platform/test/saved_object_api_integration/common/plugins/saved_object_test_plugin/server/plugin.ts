@@ -79,6 +79,43 @@ export class Plugin {
       management,
       mappings,
     });
+    core.savedObjects.registerType({
+      name: 'sortTestingType',
+      hidden: false,
+      namespaceType: 'multiple',
+      management,
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          titleKeyword: { type: 'keyword' },
+          textWithKeyword: {
+            type: 'text',
+            fields: {
+              keyword: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    });
+
+    core.savedObjects.registerType({
+      name: 'sortTestingType2',
+      hidden: false,
+      namespaceType: 'multiple',
+      management,
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          titleKeyword: { type: 'keyword' },
+          textWithKeyword: {
+            type: 'text',
+            fields: {
+              keyword: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    });
   }
 
   public start() {
