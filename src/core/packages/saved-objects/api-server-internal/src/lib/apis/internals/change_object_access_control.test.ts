@@ -205,7 +205,7 @@ describe('changeObjectAccessControl', () => {
           options: { owner: 'new-owner', namespace: 'default' },
           actionType: 'changeOwnership',
         });
-        expect(mockSecurityExt.authorizeChangeOwnership).toHaveBeenCalledWith({
+        expect(mockSecurityExt.authorizeChangeAccessControl).toHaveBeenCalledWith({
           namespace: 'default',
           objects: [
             {
@@ -217,6 +217,7 @@ describe('changeObjectAccessControl', () => {
               existingNamespaces: ['default'],
             },
           ],
+          operation: 'changeOwnership',
         });
       });
     });

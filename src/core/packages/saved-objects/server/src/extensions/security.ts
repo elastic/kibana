@@ -284,7 +284,7 @@ export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
 
 /**
  * The AuthorizeChangeOwnershipParams interface extends AuthorizeParams and is
- * used for the AuthorizeChangeOwnership method of the ISavedObjectsSecurityExtension.
+ * used for the AuthorizeeChangeAccessControl method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeChangeOwnershipParams extends AuthorizeParams {
   /** The objects to authorize */
@@ -478,21 +478,14 @@ export interface ISavedObjectsSecurityExtension {
   ) => Promise<CheckAuthorizationResult<A>>;
 
   /**
-   * Performs authorization for the CHANGE_OWNERSHIP security action
+   * Performs authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions
    * @param params the namespace and object to authorize for changing ownership
+   * @param operation the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'
    * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
    */
-  authorizeChangeOwnership: <A extends string>(
-    params: AuthorizeChangeOwnershipParams
-  ) => Promise<CheckAuthorizationResult<A>>;
-
-  /**
-   * Performs authorization for the CHANGE_ACCESS_MODE security action
-   * @param params the namespace and object to authorize for changing access mode
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
-   */
-  authorizeChangeAccessMode: <A extends string>(
-    params: AuthorizeChangeAccessModeParams
+  authorizeChangeAccessControl: <A extends string>(
+    params: AuthorizeChangeAccessModeParams,
+    operation: 'changeAccessMode' | 'changeOwnership'
   ) => Promise<CheckAuthorizationResult<A>>;
 
   /**

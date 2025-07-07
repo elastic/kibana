@@ -21,7 +21,7 @@ export class AccessControlService {
     this.userForOperation = user;
   }
 
-  getTypesRequiringAccessControlPrivilegeCheck<A extends string>({
+  getTypesRequiringPrivilegeCheck<A extends string>({
     objects,
     typeRegistry,
   }: {

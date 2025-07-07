@@ -25,6 +25,7 @@ const methods = [
   'search',
   'update',
   'updateByQuery',
+  'security',
 ] as const;
 
 type MethodName = (typeof methods)[number];

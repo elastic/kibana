@@ -47,7 +47,7 @@ describe('AccessControlService', () => {
           accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
         },
       ];
-      const { typesRequiringAccessControl } = service.getTypesRequiringAccessControlPrivilegeCheck({
+      const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
       });
@@ -63,7 +63,7 @@ describe('AccessControlService', () => {
           accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
         },
       ];
-      const { typesRequiringAccessControl } = service.getTypesRequiringAccessControlPrivilegeCheck({
+      const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
       });
@@ -78,7 +78,7 @@ describe('AccessControlService', () => {
           type: 'dashboard',
         },
       ];
-      const { typesRequiringAccessControl } = service.getTypesRequiringAccessControlPrivilegeCheck({
+      const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
       });
@@ -94,7 +94,7 @@ describe('AccessControlService', () => {
           accessControl: { owner: 'alice' },
         },
       ];
-      const { typesRequiringAccessControl } = service.getTypesRequiringAccessControlPrivilegeCheck({
+      const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
       });
@@ -110,7 +110,7 @@ describe('AccessControlService', () => {
           accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
         },
       ];
-      const { typesRequiringAccessControl } = service.getTypesRequiringAccessControlPrivilegeCheck({
+      const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
       });
@@ -126,7 +126,7 @@ describe('AccessControlService', () => {
           accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
         },
       ];
-      const { typesRequiringAccessControl } = service.getTypesRequiringAccessControlPrivilegeCheck({
+      const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
         typeRegistry,
       });
