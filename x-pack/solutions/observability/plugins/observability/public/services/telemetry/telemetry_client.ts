@@ -16,4 +16,10 @@ export class TelemetryClient implements ITelemetryClient {
       count,
     });
   }
+
+  reportAlertDetailsPageView(ruleType: string): void {
+    this.analytics.reportEvent(TelemetryEventTypes.ALERT_DETAILS_PAGE_VIEW, {
+      rule_type: ruleType,
+    });
+  }
 }
