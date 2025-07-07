@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { PageObjects, ScoutPage, createLazyPageObject } from '@kbn/scout-oblt';
+import { ScoutPage, createLazyPageObject, ObltPageObjects } from '@kbn/scout-oblt';
 import { AnnotationsApp } from './annotations_app';
 import { SLOApp } from './slo_app';
 
-export interface SLOPageObjects extends PageObjects {
+export interface SLOPageObjects extends ObltPageObjects {
   slo: SLOApp;
   annotations: AnnotationsApp;
 }
 
-export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): SLOPageObjects {
+export function extendPageObjects(pageObjects: ObltPageObjects, page: ScoutPage): SLOPageObjects {
   page.setDefaultTimeout(60_000); // Set a default timeout for all page actions
   return {
     ...pageObjects,
