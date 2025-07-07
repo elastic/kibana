@@ -10,7 +10,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 
 import type { Filter, Query } from '@kbn/es-query';
-import { type DataViewSpec, type DataView, getEsQueryConfig } from '@kbn/data-plugin/common';
+import { type DataView, type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { isActiveTimeline } from '../../../helpers';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
@@ -78,13 +78,14 @@ export interface OwnProps {
   browserFields: BrowserFields;
   field: string;
   dataViewSpec?: DataViewSpec;
-  dataView?: DataView;
+  dataView: DataView;
   scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   globalFilters?: Filter[];
 }
+
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = OwnProps & PropsFromRedux;
 
@@ -156,6 +157,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       field={field as AlertsStackByField}
       filters={isActiveTimeline(scopeId ?? '') ? EMPTY_FILTERS : globalFilters}
       from={isActiveTimeline(scopeId ?? '') ? activeTimelineFrom : from}
+      dataView={dataView}
       dataViewSpec={dataViewSpec}
       options={options}
       paddingSize={paddingSize}

@@ -28,7 +28,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters: Filter[];
   indexNames: string[];
   dataViewSpec?: DataViewSpec;
-  dataView?: DataView;
+  dataView: DataView;
   query: Query;
 }
 
