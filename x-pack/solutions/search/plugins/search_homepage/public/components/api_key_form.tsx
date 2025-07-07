@@ -88,7 +88,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = () => {
           >
             <FormattedMessage
               id="xpack.searchHomepage.apiKeyForm.createButton"
-              defaultMessage="Create API Key"
+              defaultMessage="Create API key"
             />
           </EuiButton>
           {showFlyout && (
