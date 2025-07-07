@@ -24,7 +24,6 @@ import type {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_REVISION,
 } from '@kbn/rule-data-utils';
-import {} from '@kbn/rule-data-utils';
 
 /**
  * The types in this file create a system for defining a versioned schema and deriving read and write schemas for any specific version
@@ -115,8 +114,8 @@ export type ConvertSchemaNode<
   N extends SchemaNode
 > = N extends SchemaInternalNode
   ? N['type'] extends object[]
-    ? Array<Expand<ConvertSchemaType<ModelVersion, N['fields']>>>
-    : Expand<ConvertSchemaType<ModelVersion, N['fields']>>
+    ? Array<ConvertSchemaType<ModelVersion, N['fields']>>
+    : ConvertSchemaType<ModelVersion, N['fields']>
   : N['type'];
 
 export type ConvertSchemaTypeToReadSchema<
@@ -205,10 +204,10 @@ type SuppressionFieldsSchema = {
 };
 
 export type CommonAlertFieldsLatest = ConvertSchemaType<string, CommonAlertFieldsSchema>;
-export type CommonAlertFields870 = ConvertSchemaType<Version870Plus, CommonAlertFieldsSchema>;
+export type CommonAlertFields870 = ConvertSchemaType<Version870Union, CommonAlertFieldsSchema>;
 
 export type SuppressionFieldsLatest = ConvertSchemaType<string, SuppressionFieldsSchema>;
-export type SuppressionFields870 = ConvertSchemaType<Version870Plus, SuppressionFieldsSchema>;
+export type SuppressionFields870 = ConvertSchemaType<Version870Union, SuppressionFieldsSchema>;
 
 export type AlertWithCommonFieldsLatest<T> = T & CommonAlertFieldsLatest;
 
@@ -216,4 +215,4 @@ type Version800 = '8.0.0';
 type Version860 = '8.6.0';
 type Version870 = '8.7.0';
 type Version880 = '8.8.0';
-type Version870Plus = Version800 | Version860 | Version870;
+type Version870Union = Version800 | Version860 | Version870;

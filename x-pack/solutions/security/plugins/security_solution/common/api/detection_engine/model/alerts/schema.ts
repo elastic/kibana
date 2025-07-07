@@ -91,6 +91,7 @@ import type { SearchTypes } from '../../../../detection_engine/types';
 
 type Version800 = '8.0.0';
 type Version840 = '8.4.0';
+type Version850 = '8.5.0';
 type Version880 = '8.8.0';
 type Version890 = '8.9.0';
 type Version8120 = '8.12.0';
@@ -489,13 +490,29 @@ type DetectionAlertSchema = {
     type: string | undefined;
     version: Version800;
   };
+  [ALERT_UUID]: {
+    type: string;
+    version: Version800;
+  };
   [ALERT_RULE_INDICES]: {
     type: string[];
     version: Version840;
   };
-  [ALERT_UUID]: {
-    type: string;
-    version: Version800;
+  [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: {
+    type: string | undefined;
+    version: Version850;
+  };
+  [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: {
+    type: number | undefined;
+    version: Version850;
+  };
+  [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: {
+    type: string | undefined;
+    version: Version850;
+  };
+  [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: {
+    type: number | undefined;
+    version: Version850;
   };
   [ALERT_URL]: {
     type: string | undefined;
@@ -523,23 +540,6 @@ type DetectionAlertSchema = {
   };
   [ALERT_USER_CRITICALITY]: {
     type: string | undefined;
-    version: Version8130;
-  };
-  // TODO: risk score fields were actually added earlier, figure out when exactly
-  [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: {
-    type: string | undefined;
-    version: Version8130;
-  };
-  [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: {
-    type: number | undefined;
-    version: Version8130;
-  };
-  [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: {
-    type: string | undefined;
-    version: Version8130;
-  };
-  [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: {
-    type: number | undefined;
     version: Version8130;
   };
   [ALERT_RULE_EXECUTION_TYPE]: {
