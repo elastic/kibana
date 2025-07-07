@@ -8,16 +8,6 @@
 import { getFindAttackDiscoveryAlertsAggregation } from '.';
 
 describe('getFindAttackDiscoveryAlertsAggregation', () => {
-  it('returns the expected alert_ids terms aggregation', () => {
-    const result = getFindAttackDiscoveryAlertsAggregation();
-    expect(result.alert_ids).toEqual({
-      terms: {
-        field: 'kibana.alert.attack_discovery.alert_ids',
-        size: 1000,
-      },
-    });
-  });
-
   it('returns the expected api_config_name terms aggregation', () => {
     const result = getFindAttackDiscoveryAlertsAggregation();
     expect(result.api_config_name).toEqual({
@@ -28,11 +18,11 @@ describe('getFindAttackDiscoveryAlertsAggregation', () => {
     });
   });
 
-  it('returns the expected unique_alert_ids_count sum_bucket aggregation the with correct buckets_path', () => {
+  it('returns the expected unique_alert_ids_count cardinality aggregation', () => {
     const result = getFindAttackDiscoveryAlertsAggregation();
     expect(result.unique_alert_ids_count).toEqual({
-      sum_bucket: {
-        buckets_path: 'alert_ids>_count',
+      cardinality: {
+        field: 'kibana.alert.attack_discovery.alert_ids',
       },
     });
   });
