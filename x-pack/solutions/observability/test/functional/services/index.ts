@@ -8,9 +8,13 @@
 import { services as platformFunctionalServices } from '@kbn/test-suites-xpack-platform/functional/services';
 import { services as obltApiIntegrationServices } from '../../api_integration/services';
 import { ObservabilityProvider } from './observability';
+import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
+import { LogsUiProvider } from './logs_ui';
 
 export const services = {
   ...platformFunctionalServices,
   ...obltApiIntegrationServices,
+  logsUi: LogsUiProvider,
   observability: ObservabilityProvider,
+  infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
 };

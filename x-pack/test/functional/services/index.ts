@@ -59,8 +59,6 @@ import { CanvasElementProvider } from './canvas_element';
 // @ts-ignore not ts yet
 // @ts-ignore not ts yet
 import { UptimeProvider } from './uptime';
-import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
-import { LogsUiProvider } from './logs_ui';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
 import { CasesServiceProvider } from './cases';
@@ -116,8 +114,6 @@ export const services = {
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
   uptime: UptimeProvider,
-  infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
-  logsUi: LogsUiProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,

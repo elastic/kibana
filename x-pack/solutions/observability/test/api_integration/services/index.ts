@@ -7,8 +7,10 @@
 
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 import { InfraLogViewsServiceProvider } from './infra_log_views';
+import { ApmSynthtraceKibanaClientProvider } from './apm_synthtrace_kibana_client';
 
 export const services = {
   ...platformServices,
   infraLogViews: InfraLogViewsServiceProvider,
+  apmSynthtraceKibanaClient: ApmSynthtraceKibanaClientProvider,
 };
