@@ -18,7 +18,10 @@ import { type SelectDataViewAsyncPayload } from '../redux/actions';
 
 // TODO: remove this in cleanup phase Remove deprecated sourcerer code https://github.com/elastic/security-team/issues/12665
 export const useSyncSourcererUrlState = (
-  scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
+  scopeId:
+    | SourcererScopeName.default
+    | SourcererScopeName.explore
+    | SourcererScopeName.detections = SourcererScopeName.default
 ) => {
   const scopeDataViewId = useSelector((state: State) => {
     return sourcererSelectors.sourcererScopeSelectedDataViewId(state, scopeId);
