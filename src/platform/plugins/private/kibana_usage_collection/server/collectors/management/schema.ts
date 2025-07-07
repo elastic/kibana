@@ -464,10 +464,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:entityCentricExperience': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
@@ -495,7 +491,23 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
+  'onechat:agentApi:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'onechat:mcpServer:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'onechat:esqlToolApi:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'onechat:ui:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'onechat:tools:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -652,10 +664,22 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the new logs overview component.',
     },
   },
+  'cases:incrementalIdDisplay:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Display the incremental id of a case in the relevant pages',
+    },
+  },
   'observability:enableStreamsUI': {
     type: 'boolean',
     _meta: {
       description: 'Enable Streams UI.',
+    },
+  },
+  'observability:streamsEnableSignificantEvents': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable significant events in streams.',
     },
   },
 };

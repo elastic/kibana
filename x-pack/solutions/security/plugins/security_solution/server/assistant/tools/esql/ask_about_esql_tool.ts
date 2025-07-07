@@ -10,13 +10,11 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import { z } from '@kbn/zod';
 import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
-import type { ElasticAssistantApiRequestHandlerContext } from '@kbn/elastic-assistant-plugin/server/types';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './utils/common';
 
-export type ESQLToolParams = AssistantToolParams & {
-  assistantContext: ElasticAssistantApiRequestHandlerContext;
-};
+export type ESQLToolParams = Require<AssistantToolParams, 'assistantContext'>;
 
 const TOOL_NAME = 'AskAboutEsqlTool';
 
@@ -49,7 +47,7 @@ export const ASK_ABOUT_ESQL_TOOL: AssistantTool = {
       assistantContext.getRegisteredFeatures('securitySolutionUI').advancedEsqlGeneration
     );
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;
