@@ -67,5 +67,9 @@
     "@kbn/dataset-quality-plugin",
     "@kbn/test-subj-selector",
     "@kbn/datemath",
+    "@kbn/alerting-plugin",
+    "@kbn/test-suites-xpack",
+    "@kbn/cases-plugin",
+    "@kbn/dev-utils",
   ]
 }
