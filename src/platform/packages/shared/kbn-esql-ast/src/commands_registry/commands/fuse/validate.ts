@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import type { ICommandContext } from '../../types';
-import { buildMissingMetadataMessage, isRrfImmediatelyAfterFork } from './utils';
+import { buildMissingMetadataMessage, isFuseImmediatelyAfterFork } from './utils';
 
 export const validate = (
   command: ESQLCommand,
@@ -18,14 +18,14 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  if (!isRrfImmediatelyAfterFork(ast)) {
+  if (!isFuseImmediatelyAfterFork(ast)) {
     messages.push({
       location: command.location,
-      text: i18n.translate('kbn-esql-ast.esql.validation.rrfMissingScoreMetadata', {
-        defaultMessage: '[RRF] Must be immediately preceded by a FORK command.',
+      text: i18n.translate('kbn-esql-ast.esql.validation.fuseMissingScoreMetadata', {
+        defaultMessage: '[FUSE] Must be immediately preceded by a FORK command.',
       }),
       type: 'error',
-      code: 'rrfNotImmediatelyAfterFork',
+      code: 'fuseNotImmediatelyAfterFork',
     });
   }
 

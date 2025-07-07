@@ -15,18 +15,18 @@ export function buildMissingMetadataMessage(
 ): ESQLMessage {
   return {
     location: command.location,
-    text: i18n.translate('kbn-esql-ast.esql.validation.rrfMissingMetadata', {
-      defaultMessage: `[RRF] The FROM command is missing the {metadataField} METADATA field.`,
+    text: i18n.translate('kbn-esql-ast.esql.validation.fuseMissingMetadata', {
+      defaultMessage: `[FUSE] The FROM command is missing the {metadataField} METADATA field.`,
       values: { metadataField },
     }),
     type: 'error',
-    code: `rrfMissingMetadata`,
+    code: `fuseMissingMetadata`,
   };
 }
 
-export function isRrfImmediatelyAfterFork(ast: ESQLAst): boolean {
+export function isFuseImmediatelyAfterFork(ast: ESQLAst): boolean {
   const forkIndex = ast.findIndex((cmd) => cmd.name === 'fork');
-  const rrfIndex = ast.findIndex((cmd) => cmd.name === 'rrf');
+  const fuseIndex = ast.findIndex((cmd) => cmd.name === 'fuse');
 
-  return forkIndex !== -1 && rrfIndex === forkIndex + 1;
+  return forkIndex !== -1 && fuseIndex === forkIndex + 1;
 }

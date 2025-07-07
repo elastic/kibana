@@ -158,10 +158,10 @@ export async function suggest(
       return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
     }
 
-    // If the last command is not a FORK, RRF should not be suggested.
+    // If the last command is not a FORK, FUSE should not be suggested.
     const lastCommand = root.commands[root.commands.length - 1];
     if (lastCommand.name !== 'fork') {
-      suggestions = suggestions.filter((def) => def.label !== 'RRF');
+      suggestions = suggestions.filter((def) => def.label !== 'FUSE');
     }
 
     return suggestions.filter((def) => !isSourceCommand(def));
