@@ -47,22 +47,7 @@ jest.mock('../api/hooks/use_schedule_now_risk_engine_mutation', () => ({
 
 const mockToggleSelectedClosedAlertsSetting = jest.fn();
 
-const mockUseConfigurableRiskEngineSettings = jest.fn(() => ({
-  selectedRiskEngineSettings: {
-    includeClosedAlerts: false,
-    range: {
-      start: 'now-30d',
-      end: 'now',
-    },
-  },
-  selectedSettingsMatchPersistedSettings: true,
-  resetSelectedSettings: () => {},
-  saveSelectedSettings: () => {},
-  setSelectedDateSetting: () => {},
-  toggleSelectedClosedAlertsSetting: mockToggleSelectedClosedAlertsSetting,
-  isLoadingRiskEngineSettings: false,
-  isLoadingSaveSelectedSettings: false,
-}));
+const mockUseConfigurableRiskEngineSettings = jest.fn();
 
 jest.mock(
   '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks',
@@ -107,6 +92,29 @@ jest.mock('../components/risk_score_management/risk_score_preview_section', () =
 describe('EntityAnalyticsManagementPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseConfigurableRiskEngineSettings.mockReturnValue({
+      selectedRiskEngineSettings: {
+        includeClosedAlerts: false,
+        range: {
+          start: 'now-30d',
+          end: 'now',
+        },
+      },
+      savedRiskEngineSettings: {
+        includeClosedAlerts: false,
+        range: {
+          start: 'now-30d',
+          end: 'now',
+        },
+      },
+      selectedSettingsMatchPersistedSettings: true,
+      resetSelectedSettings: () => {},
+      saveSelectedSettings: () => {},
+      setSelectedDateSetting: () => {},
+      toggleSelectedClosedAlertsSetting: mockToggleSelectedClosedAlertsSetting,
+      isLoadingRiskEngineSettings: false,
+      isLoadingSaveSelectedSettings: false,
+    });
   });
 
   const pageComponent = () => (
