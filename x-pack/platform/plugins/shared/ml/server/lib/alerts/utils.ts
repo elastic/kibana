@@ -22,8 +22,7 @@ const isRealUrl = (str: string): boolean => {
 export const escapeLinkLike = (text: string): string => {
   if (!text) return text;
 
-  // For everything else (full messages or non-URL values),
-  // find and escape all dot-containing substrings
+  // For non-URL values, find and escape all dot-containing substrings
   return text.replace(/\S+\.\S+/g, (match) => {
     // Keep real URLs intact
     if (isRealUrl(match)) return match;
