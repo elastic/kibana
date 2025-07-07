@@ -12,3 +12,47 @@ export interface PrivMonBulkUser {
   indexName: string;
   existingUserId?: string;
 }
+
+// For update metadata
+export interface BulkUpdateOperation {
+  update: {
+    _index: string;
+    _id: string;
+  };
+}
+
+// For the Painless script used in updates
+export interface BulkScriptOperation {
+  script: {
+    source: string;
+    params: {
+      index: string;
+    };
+  };
+}
+
+// For create (index) metadata
+export interface BulkIndexOperation {
+  index: {
+    _index: string;
+  };
+}
+
+// For the actual document to insert (new user)
+export interface BulkDocumentBody {
+  user: {
+    name: string;
+    is_privileged: boolean;
+  };
+  labels: {
+    sources: string[];
+    source_indices: string[];
+  };
+}
+
+// Union of all operation parts
+export type BulkOperation =
+  | BulkUpdateOperation
+  | BulkScriptOperation
+  | BulkIndexOperation
+  | BulkDocumentBody;

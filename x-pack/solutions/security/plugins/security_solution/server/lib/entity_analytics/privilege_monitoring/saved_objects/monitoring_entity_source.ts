@@ -59,7 +59,7 @@ export class MonitoringEntitySourceDescriptorClient {
         await this.dependencies.soClient.create<MonitoringEntitySourceDescriptor>(
           monitoringEntitySourceTypeName,
           attributes,
-          { id: savedObjectId }
+          { refresh: 'wait_for', id: savedObjectId }
         );
       return created;
     }
