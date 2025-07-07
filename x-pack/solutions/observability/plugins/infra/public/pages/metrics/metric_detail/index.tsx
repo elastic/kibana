@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { AssetDetailPage } from './asset_detail_page';
 import { MetricDetailPage } from './metric_detail_page';
 import { MetricsTimeProvider } from './hooks/use_metrics_time';
@@ -19,7 +19,7 @@ export const NodeDetail = () => {
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
 
   return (
-    <EuiErrorBoundary>
+    <KibanaErrorBoundary>
       {nodeType === 'host' || nodeType === 'container' ? (
         <AssetDetailPage />
       ) : (
@@ -27,6 +27,6 @@ export const NodeDetail = () => {
           <MetricDetailPage />
         </MetricsTimeProvider>
       )}
-    </EuiErrorBoundary>
+    </KibanaErrorBoundary>
   );
 };
