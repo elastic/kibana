@@ -8,7 +8,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { SortCombinations, SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { SortCombinations, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server/src/apis';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
@@ -71,7 +71,6 @@ export function getSortingParams(
             );
           }
         }
-        // Determine if any field is text with keyword, and use keyword if so
         const mergedFieldName = `merged_${sortField}`;
         // Collect field mappings for type detection
         const fieldMappings = types
