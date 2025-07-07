@@ -73,8 +73,8 @@ export default function (providerContext: FtrProviderContext) {
 
       after(async () => {
         await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
-        await es.indices.delete({ index: FROZEN_INDEX_NAME, allow_no_indices: true });
-        await es.indices.delete({ index: COLD_INDEX_NAME, allow_no_indices: true });
+        await es.indices.deleteAlias({ name: FROZEN_INDEX_NAME, index: `*${FROZEN_INDEX_NAME}*` });
+        await es.indices.deleteAlias({ name: COLD_INDEX_NAME, index: `*${COLD_INDEX_NAME}*` });
         await dataView.delete('security-solution');
       });
 
