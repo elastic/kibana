@@ -338,9 +338,8 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                     {activeStickyIndexRef.current !== null && stickyGroupRoot && (
                       <EuiFlexItem
                         ref={activeStickyRenderSlotRef}
-                        css={({ euiTheme }) => ({
+                        css={() => ({
                           position: 'relative',
-                          margin: `0 ${euiTheme.size.s}`,
                         })}
                       />
                     )}
@@ -350,7 +349,6 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
               <EuiFlexItem>
                 <div
                   css={({ euiTheme }) => ({
-                    padding: `0 ${euiTheme.size.s}`,
                     background: euiTheme.colors.backgroundBaseSubdued,
                   })}
                   style={{ height: rowVirtualizer.getTotalSize() }}
