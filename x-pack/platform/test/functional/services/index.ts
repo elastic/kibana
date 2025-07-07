@@ -13,12 +13,19 @@ import { AceEditorProvider } from './ace_editor';
 import { SampleDataServiceProvider } from './sample_data';
 import { GrokDebuggerProvider } from './grok_debugger';
 import { SearchSessionsService } from './search_sessions';
+import { CasesServiceProvider } from './cases';
+import { ActionsServiceProvider } from './actions';
+import { AiopsProvider } from './aiops';
+import { RulesServiceProvider } from './rules';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
 // only the built-in services will be available
 export const services = {
   ...kibanaFunctionalServices,
+  actions: ActionsServiceProvider,
+  aiops: AiopsProvider,
+  cases: CasesServiceProvider,
   supertest: kibanaApiIntegrationServices.supertest,
   supertestWithoutAuth: kibanaXPackApiIntegrationServices.supertestWithoutAuth,
   esSupertest: kibanaApiIntegrationServices.esSupertest,
@@ -26,6 +33,7 @@ export const services = {
   spaces: kibanaXPackApiIntegrationServices.spaces,
   userMenu: UserMenuProvider,
   aceEditor: AceEditorProvider,
+  rules: RulesServiceProvider,
   sampleData: SampleDataServiceProvider,
   grokDebugger: GrokDebuggerProvider,
   searchSessions: SearchSessionsService,

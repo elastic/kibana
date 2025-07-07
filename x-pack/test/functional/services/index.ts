@@ -12,6 +12,10 @@ import { UserMenuProvider } from '@kbn/test-suites-xpack-platform/functional/ser
 import { SampleDataServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/sample_data';
 import { GrokDebuggerProvider } from '@kbn/test-suites-xpack-platform/functional/services/grok_debugger';
 import { SearchSessionsService } from '@kbn/test-suites-xpack-platform/functional/services/search_sessions';
+import { CasesServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/cases';
+import { ActionsServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/actions';
+import { AiopsProvider } from '@kbn/test-suites-xpack-platform/functional/services/aiops';
+import { RulesServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/rules';
 import { ReportingFunctionalProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
@@ -64,10 +68,6 @@ import { LogsUiProvider } from './logs_ui';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
 import { ObservabilityProvider } from './observability';
-import { CasesServiceProvider } from './cases';
-import { ActionsServiceProvider } from './actions';
-import { RulesServiceProvider } from './rules';
-import { AiopsProvider } from './aiops';
 import { DataStreamProvider } from './data_stream';
 import { SloUiServiceProvider } from './slo';
 // define the name and providers for services that should be

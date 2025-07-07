@@ -1672,7 +1672,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui @elastic/kibana-management
 /x-pack/test/functional/es_archives/large_arrays @elastic/ml-ui # Assigned per usages
 /x-pack/test/functional/services/transform/ @elastic/ml-ui @elastic/kibana-management
-/x-pack/test/functional/services/aiops @elastic/ml-ui
+/x-pack/platform/test/functional/services/aiops @elastic/ml-ui
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui @elastic/kibana-management
 
 # Operations
@@ -2125,13 +2125,13 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/functional_with_es_ssl/page_objects/rule_details.ts @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/lib/object_remover.ts @elastic/response-ops
 /x-pack/test/stack_functional_integration/apps/alerts @elastic/response-ops
-/x-pack/test/functional/services/actions @elastic/response-ops
+/x-pack/platform/test/functional/services/actions @elastic/response-ops
 /x-pack/solutions/security/test/api_integration_basic/apis/security_solution/index.ts @elastic/response-ops @elastic/kibana-cases
 /x-pack/solutions/security/test/api_integration_basic/apis/security_solution/cases_privileges.ts @elastic/response-ops @elastic/kibana-cases
 /x-pack/platform/test/upgrade/services/rules_upgrade_services.ts @elastic/response-ops
 /x-pack/platform/test/upgrade/apps/rules @elastic/response-ops
 /x-pack/platform/test/examples/triggers_actions_ui_examples @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/main/x-pack/examples/triggers_actions_ui_example/kibana.jsonc#L4
-/x-pack/test/functional/services/rules @elastic/response-ops
+/x-pack/platform/test/functional/services/rules @elastic/response-ops
 /x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
 /x-pack/test/functional/fixtures/kbn_archiver/cases @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/functional/es_archives/cases @elastic/response-ops @elastic/kibana-cases
@@ -2153,7 +2153,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /docs/management/connectors/ @elastic/response-ops
 /x-pack/platform/test/cases_api_integration/ @elastic/response-ops
 /x-pack/solutions/security/test/cases_api_integration/ @elastic/response-ops
-/x-pack/test/functional/services/cases/ @elastic/response-ops @elastic/kibana-cases
+/x-pack/platform/test/functional/services/cases/ @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/api_integration/apis/cases/ @elastic/response-ops @elastic/kibana-cases
 /x-pack/test_serverless/functional/test_suites/observability/cases @elastic/response-ops @elastic/kibana-cases
