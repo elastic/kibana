@@ -81,6 +81,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/ml_disabled/configs/serverless_essentials_tier.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_bulk_actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/basic_license_essentials_tier/configs/serverless.config.ts
@@ -130,6 +131,5 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/ai4dsoc/cases/search_ai_lake_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/ai4dsoc/nlp_cleanup_task/search_ai_lake_tier/configs/serverless.config.ts
   # serverless config files that run deployment-agnostic tests
-  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/security.serverless.config.ts
-  - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.config.ts
-  - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.copy_to_space.config.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.config.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.copy_to_space.config.ts
