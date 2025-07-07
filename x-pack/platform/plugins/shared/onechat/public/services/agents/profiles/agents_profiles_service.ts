@@ -54,11 +54,7 @@ export class AgentProfilesService {
   /**
    * Update an existing agent profile
    */
-<<<<<<< HEAD
   async update(id: string, update: Omit<AgentProfileUpdateRequest, 'id'>): Promise<AgentProfile> {
-=======
-  async update(id: string, update: AgentProfileUpdateRequest): Promise<AgentProfile> {
->>>>>>> main
     return await this.http.put<UpdateAgentProfileResponse>(`/api/chat/agents/profiles/${id}`, {
       body: JSON.stringify(update),
     });
