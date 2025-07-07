@@ -6,8 +6,6 @@
  */
 
 import {
-  EuiBadge,
-  EuiBadgeGroup,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -20,6 +18,7 @@ import { ToolDescriptor } from '@kbn/onechat-common';
 import React from 'react';
 import { useOnechatBaseTools } from '../../hooks/use_tools';
 import { truncateAtNewline } from '../../utils/truncate_at_newline';
+import { OnechatToolTags } from './tags/tool_tags';
 
 const columns: Array<EuiBasicTableColumn<ToolDescriptor>> = [
   {
@@ -50,17 +49,7 @@ const columns: Array<EuiBasicTableColumn<ToolDescriptor>> = [
     }),
     width: '15%',
     valign: 'top',
-    render: (tags: string[]) => {
-      return (
-        <EuiBadgeGroup>
-          {tags.map((tag) => (
-            <EuiBadge key={tag} color="primary">
-              {tag}
-            </EuiBadge>
-          ))}
-        </EuiBadgeGroup>
-      );
-    },
+    render: (tags: string[]) => <OnechatToolTags tags={tags} />,
   },
 ];
 
