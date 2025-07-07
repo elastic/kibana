@@ -13,6 +13,7 @@ import React, { useState } from 'react';
 import { useConversation } from '../../hooks/use_conversation';
 import { Conversation } from './conversation';
 import { ConversationActions } from './conversation_actions';
+import { ConversationGrid } from './conversation_grid';
 import { ConversationSidebar } from './conversation_sidebar';
 import { ConversationSidebarToggle } from './conversation_sidebar_toggle';
 import { ConversationTitle } from './conversation_title';
@@ -41,14 +42,6 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     max-block-size: ${headerHeight};
     ${backgroundStyles}
   `;
-  const sideColumnWidth = `minmax(calc(${euiTheme.size.xxl} * 2), 1fr)`;
-  const contentMaxWidth = `calc(${euiTheme.size.xl} * 25)`;
-  const headerGridStyles = css`
-    display: grid;
-    grid-template-columns: ${sideColumnWidth} minmax(auto, ${contentMaxWidth}) ${sideColumnWidth};
-    align-items: center;
-    width: 100%;
-  `;
   const mainContentStyles = css`
     ${fullSizeStyles}
     ${backgroundStyles}
@@ -58,7 +51,6 @@ export const OnechatConversationsView: React.FC<{}> = () => {
   `;
   const conversationContainerStyles = css`
     ${fullSizeStyles}
-    max-inline-size: ${contentMaxWidth};
     max-block-size: calc(
       100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) - ${headerHeight}
     );
@@ -80,7 +72,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
 
       {hasActiveConversation && (
         <KibanaPageTemplate.Header css={headerStyles} bottomBorder={false}>
-          <div css={headerGridStyles}>
+          <ConversationGrid>
             <ConversationSidebarToggle
               isSidebarOpen={isSidebarOpen}
               onToggle={() => {
@@ -89,7 +81,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
             />
             <ConversationTitle />
             <ConversationActions />
-          </div>
+          </ConversationGrid>
         </KibanaPageTemplate.Header>
       )}
       <KibanaPageTemplate.Section

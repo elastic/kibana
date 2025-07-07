@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiPanel, useEuiScrollBar } from '@elastic/eui';
+import { EuiFlexItem, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useChat } from '../../hooks/use_chat';
@@ -15,6 +15,7 @@ import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ConversationInputForm } from './conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
+import { ConversationContent } from './conversation_grid';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -66,13 +67,15 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId }) => {
     <>
       <EuiFlexItem grow css={scrollContainerStyles}>
         <div ref={scrollContainerRef} css={fullHeightStyles}>
-          <EuiPanel hasBorder={false} hasShadow={false} css={roundsContainerStyles}>
+          <ConversationContent css={roundsContainerStyles}>
             <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
-          </EuiPanel>
+          </ConversationContent>
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ConversationInputForm disabled={!agentId} loading={false} onSubmit={onSubmit} />
+        <ConversationContent>
+          <ConversationInputForm disabled={!agentId} loading={false} onSubmit={onSubmit} />
+        </ConversationContent>
       </EuiFlexItem>
     </>
   );
