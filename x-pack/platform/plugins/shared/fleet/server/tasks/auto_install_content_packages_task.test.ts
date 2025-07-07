@@ -125,7 +125,10 @@ describe('AutoInstallContentPackagesTask', () => {
           name: 'kubernetes_otel',
           version: '1.1.0',
           discovery: {
-            fields: [{ name: 'data_stream.dataset', value: 'system.cpu' }],
+            fields: [
+              { name: 'data_stream.dataset', value: 'system.cpu' },
+              { name: 'data_stream.dataset', value: 'system.memory' },
+            ],
           },
         } as any,
       ]);
@@ -151,6 +154,7 @@ describe('AutoInstallContentPackagesTask', () => {
         pkgName: 'kubernetes_otel',
         pkgVersion: '1.1.0',
       });
+      expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
     });
 
     it('should not call registry if cached', async () => {
