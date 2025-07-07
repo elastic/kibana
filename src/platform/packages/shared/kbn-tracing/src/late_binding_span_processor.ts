@@ -8,8 +8,8 @@
  */
 
 import { Context } from '@opentelemetry/api';
-import { ReadableSpan, Span, SpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { pull } from 'lodash';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
 
 const noop = async () => {};
 
@@ -18,18 +18,18 @@ const noop = async () => {};
  * which is useful if processors should be conditionally applied based on config
  * or runtime logic.
  */
-export class LateBindingSpanProcessor implements SpanProcessor {
+export class LateBindingSpanProcessor implements tracing.SpanProcessor {
   static #instance?: LateBindingSpanProcessor;
 
-  #processors: SpanProcessor[] = [];
+  #processors: tracing.SpanProcessor[] = [];
 
   private constructor() {}
 
-  onStart(span: Span, parentContext: Context): void {
+  onStart(span: tracing.Span, parentContext: Context): void {
     this.#processors.forEach((processor) => processor.onStart(span, parentContext));
   }
 
-  onEnd(span: ReadableSpan): void {
+  onEnd(span: tracing.ReadableSpan): void {
     this.#processors.forEach((processor) => processor.onEnd(span));
   }
 
@@ -40,7 +40,7 @@ export class LateBindingSpanProcessor implements SpanProcessor {
     await Promise.all(this.#processors.map((processor) => processor.shutdown()));
   }
 
-  register(processor: SpanProcessor) {
+  register(processor: tracing.SpanProcessor) {
     this.#processors.push(processor);
 
     return async () => {
@@ -49,7 +49,7 @@ export class LateBindingSpanProcessor implements SpanProcessor {
     };
   }
 
-  static register(processor: SpanProcessor): () => Promise<void> {
+  static register(processor: tracing.SpanProcessor): () => Promise<void> {
     return this.#instance?.register(processor) ?? noop;
   }
 

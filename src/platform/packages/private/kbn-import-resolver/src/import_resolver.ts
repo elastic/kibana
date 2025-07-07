@@ -147,6 +147,10 @@ export class ImportResolver {
       return Path.resolve(REPO_ROOT, `node_modules/@modelcontextprotocol/sdk/dist/esm/${relPath}`);
     }
 
+    if (req.startsWith('@elastic/opentelemetry-node/sdk')) {
+      return Path.resolve(REPO_ROOT, `node_modules/@elastic/opentelemetry-node/lib/sdk.js`);
+    }
+
     // turn root-relative paths into relative paths
     if (
       req.startsWith('src/') ||
