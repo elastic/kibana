@@ -32,10 +32,7 @@ describe('AI Assistant Management Selection Plugin', () => {
 
       const result = plugin.start(coreStart);
 
-      expect(coreStart.uiSettings.get).toHaveBeenCalledWith(
-        serverlessUiSettingsKey,
-        AIAssistantType.Never
-      );
+      expect(coreStart.uiSettings.get).toHaveBeenCalledWith(serverlessUiSettingsKey);
       const aiAssistantType = await firstValueFrom(result.aiAssistantType$);
       expect(aiAssistantType).toBe(AIAssistantType.Observability);
     });
