@@ -70,10 +70,13 @@ export class MonitoringEntitySourceDescriptorClient {
   }
 
   async find(query?: ListEntitySourcesRequestQuery) {
-    return this.dependencies.soClient.find<MonitoringEntitySource>({
+    const scopedSoClient = this.dependencies.soClient.asScopedToNamespace(
+      this.dependencies.namespace
+    );
+
+    return scopedSoClient.find<MonitoringEntitySource>({
       type: monitoringEntitySourceTypeName,
       filter: this.getQueryFilters(query),
-      namespaces: [this.dependencies.namespace],
     });
   }
 
