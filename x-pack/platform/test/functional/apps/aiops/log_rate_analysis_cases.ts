@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { USER } from '../../services/ml/security_common';
+import { USER } from '../../../api_integration/services/ml/security_common';
 import { logRateAnalysisTestData } from './log_rate_analysis_test_data';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

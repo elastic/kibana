@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { USER } from '../../services/ml/security_common';
+import { USER } from '../../../api_integration/services/ml/security_common';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
