@@ -188,7 +188,7 @@ describe('savedObjectToItem', () => {
     expect(error).toBeNull();
     expect(item).toEqual({
       ...commonSavedObject,
-      references: undefined,
+      references: [],
       attributes: {
         title: 'title',
         description: 'my description',
@@ -260,7 +260,7 @@ describe('savedObjectToItem', () => {
         allowedAttributes: ['title', 'description'],
         allowedReferences: [],
       });
-      expect(item?.references).toBeUndefined();
+      expect(item?.references).toEqual([]);
     }
   });
 });
