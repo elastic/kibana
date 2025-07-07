@@ -65,10 +65,6 @@ export const validateCompleteThreatMatches = (
 
   signalsQueryMap.forEach((threatQueries, signalId) => {
     const hasCompleteMatch = threatMapping.some((andGroup) => {
-      if (andGroup.entries.length > threatQueries.length) {
-        return false;
-      }
-
       return andGroup.entries.every((entry) =>
         threatQueries.some(
           (threatQuery) => threatQuery.field === entry.field && threatQuery.value === entry.value
