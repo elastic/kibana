@@ -49,7 +49,7 @@ export interface UsageStats {
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
-  'observability:aiAssistantAnonymizationRules': string;
+  'aiAssistant:anonymizationRules': string;
   'onechat:mcpServer:enabled': boolean;
   'onechat:esqlToolApi:enabled': boolean;
   'onechat:agentApi:enabled': boolean;
