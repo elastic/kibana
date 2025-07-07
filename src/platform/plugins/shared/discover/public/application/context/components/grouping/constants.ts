@@ -20,19 +20,19 @@ export const getDefaultGroupingOptionsPerDataView = (dataViewName: string): Grou
     case '.alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*':
       return [
         {
-          label: i18n.translate('discover.grouping.ungrouped.label', {
+          label: i18n.translate('discover.grouping.ungrouped.label.alert', {
             defaultMessage: 'Rule name',
           }),
           key: ALERT_RULE_NAME,
         },
         {
-          label: i18n.translate('discover.grouping.ungrouped.label', {
+          label: i18n.translate('discover.grouping.ungrouped.label.user', {
             defaultMessage: 'User name',
           }),
           key: 'user.name',
         },
         {
-          label: i18n.translate('discover.grouping.ungrouped.label', {
+          label: i18n.translate('discover.grouping.ungrouped.label.host', {
             defaultMessage: 'Host name',
           }),
           key: 'host.name',
@@ -41,13 +41,13 @@ export const getDefaultGroupingOptionsPerDataView = (dataViewName: string): Grou
     case '.kibana-event-log-*':
       return [
         {
-          label: i18n.translate('discover.grouping.ungrouped.label', {
+          label: i18n.translate('discover.grouping.ungrouped.label.event_action', {
             defaultMessage: 'Event action',
           }),
           key: 'event.action',
         },
         {
-          label: i18n.translate('discover.grouping.ungrouped.label', {
+          label: i18n.translate('discover.grouping.ungrouped.label.event_category', {
             defaultMessage: 'Event category',
           }),
           key: 'event.category',

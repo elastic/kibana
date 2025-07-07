@@ -46,7 +46,7 @@ export const InstanceIdGroupContent = React.memo<{
                 <EuiIconTip
                   content={
                     <FormattedMessage
-                      id="xpack.observability.alert.grouping.ungrouped.info"
+                      id="discover.alert.grouping.ungrouped.info"
                       defaultMessage='There is no "group by" field selected in the rule definition.'
                     />
                   }
