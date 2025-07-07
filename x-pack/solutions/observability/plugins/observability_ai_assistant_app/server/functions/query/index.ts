@@ -102,14 +102,16 @@ export function registerQueryFunction({
 
       const actions = functions.getActions();
 
+      const inferenceMessages = convertMessagesForInference(
+        // remove system message and query function request
+        messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1),
+        resources.logger
+      );
+
       const events$ = naturalLanguageToEsql({
         client: pluginsStart.inference.getClient({ request: resources.request }),
         connectorId,
-        messages: convertMessagesForInference(
-          // remove system message and query function request
-          messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1),
-          resources.logger
-        ),
+        messages: inferenceMessages,
         logger: resources.logger,
         tools: Object.fromEntries(
           [...actions, ...esqlFunctions].map((fn) => [
@@ -118,6 +120,7 @@ export function registerQueryFunction({
           ])
         ),
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
+        maxRetries: 0,
         metadata: {
           connectorTelemetry: {
             pluginId: 'observability_ai_assistant',
