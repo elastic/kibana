@@ -29,7 +29,6 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
-import { EnterpriseSearchOverview } from './enterprise_search_overview';
 import { KibanaLogic } from './shared/kibana';
 
 import { renderApp, renderHeaderActions } from '.';
@@ -91,21 +90,6 @@ describe('renderApp', () => {
   const mount = (App: React.FC) => {
     unmount = renderApp(App, kibanaDeps, pluginData);
   };
-
-  describe('Enterprise Search apps', () => {
-    afterEach(() => {
-      act(() => {
-        unmount();
-      });
-    });
-
-    it('renders EnterpriseSearchOverview', () => {
-      act(() => {
-        mount(EnterpriseSearchOverview);
-      });
-      expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
-    });
-  });
 
   describe('renderHeaderActions', () => {
     const mockHeaderEl = document.createElement('header');
