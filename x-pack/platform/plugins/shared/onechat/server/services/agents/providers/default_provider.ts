@@ -10,7 +10,6 @@ import {
   allToolsSelectionWildcard as allTools,
   AgentType,
   createAgentNotFoundError,
-  toSerializedAgentIdentifier,
 } from '@kbn/onechat-common';
 import type { ProvidedAgent } from '@kbn/onechat-server';
 import type { AgentProviderWithId } from '../types';
@@ -29,7 +28,7 @@ export const createDefaultAgentProvider = (): AgentProviderWithId => {
       if (agentId === oneChatDefaultAgentId) {
         return createDefaultAgentDescriptor();
       }
-      throw createAgentNotFoundError({ agentId: toSerializedAgentIdentifier(agentId) });
+      throw createAgentNotFoundError({ agentId });
     },
     list: () => {
       return [createDefaultAgentDescriptor()];

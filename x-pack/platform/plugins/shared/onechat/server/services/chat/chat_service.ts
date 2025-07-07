@@ -31,9 +31,6 @@ import {
   type ChatAgentEvent,
   type RoundCompleteEvent,
   oneChatDefaultAgentId,
-  toSerializedAgentIdentifier,
-  AgentIdentifier,
-  SerializedAgentIdentifier,
   isRoundCompleteEvent,
   isOnechatError,
   createInternalError,
@@ -68,7 +65,7 @@ export interface ChatConverseParams {
    * Id of the conversational agent to converse with.
    * If empty, will use the default agent id.
    */
-  agentId?: AgentIdentifier;
+  agentId?: string;
   /**
    * Agent mode to use for this round of conversation.
    */
@@ -151,13 +148,8 @@ class ChatServiceImpl implements ChatService {
       ),
     }).pipe(
       switchMap(({ conversationClient, chatModel, agent }) => {
-        const agentIdentifier = toSerializedAgentIdentifier({
-          agentId: agent.agentId,
-          providerId: agent.providerId,
-        });
-
         const conversation$ = getConversation$({
-          agentId: agentIdentifier,
+          agentId,
           conversationId,
           conversationClient,
         });
@@ -175,7 +167,7 @@ class ChatServiceImpl implements ChatService {
 
         const saveOrUpdateAndEmit$ = isNewConversation
           ? createConversation$({
-              agentId: agentIdentifier,
+              agentId,
               conversationClient,
               title$,
               roundCompletedEvents$,
@@ -236,7 +228,7 @@ const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  agentId: SerializedAgentIdentifier;
+  agentId: string;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -336,7 +328,7 @@ const getConversation$ = ({
   conversationId,
   conversationClient,
 }: {
-  agentId: SerializedAgentIdentifier;
+  agentId: string;
   conversationId: string | undefined;
   conversationClient: ConversationClient;
 }): Observable<Conversation> => {
@@ -349,11 +341,7 @@ const getConversation$ = ({
   }).pipe(shareReplay());
 };
 
-const placeholderConversation = ({
-  agentId,
-}: {
-  agentId: SerializedAgentIdentifier;
-}): Conversation => {
+const placeholderConversation = ({ agentId }: { agentId: string }): Conversation => {
   return {
     id: uuidv4(),
     title: 'New conversation',

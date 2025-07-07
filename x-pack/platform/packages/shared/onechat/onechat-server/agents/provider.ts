@@ -13,8 +13,6 @@ import {
   type ConversationRound,
   type RoundInput,
   type ChatAgentEvent,
-  type AgentIdentifier,
-  type PlainIdAgentIdentifier,
 } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -111,7 +109,7 @@ export interface AgentResponse {
 
 export interface ProvidedAgent {
   type: AgentType;
-  id: PlainIdAgentIdentifier;
+  id: string;
   description: string;
   handler: AgentHandlerFn;
 }
@@ -120,7 +118,7 @@ export interface ProvidedAgent {
  * Provider that can be registered to expose agents to onechat
  */
 export interface AgentProvider<TAgent = ProvidedAgent> {
-  has(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<boolean>;
-  get(opts: { agentId: AgentIdentifier; request: KibanaRequest }): MaybePromise<TAgent>;
+  has(opts: { agentId: string; request: KibanaRequest }): MaybePromise<boolean>;
+  get(opts: { agentId: string; request: KibanaRequest }): MaybePromise<TAgent>;
   list(opts: { request: KibanaRequest }): MaybePromise<TAgent[]>;
 }

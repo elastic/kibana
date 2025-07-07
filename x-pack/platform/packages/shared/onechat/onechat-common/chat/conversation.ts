@@ -6,7 +6,7 @@
  */
 
 import type { StructuredToolIdentifier } from '../tools/tools';
-import { oneChatDefaultAgentId, type PlainIdAgentIdentifier } from '../agents';
+import { oneChatDefaultAgentId } from '../agents';
 import type { UserIdAndName } from '../base/users';
 
 /**
@@ -114,7 +114,7 @@ export interface ConversationRound {
 
 export interface Conversation {
   id: string;
-  agentId: PlainIdAgentIdentifier;
+  agentId: string;
   user: UserIdAndName;
   title: string;
   createdAt: string;

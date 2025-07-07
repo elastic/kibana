@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AgentIdentifier, ChatAgentEvent } from '@kbn/onechat-common';
+import type { ChatAgentEvent } from '@kbn/onechat-common';
 import type { AgentParams, AgentResponse } from './provider';
 
 export interface RunAgentReturn {
@@ -23,7 +23,7 @@ export interface RunAgentParams {
   /**
    * ID of the agent to call.
    */
-  agentId: AgentIdentifier;
+  agentId: string;
   /**
    * Parameters to call the agent with.
    */

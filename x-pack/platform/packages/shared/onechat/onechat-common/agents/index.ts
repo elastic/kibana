@@ -13,14 +13,3 @@ export {
   type AgentDefinition,
   type AgentConfiguration,
 } from './definition';
-export {
-  type AgentIdentifier,
-  type PlainIdAgentIdentifier,
-  type SerializedAgentIdentifier,
-  type StructuredAgentIdentifier,
-  isSerializedAgentIdentifier,
-  isPlainAgentIdentifier,
-  isStructuredAgentIdentifier,
-  toSerializedAgentIdentifier,
-  toStructuredAgentIdentifier,
-} from './identifiers';

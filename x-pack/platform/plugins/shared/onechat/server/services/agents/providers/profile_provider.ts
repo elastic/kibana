@@ -7,7 +7,6 @@
 
 import {
   AgentType,
-  toStructuredAgentIdentifier,
   AgentDefinition,
   builtinToolProviderId,
   allToolsSelectionWildcard as allTools,
@@ -28,19 +27,17 @@ export const creatProfileProvider = ({
 }): AgentProviderWithId => {
   const provider: AgentProviderWithId = {
     id: 'profile',
-    has: async (options) => {
-      const agentClient = await getScopedClient(options.request);
-      const { agentId } = toStructuredAgentIdentifier(options.agentId);
+    has: async ({ request, agentId }) => {
+      const agentClient = await getScopedClient(request);
       return agentClient.has(agentId);
     },
-    get: async (options) => {
-      const agentClient = await getScopedClient(options.request);
-      const { agentId } = toStructuredAgentIdentifier(options.agentId);
+    get: async ({ request, agentId }) => {
+      const agentClient = await getScopedClient(request);
       const agent = await agentClient.get(agentId);
       return profileToDescriptor({ agent });
     },
-    list: async (options) => {
-      const agentClient = await getScopedClient(options.request);
+    list: async ({ request }) => {
+      const agentClient = await getScopedClient(request);
       const agentProfiles = await agentClient.list();
       return agentProfiles.map((agent) => profileToDescriptor({ agent }));
     },

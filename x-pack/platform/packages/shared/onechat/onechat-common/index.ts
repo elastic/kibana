@@ -63,17 +63,8 @@ export {
   AgentType,
   AgentMode,
   type AgentDescriptor,
-  type AgentIdentifier,
   type AgentDefinition,
   type AgentConfiguration,
-  type PlainIdAgentIdentifier,
-  type SerializedAgentIdentifier,
-  type StructuredAgentIdentifier,
-  isSerializedAgentIdentifier,
-  isPlainAgentIdentifier,
-  isStructuredAgentIdentifier,
-  toSerializedAgentIdentifier,
-  toStructuredAgentIdentifier,
 } from './agents';
 export {
   type RoundInput,
