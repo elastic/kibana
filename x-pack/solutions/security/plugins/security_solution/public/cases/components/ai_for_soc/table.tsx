@@ -102,7 +102,6 @@ export const Table = memo(
       [application, cases, data, fieldFormats, http, licensing, notifications, settings]
     );
 
-    // TODO: remove second Dataview parameter when newDataViewPickerEnabled is default
     const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
 
     const additionalContext: AdditionalTableContext = useMemo(

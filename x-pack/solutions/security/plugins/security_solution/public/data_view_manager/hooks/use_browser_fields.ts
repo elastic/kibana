@@ -15,10 +15,12 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 
 export const useBrowserFields = (
   scope: DataViewManagerScopeName = DataViewManagerScopeName.default,
+  /**
+   * @deprecated remove when newDataViewPickerEnabled is removed
+   */
   oldDataView?: DataView
 ): BrowserFields => {
   const { dataView } = useDataView(scope);
-  // TODO: When removing, oldDataView should be removed as well and only the scope will be necessary
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const activeDataView = newDataViewPickerEnabled ? dataView : oldDataView;
 
