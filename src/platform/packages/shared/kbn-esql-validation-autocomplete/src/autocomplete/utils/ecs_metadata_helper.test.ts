@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFieldWithMetadata } from '../../validation/types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import { type ECSMetadata, enrichFieldsWithECSInfo } from './ecs_metadata_helper';
 
 describe('enrichFieldsWithECSInfo', () => {
