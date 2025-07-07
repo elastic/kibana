@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { SYSTEM_INTEGRATION } from '../../../../common/constants';
@@ -37,7 +37,7 @@ export const HostsPage = () => {
   ]);
 
   return (
-    <EuiErrorBoundary>
+    <KibanaErrorBoundary>
       <div className={APP_WRAPPER_CLASS}>
         <InfraPageTemplate
           dataAvailabilityModules={DATA_AVAILABILITY_MODULES}
@@ -74,6 +74,6 @@ export const HostsPage = () => {
           <HostContainer />
         </InfraPageTemplate>
       </div>
-    </EuiErrorBoundary>
+    </KibanaErrorBoundary>
   );
 };
