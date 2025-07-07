@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { CASE_PAGE_VIEW_EVENT_TYPE } from '../../../common/constants';
+import { CASE_PAGE_VIEW_EVENT_TYPE } from '../../common/constants';
 
 export const registerAnalytics = ({
   analyticsService,

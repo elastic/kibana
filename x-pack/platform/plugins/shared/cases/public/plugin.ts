@@ -38,7 +38,7 @@ import type {
   CasesPublicStartDependencies,
 } from './types';
 import { registerSystemActions } from './components/system_actions';
-import { registerAnalytics } from './components/analytics';
+import { registerAnalytics } from './analytics';
 
 /**
  * @public
