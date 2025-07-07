@@ -90,7 +90,6 @@ const appDependencies: AppDependencies = {
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   notifications: coreStart.notifications,
   uiSettings: coreStart.uiSettings,
-  savedObjects: coreStart.savedObjects,
   storage: { get: jest.fn() } as unknown as Storage,
   overlays: coreStart.overlays,
   theme: themeServiceMock.createStartContract(),
