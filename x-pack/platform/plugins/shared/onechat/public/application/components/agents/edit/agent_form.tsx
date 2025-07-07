@@ -132,7 +132,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
 
   const toolSelection = watch('toolSelection');
 
-  // Show loading spinner when data is being fetched
   if (isLoading) {
     return (
       <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '200px' }}>
@@ -143,7 +142,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
     );
   }
 
-  // Handle any error that occurred while loading
   if (error) {
     return (
       <EuiCallOut
