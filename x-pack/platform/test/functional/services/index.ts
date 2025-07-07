@@ -104,5 +104,4 @@ export const services = {
   actions: ActionsServiceProvider,
   rules: RulesServiceProvider,
   aiops: AiopsProvider,
-  dataStreams: DataStreamProvider,
 };
