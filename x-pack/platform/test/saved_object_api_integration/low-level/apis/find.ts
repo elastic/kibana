@@ -293,9 +293,9 @@ export default function ({ getService }: FtrProviderContext) {
         // Documents missing the sort field should appear last in the sort order
         const titles = response.body.saved_objects.map((o: any) => o.attributes.titleKeyword);
         // Check that undefined/null values (missing field) are at the end
-        if (titles.some((t) => t === undefined || t === null)) {
-          const firstMissing = titles.findIndex((t) => t === undefined || t === null);
-          expect(titles.slice(firstMissing).every((t) => t === undefined || t === null)).to.be(
+        if (titles.some((t: any) => t === undefined || t === null)) {
+          const firstMissing = titles.findIndex((t: any) => t === undefined || t === null);
+          expect(titles.slice(firstMissing).every((t: any) => t === undefined || t === null)).to.be(
             true
           );
         }

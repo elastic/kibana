@@ -314,6 +314,8 @@ export function parseMappingKey(key: string | undefined) {
   switch (key) {
     case 'schedule.keyword':
       return 'schedule.number';
+    case 'schedule':
+      return 'schedule.number';
     case 'project_id.keyword':
       return 'project_id';
     default:
