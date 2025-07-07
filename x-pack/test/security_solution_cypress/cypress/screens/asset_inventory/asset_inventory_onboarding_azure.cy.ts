@@ -25,7 +25,7 @@ import {
   saveIntegration,
   selectPolicyForEditing,
   selectCloudProvider,
-} from './constants';
+} from '../../tasks/asset_inventory/common';
 
 const AZURE_ORGANIZATION_ACCOUNT_TEST_ID = '#organization-account';
 const AZURE_SINGLE_ACCOUNT_TEST_ID = '#single-account';

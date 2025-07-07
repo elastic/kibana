@@ -27,7 +27,7 @@ import {
   saveIntegration,
   selectCloudProvider,
   selectPolicyForEditing,
-} from './constants';
+} from '../../tasks/asset_inventory/common';
 
 const GCP_CLOUDSHELL_TEST_ID = `${getDataTestSubjectSelector(
   'gcpGoogleCloudShellOptionTestId'

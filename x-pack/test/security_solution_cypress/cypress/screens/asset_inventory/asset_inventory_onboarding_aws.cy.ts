@@ -24,7 +24,7 @@ import {
   findPolicyLink,
   saveIntegration,
   selectPolicyForEditing,
-} from './constants';
+} from '../../tasks/asset_inventory/common';
 
 const ROLE_ARN = getDataTestSubjectSelector('awsRoleArnInput');
 const ACCESS_KEY = getDataTestSubjectSelector('awsDirectAccessKeyId');
