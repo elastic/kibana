@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 
 import { FileThumbnail } from './file_thumbnail';
 import { basicFileMock } from '../../containers/mock';
+import type { ExternalReferenceAttachmentViewProps } from '../../client/attachment_framework/types';
 
 jest.mock('@kbn/shared-ux-file-context', () => ({
   useFilesContext: () => ({
@@ -26,41 +27,26 @@ jest.mock('../cases_context/use_cases_context', () => ({
   }),
 }));
 
+const attachmentProps = {
+  externalReferenceId: basicFileMock.id,
+  externalReferenceMetadata: { files: [basicFileMock] },
+} as unknown as ExternalReferenceAttachmentViewProps;
+
 describe('FileThumbnail', () => {
-  it('renders an EuiImage when compact is not provided', async () => {
-    render(<FileThumbnail file={basicFileMock} />);
+  it('renders the image', async () => {
+    render(<FileThumbnail {...attachmentProps} />);
 
     expect(await screen.findByTestId('cases-files-image-thumbnail')).toBeInTheDocument();
-    expect(screen.queryByTestId('cases-files-image-thumbnail-compact')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('cases-files-image-preview')).not.toBeInTheDocument();
-  });
-
-  it('renders an EuiAvatar and not an EuiImage when compact is true', async () => {
-    render(<FileThumbnail file={basicFileMock} compact />);
-
-    expect(await screen.findByTestId('cases-files-image-thumbnail-compact')).toBeInTheDocument();
-    expect(screen.queryByTestId('cases-files-image-thumbnail')).not.toBeInTheDocument();
     expect(screen.queryByTestId('cases-files-image-preview')).not.toBeInTheDocument();
   });
 
   it('shows FilePreview after clicking the image', async () => {
     const user = userEvent.setup();
 
-    render(<FileThumbnail file={basicFileMock} />);
+    render(<FileThumbnail {...attachmentProps} />);
 
     const image = await screen.findByTestId('cases-files-image-thumbnail');
     await user.click(image);
-
-    await screen.findByTestId('cases-files-image-preview');
-  });
-
-  it('shows FilePreview after clicking the avatar thumbnail', async () => {
-    const user = userEvent.setup();
-
-    render(<FileThumbnail file={basicFileMock} compact />);
-
-    const avatar = await screen.findByTestId('cases-files-image-thumbnail-compact');
-    await user.click(avatar);
 
     await screen.findByTestId('cases-files-image-preview');
   });

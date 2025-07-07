@@ -7,7 +7,6 @@
 import React, { Suspense, lazy } from 'react';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { FileAttachmentMetadata } from '../../../common/types/domain';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import type {
   AttachmentViewObject,
@@ -17,22 +16,11 @@ import type {
 
 import { AttachmentActionType } from '../../client/attachment_framework/types';
 import * as i18n from './translations';
-import { isImage, isValidFileExternalReferenceMetadata } from './utils';
-import { FileThumbnail } from './file_thumbnail';
-
-const getFileFromReferenceMetadata = ({
-  fileId,
-  externalReferenceMetadata,
-}: {
-  fileId: string;
-  externalReferenceMetadata: FileAttachmentMetadata;
-}) => {
-  const fileMetadata = externalReferenceMetadata.files[0];
-  return {
-    id: fileId,
-    ...fileMetadata,
-  };
-};
+import {
+  getFileFromReferenceMetadata,
+  isImage,
+  isValidFileExternalReferenceMetadata,
+} from './utils';
 
 const FileAttachmentEvent = lazy(() =>
   import('./file_attachment_event').then((module) => ({ default: module.FileAttachmentEvent }))
@@ -43,21 +31,8 @@ const FileDeleteButton = lazy(() =>
 const FileDownloadButton = lazy(() =>
   import('./file_download_button').then((module) => ({ default: module.FileDownloadButton }))
 );
-
-const LazyFileThumbnail = lazy<React.FC<ExternalReferenceAttachmentViewProps>>(() =>
-  Promise.resolve({
-    default: function FileThumbnailInline(props: ExternalReferenceAttachmentViewProps) {
-      if (!isValidFileExternalReferenceMetadata(props.externalReferenceMetadata)) {
-        // This check is done only for TS reasons, externalReferenceMetadata is always FileAttachmentMetadata
-        return null;
-      }
-      const file = getFileFromReferenceMetadata({
-        externalReferenceMetadata: props.externalReferenceMetadata,
-        fileId: props.externalReferenceId,
-      });
-      return <FileThumbnail file={file} />;
-    },
-  })
+const FileThumbnail = lazy(() =>
+  import('./file_thumbnail').then((module) => ({ default: module.FileThumbnail }))
 );
 
 function getFileDownloadButton(fileId: string) {
@@ -124,7 +99,7 @@ const getFileAttachmentViewObject = (
     timelineAvatar: isImage(file) ? 'image' : 'document',
     getActions: () => getFileAttachmentActions({ caseId, fileId }),
     hideDefaultActions: true,
-    children: isImage(file) ? LazyFileThumbnail : undefined,
+    children: isImage(file) ? FileThumbnail : undefined,
   };
 };
 

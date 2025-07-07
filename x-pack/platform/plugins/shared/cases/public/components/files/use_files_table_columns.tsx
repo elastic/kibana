@@ -11,10 +11,10 @@ import { type EuiBasicTableColumn, EuiFlexGroup } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import * as i18n from './translations';
-import { isImage, parseMimeType } from './utils';
+import { parseMimeType } from './utils';
 import { FileNameLink } from './file_name_link';
 import { FileActionsPopoverButton } from './file_actions_popover_button';
-import { FileThumbnail } from './file_thumbnail';
+import { FileAvatar } from './file_avatar';
 
 export interface FilesTableColumnsProps {
   caseId: string;
@@ -32,7 +32,7 @@ export const useFilesTableColumns = ({
       'data-test-subj': 'cases-files-table-filename',
       render: (name: string, file: FileJSON) => (
         <EuiFlexGroup>
-          {isImage(file) ? <FileThumbnail file={file} compact /> : null}
+          <FileAvatar file={file} />
           <FileNameLink file={file} showPreview={() => showPreview(file)} />
         </EuiFlexGroup>
       ),
