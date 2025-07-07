@@ -130,6 +130,7 @@ export const IndicesConfigurationPanel = ({
           }
         >
           <EuiFieldText
+            isInvalid={metricAliasFieldProps.isInvalid}
             data-test-subj="metricIndicesInput"
             fullWidth
             disabled={isLoading}

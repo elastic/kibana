@@ -117,6 +117,7 @@ export const PathParameter = ({ field, allFields }: Props) => {
                 fullWidth
               >
                 <EuiComboBox
+                  isInvalid={isInvalid}
                   placeholder={i18n.translate(
                     'xpack.idxMgmt.mappingsEditor.aliasType.pathPlaceholderLabel',
                     {

@@ -327,6 +327,10 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.FEATURE_INFLUENCE_THRESHOLD]}
         >
           <EuiFieldNumber
+            isInvalid={
+              advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.FEATURE_INFLUENCE_THRESHOLD] !==
+              undefined
+            }
             onChange={(e) =>
               setFormState({
                 featureInfluenceThreshold: e.target.value === '' ? undefined : +e.target.value,
@@ -440,7 +444,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             onChange={(e) =>
               setFormState({ randomizeSeed: e.target.value === '' ? undefined : +e.target.value })
             }
-            isInvalid={randomizeSeed !== undefined && typeof randomizeSeed !== 'number'}
+            isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.RANDOMIZE_SEED] !== undefined}
             value={getNumberValue(randomizeSeed)}
             step={1}
           />
@@ -510,7 +514,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                   setNumTopClassesSelectedOptions(selectedOptions);
                 }}
                 isClearable={true}
-                isInvalid={selectedNumTopClasses !== undefined && selectedNumTopClasses < -1}
+                isInvalid={selectedNumTopClasses === 0 || selectedNumTopClassesIsInvalid}
                 data-test-subj="mlAnalyticsCreateJobWizardnumTopClassesInput"
               />
             </EuiFormRow>
@@ -580,6 +584,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             }
           >
             <EuiFieldNumber
+              isInvalid={maxNumThreads === 0}
               aria-label={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.maxNumThreadsInputAriaLabel',
                 {

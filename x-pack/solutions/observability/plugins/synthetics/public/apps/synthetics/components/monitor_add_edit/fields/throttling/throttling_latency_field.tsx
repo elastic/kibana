@@ -40,6 +40,7 @@ export const ThrottlingLatencyField = ({
       error={LATENCY_NEGATIVE_ERROR}
     >
       <EuiFieldNumber
+        isInvalid={validate ? !!validate?.[ConfigKey.THROTTLING_CONFIG]?.(throttling) : false}
         fullWidth
         min={0}
         value={throttlingValue.latency}

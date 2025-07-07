@@ -106,6 +106,7 @@ export const SchemaAddFieldModal: React.FC<Props> = ({
                 isInvalid={!!addFieldFormErrors}
               >
                 <EuiFieldText
+                  isInvalid={!!addFieldFormErrors}
                   placeholder={FIELD_NAME_PLACEHOLDER}
                   onChange={handleChange}
                   value={rawFieldName}

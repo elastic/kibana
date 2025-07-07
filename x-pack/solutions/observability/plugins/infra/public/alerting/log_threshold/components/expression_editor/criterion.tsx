@@ -202,6 +202,7 @@ export const Criterion: React.FC<Props> = ({
                   error={errors.field as string}
                 >
                   <EuiComboBox
+                    isInvalid={errors.field.length > 0}
                     compressed
                     fullWidth
                     isClearable={false}
@@ -259,6 +260,7 @@ export const Criterion: React.FC<Props> = ({
                       error={errors.comparator as string}
                     >
                       <EuiSelect
+                        isInvalid={errors.comparator.length > 0}
                         data-test-subj="infraCriterionSelect"
                         compressed
                         hasNoInitialSelection={criterion.comparator == null}

@@ -60,6 +60,7 @@ export const NameConfigurationPanel = ({
         }
       >
         <EuiFieldText
+          isInvalid={nameFieldProps.isInvalid}
           data-test-subj="nameInput"
           fullWidth
           disabled={isLoading}

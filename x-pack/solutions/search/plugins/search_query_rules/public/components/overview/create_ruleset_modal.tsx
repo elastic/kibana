@@ -100,6 +100,7 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
             }
           >
             <EuiFieldText
+              isInvalid={conflictError}
               data-test-subj="searchRulesetCreateRulesetModalFieldText"
               value={rawName}
               onChange={(e) => {

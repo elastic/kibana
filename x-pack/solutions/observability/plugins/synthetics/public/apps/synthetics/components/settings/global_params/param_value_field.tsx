@@ -29,6 +29,7 @@ export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamIte
           labelAppend={<OptionalText />}
         >
           <EuiTextArea
+            isInvalid={Boolean(errors?.value)}
             data-test-subj="syntheticsAddParamFormTextArea"
             fullWidth
             aria-label={NEW_VALUE_LABEL}
@@ -56,6 +57,7 @@ export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamIte
       error={errors?.value?.message}
     >
       <EuiTextArea
+        isInvalid={Boolean(errors?.value)}
         data-test-subj="syntheticsAddParamFormTextArea"
         fullWidth
         aria-label={VALUE_LABEL}

@@ -55,6 +55,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
             error={error?.metadata ? error.metadata.message : undefined}
           >
             <EuiFieldText
+              isInvalid={!!error?.metadata}
               data-test-subj="searchQueryRulesQueryRuleMetadataEditorField"
               fullWidth
               aria-label={i18n.translate(
@@ -203,6 +204,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                   error={error?.values ? error.values.message : undefined}
                 >
                   <EuiComboBox
+                    isInvalid={!!error?.values}
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorValues"
                     fullWidth
                     aria-label={i18n.translate(

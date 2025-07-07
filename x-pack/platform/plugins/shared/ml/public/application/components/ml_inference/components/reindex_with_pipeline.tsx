@@ -355,6 +355,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
               }
             >
               <EuiFieldText
+                isInvalid={destinationIndexInvalidMessage !== undefined || destinationIndexExists}
                 value={destinationIndex}
                 onChange={onDestIndexNameChange}
                 aria-label={i18n.translate(

@@ -109,6 +109,7 @@ export const RuleDetails = () => {
             error={baseErrors?.name}
           >
             <EuiFieldText
+              isInvalid={!!baseErrors?.name?.length}
               fullWidth
               value={name}
               placeholder={RULE_NAME_INPUT_TITLE}
@@ -126,6 +127,7 @@ export const RuleDetails = () => {
             error={baseErrors?.tags}
           >
             <EuiComboBox
+              isInvalid={!!baseErrors?.tags?.length}
               fullWidth
               noSuggestions
               placeholder={RULE_TAG_PLACEHOLDER}

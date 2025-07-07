@@ -265,6 +265,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           error={NAME_ERROR}
         >
           <EuiFieldText
+            isInvalid={hasNameError && hasBeenInputNameVisited}
             aria-label={NAME_LABEL}
             id="eventFiltersFormInputName"
             defaultValue={exception?.name ?? ''}

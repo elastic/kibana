@@ -117,7 +117,7 @@ export const NewConnectorTemplate: React.FC<Props> = ({
                     )}
                     fullWidth
                     disabled={disabled}
-                    isInvalid={false}
+                    isInvalid={formInvalid}
                     value={rawName}
                     onChange={handleNameChange}
                     autoFocus

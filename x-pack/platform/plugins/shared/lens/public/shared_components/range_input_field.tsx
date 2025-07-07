@@ -49,6 +49,7 @@ export function RangeInputField({
       error={error}
     >
       <EuiFormControlLayoutDelimited
+        isInvalid={isInvalid}
         data-test-subj={testSubjLayout}
         compressed
         startControl={

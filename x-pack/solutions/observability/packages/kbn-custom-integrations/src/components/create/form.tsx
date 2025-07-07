@@ -231,7 +231,7 @@ export const CreateCustomIntegrationForm = ({
             })}
             value={datasetName}
             onChange={(event) => updateDatasetName(event.target.value)}
-            isInvalid={hasErrors(errors?.fields?.datasets?.[0].name) && touchedFields.datasets}
+            isInvalid={hasErrors(errors?.fields?.datasets?.[0]?.name) && touchedFields.datasets}
             max={100}
             data-test-subj={
               testSubjects?.datasetName ?? 'customIntegrationsPackageCreateFormDatasetNameInput'

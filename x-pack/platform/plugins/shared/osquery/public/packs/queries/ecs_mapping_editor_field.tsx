@@ -247,6 +247,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
       isDisabled={euiFieldProps.isDisabled}
     >
       <EuiComboBox
+        isInvalid={!!ECSFieldState.error?.message?.length}
         prepend={prepend}
         fullWidth
         singleSelection={SINGLE_SELECTION}

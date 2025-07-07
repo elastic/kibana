@@ -143,6 +143,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
               }
             >
               <EuiFieldNumber
+                isInvalid={!isMaxSeriesToPlotValid}
                 data-test-subj="mlAnomalyChartsInitializerMaxSeries"
                 id="selectMaxSeriesToPlot"
                 name="selectMaxSeriesToPlot"

@@ -67,7 +67,7 @@ function RequiredNumberInputOption<ParamName extends string>({
         required
         data-test-subj={dataTestSubj}
         disabled={disabled}
-        isInvalid={!isValid}
+        isInvalid={isInvalid}
         step={step}
         max={max}
         min={min}
