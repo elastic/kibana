@@ -22,6 +22,7 @@ interface MarkdownEditorProps {
   onChange: (content: string) => void;
   disabledUiPlugins?: string[] | undefined;
   value: string;
+  errors: Array<string | Error>;
 }
 
 export type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
@@ -33,7 +34,10 @@ export interface MarkdownEditorRef {
 }
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
-  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins }, ref) => {
+  (
+    { ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins, errors },
+    ref
+  ) => {
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState<Array<string | Error>>([]);
     const onParse = useCallback<NonNullable<EuiMarkdownEditorProps['onParse']>>(
@@ -86,7 +90,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         parsingPluginList={parsingPlugins}
         processingPluginList={processingPlugins}
         onParse={onParse}
-        errors={markdownErrorMessages}
+        errors={[...markdownErrorMessages, ...errors]}
         data-test-subj={dataTestSubj}
         height={height}
       />

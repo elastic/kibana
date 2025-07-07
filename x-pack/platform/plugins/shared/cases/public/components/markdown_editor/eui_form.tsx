@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
 import {
@@ -66,6 +66,7 @@ export const MarkdownEditorForm = React.memo(
       const { owner: ownerList } = useCasesContext();
       const owner = ownerList[0];
       const fileKindId = constructFileKindIdByOwner(owner as Owner);
+      const [editorErrors, setEditorErrors] = useState<Array<string | Error>>([]);
 
       const { isUploading } = useImagePasteUpload({
         editorRef: ref,
@@ -73,6 +74,7 @@ export const MarkdownEditorForm = React.memo(
         caseId,
         owner,
         fileKindId,
+        setErrors: setEditorErrors,
       });
 
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -119,6 +121,7 @@ export const MarkdownEditorForm = React.memo(
                 value={field.value}
                 disabledUiPlugins={disabledUiPlugins}
                 data-test-subj={`${dataTestSubj}-markdown-editor`}
+                errors={editorErrors}
               />
             </>
           </EuiFormRow>
