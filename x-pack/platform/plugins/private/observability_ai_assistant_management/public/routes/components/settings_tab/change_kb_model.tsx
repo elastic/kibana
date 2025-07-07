@@ -36,7 +36,7 @@ import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
 export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
 
-  let currentlyDeployedInferenceId =
+  const currentlyDeployedInferenceId =
     knowledgeBase.status.value?.currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID
       ? ELSER_ON_ML_NODE_INFERENCE_ID
       : knowledgeBase.status.value?.currentInferenceId;
