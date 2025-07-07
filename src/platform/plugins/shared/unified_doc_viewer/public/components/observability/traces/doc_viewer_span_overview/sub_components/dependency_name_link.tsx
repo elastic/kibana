@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { DEPENDENCY_OVERVIEW_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
+import { SpanIcon } from '@kbn/apm-ui-shared';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 interface DependencyNameLinkProps {
@@ -64,6 +65,9 @@ export function DependencyNameLink({
 
   const content = (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem>
+        <SpanIcon type="db" subtype="elasticsearch" size="m" />
+      </EuiFlexItem>
       <EuiFlexItem>{formattedDependencyName}</EuiFlexItem>
     </EuiFlexGroup>
   );
