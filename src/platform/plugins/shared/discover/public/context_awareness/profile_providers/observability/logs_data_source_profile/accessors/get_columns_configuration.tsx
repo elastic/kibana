@@ -48,7 +48,7 @@ export const DataTableSummaryColumnHeaderLogsContext = ({
   const tooltipContent = (
     <FormattedMessage
       id="discover.unifiedDataTable.tableHeader.logsContext.sourceFieldIconTooltip"
-      defaultMessage="Displays the most relevant resource identifiers -{br}{br}service.name{br}host.name{br}kubernetes.pod.name{br}etc.{br}{br}followed by the log or error message;{br}if no message fields are present, it shows the full document instead"
+      defaultMessage="Displays the most relevant resource identifiers like:{br}{br}service.name{br}host.name{br}kubernetes.pod.name{br}etc.{br}{br}followed by the log or error message.{br}if no message fields are present, it shows the full document instead"
       values={{ br: <br /> }}
     />
   );
