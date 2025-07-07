@@ -129,9 +129,7 @@ export const staticValueOperation: OperationDefinition<
       label: ofName(previousParams.value),
       dataType: 'number',
       operationType: 'static_value',
-      isStaticValue: true,
       isBucketed: false,
-      scale: 'ratio',
       params: { ...previousParams, value: String(previousParams.value ?? defaultValue) },
       references: [],
     };

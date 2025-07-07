@@ -10,7 +10,6 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { filter, take } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
   CoreStart,
@@ -360,9 +359,6 @@ export class FleetPlugin
         scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [PLUGIN_ID],
         catalogue: ['fleet'],
-        privilegesTooltip: i18n.translate('xpack.fleet.serverPlugin.privilegesTooltip', {
-          defaultMessage: 'All Spaces is required for Fleet access.',
-        }),
         reserved: {
           description:
             'Privilege to setup Fleet packages and configured policies. Intended for use by the elastic/fleet-server service account only.',
@@ -667,6 +663,9 @@ export class FleetPlugin
       core,
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
+      config: {
+        taskInterval: config.syncIntegrations?.taskInterval,
+      },
     });
     this.automaticAgentUpgradeTask = new AutomaticAgentUpgradeTask({
       core,
@@ -752,7 +751,7 @@ export class FleetPlugin
 
     const logger = appContextService.getLogger();
 
-    this.policyWatcher = new PolicyWatcher(core.savedObjects, logger);
+    this.policyWatcher = new PolicyWatcher(logger);
 
     this.policyWatcher.start(licenseService);
 

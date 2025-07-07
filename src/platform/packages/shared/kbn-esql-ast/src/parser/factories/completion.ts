@@ -10,18 +10,49 @@ import { ESQLAstCompletionCommand, ESQLSingleAstItem } from '../../types';
 import { Builder } from '../../..';
 import { visitPrimaryExpression } from '../walkers';
 import { CompletionCommandContext } from '../../antlr/esql_parser';
-import { createColumn, createCommand, createIdentifierOrParam } from '../factories';
+import {
+  computeLocationExtends,
+  createColumn,
+  createCommand,
+  createFunction,
+  createIdentifierOrParam,
+  createUnknownItem,
+} from '../factories';
 import { getPosition } from '../helpers';
-import { EDITOR_MARKER } from '../constants';
 
 export const createCompletionCommand = (
   ctx: CompletionCommandContext
 ): ESQLAstCompletionCommand => {
   const command = createCommand<'completion', ESQLAstCompletionCommand>('completion', ctx);
 
-  const prompt = visitPrimaryExpression(ctx._prompt) as ESQLSingleAstItem;
-  command.args.push(prompt);
-  command.prompt = prompt;
+  if (ctx._targetField && ctx.ASSIGN()) {
+    const targetField = createColumn(ctx._targetField);
+
+    const prompt = visitPrimaryExpression(ctx._prompt) as ESQLSingleAstItem;
+    command.prompt = prompt;
+
+    const assignment = createFunction(ctx.ASSIGN().getText(), ctx, undefined, 'binary-expression');
+    assignment.args.push(targetField, prompt);
+    // update the location of the assign based on arguments
+    assignment.location = computeLocationExtends(assignment);
+
+    command.targetField = targetField;
+    command.args.push(assignment);
+  } else if (ctx._prompt) {
+    const prompt = visitPrimaryExpression(ctx._prompt) as ESQLSingleAstItem;
+    command.prompt = prompt;
+    command.args.push(prompt);
+  } else {
+    // When the user is typing a column as prompt i.e: | COMPLETION message^,
+    // ANTLR does not know if it is trying to type a prompt
+    // or a target field, so it does not return neither _prompt nor _targetField. We fill the AST
+    // with an unknown item until the user inserts the next keyword and breaks the tie.
+    const unknownItem = createUnknownItem(ctx);
+    unknownItem.text = ctx.getText().replace(/^completion/i, '');
+
+    command.prompt = unknownItem;
+    command.args.push(unknownItem);
+  }
 
   const withCtx = ctx.WITH();
 
@@ -61,26 +92,6 @@ export const createCompletionCommand = (
   );
 
   command.args.push(optionWith);
-
-  if (ctx._targetField) {
-    const targetField = createColumn(ctx._targetField);
-    targetField.incomplete =
-      targetField.text.length === 0 || targetField.text.includes(EDITOR_MARKER);
-
-    const option = Builder.option(
-      {
-        name: 'as',
-        args: [targetField],
-      },
-      {
-        incomplete: targetField.incomplete,
-        location: getPosition(ctx.AS().symbol, ctx._targetField.stop),
-      }
-    );
-
-    command.args.push(option);
-    command.targetField = targetField;
-  }
 
   return command;
 };

@@ -149,7 +149,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiIconTip
-                type="iInCircle"
+                type="info"
                 content={
                   <FormattedMessage
                     id="presentationUtil.saveModalDashboard.dashboardInfoTooltip"

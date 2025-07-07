@@ -15,8 +15,7 @@
     "scripts/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*",
-    "emotion.d.ts"
-  ],
+    "emotion.d.ts" ],
   "exclude": [
     "target/**/*",
     "**/cypress/**",
@@ -254,5 +253,8 @@
     "@kbn/triggers-actions-ui-types",
     "@kbn/unified-histogram",
     "@kbn/react-kibana-context-theme",
+    "@kbn/elastic-assistant-shared-state",
+    "@kbn/elastic-assistant-shared-state-plugin",
+    "@kbn/spaces-utils",
   ]
 }

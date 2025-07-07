@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  describe('log pattern analysis', function () {
+  describe('log pattern analysis in discover', function () {
     let tabsCount = 1;
 
     afterEach(async () => {

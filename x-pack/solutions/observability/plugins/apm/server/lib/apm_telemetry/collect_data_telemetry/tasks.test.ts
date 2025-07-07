@@ -925,6 +925,18 @@ describe('data telemetry collection tasks', () => {
                     key: 'opentelemetry/nodejs/elastic',
                     services: { value: 7 },
                   },
+                  {
+                    key: 'opentelemetry/python/elastic',
+                    services: { value: 8 },
+                  },
+                  {
+                    key: 'opentelemetry/php/elastic',
+                    services: { value: 9 },
+                  },
+                  {
+                    key: 'opentelemetry/dotnet/elastic',
+                    services: { value: 10 },
+                  },
                 ],
               },
             },

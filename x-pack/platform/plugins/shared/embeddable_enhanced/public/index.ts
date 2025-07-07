@@ -15,6 +15,11 @@ export type {
   StartDependencies as EmbeddableEnhancedStartDependencies,
 } from './plugin';
 
+export type {
+  DynamicActionsSerializedState,
+  EmbeddableDynamicActionsManager,
+} from './embeddables/types';
+
 export function plugin(context: PluginInitializerContext) {
   return new EmbeddableEnhancedPlugin(context);
 }

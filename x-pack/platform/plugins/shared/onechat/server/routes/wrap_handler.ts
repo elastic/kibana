@@ -11,9 +11,9 @@ import { isOnechatError } from '@kbn/onechat-common';
 export const getHandlerWrapper =
   ({ logger }: { logger: Logger }) =>
   <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> => {
-    return (ctx, req, res) => {
+    return async (ctx, req, res) => {
       try {
-        return handler(ctx, req, res);
+        return await handler(ctx, req, res);
       } catch (e) {
         if (isOnechatError(e)) {
           logger.error(e);
@@ -22,7 +22,13 @@ export const getHandlerWrapper =
             statusCode: e.meta?.statusCode ?? 500,
           });
         } else {
-          throw e;
+          logger.error('Unexpected error in handler:', e);
+          return res.customError({
+            body: {
+              message: e instanceof Error ? e.message : 'An unexpected error occurred',
+            },
+            statusCode: 500,
+          });
         }
       }
     };

@@ -34,6 +34,7 @@ import { getConnectorType } from '.';
 import type { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AdditionalEmailServices } from '../../../common';
+import { serviceParamValueToKbnSettingMap } from '../../../common/email/constants';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -502,6 +503,75 @@ describe('params validation', () => {
         { configurationUtilities }
       );
     }).not.toThrowError();
+  });
+
+  test('error when using a service that is not enabled', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.getEnabledEmailServices = jest
+      .fn()
+      .mockReturnValue([
+        serviceParamValueToKbnSettingMap.gmail,
+        serviceParamValueToKbnSettingMap.elastic_cloud,
+      ]);
+
+    expect(() =>
+      validateConfig(
+        connectorType,
+        {
+          service: 'other',
+          from: 'bob@example.com',
+          host: 'wrong-host',
+          port: 123,
+          secure: true,
+          hasAuth: true,
+        },
+        { configurationUtilities: configUtils }
+      )
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [service]: \\"other\\" is not in the list of enabled email services: google-mail,elastic-cloud"`
+    );
+  });
+
+  test('no error using enabled services = *', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.getEnabledEmailServices = jest.fn().mockReturnValue(['*']);
+
+    expect(() =>
+      validateConfig(
+        connectorType,
+        {
+          service: 'other',
+          from: 'bob@example.com',
+          host: 'wrong-host',
+          port: 123,
+          secure: true,
+          hasAuth: true,
+        },
+        { configurationUtilities: configUtils }
+      )
+    ).not.toThrowError();
+  });
+
+  test('does not throw when fetching service enabled in config', () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.getEnabledEmailServices = jest
+      .fn()
+      .mockReturnValue([serviceParamValueToKbnSettingMap.elastic_cloud]);
+
+    expect(() =>
+      validateConfig(
+        connectorType,
+        {
+          service: 'elastic_cloud',
+          from: 'bob@example.com',
+          host: 'dockerhost',
+          port: 10025,
+          secure: false,
+          hasAuth: false,
+        },
+        { configurationUtilities: configUtils }
+      )
+    ).not.toThrowError();
   });
 });
 

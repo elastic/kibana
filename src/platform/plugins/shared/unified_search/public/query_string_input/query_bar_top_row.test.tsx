@@ -23,6 +23,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { unifiedSearchPluginMock } from '../mocks';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const startMock = coreMock.createStart();
 startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
@@ -105,11 +106,13 @@ function wrapQueryBarTopRowInContext(testProps: any) {
   };
 
   return (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <QueryBarTopRow {...defaultOptions} {...testProps} />
-      </KibanaContextProvider>
-    </I18nProvider>
+    <EuiThemeProvider>
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryBarTopRow {...defaultOptions} {...testProps} />
+        </KibanaContextProvider>
+      </I18nProvider>
+    </EuiThemeProvider>
   );
 }
 

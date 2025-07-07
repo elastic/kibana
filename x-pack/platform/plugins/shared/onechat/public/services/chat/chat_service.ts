@@ -21,12 +21,19 @@ export class ChatService {
     this.http = http;
   }
 
-  chat({ agentId, connectorId, conversationId, nextMessage }: ChatParams): Observable<ChatEvent> {
+  chat({
+    agentId,
+    connectorId,
+    conversationId,
+    nextMessage,
+    mode,
+  }: ChatParams): Observable<ChatEvent> {
     return defer(() => {
-      return this.http.post('/internal/onechat/chat?stream=true', {
+      return this.http.post('/internal/onechat/chat', {
+        query: { stream: true },
         asResponse: true,
         rawResponse: true,
-        body: JSON.stringify({ agentId, connectorId, conversationId, nextMessage }),
+        body: JSON.stringify({ agentId, mode, connectorId, conversationId, nextMessage }),
       });
     }).pipe(
       // @ts-expect-error SseEvent mixin issue

@@ -15,11 +15,11 @@ import {
 } from '@kbn/cases-plugin/common/types/domain';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
-} from '../../../../cases_api_integration/common/lib/authentication';
+} from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { users, roles, casesAllUser, casesAllUser2 } from '../common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {

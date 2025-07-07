@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { omit, pick } from 'lodash';
+import { convertToQueryString } from './utils';
 
 // Search body fields as per https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html#search-search-api-request-body
 const BODY_FIELDS = [
@@ -47,17 +48,7 @@ export const logSearchRequest = (searchRequest: estypes.SearchRequest): string =
     ...(searchRequest.body as Record<string, unknown>),
   };
 
-  const urlParams = Object.entries(params)
-    .reduce<string[]>((acc, [key, value]) => {
-      if (value != null) {
-        acc.push(`${key}=${value}`);
-      }
-
-      return acc;
-    }, [])
-    .join('&');
-
-  const url = `/${index}/_search${urlParams ? `?${urlParams}` : ''}`;
+  const url = `/${index}/_search${convertToQueryString(params)}`;
 
   if (body) {
     return `POST ${url}\n${JSON.stringify({ ...body }, null, 2)}`;

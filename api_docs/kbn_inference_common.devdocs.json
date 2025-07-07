@@ -6068,7 +6068,7 @@
           "\nConstants for all default (preconfigured) inference endpoints."
         ],
         "signature": [
-          "{ readonly ELSER: \".elser-2-elasticsearch\"; readonly MULTILINGUAL_E5_SMALL: \".multilingual-e5-small-elasticsearch\"; }"
+          "{ readonly ELSER: \".elser-2-elasticsearch\"; readonly ELSER_IN_EIS_INFERENCE_ID: \".elser-v2-elastic\"; readonly MULTILINGUAL_E5_SMALL: \".multilingual-e5-small-elasticsearch\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
         "deprecated": false,

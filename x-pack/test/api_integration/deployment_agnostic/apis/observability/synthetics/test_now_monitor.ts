@@ -75,8 +75,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(newMonitor)
-        .expect(200);
+        .send({ ...newMonitor, spaces: [] });
+
+      expect(resp.status).to.eql(200, JSON.stringify(resp.body));
 
       const res = await supertest
         .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.TRIGGER_MONITOR}/${resp.body.id}`)
@@ -91,7 +92,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(result.locations).to.eql([LOCAL_LOCATION]);
 
       expect(omit(result.monitor, ['id', 'config_id'])).to.eql(
-        omit(newMonitor, ['id', 'config_id'])
+        omit({ ...newMonitor, spaces: [SPACE_ID] }, ['id', 'config_id'])
       );
     });
   });

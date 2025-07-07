@@ -69,6 +69,13 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     },
     [setPagination]
   );
+  const usedByAgentPolicy = (item: InstalledPackageUIPackageListItem) => {
+    if (!item.packagePoliciesInfo) {
+      return false;
+    }
+    const count = item.packagePoliciesInfo.count;
+    return count > 0;
+  };
 
   return (
     <>
@@ -279,13 +286,18 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   ),
                   icon: 'trash',
                   type: 'icon',
-                  description: i18n.translate(
-                    'xpack.fleet.epmInstalledIntegrations.uninstallIntegrationLabel',
-                    {
-                      defaultMessage: 'Uninstall integration',
-                    }
-                  ),
+
                   onClick: (item) => bulkUninstallIntegrationsWithConfirmModal([item]),
+                  enabled: (item) => !usedByAgentPolicy(item),
+                  description: (item) =>
+                    i18n.translate(
+                      'xpack.fleet.epmInstalledIntegrations.uninstallIntegrationLabel',
+                      {
+                        defaultMessage: usedByAgentPolicy(item)
+                          ? "You can't uninstall this integration because it is used by one or more agent policies"
+                          : 'Uninstall integration',
+                      }
+                    ),
                 },
                 !authz.integrations.removePackages,
                 i18n.translate(

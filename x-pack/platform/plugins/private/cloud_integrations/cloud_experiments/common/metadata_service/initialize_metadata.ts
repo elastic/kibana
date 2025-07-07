@@ -16,7 +16,7 @@ import type { Logger } from '@kbn/logging';
 import type { MetadataService } from './metadata_service';
 
 /**
- * @private
+ * @internal
  */
 export function initializeMetadata({
   metadataService,

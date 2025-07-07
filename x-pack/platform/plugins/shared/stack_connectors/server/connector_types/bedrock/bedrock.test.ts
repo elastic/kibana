@@ -990,7 +990,7 @@ describe('BedrockConnector', () => {
             method: 'post',
             responseSchema: StreamingResponseSchema,
             responseType: 'stream',
-            timeout: 120000,
+            timeout: 200000,
             signal: undefined,
             data: JSON.stringify(DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD),
           },
@@ -1053,7 +1053,7 @@ describe('BedrockConnector', () => {
             method: 'post',
             responseSchema: StreamingResponseSchema,
             signal: undefined,
-            timeout: 120000,
+            timeout: 200000,
             data: JSON.stringify({
               ...DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD,
               messages: [
@@ -1104,7 +1104,7 @@ describe('BedrockConnector', () => {
             method: 'post',
             responseSchema: StreamingResponseSchema,
             signal: undefined,
-            timeout: 120000,
+            timeout: 200000,
             data: JSON.stringify({
               ...DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD,
               messages: [
@@ -1144,7 +1144,7 @@ describe('BedrockConnector', () => {
             url: `${DEFAULT_BEDROCK_URL}/model/${modelOverride}/converse-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
-            timeout: 120000,
+            timeout: 200000,
             signal: undefined,
             data: JSON.stringify({
               ...DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD,

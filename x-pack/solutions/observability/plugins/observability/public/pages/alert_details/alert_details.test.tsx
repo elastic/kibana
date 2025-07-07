@@ -204,6 +204,7 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('alert-summary-container')).toBeFalsy();
     expect(alertDetails.queryByTestId('overviewTab')).toBeTruthy();
     expect(alertDetails.queryByTestId('metadataTab')).toBeTruthy();
+    expect(alertDetails.queryByTestId('relatedAlertsTab')).toBeTruthy();
   });
 
   it('should show Metadata tab', async () => {

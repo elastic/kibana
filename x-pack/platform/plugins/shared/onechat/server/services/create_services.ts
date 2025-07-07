@@ -17,6 +17,7 @@ import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
+import { createEsqlToolRegistry } from './tools/esql/esql_registry';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -61,13 +62,18 @@ export class ServiceManager {
       }
       return runner;
     };
+    const esql = createEsqlToolRegistry(logger, elasticsearch);
 
     const tools = this.services.tools.start({
       getRunner,
+      esql,
     });
 
     const agents = this.services.agents.start({
+      security,
+      elasticsearch,
       getRunner,
+      toolsService: tools,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -97,6 +103,7 @@ export class ServiceManager {
 
     this.internalStart = {
       tools,
+      esql,
       agents,
       conversations,
       runnerFactory,

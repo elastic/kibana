@@ -12,10 +12,7 @@ import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
 import { DASHBOARD_APP_ID } from '../../common/constants';
-import {
-  getReferencesForControls,
-  getReferencesForPanelId,
-} from '../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
@@ -81,7 +78,6 @@ export function getDashboardApi({
   const layoutManager = initializeLayoutManager(
     incomingEmbeddable,
     initialState.panels,
-    initialState.sections,
     trackPanel,
     getReferences
   );
@@ -116,19 +112,13 @@ export function getDashboardApi({
   });
 
   function getState() {
-    const {
-      panels,
-      sections,
-      references: panelReferences,
-    } = layoutManager.internalApi.serializeLayout();
+    const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
     const { state: unifiedSearchState, references: searchSourceReferences } =
       unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.api.getSettings(),
       ...unifiedSearchState,
       panels,
-      sections,
-      viewMode: viewModeManager.api.viewMode$.value,
     };
 
     const { controlGroupInput, controlGroupReferences } =
@@ -138,7 +128,7 @@ export function getDashboardApi({
     return {
       dashboardState,
       controlGroupReferences,
-      panelReferences,
+      panelReferences: panelReferences ?? [],
       searchSourceReferences,
     };
   }

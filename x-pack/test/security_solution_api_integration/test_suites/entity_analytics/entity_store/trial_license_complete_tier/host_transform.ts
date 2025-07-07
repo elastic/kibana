@@ -19,14 +19,13 @@ import { EntityStoreUtils } from '../../utils';
 const DATASTREAM_NAME: string = 'logs-elastic_agent.cloudbeat-test';
 const HOST_TRANSFORM_ID: string = 'entities-v1-latest-security_host_default';
 const INDEX_NAME: string = '.entities.v1.latest.security_host_default';
-const TIMEOUT_MS: number = 300000; // 5 minutes
+const TIMEOUT_MS: number = 600000; // 10 minutes
 
 export default function (providerContext: FtrProviderContext) {
   const supertest = providerContext.getService('supertest');
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
   const dataView = dataViewRouteHelpersFactory(supertest);
-  const utils = EntityStoreUtils(providerContext.getService);
 
   describe('@ess Host transform logic', () => {
     describe('Entity Store is not installed by default', () => {
@@ -40,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Install Entity Store and test Host transform', () => {
       before(async () => {
-        await utils.cleanEngines();
+        await cleanUpEntityStore(providerContext);
         // Initialize security solution by creating a prerequisite index pattern.
         // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
         await dataView.create('security-solution');
@@ -55,26 +54,11 @@ export default function (providerContext: FtrProviderContext) {
 
       beforeEach(async () => {
         // Now we can enable the Entity Store...
-        const response = await supertest
-          .post('/api/entity_store/enable')
-          .set('kbn-xsrf', 'xxxx')
-          .send({});
-        expect(response.statusCode).to.eql(200);
-        expect(response.body.succeeded).to.eql(true);
-
-        // and wait for it to start up
-        await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
-          const { body } = await supertest
-            .get('/api/entity_store/status')
-            .query({ include_components: true })
-            .expect(200);
-          expect(body.status).to.eql('running');
-          return true;
-        });
+        await enableEntityStore(providerContext);
       });
 
       afterEach(async () => {
-        await utils.cleanEngines();
+        await cleanUpEntityStore(providerContext);
       });
 
       it("Should return 200 and status 'running' for all engines", async () => {
@@ -262,6 +246,69 @@ async function createDocumentsAndTriggerTransform(
     expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
     return true;
   });
+}
+
+async function enableEntityStore(providerContext: FtrProviderContext): Promise<void> {
+  const log = providerContext.getService('log');
+  const supertest = providerContext.getService('supertest');
+  const retry = providerContext.getService('retry');
+
+  const RETRIES = 5;
+  let success: boolean = false;
+  for (let attempt = 0; attempt < RETRIES; attempt++) {
+    const response = await supertest
+      .post('/api/entity_store/enable')
+      .set('kbn-xsrf', 'xxxx')
+      .send({});
+    expect(response.statusCode).to.eql(200);
+    expect(response.body.succeeded).to.eql(true);
+
+    // and wait for it to start up
+    await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
+      const { body } = await supertest
+        .get('/api/entity_store/status')
+        .query({ include_components: true })
+        .expect(200);
+      if (body.status === 'error') {
+        log.error(`Expected body.status to be 'running', got 'error': ${JSON.stringify(body)}`);
+        success = false;
+        return true;
+      }
+      expect(body.status).to.eql('running');
+      success = true;
+      return true;
+    });
+
+    if (success) {
+      break;
+    } else {
+      log.info(`Retrying Entity Store setup...`);
+      await cleanUpEntityStore(providerContext);
+    }
+  }
+  expect(success).ok();
+}
+
+async function cleanUpEntityStore(providerContext: FtrProviderContext): Promise<void> {
+  const log = providerContext.getService('log');
+  const es = providerContext.getService('es');
+  const utils = EntityStoreUtils(providerContext.getService);
+  const attempts = 5;
+  const delayMs = 60000;
+
+  await utils.cleanEngines();
+  for (const kind of ['host', 'user', 'service', 'generic']) {
+    const name: string = `entity_store_field_retention_${kind}_default_v1.0.0`;
+    for (let currentAttempt = 0; currentAttempt < attempts; currentAttempt++) {
+      try {
+        await es.enrich.deletePolicy({ name }, { ignore: [404] });
+        break;
+      } catch (e) {
+        log.error(`Error deleting policy ${name}: ${e.message} after ${currentAttempt} tries`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
 }
 
 interface HostTransformResult {

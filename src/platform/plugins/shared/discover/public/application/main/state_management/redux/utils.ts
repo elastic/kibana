@@ -8,6 +8,7 @@
  */
 
 import { v4 as uuid } from 'uuid';
+import { escapeRegExp } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { TabItem } from '@kbn/unified-tabs';
 import { createAsyncThunk } from '@reduxjs/toolkit';
@@ -46,13 +47,23 @@ export type TabActionInjector = ReturnType<typeof createTabActionInjector>;
 const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
   defaultMessage: 'Untitled',
 });
-const DEFAULT_TAB_REGEX = new RegExp(`^${DEFAULT_TAB_LABEL}( \\d+)?$`);
+const ESCAPED_DEFAULT_TAB_LABEL = escapeRegExp(DEFAULT_TAB_LABEL);
+const DEFAULT_TAB_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL}( \\d+)?$`); // any default tab
+const DEFAULT_TAB_NUMBER_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL} (?<tabNumber>\\d+)$`); // tab with a number
 
 export const createTabItem = (allTabs: TabState[]): TabItem => {
   const id = uuid();
-  const untitledTabCount = allTabs.filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim())).length;
-  const label =
-    untitledTabCount > 0 ? `${DEFAULT_TAB_LABEL} ${untitledTabCount}` : DEFAULT_TAB_LABEL;
+
+  const existingNumbers = allTabs
+    .filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim()))
+    .map((tab) => {
+      const match = tab.label.trim().match(DEFAULT_TAB_NUMBER_REGEX);
+      const tabNumber = match?.groups?.tabNumber;
+      return tabNumber ? Number(tabNumber) : 1;
+    });
+
+  const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : null;
+  const label = nextNumber ? `${DEFAULT_TAB_LABEL} ${nextNumber}` : DEFAULT_TAB_LABEL;
 
   return { id, label };
 };

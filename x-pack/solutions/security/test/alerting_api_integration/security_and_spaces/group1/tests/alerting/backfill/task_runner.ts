@@ -58,7 +58,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
   const alertsAsDataIndex = '.alerts-security.alerts-space1';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
-  describe('ad hoc backfill task', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/224202
+  describe.skip('ad hoc backfill task', () => {
     beforeEach(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();

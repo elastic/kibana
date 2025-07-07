@@ -60,7 +60,7 @@ export function ConfirmSwitchModal({ onConfirm, onCancel, unsupportedConfigs }: 
           defaultMessage: `Switching to Elastic Agent is an irreversible action`,
         })}
         color="warning"
-        iconType="help"
+        iconType="question"
       >
         <p>
           {i18n.translate('xpack.apm.settings.schema.confirm.irreversibleWarning.message', {
@@ -75,7 +75,7 @@ export function ConfirmSwitchModal({ onConfirm, onCancel, unsupportedConfigs }: 
             title={i18n.translate('xpack.apm.settings.schema.confirm.unsupportedConfigs.title', {
               defaultMessage: `The following apm-server.yml user settings are incompatible and will be removed`,
             })}
-            iconType="iInCircle"
+            iconType="info"
           >
             <EuiCodeBlock language="yaml">
               {unsupportedConfigs

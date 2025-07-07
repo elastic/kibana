@@ -19,6 +19,7 @@ import {
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
   SEMANTIC_SEARCH_PLUGIN,
+  SEARCH_HOMEPAGE_URL,
   APPLICATIONS_PLUGIN,
   GETTING_STARTED_TITLE,
 } from '../../../../common/constants';
@@ -27,8 +28,6 @@ import { stripLeadingSlash } from '../../../../common/strip_slashes';
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
-
-import { getHomeURL } from './breadcrumbs_home';
 
 /**
  * Types
@@ -108,7 +107,7 @@ export const useSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
       text: SEARCH_PRODUCT_NAME,
-      path: getHomeURL(),
+      path: SEARCH_HOMEPAGE_URL,
       shouldNotCreateHref: true,
     },
     ...breadcrumbs,
@@ -118,7 +117,7 @@ export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
       text: ENTERPRISE_SEARCH_PRODUCT_NAME,
-      path: getHomeURL(),
+      path: SEARCH_HOMEPAGE_URL,
       shouldNotCreateHref: true,
     },
     ...breadcrumbs,

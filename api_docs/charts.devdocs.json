@@ -3405,21 +3405,6 @@
       },
       {
         "parentPluginId": "charts",
-        "id": "def-common.LEGACY_TIME_AXIS",
-        "type": "string",
-        "tags": [],
-        "label": "LEGACY_TIME_AXIS",
-        "description": [],
-        "signature": [
-          "\"visualization:useLegacyTimeAxis\""
-        ],
-        "path": "src/platform/plugins/shared/charts/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "charts",
         "id": "def-common.paletteIds",
         "type": "Array",
         "tags": [],

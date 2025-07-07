@@ -38,5 +38,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./change_point_detection_cases'));
     loadTestFile(require.resolve('./log_pattern_analysis'));
     loadTestFile(require.resolve('./log_pattern_analysis_in_discover'));
+    loadTestFile(require.resolve('./log_pattern_analysis_esql_in_discover'));
   });
 }

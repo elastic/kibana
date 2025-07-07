@@ -36,6 +36,16 @@
     "@kbn/core-http-browser",
     "@kbn/features-plugin",
     "@kbn/core-logging-server-mocks",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/onechat-genai-utils",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-application-common",
+    "@kbn/core-application-browser",
+    "@kbn/core-ui-settings-server",
   ]
 }

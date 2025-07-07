@@ -28,10 +28,48 @@ describe('deferred migrations', () => {
   let runMigrations: KibanaMigratorTestKit['runMigrations'];
   let savedObjectsRepository: KibanaMigratorTestKit['savedObjectsRepository'];
   let server: TestElasticsearchUtils['es'];
-  let type: SavedObjectsType;
+
+  const noop = (doc: SavedObjectUnsanitizedDoc) => doc;
+  const type: SavedObjectsType = {
+    name: 'some-type',
+    hidden: false,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        name: { type: 'keyword' },
+      },
+    },
+    migrations: {
+      '1.0.0': jest.fn(noop),
+      '2.0.0': jest.fn(noop),
+      '3.0.0': {
+        // @ts-expect-error
+        deferred: true,
+        transform: jest.fn(noop),
+      },
+      '4.0.0': jest.fn(noop),
+      '5.0.0': {
+        // @ts-expect-error
+        deferred: true,
+        transform: jest.fn(noop),
+      },
+      '6.0.0': {
+        // @ts-expect-error
+        deferred: true,
+        transform: jest.fn(noop),
+      },
+    },
+  };
 
   beforeAll(async () => {
     server = await startElasticsearch();
+
+    const { runMigrations: createKibanaIndex } = await getKibanaMigratorTestKit({
+      kibanaIndex: defaultKibanaIndex,
+      types: [type],
+    });
+
+    await createKibanaIndex(); // we runMigrations a first time to create the SO index
   });
 
   afterAll(async () => {
@@ -39,39 +77,6 @@ describe('deferred migrations', () => {
   });
 
   beforeEach(async () => {
-    const noop = (doc: SavedObjectUnsanitizedDoc) => doc;
-
-    type = {
-      name: 'some-type',
-      hidden: false,
-      namespaceType: 'agnostic',
-      mappings: {
-        properties: {
-          name: { type: 'keyword' },
-        },
-      },
-      migrations: {
-        '1.0.0': jest.fn(noop),
-        '2.0.0': jest.fn(noop),
-        '3.0.0': {
-          // @ts-expect-error
-          deferred: true,
-          transform: jest.fn(noop),
-        },
-        '4.0.0': jest.fn(noop),
-        '5.0.0': {
-          // @ts-expect-error
-          deferred: true,
-          transform: jest.fn(noop),
-        },
-        '6.0.0': {
-          // @ts-expect-error
-          deferred: true,
-          transform: jest.fn(noop),
-        },
-      },
-    };
-
     ({ client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
       kibanaIndex: defaultKibanaIndex,
       types: [type],

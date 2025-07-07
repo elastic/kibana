@@ -650,6 +650,14 @@
                 "section": "def-common.RecommendedQuery",
                 "text": "RecommendedQuery"
               },
+              "[]; recommendedFields: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.RecommendedField",
+                "text": "RecommendedField"
+              },
               "[]; }>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
@@ -1566,6 +1574,21 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.ESQL_AUTOCOMPLETE_TRIGGER_CHARS",
+        "type": "Array",
+        "tags": [],
+        "label": "ESQL_AUTOCOMPLETE_TRIGGER_CHARS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.ESQL_DARK_THEME_ID",
         "type": "string",
         "tags": [],
@@ -1965,6 +1988,71 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ConsoleLang.getSuggestionProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "getSuggestionProvider",
+            "description": [],
+            "signature": [
+              "(esqlCallbacks: Pick<",
+              {
+                "pluginId": "@kbn/esql-validation-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "section": "def-common.ESQLCallbacks",
+                "text": "ESQLCallbacks"
+              },
+              ", \"getSources\" | \"getPolicies\">, actionsProvider: React.MutableRefObject<any>) => ",
+              "languages",
+              ".CompletionItemProvider"
+            ],
+            "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ConsoleLang.getSuggestionProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "esqlCallbacks",
+                "description": [],
+                "signature": [
+                  "Pick<",
+                  {
+                    "pluginId": "@kbn/esql-validation-autocomplete",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                    "section": "def-common.ESQLCallbacks",
+                    "text": "ESQLCallbacks"
+                  },
+                  ", \"getSources\" | \"getPolicies\">"
+                ],
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ConsoleLang.getSuggestionProvider.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "actionsProvider",
+                "description": [],
+                "signature": [
+                  "React.MutableRefObject<any>"
+                ],
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

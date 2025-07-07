@@ -21,7 +21,7 @@
             "label": "payload",
             "description": [],
             "signature": [
-              "{ spaceId?: string | undefined; version: string; isDeprecated?: boolean | undefined; title: string; layout?: { id?: ",
+              "{ spaceId?: string | undefined; version: string; isDeprecated?: boolean | undefined; title: string; forceNow?: string | undefined; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",
@@ -471,6 +471,20 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.Job.scheduled_report_id",
+            "type": "string",
+            "tags": [],
+            "label": "scheduled_report_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
             "deprecated": false,
@@ -1079,6 +1093,40 @@
                 "type": "string",
                 "tags": [],
                 "label": "jobId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ReportingAPIClient.getScheduledReportInfo",
+            "type": "Function",
+            "tags": [],
+            "label": "getScheduledReportInfo",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              "ScheduledReportApiJSON",
+              " | undefined>"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-public",
+                "id": "def-public.ReportingAPIClient.getScheduledReportInfo.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
                 "description": [],
                 "signature": [
                   "string"
@@ -1752,6 +1800,20 @@
           },
           {
             "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "SettingsStart"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
             "id": "def-public.KibanaContext.uiSettings",
             "type": "Object",
             "tags": [],
@@ -1835,6 +1897,57 @@
               ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
               "ShareActionIntents",
               "[]; }"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "public",
+                "docId": "kibActionsPluginApi",
+                "section": "def-public.ActionsPublicPluginSetup",
+                "text": "ActionsPublicPluginSetup"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.notifications",
+            "type": "Object",
+            "tags": [],
+            "label": "notifications",
+            "description": [],
+            "signature": [
+              "NotificationsStart"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.license$",
+            "type": "Object",
+            "tags": [],
+            "label": "license$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "ILicense",
+              ">"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
             "deprecated": false,

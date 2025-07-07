@@ -6,10 +6,8 @@
  */
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { aiAssistantAnonymizationSettings } from '@kbn/inference-common';
+import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
 import { setAdvancedSettings } from '../utils/advanced_settings';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { clearConversations } from '../utils/conversation';
@@ -40,28 +38,26 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       // configure anonymization rules for these tests
       await setAdvancedSettings(supertest, {
-        'observability:aiAssistantAnonymizationRules': [
+        [aiAssistantAnonymizationSettings]: JSON.stringify(
           {
-            id: 'email_regex',
-            entityClass: 'EMAIL',
-            type: 'regex',
-            pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
-            enabled: true,
-            builtIn: true,
-            description: 'Anonymize email addresses',
-            normalize: true,
+            rules: [
+              {
+                entityClass: 'EMAIL',
+                type: 'RegExp',
+                pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+                enabled: true,
+              },
+              {
+                entityClass: 'URL',
+                type: 'RegExp',
+                pattern: '(https?:\\/\\/[^\\s"\']+)',
+                enabled: true,
+              },
+            ],
           },
-          {
-            id: 'url_regex',
-            entityClass: 'URL',
-            type: 'regex',
-            pattern: 'https?://[^\\s]+',
-            enabled: true,
-            builtIn: true,
-            description: 'Anonymize URLs',
-            normalize: true,
-          },
-        ],
+          null,
+          2
+        ),
       });
     });
 
@@ -70,7 +66,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
       await clearConversations(es);
       await setAdvancedSettings(supertest, {
-        'observability:aiAssistantAnonymizationRules': [],
+        [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
       });
     });
 
@@ -144,15 +140,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       // First stored message
       const firstSavedMsg = storedUserMsgs[0];
-      expect(firstSavedMsg.unredactions).to.have.length(1);
-      expect(firstSavedMsg.unredactions[0].entity).to.eql('claudia@example.com');
-      expect(firstSavedMsg.unredactions[0].class_name).to.eql('EMAIL');
+      expect(firstSavedMsg.deanonymizations).to.have.length(1);
+      expect(firstSavedMsg.deanonymizations[0].entity.value).to.eql('claudia@example.com');
+      expect(firstSavedMsg.deanonymizations[0].entity.class_name).to.eql('EMAIL');
 
       // Second stored message
       const secSavedMsg = storedUserMsgs[1];
-      expect(secSavedMsg.unredactions).to.have.length(1);
-      expect(secSavedMsg.unredactions[0].entity).to.eql('http://claudia.is');
-      expect(secSavedMsg.unredactions[0].class_name).to.eql('URL');
+      expect(secSavedMsg.deanonymizations).to.have.length(1);
+      expect(secSavedMsg.deanonymizations[0].entity.value).to.eql('http://claudia.is');
+      expect(secSavedMsg.deanonymizations[0].entity.class_name).to.eql('URL');
     });
   });
 }

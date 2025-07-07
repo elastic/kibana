@@ -327,7 +327,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(dissectMetrics.skipped_rate).to.be(0.75);
       });
 
-      it('should allow overriding fields detected by previous simulation processors (skip non-additive check)', async () => {
+      it('should allow overriding fields detected by previous simulation processors', async () => {
         const response = await simulateProcessingForStream(apiClient, 'logs.test', {
           processing: [
             basicDissectProcessor,
@@ -481,40 +481,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
-      it('should gracefully return non-additive simulation errors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
-          processing: [
-            {
-              id: 'draft',
-              grok: {
-                field: 'body.text',
-                patterns: [
-                  // This overwrite the exising log.level and message values
-                  '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:body.text}',
-                ],
-                if: { always: {} },
-              },
-            },
-          ],
-          documents: [{ ...createTestDocument(), severity_text: 'info' }],
-        });
-
-        const processorsMetrics = response.body.processors_metrics;
-        const grokMetrics = processorsMetrics.draft;
-
-        expect(grokMetrics.errors).to.eql([
-          {
-            processor_id: 'draft',
-            type: 'non_additive_processor_failure',
-            message:
-              'The processor is not additive to the documents. It might update fields [body.text,severity_text]',
-          },
-        ]);
-        // Non-additive changes are not counted as error
-        expect(grokMetrics.parsed_rate).to.be(1);
-        expect(grokMetrics.failed_rate).to.be(0);
-      });
-
       it('should gracefully return mappings simulation errors', async () => {
         const response = await simulateProcessingForStream(apiClient, 'logs.test', {
           processing: [
@@ -531,12 +497,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.body.documents[0].errors).to.eql([
-          {
-            message:
-              'The processor is not additive to the documents. It might update fields [@timestamp]',
-            processor_id: 'draft',
-            type: 'non_additive_processor_failure',
-          },
           {
             message:
               "Some field types might not be compatible with this document: [1:15] failed to parse field [@timestamp] of type [date] in document with id '0'. Preview of field's value: '2025-04-04 00:00:00,000'",
@@ -565,34 +525,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         ]);
         expect(detectedFieldsFailureResponse.body.documents[0].status).to.be('failed');
-      });
-
-      it('should return the is_non_additive_simulation simulation flag', async () => {
-        const [additiveParsingResponse, nonAdditiveParsingResponse] = await Promise.all([
-          simulateProcessingForStream(apiClient, 'logs.test', {
-            processing: [basicGrokProcessor],
-            documents: [createTestDocument()],
-          }),
-          simulateProcessingForStream(apiClient, 'logs.test', {
-            processing: [
-              {
-                id: 'draft',
-                grok: {
-                  field: 'body.text',
-                  patterns: [
-                    // This overwrite the exising log.level and message values
-                    '%{TIMESTAMP_ISO8601:attributes.parsed_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message}',
-                  ],
-                  if: { always: {} },
-                },
-              },
-            ],
-            documents: [{ ...createTestDocument(), severity_text: 'info' }],
-          }),
-        ]);
-
-        expect(additiveParsingResponse.body.is_non_additive_simulation).to.be(false);
-        expect(nonAdditiveParsingResponse.body.is_non_additive_simulation).to.be(true);
       });
     });
   });

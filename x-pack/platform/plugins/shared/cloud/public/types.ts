@@ -6,6 +6,7 @@
  */
 
 import type { SolutionId } from '@kbn/core-chrome-browser';
+import { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { FC, PropsWithChildren } from 'react';
 
 export interface CloudStart {
@@ -88,7 +89,7 @@ export interface CloudStart {
      * The serverless project type.
      * Will always be present if `isServerlessEnabled` is `true`
      */
-    projectType?: string;
+    projectType?: KibanaSolution;
   };
 }
 
@@ -217,7 +218,7 @@ export interface CloudSetup {
      * The serverless project type.
      * Will always be present if `isServerlessEnabled` is `true`
      */
-    projectType?: string;
+    projectType?: KibanaSolution;
     /**
      * The serverless orchestrator target. The potential values are `canary` or `non-canary`
      * Will always be present if `isServerlessEnabled` is `true`

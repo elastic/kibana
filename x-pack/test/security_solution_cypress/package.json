@@ -54,6 +54,7 @@
     "cypress:run:qa:serverless:detection_engine": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/detection_engine/!(exceptions)/**/*.cy.ts'",
     "cypress:run:qa:serverless:detection_engine:exceptions": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/detection_engine/exceptions/**/*.cy.ts'",
     "cypress:run:qa:serverless:ai_assistant": "yarn cypress:qa:serverless --spec './cypress/e2e/ai_assistant/**/*.cy.ts'",
-    "cypress:run:qa:serverless:cloud_security_posture": "yarn cypress:qa:serverless --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts"
+    "cypress:run:qa:serverless:cloud_security_posture": "yarn cypress:qa:serverless --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts",
+    "cypress:run:qa:serverless:ai4dsoc": "yarn cypress:qa:serverless --spec './cypress/e2e/ai4dsoc/**/*.cy.ts'"
   }
 }

@@ -86,7 +86,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
         ).to.eql(['development', 'production']);
       });
 
-      after(async () => await ml.cleanMlIndices());
+      after(() => ml.cleanMlIndices());
     });
 
     describe('when there are both v2 and v3 jobs', () => {
@@ -95,7 +95,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
         await createV3Jobs(['production']);
       });
 
-      after(async () => await ml.cleanMlIndices());
+      after(() => ml.cleanMlIndices());
 
       it('only creates new jobs for environments that did not have a v3 job', async () => {
         await callUpdateEndpoint();

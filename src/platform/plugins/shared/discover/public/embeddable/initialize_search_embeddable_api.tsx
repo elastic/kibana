@@ -46,6 +46,7 @@ const initializeSearchSource = async (
   ]);
   searchSource.setParent(parentSearchSource);
   const dataView = searchSource.getField('index');
+
   return { searchSource, dataView };
 };
 

@@ -120,7 +120,13 @@ export type {
   DefaultActionGroupId,
 } from './builtin_action_groups';
 export { getBuiltinActionGroups, RecoveredActionGroup } from './builtin_action_groups';
-export type { BulkEditSkipReason, BulkActionSkipResult } from './bulk_edit';
+export type {
+  BulkEditSkipReason,
+  BulkGapsFillingSkipReason,
+  BulkEditActionSkipResult,
+  BulkGapsFillingSkipResult,
+  BulkActionSkipResult,
+} from './bulk_action';
 export {
   DisabledActionTypeIdsForActionGroup,
   isActionGroupDisabledForActionTypeId,

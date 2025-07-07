@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-export type FlyoutStep =
-  | 'details'
+export type FlyoutStep = 'initializing' | 'confirmReindex' | 'reindexing' | 'completed';
+export type ModalStep =
+  | 'initializing'
   | 'confirmReadonly'
-  | 'confirmReindex'
-  | 'reindexing'
+  | 'confirmUnfreeze'
   | 'makeReadonly'
+  | 'makeReadonlyRetry'
   | 'unfreeze'
+  | 'unfreezeRetry'
   | 'completed';

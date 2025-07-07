@@ -5,61 +5,64 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiStat, formatNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  Streams,
-  isDslLifecycle,
-  isIlmLifecycle,
-  isInheritLifecycle,
-  isRoot,
-} from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import { css } from '@emotion/react';
+import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
+import { DataStreamStats } from './hooks/use_data_stream_stats';
+import { formatBytes } from './helpers/format_bytes';
 
-export function RetentionSummary({ definition }: { definition: Streams.ingest.all.GetResponse }) {
-  const summary = useMemo(() => summaryText(definition), [definition]);
+const statCss = css`
+  min-width: 200px;
+`;
 
+export function RetentionSummary({
+  definition,
+  stats,
+  isLoadingStats,
+  statsError,
+}: {
+  definition: Streams.ingest.all.GetResponse;
+  stats?: DataStreamStats;
+  isLoadingStats: boolean;
+  statsError?: Error;
+}) {
   return (
-    <EuiPanel hasShadow={false} hasBorder color="subdued" paddingSize="m">
-      <EuiText>
-        <h5>
-          {i18n.translate('xpack.streams.streamDetailLifecycle.retentionSummaryLabel', {
-            defaultMessage: 'Retention summary',
-          })}
-        </h5>
-        <p>{summary}</p>
-      </EuiText>
-    </EuiPanel>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiStat
+        css={statCss}
+        isLoading={isLoadingStats || !stats}
+        titleSize="m"
+        title={
+          <PrivilegesWarningIconWrapper
+            hasPrivileges={definition.privileges.monitor}
+            title="storageSize"
+          >
+            {statsError || !stats || !stats.sizeBytes ? '-' : formatBytes(stats.sizeBytes)}
+          </PrivilegesWarningIconWrapper>
+        }
+        description={i18n.translate('xpack.streams.streamDetailLifecycle.storageSize', {
+          defaultMessage: 'Storage size',
+        })}
+      />
+      <EuiStat
+        css={statCss}
+        isLoading={isLoadingStats || !stats}
+        titleSize="m"
+        title={
+          <PrivilegesWarningIconWrapper
+            hasPrivileges={definition.privileges.monitor}
+            title="totalDocCount"
+          >
+            {statsError || !stats || !stats.totalDocs ? '-' : formatNumber(stats.totalDocs, '0,0')}
+          </PrivilegesWarningIconWrapper>
+        }
+        description={i18n.translate('xpack.streams.streamDetailLifecycle.totalDocs', {
+          defaultMessage: 'Total doc count',
+        })}
+      />
+    </EuiFlexGroup>
   );
-}
-
-function summaryText(definition: Streams.ingest.all.GetResponse) {
-  const lifecycle = definition.stream.ingest.lifecycle;
-
-  if (isInheritLifecycle(lifecycle)) {
-    return i18n.translate('xpack.streams.streamDetailLifecycle.inheritLifecycleNote', {
-      defaultMessage: 'This data stream is inheriting its lifecycle configuration.',
-    });
-  } else if (isDslLifecycle(lifecycle)) {
-    return isRoot(definition.stream.name) || Streams.UnwiredStream.GetResponse.is(definition)
-      ? i18n.translate('xpack.streams.streamDetailLifecycle.dslLifecycleRootNote', {
-          defaultMessage: 'This data stream is using a custom data retention.',
-        })
-      : i18n.translate('xpack.streams.streamDetailLifecycle.dslLifecycleNonRootNote', {
-          defaultMessage:
-            'This data stream is using a custom data retention as an override at this level.',
-        });
-  } else if (isIlmLifecycle(lifecycle)) {
-    return isRoot(definition.stream.name) || Streams.UnwiredStream.GetResponse.is(definition)
-      ? i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicyRootNote', {
-          defaultMessage: 'This data stream is using an ILM policy.',
-        })
-      : i18n.translate('xpack.streams.streamDetailLifecycle.ilmPolicyNonRootNote', {
-          defaultMessage: 'This data stream is using an ILM policy as an override at this level.',
-        });
-  }
-
-  return i18n.translate('xpack.streams.streamDetailLifecycle.disabledPolicyNote', {
-    defaultMessage: 'The retention for this data stream is disabled.',
-  });
 }

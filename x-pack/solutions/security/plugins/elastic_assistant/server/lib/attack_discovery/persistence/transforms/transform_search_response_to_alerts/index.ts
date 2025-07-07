@@ -11,7 +11,12 @@ import { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
+  ALERT_START,
+  ALERT_UPDATED_AT,
+  ALERT_UPDATED_BY_USER_ID,
+  ALERT_UPDATED_BY_USER_NAME,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 
@@ -78,7 +83,18 @@ export const transformSearchResponseToAlerts = ({
     return {
       alertIds: source[ALERT_ATTACK_DISCOVERY_ALERT_IDS] ?? [], // required field
       alertRuleUuid: source[ALERT_RULE_UUID],
+      alertStart: moment(source[ALERT_START]).isValid()
+        ? moment(source[ALERT_START]).toISOString()
+        : undefined, // optional field
+      alertUpdatedAt: moment(source[ALERT_UPDATED_AT]).isValid()
+        ? moment(source[ALERT_UPDATED_AT]).toISOString()
+        : undefined, // optional field
+      alertUpdatedByUserId: source[ALERT_UPDATED_BY_USER_ID],
+      alertUpdatedByUserName: source[ALERT_UPDATED_BY_USER_NAME],
       alertWorkflowStatus: source[ALERT_WORKFLOW_STATUS],
+      alertWorkflowStatusUpdatedAt: moment(source[ALERT_WORKFLOW_STATUS_UPDATED_AT]).isValid()
+        ? moment(source[ALERT_WORKFLOW_STATUS_UPDATED_AT]).toISOString()
+        : undefined, // optional field
       connectorId: source[ALERT_ATTACK_DISCOVERY_API_CONFIG].connector_id, // required field
       connectorName: source[ALERT_ATTACK_DISCOVERY_API_CONFIG].name,
       detailsMarkdown: source[ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN] ?? '', // required field
@@ -121,7 +137,7 @@ export const transformSearchResponseToAlerts = ({
     connectorNamesAggregation?.buckets?.flatMap((bucket) => bucket.key ?? []) ?? [];
 
   return {
-    connectorNames: connectorNames.sort(), // mutation
+    connectorNames: [...connectorNames].sort(), // mutation
     data,
     uniqueAlertIdsCount,
   };

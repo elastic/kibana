@@ -484,7 +484,7 @@
             },
             "; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
             "StreamsRouteHandlerResources",
-            ", undefined, { enabled: boolean; }>; security: ",
+            ", undefined, { enabled: boolean | \"conflict\"; }>; security: ",
             "RouteSecurity",
             "; }; \"POST /api/streams/_resync 2023-10-31\": ",
             {
@@ -778,7 +778,7 @@
             "SimulationDocReport",
             "[]; processors_metrics: Record<string, ",
             "ProcessorMetrics",
-            ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; is_non_additive_simulation: boolean; }; }[], undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
+            ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; }; }[], undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -820,7 +820,7 @@
             "SimulationDocReport",
             "[]; processors_metrics: Record<string, ",
             "ProcessorMetrics",
-            ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; is_non_additive_simulation: boolean; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
+            ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -968,67 +968,7 @@
             "StreamsRouteHandlerResources",
             ", ",
             "UnmanagedElasticsearchAssetDetails",
-            ", undefined>; \"POST /internal/streams/{name}/_sample\": ",
-            {
-              "pluginId": "@kbn/server-route-repository-utils",
-              "scope": "common",
-              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-              "section": "def-common.ServerRoute",
-              "text": "ServerRoute"
-            },
-            "<\"POST /internal/streams/{name}/_sample\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; body: Zod.ZodObject<{ if: Zod.ZodOptional<Zod.ZodType<",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ", Zod.ZodTypeDef, ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            ">>; start: Zod.ZodOptional<Zod.ZodNumber>; end: Zod.ZodOptional<Zod.ZodNumber>; size: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { start?: number | undefined; end?: number | undefined; size?: number | undefined; if?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            " | undefined; }, { start?: number | undefined; end?: number | undefined; size?: number | undefined; if?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            " | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; body: { start?: number | undefined; end?: number | undefined; size?: number | undefined; if?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            " | undefined; }; }, { path: { name: string; }; body: { start?: number | undefined; end?: number | undefined; size?: number | undefined; if?: ",
-            {
-              "pluginId": "@kbn/streams-schema",
-              "scope": "common",
-              "docId": "kibKbnStreamsSchemaPluginApi",
-              "section": "def-common.Condition",
-              "text": "Condition"
-            },
-            " | undefined; }; }>, ",
-            "StreamsRouteHandlerResources",
-            ", { documents: ",
-            "RecursiveRecord",
-            "[]; }, undefined>; \"GET /internal/streams/_resolve_index\": ",
+            ", undefined>; \"GET /internal/streams/_resolve_index\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1132,7 +1072,7 @@
         "label": "StreamsConfig",
         "description": [],
         "signature": [
-          "{ readonly experimental?: Readonly<{ significantEventsEnabled?: boolean | undefined; } & {}> | undefined; }"
+          "{}"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/config.ts",
         "deprecated": false,
@@ -1553,7 +1493,7 @@
           },
           "; }, undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
           "StreamsRouteHandlerResources",
-          ", undefined, { enabled: boolean; }>; security: ",
+          ", undefined, { enabled: boolean | \"conflict\"; }>; security: ",
           "RouteSecurity",
           "; }; \"POST /api/streams/_resync 2023-10-31\": ",
           {
@@ -1847,7 +1787,7 @@
           "SimulationDocReport",
           "[]; processors_metrics: Record<string, ",
           "ProcessorMetrics",
-          ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; is_non_additive_simulation: boolean; }; }[], undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
+          ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; }; }[], undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1889,7 +1829,7 @@
           "SimulationDocReport",
           "[]; processors_metrics: Record<string, ",
           "ProcessorMetrics",
-          ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; is_non_additive_simulation: boolean; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
+          ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -2037,67 +1977,7 @@
           "StreamsRouteHandlerResources",
           ", ",
           "UnmanagedElasticsearchAssetDetails",
-          ", undefined>; \"POST /internal/streams/{name}/_sample\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"POST /internal/streams/{name}/_sample\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; body: Zod.ZodObject<{ if: Zod.ZodOptional<Zod.ZodType<",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ", Zod.ZodTypeDef, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          ">>; start: Zod.ZodOptional<Zod.ZodNumber>; end: Zod.ZodOptional<Zod.ZodNumber>; size: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { start?: number | undefined; end?: number | undefined; size?: number | undefined; if?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          " | undefined; }, { start?: number | undefined; end?: number | undefined; size?: number | undefined; if?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          " | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; body: { start?: number | undefined; end?: number | undefined; size?: number | undefined; if?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          " | undefined; }; }, { path: { name: string; }; body: { start?: number | undefined; end?: number | undefined; size?: number | undefined; if?: ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.Condition",
-            "text": "Condition"
-          },
-          " | undefined; }; }>, ",
-          "StreamsRouteHandlerResources",
-          ", { documents: ",
-          "RecursiveRecord",
-          "[]; }, undefined>; \"GET /internal/streams/_resolve_index\": ",
+          ", undefined>; \"GET /internal/streams/_resolve_index\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -2236,8 +2116,177 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.STREAMS_TIERED_FEATURES",
+        "type": "Array",
+        "tags": [],
+        "label": "STREAMS_TIERED_FEATURES",
+        "description": [],
+        "signature": [
+          "PricingProductFeature",
+          "[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.STREAMS_TIERED_AI_FEATURE",
+        "type": "Object",
+        "tags": [],
+        "label": "STREAMS_TIERED_AI_FEATURE",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.STREAMS_TIERED_AI_FEATURE.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.STREAMS_TIERED_AI_FEATURE.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.STREAMS_TIERED_AI_FEATURE.products",
+            "type": "Array",
+            "tags": [],
+            "label": "products",
+            "description": [],
+            "signature": [
+              "{ name: \"observability\"; tier: \"complete\"; }[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.STREAMS_TIERED_ML_FEATURE",
+        "type": "Object",
+        "tags": [],
+        "label": "STREAMS_TIERED_ML_FEATURE",
+        "description": [
+          "\nTiered features"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.STREAMS_TIERED_ML_FEATURE.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.STREAMS_TIERED_ML_FEATURE.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.STREAMS_TIERED_ML_FEATURE.products",
+            "type": "Array",
+            "tags": [],
+            "label": "products",
+            "description": [],
+            "signature": [
+              "{ name: \"observability\"; tier: \"complete\"; }[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE",
+        "type": "Object",
+        "tags": [],
+        "label": "STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "streams",
+            "id": "def-common.STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.products",
+            "type": "Array",
+            "tags": [],
+            "label": "products",
+            "description": [],
+            "signature": [
+              "{ name: \"observability\"; tier: \"complete\"; }[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

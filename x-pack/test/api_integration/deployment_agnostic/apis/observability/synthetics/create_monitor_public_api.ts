@@ -68,6 +68,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...monitor,
             locations: [LOCAL_PUBLIC_LOCATION],
             name: 'https://www.google.com',
+            spaces: ['default'],
           })
         );
       });
@@ -90,6 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             locations: [LOCAL_PUBLIC_LOCATION],
             name,
             retest_on_failure: true,
+            spaces: ['default'],
           })
         );
       });
@@ -113,6 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             name,
             max_attempts: 1,
             retest_on_failure: undefined, // this key is not part of the SO and should not be defined
+            spaces: ['default'],
           })
         );
       });
@@ -135,6 +138,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...monitor,
             locations: [LOCAL_PUBLIC_LOCATION],
             name: 'https://www.google.com/',
+            spaces: ['default'],
           })
         );
       });
@@ -157,6 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...monitor,
             locations: [LOCAL_PUBLIC_LOCATION],
             name: 'https://8.8.8.8',
+            spaces: ['default'],
           })
         );
       });
@@ -198,6 +203,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...defaultFields,
             ...monitor,
             locations: [LOCAL_PUBLIC_LOCATION],
+            spaces: ['default'],
           })
         );
       });
@@ -216,6 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...defaultFields,
             ...monitor,
             locations: [LOCAL_PUBLIC_LOCATION],
+            spaces: ['default'],
           })
         );
       });

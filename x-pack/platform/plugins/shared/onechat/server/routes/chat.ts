@@ -10,7 +10,8 @@ import { Observable, firstValueFrom, toArray } from 'rxjs';
 import { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import {
-  OneChatDefaultAgentId,
+  AgentMode,
+  oneChatDefaultAgentId,
   isRoundCompleteEvent,
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
@@ -36,7 +37,16 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
           stream: schema.boolean({ defaultValue: false }),
         }),
         body: schema.object({
-          agentId: schema.string({ defaultValue: OneChatDefaultAgentId }),
+          agentId: schema.string({ defaultValue: oneChatDefaultAgentId }),
+          mode: schema.oneOf(
+            [
+              schema.literal(AgentMode.normal),
+              schema.literal(AgentMode.reason),
+              schema.literal(AgentMode.plan),
+              schema.literal(AgentMode.research),
+            ],
+            { defaultValue: AgentMode.normal }
+          ),
           connectorId: schema.maybe(schema.string()),
           conversationId: schema.maybe(schema.string()),
           nextMessage: schema.string(),
@@ -45,7 +55,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
     },
     wrapHandler(async (ctx, request, response) => {
       const { chat: chatService } = getInternalServices();
-      const { agentId, connectorId, conversationId, nextMessage } = request.body;
+      const { agentId, mode, connectorId, conversationId, nextMessage } = request.body;
       const { stream } = request.query;
 
       const abortController = new AbortController();
@@ -55,6 +65,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
 
       const chatEvents$ = chatService.converse({
         agentId,
+        mode,
         connectorId,
         conversationId,
         nextInput: { message: nextMessage },

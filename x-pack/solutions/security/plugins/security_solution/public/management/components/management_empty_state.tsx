@@ -203,7 +203,7 @@ const EndpointsEmptyState = React.memo<{
             <EuiSpacer size="xl" />
             <EuiCallOut
               color="primary"
-              iconType="iInCircle"
+              iconType="info"
               title={i18n.translate(
                 'xpack.securitySolution.endpoint.list.notAddedIntegrations.title',
                 {

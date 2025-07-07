@@ -48,6 +48,7 @@ import { createBackfillError } from './lib';
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { denormalizeActions } from '../rules_client/lib/denormalize_actions';
 import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../rules_client';
+import type { Gap } from '../lib/rule_gaps/gap';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
 
@@ -69,6 +70,7 @@ interface BulkQueueOpts {
   eventLogClient: IEventLogClient;
   internalSavedObjectsRepository: ISavedObjectsRepository;
   eventLogger: IEventLogger | undefined;
+  gaps?: Gap[];
 }
 
 interface DeleteBackfillForRulesOpts {
@@ -106,6 +108,7 @@ export class BackfillClient {
     eventLogClient,
     internalSavedObjectsRepository,
     eventLogger,
+    gaps,
   }: BulkQueueOpts): Promise<ScheduleBackfillResults> {
     const adHocSOsToCreate: Array<SavedObjectsBulkCreateObject<AdHocRunSO>> = [];
 
@@ -297,6 +300,7 @@ export class BackfillClient {
                 logger: this.logger,
                 backfillClient: this,
                 actionsClient,
+                gaps,
               })
             )
           );

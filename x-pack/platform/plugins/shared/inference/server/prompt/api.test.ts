@@ -42,6 +42,11 @@ jest.mock('../../common/prompt/prompt_to_message_options', () => {
     promptToMessageOptions: jest.fn(actual.promptToMessageOptions),
   };
 });
+const mockEsClient = {
+  ml: {
+    inferTrainedModel: jest.fn(),
+  },
+} as any;
 
 const mockCreateChatCompleteCallbackApi = jest.mocked(createChatCompleteCallbackApi);
 const mockPromptToMessageOptions = jest.mocked(promptToMessageOptions);
@@ -73,7 +78,13 @@ describe('createPromptApi', () => {
     mockCallbackApi = jest.fn();
     mockCreateChatCompleteCallbackApi.mockReturnValue(mockCallbackApi);
 
-    promptApi = createPromptApi({ request, actions, logger });
+    promptApi = createPromptApi({
+      request,
+      actions,
+      logger,
+      anonymizationRulesPromise: Promise.resolve([]),
+      esClient: mockEsClient,
+    });
   });
 
   afterEach(() => {
@@ -81,7 +92,13 @@ describe('createPromptApi', () => {
   });
 
   it('initializes createChatCompleteCallbackApi with correct options', () => {
-    expect(mockCreateChatCompleteCallbackApi).toHaveBeenCalledWith({ request, actions, logger });
+    expect(mockCreateChatCompleteCallbackApi).toHaveBeenCalledWith({
+      request,
+      actions,
+      logger,
+      anonymizationRulesPromise: Promise.resolve([]),
+      esClient: mockEsClient,
+    });
   });
 
   it('calls the callback API with correct initial options', async () => {
