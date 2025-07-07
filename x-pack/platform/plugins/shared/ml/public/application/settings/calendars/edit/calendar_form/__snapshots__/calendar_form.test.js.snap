@@ -29,6 +29,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     <EuiFieldText
       data-test-subj="mlCalendarIdInput"
       disabled={false}
+      isInvalid={true}
       name="calendarId"
       onChange={[MockFunction]}
       value=""
