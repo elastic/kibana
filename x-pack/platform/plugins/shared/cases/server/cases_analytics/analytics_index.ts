@@ -93,11 +93,11 @@ export class AnalyticsIndex {
     this.sourceIndex = sourceIndex;
     this.sourceQuery = sourceQuery;
     this.indexSettings = {
+      hidden: true,
       // settings are not supported on serverless ES
       ...(isServerless
         ? {}
         : {
-            hidden: true,
             number_of_shards: CAI_NUMBER_OF_SHARDS,
             auto_expand_replicas: CAI_AUTO_EXPAND_REPLICAS,
             refresh_interval: CAI_REFRESH_INTERVAL,
