@@ -12,10 +12,11 @@ import { EventEmitter } from 'events';
 import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiScreenReaderOnly, type UseEuiTheme, euiBreakpoint } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { css, SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { urlFor } from '../..';
@@ -54,16 +55,31 @@ interface VisualizeEditorCommonProps {
   eventEmitter?: EventEmitter;
 }
 
-const visEditorCommonStyles: { [key: string]: SerializedStyles } = {
-  timelion: css({
-    ' &.visEditor--timelion': {
-      '.visEditorSidebar__timelionOptions': {
-        flex: '1 1 auto',
-        display: 'flex',
-        flexDirection: 'column',
+const visEditorCommonStyles = {
+  visType: (euiThemeContext: UseEuiTheme) =>
+    css({
+      '&.visEditor--timelion': {
+        '.visEditorSidebar__timelionOptions': {
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column',
+        },
       },
-    },
-  }),
+      '&.visEditor--vega': {
+        '.visEditorSidebar__config': {
+          padding: 0,
+          display: 'flex',
+          flexDirection: 'row',
+          overflow: 'hidden',
+
+          minHeight: `calc(${euiThemeContext.euiTheme.size.base} * 15)`,
+
+          [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+            maxHeight: `calc(${euiThemeContext.euiTheme.size.base} * 15)`,
+          },
+        },
+      },
+    }),
 };
 
 export const VisualizeEditorCommon = ({
@@ -84,6 +100,7 @@ export const VisualizeEditorCommon = ({
   visEditorRef,
   eventEmitter,
 }: VisualizeEditorCommonProps) => {
+  const styles = useMemoCss(visEditorCommonStyles);
   const { services } = useKibana<VisualizeServices>();
 
   useEffect(() => {
@@ -150,7 +167,7 @@ export const VisualizeEditorCommon = ({
   return (
     <div
       className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}
-      css={visInstance?.vis.type.name && visEditorCommonStyles[visInstance?.vis.type.name]}
+      css={styles.visType}
     >
       {visInstance && appState && currentAppState && (
         <VisualizeTopNav
