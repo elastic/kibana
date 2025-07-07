@@ -62,7 +62,7 @@ export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
           </EuiToolTip>
         )}
       </EuiBadge>
-      {status && <HttpStatusCode code={status} showTooltip={true} />}
+      {status && <HttpStatusCode code={status} showTooltip />}
     </span>
   );
 }
