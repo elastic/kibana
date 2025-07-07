@@ -57,7 +57,7 @@ export const relevanceSearchTool = (): RegisteredTool<
     schema: relevanceSearchSchema,
     handler: async ({ term, index, fields = [], size }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
-      return relevanceSearch({
+      const result = await relevanceSearch({
         term,
         index,
         fields,
@@ -65,6 +65,9 @@ export const relevanceSearchTool = (): RegisteredTool<
         model,
         esClient: esClient.asCurrentUser,
       });
+      return {
+        result,
+      };
     },
     meta: {
       tags: [BuiltinTags.retrieval],

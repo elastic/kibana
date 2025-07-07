@@ -34,13 +34,16 @@ export const naturalLanguageSearchTool = (): RegisteredTool<
     schema: searchDslSchema,
     handler: async ({ query, index, context }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
-      return naturalLanguageSearch({
+      const result = await naturalLanguageSearch({
         query,
         context,
         index,
         model,
         esClient: esClient.asCurrentUser,
       });
+      return {
+        result,
+      };
     },
     meta: {
       tags: [BuiltinTags.retrieval],
