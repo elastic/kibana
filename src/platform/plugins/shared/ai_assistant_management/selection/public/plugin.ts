@@ -112,7 +112,7 @@ export class AIAssistantManagementPlugin
         return new BehaviorSubject(AIAssistantType.Never);
       }
       const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
-        this.config.serverlessUiSettingsKey,
+        this.config.serverlessUiSettingsKey
       );
 
       return new BehaviorSubject(preferredAIAssistantType).asObservable();
