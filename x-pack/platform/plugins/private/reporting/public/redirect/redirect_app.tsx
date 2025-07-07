@@ -56,8 +56,8 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
         if (scheduledReportId) {
           const scheduledReport = await apiClient.getScheduledReportInfo(
             scheduledReportId as string,
-            page as string,
-            perPage as string
+            parseInt(page as string, 10),
+            parseInt(perPage as string, 10)
           );
 
           locatorParams = (scheduledReport?.payload as BaseParamsV2)?.locatorParams?.[0];
