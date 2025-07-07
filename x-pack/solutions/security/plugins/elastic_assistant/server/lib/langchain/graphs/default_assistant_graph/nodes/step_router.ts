@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Send } from '@langchain/langgraph';
 import { NodeType } from '../constants';
 import { AgentState } from '../types';
 
@@ -15,7 +14,7 @@ import { AgentState } from '../types';
  * or to a new node that's been added to the graph.
  * More routers could always be added later when needed.
  */
-export function stepRouter(state: AgentState): string | Send {
+export function stepRouter(state: AgentState): string {
   switch (state.lastNode) {
     case NodeType.AGENT:
       if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
