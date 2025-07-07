@@ -210,13 +210,24 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('Should not collect fields present in frozen or cold tier', async () => {
+        // We are prefixing data to avoid conflict with old data not yet cleaned up
+        const TEST_DATA_PREFIX = 'test-cold-frozen-';
         const log = providerContext.getService('log');
 
         // Two docs per tier
         const docsPerIndex: Record<string, EcsHost[]> = {
-          [FROZEN_INDEX_NAME]: [{ name: 'frozen-host-0' }, { name: 'frozen-host-1' }],
-          [COLD_INDEX_NAME]: [{ name: 'cold-host-0' }, { name: 'cold-host-1' }],
-          [DATASTREAM_NAME]: [{ name: 'hot-host-0' }, { name: 'hot-host-1' }],
+          [FROZEN_INDEX_NAME]: [
+            { name: `${TEST_DATA_PREFIX}frozen-host-0` },
+            { name: `${TEST_DATA_PREFIX}frozen-host-1` },
+          ],
+          [COLD_INDEX_NAME]: [
+            { name: `${TEST_DATA_PREFIX}cold-host-0` },
+            { name: `${TEST_DATA_PREFIX}cold-host-1` },
+          ],
+          [DATASTREAM_NAME]: [
+            { name: `${TEST_DATA_PREFIX}hot-host-0` },
+            { name: `${TEST_DATA_PREFIX}hot-host-1` },
+          ],
         };
 
         // Ingest docs
@@ -259,13 +270,15 @@ export default function (providerContext: FtrProviderContext) {
           const result = await es.search({
             index: INDEX_NAME,
             query: {
-              exists: {
-                field: 'host.name',
+              wildcard: {
+                'host.name': {
+                  value: `${TEST_DATA_PREFIX}*`,
+                },
               },
             },
           });
 
-          log.info(`Found documents ${JSON.stringify(result)}`);
+          log.debug(`Found documents ${JSON.stringify(result)}`);
 
           const total = result.hits.total as SearchTotalHits;
           expect(total.value).to.eql(2);
