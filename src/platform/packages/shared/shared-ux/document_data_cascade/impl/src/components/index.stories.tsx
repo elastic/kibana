@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 import { StoryObj, Meta } from '@storybook/react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiDescriptionList } from '@elastic/eui';
@@ -23,7 +23,9 @@ export default {
   title: 'Data Cascade/Data Cascade',
 } satisfies Meta;
 
-export const CascadeGridImplementation: StoryObj<{ query: string }> = {
+export const CascadeGridImplementation: StoryObj<
+  { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
+> = {
   render: function DataCascadeWrapper(args) {
     const initData = new Array(100).fill(null).map(() => {
       return {
@@ -46,6 +48,7 @@ export const CascadeGridImplementation: StoryObj<{ query: string }> = {
         <EuiFlexItem>
           <DataCascade
             stickyGroupRoot
+            size={args.size}
             data={initData}
             cascadeGroups={getESQLStatsQueryMeta(args.query).groupByFields}
             tableTitleSlot={({ rows }) => (
@@ -128,9 +131,16 @@ export const CascadeGridImplementation: StoryObj<{ query: string }> = {
       type: 'string' as const,
       description: 'Simulation of The ES|QL query that the user provided into the esql editor',
     },
+    size: {
+      name: 'Size',
+      control: 'radio',
+      options: ['s', 'm', 'l'],
+      description: 'Size of the cascade rows',
+    },
   },
   args: {
     query:
       'FROM kibana_sample_data_ecommerce | STATS count = COUNT(*) by customer_full_name, customer_birth_date , customer_first_name ',
+    size: 'm',
   },
 };
