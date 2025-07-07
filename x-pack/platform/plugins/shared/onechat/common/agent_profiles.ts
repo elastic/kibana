@@ -13,6 +13,6 @@ export interface AgentProfileListOptions {}
 export type AgentProfileCreateRequest = Omit<AgentProfile, 'createdAt' | 'updatedAt'>;
 
 export type AgentProfileUpdateRequest = Pick<AgentProfile, 'id'> &
-  Partial<Pick<AgentProfile, 'name' | 'description' | 'customInstructions' | 'toolSelection'>>;
+  Partial<Pick<AgentProfile, 'name' | 'description' | 'configuration'>>;
 
 export type AgentProfileDeleteRequest = Pick<AgentProfile, 'id'>;

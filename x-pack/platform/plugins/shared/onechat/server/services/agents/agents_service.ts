@@ -6,17 +6,13 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type {
-  SecurityServiceStart,
-  ElasticsearchServiceStart,
-  KibanaRequest,
-} from '@kbn/core/server';
+import type { SecurityServiceStart, ElasticsearchServiceStart } from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import type { ToolsServiceStart } from '../tools';
 import { createInternalRegistry } from './utils';
 import { createDefaultAgentProvider, creatProfileProvider } from './providers';
-import { createClient, createStorage, createAgentProfileService } from './profiles';
+import { createClient } from './client';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -34,7 +30,6 @@ export class AgentsService {
 
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
     this.setupDeps = setupDeps;
-
     return {};
   }
 
@@ -46,31 +41,19 @@ export class AgentsService {
     const { logger } = this.setupDeps;
     const { getRunner, security, elasticsearch, toolsService } = startDeps;
 
-    const getProfileClient = async (request: KibanaRequest) => {
-      const authUser = security.authc.getCurrentUser(request);
-      if (!authUser) {
-        throw new Error('No user bound to the provided request');
-      }
-
-      const esClient = elasticsearch.client.asScoped(request).asInternalUser;
-      const storage = createStorage({ logger, esClient });
-      const user = { id: authUser.profile_uid!, username: authUser.username };
-
-      return createClient({ user, storage });
-    };
-
-    const getProfileService: AgentsServiceStart['getProfileService'] = async (request) => {
-      const client = await getProfileClient(request);
-      return createAgentProfileService({
-        client,
-        toolsService,
-        logger: logger.get('agentProfileService'),
+    const getScopedClient: AgentsServiceStart['getScopedClient'] = (request) => {
+      return createClient({
         request,
+        toolsService,
+        logger,
+        security,
+        elasticsearch,
       });
     };
 
+    // TODO - only one - persisted agent provider
     const defaultAgentProvider = createDefaultAgentProvider();
-    const profileAgentsProvider = creatProfileProvider({ getProfileClient });
+    const profileAgentsProvider = creatProfileProvider({ getScopedClient });
 
     const registry = createInternalRegistry({
       providers: [defaultAgentProvider, profileAgentsProvider],
@@ -79,7 +62,7 @@ export class AgentsService {
 
     return {
       registry,
-      getProfileService,
+      getScopedClient,
       execute: async (args) => {
         return getRunner().runAgent(args);
       },

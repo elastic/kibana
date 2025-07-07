@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AgentType } from './descriptor';
 import type { PlainIdAgentIdentifier } from './identifiers';
 import type { ToolSelection } from '../tools';
 
@@ -14,6 +15,10 @@ export interface AgentProfile {
    */
   id: PlainIdAgentIdentifier;
   /**
+   * The type of the agent (only for type for now, here for future-proofing)
+   */
+  type: AgentType;
+  /**
    * Human-readable name for the agent.
    */
   name: string;
@@ -22,19 +27,12 @@ export interface AgentProfile {
    */
   description: string;
   /**
-   * Custom instructions that should be added to the prompts when calling the LLM.
+   * Configuration associated with this agent
    */
-  customInstructions: string;
-  /**
-   * Tool selection for this profile, using the {@link ToolSelection} format.
-   */
-  toolSelection: ToolSelection[];
-  /**
-   * Creation date
-   */
-  createdAt: string;
-  /**
-   * Last update date.
-   */
-  updatedAt: string;
+  configuration: ChatAgentConfiguration;
+}
+
+export interface ChatAgentConfiguration {
+  additional_prompt?: string;
+  tools: ToolSelection[]; // TODO: change shape too.
 }

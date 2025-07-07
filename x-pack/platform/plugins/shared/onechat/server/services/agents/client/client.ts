@@ -6,9 +6,16 @@
  */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
+import type {
+  SecurityServiceStart,
+  ElasticsearchServiceStart,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import {
   type UserIdAndName,
   type AgentProfile,
+  type ToolSelection,
   createAgentNotFoundError,
   createBadRequestError,
   isAgentNotFoundError,
@@ -20,11 +27,12 @@ import type {
   AgentProfileUpdateRequest,
   AgentProfileDeleteRequest,
 } from '../../../../common/agent_profiles';
-import { AgentProfileStorage } from './storage';
-import { fromEs, toEs, createRequestToEs, updateProfile, type Document } from './converters';
-import { ensureValidId } from './utils';
+import type { ToolsServiceStart } from '../../tools';
+import { AgentProfileStorage, createStorage } from './storage';
+import { fromEs, createRequestToEs, updateProfile, type Document } from './converters';
+import { ensureValidId, validateToolSelection } from './utils';
 
-export interface AgentProfileClient {
+export interface AgentClient {
   has(agentId: string): Promise<boolean>;
   get(agentId: string): Promise<AgentProfile>;
   create(profile: AgentProfileCreateRequest): Promise<AgentProfile>;
@@ -33,22 +41,51 @@ export interface AgentProfileClient {
   delete(options: AgentProfileDeleteRequest): Promise<boolean>;
 }
 
-export const createClient = ({
-  storage,
-  user,
+export const createClient = async ({
+  request,
+  elasticsearch,
+  security,
+  toolsService,
+  logger,
 }: {
-  storage: AgentProfileStorage;
-  user: UserIdAndName;
-}): AgentProfileClient => {
-  return new AgentProfileClientImpl({ storage, user });
+  request: KibanaRequest;
+  security: SecurityServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
+  toolsService: ToolsServiceStart;
+  logger: Logger;
+}): Promise<AgentClient> => {
+  const authUser = security.authc.getCurrentUser(request);
+  if (!authUser) {
+    throw new Error('No user bound to the provided request');
+  }
+
+  const esClient = elasticsearch.client.asScoped(request).asInternalUser;
+  const storage = createStorage({ logger, esClient });
+  const user = { id: authUser.profile_uid!, username: authUser.username };
+
+  return new AgentClientImpl({ storage, user, request, toolsService });
 };
 
-class AgentProfileClientImpl implements AgentProfileClient {
+class AgentClientImpl implements AgentClient {
+  private readonly request: KibanaRequest;
   private readonly storage: AgentProfileStorage;
+  private readonly toolsService: ToolsServiceStart;
   private readonly user: UserIdAndName;
 
-  constructor({ storage, user }: { storage: AgentProfileStorage; user: UserIdAndName }) {
+  constructor({
+    storage,
+    toolsService,
+    user,
+    request,
+  }: {
+    storage: AgentProfileStorage;
+    toolsService: ToolsServiceStart;
+    user: UserIdAndName;
+    request: KibanaRequest;
+  }) {
     this.storage = storage;
+    this.toolsService = toolsService;
+    this.request = request;
     this.user = user;
   }
 
@@ -105,6 +142,8 @@ class AgentProfileClientImpl implements AgentProfileClient {
       throw createBadRequestError(`Agent with id ${profile.id} already exists.`);
     }
 
+    await this.validateAgentToolSelection(profile.configuration.tools);
+
     const attributes = createRequestToEs({
       profile,
       creationDate: now,
@@ -126,17 +165,19 @@ class AgentProfileClientImpl implements AgentProfileClient {
       throw createAgentNotFoundError({ agentId: profileUpdate.id });
     }
 
-    const storedProfile = fromEs(document);
+    if (profileUpdate.configuration?.tools) {
+      await this.validateAgentToolSelection(profileUpdate.configuration.tools);
+    }
+
     const updatedConversation = updateProfile({
-      profile: storedProfile,
+      profile: document._source!,
       update: profileUpdate,
       updateDate: now,
     });
-    const attributes = toEs(updatedConversation);
 
     await this.storage.getClient().index({
       id: profileUpdate.id,
-      document: attributes,
+      document: updatedConversation,
     });
 
     return this.get(profileUpdate.id);
@@ -161,6 +202,20 @@ class AgentProfileClientImpl implements AgentProfileClient {
 
     const deleteResponse = await this.storage.getClient().delete({ id });
     return deleteResponse.result === 'deleted';
+  }
+
+  // Agent tool selection validation helper
+  private async validateAgentToolSelection(toolSelection: ToolSelection[]) {
+    const errors = await validateToolSelection({
+      toolRegistry: this.toolsService.registry,
+      request: this.request,
+      toolSelection,
+    });
+    if (errors.length > 0) {
+      throw createBadRequestError(
+        `Agent tool selection validation failed:\n` + errors.map((e) => `- ${e}`).join('\n')
+      );
+    }
   }
 
   private async exists(agentId: string): Promise<boolean> {

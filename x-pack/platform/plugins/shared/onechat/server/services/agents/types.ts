@@ -12,8 +12,7 @@ import type {
   AgentDefinition,
   RunAgentFn,
 } from '@kbn/onechat-server';
-
-import type { AgentProfileService } from './profiles';
+import type { AgentClient } from './client';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentsServiceSetup {}
@@ -21,8 +20,10 @@ export interface AgentsServiceSetup {}
 export interface AgentsServiceStart {
   registry: InternalAgentRegistry;
   execute: RunAgentFn;
-  getProfileService: (request: KibanaRequest) => Promise<AgentProfileService>;
+  getScopedClient: (request: KibanaRequest) => Promise<AgentClient>;
 }
+
+// TODO: we can probably cleanup some of those.
 
 export type AgentProviderWithId = AgentProvider & {
   id: string;

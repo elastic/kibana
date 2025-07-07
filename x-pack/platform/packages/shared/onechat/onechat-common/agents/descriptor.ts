@@ -7,8 +7,12 @@
 
 import { PlainIdAgentIdentifier } from './identifiers';
 
+/**
+ * The type of an agent.
+ * Only one type for now, this enum is mostly here for future-proofing.
+ */
 export enum AgentType {
-  conversational = 'conversational',
+  chat = 'chat',
 }
 
 /**
