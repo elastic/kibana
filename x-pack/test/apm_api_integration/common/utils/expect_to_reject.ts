@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-import archivesMetadata from '../../../../../../apm_api_integration/common/fixtures/es_archiver/archives_metadata';
+export async function expectToReject<T extends Error>(fn: () => Promise<any>): Promise<T> {
+  let res: any;
+  try {
+    res = await fn();
+  } catch (e) {
+    return e;
+  }
 
-export default archivesMetadata;
+  throw new Error(`expectToReject resolved: "${JSON.stringify(res)}"`);
+}
