@@ -24,7 +24,7 @@ import {
   getConditionFields,
   isAlwaysCondition,
 } from '@kbn/streams-schema';
-import { isNumber } from 'lodash';
+import { isEmpty, isNumber } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
@@ -94,7 +94,7 @@ export const routingSamplesMachine = setup({
         documentsError: undefined,
       };
     }),
-    storeDocumentsError: assign((_, params: { error: Error }) => ({
+    storeDocumentsError: assign((_, params: { error: Error | undefined }) => ({
       documentsError: params.error,
     })),
     storeDocumentCounts: assign((_, params: { count: string }) => ({
@@ -152,6 +152,7 @@ export const routingSamplesMachine = setup({
           initial: 'loading',
           states: {
             loading: {
+              entry: [{ type: 'storeDocumentsError', params: { error: undefined } }],
               invoke: {
                 id: 'collectDocuments',
                 src: 'collectDocuments',
@@ -177,6 +178,10 @@ export const routingSamplesMachine = setup({
                 onError: {
                   target: 'done',
                   actions: [
+                    {
+                      type: 'storeDocuments',
+                      params: { documents: [] },
+                    },
                     {
                       type: 'storeDocumentsError',
                       params: ({ event }) => ({ error: event.error as Error }),
@@ -280,8 +285,9 @@ function collectDocuments({ data, input }: CollectorParams): Observable<SampleDo
 
   return new Observable((observer) => {
     const subscription = data.search
-      .search({ params }, { abortSignal: abortController.signal })
+      .search({ params }, { abortSignal: abortController.signal, retrieveResults: true })
       .pipe(
+        filter((result) => !isEmpty(result.rawResponse.hits.hits)),
         timeout(SEARCH_TIMEOUT_MS),
         map((result) => result.rawResponse.hits.hits.map((hit) => hit._source)),
         catchError(handleTimeoutError)
@@ -431,32 +437,29 @@ function buildDocumentsSearchParams({ condition, start, end, definition }: Searc
 
   return {
     index: definition.stream.name,
-    body: {
-      query: {
-        bool: {
-          must: [
-            finalCondition ? conditionToQueryDsl(finalCondition) : { match_all: {} },
-            createTimestampRangeQuery(start, end),
-          ],
-        },
+    query: {
+      bool: {
+        must: [
+          finalCondition ? conditionToQueryDsl(finalCondition) : { match_all: {} },
+          createTimestampRangeQuery(start, end),
+        ],
       },
-      runtime_mappings: runtimeMappings,
-      size: SAMPLES_SIZE,
-      sort: [{ '@timestamp': { order: 'desc' } }],
-      terminate_after: SAMPLES_SIZE,
-      track_total_hits: false,
     },
+    runtime_mappings: runtimeMappings,
+    size: SAMPLES_SIZE,
+    sort: [{ '@timestamp': { order: 'desc' } }],
+    terminate_after: SAMPLES_SIZE,
+    track_total_hits: false,
+    allow_partial_search_results: true,
   };
 }
 
 function buildDocumentCountSearchParams({ start, end, definition }: SearchParams) {
   return {
     index: definition.stream.name,
-    body: {
-      query: createTimestampRangeQuery(start, end),
-      size: 0,
-      track_total_hits: true,
-    },
+    query: createTimestampRangeQuery(start, end),
+    size: 0,
+    track_total_hits: true,
   };
 }
 
@@ -474,25 +477,23 @@ function buildDocumentCountProbabilitySearchParams({
 
   return {
     index: definition.stream.name,
-    body: {
-      query: createTimestampRangeQuery(start, end),
-      aggs: {
-        sample: {
-          random_sampler: {
-            probability,
-          },
-          aggs: {
-            matching_docs: {
-              filter: query,
-            },
+    query: createTimestampRangeQuery(start, end),
+    aggs: {
+      sample: {
+        random_sampler: {
+          probability,
+        },
+        aggs: {
+          matching_docs: {
+            filter: query,
           },
         },
       },
-      runtime_mappings: runtimeMappings,
-      size: 0,
-      _source: false,
-      track_total_hits: false,
     },
+    runtime_mappings: runtimeMappings,
+    size: 0,
+    _source: false,
+    track_total_hits: false,
   };
 }
 
