@@ -131,12 +131,17 @@ main () {
   git add src/antlr/*
   git commit -m "Update ES|QL grammars"
 
-  report_main_step "Changes committed. Creating pull request."
+  if [[ "${DRY_RUN:-}" =~ ^(1|true)$  ]]; then
+    echo "Dry run, preventing PR creation"
+    exit 0
+  else
+    report_main_step "Changes committed. Creating pull request."
+  fi
 
   git push origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
+  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL'
 }
 
 main
