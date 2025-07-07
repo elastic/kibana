@@ -40,8 +40,10 @@ export const initializeCspIndices = async (
   latestFindingsIndexAutoCreated: boolean,
   logger: Logger
 ) => {
-  await createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger);
-
+  await Promise.allSettled([
+    createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger),
+    createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger),
+  ]);
   const [createVulnerabilitiesLatestIndexPromise, createBenchmarkScoreIndexPromise] =
     await Promise.allSettled([
       createLatestIndex(
@@ -62,7 +64,6 @@ export const initializeCspIndices = async (
 
   if (!latestFindingsIndexAutoCreated) {
     try {
-      await createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger);
       await createLatestIndex(
         esClient,
         latestIndexConfigs.findings,
