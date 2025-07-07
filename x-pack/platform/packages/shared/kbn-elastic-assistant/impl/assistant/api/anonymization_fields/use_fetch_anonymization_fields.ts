@@ -28,6 +28,8 @@ export interface FetchAnonymizationFields {
   data: FindAnonymizationFieldsResponse; // Adjust type as per your data structure
   isFetched: boolean;
   isFetching: boolean;
+  isError: boolean;
+  isLoading: boolean;
 }
 
 export const DEFAULTS = {
@@ -144,7 +146,7 @@ export const useFetchAnonymizationFields = (
     filter,
   ];
 
-  const { refetch, data, isFetched, isFetching } = useInfiniteQuery<
+  const { refetch, data, isFetched, isFetching, isError, isLoading } = useInfiniteQuery<
     FindAnonymizationFieldsResponse,
     unknown,
     FindAnonymizationFieldsResponse
@@ -170,5 +172,7 @@ export const useFetchAnonymizationFields = (
     data: currentPageItems,
     isFetched,
     isFetching,
+    isError,
+    isLoading,
   };
 };

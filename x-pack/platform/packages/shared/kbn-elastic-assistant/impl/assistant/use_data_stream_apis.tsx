@@ -15,7 +15,10 @@ import {
   RefetchOptions,
   RefetchQueryFilters,
 } from '@tanstack/react-query';
-import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import {
+  QUERY_ALL,
+  useFetchAnonymizationFields,
+} from './api/anonymization_fields/use_fetch_anonymization_fields';
 import { FetchConversationsResponse, useFetchPrompts } from './api';
 import { Conversation, useFetchCurrentUserConversations } from '../..';
 
@@ -68,7 +71,7 @@ export const useDataStreamApis = ({ http, isAssistantEnabled }: Props): DataStre
     isLoading: isLoadingAnonymizationFields,
     isError: isErrorAnonymizationFields,
     isFetched: isFetchedAnonymizationFields,
-  } = useFetchAnonymizationFields();
+  } = useFetchAnonymizationFields(QUERY_ALL);
 
   const {
     data: { data: allPrompts },
