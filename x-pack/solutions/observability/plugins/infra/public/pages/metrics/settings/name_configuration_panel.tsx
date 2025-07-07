@@ -60,13 +60,13 @@ export const NameConfigurationPanel = ({
         }
       >
         <EuiFieldText
-          isInvalid={nameFieldProps.isInvalid}
           data-test-subj="nameInput"
           fullWidth
           disabled={isLoading}
           readOnly={readOnly}
           isLoading={isLoading}
           {...nameFieldProps}
+          isInvalid={nameFieldProps.isInvalid}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

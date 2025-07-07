@@ -130,13 +130,13 @@ export const IndicesConfigurationPanel = ({
           }
         >
           <EuiFieldText
-            isInvalid={metricAliasFieldProps.isInvalid}
             data-test-subj="metricIndicesInput"
             fullWidth
             disabled={isLoading}
             readOnly={readOnly}
             isLoading={isLoading}
             {...metricAliasFieldProps}
+            isInvalid={metricAliasFieldProps.isInvalid}
           />
         </EuiFormRow>
         {isMetricAliasChanged && numberOfInfraRules > 0 && (
