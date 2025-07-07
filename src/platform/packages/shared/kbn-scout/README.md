@@ -395,7 +395,7 @@ export const newTestFixture = base.extend<ScoutTestFixtures, ScoutWorkerFixtures
 3. **Register the Fixture:** Add the fixture to the appropriate scope:
 
 ```ts
-export const scoutTestFixtures = mergeTests(...newTestFixture);
+export const scoutTestFixtures = mergeTests(coreFixtures, newTestFixture);
 ```
 
 #### Best Practices
