@@ -14,12 +14,12 @@ import {
   isErrorLifecycle,
   isDslLifecycle,
   Streams,
+  getIndexPatternsForStream,
 } from '@kbn/streams-schema';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
-import { getIndexPatterns } from '../../util/hierarchy_helpers';
 
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
   <EuiToolTip
@@ -139,7 +139,7 @@ export function DiscoverBadgeButton({
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const dataStreamExists =
     Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
-  const indexPatterns = getIndexPatterns(definition.stream);
+  const indexPatterns = getIndexPatternsForStream(definition.stream);
   const esqlQuery = indexPatterns ? `FROM ${indexPatterns.join(', ')}` : undefined;
 
   if (!discoverLocator || !dataStreamExists || !esqlQuery) {
