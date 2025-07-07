@@ -17,10 +17,12 @@ import { createServerRoute } from '../../create_server_route';
 import { readSignificantEvents } from './read_significant_events';
 import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
 
+// const dateTimeString = z.string().openapi({ format: 'date-time' });
 export const readSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
+    // TODO: Handle Date
     query: z.object({ from: z.coerce.date(), to: z.coerce.date(), bucketSize: z.string() }),
   }),
 

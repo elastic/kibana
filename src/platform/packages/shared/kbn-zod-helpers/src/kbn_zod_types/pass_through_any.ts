@@ -18,7 +18,7 @@ class KbnPassThroughAny extends z.ZodAny implements KbnZodType {
   readonly kbnTypeName = KbnZodTypes.PassThroughAny;
 
   static create() {
-    return new KbnPassThroughAny({ typeName: z.ZodFirstPartyTypeKind.ZodAny }).describe(
+    return new KbnPassThroughAny({ typeName: z.ZodAny }).describe(
       'Pass through any value without validation.'
     );
   }

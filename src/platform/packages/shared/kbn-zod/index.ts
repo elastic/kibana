@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from 'zod';
+export * from 'zod/v4';
 export { isZod } from './util';
 export type { ZodEsque } from './types';
+// import { z as zod } from 'zod/v4';
+// import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+//
+// extendZodWithOpenApi(zod);
