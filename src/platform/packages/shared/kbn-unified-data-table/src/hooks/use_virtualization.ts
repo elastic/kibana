@@ -49,14 +49,7 @@ export const useVirtualization = ({
   );
 
   const virtualizationOptions: EuiDataGridProps['virtualizationOptions'] = useMemo(() => {
-    const initialScroll =
-      !isInitialScrollAppliedRef.current && (scrollTopRef.current || scrollLeftRef.current)
-        ? { top: scrollTopRef.current, left: scrollLeftRef.current }
-        : undefined;
-
     const options: EuiDataGridProps['virtualizationOptions'] = {
-      initialScrollTop: initialScroll?.top,
-      initialScrollLeft: initialScroll?.left,
       onScroll: throttle((event: { scrollTop: number; scrollLeft: number }) => {
         if (loadingStateRef.current !== DataLoadingState.loaded) {
           return;
@@ -70,6 +63,7 @@ export const useVirtualization = ({
           const rendered = Boolean(getVirtualizedElement(containerRef));
 
           if (rendered) {
+            const initialScroll = { top: scrollTopRef.current, left: scrollLeftRef.current };
             requestAnimationFrame(() => {
               getVirtualizedElement(containerRef)?.scrollTo?.({
                 ...initialScroll,
