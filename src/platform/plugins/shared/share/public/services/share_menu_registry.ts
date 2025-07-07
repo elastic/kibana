@@ -30,6 +30,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
   private capabilities?: ApplicationStart['capabilities'];
   private getLicense?: () => ILicense | undefined;
+  private readonly shareObjectResolutionCache: Record<string, ShareActionIntents> = {};
 
   private readonly globalMarker: string = '*';
 
@@ -38,6 +39,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     this.registerLinkShareAction();
     this.registerEmbedShareAction();
   }
+
   private readonly shareOptionsStore: Record<
     string,
     Map<ShareContextMapKey, () => Promise<ShareActionIntents>>

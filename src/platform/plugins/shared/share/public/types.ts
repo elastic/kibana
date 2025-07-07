@@ -255,6 +255,7 @@ export interface SharingData {
 }
 
 export type ShareIntegrationMapKey = `integration-${string}`;
+
 export interface ShareRegistryInternalApi {
   registerShareIntegration<I extends ShareIntegration>(
     shareObject: string,
