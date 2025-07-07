@@ -12,6 +12,7 @@ import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_fu
 import { operatorsDefinitions } from '../../definitions/all_operators';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { aggFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '../../definitions/generated/time_series_agg_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import {
   FunctionDefinitionTypes,
@@ -147,6 +148,7 @@ export function getFunctionSignaturesByReturnType(
     grouping,
     scalar,
     operators,
+    timeseriesAgg,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
@@ -155,6 +157,7 @@ export function getFunctionSignaturesByReturnType(
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
+    timeseriesAgg?: boolean;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
@@ -175,6 +178,9 @@ export function getFunctionSignaturesByReturnType(
   // eval functions (eval is a special keyword in JS)
   if (scalar) {
     list.push(...scalarFunctionDefinitions);
+  }
+  if (timeseriesAgg) {
+    list.push(...timeSeriesAggFunctionDefinitions);
   }
   if (operators) {
     list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));

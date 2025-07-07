@@ -76,6 +76,7 @@ import {
   extractTypeFromASTArg,
   getSuggestionsToRightOfOperatorExpression,
   correctQuerySyntax,
+  isTimeseriesAggUsedAlready,
 } from './helper';
 import {
   FunctionParameter,
@@ -547,6 +548,11 @@ async function getFunctionArgsSuggestions(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
+          : []),
+        ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
+          ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(
+              ({ name }) => name
+            )
           : [])
       );
     }
