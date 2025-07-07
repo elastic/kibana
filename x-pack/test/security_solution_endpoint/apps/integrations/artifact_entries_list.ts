@@ -7,7 +7,7 @@
 
 import { unzip } from 'zlib';
 import { promisify } from 'util';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import {
   ENDPOINT_ARTIFACT_LIST_IDS,
