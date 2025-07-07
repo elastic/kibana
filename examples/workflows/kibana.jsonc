@@ -10,6 +10,7 @@
     "requiredPlugins": [
       "developerExamples",
       "navigation",
+      "taskManager"
     ]
   }
 }
