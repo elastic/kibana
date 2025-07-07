@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const SETUP_SIEM_MIGRATION_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.tour.setupSiemMigrationGuide.title',
+  'xpack.securitySolution.siemMigrations.rules.tour.setupAutomaticMigrationGuide.title',
   {
-    defaultMessage: 'Streamlined SIEM migration',
+    defaultMessage: 'Streamlined Automatic migration',
   }
 );
 
