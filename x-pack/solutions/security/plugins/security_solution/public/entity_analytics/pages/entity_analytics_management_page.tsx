@@ -54,7 +54,7 @@ export const EntityAnalyticsManagementPage = () => {
   });
   const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
   const runEngineEnabled = currentRiskEngineStatus === 'ENABLED';
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingRunRiskEngine, setIsLoadingRunRiskEngine] = useState(false);
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess, addError } = useAppToasts();
   const userCanRunEngine =
@@ -65,10 +65,10 @@ export const EntityAnalyticsManagementPage = () => {
     false;
 
   const handleRunEngineClick = async () => {
-    setIsLoading(true);
+    setIsLoadingRunRiskEngine(true);
     try {
       scheduleNowRiskEngine();
-      if (!isLoading) {
+      if (!isLoadingRunRiskEngine) {
         addSuccess(i18n.RISK_SCORE_ENGINE_RUN_SUCCESS, { toastLifeTimeMs: 5000 });
       }
     } catch (error) {
@@ -76,7 +76,7 @@ export const EntityAnalyticsManagementPage = () => {
         title: i18n.RISK_SCORE_ENGINE_RUN_FAILURE,
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingRunRiskEngine(false);
     }
   };
 
@@ -85,7 +85,7 @@ export const EntityAnalyticsManagementPage = () => {
   const isRunning = status === 'running' || (!!runAt && new Date(runAt) < new Date());
 
   const runEngineBtnIsDisabled =
-    !currentRiskEngineStatus || isLoading || !userCanRunEngine || isRunning;
+    !currentRiskEngineStatus || isLoadingRunRiskEngine || !userCanRunEngine || isRunning;
 
   const formatTimeFromNow = (time: string | undefined): string => {
     if (!time) {
@@ -120,7 +120,7 @@ export const EntityAnalyticsManagementPage = () => {
                       size="s"
                       iconType="play"
                       disabled={runEngineBtnIsDisabled}
-                      isLoading={isLoading}
+                      isLoading={isLoadingRunRiskEngine}
                       onClick={handleRunEngineClick}
                     >
                       {i18n.RUN_RISK_SCORE_ENGINE}
