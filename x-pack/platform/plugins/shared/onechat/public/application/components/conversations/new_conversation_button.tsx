@@ -11,20 +11,26 @@ import React from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { conversationsCommonLabels } from './i18n';
+import { useConversationId } from '../../hooks/use_conversation_id';
 
 export const NewConversationButton: React.FC<{}> = () => {
   const { navigateToOnechatUrl } = useNavigation();
-  return (
-    <EuiButton
-      iconType="plus"
-      iconSide="left"
-      {...getRouterLinkProps({
+  const conversationId = useConversationId();
+  const isDisabled = Boolean(!conversationId);
+
+  const buttonProps = isDisabled
+    ? {
+        disabled: true,
+      }
+    : getRouterLinkProps({
         href: appPaths.chat.new,
         onClick() {
           navigateToOnechatUrl(appPaths.chat.new);
         },
-      })}
-    >
+      });
+
+  return (
+    <EuiButton iconType="plus" iconSide="left" {...buttonProps}>
       {conversationsCommonLabels.header.createNewConversationButtonLabel}
     </EuiButton>
   );
