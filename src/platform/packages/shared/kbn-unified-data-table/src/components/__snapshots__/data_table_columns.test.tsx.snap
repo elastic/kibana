@@ -40,7 +40,7 @@ Array [
       "showMoveRight": true,
     },
     "cellActions": Array [],
-    "display": <Memo(DataTableSummaryColumnHeader)
+    "display": <Memo(UnifiedDataTableSummaryColumnHeader)
       columnDisplayName="Summary"
       headerRowHeight={5}
     />,
