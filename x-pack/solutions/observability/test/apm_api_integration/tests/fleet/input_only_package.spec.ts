@@ -12,6 +12,7 @@ import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import { LogLevel, SynthtraceClientsManager, createLogger } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { getBettertest } from '../../common/bettertest';
 import {
@@ -72,12 +73,16 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     api_key: string;
   }) {
     const esClient = createEsClientWithApiKey({ id, apiKey });
+    const clientsManager = new SynthtraceClientsManager({
+      client: esClient,
+      logger: createLogger(LogLevel.info),
+    });
 
-    await apmSynthtraceEsClient.initializePackage({ skipBootstrap: true });
+    const { apmEsClient } = await clientsManager.getClients({
+      clients: ['apmEsClient'],
+    });
 
-    apmSynthtraceEsClient.setEsClient(esClient);
-
-    return apmSynthtraceEsClient;
+    return apmEsClient;
   }
 
   // FLAKY: https://github.com/elastic/kibana/issues/177384
@@ -116,6 +121,8 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
         await cleanAll();
 
         await setupFleet(bettertest);
+        await apmSynthtraceEsClient.initializePackage({ skipInstallation: false });
+
         agentPolicyId = await createAgentPolicy({ bettertest, name: APM_AGENT_POLICY_NAME });
         packagePolicyId = await createPackagePolicy({
           bettertest,
@@ -127,6 +134,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
 
       after(async () => {
+        await apmSynthtraceEsClient.uninstallPackage();
         await cleanAll();
       });
 

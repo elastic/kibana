@@ -12,7 +12,7 @@ export async function getApmSynthtraceEsClient(context: InheritedFtrProviderCont
 
   const { apmEsClient } = await synthtraceClient.getClients(['apmEsClient']);
 
-  await apmEsClient.initializePackage({ skipBootstrap: false });
+  await apmEsClient.initializePackage({ skipInstallation: false });
 
   return apmEsClient;
 }

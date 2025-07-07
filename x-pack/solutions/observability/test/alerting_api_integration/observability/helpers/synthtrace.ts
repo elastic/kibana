@@ -31,7 +31,7 @@ export const getSynthtraceClient = async ({
     clients: ['apmEsClient'],
     kibana: {
       target: kibanaUrl,
-      logger: createLogger(LogLevel.info),
+      logger: createLogger(LogLevel.debug),
     },
   });
 

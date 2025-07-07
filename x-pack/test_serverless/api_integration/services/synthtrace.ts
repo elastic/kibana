@@ -21,7 +21,7 @@ export function SynthtraceClientProvider({ getService }: FtrProviderContext) {
 
   const servers = config.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
-  const kibanaServerUrlWithAuth = format(kibanaServer).slice(0, -1);
+  const kibanaServerUrlWithAuth = format(kibanaServer);
 
   return {
     getClients<TClient extends SynthtraceClientTypes>(
@@ -31,7 +31,6 @@ export function SynthtraceClientProvider({ getService }: FtrProviderContext) {
         client: esClient,
         logger: createLogger(LogLevel.info),
         refreshAfterIndex: true,
-        includePipelineSerialization: false,
       });
 
       const clients = clientManager.getClients({

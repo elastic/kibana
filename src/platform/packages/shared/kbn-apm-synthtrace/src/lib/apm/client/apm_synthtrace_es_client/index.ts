@@ -88,24 +88,22 @@ export class ApmSynthtraceEsClientImpl
     }
   }
 
-  async initializePackage(opts?: { version?: string; skipBootstrap?: boolean }) {
+  async initializePackage(opts?: { version?: string; skipInstallation?: boolean }) {
     if (!this.fleetClient) {
       throw new Error(
         'ApmSynthtraceEsClient requires a FleetClient to be initialized. Please provide a valid Kibana client.'
       );
     }
 
-    const { version = this.version, skipBootstrap = true } = opts ?? {};
+    const { version = this.version, skipInstallation = true } = opts ?? {};
 
-    let latestVersion = version;
+    const latestVersion =
+      !version || version === 'latest'
+        ? await this.fleetClient.fetchLatestPackageVersion('apm')
+        : version;
 
-    if (!latestVersion) {
-      latestVersion = await this.fleetClient.fetchLatestPackageVersion('apm');
-      if (!skipBootstrap) {
-        await this.fleetClient.installPackage('apm', latestVersion);
-      }
-    } else if (latestVersion === 'latest') {
-      latestVersion = await this.fleetClient.fetchLatestPackageVersion('apm');
+    if (!skipInstallation) {
+      await this.fleetClient.installPackage('apm', latestVersion);
     }
 
     this.logger.info(`Using package version: ${latestVersion}`);

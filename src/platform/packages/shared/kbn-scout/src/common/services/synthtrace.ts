@@ -6,15 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import Url from 'url';
 import {
   LogLevel,
   SynthtraceClientTypes,
   createLogger,
   SynthtraceClientsManager,
+  GetClientsReturn,
 } from '@kbn/apm-synthtrace';
 import { Client } from '@elastic/elasticsearch';
 import { ScoutLogger } from './logger';
+import { ScoutTestConfig } from '../../types';
 
 export interface SynthtraceClientOptions {
   kbnUrl?: string;
@@ -22,33 +24,61 @@ export interface SynthtraceClientOptions {
   esClient: Client;
 
   log: ScoutLogger;
+
+  config: ScoutTestConfig;
 }
 
-const logger = createLogger(LogLevel.info);
+const buildUrlWithAuth = (kbnUrl: string, config: ScoutTestConfig) => {
+  const { username, password } = config.auth;
+  const kibanaUrl = new URL(kbnUrl);
+  return Url.format({
+    protocol: kibanaUrl.protocol,
+    hostname: kibanaUrl.hostname,
+    port: kibanaUrl.port,
+    auth: `${username}:${password}`,
+  });
+};
 
-export async function getSynthtraceClient(
-  synthClient: SynthtraceClientTypes,
-  { esClient, kbnUrl, log }: SynthtraceClientOptions
-) {
+const instantiatedClients: Record<
+  string,
+  GetClientsReturn<SynthtraceClientTypes>[SynthtraceClientTypes]
+> = {};
+export async function getSynthtraceClient<
+  TClient extends SynthtraceClientTypes = SynthtraceClientTypes
+>(
+  synthClient: TClient,
+  { esClient, kbnUrl, log, config }: SynthtraceClientOptions
+): Promise<GetClientsReturn<TClient>> {
+  if (instantiatedClients[synthClient]) {
+    return instantiatedClients[synthClient] as unknown as GetClientsReturn<TClient>;
+  }
+
+  const kibanaTarget = kbnUrl ? buildUrlWithAuth(kbnUrl, config) : undefined;
+
   const clientManager = new SynthtraceClientsManager({
     client: esClient,
-    logger,
+    logger: createLogger(LogLevel.info),
     refreshAfterIndex: true,
-    includePipelineSerialization: false,
   });
 
   const clients = clientManager.getClients({
     clients: [synthClient],
-    kibana: kbnUrl
+    kibana: kibanaTarget
       ? {
-          target: kbnUrl,
+          target: kibanaTarget.toString(),
+          logger: createLogger(LogLevel.debug),
         }
       : undefined,
   });
 
-  clientManager.initFleetPackageForClient({ clients });
+  await clientManager.initFleetPackageForClient({
+    clients,
+    skipInstallation: false,
+  });
 
   log.serviceLoaded(synthClient);
 
-  return clients[synthClient];
+  instantiatedClients[synthClient] = clients[synthClient];
+
+  return instantiatedClients as GetClientsReturn<TClient>;
 }

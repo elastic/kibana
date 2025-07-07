@@ -8,7 +8,6 @@
  */
 
 import { FullConfig } from 'playwright/test';
-import Url from 'url';
 import { Readable } from 'node:stream';
 import type {
   ApmFields,
@@ -18,21 +17,10 @@ import type {
   Serializable,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import {
-  LogLevel,
-  SynthtraceClientTypes,
-  createLogger,
-  SynthtraceClientsManager,
-} from '@kbn/apm-synthtrace';
-import {
-  getLogger,
-  createScoutConfig,
-  measurePerformanceAsync,
-  getEsClient,
-  ScoutLogger,
-  EsClient,
-} from '../../common';
+import { SynthtraceClientTypes } from '@kbn/apm-synthtrace';
+import { getLogger, createScoutConfig, measurePerformanceAsync, getEsClient } from '../../common';
 import { ScoutTestOptions } from '../types';
+import { getSynthtraceClient } from '../../common/services/synthtrace';
 
 export type SynthtraceEvents<T extends Fields> = SynthtraceGenerator<T> | Array<Serializable<T>>;
 
@@ -44,40 +32,6 @@ interface SynthtraceIngestionData {
 const INGESTION_CLIENT_MAP: Record<string, SynthtraceClientTypes> = {
   apm: 'apmEsClient',
   infra: 'infraEsClient',
-};
-
-const getSynthtraceClient = async (
-  synthClient: SynthtraceClientTypes,
-  esClient: EsClient,
-  kbnUrl: string,
-  auth: { username: string; password: string },
-  log: ScoutLogger
-) => {
-  const kibanaUrl = new URL(kbnUrl);
-  const kibanaUrlWithAuth = Url.format({
-    protocol: kibanaUrl.protocol,
-    hostname: kibanaUrl.hostname,
-    port: kibanaUrl.port,
-    auth: `${auth.username}:${auth.password}`,
-  });
-
-  const logger = createLogger(LogLevel.info);
-
-  const clientManager = new SynthtraceClientsManager({
-    client: esClient,
-    logger,
-    refreshAfterIndex: true,
-    includePipelineSerialization: false,
-  });
-
-  const clients = clientManager.getClients({
-    clients: [synthClient],
-    kibana: {
-      target: kibanaUrlWithAuth,
-    },
-  });
-
-  return clients[synthClient];
 };
 
 /**
@@ -109,20 +63,20 @@ export async function ingestSynthtraceDataHook(config: FullConfig, data: Synthtr
     for (const key of Object.keys(data)) {
       const typedKey = key as keyof SynthtraceIngestionData;
       if (data[typedKey].length > 0) {
-        const client = await getSynthtraceClient(
-          INGESTION_CLIENT_MAP[key],
+        const clientType = INGESTION_CLIENT_MAP[typedKey];
+        const clients = await getSynthtraceClient(clientType, {
           esClient,
           kbnUrl,
-          scoutConfig.auth,
-          log
-        );
+          log,
+          config: scoutConfig,
+        });
 
         log.debug(`[setup] ingesting ${key} synthtrace data`);
 
         try {
           await Promise.all(
             data[typedKey].map((event) => {
-              return client.index(Readable.from(Array.from(event).flatMap((e) => e.serialize())));
+              return clients[clientType].index(Readable.from(Array.from(event)));
             })
           );
         } catch (e) {

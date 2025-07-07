@@ -21,7 +21,7 @@ export class FleetClient {
   }
 
   async fetchLatestPackageVersion(packageName: string) {
-    this.logger.debug(`Fetching latest APM package version`);
+    this.logger.debug(`Fetching latest ${packageName} package version`);
 
     const fetchPackageVersion = async ({ prerelease }: { prerelease: boolean }) => {
       const url = `${this.getFleetPackagePath(packageName)}?prerelease=${prerelease}`;
@@ -53,7 +53,7 @@ export class FleetClient {
       return await fetchPackageVersion({ prerelease: true });
     } catch (error) {
       this.logger.debug(
-        'Fetching latestes prerelease version failed, retrying with latest GA version'
+        'Fetching latest prerelease version failed, retrying with latest GA version'
       );
       const retryResult = await fetchPackageVersion({ prerelease: false });
 
@@ -62,16 +62,17 @@ export class FleetClient {
   }
 
   async installPackage(packageName: string, packageVersion?: string) {
-    this.logger.debug(`Installing APM package ${packageVersion}`);
+    this.logger.debug(`Installing ${packageName} package ${packageVersion}`);
     if (!packageVersion) {
       packageVersion = await this.fetchLatestPackageVersion(packageName);
     }
 
     const url = this.getFleetPackagePath(packageName, packageVersion);
+
     const response = await pRetry(
       async () => {
         const res = await this.kibanaClient
-          ?.fetch<{ items: unknown[] }>(url, {
+          .fetch<{ items: unknown[] }>(url, {
             method: 'POST',
             body: '{"force":true}',
           })
@@ -98,15 +99,16 @@ export class FleetClient {
       throw new Error(`No installed assets received for APM package version ${packageVersion}`);
     }
 
-    this.logger.info(`Installed APM package ${packageVersion}`);
+    this.logger.info(`Installed ${packageName} package ${packageVersion}`);
     return { version: packageVersion };
   }
 
   async uninstallPackage(packageName: string) {
-    this.logger.debug('Uninstalling APM package');
+    this.logger.debug(`Uninstalling ${packageName} package`);
     const latestApmPackageVersion = await this.fetchLatestPackageVersion(packageName);
 
     const url = this.getFleetPackagePath(packageName, latestApmPackageVersion);
+
     const response = await pRetry(
       async () => {
         const res = await this.kibanaClient
@@ -127,7 +129,7 @@ export class FleetClient {
         retries: 5,
         onFailedAttempt: (error) => {
           this.logger.debug(
-            `APM package version ${latestApmPackageVersion} uninstallation failure. ${
+            `${packageName} package version ${latestApmPackageVersion} uninstallation failure. ${
               error.retriesLeft >= 1 ? 'Retrying' : 'Aborting'
             }`
           );
@@ -137,10 +139,10 @@ export class FleetClient {
 
     if (!response.items) {
       throw new Error(
-        `No uninstalled assets received for APM package version ${latestApmPackageVersion}`
+        `No uninstalled assets received for ${packageName} package version ${latestApmPackageVersion}`
       );
     }
 
-    this.logger.info(`Uninstalled APM package ${latestApmPackageVersion}`);
+    this.logger.info(`Uninstalled ${packageName} package ${latestApmPackageVersion}`);
   }
 }

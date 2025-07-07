@@ -8,11 +8,12 @@
 import { createLogger, LogLevel, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
 import Url from 'url';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
+import { createEsClientForFtrConfig } from '@kbn/test';
 import type { FtrProviderContext } from '../common/ftr_provider_context';
 
 export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const es = getService('es');
+  const es = createEsClientForFtrConfig(config);
 
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
@@ -52,7 +53,12 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
     },
   });
 
-  const packageVersion = apmEsClient.initializePackage();
+  const packageVersion = await clientsManager.initFleetPackageForClient({
+    clients: {
+      apmEsClient,
+    },
+    skipInstallation: false,
+  });
 
   const kibanaUrlWithoutAuth = Url.format({
     protocol: config.get('servers.kibana.protocol'),
@@ -62,7 +68,7 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
 
   return {
     KIBANA_URL: kibanaUrlWithoutAuth,
-    APM_PACKAGE_VERSION: packageVersion,
+    APM_PACKAGE_VERSION: packageVersion.apmEsClient,
     ES_NODE: esNode,
     ES_REQUEST_TIMEOUT: esRequestTimeout,
     TEST_CLOUD: process.env.TEST_CLOUD,

@@ -52,7 +52,7 @@ export async function bootstrap({
       apmEsClient: clients.apmEsClient,
     },
     version: runOptions['assume-package-version'],
-    skipBootstrap: skipClientBootstrap,
+    skipInstallation: skipClientBootstrap,
   });
 
   if (runOptions.clean) {

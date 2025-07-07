@@ -118,18 +118,23 @@ export class SynthtraceClientsManager {
   >(opts: {
     clients: Partial<GetClientsReturn<TClient>>;
     version?: string;
-    skipBootstrap?: boolean;
-  }) {
-    const { clients, version, skipBootstrap } = opts;
+    skipInstallation?: boolean;
+  }): Promise<Record<TClient, string | undefined>> {
+    const { clients, version, skipInstallation } = opts;
+
     if (!clients) {
       throw new Error('No clients have been initialized. Call getClients() first.');
     }
 
-    for (const synthtraceClient of Object.values(clients)) {
-      if (this.isClientWithPackageManangement(synthtraceClient)) {
-        await synthtraceClient.initializePackage({ version, skipBootstrap });
+    const result: Record<string, string | undefined> = {};
+
+    for (const [key, client] of Object.entries(clients)) {
+      if (this.isClientWithPackageManangement(client)) {
+        result[key] = await client.initializePackage({ version, skipInstallation });
       }
     }
+
+    return result;
   }
 
   private isClientWithPackageManangement(client: unknown): client is PackageManagement {

@@ -168,7 +168,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const clients = await synthtraceClient.getClients(['apmEsClient']);
       apmSynthtraceEsClient = clients.apmEsClient;
 
-      await apmSynthtraceEsClient.initializePackage({ skipBootstrap: false });
+      await apmSynthtraceEsClient.initializePackage({ skipInstallation: false });
 
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })

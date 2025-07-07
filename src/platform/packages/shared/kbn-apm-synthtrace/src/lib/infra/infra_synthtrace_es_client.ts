@@ -53,22 +53,21 @@ export class InfraSynthtraceEsClientImpl
     ];
   }
 
-  async initializePackage(opts?: { version?: string; skipBootstrap?: boolean }) {
+  async initializePackage(opts?: { version?: string; skipInstallation?: boolean }) {
     if (!this.fleetClient) {
       throw new Error(
         'InfraSynthtraceEsClient requires a FleetClient to be initialized. Please provide a valid Kibana client.'
       );
     }
 
-    const { version, skipBootstrap = true } = opts ?? {};
-
-    if (skipBootstrap) {
-      return;
-    }
+    const { version, skipInstallation = true } = opts ?? {};
 
     let latestVersion = version;
     if (!latestVersion || latestVersion === 'latest') {
       latestVersion = await this.fleetClient.fetchLatestPackageVersion('system');
+    }
+
+    if (!skipInstallation) {
       await this.fleetClient.installPackage('system', latestVersion);
     }
 

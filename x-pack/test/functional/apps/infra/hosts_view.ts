@@ -245,11 +245,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'apmEsClient',
       ]);
 
-      await synthtraceApmClient.initializePackage({ skipBootstrap: false });
-
       synthEsInfraClient = clients.infraEsClient;
       syntEsLogsClient = clients.logsEsClient;
       synthtraceApmClient = clients.apmEsClient;
+
+      await synthtraceApmClient.initializePackage({ skipInstallation: false });
 
       return Promise.all([
         synthtraceApmClient.clean(),

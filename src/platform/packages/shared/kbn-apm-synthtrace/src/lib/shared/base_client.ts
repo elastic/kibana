@@ -72,13 +72,20 @@ export class SynthtraceEsClientBase<TFields extends Fields> implements Synthtrac
     }
   }
 
-  private initKibanaClient(input?: KibanaClient | { target: string }): KibanaClient | undefined {
+  private initKibanaClient(
+    input?: KibanaClient | { target: string; username?: string; password?: string }
+  ): KibanaClient | undefined {
     if (!input) {
       return undefined;
     }
 
     if (isKibanaClientConfig(input)) {
-      return getKibanaClient({ target: input.target, logger: this.logger });
+      return getKibanaClient({
+        target: input.target,
+        logger: this.logger,
+        username: input.username,
+        password: input.password,
+      });
     }
 
     return input;

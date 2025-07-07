@@ -17,13 +17,10 @@ export function SynthtraceProvider({ getService }: DeploymentAgnosticFtrProvider
   const kibanaServer = servers.kibana as UrlObject;
   const kibanaServerUrl = format(kibanaServer);
 
-  const logger = createLogger(LogLevel.info);
-
   const clientManager = new SynthtraceClientsManager({
     client,
-    logger,
+    logger: createLogger(LogLevel.info),
     refreshAfterIndex: true,
-    includePipelineSerialization: false,
   });
 
   return {
@@ -39,6 +36,7 @@ export function SynthtraceProvider({ getService }: DeploymentAgnosticFtrProvider
         clients: ['apmEsClient'],
         kibana: {
           target: kibanaServerUrl,
+          logger: createLogger(LogLevel.debug),
         },
       });
 

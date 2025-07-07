@@ -43,7 +43,7 @@ export async function getSynthtraceClient(
     client: es,
     logger,
     refreshAfterIndex: true,
-    includePipelineSerialization: false,
+    includePipelineSerialization: synthClient !== 'apm', // Only include pipeline serialization for APM client
   });
 
   const clients = clientManager.getClients({
@@ -52,10 +52,11 @@ export async function getSynthtraceClient(
       target: kbnUrl.get(),
       username: auth.getUsername(),
       password: auth.getPassword(),
+      logger,
     },
   });
 
-  clientManager.initFleetPackageForClient({ clients, skipBootstrap: false });
+  await clientManager.initFleetPackageForClient({ clients, skipInstallation: false });
 
   return clients[clientType];
 }

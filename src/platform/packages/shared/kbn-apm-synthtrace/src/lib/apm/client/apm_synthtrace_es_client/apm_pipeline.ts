@@ -30,7 +30,9 @@ export function apmPipeline(
 ) {
   return (base: Readable) => {
     const continousRollupSupported =
-      version === 'latest' || semver.gte(semver.coerce(version)?.version ?? version, '8.7.0');
+      !version ||
+      version === 'latest' ||
+      semver.gte(semver.coerce(version)?.version ?? version, '8.7.0');
 
     const aggregators = [
       createTransactionMetricsAggregator('1m'),

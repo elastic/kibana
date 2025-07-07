@@ -45,11 +45,11 @@ export async function setupSynthtrace({
     },
   });
 
-  clientManager.initFleetPackageForClient({
+  await clientManager.initFleetPackageForClient({
     clients: {
       apmEsClient,
     },
-    skipBootstrap: false,
+    skipInstallation: false,
   });
 
   return {
