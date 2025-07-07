@@ -9,10 +9,13 @@ import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import type { MetricSchema } from '../../../common/constants';
 import {
   DATASTREAM_DATASET,
   EVENT_MODULE,
   METRICSET_MODULE,
+  METRIC_SCHEMA_ECS,
+  METRIC_SCHEMA_SEMCONV,
   OTEL_RECEIVER_DATASET_VALUE,
   SYSTEM_INTEGRATION,
 } from '../../../common/constants';
@@ -326,9 +329,14 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
 
         return response.ok({
           body: getTimeRangeMetadataResponseRT.encode({
-            schemas: (['ecs', 'semconv'] as const).filter((key) => {
-              return (key === 'ecs' && hasEcsData) || (key === 'semconv' && hasOtelData);
-            }),
+            schemas: ([METRIC_SCHEMA_ECS, METRIC_SCHEMA_SEMCONV] as MetricSchema[]).filter(
+              (key) => {
+                return (
+                  (key === METRIC_SCHEMA_ECS && hasEcsData) ||
+                  (key === METRIC_SCHEMA_SEMCONV && hasOtelData)
+                );
+              }
+            ),
           }),
         });
       } catch (err) {
