@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNotNullish } from '@opentelemetry/sdk-metrics-base/build/src/utils';
+import { isNotNullish } from '@opentelemetry/sdk-metrics/build/src/utils';
 
 import { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
