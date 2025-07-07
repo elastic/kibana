@@ -125,9 +125,7 @@ const NetworkDetailsComponent: React.FC = () => {
   const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
-    : oldIndicesExist;
+  const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
