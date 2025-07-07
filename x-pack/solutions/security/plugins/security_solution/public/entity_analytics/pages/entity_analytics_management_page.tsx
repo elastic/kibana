@@ -14,7 +14,9 @@ import {
   EuiButton,
   EuiLoadingSpinner,
   EuiText,
+  EuiCallOut,
   useEuiTheme,
+  EuiSpacer,
 } from '@elastic/eui';
 import moment from 'moment';
 import { RiskScorePreviewSection } from '../components/risk_score_management/risk_score_preview_section';
@@ -39,6 +41,7 @@ export const EntityAnalyticsManagementPage = () => {
   const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
   const privileges = useMissingRiskEnginePrivileges();
   const {
+    savedRiskEngineSettings,
     selectedRiskEngineSettings,
     selectedSettingsMatchPersistedSettings,
     resetSelectedSettings,
@@ -159,6 +162,12 @@ export const EntityAnalyticsManagementPage = () => {
                 setSelectedDateSetting={setSelectedDateSetting}
                 toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
               />
+              {!savedRiskEngineSettings && !selectedSettingsMatchPersistedSettings && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiCallOut size="s" title={i18n.RISK_ENGINE_SAVE_CHANGES_AFTER_INITIALIZATION} />
+                </>
+              )}
               <EuiHorizontalRule />
               <RiskScoreUsefulLinksSection />
             </EuiFlexItem>
@@ -173,7 +182,7 @@ export const EntityAnalyticsManagementPage = () => {
           </>
         )}
       </EuiFlexGroup>
-      {!selectedSettingsMatchPersistedSettings && (
+      {savedRiskEngineSettings && !selectedSettingsMatchPersistedSettings && (
         <RiskScoreSaveBar
           resetSelectedSettings={resetSelectedSettings}
           saveSelectedSettings={saveSelectedSettings}

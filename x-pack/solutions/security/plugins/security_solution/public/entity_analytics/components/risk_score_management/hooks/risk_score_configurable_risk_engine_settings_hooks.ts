@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { useConfigureSORiskEngineMutation } from '../../../api/hooks/use_configure_risk_engine_saved_object';
@@ -41,6 +41,18 @@ const riskEngineSettingsWithDefaults = (
   },
 });
 
+const FETCH_RISK_ENGINE_SETTINGS = ['GET', 'FETCH_RISK_ENGINE_SETTINGS'];
+
+export const useInvalidateRiskEngineSettingsQuery = () => {
+  const queryClient = useQueryClient();
+
+  return useCallback(async () => {
+    await queryClient.invalidateQueries(FETCH_RISK_ENGINE_SETTINGS, {
+      refetchType: 'active',
+    });
+  }, [queryClient]);
+};
+
 export const useConfigurableRiskEngineSettings = () => {
   const { addSuccess } = useAppToasts();
 
@@ -56,13 +68,15 @@ export const useConfigurableRiskEngineSettings = () => {
     isLoading: isLoadingRiskEngineSettings,
     isError,
   } = useQuery(
-    ['GET', 'FETCH_RISK_ENGINE_SETTINGS'],
+    FETCH_RISK_ENGINE_SETTINGS,
     async () => {
       const riskEngineSettings = await fetchRiskEngineSettings();
-      setSelectedRiskEngineSettings(riskEngineSettingsWithDefaults(riskEngineSettings));
+      setSelectedRiskEngineSettings((currentValue) => {
+        return currentValue ?? riskEngineSettingsWithDefaults(riskEngineSettings);
+      });
       return riskEngineSettings;
     },
-    { retry: false }
+    { retry: false, refetchOnWindowFocus: false }
   );
 
   useEffect(() => {

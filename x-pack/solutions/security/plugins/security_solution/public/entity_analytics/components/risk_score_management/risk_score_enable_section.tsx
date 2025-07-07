@@ -27,6 +27,7 @@ import { useEnableRiskEngineMutation } from '../../api/hooks/use_enable_risk_eng
 import { useDisableRiskEngineMutation } from '../../api/hooks/use_disable_risk_engine_mutation';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
+import { useInvalidateRiskEngineSettingsQuery } from './hooks/risk_score_configurable_risk_engine_settings_hooks';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 const toastOptions = {
@@ -113,8 +114,11 @@ export const RiskScoreEnableSection: React.FC<{
 }> = ({ privileges }) => {
   const { addSuccess } = useAppToasts();
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
+  const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
+
   const initRiskEngineMutation = useInitRiskEngineMutation({
     onSuccess: () => {
+      invalidateRiskEngineSettingsQuery();
       addSuccess(i18n.RISK_ENGINE_TURNED_ON, toastOptions);
     },
   });

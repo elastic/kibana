@@ -187,6 +187,13 @@ export const INCLUDE_CLOSED_ALERTS_LABEL = i18n.translate(
   }
 );
 
+export const RISK_ENGINE_SAVE_CHANGES_AFTER_INITIALIZATION = i18n.translate(
+  'xpack.securitySolution.riskScore.changesSavedAfterInitialization',
+  {
+    defaultMessage: `Changes can only be saved after starting the risk engine for the first time.`,
+  }
+);
+
 export const RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.riskScore.includeClosedAlertsDescription',
   {
