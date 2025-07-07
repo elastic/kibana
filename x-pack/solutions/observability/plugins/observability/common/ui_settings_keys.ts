@@ -13,7 +13,6 @@ export const apmProgressiveLoading = 'observability:apmProgressiveLoading';
 export const apmServiceGroupMaxNumberOfServices =
   'observability:apmServiceGroupMaxNumberOfServices';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
-export const entityCentricExperience = 'observability:entityCentricExperience';
 export const apmEnableServiceInventoryTableSearchBar =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';

@@ -20,6 +20,18 @@ const FLYOUT_CARDS = getDataTestSubjectSelector('responsive-data-card');
 const DATAGRID_COLUMN_SELECTOR = getDataTestSubjectSelector('dataGridColumnSelectorButton');
 const DATAGRID_SORTING_SELECTOR = getDataTestSubjectSelector('dataGridColumnSortingButton');
 const DATAGRID_HEADER = getDataTestSubjectSelector('dataGridHeader');
+const TAKE_ACTION_BUTTON = getDataTestSubjectSelector('take-action-button');
+const INVESTIGATE_IN_TIMELINE_BUTTON = getDataTestSubjectSelector(
+  'investigate-in-timeline-take-action-button'
+);
+const TIMELINE_BODY = getDataTestSubjectSelector('timeline-body');
+const TYPE_FILTER_BOX = getDataTestSubjectSelector('optionsList-control-0');
+const NAME_FILTER_BOX = getDataTestSubjectSelector('optionsList-control-1');
+const ID_FILTER_BOX = getDataTestSubjectSelector('optionsList-control-2');
+
+const getFilterValueDataTestSubj = (value: string) => {
+  return getDataTestSubjectSelector('optionsList-control-selection-' + value);
+};
 
 const timestamp = Date.now();
 
@@ -82,6 +94,7 @@ const getMockAsset = () => {
     },
     tags: [],
     team: 'cloud-security-posture',
+    message: 'test_message',
   };
 };
 
@@ -91,6 +104,10 @@ const getAssetInventoryMapping = (indexName: string) => {
     template: {
       mappings: {
         properties: {
+          message: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
           agent: {
             properties: {
               name: {
@@ -412,7 +429,7 @@ describe('Asset Inventory page - user flyout', { tags: ['@ess'] }, () => {
     login();
     visit(ASSET_INVENTORY_URL);
     cy.intercept('GET', '/api/asset_inventory/status').as('getStatus');
-    waitForStatusReady(20);
+    waitForStatusReady(30);
   });
 
   it('should display All assets title', () => {
@@ -432,7 +449,7 @@ describe('Asset Inventory page - user flyout', { tags: ['@ess'] }, () => {
     cy.get(DATAGRID_HEADER).should('contain', 'Last Seen');
   });
 
-  it('should be able to open generic flyout', () => {
+  it('should be able to open generic flyout and open take action button', () => {
     cy.get(getDataTestSubjectSelector('docTableExpandToggleColumn')).eq(0).click();
     cy.get(FLYOUT_RIGHT_PANEL).should('be.visible');
     cy.get(FLYOUT_CARDS).should('contain', 'Criticality');
@@ -441,13 +458,29 @@ describe('Asset Inventory page - user flyout', { tags: ['@ess'] }, () => {
     cy.get(FLYOUT_CARDS).should('contain', 'Sub Type');
     cy.contains('Highlighted Fields').click();
     cy.contains('cloud.provider').should('be.visible');
+    cy.get(TAKE_ACTION_BUTTON).click();
+    cy.get(INVESTIGATE_IN_TIMELINE_BUTTON).click();
+    cy.get(TIMELINE_BODY)
+      .filter(':contains("test_message")')
+      .then((matchedElements) => {
+        const count = matchedElements.length;
+        expect(count).to.be.greaterThan(0);
+      });
   });
 
-  it('should be able to open host flyout', () => {
+  it('should be able to open host flyout and open take action button', () => {
     cy.get(getDataTestSubjectSelector('docTableExpandToggleColumn')).eq(1).click();
     cy.get(FLYOUT_RIGHT_PANEL).should('be.visible');
     // Host ID field only shows up on host flyout
     cy.contains('Host ID').should('be.visible');
+    cy.get(TAKE_ACTION_BUTTON).click();
+    cy.get(INVESTIGATE_IN_TIMELINE_BUTTON).click();
+    cy.get(TIMELINE_BODY)
+      .filter(':contains("test_message")')
+      .then((matchedElements) => {
+        const count = matchedElements.length;
+        expect(count).to.be.greaterThan(0);
+      });
   });
 
   it('should be able to open service flyout', () => {
@@ -457,10 +490,63 @@ describe('Asset Inventory page - user flyout', { tags: ['@ess'] }, () => {
     cy.contains('Service ID').should('be.visible');
   });
 
-  it('should be able to open user flyout', () => {
+  it('should be able to open user flyout and open take action button', () => {
     cy.get(getDataTestSubjectSelector('docTableExpandToggleColumn')).eq(3).click();
     cy.get(FLYOUT_RIGHT_PANEL).should('be.visible');
     // User ID field only shows up on user flyout
     cy.contains('User ID').should('be.visible');
+    cy.get(TAKE_ACTION_BUTTON).click();
+    cy.get(INVESTIGATE_IN_TIMELINE_BUTTON).click();
+    cy.get(TIMELINE_BODY)
+      .filter(':contains("test_message")')
+      .then((matchedElements) => {
+        const count = matchedElements.length;
+        expect(count).to.be.greaterThan(0);
+      });
+  });
+
+  it('each filter should be populated with correct options', () => {
+    // Type Filter Box should only contain 2 options
+    cy.get(TYPE_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('exists')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('Service Usage Technology')).should('be.visible');
+
+    // Name Filter Box should only contain 2 options
+    cy.get(NAME_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('exists')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('generic_name_test')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('host_name_test')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('service_name_test')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('user_name_test')).should('be.visible');
+
+    // ID Filter Box should only contain 2 options
+    cy.get(ID_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('exists')).should('be.visible');
+    cy.get(
+      getFilterValueDataTestSubj(
+        '/subscriptions/ef111ee2-6c89-4b09-92c6-5c2321f888df/resourceGroups/cloud-shell-storage-centralindia/providers/Microsoft.Storage/storageAccounts/csg100320021acf35e2/tableServices/default'
+      )
+    ).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('host_name_test')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('service_name_test')).should('be.visible');
+    cy.get(getFilterValueDataTestSubj('user_name_test')).should('be.visible');
+  });
+
+  it('should be able to filter using type filter box', () => {
+    cy.get(TYPE_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('Service Usage Technology')).click();
+    cy.get(getDataTestSubjectSelector('docTableExpandToggleColumn')).should('have.length', 1);
+  });
+
+  it('should be able to filter using name filter box', () => {
+    cy.get(NAME_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('user_name_test')).click();
+    cy.get(getDataTestSubjectSelector('docTableExpandToggleColumn')).should('have.length', 1);
+  });
+
+  it('should be able to filter using id filter box', () => {
+    cy.get(ID_FILTER_BOX).click();
+    cy.get(getFilterValueDataTestSubj('host_name_test')).click();
+    cy.get(getDataTestSubjectSelector('docTableExpandToggleColumn')).should('have.length', 1);
   });
 });

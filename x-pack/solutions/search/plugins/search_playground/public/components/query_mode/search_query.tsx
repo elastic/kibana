@@ -15,7 +15,6 @@ import { PlaygroundForm, PlaygroundFormFields } from '../../types';
 export const SearchQuery = ({ isLoading }: { isLoading: boolean }) => {
   const { control } = useFormContext();
   const {
-    field: { value: searchBarValue },
     formState: { isSubmitting },
   } = useController<PlaygroundForm, PlaygroundFormFields.searchQuery>({
     name: PlaygroundFormFields.searchQuery,
@@ -29,8 +28,11 @@ export const SearchQuery = ({ isLoading }: { isLoading: boolean }) => {
         <EuiFieldText
           data-test-subj="searchPlaygroundSearchModeFieldText"
           prepend="{query}"
-          {...field}
-          value={searchBarValue}
+          name={field.name}
+          onBlur={field.onBlur}
+          onChange={field.onChange}
+          value={field.value}
+          inputRef={field.ref}
           icon="search"
           fullWidth
           placeholder={i18n.translate(

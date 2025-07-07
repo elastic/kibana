@@ -8,6 +8,7 @@
  */
 
 import type { ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata, ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
 import { createMapFromList, isSourceItem, nonNullable } from '../shared/helpers';
 import {
   getFieldsByTypeHelper,
@@ -19,8 +20,8 @@ import {
   buildQueryForFieldsForStringSources,
   buildQueryForFieldsFromSource,
   buildQueryForFieldsInPolicies,
+  getEnrichCommands,
 } from './helpers';
-import type { ESQLFieldWithMetadata, ESQLPolicy } from './types';
 
 export async function retrieveFields(
   queryString: string,
@@ -52,7 +53,8 @@ export async function retrievePolicies(
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLPolicy>> {
-  if (!callbacks || commands.every(({ name }) => name !== 'enrich')) {
+  const enrichCommands = getEnrichCommands(commands);
+  if (!callbacks || !enrichCommands.length) {
     return new Map();
   }
 
@@ -82,7 +84,7 @@ export async function retrievePoliciesFields(
   if (!callbacks) {
     return new Map();
   }
-  const enrichCommands = commands.filter(({ name }) => name === 'enrich');
+  const enrichCommands = getEnrichCommands(commands);
   if (!enrichCommands.length) {
     return new Map();
   }

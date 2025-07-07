@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
@@ -31,7 +30,6 @@ import {
   TopNFunctionsLocatorDefinition,
   ServiceOverviewLocatorDefinition,
   TransactionDetailsByNameLocatorDefinition,
-  ServiceEntityLocatorDefinition,
   TransactionDetailsByTraceIdLocatorDefinition,
   type AssetDetailsFlyoutLocator,
   type AssetDetailsLocator,
@@ -43,10 +41,7 @@ import {
   type ServiceOverviewLocator,
   type TransactionDetailsByNameLocator,
   type MetricsExplorerLocator,
-  type ServiceEntityLocator,
   type TransactionDetailsByTraceIdLocator,
-  type EntitiesInventoryLocator,
-  EntitiesInventoryLocatorDefinition,
 } from '../common';
 import { updateGlobalNavigation } from './services/update_global_navigation';
 import {
@@ -59,7 +54,6 @@ export interface ObservabilitySharedSetup {
 
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
-  cases: CasesPublicStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
@@ -87,9 +81,7 @@ interface ObservabilitySharedLocators {
     dependencyOverview: DependencyOverviewLocator;
     transactionDetailsByName: TransactionDetailsByNameLocator;
     transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
-    serviceEntity: ServiceEntityLocator;
   };
-  entitiesInventory: EntitiesInventoryLocator;
 }
 
 export class ObservabilitySharedPlugin implements Plugin {
@@ -166,9 +158,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         transactionDetailsByTraceId: urlService.locators.create(
           new TransactionDetailsByTraceIdLocatorDefinition()
         ),
-        serviceEntity: urlService.locators.create(new ServiceEntityLocatorDefinition()),
       },
-      entitiesInventory: urlService.locators.create(new EntitiesInventoryLocatorDefinition()),
     };
   }
 }

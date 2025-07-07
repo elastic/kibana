@@ -1,0 +1,809 @@
+{
+  "id": "@kbn/response-ops-alerts-delete",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.AlertDeleteDescriptiveFormGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertDeleteDescriptiveFormGroup",
+        "description": [],
+        "signature": [
+          "({ services: { http, notifications }, categoryIds, isDisabled, }: AlertDeleteDescriptiveFormGroupProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/components/descriptive_form_group.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.AlertDeleteDescriptiveFormGroup.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  services: { http, notifications },\n  categoryIds,\n  isDisabled = false,\n}",
+            "description": [],
+            "signature": [
+              "AlertDeleteDescriptiveFormGroupProps"
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/components/descriptive_form_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.AlertDeleteModal",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertDeleteModal",
+        "description": [],
+        "signature": [
+          "({ services: { http, notifications }, categoryIds, onCloseModal, isVisible, isDisabled, }: ",
+          "AlertDeleteProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/components/modal.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.AlertDeleteModal.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  services: { http, notifications },\n  categoryIds,\n  onCloseModal,\n  isVisible,\n  isDisabled = false,\n}",
+            "description": [],
+            "signature": [
+              "AlertDeleteProps"
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/components/modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.createAlertDeleteSchedule",
+        "type": "Function",
+        "tags": [],
+        "label": "createAlertDeleteSchedule",
+        "description": [],
+        "signature": [
+          "({ services: { http }, requestBody: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds }, }: ",
+          {
+            "pluginId": "@kbn/response-ops-alerts-delete",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+            "section": "def-public.CreateAlertDeleteScheduleParams",
+            "text": "CreateAlertDeleteScheduleParams"
+          },
+          ") => Promise<string | undefined>"
+        ],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.createAlertDeleteSchedule.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  services: { http },\n  requestBody: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds },\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-alerts-delete",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+                "section": "def-public.CreateAlertDeleteScheduleParams",
+                "text": "CreateAlertDeleteScheduleParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.getAlertDeleteLastRun",
+        "type": "Function",
+        "tags": [],
+        "label": "getAlertDeleteLastRun",
+        "description": [],
+        "signature": [
+          "({ services: { http }, }: ",
+          {
+            "pluginId": "@kbn/response-ops-alerts-delete",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+            "section": "def-public.GetAlertDeleteLastRunParams",
+            "text": "GetAlertDeleteLastRunParams"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.AlertDeleteLastRun",
+            "text": "AlertDeleteLastRun"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.getAlertDeleteLastRun.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  services: { http },\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-alerts-delete",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+                "section": "def-public.GetAlertDeleteLastRunParams",
+                "text": "GetAlertDeleteLastRunParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.getAlertDeletePreview",
+        "type": "Function",
+        "tags": [],
+        "label": "getAlertDeletePreview",
+        "description": [],
+        "signature": [
+          "({ services: { http }, requestQuery: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds }, }: ",
+          {
+            "pluginId": "@kbn/response-ops-alerts-delete",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+            "section": "def-public.GetAlertDeletePreviewParams",
+            "text": "GetAlertDeletePreviewParams"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.AlertDeletePreview",
+            "text": "AlertDeletePreview"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.getAlertDeletePreview.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  services: { http },\n  requestQuery: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds },\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-alerts-delete",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+                "section": "def-public.GetAlertDeletePreviewParams",
+                "text": "GetAlertDeletePreviewParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.useAlertDeleteLastRun",
+        "type": "Function",
+        "tags": [],
+        "label": "useAlertDeleteLastRun",
+        "description": [],
+        "signature": [
+          "({ isEnabled, isOpen, services: { http }, }: ",
+          {
+            "pluginId": "@kbn/response-ops-alerts-delete",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+            "section": "def-public.UseAlertDeleteLastRunParams",
+            "text": "UseAlertDeleteLastRunParams"
+          },
+          ") => ",
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.AlertDeleteLastRun",
+            "text": "AlertDeleteLastRun"
+          },
+          ", unknown>"
+        ],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.useAlertDeleteLastRun.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isEnabled,\n  isOpen,\n  services: { http },\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-alerts-delete",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+                "section": "def-public.UseAlertDeleteLastRunParams",
+                "text": "UseAlertDeleteLastRunParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.useAlertDeletePreview",
+        "type": "Function",
+        "tags": [],
+        "label": "useAlertDeletePreview",
+        "description": [],
+        "signature": [
+          "({ isEnabled, services: { http }, queryParams: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds }, lastRun, }: ",
+          {
+            "pluginId": "@kbn/response-ops-alerts-delete",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+            "section": "def-public.UseAlertDeletePreviewParams",
+            "text": "UseAlertDeletePreviewParams"
+          },
+          ") => ",
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.AlertDeletePreview",
+            "text": "AlertDeletePreview"
+          },
+          ", unknown>"
+        ],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.useAlertDeletePreview.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isEnabled,\n  services: { http },\n  queryParams: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds },\n  lastRun,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-alerts-delete",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+                "section": "def-public.UseAlertDeletePreviewParams",
+                "text": "UseAlertDeletePreviewParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.useAlertDeleteSchedule",
+        "type": "Function",
+        "tags": [],
+        "label": "useAlertDeleteSchedule",
+        "description": [],
+        "signature": [
+          "({ services: { http }, onSuccess, onError, }: ",
+          {
+            "pluginId": "@kbn/response-ops-alerts-delete",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+            "section": "def-public.UseAlertDeleteScheduleParams",
+            "text": "UseAlertDeleteScheduleParams"
+          },
+          ") => ",
+          "UseMutationResult",
+          "<string | undefined, ",
+          "IHttpFetchError",
+          "<",
+          "ResponseErrorBody",
+          ">, ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.AlertDeleteParams",
+            "text": "AlertDeleteParams"
+          },
+          ", unknown>"
+        ],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.useAlertDeleteSchedule.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  services: { http },\n  onSuccess,\n  onError,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-alerts-delete",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertsDeletePluginApi",
+                "section": "def-public.UseAlertDeleteScheduleParams",
+                "text": "UseAlertDeleteScheduleParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.CreateAlertDeleteScheduleParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateAlertDeleteScheduleParams",
+        "description": [],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.CreateAlertDeleteScheduleParams.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              "{ http: ",
+              "HttpSetup",
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.CreateAlertDeleteScheduleParams.requestBody",
+            "type": "Object",
+            "tags": [],
+            "label": "requestBody",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.AlertDeleteParams",
+                "text": "AlertDeleteParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.GetAlertDeleteLastRunParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetAlertDeleteLastRunParams",
+        "description": [],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.GetAlertDeleteLastRunParams.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              "{ http: ",
+              "HttpSetup",
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.GetAlertDeletePreviewParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetAlertDeletePreviewParams",
+        "description": [],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.GetAlertDeletePreviewParams.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              "{ http: ",
+              "HttpSetup",
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.GetAlertDeletePreviewParams.requestQuery",
+            "type": "Object",
+            "tags": [],
+            "label": "requestQuery",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.AlertDeleteParams",
+                "text": "AlertDeleteParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.UseAlertDeleteLastRunParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseAlertDeleteLastRunParams",
+        "description": [],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.UseAlertDeleteLastRunParams.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.UseAlertDeleteLastRunParams.isOpen",
+            "type": "boolean",
+            "tags": [],
+            "label": "isOpen",
+            "description": [],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.UseAlertDeleteLastRunParams.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              "{ http: ",
+              "HttpSetup",
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.UseAlertDeletePreviewParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseAlertDeletePreviewParams",
+        "description": [],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.UseAlertDeletePreviewParams.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.UseAlertDeletePreviewParams.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              "{ http: ",
+              "HttpSetup",
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.UseAlertDeletePreviewParams.queryParams",
+            "type": "Object",
+            "tags": [],
+            "label": "queryParams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.AlertDeleteParams",
+                "text": "AlertDeleteParams"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.UseAlertDeletePreviewParams.lastRun",
+            "type": "string",
+            "tags": [],
+            "label": "lastRun",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.UseAlertDeleteScheduleParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseAlertDeleteScheduleParams",
+        "description": [],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.UseAlertDeleteScheduleParams.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              "{ http: ",
+              "HttpSetup",
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.UseAlertDeleteScheduleParams.onSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onSuccess",
+            "description": [],
+            "signature": [
+              "(message?: string | undefined) => void"
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-alerts-delete",
+                "id": "def-public.UseAlertDeleteScheduleParams.onSuccess.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-delete",
+            "id": "def-public.UseAlertDeleteScheduleParams.onError",
+            "type": "Function",
+            "tags": [],
+            "label": "onError",
+            "description": [],
+            "signature": [
+              "(error: ",
+              "IHttpFetchError",
+              "<",
+              "ResponseErrorBody",
+              ">) => void"
+            ],
+            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-alerts-delete",
+                "id": "def-public.UseAlertDeleteScheduleParams.onError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "IHttpFetchError",
+                  "<",
+                  "ResponseErrorBody",
+                  ">"
+                ],
+                "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-delete",
+        "id": "def-public.GetAlertDeletePreviewResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetAlertDeletePreviewResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.AlertDeletePreview",
+            "text": "AlertDeletePreview"
+          }
+        ],
+        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

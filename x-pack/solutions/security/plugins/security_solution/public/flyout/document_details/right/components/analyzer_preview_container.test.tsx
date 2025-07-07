@@ -151,7 +151,10 @@ describe('AnalyzerPreviewContainer', () => {
         investigateInTimelineAlertClick: jest.fn(),
       });
 
-      const { queryByTestId } = renderAnalyzerPreview({ ...mockContextValue, isPreview: true });
+      const { queryByTestId } = renderAnalyzerPreview({
+        ...mockContextValue,
+        isRulePreview: true,
+      });
       expect(
         queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
       ).not.toBeInTheDocument();
@@ -203,7 +206,10 @@ describe('AnalyzerPreviewContainer', () => {
     });
 
     it('should disable link when in rule preview', () => {
-      const { queryByTestId } = renderAnalyzerPreview({ ...mockContextValue, isPreview: true });
+      const { queryByTestId } = renderAnalyzerPreview({
+        ...mockContextValue,
+        isRulePreview: true,
+      });
       expect(
         queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
       ).not.toBeInTheDocument();

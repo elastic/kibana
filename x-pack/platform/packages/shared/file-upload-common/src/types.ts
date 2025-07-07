@@ -13,6 +13,7 @@ export interface FileUploadResults {
   dataView?: { id: string; title: string };
   inferenceId?: string;
   files: Array<{ fileName: string; docCount: number; fileFormat: string; documentType: string }>;
+  timeFieldName?: string;
 }
 
 export interface OpenFileUploadLiteContext {
@@ -20,6 +21,7 @@ export interface OpenFileUploadLiteContext {
   indexSettings?: IndicesIndexSettings;
   autoAddInference?: string;
   autoCreateDataView?: boolean;
+  existingIndex?: string;
   initialIndexName?: string;
   flyoutContent?: FlyoutContent;
 }

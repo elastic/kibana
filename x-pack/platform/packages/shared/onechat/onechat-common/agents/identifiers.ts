@@ -13,6 +13,7 @@ export type AgentIdentifier =
   | SerializedAgentIdentifier;
 
 export type PlainIdAgentIdentifier = string;
+export type AgentProviderId = string;
 
 /**
  * Structured representation of an agent identifier.
@@ -28,9 +29,9 @@ export interface StructuredAgentIdentifier {
  * String representation of {@link StructuredAgentIdentifier}
  * Follow a `{providerId}:{agentId}` format.
  */
-export type SerializedAgentIdentifier = `${PlainIdAgentIdentifier}:${string}`;
+export type SerializedAgentIdentifier = `${AgentProviderId}::${PlainIdAgentIdentifier}`;
 
-export const serializedPartsSeparator = ':';
+export const serializedPartsSeparator = '::';
 export const unknownAgentProviderId = 'unknown';
 
 /**
@@ -70,10 +71,10 @@ export const toSerializedAgentIdentifier = (
     return identifier;
   }
   if (isStructuredAgentIdentifier(identifier)) {
-    return `${identifier.providerId}:${identifier.agentId}`;
+    return `${identifier.providerId}::${identifier.agentId}`;
   }
   if (isPlainAgentIdentifier(identifier)) {
-    return `${unknownAgentProviderId}:${identifier}`;
+    return `${unknownAgentProviderId}::${identifier}`;
   }
 
   throw createInternalError(`Malformed agent identifier: "${identifier}"`);

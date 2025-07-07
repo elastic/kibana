@@ -23,6 +23,8 @@ import type {
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -35,7 +37,7 @@ import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import { ExportType } from '@kbn/reporting-server';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
@@ -52,11 +54,20 @@ import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
-import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';
+import {
+  RunSingleReportTask,
+  ReportTaskParams,
+  RunScheduledReportTask,
+  ScheduledReportTaskParamsWithoutSpaceId,
+} from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
+import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
+import { EmailNotificationService } from './services/notifications/email_notification_service';
+import { API_PRIVILEGES } from './features';
 
 export interface ReportingInternalSetup {
+  actions: ActionsPluginSetupContract;
   basePath: Pick<IBasePath, 'set'>;
   docLinks: DocLinksServiceSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
@@ -83,6 +94,7 @@ export interface ReportingInternalStart {
   logger: Logger;
   notifications: NotificationsPluginStart;
   screenshotting?: ScreenshottingStart;
+  security?: SecurityPluginStart;
   securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
 }
@@ -96,7 +108,8 @@ export class ReportingCore {
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
-  private executeTask: ExecuteReportTask;
+  private runSingleReportTask: RunSingleReportTask;
+  private runScheduledReportTask: RunScheduledReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
   private exportTypesRegistry = new ExportTypesRegistry();
@@ -117,7 +130,16 @@ export class ReportingCore {
     this.getExportTypes().forEach((et) => {
       this.exportTypesRegistry.register(et);
     });
-    this.executeTask = new ExecuteReportTask(this, config, this.logger);
+    this.runSingleReportTask = new RunSingleReportTask({
+      reporting: this,
+      config,
+      logger: this.logger,
+    });
+    this.runScheduledReportTask = new RunScheduledReportTask({
+      reporting: this,
+      config,
+      logger: this.logger,
+    });
 
     this.getContract = () => ({
       registerExportTypes: (id) => id,
@@ -142,9 +164,10 @@ export class ReportingCore {
       et.setup(setupDeps);
     });
 
-    const { executeTask } = this;
+    const { runSingleReportTask, runScheduledReportTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
-      [executeTask.TYPE]: executeTask.getTaskDefinition(),
+      [runSingleReportTask.TYPE]: runSingleReportTask.getTaskDefinition(),
+      [runScheduledReportTask.TYPE]: runScheduledReportTask.getTaskDefinition(),
     });
   }
 
@@ -159,10 +182,17 @@ export class ReportingCore {
       et.start({ ...startDeps });
     });
 
-    const { taskManager } = startDeps;
-    const { executeTask } = this;
+    const { taskManager, notifications } = startDeps;
+    const emailNotificationService = new EmailNotificationService({
+      notifications,
+    });
+
+    const { runSingleReportTask, runScheduledReportTask } = this;
     // enable this instance to generate reports
-    await Promise.all([executeTask.init(taskManager)]);
+    await Promise.all([
+      runSingleReportTask.init(taskManager),
+      runScheduledReportTask.init(taskManager, emailNotificationService),
+    ]);
   }
 
   public pluginStop() {
@@ -278,6 +308,18 @@ export class ReportingCore {
     };
   }
 
+  public async canManageReportingForSpace(req: KibanaRequest): Promise<boolean> {
+    const { security } = await this.getPluginStartDeps();
+    const spaceId = this.getSpaceId(req);
+    const result = await security?.authz
+      .checkPrivilegesWithRequest(req)
+      .atSpace(spaceId ?? DEFAULT_SPACE_ID, {
+        kibana: [security?.authz.actions.api.get(API_PRIVILEGES.MANAGE_SCHEDULED_REPORTING)],
+      });
+
+    return result?.hasAllRequested ?? false;
+  }
+
   /*
    * Gives synchronous access to the config
    */
@@ -322,11 +364,23 @@ export class ReportingCore {
   }
 
   public async scheduleTask(request: KibanaRequest, report: ReportTaskParams) {
-    return await this.executeTask.scheduleTask(request, report);
+    return await this.runSingleReportTask.scheduleTask(request, report);
+  }
+
+  public async scheduleRecurringTask(
+    request: KibanaRequest,
+    report: ScheduledReportTaskParamsWithoutSpaceId
+  ) {
+    return await this.runScheduledReportTask.scheduleTask(request, report);
   }
 
   public async getStore() {
     return (await this.getPluginStartDeps()).store;
+  }
+
+  public async getAuditLogger(request: KibanaRequest) {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.securityService.audit.asScoped(request);
   }
 
   public async getLicenseInfo() {
@@ -354,6 +408,13 @@ export class ReportingCore {
     );
   }
 
+  public validateNotificationEmails(emails: string[]): string | undefined {
+    const pluginSetupDeps = this.getPluginSetupDeps();
+    return pluginSetupDeps.actions
+      .getActionsConfigurationUtilities()
+      .validateEmailAddresses(emails);
+  }
+
   /*
    * Gives synchronous access to the setupDeps
    */
@@ -372,6 +433,24 @@ export class ReportingCore {
     const dataViews = await indexPatterns.dataViewsServiceFactory(savedObjectsClient, esClient);
 
     return dataViews;
+  }
+
+  public async getScopedSoClient(request: KibanaRequest) {
+    const { savedObjects } = await this.getPluginStartDeps();
+    return savedObjects.getScopedClient(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+      includedHiddenTypes: [SCHEDULED_REPORT_SAVED_OBJECT_TYPE],
+    });
+  }
+
+  public async getInternalSoClient() {
+    const { savedObjects } = await this.getPluginStartDeps();
+    return savedObjects.createInternalRepository([SCHEDULED_REPORT_SAVED_OBJECT_TYPE]);
+  }
+
+  public async getTaskManager() {
+    const { taskManager } = await this.getPluginStartDeps();
+    return taskManager;
   }
 
   public async getDataService() {

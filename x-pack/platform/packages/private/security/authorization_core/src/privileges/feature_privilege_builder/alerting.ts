@@ -20,6 +20,7 @@ enum AlertingEntity {
 const readOperations: Record<AlertingEntity, string[]> = {
   rule: [
     'get',
+    'bulkGet',
     'getRuleState',
     'getAlertSummary',
     'getExecutionLog',

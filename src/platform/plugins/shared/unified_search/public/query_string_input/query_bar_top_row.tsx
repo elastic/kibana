@@ -38,6 +38,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   useEuiTheme,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
@@ -58,7 +59,6 @@ import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
-import './query_bar.scss';
 
 export const strings = {
   getNeedsUpdatingLabel: () =>
@@ -522,7 +522,11 @@ export const QueryBarTopRow = React.memo(
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
 
-      return <EuiFlexItem className={wrapperClasses}>{component}</EuiFlexItem>;
+      return (
+        <EuiFlexItem className={wrapperClasses} css={inputStringStyles.datePickerWrapper}>
+          {component}
+        </EuiFlexItem>
+      );
     }
 
     function renderCancelButton() {
@@ -641,7 +645,10 @@ export const QueryBarTopRow = React.memo(
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               filtersForSuggestions={props.filtersForSuggestions}
               onFiltersUpdated={props.onFiltersUpdated}
-              buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
+              buttonProps={{
+                size: shouldShowDatePickerAsBadge() ? 's' : 'm',
+                display: 'empty',
+              }}
               isDisabled={props.isDisabled}
               suggestionsAbstraction={props.suggestionsAbstraction}
             />
@@ -738,6 +745,7 @@ export const QueryBarTopRow = React.memo(
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
             detectedTimestamp={detectedTimestamp}
+            expandToFitQueryOnMount
             onTextLangQuerySubmit={async () =>
               onSubmit({
                 query: queryRef.current,
@@ -813,3 +821,12 @@ export const QueryBarTopRow = React.memo(
     return isQueryEqual && shallowEqual(prevProps, nextProps);
   }
 ) as GenericQueryBarTopRow;
+
+const inputStringStyles = {
+  datePickerWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '.euiDatePopoverButton-isInvalid': {
+        backgroundImage: `linear-gradient(0deg,${euiTheme.colors.danger},${euiTheme.colors.danger} ${euiTheme.size.xxs},#0000 0,#0000)`,
+      },
+    }),
+};

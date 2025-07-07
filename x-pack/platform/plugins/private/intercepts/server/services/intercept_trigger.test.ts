@@ -8,7 +8,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { InterceptTriggerService } from './intercept_trigger';
 import { interceptTriggerRecordSavedObject } from '../saved_objects';
-import { ISavedObjectsRepository } from '@kbn/core/server';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
 
 describe('InterceptTriggerService', () => {
   describe('#setup', () => {
@@ -18,7 +18,7 @@ describe('InterceptTriggerService', () => {
       const coreSetupMock = coreMock.createSetup();
 
       interceptTrigger.setup(coreSetupMock, {} as any, {
-        kibanaVersion: '8.0.0',
+        kibanaVersion: '9.1.0',
       });
 
       expect(coreSetupMock.savedObjects.registerType).toHaveBeenCalledWith(

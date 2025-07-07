@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import { FieldType, FunctionReturnType, Location } from '../../definitions/types';
-import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
-import { getDateHistogramCompletionItem } from '../commands/stats/util';
-import { allStarConstant } from '../complete_items';
+import {
+  getDateHistogramCompletionItem,
+  allStarConstant,
+  ESQL_NUMBER_TYPES,
+  ESQL_COMMON_NUMERIC_TYPES,
+  FieldType,
+  FunctionReturnType,
+} from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { roundParameterTypes } from './constants';
 import {
   setup,
@@ -245,12 +250,10 @@ describe('autocomplete.suggest', () => {
 
         it('suggests after operator', async () => {
           await assertSuggestions('FROM a | STATS MIN(b) WHERE keywordField != /', [
-            ...getFieldNamesByType(['boolean', 'text', 'keyword']),
-            ...getFunctionSignaturesByReturnType(
-              Location.STATS_WHERE,
-              ['boolean', 'text', 'keyword'],
-              { scalar: true }
-            ),
+            ...getFieldNamesByType(['text', 'keyword']),
+            ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, ['text', 'keyword'], {
+              scalar: true,
+            }),
           ]);
         });
 
@@ -479,10 +482,14 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions(
           'from a | stats avg(b) by BUCKET(dateField, /50, ?_tstart, ?_tend)',
           [
-            ...getLiteralsByType('time_literal'),
-            ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'date_period'], {
-              scalar: true,
-            }),
+            ...getLiteralsByType('time_duration'),
+            ...getFunctionSignaturesByReturnType(
+              Location.EVAL,
+              ['integer', 'date_period', 'time_duration'],
+              {
+                scalar: true,
+              }
+            ),
           ]
         );
       });

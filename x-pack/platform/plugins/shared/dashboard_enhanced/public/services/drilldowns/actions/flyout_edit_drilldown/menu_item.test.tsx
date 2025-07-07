@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';

@@ -5,35 +5,13 @@
  * 2.0.
  */
 
-import { Condition, FieldDefinition, UnaryOperator, getProcessorConfig } from '@kbn/streams-schema';
-import { isEmpty, uniq } from 'lodash';
-import { ALWAYS_CONDITION } from '../../../../../util/condition';
+import { FieldDefinition, getProcessorConfig } from '@kbn/streams-schema';
+import { uniq } from 'lodash';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { PreviewDocsFilterOption } from './preview_docs_filter';
+import { PreviewDocsFilterOption } from './simulation_documents_search';
 import { DetectedField, Simulation } from './types';
 import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
-
-export function composeSamplingCondition(
-  processors: ProcessorDefinitionWithUIAttributes[]
-): Condition | undefined {
-  if (isEmpty(processors)) {
-    return undefined;
-  }
-
-  const uniqueFields = uniq(getSourceFields(processors));
-
-  if (isEmpty(uniqueFields)) {
-    return ALWAYS_CONDITION;
-  }
-
-  const conditions = uniqueFields.map((field) => ({
-    field,
-    operator: 'exists' as UnaryOperator,
-  }));
-
-  return { or: conditions };
-}
 
 export function getSourceFields(processors: ProcessorDefinitionWithUIAttributes[]): string[] {
   return processors

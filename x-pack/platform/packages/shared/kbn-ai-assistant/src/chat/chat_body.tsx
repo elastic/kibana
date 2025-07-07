@@ -34,6 +34,8 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
+  getElasticManagedLlmConnector,
+  KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
@@ -44,6 +46,7 @@ import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE 
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
 import { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
+import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
@@ -100,8 +103,8 @@ const fadeInAnimation = keyframes`
 
 const animClassName = (euiTheme: UseEuiTheme['euiTheme']) => css`
   height: 100%;
-  opacity: 0;
   ${euiCanAnimate} {
+    opacity: 0;
     animation: ${fadeInAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.bounce}
       ${euiTheme.animation.normal} forwards;
   }
@@ -377,6 +380,20 @@ export function ChatBody({
     conversation.refresh();
   };
 
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+
+  const showElasticLlmCalloutInChat =
+    !!elasticManagedLlm &&
+    connectors.selectedConnector === elasticManagedLlm.id &&
+    !conversationCalloutDismissed &&
+    tourCalloutDismissed;
+
+  const showKnowledgeBaseReIndexingCallout =
+    knowledgeBase.status.value?.enabled === true &&
+    knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY &&
+    knowledgeBase.status.value?.isReIndexing === true;
+
   const isPublic = conversation.value?.public;
   const isArchived = !!conversation.value?.archived;
   const showPromptEditor = !isArchived && (!isPublic || isConversationOwnedByCurrentUser);
@@ -517,12 +534,13 @@ export function ChatBody({
                       ])
                     )
                   }
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
+                  showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
                 />
               ) : (
                 <ChatTimeline
                   conversationId={conversationId}
                   messages={messages}
-                  knowledgeBase={knowledgeBase}
                   chatService={chatService}
                   currentUser={conversationUser}
                   isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
@@ -543,6 +561,8 @@ export function ChatBody({
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
                   isArchived={isArchived}
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
+                  showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
                 />
               )}
             </EuiPanel>
@@ -673,6 +693,7 @@ export function ChatBody({
           copyUrl={copyUrl}
           deleteConversation={deleteConversation}
           handleArchiveConversation={handleArchiveConversation}
+          isConversationApp={!showLinkToConversationsApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

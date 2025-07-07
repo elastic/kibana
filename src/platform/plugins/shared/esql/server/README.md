@@ -23,9 +23,13 @@ Currently, we support the following type of extension:
 
 * **Recommended Queries**: These queries are suggested to users in the ES|QL editor, particularly after the **`FROM <index_pattern>`** command. They guide users by offering relevant starting points or common analytical patterns for their selected data source.
 
-    **Note:** The registry intelligently handles both **exact index pattern matches** (e.g., "logs-2023-10-01") and **wildcard patterns** (e.g., "logs*"). This ensures users receive comprehensive and contextually appropriate suggestions, whether they specify a precise index or a broad pattern. For instance, a recommended query registered for `logs*` will be suggested if the user's query uses `FROM logs-2024-01-15`.
-    
-    **Important:** Extensions registered through this mechanism are **solution-specific**. They are categorized by solution (e.g., 'es', 'oblt', 'security', 'chat') and are only visible when working within the context of that specific solution. Extensions are not displayed in general or non-solution-based Kibana instances.
+* **Recommended Fields**: These are field suggestions presented to users based on the active index pattern in their ES|QL query. They help users discover relevant fields for their current data context, making it easier to build queries without prior knowledge of the dataset's schema.
+
+The registry intelligently handles both exact index pattern matches (e.g., "logs-2023-10-01") and wildcard patterns (e.g., "logs*"). This ensures users receive comprehensive and contextually appropriate suggestions, whether they specify a precise index or a broad pattern. For instance, a recommended query registered for logs* will be suggested if the user's query uses FROM logs-2024-01-15.
+
+**Note**: The registry will only return indices (remote or local) that exist in the instance.
+
+**Important:**: Extensions registered through this mechanism are solution-specific. They are categorized by solution (e.g., 'es', 'oblt', 'security', 'chat') and are only visible when working within the context of that specific solution. Extensions are not displayed in classic or non-solution-based Kibana instances.
 
 ---
 
@@ -47,10 +51,11 @@ Here's an example of how to register `recommendedQueries`:
       esql: ESQLSetup;
       // ... other dependencies
     }
+    const solutionId: SolutionId = 'oblt'; // Or 'security', 'es', 'chat', etc.
 
     // Inside your plugin's `Plugin` class
     public setup(core: CoreSetup, { esql }: SetupDeps) {
-        // Register your array of recommended queries
+        // --- Registering Recommended Queries ---
         const esqlExtensionsRegistry = esql.getExtensionsRegistry();
         esqlExtensionsRegistry.setRecommendedQueries(
           [
@@ -67,7 +72,26 @@ Here's an example of how to register `recommendedQueries`:
               query: 'from movies | STATS count(*)',
             },
           ],
-            'oblt'
+           solutionId
+        );
+
+        // --- Registering Recommended Fields ---
+        esqlExtensionsRegistry.setRecommendedFields(
+          [
+            {
+              name: 'log_level',
+              pattern: 'logs*', // This field is relevant for any index starting with 'logs...'
+            },
+            {
+              name: 'host.ip',
+              pattern: 'logs-apache_error', // This field is specific to 'logs-apache_error'
+            },
+            {
+              name: 'http.request.method',
+              pattern: 'logs*',
+            },
+          ],
+            solutionId
         );
         return {};
     }

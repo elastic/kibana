@@ -34,6 +34,15 @@ jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
   },
 }));
 
+const mockNavigateToGraphVisualization = jest.fn();
+jest.mock('../../shared/hooks/use_navigate_to_graph_visualization', () => {
+  return {
+    useNavigateToGraphVisualization: () => ({
+      navigateToGraphVisualization: mockNavigateToGraphVisualization,
+    }),
+  };
+});
+
 const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
@@ -126,6 +135,13 @@ describe('<GraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
+
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)).click();
+
+    expect(mockNavigateToGraphVisualization).toHaveBeenCalled();
   });
 
   it('should render component for alert', async () => {
@@ -181,6 +197,12 @@ describe('<GraphPreviewContainer />', () => {
       METRIC_TYPE.LOADED,
       GRAPH_PREVIEW
     );
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)).click();
+
+    expect(mockNavigateToGraphVisualization).toHaveBeenCalled();
   });
 
   it('should render component for event', async () => {
@@ -236,6 +258,12 @@ describe('<GraphPreviewContainer />', () => {
       METRIC_TYPE.LOADED,
       GRAPH_PREVIEW
     );
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)).click();
+
+    expect(mockNavigateToGraphVisualization).toHaveBeenCalled();
   });
 
   it('should render component and without link in header in preview panel', async () => {
@@ -268,8 +296,8 @@ describe('<GraphPreviewContainer />', () => {
       queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).not.toBeInTheDocument();
     expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
     expect(
       getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
@@ -310,7 +338,7 @@ describe('<GraphPreviewContainer />', () => {
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview({
       ...mockContextValue,
-      isPreview: true,
+      isRulePreview: true,
     });
 
     // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
@@ -322,8 +350,8 @@ describe('<GraphPreviewContainer />', () => {
       queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).not.toBeInTheDocument();
     expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
     expect(
       getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).toBeInTheDocument();

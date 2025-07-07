@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardPanelState } from '../../common';
+import type { DashboardPanel } from '../../server';
 
-import {
-  dataService,
-  embeddableService,
-  savedObjectsTaggingService,
-} from '../services/kibana_services';
+import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { getSampleDashboardState } from '../mocks';
 import { getSerializedState } from './get_serialized_state';
 
@@ -29,10 +25,6 @@ dataService.query.timefilter.timefilter.getTime = jest
 dataService.query.timefilter.timefilter.getRefreshInterval = jest
   .fn()
   .mockReturnValue({ pause: true, value: 0 });
-
-embeddableService.extract = jest
-  .fn()
-  .mockImplementation((attributes) => ({ state: attributes, references: [] }));
 
 if (savedObjectsTaggingService) {
   savedObjectsTaggingService.getTaggingApi = jest.fn().mockReturnValue({
@@ -87,7 +79,7 @@ describe('getSerializedState', () => {
         "timeRestore": false,
         "timeTo": undefined,
         "title": "My Dashboard",
-        "version": 3,
+        "version": 1,
       }
     `);
     expect(result.references).toEqual([]);
@@ -96,7 +88,7 @@ describe('getSerializedState', () => {
   it('should generate new IDs for panels and references when generateNewIds is true', () => {
     const dashboardState = {
       ...getSampleDashboardState(),
-      panels: { oldPanelId: { type: 'visualization' } as unknown as DashboardPanelState },
+      panels: [{ panelIndex: 'oldPanelId', type: 'visualization' } as DashboardPanel],
     };
     const result = getSerializedState({
       controlGroupReferences: [],
@@ -118,10 +110,8 @@ describe('getSerializedState', () => {
           "gridData": Object {
             "i": "54321",
           },
-          "panelConfig": Object {},
           "panelIndex": "54321",
           "type": "visualization",
-          "version": undefined,
         },
       ]
     `);
@@ -166,71 +156,5 @@ describe('getSerializedState', () => {
     });
 
     expect(result.references).toEqual(panelReferences);
-  });
-
-  it('should serialize sections', () => {
-    const dashboardState = {
-      ...getSampleDashboardState(),
-      panels: {
-        oldPanelId: {
-          type: 'visualization',
-          gridData: { sectionId: 'section1' },
-        } as unknown as DashboardPanelState,
-      },
-      sections: {
-        section1: {
-          id: 'section1',
-          title: 'Section One',
-          collapsed: false,
-          gridData: { y: 1, i: 'section1' },
-        },
-        section2: {
-          id: 'section2',
-          title: 'Section Two',
-          collapsed: true,
-          gridData: { y: 2, i: 'section2' },
-        },
-      },
-    };
-    const result = getSerializedState({
-      controlGroupReferences: [],
-      generateNewIds: true,
-      dashboardState,
-      panelReferences: [],
-      searchSourceReferences: [],
-    });
-
-    expect(result.attributes.panels).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "collapsed": false,
-          "gridData": Object {
-            "i": "section1",
-            "y": 1,
-          },
-          "panels": Array [
-            Object {
-              "gridData": Object {
-                "i": "54321",
-              },
-              "panelConfig": Object {},
-              "panelIndex": "54321",
-              "type": "visualization",
-              "version": undefined,
-            },
-          ],
-          "title": "Section One",
-        },
-        Object {
-          "collapsed": true,
-          "gridData": Object {
-            "i": "section2",
-            "y": 2,
-          },
-          "panels": Array [],
-          "title": "Section Two",
-        },
-      ]
-    `);
   });
 });

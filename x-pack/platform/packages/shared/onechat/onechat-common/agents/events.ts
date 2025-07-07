@@ -12,6 +12,7 @@ import type { StructuredToolIdentifier } from '../tools/tools';
 export enum ChatAgentEventType {
   toolCall = 'toolCall',
   toolResult = 'toolResult',
+  reasoning = 'reasoning',
   messageChunk = 'messageChunk',
   messageComplete = 'messageComplete',
   roundComplete = 'roundComplete',
@@ -51,6 +52,18 @@ export type ToolResultEvent = ChatAgentEventBase<
 
 export const isToolResultEvent = (event: OnechatEvent<string, any>): event is ToolResultEvent => {
   return event.type === ChatAgentEventType.toolResult;
+};
+
+// reasoning
+
+export interface ReasoningEventData {
+  reasoning: string;
+}
+
+export type ReasoningEvent = ChatAgentEventBase<ChatAgentEventType.reasoning, ReasoningEventData>;
+
+export const isReasoningEvent = (event: OnechatEvent<string, any>): event is ReasoningEvent => {
+  return event.type === ChatAgentEventType.reasoning;
 };
 
 // Message chunk
@@ -116,6 +129,7 @@ export const isRoundCompleteEvent = (
 export type ChatAgentEvent =
   | ToolCallEvent
   | ToolResultEvent
+  | ReasoningEvent
   | MessageChunkEvent
   | MessageCompleteEvent
   | RoundCompleteEvent;

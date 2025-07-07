@@ -224,6 +224,7 @@ export function getWebpackConfig(
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMap: true,
                       quietDeps: true,
+                      silenceDeprecations: ['import', 'legacy-js-api'],
                     },
                   },
                 },
@@ -253,6 +254,10 @@ export function getWebpackConfig(
         {
           test: /\.peggy$/,
           loader: require.resolve('@kbn/peggy-loader'),
+        },
+        {
+          test: /\.text$/,
+          loader: require.resolve('@kbn/dot-text-loader'),
         },
         // emits a separate file and exports the URL. Previously achievable by using file-loader.
         {
@@ -288,10 +293,6 @@ export function getWebpackConfig(
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'module', 'main'],
       alias: {
-        core_app_image_assets: Path.resolve(
-          worker.repoRoot,
-          'src/core/public/styles/core_app/images'
-        ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
         'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',

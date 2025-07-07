@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderHook } from '@testing-library/react';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -16,9 +15,7 @@ import { useTopNavLinks } from './use_top_nav_links';
 import type { DiscoverServices } from '../../../../build_services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import { RuntimeStateProvider } from '../../state_management/redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 describe('useTopNavLinks', () => {
   const services = {
@@ -38,15 +35,16 @@ describe('useTopNavLinks', () => {
 
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
-      <KibanaContextProvider services={services}>
-        <QueryClientProvider client={new QueryClient()}>
-          <DiscoverMainProvider value={state}>
-            <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-              {children}
-            </RuntimeStateProvider>
-          </DiscoverMainProvider>
-        </QueryClientProvider>
-      </KibanaContextProvider>
+      <DiscoverTestProvider
+        services={services}
+        stateContainer={state}
+        runtimeState={{
+          currentDataView: dataViewMock,
+          adHocDataViews: [],
+        }}
+      >
+        {children}
+      </DiscoverTestProvider>
     );
   };
 

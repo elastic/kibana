@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import archives_metadata from '@kbn/test-suites-xpack-observability/apm_api_integration/common/fixtures/es_archiver/archives_metadata';
+import archives_metadata from '../../../../../../../apm_api_integration/common/fixtures/es_archiver/archives_metadata';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { ARCHIVER_ROUTES } from '../../constants/archiver';
 
