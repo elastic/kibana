@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { css, SerializedStyles } from '@emotion/react';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { urlFor } from '../..';
@@ -52,6 +53,18 @@ interface VisualizeEditorCommonProps {
   embeddableId?: string;
   eventEmitter?: EventEmitter;
 }
+
+const visEditorCommonStyles: { [key: string]: SerializedStyles } = {
+  timelion: css({
+    ' &.visEditor--timelion': {
+      '.visEditorSidebar__timelionOptions': {
+        flex: '1 1 auto',
+        display: 'flex',
+        flexDirection: 'column',
+      },
+    },
+  }),
+};
 
 export const VisualizeEditorCommon = ({
   visInstance,
@@ -135,7 +148,10 @@ export const VisualizeEditorCommon = ({
   const hasLegacyChartsEnabled = chartToken ? getUISettings().get(chartToken) : true;
 
   return (
-    <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
+    <div
+      className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}
+      css={visInstance?.vis.type.name && visEditorCommonStyles[visInstance?.vis.type.name]}
+    >
       {visInstance && appState && currentAppState && (
         <VisualizeTopNav
           currentAppState={currentAppState}
