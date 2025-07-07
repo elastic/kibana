@@ -30,6 +30,17 @@ import type { ThreatMapping } from '../../../../../../common/api/detection_engin
  *   }
  * ]
  *
+ * Example of SignalsQueryMap:
+ * {
+ *   "eventId1": [
+ *     { field: "user.name", value: "threat.indicator.user.name", queryType: "mq", id: "threatId1", index: "threatIndex1" },
+ *     { field: "host.name", value: "threat.indicator.host.name", queryType: "mq", id: "threatId2", index: "threatIndex2" }
+ *   ],
+ *   "eventId2": [
+ *     { field: "source.ip", value: "threat.indicator.source.ip", queryType: "mq", id: "threatId1", index: "threatIndex1" }
+ *   ]
+ * }
+ *
  * This represents:
  * (user.name matches threat.indicator.user.name AND host.name matches threat.indicator.host.name)
  * OR (source.ip matches threat.indicator.source.ip)
@@ -54,6 +65,10 @@ export const validateCompleteThreatMatches = (
 
   signalsQueryMap.forEach((threatQueries, signalId) => {
     const hasCompleteMatch = threatMapping.some((andGroup) => {
+      if (andGroup.entries.length > threatQueries.length) {
+        return false;
+      }
+
       return andGroup.entries.every((entry) =>
         threatQueries.some(
           (threatQuery) => threatQuery.field === entry.field && threatQuery.value === entry.value
