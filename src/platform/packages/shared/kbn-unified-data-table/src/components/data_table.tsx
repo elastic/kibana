@@ -101,6 +101,7 @@ import {
 import { useSorting } from '../hooks/use_sorting';
 import { withRestorableState, useRestorableState, useRestorableRef } from '../restorable_state';
 import { useVirtualization } from '../hooks/use_virtualization';
+import { RowHeightMode } from './row_height_settings';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 
@@ -1164,6 +1165,7 @@ const InternalUnifiedDataTable = ({
     loadingState,
     paginationMode,
     defaultColumns,
+    isAutoRowHeightEnabled: rowHeight === RowHeightMode.auto,
   });
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;

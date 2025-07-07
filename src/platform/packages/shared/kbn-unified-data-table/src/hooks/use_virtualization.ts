@@ -24,6 +24,7 @@ export interface UseVirtualizationProps {
   loadingState: DataLoadingState;
   paginationMode: DataGridPaginationMode;
   defaultColumns: boolean;
+  isAutoRowHeightEnabled: boolean;
 }
 
 export interface UseVirtualizationReturn {
@@ -36,6 +37,7 @@ export const useVirtualization = ({
   loadingState,
   paginationMode,
   defaultColumns,
+  isAutoRowHeightEnabled,
 }: UseVirtualizationProps): UseVirtualizationReturn => {
   const loadingStateRef = useRef<DataLoadingState>(loadingState);
   loadingStateRef.current = loadingState;
@@ -55,13 +57,9 @@ export const useVirtualization = ({
         : undefined;
 
     const options: EuiDataGridProps['virtualizationOptions'] = {
-      initialScrollTop: initialScroll?.top,
-      initialScrollLeft: initialScroll?.left,
+      initialScrollTop: isAutoRowHeightEnabled ? undefined : initialScroll?.top,
+      initialScrollLeft: isAutoRowHeightEnabled ? undefined : initialScroll?.left,
       onScroll: throttle((event: { scrollTop: number; scrollLeft: number }) => {
-        if (loadingStateRef.current !== DataLoadingState.loaded) {
-          return;
-        }
-
         if (isInitialScrollAppliedRef.current) {
           scrollTopRef.current = event.scrollTop;
           scrollLeftRef.current = event.scrollLeft;
@@ -78,6 +76,10 @@ export const useVirtualization = ({
             });
             isInitialScrollAppliedRef.current = true;
           }
+        }
+
+        if (loadingStateRef.current !== DataLoadingState.loaded) {
+          return;
         }
 
         if (paginationMode === 'singlePage') {
@@ -116,7 +118,15 @@ export const useVirtualization = ({
       ...VIRTUALIZATION_OPTIONS,
       ...options,
     };
-  }, [defaultColumns, loadingStateRef, paginationMode, scrollTopRef, scrollLeftRef, containerRef]);
+  }, [
+    defaultColumns,
+    isAutoRowHeightEnabled,
+    loadingStateRef,
+    paginationMode,
+    scrollTopRef,
+    scrollLeftRef,
+    containerRef,
+  ]);
 
   useEffect(() => {
     if (loadingState === DataLoadingState.loadingMore) {

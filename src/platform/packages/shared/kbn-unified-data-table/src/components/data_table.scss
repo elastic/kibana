@@ -48,6 +48,10 @@
     border-bottom: $euiBorderThin;
   }
 
+  .euiDataGridRowCell {
+    overflow: hidden;
+  }
+
   .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content,
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'],
