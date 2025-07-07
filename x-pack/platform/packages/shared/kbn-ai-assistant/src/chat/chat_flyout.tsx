@@ -172,7 +172,6 @@ export function ChatFlyout({
           'xpack.aiAssistant.chatFlyout.euiFlyoutResizable.aiAssistantLabel',
           { defaultMessage: 'AI Assistant Chat Flyout' }
         )}
-        data-test-subj="aiAssistantChatFlyout"
         className={flyoutClassName}
         closeButtonProps={{
           css: {
