@@ -17,6 +17,7 @@ import { getEventLog } from '../../../../../common/lib/get_event_log';
 export default function updateGapsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const logger = getService('log');
 
   // Failing: See https://github.com/elastic/kibana/issues/224475
   describe('update gaps', () => {
@@ -222,7 +223,8 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
             end: gapEnd,
           });
 
-        console.log('finalGapResponse', JSON.stringify(finalGapResponse.body, null, 2));
+        logger.info('finalGapResponse');
+        logger.info(JSON.stringify(finalGapResponse.body, null, 2));
         expect(finalGapResponse.statusCode).to.eql(200);
         expect(finalGapResponse.body.total).to.eql(1);
         const finalGap = finalGapResponse.body.data[0];
