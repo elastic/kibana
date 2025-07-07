@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import {
-  ScoutPage,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-  test as baseTest,
-} from '@kbn/scout-oblt';
+import { ScoutPage, test as baseTest, ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
 import { SLOPageObjects, extendPageObjects } from './page_objects';
 
-export interface StreamsTestFixtures extends ScoutTestFixtures {
+export interface StreamsTestFixtures extends ObltTestFixtures {
   pageObjects: SLOPageObjects;
 }
 
-export const test = baseTest.extend<StreamsTestFixtures, ScoutWorkerFixtures>({
+export const test = baseTest.extend<StreamsTestFixtures, ObltWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
