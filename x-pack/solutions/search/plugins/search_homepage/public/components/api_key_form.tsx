@@ -70,7 +70,7 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = () => {
                 onClick={toggleApiKeyVisibility}
                 data-test-subj="searchHomepageShowAPIKeyButton"
                 aria-label={i18n.translate('xpack.searchHomepage.apiKeyForm.showApiKey', {
-                  defaultMessage: 'Show API Key',
+                  defaultMessage: 'Show API key',
                 })}
               />,
             ]}
