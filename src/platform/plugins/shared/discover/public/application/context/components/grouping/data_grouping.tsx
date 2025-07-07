@@ -82,7 +82,7 @@ const DataGroupingInternal = <T extends BaseDataGroupAggregations>(props: DataGr
       groupPanelRenderer: renderGroupPanel,
       getGroupStats,
       unit: (totalCount) =>
-        i18n.translate('dataGrouping.unit', {
+        i18n.translate('discover.dataGrouping.unit', {
           values: { totalCount },
           defaultMessage: `{totalCount, plural, =1 {document} other {documents}}`,
         }),

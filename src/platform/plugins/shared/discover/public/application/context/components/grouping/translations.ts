@@ -9,6 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ungrouped = i18n.translate('discover.grouping.ungrouped.label', {
+export const ungrouped = i18n.translate('discover.grouping.ungrouped.label.ungrouped', {
   defaultMessage: 'Ungrouped',
 });
