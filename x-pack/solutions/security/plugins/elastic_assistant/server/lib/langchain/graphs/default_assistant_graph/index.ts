@@ -282,7 +282,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   };
 
   // make a fire and forget async call to generateChatTitle
-  (async () => {
+  void (async () => {
     const model = await createLlmInstance();
     await generateChatTitle({
       actionsClient,

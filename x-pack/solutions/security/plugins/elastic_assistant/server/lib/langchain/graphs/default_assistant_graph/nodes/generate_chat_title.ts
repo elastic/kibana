@@ -34,7 +34,7 @@ export const GENERATE_CHAT_TITLE_PROMPT = ({
 export interface GenerateChatTitleParams extends NodeParamsBase {
   state: Pick<
     GraphInputs,
-    'connectorId' | 'conversationId' | 'llmType' | 'responseLanguage' | 'input'
+    'connectorId' | 'conversationId' | 'llmType' | 'responseLanguage' | 'input' | 'isStream'
   >;
   model: BaseChatModel;
   conversationsDataClient?: AIAssistantConversationsDataClient;
