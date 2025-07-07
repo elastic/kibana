@@ -8,9 +8,9 @@
 import { createServerlessTestConfig } from '../../default_configs/serverless.config.base';
 
 export default createServerlessTestConfig({
-  serverlessProject: 'security',
-  testFiles: [require.resolve('./security.index.ts')],
+  serverlessProject: 'oblt',
+  testFiles: [require.resolve('./oblt.index.ts')],
   junit: {
-    reportName: 'Serverless Security - Deployment-agnostic API Integration Tests',
+    reportName: 'Serverless Observability - Deployment-agnostic platform API Integration Tests',
   },
 });
