@@ -52,6 +52,7 @@ import { ActionsServiceProvider } from './actions';
 import { RulesServiceProvider } from './rules';
 import { AiopsProvider } from './aiops';
 import { SearchSessionsService } from './search_sessions';
+import { CanvasElementProvider } from './canvas_element';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -104,4 +105,5 @@ export const services = {
   actions: ActionsServiceProvider,
   rules: RulesServiceProvider,
   aiops: AiopsProvider,
+  canvasElement: CanvasElementProvider,
 };

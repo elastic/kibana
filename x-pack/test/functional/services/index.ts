@@ -52,6 +52,7 @@ import { CasesServiceProvider } from '@kbn/test-suites-xpack-platform/reporting_
 import { ActionsServiceProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services/actions';
 import { RulesServiceProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services/rules';
 import { AiopsProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services/aiops';
+import { CanvasElementProvider } from '@kbn/test-suites-xpack-platform/functional/services/canvas_element';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 
@@ -61,9 +62,6 @@ import { PipelineListProvider } from './pipeline_list';
 import { PipelineEditorProvider } from './pipeline_editor';
 // @ts-ignore not ts yet
 import { RandomProvider } from './random';
-// @ts-ignore not ts yet
-import { CanvasElementProvider } from './canvas_element';
-// @ts-ignore not ts yet
 // @ts-ignore not ts yet
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
