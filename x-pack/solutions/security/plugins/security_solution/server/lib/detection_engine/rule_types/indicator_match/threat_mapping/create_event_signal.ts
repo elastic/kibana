@@ -110,18 +110,16 @@ export const createEventSignal = async ({
       }
     }
 
-    const { validEvents, invalidIds } = validateCompleteThreatMatches(
+    const { matchedEvents, skippedIds } = validateCompleteThreatMatches(
       signalsQueryMap,
       threatMapping
     );
 
-    if (invalidIds.length > 0) {
-      ruleExecutionLogger.debug(
-        `Invalid signals: ${invalidIds.join(', ')} - skipping these signals`
-      );
+    if (skippedIds.length > 0) {
+      ruleExecutionLogger.debug(`Skipping not matched documents: ${skippedIds.join(', ')}`);
     }
 
-    const ids = Array.from(validEvents.keys());
+    const ids = Array.from(matchedEvents.keys());
     const indexFilter = {
       query: {
         bool: {

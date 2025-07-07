@@ -59,9 +59,9 @@ import type { ThreatMapping } from '../../../../../../common/api/detection_engin
 export const validateCompleteThreatMatches = (
   signalsQueryMap: SignalsQueryMap,
   threatMapping: ThreatMapping
-): { validEvents: SignalsQueryMap; invalidIds: string[] } => {
-  const validEvents: SignalsQueryMap = new Map();
-  const invalidIds: string[] = [];
+): { matchedEvents: SignalsQueryMap; skippedIds: string[] } => {
+  const matchedEvents: SignalsQueryMap = new Map();
+  const skippedIds: string[] = [];
 
   signalsQueryMap.forEach((threatQueries, signalId) => {
     const hasCompleteMatch = threatMapping.some((andGroup) => {
@@ -77,11 +77,11 @@ export const validateCompleteThreatMatches = (
     });
 
     if (hasCompleteMatch) {
-      validEvents.set(signalId, threatQueries);
+      matchedEvents.set(signalId, threatQueries);
     } else {
-      invalidIds.push(signalId);
+      skippedIds.push(signalId);
     }
   });
 
-  return { validEvents, invalidIds };
+  return { matchedEvents, skippedIds };
 };

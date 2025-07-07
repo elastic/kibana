@@ -57,8 +57,8 @@ describe('validateCompleteThreatMatches', () => {
 
       const result = validateCompleteThreatMatches(signalsQueryMap, threatMapping);
 
-      expect(result.validEvents.has('event-1')).toBe(true);
-      expect(result.invalidIds).toEqual([]);
+      expect(result.matchedEvents.has('event-1')).toBe(true);
+      expect(result.skippedIds).toEqual([]);
     });
 
     it('should reject partial match for single AND group', () => {
@@ -81,8 +81,8 @@ describe('validateCompleteThreatMatches', () => {
 
       const result = validateCompleteThreatMatches(signalsQueryMap, threatMapping);
 
-      expect(result.validEvents.has('event-1')).toBe(false);
-      expect(result.invalidIds).toEqual(['event-1']);
+      expect(result.matchedEvents.has('event-1')).toBe(false);
+      expect(result.skippedIds).toEqual(['event-1']);
     });
 
     it('should reject event with no matches for single AND group', () => {
@@ -104,8 +104,8 @@ describe('validateCompleteThreatMatches', () => {
 
       const result = validateCompleteThreatMatches(signalsQueryMap, threatMapping);
 
-      expect(result.validEvents.has('event-1')).toBe(false);
-      expect(result.invalidIds).toEqual(['event-1']);
+      expect(result.matchedEvents.has('event-1')).toBe(false);
+      expect(result.skippedIds).toEqual(['event-1']);
     });
   });
 
@@ -134,8 +134,8 @@ describe('validateCompleteThreatMatches', () => {
 
       const result = validateCompleteThreatMatches(signalsQueryMap, threatMapping);
 
-      expect(result.validEvents.has('event-1')).toBe(true);
-      expect(result.invalidIds).toEqual([]);
+      expect(result.matchedEvents.has('event-1')).toBe(true);
+      expect(result.skippedIds).toEqual([]);
     });
 
     it('should validate event that matches second AND group completely', () => {
@@ -162,8 +162,8 @@ describe('validateCompleteThreatMatches', () => {
 
       const result = validateCompleteThreatMatches(signalsQueryMap, threatMapping);
 
-      expect(result.validEvents.has('event-1')).toBe(true);
-      expect(result.invalidIds).toEqual([]);
+      expect(result.matchedEvents.has('event-1')).toBe(true);
+      expect(result.skippedIds).toEqual([]);
     });
 
     it('should reject event with partial matches across different AND groups', () => {
@@ -190,8 +190,8 @@ describe('validateCompleteThreatMatches', () => {
 
       const result = validateCompleteThreatMatches(signalsQueryMap, threatMapping);
 
-      expect(result.validEvents.has('event-1')).toBe(false);
-      expect(result.invalidIds).toEqual(['event-1']);
+      expect(result.matchedEvents.has('event-1')).toBe(false);
+      expect(result.skippedIds).toEqual(['event-1']);
     });
   });
 
@@ -230,11 +230,11 @@ describe('validateCompleteThreatMatches', () => {
 
       const result = validateCompleteThreatMatches(signalsQueryMap, threatMapping);
 
-      expect(result.validEvents.has('event-1')).toBe(true);
-      expect(result.validEvents.has('event-2')).toBe(true);
-      expect(result.validEvents.has('event-3')).toBe(false);
-      expect(result.validEvents.has('event-4')).toBe(false);
-      expect(result.invalidIds).toEqual(['event-3', 'event-4']);
+      expect(result.matchedEvents.has('event-1')).toBe(true);
+      expect(result.matchedEvents.has('event-2')).toBe(true);
+      expect(result.matchedEvents.has('event-3')).toBe(false);
+      expect(result.matchedEvents.has('event-4')).toBe(false);
+      expect(result.skippedIds).toEqual(['event-3', 'event-4']);
     });
 
     it('should handle single field AND group', () => {
@@ -248,8 +248,8 @@ describe('validateCompleteThreatMatches', () => {
 
       const result = validateCompleteThreatMatches(signalsQueryMap, threatMapping);
 
-      expect(result.validEvents.has('event-1')).toBe(true);
-      expect(result.invalidIds).toEqual([]);
+      expect(result.matchedEvents.has('event-1')).toBe(true);
+      expect(result.skippedIds).toEqual([]);
     });
 
     it('should handle empty threat mapping', () => {
@@ -261,8 +261,8 @@ describe('validateCompleteThreatMatches', () => {
 
       const result = validateCompleteThreatMatches(signalsQueryMap, threatMapping);
 
-      expect(result.validEvents.size).toBe(0);
-      expect(result.invalidIds).toEqual(['event-1']);
+      expect(result.matchedEvents.size).toBe(0);
+      expect(result.skippedIds).toEqual(['event-1']);
     });
 
     it('should handle empty signals query map', () => {
@@ -274,8 +274,8 @@ describe('validateCompleteThreatMatches', () => {
 
       const result = validateCompleteThreatMatches(signalsQueryMap, threatMapping);
 
-      expect(result.validEvents.size).toBe(0);
-      expect(result.invalidIds).toEqual([]);
+      expect(result.matchedEvents.size).toBe(0);
+      expect(result.skippedIds).toEqual([]);
     });
   });
 });
