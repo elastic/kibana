@@ -7,6 +7,8 @@
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import createContainer from 'constate';
+import type { FetcherResult } from '@kbn/observability-shared-plugin/public';
+import type { GetTimeRangeMetadataResponse } from '../../common/metrics_sources/get_has_data';
 import {
   getTimeRangeMetadataResponseRT,
   type SupportedDataSources,
@@ -23,7 +25,7 @@ const useTimeRangeMetadata = ({
   dataSource: SupportedDataSources;
   start: string;
   end: string;
-}) => {
+}): FetcherResult<GetTimeRangeMetadataResponse> => {
   const fetcherResult = useFetcher(
     async (callApi) => {
       const response = await callApi('/api/metrics/source/time_range_metadata', {
