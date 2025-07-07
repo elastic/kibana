@@ -145,7 +145,7 @@ export function OverrideSwitch({
           position="right"
         >
           <span>
-            {rowLabel} <EuiIcon type="questionInCircle" color="subdued" />
+            {rowLabel} <EuiIcon type="question" color="subdued" />
           </span>
         </EuiToolTip>
       }
@@ -585,7 +585,7 @@ export function PanelMenu({
               position="right"
             >
               <span>
-                Show custom action <EuiIcon type="questionInCircle" color="subdued" />
+                Show custom action <EuiIcon type="question" color="subdued" />
               </span>
             </EuiToolTip>
           }

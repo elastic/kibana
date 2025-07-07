@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import {
+  EuiEmptyPrompt,
   EuiFilterButton,
   EuiFilterGroup,
-  EuiEmptyPrompt,
-  EuiSpacer,
-  EuiProgress,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import { Sample } from '@kbn/grok-ui';
+import { i18n } from '@kbn/i18n';
 import { GrokProcessorDefinition } from '@kbn/streams-schema';
+import { isEmpty } from 'lodash';
+import React, { useMemo } from 'react';
 import { PreviewTable } from '../preview_table';
-import {
-  useSimulatorSelector,
-  useStreamEnrichmentEvents,
-  useStreamEnrichmentSelector,
-} from './state_management/stream_enrichment_state_machine';
 import {
   PreviewDocsFilterOption,
   getTableColumns,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
-import { isGrokProcessor } from './utils';
+import {
+  useSimulatorSelector,
+  useStreamEnrichmentEvents,
+  useStreamEnrichmentSelector,
+} from './state_management/stream_enrichment_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 import { WithUIAttributes } from './types';
+import { isGrokProcessor } from './utils';
+import { AssetImage } from '../../asset_image';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
     (snapshot) => snapshot.matches('debouncingChanges') || snapshot.matches('runningSimulation')
   );
-  const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
-  );
+
+  const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
 
   const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
     state.context.dataSourcesRefs.some((ref) => {
@@ -53,7 +53,7 @@ export const ProcessorOutcomePreview = () => {
     })
   );
 
-  if (isEmpty(previewDocuments)) {
+  if (isEmpty(samples)) {
     if (areDataSourcesLoading) {
       return (
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
@@ -300,6 +300,33 @@ const OutcomePreviewTable = () => {
     }
     setPreviewColumnsOrder(visibleColumns);
   };
+
+  if (isEmpty(previewDocuments)) {
+    return (
+      <EuiEmptyPrompt
+        icon={<AssetImage type="noResults" />}
+        titleSize="s"
+        title={
+          <h2>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noFilteredDocumentsTitle',
+              { defaultMessage: 'No documents available' }
+            )}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noFilteredDocumentsBody',
+              {
+                defaultMessage: 'The current filter settings do not match any documents.',
+              }
+            )}
+          </p>
+        }
+      />
+    );
+  }
 
   return (
     <PreviewTable

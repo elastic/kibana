@@ -9,7 +9,7 @@ import { useState, useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { LOCAL_STORAGE_NAMESPACE_KEY, DEFAULT_NAMESPACE } from '../constants';
 
-export const useActiveNamespace = ({ postureType }: { postureType?: 'cspm' | 'kspm' }) => {
+export const useActiveNamespace = ({ postureType }: { postureType: 'cspm' | 'kspm' }) => {
   const [localStorageActiveNamespace, localStorageSetActiveNamespace] = useLocalStorage(
     `${LOCAL_STORAGE_NAMESPACE_KEY}:${postureType}`,
     DEFAULT_NAMESPACE

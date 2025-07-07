@@ -26,6 +26,7 @@ import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
+  STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
 import { ContentService } from './lib/content/content_service';
@@ -152,6 +153,8 @@ export class StreamsPlugin
       },
     });
 
+    core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
+
     registerRoutes({
       repository: streamsRouteRepository,
       dependencies: {
@@ -205,17 +208,15 @@ export class StreamsPlugin
     const isObservabilityServerless =
       plugins.cloud?.isServerlessEnabled &&
       plugins.cloud?.serverless.projectType === 'observability';
+
     core.uiSettings.register({
       [OBSERVABILITY_ENABLE_STREAMS_UI]: {
         category: ['observability'],
         name: 'Streams UI',
         value: isObservabilityServerless,
         description: i18n.translate('xpack.streams.enableStreamsUIDescription', {
-          defaultMessage: '{technicalPreviewLabel} Enable the {streamsLink}.',
+          defaultMessage: 'Enable the {streamsLink}.',
           values: {
-            technicalPreviewLabel: `<em>[${i18n.translate('xpack.streams.technicalPreviewLabel', {
-              defaultMessage: 'Technical Preview',
-            })}]</em>`,
             streamsLink: `<a href="https://www.elastic.co/docs/solutions/observability/logs/streams/streams">Streams UI</href>`,
           },
         }),
@@ -223,6 +224,7 @@ export class StreamsPlugin
         schema: schema.boolean(),
         requiresPageReload: true,
         solution: 'oblt',
+        technicalPreview: true,
       },
     });
 

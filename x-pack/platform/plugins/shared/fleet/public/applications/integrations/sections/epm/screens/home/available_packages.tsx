@@ -67,7 +67,7 @@ const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
   }
 
   return (
-    <EuiCallOut title={titleMessage} iconType="iInCircle" color={'warning'}>
+    <EuiCallOut title={titleMessage} iconType="info" color={'warning'}>
       <p>{descriptionMessage}</p>
     </EuiCallOut>
   );

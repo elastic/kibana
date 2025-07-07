@@ -140,7 +140,7 @@ export function ControlledEsqlChart<T extends string>({
                   style={{ fontWeight: 'normal' }}
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="iInCircle" />
+                    <EuiIcon type="info" />
                   </EuiFlexItem>
                   <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
                 </EuiFlexGroup>
@@ -190,6 +190,7 @@ export function ControlledEsqlChart<T extends string>({
             yAccessors={serie.metricNames}
             data={serie.data}
             curve={CurveType.CURVE_MONOTONE_X}
+            enableHistogramMode
           />
         );
       })}
