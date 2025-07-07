@@ -174,7 +174,6 @@ export function registerESQLToolsRoutes({
         if (!enabled) {
           return response.notFound();
         }
-
         if (!/^[a-zA-Z0-9_-]+$/.test(request.body.id)) {
           return response.badRequest({
             body: {

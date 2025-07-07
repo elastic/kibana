@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFieldWithMetadata } from '../../validation/types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;

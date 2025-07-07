@@ -11,6 +11,10 @@ import type { ToolProviderId, PlainIdToolIdentifier, ToolDescriptor } from './to
  * "all tools" wildcard which can be used for {@link ByIdsToolSelection}
  */
 export const allToolsSelectionWildcard = '*';
+/**
+ * Constant tool selection to select all tools
+ */
+export const allToolsSelection: ToolSelection[] = [{ toolIds: [allToolsSelectionWildcard] }];
 
 /**
  * Represents a tool selection based on individual tool IDs, and optionally a provider ID.

@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { InstallationStatus } from '../../../common/install_status';
+import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
 
 /**
  * APIs to manage the product documentation.
@@ -30,8 +30,9 @@ export interface DocumentationManagerAPI {
   uninstall(options?: DocUninstallOptions): Promise<void>;
   /**
    * Returns the overall installation status of the documentation.
+   * @param inferenceId - The inference ID to get the status for.
    */
-  getStatus(): Promise<DocGetStatusResponse>;
+  getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse>;
 }
 
 /**
@@ -39,6 +40,7 @@ export interface DocumentationManagerAPI {
  */
 export interface DocGetStatusResponse {
   status: InstallationStatus;
+  installStatus?: Record<string, ProductInstallState>;
 }
 
 /**
@@ -61,6 +63,10 @@ export interface DocInstallOptions {
    * Defaults to `false`
    */
   wait?: boolean;
+  /**
+   * If provided, the docs will be installed with the model indicated by Inference ID
+   */
+  inferenceId: string;
 }
 
 /**
@@ -78,6 +84,10 @@ export interface DocUninstallOptions {
    * Defaults to `false`
    */
   wait?: boolean;
+  /**
+   * If provided, the docs will be uninstalled with the model indicated by Inference ID
+   */
+  inferenceId: string;
 }
 
 /**
@@ -95,4 +105,8 @@ export interface DocUpdateOptions {
    * Defaults to `false`
    */
   wait?: boolean;
+  /**
+   * If provided, the docs will be updated with the model indicated by Inference ID
+   */
+  inferenceId: string;
 }

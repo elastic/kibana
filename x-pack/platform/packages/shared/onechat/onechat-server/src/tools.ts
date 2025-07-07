@@ -111,7 +111,7 @@ export interface EsqlTool<RunInput extends ZodObject<any> = ZodObject<any>, RunO
     string,
     {
       /**
-       * The data type of the parameter.
+       * The data types of the parameter.
        */
       type: FieldTypes;
 
@@ -175,12 +175,19 @@ export type ExecutableToolHandlerFn<TParams = Record<string, unknown>, TResult =
 ) => Promise<RunToolReturn<TResult>>;
 
 /**
+ * Return value for {@link ToolHandlerFn} / {@link RegisteredTool}
+ */
+export interface ToolHandlerReturn<T = unknown> {
+  result: T;
+}
+
+/**
  * Tool handler function for {@link RegisteredTool} handlers.
  */
 export type ToolHandlerFn<
   TParams extends Record<string, unknown> = Record<string, unknown>,
   RunOutput = unknown
-> = (args: TParams, context: ToolHandlerContext) => MaybePromise<RunOutput>;
+> = (args: TParams, context: ToolHandlerContext) => MaybePromise<ToolHandlerReturn<RunOutput>>;
 
 /**
  * Scoped context which can be used during tool execution to access

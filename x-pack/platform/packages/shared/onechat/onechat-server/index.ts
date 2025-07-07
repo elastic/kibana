@@ -12,6 +12,7 @@ export type {
   EsqlToolDefinition,
   EsqlTool,
   ToolHandlerFn,
+  ToolHandlerReturn,
   ToolHandlerContext,
   ToolProvider,
   ToolProviderHasOptions,

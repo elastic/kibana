@@ -17,7 +17,8 @@ import { useKibana } from '../use_kibana';
 const DEFAULT_INDICES_POLLING_INTERVAL = 15 * 1000;
 
 export const useIndicesStatusQuery = (
-  pollingInterval = DEFAULT_INDICES_POLLING_INTERVAL
+  pollingInterval = DEFAULT_INDICES_POLLING_INTERVAL,
+  enabled = true
 ): UseQueryResult<IndicesStatusResponse> => {
   const { http } = useKibana().services;
 
@@ -28,5 +29,6 @@ export const useIndicesStatusQuery = (
     retry: true,
     queryKey: [QueryKeys.FetchSearchIndicesStatus],
     queryFn: () => http.get<IndicesStatusResponse>(GET_STATUS_ROUTE),
+    enabled,
   });
 };

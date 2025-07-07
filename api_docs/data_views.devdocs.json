@@ -14797,7 +14797,9 @@
             "type": "Function",
             "tags": [],
             "label": "isPersisted",
-            "description": [],
+            "description": [
+              "\nReturns true if the data view is persisted, and false if the dataview is adhoc."
+            ],
             "signature": [
               "() => boolean"
             ],

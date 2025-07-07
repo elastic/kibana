@@ -16,6 +16,10 @@ import type {
 } from './types';
 import { InstallationService } from './services/installation';
 
+interface ProductDocInstallServiceParams {
+  inferenceId: string;
+}
+
 export class ProductDocBasePlugin
   implements
     Plugin<
@@ -42,9 +46,11 @@ export class ProductDocBasePlugin
 
     return {
       installation: {
-        getStatus: () => installationService.getInstallationStatus(),
-        install: () => installationService.install(),
-        uninstall: () => installationService.uninstall(),
+        getStatus: (params: ProductDocInstallServiceParams) =>
+          installationService.getInstallationStatus(params),
+        install: (params: ProductDocInstallServiceParams) => installationService.install(params),
+        uninstall: (params: ProductDocInstallServiceParams) =>
+          installationService.uninstall(params),
       },
     };
   }

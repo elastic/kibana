@@ -17,11 +17,13 @@ import {
   PopoverAnchorPosition,
   type EuiPopoverProps,
 } from '@elastic/eui';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { useUIFieldActions } from '../../../../../hooks/use_field_actions';
 
 interface HoverPopoverActionProps {
   children: React.ReactChild;
   field: string;
+  fieldMapping?: DataViewField;
   value: unknown;
   formattedValue?: string;
   title: string;
@@ -33,6 +35,7 @@ export const FieldHoverActionPopover = ({
   children,
   title,
   field,
+  fieldMapping: mapping,
   value,
   formattedValue,
   anchorPosition = 'upCenter',
@@ -40,7 +43,7 @@ export const FieldHoverActionPopover = ({
 }: HoverPopoverActionProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
-  const uiFieldActions = useUIFieldActions({ field, value, formattedValue });
+  const uiFieldActions = useUIFieldActions({ field, value, formattedValue, mapping });
 
   const clearTimeoutIfExists = () => {
     if (leaveTimer.current) {

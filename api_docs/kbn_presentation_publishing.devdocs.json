@@ -4387,7 +4387,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PublishesDataViews",
-        "description": [],
+        "description": [
+          "\nThis API publishes a list of data views that it uses. Note that this should not contain any\nad-hoc data views."
+        ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
         "deprecated": false,
         "trackAdoption": false,

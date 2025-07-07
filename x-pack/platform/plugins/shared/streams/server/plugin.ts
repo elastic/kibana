@@ -208,17 +208,15 @@ export class StreamsPlugin
     const isObservabilityServerless =
       plugins.cloud?.isServerlessEnabled &&
       plugins.cloud?.serverless.projectType === 'observability';
+
     core.uiSettings.register({
       [OBSERVABILITY_ENABLE_STREAMS_UI]: {
         category: ['observability'],
         name: 'Streams UI',
         value: isObservabilityServerless,
         description: i18n.translate('xpack.streams.enableStreamsUIDescription', {
-          defaultMessage: '{technicalPreviewLabel} Enable the {streamsLink}.',
+          defaultMessage: 'Enable the {streamsLink}.',
           values: {
-            technicalPreviewLabel: `<em>[${i18n.translate('xpack.streams.technicalPreviewLabel', {
-              defaultMessage: 'Technical Preview',
-            })}]</em>`,
             streamsLink: `<a href="https://www.elastic.co/docs/solutions/observability/logs/streams/streams">Streams UI</href>`,
           },
         }),
@@ -226,6 +224,7 @@ export class StreamsPlugin
         schema: schema.boolean(),
         requiresPageReload: true,
         solution: 'oblt',
+        technicalPreview: true,
       },
     });
 

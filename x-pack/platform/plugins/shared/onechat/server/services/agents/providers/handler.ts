@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { AgentMode } from '@kbn/onechat-common';
+import { AgentMode, ToolSelection } from '@kbn/onechat-common';
 import type { ConversationalAgentHandlerFn } from '@kbn/onechat-server';
 import { runAgent } from '../modes';
 
 export interface CreateConversationalAgentHandlerParams {
   agentId: string;
+  toolSelection: ToolSelection[];
+  customInstructions?: string;
 }
 
 /**
@@ -18,6 +20,8 @@ export interface CreateConversationalAgentHandlerParams {
  */
 export const createHandler = ({
   agentId,
+  toolSelection,
+  customInstructions,
 }: CreateConversationalAgentHandlerParams): ConversationalAgentHandlerFn => {
   return async (
     { agentParams: { nextInput, conversation = [], agentMode = AgentMode.normal }, runId },
@@ -29,7 +33,9 @@ export const createHandler = ({
         nextInput,
         conversation,
         runId,
-        tools: context.toolProvider,
+        agentId,
+        toolSelection,
+        customInstructions,
       },
       context
     );

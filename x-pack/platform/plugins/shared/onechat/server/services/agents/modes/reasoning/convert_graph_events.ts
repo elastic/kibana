@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type { AIMessageChunk, ToolMessage } from '@langchain/core/messages';
 import { EMPTY, mergeMap, of, OperatorFunction } from 'rxjs';
 import {
-  ChatAgentEventType,
   MessageChunkEvent,
   MessageCompleteEvent,
   ToolCallEvent,
@@ -28,6 +28,9 @@ import {
   toolIdentifierFromToolCall,
   createReasoningEvent,
   ToolIdMapping,
+  createToolCallEvent,
+  createMessageEvent,
+  createToolResultEvent,
 } from '@kbn/onechat-genai-utils/langchain';
 import { isMessage, isReasoningStep } from './actions';
 import type { StateType } from './graph';
@@ -50,6 +53,7 @@ export const convertGraphEvents = ({
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, StructuredToolIdentifier>();
+    const messageId = uuidv4();
 
     return streamEvents$.pipe(
       mergeMap((event) => {
@@ -71,7 +75,7 @@ export const convertGraphEvents = ({
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
-            return of(createTextChunkEvent(chunk));
+            return of(createTextChunkEvent(textContent, { messageId }));
           }
         }
 
@@ -87,26 +91,16 @@ export const convertGraphEvents = ({
 
             for (const toolCall of toolCalls) {
               const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
+              const { toolCallId, args } = toolCall;
               toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-              toolCallEvents.push({
-                type: ChatAgentEventType.toolCall,
-                data: {
-                  toolId,
-                  toolCallId: toolCall.toolCallId,
-                  args: toolCall.args,
-                },
-              });
+              toolCallEvents.push(createToolCallEvent({ toolId, toolCallId, args }));
             }
 
             return of(...toolCallEvents);
           } else {
-            const messageEvent: MessageCompleteEvent = {
-              type: ChatAgentEventType.messageComplete,
-              data: {
-                messageId: lastMessage.id ?? 'unknown',
-                messageContent: extractTextContent(lastMessage),
-              },
-            };
+            const messageEvent = createMessageEvent(extractTextContent(lastMessage), {
+              messageId,
+            });
 
             return of(messageEvent);
           }
@@ -119,21 +113,17 @@ export const convertGraphEvents = ({
           const toolResultEvents: ToolResultEvent[] = [];
           for (const toolMessage of toolMessages) {
             const toolId = toolCallIdToIdMap.get(toolMessage.tool_call_id);
-            toolResultEvents.push({
-              type: ChatAgentEventType.toolResult,
-              data: {
+            toolResultEvents.push(
+              createToolResultEvent({
                 toolCallId: toolMessage.tool_call_id,
                 toolId: toolId ?? toStructuredToolIdentifier('unknown'),
                 result: extractTextContent(toolMessage),
-              },
-            });
+              })
+            );
           }
 
           return of(...toolResultEvents);
         }
-
-        // run is finished
-        // if (event.event === 'on_chain_end' && event.name === runName) {}
 
         return EMPTY;
       })

@@ -345,6 +345,6 @@ Similarly to `testErrorsAndWarnings`, `testSuggestions` is an all-in-one utility
 Its parameters are as follows
 
 1. the query
-2. the expected suggestions (can be strings or `Partial<SuggestionRawDefinition>`)
+2. the expected suggestions (can be strings or `Partial<ISuggestionItem>`)
 3. the trigger character. This should only be included if the test is intended to validate a "Trigger Character" trigger kind from Monaco ([ref](https://microsoft.github.io/monaco-editor/typedoc/enums/languages.CompletionTriggerKind.html#TriggerCharacter))
 4. custom callback data such as a list of indicies or a field list

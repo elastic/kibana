@@ -106,6 +106,6 @@ export const genericEntityEngineDescription: EntityDescription = {
     newestValue({ source: 'orchestrator.resource.type' }),
     newestValue({ source: 'orchestrator.type' }),
 
-    ...getCommonFieldDescriptions('generic'),
+    ...getCommonFieldDescriptions('entity'),
   ],
 };

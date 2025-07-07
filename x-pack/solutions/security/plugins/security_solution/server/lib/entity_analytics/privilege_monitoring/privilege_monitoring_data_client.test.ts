@@ -72,7 +72,6 @@ describe('Privilege Monitoring Data Client', () => {
 
       expect(mockCreateOrUpdateIndex).toHaveBeenCalled();
       expect(mockStartPrivilegeMonitoringTask).toHaveBeenCalled();
-      expect(loggerMock.debug).toHaveBeenCalledTimes(3);
       expect(auditMock.log).toHaveBeenCalled();
       expect(result).toEqual(mockDescriptor);
     });

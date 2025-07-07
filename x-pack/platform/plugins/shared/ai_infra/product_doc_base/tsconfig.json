@@ -27,5 +27,7 @@
     "@kbn/task-manager-plugin",
     "@kbn/inference-common",
     "@kbn/core-security-server",
+    "@kbn/ml-is-populated-object",
+    "@kbn/i18n"
   ]
 }

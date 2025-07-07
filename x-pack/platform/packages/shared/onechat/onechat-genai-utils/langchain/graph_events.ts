@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { AIMessageChunk } from '@langchain/core/messages';
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import {
   ChatAgentEventType,
   MessageChunkEvent,
-  ReasoningEvent,
   MessageCompleteEvent,
+  ReasoningEvent,
+  ToolCallEvent,
+  ToolCallEventData,
+  ToolResultEvent,
+  ToolResultEventData,
 } from '@kbn/onechat-common/agents';
-import { extractTextContent } from './messages';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;
@@ -39,15 +41,29 @@ export const hasTag = (event: LangchainStreamEvent, tag: string): boolean => {
   return (event.tags ?? []).includes(tag);
 };
 
+export const createToolCallEvent = (data: ToolCallEventData): ToolCallEvent => {
+  return {
+    type: ChatAgentEventType.toolCall,
+    data,
+  };
+};
+
+export const createToolResultEvent = (data: ToolResultEventData): ToolResultEvent => {
+  return {
+    type: ChatAgentEventType.toolResult,
+    data,
+  };
+};
+
 export const createTextChunkEvent = (
-  chunk: AIMessageChunk,
-  { defaultMessageId = 'unknown' }: { defaultMessageId?: string } = {}
+  chunk: string,
+  { messageId = 'unknown' }: { messageId?: string } = {}
 ): MessageChunkEvent => {
   return {
     type: ChatAgentEventType.messageChunk,
     data: {
-      messageId: chunk.id ?? defaultMessageId,
-      textChunk: extractTextContent(chunk),
+      messageId,
+      textChunk: chunk,
     },
   };
 };

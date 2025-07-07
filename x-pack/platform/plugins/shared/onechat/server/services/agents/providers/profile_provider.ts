@@ -10,10 +10,14 @@ import {
   toStructuredAgentIdentifier,
   AgentProfile,
   oneChatAgentProviderIds,
+  builtinToolProviderId,
+  allToolsSelectionWildcard as allTools,
 } from '@kbn/onechat-common';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { ConversationalAgentDefinition } from '@kbn/onechat-server';
-import type { AgentProviderWithId, AgentsServiceStart } from '../types';
+import type { AgentProviderWithId } from '../types';
 import { createHandler } from './handler';
+import type { AgentProfileClient } from '../profiles/client';
 
 /**
  * Returns an agent provider exposing profile-based agents.
@@ -21,7 +25,7 @@ import { createHandler } from './handler';
 export const creatProfileProvider = ({
   getProfileClient,
 }: {
-  getProfileClient: AgentsServiceStart['getProfileClient'];
+  getProfileClient: (request: KibanaRequest) => Promise<AgentProfileClient>;
 }): AgentProviderWithId => {
   const provider: AgentProviderWithId = {
     id: oneChatAgentProviderIds.profile,
@@ -55,6 +59,14 @@ const profileToDescriptor = ({
     type: AgentType.conversational,
     id: profile.id,
     description: profile.description,
-    handler: createHandler({ agentId: profile.id }),
+    handler: createHandler({
+      agentId: profile.id,
+      toolSelection: [
+        ...(profile.toolSelection ?? []),
+        // built-in tools are included by default
+        { provider: builtinToolProviderId, toolIds: [allTools] },
+      ],
+      customInstructions: profile.customInstructions,
+    }),
   };
 };

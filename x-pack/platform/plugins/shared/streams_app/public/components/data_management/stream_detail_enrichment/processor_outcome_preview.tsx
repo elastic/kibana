@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import {
+  EuiEmptyPrompt,
   EuiFilterButton,
   EuiFilterGroup,
-  EuiEmptyPrompt,
-  EuiSpacer,
-  EuiProgress,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import { Sample } from '@kbn/grok-ui';
+import { i18n } from '@kbn/i18n';
 import { GrokProcessorDefinition } from '@kbn/streams-schema';
+import { isEmpty } from 'lodash';
+import React, { useMemo } from 'react';
 import { PreviewTable } from '../preview_table';
-import {
-  useSimulatorSelector,
-  useStreamEnrichmentEvents,
-  useStreamEnrichmentSelector,
-} from './state_management/stream_enrichment_state_machine';
 import {
   PreviewDocsFilterOption,
   getTableColumns,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
-import { isGrokProcessor } from './utils';
+import {
+  useSimulatorSelector,
+  useStreamEnrichmentEvents,
+  useStreamEnrichmentSelector,
+} from './state_management/stream_enrichment_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 import { WithUIAttributes } from './types';
+import { isGrokProcessor } from './utils';
 import { AssetImage } from '../../asset_image';
 
 export const ProcessorOutcomePreview = () => {

@@ -29,5 +29,6 @@
     "@kbn/security-plugin",
     "@kbn/streams-plugin",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/cases-plugin",
   ]
 }

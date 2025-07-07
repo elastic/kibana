@@ -119,7 +119,6 @@ export function getDashboardApi({
       ...settingsManager.api.getSettings(),
       ...unifiedSearchState,
       panels,
-      viewMode: viewModeManager.api.viewMode$.value,
     };
 
     const { controlGroupInput, controlGroupReferences } =

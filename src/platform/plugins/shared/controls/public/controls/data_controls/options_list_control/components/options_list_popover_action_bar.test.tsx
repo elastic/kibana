@@ -56,7 +56,7 @@ const renderComponent = ({
   );
 };
 
-const getSelectAllCheckbox = () => screen.getByRole('checkbox', { name: /Select all/i });
+const getSelectAllCheckbox = () => screen.queryByRole('checkbox', { name: /Select all/i });
 
 const getSearchInput = () => screen.getByRole('searchbox', { name: /Filter suggestions/i });
 
@@ -91,6 +91,16 @@ describe('Options list popover', () => {
 
     expect(getSelectAllCheckbox()).toBeEnabled();
     expect(getSelectAllCheckbox()).not.toBeChecked();
+  });
+
+  test('hides "Select all" checkbox if the control only allows single selections', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.setTotalCardinality(80);
+    contextMock.componentApi.setAvailableOptions(take(allOptions, 10));
+    contextMock.componentApi.setSingleSelect(true);
+    renderComponent(contextMock);
+
+    expect(getSelectAllCheckbox()).not.toBeInTheDocument();
   });
 
   test('Select all is checked when all available options are selected ', async () => {

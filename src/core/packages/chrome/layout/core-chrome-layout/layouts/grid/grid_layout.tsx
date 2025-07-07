@@ -8,6 +8,7 @@
  */
 
 import React, { ReactNode } from 'react';
+import { map } from 'rxjs';
 import {
   ChromeLayout,
   ChromeLayoutConfigProvider,
@@ -24,14 +25,29 @@ import type {
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
-const layoutConfig: ChromeLayoutConfig = {
-  headerHeight: 96,
-  bannerHeight: 32,
+const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig } = {
+  classic: {
+    headerHeight: 96,
+    bannerHeight: 32,
 
-  /** for debug for now */
-  sidebarWidth: 48,
-  footerHeight: 48,
-  navigationWidth: 48,
+    /** for debug for now */
+    sidebarWidth: 48,
+    footerHeight: 48,
+    navigationWidth: 48,
+  },
+  project: {
+    headerHeight: 48,
+    bannerHeight: 32,
+
+    /** The application top bar renders the app specific menu */
+    /** we use it only in project style, because in classic it is included as part of the global header */
+    applicationTopBarHeight: 48,
+
+    /** for debug for now */
+    sidebarWidth: 48,
+    footerHeight: 48,
+    navigationWidth: 48,
+  },
 };
 
 /**
@@ -48,41 +64,70 @@ export class GridLayout implements LayoutService {
    */
   public getComponent(): React.ComponentType {
     const { application, chrome, overlays } = this.deps;
+
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
     const hasHeaderBanner$ = chrome.hasHeaderBanner$();
     const chromeVisible$ = chrome.getIsVisible$();
+    const chromeStyle$ = chrome.getChromeStyle$();
     const debug = this.params.debug ?? false;
 
-    const chromeHeader = chrome.getClassicHeaderComponentForGridLayout();
+    const classicChromeHeader = chrome.getClassicHeaderComponentForGridLayout();
+    const projectChromeHeader = chrome.getProjectHeaderComponentForGridLayout();
     const headerBanner = chrome.getHeaderBanner();
 
     // chromeless header is used when chrome is not visible and responsible for displaying the data-test-subj and fixed loading bar
     const chromelessHeader = chrome.getChromelessHeader();
 
+    // in project style, the project app menu is displayed at the top of application area
+    const projectAppMenu = chrome.getProjectAppMenuComponent();
+    const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
+
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
       const chromeVisible = useObservable(chromeVisible$, false);
       const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
+      const chromeStyle = useObservable(chromeStyle$, 'classic');
+      const hasAppMenu = useObservable(hasAppMenu$, false);
+
+      const layoutConfig = layoutConfigs[chromeStyle];
 
       // Assign main layout parts first
-      const header: ReactNode = chromeVisible && chromeHeader;
-      let banner: ReactNode = hasHeaderBanner ? headerBanner : undefined;
-
-      // not implemented
+      let header: ReactNode;
+      let navigation: ReactNode;
+      let banner: ReactNode;
+      let applicationTopBar: ReactNode;
+      // not implemented, just for debug
       let sidebar: ReactNode;
       let footer: ReactNode;
-      let navigation: ReactNode;
+
+      if (chromeVisible) {
+        if (chromeStyle === 'classic') {
+          // If classic style, we use the classic header and no navigation, since it is part of the header
+          header = classicChromeHeader;
+        } else {
+          // If project style, we use the project header and navigation
+          header = projectChromeHeader;
+          if (hasAppMenu) {
+            // If project app menu is present, we use it as the application top bar
+            applicationTopBar = projectAppMenu;
+          }
+        }
+      }
+
+      if (hasHeaderBanner) {
+        // If header banner is present, we use it, even if chrome is not visible
+        banner = headerBanner;
+      }
 
       // If debug, override/add debug overlays
       if (debug) {
         if (chromeVisible) {
           if (!sidebar) sidebar = <SimpleDebugOverlay label="Debug Sidebar" />;
           if (!footer) footer = <SimpleDebugOverlay label="Debug Footer" />;
-          if (!navigation)
-            navigation = (
-              <SimpleDebugOverlay label="Debug Nav" style={{ transform: 'rotate(180deg)' }} />
-            );
+          if (!navigation) {
+            navigation = <SimpleDebugOverlay label="Debug Navigation" />;
+          }
         }
         // banner is visible even when chrome is not visible
         if (!banner) {
@@ -100,6 +145,7 @@ export class GridLayout implements LayoutService {
               footer={footer}
               navigation={navigation}
               banner={banner}
+              applicationTopBar={applicationTopBar}
             >
               <>
                 {/* If chrome is not visible, we use the chromeless header to display the*/}

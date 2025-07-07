@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import archives_metadata from '@kbn/test-suites-xpack-observability/apm_api_integration/common/fixtures/es_archiver/archives_metadata';
+import archives_metadata from '../../../../../../apm_api_integration/common/fixtures/es_archiver/archives_metadata';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { ARCHIVER_ROUTES } from '../constants/archiver';
 

@@ -6,22 +6,98 @@
  */
 
 import { badRequest } from '@hapi/boom';
+import {
+  SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { SecurityError } from '../../../lib/streams/errors/security_error';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
 } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { readSignificantEvents } from './read_significant_events';
+import { previewSignificantEvents } from './preview_significant_events';
+import { readSignificantEventsFromAlertsIndices } from './read_significant_events_from_alerts_indices';
 import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
 
-export const readSignificantEventsRoute = createServerRoute({
+// Make sure strings are expected for input, but still converted to a
+// Date, without breaking the OpenAPI generator
+const dateFromString = z.string().transform((input) => new Date(input));
+
+const previewSignificantEventsRoute = createServerRoute({
+  endpoint: 'POST /api/streams/{name}/significant_events/_preview 2023-10-31',
+  params: z.object({
+    path: z.object({ name: z.string() }),
+    query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
+    body: z.object({
+      query: z.object({
+        kql: z.object({
+          query: z.string(),
+        }),
+      }),
+    }),
+  }),
+  options: {
+    access: 'public',
+    summary: 'Preview significant events',
+    description: 'Preview significant event results based on a given query',
+    availability: {
+      stability: 'experimental',
+    },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+  }): Promise<SignificantEventsPreviewResponse> => {
+    const { streamsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+
+    const isStreamEnabled = await streamsClient.isStreamsEnabled();
+    if (!isStreamEnabled) {
+      throw badRequest('Streams is not enabled');
+    }
+
+    const {
+      body: { query },
+      path: { name },
+      query: { bucketSize, from, to },
+    } = params;
+
+    const definition = await streamsClient.getStream(name);
+
+    return await previewSignificantEvents(
+      {
+        definition,
+        bucketSize,
+        from,
+        to,
+        query,
+      },
+      {
+        scopedClusterClient,
+      }
+    );
+  },
+});
+
+const readSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
-    query: z.object({ from: z.coerce.date(), to: z.coerce.date(), bucketSize: z.string() }),
+    query: z.object({
+      from: dateFromString,
+      to: dateFromString,
+      bucketSize: z.string(),
+    }),
   }),
 
   options: {
@@ -63,8 +139,13 @@ export const readSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize } = params.query;
 
-    return await readSignificantEvents(
-      { name, from, to, bucketSize },
+    return await readSignificantEventsFromAlertsIndices(
+      {
+        name,
+        from,
+        to,
+        bucketSize,
+      },
       { assetClient, scopedClusterClient }
     );
   },
@@ -72,4 +153,5 @@ export const readSignificantEventsRoute = createServerRoute({
 
 export const significantEventsRoutes = {
   ...readSignificantEventsRoute,
+  ...previewSignificantEventsRoute,
 };

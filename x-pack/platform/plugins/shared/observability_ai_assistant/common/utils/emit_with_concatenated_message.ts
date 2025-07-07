@@ -46,6 +46,11 @@ function mergeWithEditedMessage(
           '@timestamp': new Date().toISOString(),
           ...message,
         },
+        // Preserve deanonymization data if present in the chunk event
+        ...(chunkEvent.deanonymized_input && { deanonymized_input: chunkEvent.deanonymized_input }),
+        ...(chunkEvent.deanonymized_output && {
+          deanonymized_output: chunkEvent.deanonymized_output,
+        }),
       };
       return next;
     })

@@ -980,6 +980,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/async_sender.ts"
               },
               {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/public/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "apm",
                 "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_client.ts"
               },
@@ -1105,6 +1109,42 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/crowdstrike/crowdstrike_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/crowdstrike/crowdstrike_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/crowdstrike/crowdstrike_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/crowdstrike/crowdstrike_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/crowdstrike/crowdstrike_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/crowdstrike/crowdstrike_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/crowdstrike/crowdstrike_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/crowdstrike/crowdstrike_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/crowdstrike/crowdstrike_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/lib/base_response_actions_client.test.ts"
               },
               {
@@ -1150,6 +1190,46 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/sentinelone/sentinel_one_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/sentinelone/sentinel_one_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/sentinelone/sentinel_one_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/sentinelone/sentinel_one_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/sentinelone/sentinel_one_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/sentinelone/sentinel_one_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/microsoft/defender/endpoint/ms_defender_endpoint_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/microsoft/defender/endpoint/ms_defender_endpoint_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/microsoft/defender/endpoint/ms_defender_endpoint_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/microsoft/defender/endpoint/ms_defender_endpoint_actions_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/actions/clients/microsoft/defender/endpoint/ms_defender_endpoint_actions_client.test.ts"
               },
               {
                 "plugin": "@kbn/storybook",

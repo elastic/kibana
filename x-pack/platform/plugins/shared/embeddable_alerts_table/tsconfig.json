@@ -25,7 +25,6 @@
     "@kbn/response-ops-rules-apis",
     "@kbn/data-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/cases-plugin",
     "@kbn/licensing-plugin",
     "@kbn/core-ui-settings-browser",
     "@kbn/rule-data-utils",
