@@ -11,7 +11,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ensurePatternFormat } from '../../../common/utils/sourcerer';
 import type { KibanaDataView } from '../store/model';
 import { DEFAULT_TIME_FIELD } from '../../../common/constants';
-import { DEFAULT_SECURITY_ALERT_DATA_VIEW } from '../../data_view_manager/components/data_view_picker/translations';
+import {
+  DEFAULT_SECURITY_DATA_VIEW,
+  DEFAULT_SECURITY_ALERT_DATA_VIEW,
+} from '../../data_view_manager/components/data_view_picker/translations';
 
 export interface GetSourcererDataView {
   signal?: AbortSignal;
@@ -59,6 +62,7 @@ export const createSourcererDataView = async ({
           id: dataViewId,
           title: patternListAsTitle,
           timeFieldName: DEFAULT_TIME_FIELD,
+          name: DEFAULT_SECURITY_DATA_VIEW,
         },
         // Override property - if a data view exists with the security solution pattern
         // delete it and replace it with our data view

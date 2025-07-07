@@ -9,7 +9,7 @@
 
 import React, { useMemo, useState } from 'react';
 import type { FC, PropsWithChildren } from 'react';
-import { getFieldValue } from '@kbn/discover-utils';
+import { fieldConstants, getFieldValue } from '@kbn/discover-utils';
 import type { DocViewerComponent } from '@kbn/unified-doc-viewer/src/services/types';
 import {
   EuiTitle,
@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import * as i18n from '../translations';
 import { getSecurityTimelineRedirectUrl } from '../utils';
@@ -62,10 +63,16 @@ export const ExpandableSection: FC<PropsWithChildren<{ title: string }>> = ({
 export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
   const {
     application: { getUrlForApp },
+    fieldsMetadata,
   } = useDiscoverServices();
 
   const timelinesURL = getUrlForApp('securitySolutionUI', {
     path: 'alerts',
+  });
+
+  const result = fieldsMetadata?.useFieldsMetadata({
+    attributes: ['allowed_values', 'name', 'flat_name'],
+    fieldNames: [fieldConstants.EVENT_CATEGORY_FIELD],
   });
 
   const reason = useMemo(() => getFieldValue(hit, 'kibana.alert.reason') as string, [hit]);
@@ -100,9 +107,18 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
     >
       <EuiFlexItem>
         <ExpandableSection title={i18n.aboutSectionTitle}>
-          <EuiText size="s" data-test-subj="about">
-            {getEcsAllowedValueDescription(eventCategory)}
-          </EuiText>
+          {result?.loading ? (
+            <EuiSkeletonText
+              lines={2}
+              size={'s'}
+              isLoading={result?.loading}
+              contentAriaLabel={i18n.ecsDescriptionLoadingAriaLable}
+            />
+          ) : (
+            <EuiText size="s" data-test-subj="about">
+              {getEcsAllowedValueDescription(result?.fieldsMetadata, eventCategory)}
+            </EuiText>
+          )}
         </ExpandableSection>
       </EuiFlexItem>
       {description ? (

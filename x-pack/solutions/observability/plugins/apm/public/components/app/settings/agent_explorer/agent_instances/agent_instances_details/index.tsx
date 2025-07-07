@@ -181,26 +181,30 @@ interface Props {
   serviceName: string;
   agentName: AgentName;
   agentDocsPageUrl?: string;
+  environment: string;
   items: AgentExplorerInstance[];
   isLoading: boolean;
+  start: string;
+  end: string;
 }
 
 export function AgentInstancesDetails({
   serviceName,
   agentName,
+  start,
+  end,
   agentDocsPageUrl,
   items,
   isLoading,
 }: Props) {
   const {
     query,
-    query: { environment, rangeFrom, rangeTo, serviceGroup },
-  } = useAnyOfApmParams('/services/{serviceName}/overview', '/services/{serviceName}/metrics');
+    query: { environment },
+  } = useAnyOfApmParams('/settings/agent-explorer');
   const { core } = useApmPluginContext();
 
   const defaultComparisonEnabled = getComparisonEnabled({
     core,
-    urlComparisonEnabled: query.comparisonEnabled,
   });
 
   return (
@@ -212,10 +216,10 @@ export function AgentInstancesDetails({
           agentName,
           query: {
             ...query,
+            serviceGroup: '',
             environment: environment ?? ENVIRONMENT_NOT_DEFINED.value,
-            rangeFrom,
-            rangeTo,
-            serviceGroup,
+            rangeFrom: start,
+            rangeTo: end,
             comparisonEnabled: defaultComparisonEnabled,
           },
           agentDocsPageUrl,

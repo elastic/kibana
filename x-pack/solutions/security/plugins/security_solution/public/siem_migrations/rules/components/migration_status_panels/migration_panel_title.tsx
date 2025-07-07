@@ -109,7 +109,7 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
       ) : (
         <>
           <EuiFlexItem grow={false}>
-            <PanelText size="s" semiBold>
+            <PanelText size="s" semiBold data-test-subj="migrationPanelTitleName">
               <p>{name}</p>
             </PanelText>
           </EuiFlexItem>

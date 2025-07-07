@@ -187,7 +187,7 @@ function getStateContainer({
   fieldListUiState,
 }: {
   query?: Query | AggregateQuery;
-  fieldListUiState?: UnifiedFieldListRestorableState;
+  fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
 }) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.appState.set({
@@ -211,7 +211,7 @@ async function mountComponent<WithReactTestingLibrary extends boolean = false>(
   props: TestWrapperProps,
   appStateParams: {
     query?: Query | AggregateQuery;
-    fieldListUiState?: UnifiedFieldListRestorableState;
+    fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
   } = {},
   services?: DiscoverServices,
   withReactTestingLibrary?: WithReactTestingLibrary
@@ -579,6 +579,24 @@ describe('discover responsive sidebar', function () {
       '1 popular field. 1 available field. 0 meta fields.'
     );
     expect(findTestSubject(comp, 'fieldListFiltersFieldSearch').prop('value')).toBe('byte');
+  });
+
+  it('should restore collapsed state state after switching tabs', async function () {
+    const compCollapsed = await mountComponent(props, {
+      fieldListUiState: {
+        isCollapsed: true,
+      },
+    });
+
+    expect(findTestSubject(compCollapsed, 'fieldList').exists()).toBe(false);
+
+    const compExpanded = await mountComponent(props, {
+      fieldListUiState: {
+        isCollapsed: false,
+      },
+    });
+
+    expect(findTestSubject(compExpanded, 'fieldList').exists()).toBe(true);
   });
 
   it('should show "Add a field" button to create a runtime field', async () => {

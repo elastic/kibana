@@ -107,9 +107,7 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
     label: 'Static value: 0.75',
     dataType: 'number',
     operationType: 'static_value',
-    isStaticValue: true,
     isBucketed: false,
-    scale: 'ratio',
     params: {
       value: '0.75',
     },

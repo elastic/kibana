@@ -1,6 +1,6 @@
 # REPLACE
 
-The REPLACE function substitutes any match of a regular expression within a string with a replacement string.
+The `REPLACE` function substitutes any match of a regular expression in a string with a specified replacement string.
 
 ## Syntax
 
@@ -8,17 +8,17 @@ The REPLACE function substitutes any match of a regular expression within a stri
 
 ### Parameters
 
-#### string
+#### `string`
 
-The string expression where the replacement will occur.
+String expression.
 
-#### regex
+#### `regex`
 
-The regular expression that will be matched in the string.
+Regular expression.
 
-#### newString
+#### `newString`
 
-The string that will replace the matched regular expression in the string.
+Replacement string.
 
 ## Examples
 

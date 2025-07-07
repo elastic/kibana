@@ -17,20 +17,25 @@ const getLatestCSVPrivilegedUserUploadQuery = (namespace: string) => {
     | STATS latest_timestamp = MAX(@timestamp)`;
 };
 
+const GET_LATEST_CSV_UPLOAD_QUERY_ID = 'getPrivilegedUserMonitoringLatestCsvQuery';
+
 export const useGetLatestCSVPrivilegedUserUploadQuery = (namespace: string) => {
   const search = useKibana().services.data.search.search;
 
-  const { isLoading, data, isError, refetch } = useQuery([], async ({ signal }) => {
-    return esqlResponseToRecords<{ latest_timestamp: string }>(
-      (
-        await getESQLResults({
-          esqlQuery: getLatestCSVPrivilegedUserUploadQuery(namespace),
-          search,
-          signal,
-        })
-      )?.response
-    );
-  });
+  const { isLoading, data, isError, refetch } = useQuery(
+    [GET_LATEST_CSV_UPLOAD_QUERY_ID],
+    async ({ signal }) => {
+      return esqlResponseToRecords<{ latest_timestamp: string }>(
+        (
+          await getESQLResults({
+            esqlQuery: getLatestCSVPrivilegedUserUploadQuery(namespace),
+            search,
+            signal,
+          })
+        )?.response
+      );
+    }
+  );
   const latestTimestamp = data ? data.find(Boolean)?.latest_timestamp : undefined;
   return {
     latestTimestamp,

@@ -1,6 +1,6 @@
 # MV_APPEND
 
-MV_APPEND is a function that concatenates the values of two multi-value fields.
+Concatenates the values of two multi-value fields into a single field.
 
 ## Syntax
 
@@ -8,9 +8,15 @@ MV_APPEND is a function that concatenates the values of two multi-value fields.
 
 ### Parameters
 
-#### field1
+#### `field1`
 
-The first multi-value field to be concatenated.
+The first multi-value field to concatenate.
+
+#### `field2`
+
+The second multi-value field to concatenate.
+
+## Examples
 
 ```esql
 ROW a = ["foo", "bar"], b = ["baz", "qux"]
@@ -23,3 +29,7 @@ ROW x = [1, 2, 3], y = [4, 5, 6]
 | EVAL z = MV_APPEND(x, y)
 | KEEP x, y, z
 ```
+
+## Limitations
+
+No specific limitations are mentioned in the source documentation.

@@ -17,7 +17,11 @@ import React from 'react';
 import { css } from '@emotion/css';
 import * as i18n from '../json_diff/translations';
 
-export const RuleDiffHeaderBar = () => {
+interface RuleDiffHeaderBarProps {
+  diffRightSideTitle?: string;
+}
+
+export const RuleDiffHeaderBar = ({ diffRightSideTitle }: RuleDiffHeaderBarProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -34,7 +38,7 @@ export const RuleDiffHeaderBar = () => {
           <EuiIconTip
             color="subdued"
             content={i18n.CURRENT_VERSION_DESCRIPTION}
-            type="iInCircle"
+            type="info"
             size="m"
             display="block"
           />
@@ -46,11 +50,11 @@ export const RuleDiffHeaderBar = () => {
           <EuiIconTip
             color="subdued"
             content={i18n.UPDATED_VERSION_DESCRIPTION}
-            type="iInCircle"
+            type="info"
             size="m"
           />
           <EuiTitle size="xxs">
-            <h6>{i18n.ELASTIC_UPDATE_VERSION}</h6>
+            <h6>{diffRightSideTitle ?? i18n.ELASTIC_UPDATE_VERSION}</h6>
           </EuiTitle>
         </EuiFlexGroup>
       </EuiFlexGroup>

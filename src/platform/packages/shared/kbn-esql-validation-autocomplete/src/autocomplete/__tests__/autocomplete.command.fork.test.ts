@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Location } from '../../definitions/types';
-import { ESQL_STRING_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '@kbn/esql-ast';
 import { EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS } from './autocomplete.command.sort.test';
 import { AVG_TYPES, EXPECTED_FOR_EMPTY_EXPRESSION } from './autocomplete.command.stats.test';
 import {
@@ -167,7 +167,7 @@ describe('autocomplete.suggest', () => {
             );
           });
 
-          test('lookup join', async () => {
+          test('lookup join after command name', async () => {
             await assertSuggestions('FROM a | FORK (LOOKUP JOIN /)', [
               'join_index ',
               'join_index_with_alias ',
@@ -175,8 +175,9 @@ describe('autocomplete.suggest', () => {
               'join_index_alias_1 $0',
               'join_index_alias_2 $0',
             ]);
-            const suggestions = await suggest('FROM a | FORK (LOOKUP JOIN join_index ON /)');
-            const labels = suggestions.map((s) => s.text.trim()).sort();
+          });
+
+          test('lookup join after ON keyword', async () => {
             const expected = getFieldNamesByType('any')
               .sort()
               .map((field) => field.trim());
@@ -184,9 +185,8 @@ describe('autocomplete.suggest', () => {
             for (const { name } of lookupIndexFields) {
               expected.push(name.trim());
             }
-            expected.sort();
 
-            expect(labels).toEqual(expected);
+            await assertSuggestions('FROM a | FORK (LOOKUP JOIN join_index ON /)', expected);
           });
 
           test('enrich', async () => {

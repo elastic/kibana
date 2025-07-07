@@ -12,7 +12,6 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { AlertEventOverview } from './alert_event_overview';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { EcsFlat } from '@elastic/ecs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { encode } from '@kbn/rison';
 import { URLSearchParams } from 'url';
@@ -27,6 +26,19 @@ const mockDiscoverServices = {
   application: {
     getUrlForApp: mockGetUrlForApp,
   },
+  fieldsMetadata: {
+    useFieldsMetadata: jest.fn().mockReturnValue({
+      fieldsMetadata: {
+        'event.category': {
+          allowed_values: [
+            { name: 'process', description: 'Process events' },
+            { name: 'network', description: 'Network events' },
+          ],
+        },
+      },
+      loading: false,
+    }),
+  },
 };
 
 const mockRow = {
@@ -36,6 +48,7 @@ const mockRow = {
   _id: 'test-id',
   '@timestamp': '2021-08-02T14:00:00.000Z',
   'kibana.alert.url': 'test-url',
+  'event.category': 'process',
 };
 
 const mockHit = {
@@ -87,10 +100,7 @@ describe('AlertEventOverview', () => {
 
       render(<AlertEventOverview hit={localMockHit} dataView={mockDataView} />);
 
-      expect(screen.getByTestId('expandableContent-About')).toHaveTextContent(
-        EcsFlat['event.category'].allowed_values.find((i) => i.name === 'process')
-          ?.description as string
-      );
+      expect(screen.getByTestId('expandableContent-About')).toHaveTextContent('Process events');
     });
 
     test('should display timeline redirect url correctly', () => {
@@ -141,6 +151,74 @@ describe('AlertEventOverview', () => {
       expect(screen.getByTestId('exploreSecurity').getAttribute('href')).toBe(
         `test-timeline-url?${searchParams}`
       );
+    });
+
+    describe('ECS Description', () => {
+      test('should give ECS description for event.category field', () => {
+        render(<AlertEventOverview hit={mockHit} dataView={mockDataView} />);
+        expect(screen.getByTestId('about')).toHaveTextContent('Process events');
+      });
+      test('should give placeholder ECS description when fieldsMetadata is not available', () => {
+        (useDiscoverServices as jest.Mock).mockReturnValue({
+          ...mockDiscoverServices,
+          fieldsMetadata: {
+            useFieldsMetadata: jest.fn().mockReturnValue({
+              fieldsMetadata: undefined,
+              loading: false,
+            }),
+          },
+        });
+
+        render(<AlertEventOverview hit={mockHit} dataView={mockDataView} />);
+        expect(screen.getByTestId('about')).toHaveTextContent(
+          "This field doesn't have a description because it's not part of ECS."
+        );
+      });
+
+      test('should give placeholder ECS description when event.category field is not present in fieldMetada', () => {
+        (useDiscoverServices as jest.Mock).mockReturnValue({
+          ...mockDiscoverServices,
+          fieldsMetadata: {
+            useFieldsMetadata: jest.fn().mockReturnValue({
+              fieldsMetadata: {},
+              loading: false,
+            }),
+          },
+        });
+
+        render(<AlertEventOverview hit={mockHit} dataView={mockDataView} />);
+        expect(screen.getByTestId('about')).toHaveTextContent(
+          "This field doesn't have a description because it's not part of ECS."
+        );
+      });
+
+      test('should give placeholder ECS description when event.category field is not present in hit', () => {
+        const localMockHit = {
+          flattened: {
+            ...mockRow,
+            'event.category': undefined,
+          },
+        } as unknown as DataTableRecord;
+
+        render(<AlertEventOverview hit={localMockHit} dataView={mockDataView} />);
+        expect(screen.getByTestId('about')).toHaveTextContent(
+          "This field doesn't have a description because it's not part of ECS."
+        );
+      });
+
+      test('should give placeholder ECS when event.category fields has a value that is not in allowed values', () => {
+        const localMockHit = {
+          flattened: {
+            ...mockRow,
+            'event.category': 'unknown',
+          },
+        } as unknown as DataTableRecord;
+
+        render(<AlertEventOverview hit={localMockHit} dataView={mockDataView} />);
+        expect(screen.getByTestId('about')).toHaveTextContent(
+          "This field doesn't have a description because it's not part of ECS."
+        );
+      });
     });
   });
 });
