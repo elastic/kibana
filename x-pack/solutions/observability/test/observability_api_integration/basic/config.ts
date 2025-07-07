@@ -7,9 +7,8 @@
 
 import { createTestConfig } from '../common/config';
 
-// eslint-disable-next-line import/no-default-export
 export default createTestConfig({
-  license: 'trial',
-  name: 'X-Pack Observability API integration tests (trial)',
+  license: 'basic',
+  name: 'X-Pack Observability API integration tests (basic)',
   testFiles: [require.resolve('./tests')],
 });

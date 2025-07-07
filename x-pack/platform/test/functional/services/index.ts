@@ -7,6 +7,7 @@
 
 import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
+import { services as xpackTestApiIntegrationServices } from '@kbn/test-suites-xpack/functional/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { UserMenuProvider } from './user_menu';
 import { AceEditorProvider } from './ace_editor';
@@ -19,6 +20,9 @@ import { SearchSessionsService } from './search_sessions';
 // only the built-in services will be available
 export const services = {
   ...kibanaFunctionalServices,
+  actions: xpackTestApiIntegrationServices.actions,
+  rules: xpackTestApiIntegrationServices.rules,
+  cases: xpackTestApiIntegrationServices.cases,
   supertest: kibanaApiIntegrationServices.supertest,
   supertestWithoutAuth: kibanaXPackApiIntegrationServices.supertestWithoutAuth,
   esSupertest: kibanaApiIntegrationServices.esSupertest,

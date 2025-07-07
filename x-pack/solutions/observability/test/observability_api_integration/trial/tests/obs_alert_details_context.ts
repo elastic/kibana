@@ -12,7 +12,6 @@ import { LogCategory } from '@kbn/apm-plugin/server/routes/assistant_functions/g
 import { SupertestReturnType } from '../../common/obs_api_supertest';
 import { ObsFtrProviderContext } from '../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ApiTest({ getService }: ObsFtrProviderContext) {
   const obsApiClient = getService('obsApiClient');
   const apmSynthtraceClient = getService('apmSynthtraceEsClient');
