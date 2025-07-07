@@ -16,7 +16,7 @@ import { getPromptSuffixForOssModel } from './utils/common';
 
 export type ESQLToolParams = Require<AssistantToolParams, 'assistantContext'>;
 
-const TOOL_NAME = 'AskAboutEsqlTool';
+const TOOL_NAME = 'AskAboutESQLTool';
 
 const toolDetails = {
   id: 'ask-about-esql-tool',
@@ -43,8 +43,7 @@ export const ASK_ABOUT_ESQL_TOOL: AssistantTool = {
     return (
       inference != null &&
       connectorId != null &&
-      assistantContext != null &&
-      assistantContext.getRegisteredFeatures('securitySolutionUI').advancedEsqlGeneration
+      assistantContext != null
     );
   },
   async getTool(params: AssistantToolParams) {

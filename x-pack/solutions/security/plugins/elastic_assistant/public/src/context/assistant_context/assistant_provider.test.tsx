@@ -69,7 +69,6 @@ describe('AssistantProvider', () => {
           isStarterPromptsEnabled: expect.any(Boolean),
         }),
         assistantFeatures: expect.objectContaining({
-          advancedEsqlGeneration: expect.any(Boolean),
           assistantModelEvaluation: expect.any(Boolean),
           defendInsights: expect.any(Boolean),
         }),
