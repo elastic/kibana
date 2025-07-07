@@ -102,10 +102,11 @@ export async function generateChatTitle({
     }
   } catch (e) {
     telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
-      actionTypeId: telemetryParams?.actionTypeId ?? getActionTypeId(state.llmType),
+      actionTypeId: telemetryParams?.actionTypeId ?? getActionTypeId(state.llmType ?? `.gen-ai`),
       model: telemetryParams?.model,
       errorMessage: e.message ?? e.toString(),
-      assistantStreamingEnabled: telemetryParams?.assistantStreamingEnabled ?? state.isStream,
+      assistantStreamingEnabled:
+        telemetryParams?.assistantStreamingEnabled ?? state.isStream ?? true,
       isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
       errorLocation: 'generateChatTitle',
     });
