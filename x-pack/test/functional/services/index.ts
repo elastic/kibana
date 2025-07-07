@@ -11,6 +11,7 @@ import { AceEditorProvider } from '@kbn/test-suites-xpack-platform/functional/se
 import { UserMenuProvider } from '@kbn/test-suites-xpack-platform/functional/services/user_menu';
 import { SampleDataServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/sample_data';
 import { GrokDebuggerProvider } from '@kbn/test-suites-xpack-platform/functional/services/grok_debugger';
+import { SearchSessionsService } from '@kbn/test-suites-xpack-platform/functional/services/search_sessions';
 import { ReportingFunctionalProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
@@ -62,7 +63,6 @@ import { InfraSourceConfigurationFormProvider } from './infra_source_configurati
 import { LogsUiProvider } from './logs_ui';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
-import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
 import { CasesServiceProvider } from './cases';
 import { ActionsServiceProvider } from './actions';
