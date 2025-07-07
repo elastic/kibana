@@ -63,7 +63,6 @@ import { InfraSourceConfigurationFormProvider } from './infra_source_configurati
 import { LogsUiProvider } from './logs_ui';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
-import { ObservabilityProvider } from './observability';
 import { CasesServiceProvider } from './cases';
 import { ActionsServiceProvider } from './actions';
 import { RulesServiceProvider } from './rules';
@@ -124,7 +123,6 @@ export const services = {
   reporting: ReportingFunctionalProvider,
   sampleData: SampleDataServiceProvider,
   searchSessions: SearchSessionsService,
-  observability: ObservabilityProvider,
   actions: ActionsServiceProvider,
   rules: RulesServiceProvider,
   cases: CasesServiceProvider,
