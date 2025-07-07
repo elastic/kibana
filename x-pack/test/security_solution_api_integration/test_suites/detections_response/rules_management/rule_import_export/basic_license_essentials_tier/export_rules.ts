@@ -9,8 +9,9 @@ import expect from 'expect';
 
 import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { binaryToString, getCustomQueryRuleParams } from '../../../utils';
+import { binaryToString, getCustomQueryRuleParams, parseNdJson } from '../../../utils';
 import { deleteAllRules } from '../../../../../../common/utils/security_solution';
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
@@ -44,9 +45,44 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+        const [exportedRule] = parseNdJson(body);
 
         expect(exportedRule).toMatchObject(ruleToExport);
+      });
+
+      it('exports a set of custom rules via the _export API', async () => {
+        await Promise.all([
+          securitySolutionApi
+            .createRule({ body: getCustomQueryRuleParams({ rule_id: 'rule-id-1' }) })
+            .expect(200),
+          securitySolutionApi
+            .createRule({ body: getCustomQueryRuleParams({ rule_id: 'rule-id-2' }) })
+            .expect(200),
+        ]);
+
+        const { body: exportResult } = await securitySolutionApi
+          .exportRules({ query: {}, body: null })
+          .expect(200)
+          .parse(binaryToString);
+
+        const ndJson = parseNdJson(exportResult);
+
+        expect(ndJson).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: 'rule-id-1',
+              rule_source: {
+                type: 'internal',
+              },
+            }),
+            expect.objectContaining({
+              rule_id: 'rule-id-2',
+              rule_source: {
+                type: 'internal',
+              },
+            }),
+          ])
+        );
       });
 
       it('should export defaultable fields when values are set', async () => {
@@ -80,7 +116,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+        const [exportedRule] = parseNdJson(body);
 
         expect(exportedRule).toMatchObject(expectedRule);
       });
@@ -95,7 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const exportSummary = JSON.parse(body.toString().split(/\n/)[1]);
+        const [, exportSummary] = parseNdJson(body);
 
         expect(exportSummary).toMatchObject({
           exported_exception_list_count: 0,
@@ -117,8 +153,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const exportedRule1 = JSON.parse(body.toString().split(/\n/)[0]);
-        const exportedRule2 = JSON.parse(body.toString().split(/\n/)[1]);
+        const [exportedRule1, exportedRule2] = parseNdJson(body);
 
         expect([exportedRule1, exportedRule2]).toEqual(
           expect.arrayContaining([
