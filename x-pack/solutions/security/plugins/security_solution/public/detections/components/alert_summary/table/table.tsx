@@ -206,7 +206,6 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
 
   const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
 
-  // TODO: remove second Dataview parameter when newDataViewPickerEnabled is default
   const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
