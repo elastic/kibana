@@ -25,12 +25,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  SavedObjectsImportSuccess,
-  SavedObjectsImportWarning,
-  IBasePath,
-  useMemoizedStyles,
-} from '@kbn/core/public';
+import { SavedObjectsImportSuccess, SavedObjectsImportWarning, IBasePath } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
@@ -85,7 +81,7 @@ const mapImportSuccess = (obj: SavedObjectsImportSuccess): ImportItem => {
 };
 
 const CountIndicators: FC<{ importItems: ImportItem[] }> = ({ importItems }) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   if (!importItems.length) {
     return null;
@@ -261,7 +257,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
       ),
     [successfulImports, failedImports]
   );
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   return (
     <Fragment>
