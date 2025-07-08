@@ -21,7 +21,7 @@ export const getColumnsConfiguration: DataSourceProfileProvider['profile']['getC
       ...column,
       display: (
         <DataTableSummaryColumnHeaderTracesContext
-          columnDisplayName={column.displayAsText ?? 'Summary'}
+          columnDisplayName={column.displayAsText}
           headerRowHeight={headerRowHeight}
         />
       ),
@@ -33,7 +33,7 @@ export const DataTableSummaryColumnHeaderTracesContext = ({
   columnDisplayName,
 }: {
   headerRowHeight?: number;
-  columnDisplayName: string;
+  columnDisplayName?: string;
 }) => {
   const tooltipTitle = i18n.translate(
     'discover.unifiedDataTable.tableHeader.tracesContext.sourceFieldIconTooltipTitle',

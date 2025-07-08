@@ -27,15 +27,19 @@ const DEFAULT_COLUMN_HEADER_TOOLTIP_TITLE = i18n.translate(
   }
 );
 
+const SUMMARY_COLUMN_NAME = i18n.translate('unifiedDataTable.tableHeader.summary', {
+  defaultMessage: 'Summary',
+});
+
 export const UnifiedDataTableSummaryColumnHeader = ({
   headerRowHeight = ROWS_HEIGHT_OPTIONS.single,
-  columnDisplayName,
+  columnDisplayName = SUMMARY_COLUMN_NAME,
   tooltipContent = DEFAULT_COLUMN_HEADER_TOOLTIP_CONTENT,
   tooltipTitle = DEFAULT_COLUMN_HEADER_TOOLTIP_TITLE,
-  iconTipDataTestSubj = 'default-summary-icon',
+  iconTipDataTestSubj = 'unifiedDataTable_headerSummaryIcon',
 }: {
   headerRowHeight?: number;
-  columnDisplayName: string;
+  columnDisplayName?: string;
   tooltipContent?: React.ReactNode | string;
   tooltipTitle?: string;
   iconTipDataTestSubj?: string;
@@ -49,7 +53,7 @@ export const UnifiedDataTableSummaryColumnHeader = ({
       {columnDisplayName}
       <span css={marginStyle}>
         <EuiIconTip
-          data-test-subj="default-summary-icon"
+          data-test-subj={iconTipDataTestSubj}
           type="questionInCircle"
           content={tooltipContent}
           title={tooltipTitle}
@@ -58,6 +62,3 @@ export const UnifiedDataTableSummaryColumnHeader = ({
     </ColumnHeaderTruncateContainer>
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export default UnifiedDataTableSummaryColumnHeader;

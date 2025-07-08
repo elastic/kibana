@@ -14,10 +14,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedDataTableSummaryColumnHeader } from '@kbn/unified-data-table';
 import type { DataSourceProfileProvider } from '../../../..';
 
-const SUMMARY_COLUMN_NAME = i18n.translate('discover.unifiedDataTable.tableHeader.summary', {
-  defaultMessage: 'Summary',
-});
-
 export const getColumnsConfiguration: DataSourceProfileProvider['profile']['getColumnsConfiguration'] =
   (prev) => () => ({
     ...(prev ? prev() : {}),
@@ -25,7 +21,7 @@ export const getColumnsConfiguration: DataSourceProfileProvider['profile']['getC
       ...column,
       display: (
         <DataTableSummaryColumnHeaderLogsContext
-          columnDisplayName={column.displayAsText ?? SUMMARY_COLUMN_NAME}
+          columnDisplayName={column.displayAsText}
           headerRowHeight={headerRowHeight}
         />
       ),
@@ -37,7 +33,7 @@ export const DataTableSummaryColumnHeaderLogsContext = ({
   columnDisplayName,
 }: {
   headerRowHeight?: number;
-  columnDisplayName: string;
+  columnDisplayName?: string;
 }) => {
   const tooltipTitle = i18n.translate(
     'discover.unifiedDataTable.tableHeader.logsContext.sourceFieldIconTooltipTitle',
