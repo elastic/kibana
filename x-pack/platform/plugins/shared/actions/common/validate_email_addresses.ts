@@ -131,11 +131,10 @@ function validateEmailAddress_(
       }
 
       for (const _address of flattenEmailAddresses) {
-        if (isAddressMatchingSomePattern(_address, recipientAllowlist)) {
-          return { address, valid: true };
+        if (!isAddressMatchingSomePattern(_address, recipientAllowlist)) {
+          return { address, valid: false, reason: InvalidEmailReason.notAllowed };
         }
       }
-      return { address, valid: false, reason: InvalidEmailReason.notAllowed };
     }
   }
 

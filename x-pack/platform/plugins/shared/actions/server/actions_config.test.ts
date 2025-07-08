@@ -561,13 +561,13 @@ describe('validateEmailAddresses()', () => {
       const acu = getActionsConfigurationUtilities({
         ...defaultActionsConfig,
         email: {
-          recipient_allowlist: recipientAllowlist,
+          recipient_allowlist: [],
         },
       });
 
       const message = acu.validateEmailAddresses([...testEmailsAll, ...validRecipientEmails]);
       expect(message).toMatchInlineSnapshot(
-        `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org"`
+        `"not valid emails: invalid-email-address, (garbage); not allowed emails: bob@elastic.co, jim@elastic.co, hal@bad.com, lou@notgood.org, dev.team@company.co, dev.backend@company.co"`
       );
     });
   });
