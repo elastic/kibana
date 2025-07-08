@@ -34,24 +34,27 @@ import {
   startModelDeployment,
 } from '../utils/model_and_inference';
 import { animalSampleDocs } from '../utils/sample_docs';
+import { getLoggerMock } from '../utils/kibana_mocks';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const loggerMock = getLoggerMock(log);
 
   type KnowledgeBaseEsEntry = Awaited<ReturnType<typeof getKnowledgeBaseEntriesFromEs>>[0];
 
   describe('Knowledge base: when changing from ELSER to E5-like model', function () {
+    this.tags(['skipCloud']);
     let elserEntriesFromApi: KnowledgeBaseEntry[];
     let elserEntriesFromEs: KnowledgeBaseEsEntry[];
-    let elserInferenceId: string;
+    let elserInferenceId: string | undefined;
     let elserWriteIndex: string;
 
     let e5EntriesFromApi: KnowledgeBaseEntry[];
     let e5EntriesFromEs: KnowledgeBaseEsEntry[];
-    let e5InferenceId: string;
+    let e5InferenceId: string | undefined;
     let e5WriteIndex: string;
 
     before(async () => {
@@ -72,7 +75,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         ).body.entries;
 
         elserEntriesFromEs = await getKnowledgeBaseEntriesFromEs(es);
-        elserInferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es });
+        elserInferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es }, loggerMock);
         elserWriteIndex = await getConcreteWriteIndexFromAlias(es);
 
         // setup KB with E5-like model
@@ -92,7 +95,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         ).body.entries;
 
         e5EntriesFromEs = await getKnowledgeBaseEntriesFromEs(es);
-        e5InferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es });
+        e5InferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es }, loggerMock);
         e5WriteIndex = await getConcreteWriteIndexFromAlias(es);
 
         // retry until the following assertions pass

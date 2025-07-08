@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -24,8 +24,11 @@ import { useQueryRulesSetsTableData } from '../../hooks/use_query_rules_sets_tab
 import { QueryRulesSetsSearch } from './query_rules_sets_search';
 import { DeleteRulesetModal } from './delete_ruleset_modal';
 import { UseRunQueryRuleset } from '../../hooks/use_run_query_ruleset';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export const QueryRulesSets = () => {
+  const useTracker = useUsageTracker();
   const {
     services: { application, http },
   } = useKibana();
@@ -37,11 +40,15 @@ export const QueryRulesSets = () => {
   const [rulesetToDelete, setRulesetToDelete] = useState<string | null>(null);
 
   const { queryRulesSetsFilteredData, pagination } = useQueryRulesSetsTableData(
-    queryRulesData?.data,
+    queryRulesData,
     searchKey,
     pageIndex,
     pageSize
   );
+
+  useEffect(() => {
+    useTracker?.load?.(AnalyticsEvents.rulesetListPageLoaded);
+  }, [useTracker]);
 
   if (!queryRulesData) {
     return null;
@@ -57,6 +64,7 @@ export const QueryRulesSets = () => {
         <EuiLink
           data-test-subj="queryRuleSetName"
           onClick={() => {
+            useTracker?.click?.(AnalyticsEvents.editRulesetInlineNameClicked);
             application.navigateToUrl(
               http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/ruleset/${name}`)
             );
@@ -86,6 +94,9 @@ export const QueryRulesSets = () => {
                 content={i18n.translate('xpack.queryRules.queryRulesSetTable.actions.run', {
                   defaultMessage: 'Test in Console',
                 })}
+                onClick={() => {
+                  useTracker?.click?.(AnalyticsEvents.testRulesetInlineDropdownClicked);
+                }}
               />
             );
           },
@@ -102,10 +113,12 @@ export const QueryRulesSets = () => {
           icon: 'pencil',
           color: 'text',
           type: 'icon',
-          onClick: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) =>
+          onClick: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) => {
+            useTracker?.click?.(AnalyticsEvents.editRulesetInlineDropdownClicked);
             application.navigateToUrl(
               http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/ruleset/${ruleset.ruleset_id}`)
-            ),
+            );
+          },
         },
         {
           name: i18n.translate('xpack.queryRules.queryRulesSetTable.actions.delete', {
@@ -119,7 +132,10 @@ export const QueryRulesSets = () => {
           icon: 'trash',
           color: 'danger',
           type: 'icon',
+          'data-test-subj': 'queryRulesSetDeleteButton',
+          isPrimary: true,
           onClick: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) => {
+            useTracker?.click?.(AnalyticsEvents.deleteRulesetInlineDropdownClicked);
             setRulesetToDelete(ruleset.ruleset_id);
           },
         },

@@ -7,30 +7,39 @@
 
 import path from 'path';
 import type { SavedObject } from '@kbn/core/server';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
+import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
 import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common/data_views';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import type { ContentPackEntry } from '.';
 
-export const SUPPORTED_SAVED_OBJECT_TYPES = [
-  { type: 'dashboard', dir: 'dashboard' },
-  { type: 'index-pattern', dir: 'index_pattern' },
-  { type: 'lens', dir: 'lens' },
-];
+export const SUPPORTED_SAVED_OBJECT_TYPE: Record<ContentPackSavedObject['type'], string> = {
+  dashboard: 'dashboard',
+  'index-pattern': 'index_pattern',
+  lens: 'lens',
+};
+
 export const isSupportedSavedObjectType = (
-  entry: SavedObject<unknown>
+  entry: SavedObject<unknown> | ContentPackEntry
 ): entry is ContentPackSavedObject => {
-  return SUPPORTED_SAVED_OBJECT_TYPES.some(({ type }) => type === entry.type);
+  return entry.type in SUPPORTED_SAVED_OBJECT_TYPE;
 };
 
-export const isSupportedSavedObjectFile = (filepath: string) => {
-  return SUPPORTED_SAVED_OBJECT_TYPES.some(
-    ({ dir }) => path.dirname(filepath) === path.join('kibana', dir)
-  );
+export const isDashboardFile = (rootDir: string, filepath: string) => {
+  const subDir = SUPPORTED_SAVED_OBJECT_TYPE.dashboard;
+  return path.dirname(filepath) === path.join(rootDir, 'kibana', subDir);
 };
 
-type ContentPackDashboard = SavedObject<DashboardAttributes> & { type: 'dashboard' };
-type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs> & { type: 'index-pattern' };
-type ContentPackLens = SavedObject<LensAttributes> & { type: 'lens' };
+export const isSupportedReferenceType = (type: string) => {
+  const referenceTypes: Array<ContentPackSavedObject['type']> = ['index-pattern', 'lens'];
+  return referenceTypes.some((refType) => refType === type);
+};
+
+export type ContentPackDashboard = SavedObject<DashboardSavedObjectAttributes> & {
+  type: 'dashboard';
+};
+export type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs> & { type: 'index-pattern' };
+export type ContentPackLens = SavedObject<LensAttributes> & { type: 'lens' };
+
 export type ContentPackSavedObject = ContentPackDashboard | ContentPackDataView | ContentPackLens;
 
 export interface SavedObjectLink {

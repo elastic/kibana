@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient } from '../../services';
 
-describe('Elasticsearch functions', () => {
+describe('Elasticsearch function', () => {
   describe('health', () => {
     it('returns the cluster health state', async () => {
       const conversation = await chatClient.complete({

@@ -71,4 +71,26 @@ describe('ui settings migrations', () => {
       }),
     ]);
   });
+
+  it('removes "visualization:useLegacyTimeAxis" setting', async () => {
+    const input = [
+      {
+        type: 'config',
+        id: '1',
+        attributes: {
+          'banners:textContent': 'my custom banner',
+          'visualization:useLegacyTimeAxis': true,
+        },
+        references: [],
+      },
+    ];
+
+    const output = await testHarness.migrate(input);
+
+    expect(output[0].attributes).toMatchInlineSnapshot(`
+      Object {
+        "banners:textContent": "my custom banner",
+      }
+    `);
+  });
 });

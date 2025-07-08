@@ -9,7 +9,6 @@ import type { CoreSetup } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import type { EditorFrameSetup } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { FormatFactory } from '../../../common/types';
@@ -44,7 +43,6 @@ export class XyVisualization {
         charts.palettes.getPalettes(),
         eventAnnotation.getService(),
       ]);
-      const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
       return getXyVisualization({
         core: coreStart,
         data,
@@ -52,7 +50,6 @@ export class XyVisualization {
         paletteService,
         eventAnnotationService,
         fieldFormats,
-        useLegacyTimeAxis,
         kibanaTheme: core.theme,
         unifiedSearch,
         dataViewsService: dataViews,

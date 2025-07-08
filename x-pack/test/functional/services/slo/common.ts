@@ -66,7 +66,9 @@ export function SloUiCommonServiceProvider({ getService }: FtrProviderContext) {
     async clickOverviewMode() {
       await retry.tryForTime(60 * 1000, async () => {
         await this.assertOverviewModeSelectorExists();
-        await testSubjects.click(OVERVIEW_MODE_SELECTOR);
+        const wrapper = await testSubjects.find(OVERVIEW_MODE_SELECTOR);
+        const button = await testSubjects.findDescendant('groups', wrapper);
+        await button.click();
       });
     },
 

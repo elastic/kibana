@@ -17,12 +17,12 @@ import { SiemMigrationsIcon } from '../common/icons/siem_migrations';
 
 export const siemMigrationsLinks: LinkItem = {
   id: SecurityPageName.siemMigrationsRules,
-  title: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRules.title', {
-    defaultMessage: 'SIEM rule migrations',
+  title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrationRules.title', {
+    defaultMessage: 'Automatic migrations',
   }),
   description: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRules.description', {
     defaultMessage:
-      'Our generative AI powered SIEM migration tool automates some of the most time consuming migrations tasks and processes.',
+      'Our generative AI powered Automatic migration tool automates some of the most time consuming migrations tasks and processes.',
   }),
   landingIcon: SiemMigrationsIcon,
   path: SIEM_MIGRATIONS_RULES_PATH,
@@ -30,10 +30,4 @@ export const siemMigrationsLinks: LinkItem = {
   skipUrlState: true,
   hideTimeline: true,
   hideWhenExperimentalKey: 'siemMigrationsDisabled',
-  isBeta: true,
-  betaOptions: {
-    text: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRules.badge', {
-      defaultMessage: 'Technical Preview',
-    }),
-  },
 };

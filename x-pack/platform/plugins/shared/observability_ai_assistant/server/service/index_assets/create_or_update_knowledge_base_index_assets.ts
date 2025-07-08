@@ -34,6 +34,10 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
       template: getComponentTemplate(componentTemplateInferenceId),
     });
 
+    logger.debug(
+      `Knowledge base component template updated with inference_id: ${componentTemplateInferenceId}`
+    );
+
     // Knowledge base: index template
     await asInternalUser.indices.putIndexTemplate({
       name: resourceNames.indexTemplate.kb,
@@ -49,14 +53,15 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
       },
     });
 
-    const writeIndexInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(
-      () => undefined
-    );
+    const writeIndexInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
 
     // Knowledge base: write index
     // `createConcreteWriteIndex` will create the write index, or update the index mappings if the index already exists
     // only invoke `createConcreteWriteIndex` if the write index does not exist or the inferenceId in the component template is the same as the one in the write index
     if (!writeIndexInferenceId || writeIndexInferenceId === componentTemplateInferenceId) {
+      logger.debug(
+        `Creating or updating mappings for knowledge base write index. Inference ID: ${componentTemplateInferenceId}`
+      );
       const kbAliasName = resourceNames.writeIndexAlias.kb;
       await createConcreteWriteIndex({
         esClient: asInternalUser,
@@ -71,6 +76,10 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
         },
         dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
+    } else {
+      logger.debug(
+        `Knowledge base write index already exists with a different inference ID (${writeIndexInferenceId}) than the inference ID in the component template (${componentTemplateInferenceId}). Skipping update.`
+      );
     }
 
     logger.info('Successfully set up knowledge base index assets');

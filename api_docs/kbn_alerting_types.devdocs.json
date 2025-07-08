@@ -422,6 +422,115 @@
       },
       {
         "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.AlertDeleteLastRun",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertDeleteLastRun",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.AlertDeleteLastRun.lastRun",
+            "type": "string",
+            "tags": [],
+            "label": "lastRun",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.AlertDeleteParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertDeleteParams",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.AlertDeleteParams.activeAlertDeleteThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "activeAlertDeleteThreshold",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.AlertDeleteParams.inactiveAlertDeleteThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "inactiveAlertDeleteThreshold",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.AlertDeleteParams.categoryIds",
+            "type": "Array",
+            "tags": [],
+            "label": "categoryIds",
+            "description": [],
+            "signature": [
+              "(\"observability\" | \"management\" | \"securitySolution\")[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.AlertDeletePreview",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertDeletePreview",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.AlertDeletePreview.affectedAlertCount",
+            "type": "number",
+            "tags": [],
+            "label": "affectedAlertCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-alerting-types/alert_delete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
         "id": "def-common.AlertingFrameworkHealth",
         "type": "Interface",
         "tags": [],
@@ -2893,6 +3002,92 @@
                 "text": "RulesSettingsQueryDelay"
               },
               " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.RulesSettingsAlertDeleteProperties",
+        "type": "Interface",
+        "tags": [],
+        "label": "RulesSettingsAlertDeleteProperties",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.RulesSettingsAlertDeleteProperties.isActiveAlertDeleteEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isActiveAlertDeleteEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.RulesSettingsAlertDeleteProperties.isInactiveAlertDeleteEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInactiveAlertDeleteEnabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.RulesSettingsAlertDeleteProperties.activeAlertDeleteThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "activeAlertDeleteThreshold",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.RulesSettingsAlertDeleteProperties.inactiveAlertDeleteThreshold",
+            "type": "number",
+            "tags": [],
+            "label": "inactiveAlertDeleteThreshold",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.RulesSettingsAlertDeleteProperties.categoryIds",
+            "type": "Array",
+            "tags": [],
+            "label": "categoryIds",
+            "description": [],
+            "signature": [
+              "(\"observability\" | \"management\" | \"securitySolution\")[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.RulesSettingsAlertDeleteProperties.spaceIds",
+            "type": "Array",
+            "tags": [],
+            "label": "spaceIds",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_settings.ts",
             "deprecated": false,

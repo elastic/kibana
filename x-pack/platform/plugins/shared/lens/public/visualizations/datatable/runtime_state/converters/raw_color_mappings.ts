@@ -59,6 +59,6 @@ export const convertToRawColorMappingsFn = (
     return {
       ...state,
       columns: convertedColumns,
-    };
+    } satisfies DatatableVisualizationState;
   };
 };

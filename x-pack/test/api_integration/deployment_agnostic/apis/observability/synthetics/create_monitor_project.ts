@@ -13,12 +13,15 @@ import {
   PrivateLocation,
   ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import {
+  syntheticsMonitorSavedObjectType,
+  legacySyntheticsMonitorTypeSingle,
+} from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
 } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
@@ -61,7 +64,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await supertest
           .get(`/s/${space}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.journey_id: "${journeyId}" AND ${syntheticsMonitorType}.attributes.project_id: "${projectId}"`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: "${journeyId}" AND ${syntheticsMonitorSavedObjectType}.attributes.project_id: "${projectId}"`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -155,7 +158,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const journeyId = monitor.id;
         const createdMonitorsResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-          .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+          .query({
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${journeyId}`,
+          })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .expect(200);
@@ -229,6 +234,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           updated_at: decryptedCreatedMonitor.rawBody.updated_at,
           created_at: decryptedCreatedMonitor.rawBody.created_at,
           labels: {},
+          maintenance_windows: [],
+          spaces: ['default'],
         });
       }
     });
@@ -270,7 +277,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
           const createdMonitorsResponse = await supertest
             .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .query({
+              filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${journeyId}`,
+            })
             .set(editorUser.apiKeyHeader)
             .set(samlAuth.getInternalRequestHeader())
             .expect(200);
@@ -357,6 +366,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ipv4: true,
             max_attempts: 2,
             labels: {},
+            maintenance_windows: [],
+            spaces: ['default'],
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
           });
@@ -407,7 +418,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const isTLSEnabled = Object.keys(monitor).some((key) => key.includes('ssl'));
           const createdMonitorsResponse = await supertest
             .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .query({
+              filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${journeyId}`,
+            })
             .set(editorUser.apiKeyHeader)
             .set(samlAuth.getInternalRequestHeader())
             .expect(200);
@@ -473,6 +486,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: '',
             max_attempts: 2,
             labels: {},
+            maintenance_windows: [],
+            spaces: ['default'],
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
           });
@@ -521,7 +536,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const journeyId = monitor.id;
           const createdMonitorsResponse = await supertest
             .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-            .query({ filter: `${syntheticsMonitorType}.attributes.journey_id: ${journeyId}` })
+            .query({
+              filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${journeyId}`,
+            })
             .set(editorUser.apiKeyHeader)
             .set(samlAuth.getInternalRequestHeader())
             .expect(200);
@@ -578,6 +595,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
             labels: {},
+            maintenance_windows: [],
+            spaces: ['default'],
           });
         }
       } finally {
@@ -604,7 +623,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+            filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
           })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
@@ -657,7 +676,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             return supertest
               .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
               .query({
-                filter: `${syntheticsMonitorType}.attributes.journey_id: ${monitor.id}`,
+                filter: `${syntheticsMonitorSavedObjectType}.attributes.journey_id: ${monitor.id}`,
                 internal: true,
               })
               .set(editorUser.apiKeyHeader)
@@ -778,6 +797,174 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       } finally {
         await deleteMonitor(httpProjectMonitors.monitors[1].id, project);
       }
+    });
+
+    // --- Legacy monitor CRUD tests ---
+    describe('LegacyProjectMonitorCRUD', () => {
+      let legacyProject: string;
+      let legacyMonitor: any;
+      let legacyMonitorId: string;
+
+      beforeEach(async () => {
+        legacyProject = `legacy-project-${uuidv4()}`;
+        legacyMonitorId = uuidv4();
+        legacyMonitor = {
+          ...getFixtureJson('project_http_monitor').monitors[1],
+          id: legacyMonitorId,
+          name: `Legacy Monitor ${legacyMonitorId}`,
+        };
+        await kibanaServer.savedObjects.clean({
+          types: [legacySyntheticsMonitorTypeSingle],
+        });
+      });
+
+      it('should create a legacy project monitor', async () => {
+        const { body } = await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              legacyProject
+            ) + `?savedObjectType=${legacySyntheticsMonitorTypeSingle}`
+          )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ monitors: [legacyMonitor] })
+          .expect(200);
+
+        expect(body).eql({
+          updatedMonitors: [],
+          createdMonitors: [legacyMonitorId],
+          failedMonitors: [],
+        });
+
+        // Fetch from SO API to verify creation
+        const soRes = await kibanaServer.savedObjects.find({
+          type: legacySyntheticsMonitorTypeSingle,
+        });
+        const found = soRes.saved_objects.find(
+          (obj: any) => obj.attributes.journey_id === legacyMonitorId
+        );
+        expect(found).not.to.be(undefined);
+        expect(found?.attributes.name).to.eql(`Legacy Monitor ${legacyMonitorId}`);
+      });
+
+      it('should fetch a legacy project monitor', async () => {
+        // Create first
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              legacyProject
+            ) + `?savedObjectType=${legacySyntheticsMonitorTypeSingle}`
+          )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ monitors: [legacyMonitor] })
+          .expect(200);
+
+        // Fetch via monitors API
+        const res = await supertest
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?internal=true')
+          .query({
+            filter: `${legacySyntheticsMonitorTypeSingle}.attributes.journey_id: ${legacyMonitorId}`,
+          })
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .expect(200);
+
+        expect(res.body.monitors.length).to.be(1);
+        expect(res.body.monitors[0].journey_id).to.eql(legacyMonitorId);
+        expect(res.body.monitors[0].name).to.eql(`Legacy Monitor ${legacyMonitorId}`);
+      });
+
+      it('should edit a legacy project monitor', async () => {
+        // Create first
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              legacyProject
+            ) + `?savedObjectType=${legacySyntheticsMonitorTypeSingle}`
+          )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ monitors: [legacyMonitor] })
+          .expect(200);
+
+        // Edit via project update
+        const editedName = `Legacy Monitor Edited ${legacyMonitorId}`;
+        const editedMonitor = { ...legacyMonitor, name: editedName };
+        const { body } = await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              legacyProject
+            ) + `?savedObjectType=${legacySyntheticsMonitorTypeSingle}`
+          )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ monitors: [editedMonitor] })
+          .expect(200);
+
+        expect(body).eql({
+          updatedMonitors: [legacyMonitorId],
+          createdMonitors: [],
+          failedMonitors: [],
+        });
+
+        // Fetch and verify edit
+        const soRes = await kibanaServer.savedObjects.find({
+          type: legacySyntheticsMonitorTypeSingle,
+        });
+        const found = soRes.saved_objects.find(
+          (obj: any) => obj.attributes.journey_id === legacyMonitorId
+        );
+        expect(found?.attributes.name).to.eql(editedName);
+      });
+
+      it('should delete a legacy project monitor', async () => {
+        // Create first
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              legacyProject
+            ) + `?savedObjectType=${legacySyntheticsMonitorTypeSingle}`
+          )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ monitors: [legacyMonitor] })
+          .expect(200);
+
+        // Delete via SYNTHETICS_MONITORS_PROJECT_DELETE API
+        const soRes = await kibanaServer.savedObjects.find({
+          type: legacySyntheticsMonitorTypeSingle,
+        });
+        const found = soRes.saved_objects.find(
+          (obj: any) => obj.attributes.journey_id === legacyMonitorId
+        );
+        expect(found).not.to.be(undefined);
+
+        // Use the project delete API for legacy monitor
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+              '{projectName}',
+              legacyProject
+            )
+          )
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ monitors: [legacyMonitorId] })
+          .expect(200);
+
+        // Ensure deleted
+        const soResAfter = await kibanaServer.savedObjects.find({
+          type: legacySyntheticsMonitorTypeSingle,
+        });
+        const foundAfter = soResAfter.saved_objects.find((obj: any) => obj.id === found!.id);
+        expect(foundAfter).to.be(undefined);
+      });
     });
   });
 }

@@ -6,9 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { Location } from '../../definitions/types';
-import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
+import { ESQL_COMMON_NUMERIC_TYPES } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import {
   AssertSuggestionsFn,
   getFieldNamesByType,
@@ -62,10 +61,10 @@ describe('case', () => {
       'from a | eval case( keywordField != /)',
       [
         // Notice no extra space after field name
-        ...getFieldNamesByType(['keyword', 'text', 'boolean']).map((field) => `${field}`),
+        ...getFieldNamesByType(['keyword', 'text']).map((field) => `${field}`),
         ...getFunctionSignaturesByReturnType(
           Location.EVAL,
-          ['keyword', 'text', 'boolean'],
+          ['keyword', 'text'],
           { scalar: true },
           undefined,
           []

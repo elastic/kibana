@@ -15,21 +15,27 @@ import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
+  GetPrebuiltRuleBaseVersionRequest,
+  GetPrebuiltRuleBaseVersionResponseBody,
   GetPrebuiltRulesStatusResponseBody,
   InstallSpecificRulesRequest,
   PerformRuleInstallationResponseBody,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
+  RevertPrebuiltRulesRequest,
+  RevertPrebuiltRulesResponseBody,
   ReviewRuleInstallationResponseBody,
   ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import {
   BOOTSTRAP_PREBUILT_RULES_URL,
+  GET_PREBUILT_RULES_BASE_VERSION_URL,
   GET_PREBUILT_RULES_STATUS_URL,
   PERFORM_RULE_INSTALLATION_URL,
   PERFORM_RULE_UPGRADE_URL,
   PREBUILT_RULES_STATUS_URL,
+  REVERT_PREBUILT_RULES_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
@@ -42,6 +48,7 @@ import type {
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
   ImportRulesResponse,
+  BulkManualRuleFillGaps,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -341,7 +348,10 @@ export interface BulkActionErrorResponse {
   attributes?: BulkActionAttributes;
 }
 
-export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefined; ids: string[] };
+export type QueryOrIds =
+  | { query: string; ids?: undefined; gapRange?: { start: string; end: string } }
+  | { query?: undefined; ids: string[] };
+
 type PlainBulkAction = {
   type: Exclude<
     BulkActionType,
@@ -349,6 +359,7 @@ type PlainBulkAction = {
     | BulkActionTypeEnum['export']
     | BulkActionTypeEnum['duplicate']
     | BulkActionTypeEnum['run']
+    | BulkActionTypeEnum['fill_gaps']
   >;
 } & QueryOrIds;
 
@@ -367,11 +378,17 @@ export type ManualRuleRunBulkAction = {
   runPayload: BulkManualRuleRun['run'];
 } & QueryOrIds;
 
+export type ManualRuleFillGapsAction = {
+  type: BulkActionTypeEnum['fill_gaps'];
+  fillGapsPayload: BulkManualRuleFillGaps['fill_gaps'];
+} & QueryOrIds;
+
 export type BulkAction =
   | PlainBulkAction
   | EditBulkAction
   | DuplicateBulkAction
-  | ManualRuleRunBulkAction;
+  | ManualRuleRunBulkAction
+  | ManualRuleFillGapsAction;
 
 export interface PerformRulesBulkActionProps {
   bulkAction: BulkAction;
@@ -398,6 +415,10 @@ export async function performBulkAction({
     duplicate:
       bulkAction.type === BulkActionTypeEnum.duplicate ? bulkAction.duplicatePayload : undefined,
     run: bulkAction.type === BulkActionTypeEnum.run ? bulkAction.runPayload : undefined,
+    gaps_range_start: 'gapRange' in bulkAction ? bulkAction.gapRange?.start : undefined,
+    gaps_range_end: 'gapRange' in bulkAction ? bulkAction.gapRange?.end : undefined,
+    fill_gaps:
+      bulkAction.type === BulkActionTypeEnum.fill_gaps ? bulkAction.fillGapsPayload : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
@@ -700,4 +721,27 @@ export const bootstrapPrebuiltRules = async (): Promise<BootstrapPrebuiltRulesRe
   KibanaServices.get().http.fetch(BOOTSTRAP_PREBUILT_RULES_URL, {
     method: 'POST',
     version: '1',
+  });
+
+export const getPrebuiltRuleBaseVersion = async ({
+  signal,
+  request,
+}: {
+  signal: AbortSignal | undefined;
+  request: GetPrebuiltRuleBaseVersionRequest;
+}): Promise<GetPrebuiltRuleBaseVersionResponseBody> =>
+  KibanaServices.get().http.fetch(GET_PREBUILT_RULES_BASE_VERSION_URL, {
+    method: 'GET',
+    version: '1',
+    signal,
+    query: request,
+  });
+
+export const revertPrebuiltRule = async (
+  body: RevertPrebuiltRulesRequest
+): Promise<RevertPrebuiltRulesResponseBody> =>
+  KibanaServices.get().http.fetch(REVERT_PREBUILT_RULES_URL, {
+    method: 'POST',
+    version: '1',
+    body: JSON.stringify(body),
   });

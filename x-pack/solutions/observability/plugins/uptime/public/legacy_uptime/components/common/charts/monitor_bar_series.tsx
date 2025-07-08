@@ -103,6 +103,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
           })}
           timeZone="local"
           xAccessor={0}
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yAccessors={[1]}
           yScaleType={ScaleType.Linear}

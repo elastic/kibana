@@ -15,7 +15,52 @@ import {
   type StarterPrompt,
 } from '../../common/types';
 
+export const deanonymizationRt = t.type({
+  start: t.number,
+  end: t.number,
+  entity: t.type({
+    class_name: t.string,
+    value: t.string,
+    mask: t.string,
+  }),
+});
+
 export const messageRt: t.Type<Message> = t.type({
+  '@timestamp': t.string,
+  message: t.intersection([
+    t.type({
+      role: t.union([
+        t.literal(MessageRole.System),
+        t.literal(MessageRole.Assistant),
+        t.literal(MessageRole.Function),
+        t.literal(MessageRole.User),
+        t.literal(MessageRole.Elastic),
+      ]),
+    }),
+    t.partial({
+      content: t.string,
+      name: t.string,
+      event: t.string,
+      data: t.string,
+      function_call: t.intersection([
+        t.type({
+          name: t.string,
+          trigger: t.union([
+            t.literal(MessageRole.Assistant),
+            t.literal(MessageRole.User),
+            t.literal(MessageRole.Elastic),
+          ]),
+        }),
+        t.partial({
+          arguments: t.string,
+        }),
+      ]),
+      deanonymizations: t.array(deanonymizationRt),
+    }),
+  ]),
+});
+
+export const publicMessageRt: t.Type<Omit<Message, 'unredactions'>> = t.type({
   '@timestamp': t.string,
   message: t.intersection([
     t.type({

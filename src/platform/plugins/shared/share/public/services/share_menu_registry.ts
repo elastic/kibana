@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ApplicationStart } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import type {
   BrowserUrlService,
   ShareContext,
@@ -23,6 +25,8 @@ import type { AnonymousAccessServiceContract } from '../../common/anonymous_acce
 export class ShareRegistry implements ShareRegistryPublicApi {
   private urlService?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+  private capabilities?: ApplicationStart['capabilities'];
+  private getLicense?: () => ILicense | undefined;
 
   private readonly globalMarker: string = '*';
 
@@ -49,11 +53,19 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     };
   }
 
-  start({ urlService, anonymousAccessServiceProvider }: ShareRegistryApiStart) {
+  start({
+    urlService,
+    anonymousAccessServiceProvider,
+    capabilities,
+    getLicense,
+  }: ShareRegistryApiStart) {
     this.urlService = urlService;
     this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
+    this.capabilities = capabilities;
+    this.getLicense = getLicense;
 
     return {
+      availableIntegrations: this.availableIntegrations.bind(this),
       resolveShareItemsForShareContext: this.resolveShareItemsForShareContext.bind(this),
     };
   }
@@ -137,6 +149,36 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     return globalOptions.concat(Array.from(shareContextMap.values()));
   }
 
+  /**
+   * Returns all share actions that are available for the given object type.
+   */
+  private availableIntegrations(objectType: string, groupId?: string): ShareActionIntents[] {
+    if (!this.capabilities || !this.getLicense) {
+      throw new Error('ShareOptionsManager#start was not invoked');
+    }
+
+    return this.getShareConfigOptionsForObject(objectType).filter((share) => {
+      if (
+        groupId &&
+        (share.shareType !== 'integration' ||
+          (share?.groupId !== groupId && share.shareType === 'integration'))
+      ) {
+        return false;
+      }
+
+      if (share.shareType === 'integration' && share.prerequisiteCheck) {
+        return share.prerequisiteCheck({
+          capabilities: this.capabilities!,
+          license: this.getLicense!(),
+          objectType,
+        });
+      }
+
+      // if no activation requirement is provided, assume that the share action is always available
+      return true;
+    });
+  }
+
   private resolveShareItemsForShareContext({
     objectType,
     isServerless,
@@ -146,7 +188,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
       throw new Error('ShareOptionsManager#start was not invoked');
     }
 
-    return this.getShareConfigOptionsForObject(objectType)
+    return this.availableIntegrations(objectType)
       .map((shareAction) => {
         let config: ShareConfigs['config'] | null;
 

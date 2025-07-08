@@ -63,13 +63,15 @@ describe('ReportingAPIClient', () => {
     });
 
     it('should send job IDs in query parameters', async () => {
-      await apiClient.list(1, ['123', '456']);
+      await apiClient.list(1, 10, ['123', '456']);
 
       expect(httpClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/list'),
         expect.objectContaining({
+          asSystemRequest: true,
           query: {
             page: 1,
+            size: 10,
             ids: '123,456',
           },
         })
@@ -115,6 +117,32 @@ describe('ReportingAPIClient', () => {
 
     it('should return a job instance', async () => {
       await expect(apiClient.getInfo('123')).resolves.toBeInstanceOf(Job);
+    });
+  });
+
+  describe('getScheduledReportInfo', () => {
+    beforeEach(() => {
+      httpClient.get.mockResolvedValueOnce({
+        data: [
+          { id: 'scheduled-report-1', title: 'Scheduled Report 1' },
+          { id: 'scheduled-report-2', title: 'Schedule Report 2' },
+        ],
+      });
+    });
+
+    it('should send a get request', async () => {
+      await apiClient.getScheduledReportInfo('scheduled-report-1');
+
+      expect(httpClient.get).toHaveBeenCalledWith(
+        expect.stringContaining('/internal/reporting/scheduled/list')
+      );
+    });
+
+    it('should return a report', async () => {
+      await expect(apiClient.getScheduledReportInfo('scheduled-report-1')).resolves.toEqual({
+        id: 'scheduled-report-1',
+        title: 'Scheduled Report 1',
+      });
     });
   });
 

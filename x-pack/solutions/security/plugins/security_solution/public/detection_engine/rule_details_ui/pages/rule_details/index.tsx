@@ -78,7 +78,7 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
-import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
+import { RuleSwitch } from '../../../common/components/rule_switch';
 import { StepPanel } from '../../../rule_creation/components/step_panel';
 import {
   getMachineLearningJobId,
@@ -89,7 +89,7 @@ import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/ru
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { RuleActionsOverflow } from '../../../../detections/components/rules/rule_actions_overflow';
+import { RuleActionsOverflow } from './rule_actions_overflow';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -102,7 +102,6 @@ import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
-  showGlobalFilters,
 } from '../../../../timelines/components/timeline/helpers';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -117,7 +116,7 @@ import {
   RuleStatus,
   RuleStatusFailedCallOut,
   ruleStatusI18n,
-} from '../../../../detections/components/rules/rule_execution_status';
+} from '../../../common/components/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
@@ -156,6 +155,7 @@ import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
+import { usePrebuiltRulesViewBaseDiff } from '../../../rule_management/hooks/use_prebuilt_rules_view_base_diff';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -228,9 +228,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).graphEventId
-  );
   const updatedAt = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).updated
   );
@@ -436,6 +433,18 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     onUpgrade: refreshRule,
   });
 
+  const {
+    baseVersionFlyout,
+    openFlyout,
+    doesBaseVersionExist,
+    isLoading: isBaseVersionLoading,
+  } = usePrebuiltRulesViewBaseDiff({ rule, onRevert: refreshRule });
+
+  const isRevertBaseVersionDisabled = useMemo(
+    () => !doesBaseVersionExist || isBaseVersionLoading,
+    [doesBaseVersionExist, isBaseVersionLoading]
+  );
+
   const ruleStatusInfo = useMemo(() => {
     return (
       <>
@@ -612,6 +621,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
       {upgradeCallout}
+      {baseVersionFlyout}
       {isBulkDuplicateConfirmationVisible && (
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
@@ -638,7 +648,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
-        <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+        <FiltersGlobal>
           <SiemSearchBar
             id={InputsModelId.global}
             pollForSignalIndex={pollForSignalIndex}
@@ -726,6 +736,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
                           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
                           confirmDeletion={confirmDeletion}
+                          isRevertBaseVersionDisabled={isRevertBaseVersionDisabled}
+                          openRuleDiffFlyout={openFlyout}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

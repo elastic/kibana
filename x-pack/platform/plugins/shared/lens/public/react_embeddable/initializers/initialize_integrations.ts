@@ -11,8 +11,9 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
-import type { HasSerializableState } from '@kbn/presentation-publishing';
+import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
 import { SavedObjectReference } from '@kbn/core/types';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { isTextBasedLanguage } from '../helper';
 import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
 import type { IntegrationCallbacks } from '../types';
@@ -33,6 +34,7 @@ function cleanupSerializedState({
 
 export function initializeIntegrations(
   getLatestState: GetStateType,
+  serializeDynamicActions: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined,
   { attributeService }: LensEmbeddableStartServices
 ): {
   api: Omit<
@@ -44,6 +46,7 @@ export function initializeIntegrations(
     | 'updateOverrides'
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
+    | 'mountInlineFlyout'
   > &
     HasSerializableState;
 } {
@@ -58,10 +61,25 @@ export function initializeIntegrations(
         const cleanedState = cleanupSerializedState(
           attributeService.extractReferences(currentState)
         );
+        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+          serializeDynamicActions?.() ?? {};
         if (cleanedState.rawState.savedObjectId) {
-          return { ...cleanedState, rawState: { ...cleanedState.rawState, attributes: undefined } };
+          return {
+            rawState: {
+              ...cleanedState.rawState,
+              ...dynamicActionsState,
+              attributes: undefined,
+            },
+            references: [...cleanedState.references, ...(dynamicActionsReferences ?? [])],
+          };
         }
-        return cleanedState;
+        return {
+          rawState: {
+            ...cleanedState.rawState,
+            ...dynamicActionsState,
+          },
+          references: [...cleanedState.references, ...(dynamicActionsReferences ?? [])],
+        };
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

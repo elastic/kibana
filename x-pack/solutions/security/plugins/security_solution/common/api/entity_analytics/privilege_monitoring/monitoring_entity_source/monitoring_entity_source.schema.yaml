@@ -1,0 +1,235 @@
+openapi: 3.0.0
+info:
+  title: Monitoring Entity Source Schema
+  description: Schema for managing entity source configurations in the monitoring system.
+  version: "1"
+
+paths:
+  /api/entity_analytics/monitoring/entity_source:
+    post:
+      operationId: CreateEntitySource
+      x-codegen-enabled: true
+      summary: Create a new entity source configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMonitoringEntitySource"
+      responses:
+        "200":
+          description: Entity source created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatedMonitoringEntitySource"
+
+  /api/entity_analytics/monitoring/entity_source/{id}:
+    get:
+      operationId: GetEntitySource
+      x-codegen-enabled: true
+      summary: Get an entity source configuration by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Entity source details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitoringEntitySource"
+
+    put:
+      operationId: UpdateEntitySource
+      x-codegen-enabled: true
+      summary: Update an entity source configuration
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonitoringEntitySource"
+      responses:
+        "200":
+          description: Entity source updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatedMonitoringEntitySource"          
+
+    delete:
+      operationId: DeleteEntitySource
+      x-codegen-enabled: true
+      summary: Delete an entity source configuration
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Entity source deleted successfully
+
+  /api/entity_analytics/monitoring/entity_source/list:
+    get:
+      operationId: ListEntitySources
+      x-codegen-enabled: true
+      summary: List all entity source configurations
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: managed
+          in: query
+          schema:
+            type: boolean
+        - name: name
+          in: query
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: List of entity sources retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MonitoringEntitySource"
+components:
+  schemas:
+    CreateMonitoringEntitySource:
+      type: object
+      required: [type, name]
+      properties:
+        type:
+          type: string
+        name:
+          type: string
+        managed:
+          type: boolean
+        indexPattern:
+          type: string
+        enabled:
+          type: boolean
+        error:
+          type: string
+        integrationName:
+          type: string
+        matchers:
+          type: array
+          items:
+            type: object
+            required:
+            - fields
+            - values
+            properties:
+              fields:
+                type: array
+                items:
+                  type: string                  
+              values:
+                type: array
+                items:
+                  type: string                
+        filter:
+          type: object
+          properties:
+            kuery:
+              oneOf:
+                - type: string
+                - type: object
+
+    UpdatedMonitoringEntitySource:
+      type: object
+      properties:
+        type:
+          type: string
+        name:
+          type: string
+        managed:
+          type: boolean
+        indexPattern:
+          type: string
+        enabled:
+          type: boolean
+        error:
+          type: string
+        integrationName:
+          type: string
+        matchers:
+          type: array
+          items:
+            type: object
+            required:
+            - fields
+            - values
+            properties:
+              fields:
+                type: array
+                items:
+                  type: string                  
+              values:
+                type: array
+                items:
+                  type: string                
+        filter:
+          type: object
+          properties:
+            kuery:
+              oneOf:
+                - type: string
+                - type: object
+
+    MonitoringEntitySource:
+      type: object
+      required: [type, name, id, managed]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        indexPattern:
+          type: string
+        integrationName:
+          type: string
+        enabled:
+          type: boolean
+        matchers:
+          type: array
+          items:
+            type: object
+            required:
+            - fields
+            - values
+            properties:
+              fields:
+                type: array
+                items:
+                  type: string                
+              values:
+                type: array
+                items:
+                  type: string        
+        filter:
+          type: object
+          properties:
+            kuery:
+              oneOf:
+                - type: string
+                - type: object

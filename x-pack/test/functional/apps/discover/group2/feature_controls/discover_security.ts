@@ -8,8 +8,8 @@
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
 import { decompressFromBase64 } from 'lz-string';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { getSavedQuerySecurityUtils } from '../../../saved_query_management/utils/saved_query_security';
+import { getSavedQuerySecurityUtils } from '@kbn/test-suites-xpack-platform/functional/apps/saved_query_management/utils/saved_query_security';
+import { FtrProviderContext } from '@kbn/test-suites-xpack-platform/functional/ftr_provider_context';
 
 export default function (ctx: FtrProviderContext) {
   const { getPageObjects, getService } = ctx;
@@ -22,17 +22,27 @@ export default function (ctx: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const securityService = getService('security');
   const globalNav = getService('globalNav');
-  const { common, error, discover, timePicker, security, share, header, unifiedFieldList } =
-    getPageObjects([
-      'common',
-      'error',
-      'discover',
-      'timePicker',
-      'security',
-      'share',
-      'header',
-      'unifiedFieldList',
-    ]);
+  const {
+    common,
+    error,
+    discover,
+    timePicker,
+    security,
+    share,
+    header,
+    unifiedFieldList,
+    exports,
+  } = getPageObjects([
+    'common',
+    'error',
+    'discover',
+    'timePicker',
+    'security',
+    'share',
+    'header',
+    'unifiedFieldList',
+    'exports',
+  ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
@@ -131,10 +141,10 @@ export default function (ctx: FtrProviderContext) {
       });
 
       it('shows CSV reports', async () => {
-        await share.clickShareTopNavButton();
-        await share.clickTab('Export');
+        await exports.clickExportTopNavButton();
+        await exports.clickPopoverItem('CSV');
         await testSubjects.existOrFail('generateReportButton');
-        await share.closeShareModal();
+        await exports.closeExportFlyout();
       });
 
       savedQuerySecurityUtils.shouldAllowSavingQueries();

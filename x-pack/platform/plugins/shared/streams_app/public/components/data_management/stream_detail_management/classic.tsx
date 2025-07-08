@@ -7,17 +7,22 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
-import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { ManagementTabs, Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
+import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 
-const classicStreamManagementSubTabs = ['enrich', 'advanced', 'lifecycle'] as const;
+const classicStreamManagementSubTabs = [
+  'enrich',
+  'advanced',
+  'lifecycle',
+  'significantEvents',
+] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
 
@@ -35,6 +40,11 @@ export function ClassicStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+
+  const { enrich, ...otherTabs } = useStreamsDetailManagementTabs({
+    definition,
+    refreshDefinition,
+  });
 
   if (!definition.data_stream_exists) {
     return (
@@ -80,23 +90,26 @@ export function ClassicStreamDetailManagement({
   const tabs: ManagementTabs = {};
 
   if (definition.data_stream_exists) {
-    tabs.enrich = {
-      content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
-        defaultMessage: 'Extract field',
-      }),
-    };
-
     tabs.lifecycle = {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
       ),
-      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-        defaultMessage: 'Data retention',
-      }),
+      label: (
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+            defaultMessage:
+              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+              defaultMessage: 'Data retention',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
     };
+    tabs.enrich = enrich;
   }
 
   if (definition.privileges.manage) {
@@ -107,10 +120,25 @@ export function ClassicStreamDetailManagement({
           refreshDefinition={refreshDefinition}
         />
       ),
-      label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
-        defaultMessage: 'Advanced',
-      }),
+      label: (
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
+            defaultMessage:
+              'View technical details about this classic stream’s underlying index setup',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+              defaultMessage: 'Advanced',
+            })}
+          </span>
+        </EuiToolTip>
+      ),
     };
+  }
+
+  if (otherTabs.significantEvents) {
+    tabs.significantEvents = otherTabs.significantEvents;
   }
 
   if (!isValidManagementSubTab(tab)) {

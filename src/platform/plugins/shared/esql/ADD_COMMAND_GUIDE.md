@@ -145,7 +145,7 @@ You can read how suggestions work [here](https://github.com/elastic/kibana/blob/
     ```ts
     export async function suggest(
       params: CommandSuggestParams<'where'>
-    ): Promise<SuggestionRawDefinition[]> {
+    ): Promise<ISuggestionItem[]> {
       const expressionRoot = params.command.args[0] as ESQLSingleAstItem | undefined;
       const suggestions = await suggestForExpression({
         ...params,
@@ -186,6 +186,17 @@ You can read how suggestions work [here](https://github.com/elastic/kibana/blob/
     ```
   - [ ] If the new command must be suggested only in particular situations, modify the corresponding suggestions to make it possible.
   - [ ] Add tests following this [guide](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/README.md#automated-testing).
+     
+### Important things to check when adding suggestions
+- **Partial words** — suggestions should work after partial words. For example `SORT field AS/` should suggest the same list of options as `SORT field /` (where `/` is the cursor position). Otherwise, users won't get suggestions if they resume typing words.
+- **Lists of things** — All field lists (and source and other lists where appropriate) should follow the pattern found in `KEEP`. That is, they should differentiate between partial and complete list item names and show the comma suggestion after a complete name without advancing the cursor by a space. There is a `handleFragment` function to assist with this. If we get this wrong, the editor awkwardly inserts commas surrounded by whitespace.
+- **Prefix ranges** — When a suggestion is chosen, Monaco computes a prefix range to replace with the text of the completion item. Sometimes, Monaco's default prefix detection is inadequate, leading the editor to insert the suggestion text at the wrong location. This happens when a prefix can contain one of VSCode's [default word separator characters](https://github.com/microsoft/vscode/blob/1c931b181d6922ddc1eac2469117fba2c500da07/src/vs/editor/common/core/wordHelper.ts#L10). A classic ES|QL example is accepting a suggestion for a dotted field name (e.g. `foo.bar.baz`) _when the suggestions have been generated after the dot (e.g. `foo.ba/`)._ The best way to make sure things work is manual testing in the editor.
+  1. type something like the following: `WHERE foo.ba` so that you have a prefix with a dot in it.
+  1. close the suggestion menu by pressing `ESC`
+  1. resume typing where you left off to generate suggestions again
+  1. then accept a suggestion
+  
+  If the editor is inserting the text incorrectly, you need to calculate and attach a custom [`rangeToReplace`](https://github.com/elastic/kibana/blob/f09bce1108cdd55ba69e11e8b14c947bf052dd91/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts#L64-L75) that covers the entire prefix. Once you have verified the behavior manually, you can add an automated test to check the computed range ([example](https://github.com/elastic/kibana/blob/3962e0fb2a7b833a21b33012b2425fa847e48bcb/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/__tests__/autocomplete.command.sort.test.ts#L240)). (We may be able to find [a more automatic way](https://github.com/elastic/kibana/issues/209905) to ensure correct behavior in the future, but for now, it's manual.)
 
 ### Example PR’s ⭐
 [Adding FORK command](https://github.com/elastic/kibana/pull/216743)

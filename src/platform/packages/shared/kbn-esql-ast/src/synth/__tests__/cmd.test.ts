@@ -18,13 +18,24 @@ test('can create a WHERE command', () => {
   expect(text).toBe('WHERE coordinates.lat >= 12.123123');
 });
 
-test('can create a RERANK command', () => {
+/**
+ * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+ * get back to it after 9.1 release.
+ */
+test.skip('can create a RERANK command', () => {
   const node = cmd`RERANK "star wars" ON title, overview=SUBSTRING(overview, 0, 100), actors WITH rerankerInferenceId`;
   const text = node.toString();
 
   expect(text).toBe(
     'RERANK "star wars" ON title, overview = SUBSTRING(overview, 0, 100), actors WITH rerankerInferenceId'
   );
+});
+
+test('can create a SAMPLE command', () => {
+  const node = cmd`SAMPLE 0.23`;
+  const text = node.toString();
+
+  expect(text).toBe('SAMPLE 0.23');
 });
 
 test('can create a complex STATS command', () => {

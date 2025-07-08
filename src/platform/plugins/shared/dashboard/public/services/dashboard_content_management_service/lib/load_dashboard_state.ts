@@ -7,22 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { has } from 'lodash';
 import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { has } from 'lodash';
 
-import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
 import { getDashboardContentManagementCache } from '..';
-import { convertPanelsArrayToPanelMap } from '../../../../common/lib/dashboard_panel_converters';
-import { injectReferences } from '../../../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
-import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
+import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
+import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import {
   contentManagementService,
   dataService,
-  embeddableService,
   savedObjectsTaggingService,
 } from '../../kibana_services';
 import type {
@@ -30,7 +27,6 @@ import type {
   LoadDashboardFromSavedObjectProps,
   LoadDashboardReturn,
 } from '../types';
-import { convertNumberToDashboardVersion } from './dashboard_versioning';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -73,6 +69,7 @@ export const loadDashboardState = async ({
   let resolveMeta: DashboardGetOut['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
+
   if (cachedDashboard) {
     /** If the dashboard exists in the cache, use the cached version to load the dashboard */
     ({ item: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
@@ -111,19 +108,7 @@ export const loadDashboardState = async ({
     };
   }
 
-  /**
-   * Inject saved object references back into the saved object attributes
-   */
-  const { references, attributes: rawAttributes, managed } = rawDashboardContent;
-  const attributes = (() => {
-    if (!references || references.length === 0) return rawAttributes;
-    return injectReferences(
-      { references, attributes: rawAttributes },
-      {
-        embeddablePersistableStateService: embeddableService,
-      }
-    );
-  })();
+  const { references, attributes, managed } = rawDashboardContent;
 
   /**
    * Create search source and pull filters and query from it.
@@ -149,18 +134,8 @@ export const loadDashboardState = async ({
   const query = migrateLegacyQuery(
     searchSource?.getOwnField('query') || queryString.getDefaultQuery() // TODO SAVED DASHBOARDS determine if migrateLegacyQuery is still needed
   );
-
-  const {
-    refreshInterval,
-    description,
-    timeRestore,
-    options,
-    panels,
-    timeFrom,
-    version,
-    timeTo,
-    title,
-  } = attributes;
+  const { refreshInterval, description, timeRestore, options, panels, timeFrom, timeTo, title } =
+    attributes;
 
   const timeRange =
     timeRestore && timeFrom && timeTo
@@ -169,8 +144,6 @@ export const loadDashboardState = async ({
           to: timeTo,
         }
       : undefined;
-
-  const panelMap = convertPanelsArrayToPanelMap(panels ?? []);
 
   return {
     managed,
@@ -184,17 +157,13 @@ export const loadDashboardState = async ({
       description,
       timeRange,
       filters,
-      panels: panelMap,
+      panels,
       query,
       title,
-
-      viewMode: 'view', // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags:
         savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
 
       controlGroupInput: attributes.controlGroupInput,
-
-      ...(version && { version: convertNumberToDashboardVersion(version) }),
     },
     dashboardFound: true,
     dashboardId: savedObjectId,

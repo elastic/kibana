@@ -9,10 +9,12 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { EuiHighlight, EuiSelectable, useEuiTheme } from '@elastic/eui';
+import { EuiHighlight, EuiSelectable, UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { OptionsListSuggestions } from '../../../../../common/options_list/types';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
@@ -34,6 +36,7 @@ export const OptionsListPopoverSuggestions = ({
   } = useOptionsListContext();
 
   const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(optionListPopoverSuggestionsStyles);
 
   const [
     sort,
@@ -85,10 +88,10 @@ export const OptionsListPopoverSuggestions = ({
       key: 'exists-option',
       checked: existsSelected ? 'on' : undefined,
       label: OptionsListStrings.controlAndPopover.getExists(),
-      className: 'optionsList__existsFilter',
+      css: styles.optionsListExistsFilter,
       'data-test-subj': 'optionsList-control-selection-exists',
     };
-  }, [suggestions, existsSelected, showOnlySelected, hideExists]);
+  }, [suggestions, existsSelected, showOnlySelected, hideExists, styles]);
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
@@ -119,16 +122,16 @@ export const OptionsListPopoverSuggestions = ({
       options.push({
         key: 'loading-option',
         'data-test-subj': 'optionslist--canLoadMore',
-        className: 'optionslist--loadingMoreGroupLabel',
         label: OptionsListStrings.popover.getLoadingMoreMessage(),
         isGroupLabel: true,
+        css: styles.loadMore,
       });
     } else if (options.length === MAX_OPTIONS_LIST_REQUEST_SIZE) {
       options.push({
         key: 'no-more-option',
-        className: 'optionslist--endOfOptionsGroupLabel',
         label: OptionsListStrings.popover.getAtEndOfOptionsMessage(),
         isGroupLabel: true,
+        css: styles.noMoreOptions,
       });
     }
     setSelectableOptions(existsSelectableOption ? [existsSelectableOption, ...options] : options);
@@ -141,6 +144,7 @@ export const OptionsListPopoverSuggestions = ({
     existsSelectableOption,
     canLoadMoreSuggestions,
     fieldFormatter,
+    styles,
   ]);
 
   const loadMoreOptions = useCallback(() => {
@@ -206,4 +210,25 @@ export const OptionsListPopoverSuggestions = ({
       </div>
     </>
   );
+};
+
+const optionListPopoverSuggestionsStyles = {
+  optionsListExistsFilter: ({ euiTheme }: UseEuiTheme) => css`
+    font-style: italic;
+    font-weight: ${euiTheme.font.weight.medium};
+  `,
+  loadMore: ({ euiTheme }: UseEuiTheme) => css`
+    text-align: center;
+    padding: ${euiTheme.size.m};
+    font-style: italic;
+    height: ${euiTheme.size.xxl} !important;
+  `,
+  noMoreOptions: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      textAlign: 'center',
+      fontSize: euiTheme.size.m,
+      height: 'auto !important',
+      color: euiTheme.colors.textSubdued,
+      padding: euiTheme.size.m,
+    }),
 };

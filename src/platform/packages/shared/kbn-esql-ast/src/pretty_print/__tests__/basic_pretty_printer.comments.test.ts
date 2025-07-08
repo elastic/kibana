@@ -99,9 +99,28 @@ describe('inline cast expression', () => {
   });
 });
 
-describe('list literal expression', () => {
-  test('can print source left comment', () => {
-    assertPrint('FROM a | STATS /* 1 */ /* 2 */ [1, 2, 3] /* 3 */');
+describe('list expressions', () => {
+  describe('literal list', () => {
+    test('can print source left comment', () => {
+      assertPrint('FROM a | STATS /* 1 */ /* 2 */ [1, 2, 3] /* 3 */');
+    });
+  });
+
+  describe('tuple list', () => {
+    test('can print comments around the tuple', () => {
+      assertPrint('FROM a | WHERE b IN /* 1 */ /* 2 */ (1, 2, 3) /* 3 */');
+      assertPrint('FROM a | WHERE b NOT IN /* 1 */ /* 2 */ (1, 2, 3) /* 3 */');
+    });
+
+    test('can print comments inside the tuple', () => {
+      assertPrint('FROM a | WHERE b IN (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */)');
+      assertPrint(
+        'FROM a | WHERE b NOT IN (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */)'
+      );
+      assertPrint(
+        'FROM a | WHERE b IN /* 0 */ (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */) /* 7 */'
+      );
+    });
   });
 });
 
@@ -167,6 +186,32 @@ describe('binary expressions', () => {
       'FROM a | STATS /* a */ /* a.2 */ 1 /* b */ + /* c */ 2 /* d */ + /* e */ 3 /* f */ + /* g */ 4 /* h */ /* h.2 */'
     );
   });
+
+  describe('grouping', () => {
+    test('AND has higher precedence than OR', () => {
+      assertPrint('FROM a | WHERE /* a */ b /* b */ AND (c /* d */ OR /* e */ d)');
+      assertPrint('FROM a | WHERE (b /* a */ OR /* b */ c) AND /* c */ d');
+    });
+
+    test('addition has higher precedence than AND', () => {
+      assertPrint('FROM a | WHERE b /* a */ + (/* b */ c /* c */ AND /* d */ d /* e */)');
+      assertPrint('FROM a | WHERE (/* a */ b /* b */ AND /* c */ c /* d */) + /* e */ d /* f */');
+    });
+
+    test('multiplication (division) has higher precedence than addition (subtraction)', () => {
+      assertPrint(
+        'FROM a | WHERE /* a */ b /* b */ / (/* c */ c /* d */ - /* e */ d /* f */) /* h */'
+      );
+      assertPrint('FROM a | WHERE (/* a */ b /* b */ - /* c */ c /* d */) / /* e */ d /* f */');
+    });
+
+    test('issue: https://github.com/elastic/kibana/issues/224990', () => {
+      assertPrint('FROM a | WHERE b AND (c OR d)');
+      assertPrint(
+        'FROM kibana_sample_data_logs | WHERE agent.keyword /* a */ == /* b */ "meow" AND (geo.dest == "GR" /* c */ OR geo.dest == "ES")'
+      );
+    });
+  });
 });
 
 describe('unary expressions', () => {
@@ -214,7 +259,11 @@ describe('commands', () => {
     });
   });
 
-  describe('RERANK', () => {
+  /**
+   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+   * get back to it after 9.1 release.
+   */
+  describe.skip('RERANK', () => {
     test('comments around all elements', () => {
       assertPrint(
         'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field /*4*/ WITH /*5*/ id /*6*/'
