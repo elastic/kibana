@@ -73,7 +73,7 @@ describe('DetectionEngineFilters', () => {
     },
     timeRange: { from: 'now-15m', to: 'now' },
     onInit: jest.fn(),
-    dataViewSpec: {
+    dataView: {
       title: 'mock-title',
       fields: {},
     },
@@ -99,7 +99,7 @@ describe('DetectionEngineFilters', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders correctly when spaceId and dataViewSpec are defined', () => {
+  it('renders correctly when spaceId and dataView are defined', () => {
     const { container } = render(<DetectionEngineFilters {...mockProps} />);
     expect(container).toBeInTheDocument();
   });

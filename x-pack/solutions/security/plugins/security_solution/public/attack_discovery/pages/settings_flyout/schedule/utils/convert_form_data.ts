@@ -6,7 +6,7 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { AIConnector } from '@kbn/elastic-assistant';
 
@@ -20,13 +20,15 @@ export const convertFormDataInBaseSchedule = (
   alertsIndexPattern: string,
   connector: AIConnector,
   dataViewSpec: DataViewSpec,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  dataView: DataView
 ) => {
   const alertsSelectionSettings = scheduleData.alertsSelectionSettings;
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
     dataViewSpec,
+    dataView,
     queries: [alertsSelectionSettings.query],
     filters: alertsSelectionSettings.filters,
   });

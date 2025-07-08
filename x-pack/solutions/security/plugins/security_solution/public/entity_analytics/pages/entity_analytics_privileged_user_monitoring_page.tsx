@@ -110,7 +110,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView, status } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
+  const { dataViewSpec } = useDataViewSpec(); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
@@ -193,7 +193,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     <>
       {state.type === 'dashboard' && (
         <FiltersGlobal>
-          <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+          <SiemSearchBar id={InputsModelId.global} sourcererDataView={oldSourcererDataViewSpec} />
         </FiltersGlobal>
       )}
 
