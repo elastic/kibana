@@ -34,7 +34,7 @@ The file name should be the article title in snakecase e.g. vulnerability_summar
 
 The content is often delivered to us as a zip of `.mdx` files that are in kebab case with some upper case letters. Follow the below steps to convert them to the required format:
 
-1. Delete all existing files in the `x-pack/solutions/security/plugins/elastic_assistant/server/knowledge_base/security_labs` to ensure any removed articles are not left behind.
+1. Delete all existing files in the `x-pack/solutions/security/plugins/elastic_assistant/server/knowledge_base/security_labs` to ensure any removed articles are not left behind
 
 ```bash
 cd x-pack/solutions/security/plugins/elastic_assistant/server/knowledge_base/security_labs
@@ -42,7 +42,7 @@ rm -rf ./*
 ```
 
 2. Extract the zip of `.mdx` files into the same directory
-3. Remove `callout_example.md` if present, this was a leftover example document
+3. Remove `callout_example.md` if present as this was a leftover example document, and also remove `signaling_from_within_how_ebpf_interacts_with_signals.md` if present as it was removed in https://github.com/elastic/kibana/pull/212525
 4. Open your terminal to this directory and run this script to convert the files to the required format:
 
 ```bash
