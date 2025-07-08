@@ -14,6 +14,7 @@ export type {
   RacRequestHandlerContext,
   RacApiRequestHandlerContext,
   AlertTypeWithExecutor,
+  GetBrowserFieldsResponse,
 } from './types';
 
 export type { RuleRegistryPluginConfig } from './config';

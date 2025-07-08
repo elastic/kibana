@@ -9,7 +9,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { ActionVariable } from '@kbn/alerting-plugin/common';
 import { useEffect, useMemo, useState } from 'react';
 import { EcsFlat } from '@elastic/ecs';
-import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
+import type { GetBrowserFieldsResponse } from '@kbn/rule-registry-plugin/server';
 
 import {
   fetchRuleTypeAlertFields,
@@ -23,7 +23,7 @@ export function useRuleTypeAlertFields(
 ): { isLoading: boolean; fields: ActionVariable[] } {
   // Reimplement useQuery here; this hook is sometimes called in contexts without a QueryClientProvider
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<FieldDescriptor[]>([]);
+  const [data, setData] = useState<GetBrowserFieldsResponse['fields']>([]);
 
   useEffect(() => {
     if (enabled && data.length === 0 && ruleTypeId) {

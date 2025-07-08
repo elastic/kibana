@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
+import type { GetBrowserFieldsResponse } from '@kbn/rule-registry-plugin/server';
 
 export const DEFAULT_ALERTS_PAGE_SIZE = 10;
-export const EMPTY_AAD_FIELDS: FieldDescriptor[] = [];
+export const EMPTY_AAD_FIELDS: GetBrowserFieldsResponse['fields'] = [];
