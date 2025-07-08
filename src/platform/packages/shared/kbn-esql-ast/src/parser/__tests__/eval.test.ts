@@ -8,24 +8,26 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { Walker } from '../../walker';
 
-describe('RENAME', () => {
+describe('EVAL', () => {
   describe('correctly formatted', () => {
-    it('parses basic example from documentation', () => {
-      const src = `
-        FROM employees
-        | KEEP first_name, last_name, still_hired
-        | RENAME still_hired AS employed`;
-      const { ast, errors } = EsqlQuery.fromSrc(src);
-      const rename = Walker.match(ast, { type: 'command', name: 'rename' });
+    it('parses basic command', () => {
+      const query = 'FROM a | EVAL a = 1';
+      const { ast } = EsqlQuery.fromSrc(query);
 
-      expect(errors.length).toBe(0);
-      expect(rename).toMatchObject({
-        type: 'command',
-        name: 'rename',
-        args: [{}],
-      });
+      expect(ast.commands).toMatchObject([
+        {},
+        {
+          type: 'command',
+          name: 'eval',
+          args: [
+            {
+              type: 'function',
+              name: '=',
+            },
+          ],
+        },
+      ]);
     });
   });
 });

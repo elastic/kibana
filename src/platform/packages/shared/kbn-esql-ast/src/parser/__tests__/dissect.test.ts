@@ -10,21 +10,21 @@
 import { EsqlQuery } from '../../query';
 import { Walker } from '../../walker';
 
-describe('RENAME', () => {
+describe('DISSECT', () => {
   describe('correctly formatted', () => {
     it('parses basic example from documentation', () => {
       const src = `
-        FROM employees
-        | KEEP first_name, last_name, still_hired
-        | RENAME still_hired AS employed`;
+        ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
+        | DISSECT a """%{date} - %{msg} - %{ip}"""
+        | KEEP date, msg, ip`;
       const { ast, errors } = EsqlQuery.fromSrc(src);
-      const rename = Walker.match(ast, { type: 'command', name: 'rename' });
+      const dissect = Walker.match(ast, { type: 'command', name: 'dissect' });
 
       expect(errors.length).toBe(0);
-      expect(rename).toMatchObject({
+      expect(dissect).toMatchObject({
         type: 'command',
-        name: 'rename',
-        args: [{}],
+        name: 'dissect',
+        args: [{}, {}],
       });
     });
   });

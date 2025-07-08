@@ -10,21 +10,21 @@
 import { EsqlQuery } from '../../query';
 import { Walker } from '../../walker';
 
-describe('RENAME', () => {
+describe('GROK', () => {
   describe('correctly formatted', () => {
     it('parses basic example from documentation', () => {
       const src = `
-        FROM employees
-        | KEEP first_name, last_name, still_hired
-        | RENAME still_hired AS employed`;
+        ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
+            | GROK a """%{TIMESTAMP_ISO8601:date} %{IP:ip} %{EMAILADDRESS:email} %{NUMBER:num}"""
+            | KEEP date, ip, email, num`;
       const { ast, errors } = EsqlQuery.fromSrc(src);
-      const rename = Walker.match(ast, { type: 'command', name: 'rename' });
+      const grok = Walker.match(ast, { type: 'command', name: 'grok' });
 
       expect(errors.length).toBe(0);
-      expect(rename).toMatchObject({
+      expect(grok).toMatchObject({
         type: 'command',
-        name: 'rename',
-        args: [{}],
+        name: 'grok',
+        args: [{}, {}],
       });
     });
   });

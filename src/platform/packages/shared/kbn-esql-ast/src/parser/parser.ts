@@ -10,10 +10,10 @@
 import { CharStreams, type Token } from 'antlr4';
 import { CommonTokenStream, type CharStream } from 'antlr4';
 import { ESQLErrorListener } from './esql_error_listener';
-import { ESQLAstBuilderListener } from './esql_ast_builder_listener';
 import { GRAMMAR_ROOT_RULE } from './constants';
 import { attachDecorations, collectDecorations } from './formatting';
 import { Builder } from '../builder';
+import { CstToAstConverter } from './cst_to_ast_converter';
 import { default as ESQLLexer } from '../antlr/esql_lexer';
 import { default as ESQLParser } from '../antlr/esql_parser';
 import type { ESQLAst, ESQLAstQueryExpression, EditorError } from '../types';
@@ -68,10 +68,8 @@ export class Parser {
   public readonly tokens: CommonTokenStream;
   public readonly parser: ESQLParser;
   public readonly errors = new ESQLErrorListener();
-  public readonly listener: ESQLAstBuilderListener;
 
   constructor(public readonly src: string, public readonly options: ParseOptions = {}) {
-    this.listener = new ESQLAstBuilderListener(src);
     const streams = (this.streams = CharStreams.fromString(src));
     const lexer = (this.lexer = new ESQLLexer(streams));
     const tokens = (this.tokens = new CommonTokenStream(lexer));
@@ -82,35 +80,28 @@ export class Parser {
 
     parser.removeErrorListeners();
     parser.addErrorListener(this.errors);
-
-    if (this.listener) {
-      // The addParseListener API does exist and is documented here
-      // https://github.com/antlr/antlr4/blob/dev/doc/listeners.md
-      (parser as unknown as { addParseListener: any }).addParseListener(this.listener);
-    }
   }
 
   public parse(): ParseResult {
     const { src, options } = this;
 
     try {
-      this.parser[GRAMMAR_ROOT_RULE]();
+      const ctx = this.parser[GRAMMAR_ROOT_RULE]();
+      const converter = new CstToAstConverter(this);
+      const root = converter.fromSingleStatement(ctx);
+
+      if (!root) {
+        throw new Error('Parsing failed: no root node found');
+      }
 
       const errors = this.errors.getErrors();
-      const { ast: commands } = this.listener.getAst();
-      const root = Builder.expression.query(commands, {
-        location: {
-          min: 0,
-          max: src.length - 1,
-        },
-      });
 
       if (options.withFormatting) {
         const decorations = collectDecorations(this.tokens);
         attachDecorations(root, this.tokens.tokens, decorations.lines);
       }
 
-      return { root, ast: commands, errors, tokens: this.tokens.tokens };
+      return { root, ast: root.commands, errors, tokens: this.tokens.tokens };
     } catch (error) {
       if (error !== 'Empty Stack')
         // eslint-disable-next-line no-console

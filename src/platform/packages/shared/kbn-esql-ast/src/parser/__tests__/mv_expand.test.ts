@@ -10,21 +10,20 @@
 import { EsqlQuery } from '../../query';
 import { Walker } from '../../walker';
 
-describe('RENAME', () => {
+describe('MV_EXPAND', () => {
   describe('correctly formatted', () => {
     it('parses basic example from documentation', () => {
       const src = `
-        FROM employees
-        | KEEP first_name, last_name, still_hired
-        | RENAME still_hired AS employed`;
+        ROW a=[1,2,3], b="b", j=["a","b"]
+        | MV_EXPAND a`;
       const { ast, errors } = EsqlQuery.fromSrc(src);
-      const rename = Walker.match(ast, { type: 'command', name: 'rename' });
+      const mvExpand = Walker.match(ast, { type: 'command', name: 'mv_expand' });
 
       expect(errors.length).toBe(0);
-      expect(rename).toMatchObject({
+      expect(mvExpand).toMatchObject({
         type: 'command',
-        name: 'rename',
-        args: [{}],
+        name: 'mv_expand',
+        args: [{ name: 'a' }],
       });
     });
   });

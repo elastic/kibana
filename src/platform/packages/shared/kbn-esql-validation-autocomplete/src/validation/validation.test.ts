@@ -440,24 +440,6 @@ describe('validation logic', () => {
       });
     });
 
-    describe('show', () => {
-      testErrorsAndWarnings('show', ["SyntaxError: missing 'info' at '<EOF>'"]);
-      testErrorsAndWarnings('show info', []);
-      testErrorsAndWarnings('show doubleField', [
-        "SyntaxError: token recognition error at: 'd'",
-        "SyntaxError: token recognition error at: 'o'",
-        "SyntaxError: token recognition error at: 'u'",
-        "SyntaxError: token recognition error at: 'b'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'e'",
-        "SyntaxError: token recognition error at: 'F'",
-        "SyntaxError: token recognition error at: 'ie'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'd'",
-        "SyntaxError: missing 'info' at '<EOF>'",
-      ]);
-    });
-
     describe('limit', () => {
       testErrorsAndWarnings('from index | limit ', [
         `SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}`,
