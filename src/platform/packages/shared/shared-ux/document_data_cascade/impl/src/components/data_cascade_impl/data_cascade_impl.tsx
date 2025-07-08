@@ -288,7 +288,36 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     },
   });
 
-  const virtualizedRowComputedTranslateValue = useRef(new Map());
+  /**
+   * @description records the computed translate value for each item of virtualized row
+   */
+  const virtualizedRowComputedTranslateValue = useRef(new Map<number, number>());
+
+  /**
+   * @description returns the position style for the header row, in relation to the scrolled virtualized row
+   */
+  const getGridHeaderPositioningStyle = useCallback(
+    () => ({
+      top: -(virtualizedRowComputedTranslateValue.current.get(0) ?? 0),
+      transform: `translate3d(0, ${virtualizedRowComputedTranslateValue.current.get(0) ?? 0}px, 0)`,
+    }),
+    []
+  );
+
+  /**
+   * @description returns the position style for the grid row, in relation to the scrolled virtualized row
+   */
+  const getGridRowPositioningStyle = useCallback(
+    (renderIndex: number, isActiveStickyRow: boolean) =>
+      !isActiveStickyRow
+        ? {
+            transform: `translateY(${
+              virtualizedRowComputedTranslateValue.current.get(renderIndex) ?? 0
+            }px)`,
+          }
+        : {},
+    []
+  );
 
   return (
     <div css={{ flex: '1 1 auto' }}>
@@ -307,12 +336,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                   zIndex: euiTheme.levels.header,
                   background: euiTheme.colors.backgroundBaseSubdued,
                 })}
-                style={{
-                  top: -(virtualizedRowComputedTranslateValue.current.get(0) ?? 0),
-                  transform: `translate3d(0, ${
-                    virtualizedRowComputedTranslateValue.current.get(0) ?? 0
-                  }px,  0)`,
-                }}
+                style={getGridHeaderPositioningStyle()}
               >
                 <EuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem
@@ -376,17 +400,10 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                             rowInstance={row}
                             rowGapSize={size}
                             virtualRow={virtualItem}
-                            virtualRowStyle={
-                              !isActiveSticky
-                                ? {
-                                    transform: `translateY(${
-                                      virtualizedRowComputedTranslateValue.current.get(
-                                        renderIndex
-                                      ) ?? 0
-                                    }px)`,
-                                  }
-                                : {}
-                            }
+                            virtualRowStyle={getGridRowPositioningStyle(
+                              renderIndex,
+                              isActiveSticky
+                            )}
                           />
                         );
 
