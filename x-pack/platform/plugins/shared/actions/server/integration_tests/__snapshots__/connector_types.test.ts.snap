@@ -2639,6 +2639,44 @@ Object {
                     ],
                     "type": "array",
                   },
+                  "assistantComments": Object {
+                    "flags": Object {
+                      "default": [Function],
+                      "error": [Function],
+                      "presence": "optional",
+                    },
+                    "items": Array [
+                      Object {
+                        "flags": Object {
+                          "error": [Function],
+                          "presence": "optional",
+                        },
+                        "rules": Array [
+                          Object {
+                            "args": Object {
+                              "method": [Function],
+                            },
+                            "name": "custom",
+                          },
+                        ],
+                        "type": "string",
+                      },
+                    ],
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "limit": 5000,
+                        },
+                        "name": "max",
+                      },
+                    ],
+                    "type": "array",
+                  },
                   "comments": Object {
                     "flags": Object {
                       "default": [Function],
