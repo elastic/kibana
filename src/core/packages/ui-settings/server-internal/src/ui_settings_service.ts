@@ -22,7 +22,6 @@ import type {
   UiSettingsParams,
   UiSettingsScope,
 } from '@kbn/core-ui-settings-common';
-import { BuildFlavor } from '@kbn/config';
 import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
 import type {
@@ -59,14 +58,12 @@ export class UiSettingsService
   private readonly uiSettingsGlobalDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
   private allowlist: Set<string> | null = null;
-  private readonly buildFlavor: BuildFlavor;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
     this.isDist = coreContext.env.packageInfo.dist;
     this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
     this.isDev = coreContext.env.mode.dev;
-    this.buildFlavor = coreContext.env.packageInfo.buildFlavor;
   }
 
   public async preboot(): Promise<InternalUiSettingsServicePreboot> {
@@ -119,7 +116,7 @@ export class UiSettingsService
   public async start(): Promise<InternalUiSettingsServiceStart> {
     if (this.allowlist) {
       // If we are in development mode, check if all settings in the allowlist are registered
-      if (this.isDev && this.buildFlavor === 'serverless') {
+      if (this.isDev) {
         this.validateAllowlist();
       }
       this.applyAllowlist(this.uiSettingsDefaults, false);

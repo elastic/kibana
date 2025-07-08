@@ -33,12 +33,12 @@ import { securitySolutionSetting } from './src/settings/security_setting';
 
 export class AIAssistantManagementSelectionPlugin
   implements
-    Plugin<
-      AIAssistantManagementSelectionPluginServerSetup,
-      AIAssistantManagementSelectionPluginServerStart,
-      AIAssistantManagementSelectionPluginServerDependenciesSetup,
-      AIAssistantManagementSelectionPluginServerDependenciesStart
-    >
+  Plugin<
+    AIAssistantManagementSelectionPluginServerSetup,
+    AIAssistantManagementSelectionPluginServerStart,
+    AIAssistantManagementSelectionPluginServerDependenciesSetup,
+    AIAssistantManagementSelectionPluginServerDependenciesStart
+  >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
   private readonly buildFlavor: BuildFlavor;
@@ -122,7 +122,7 @@ export class AIAssistantManagementSelectionPlugin
           core.uiSettings.register({
             [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
               ...observabilitySolutionSetting,
-              value: AIAssistantType.Observability,
+              value: this.config.preferredAIAssistantType,
             },
           });
           break;
@@ -130,12 +130,26 @@ export class AIAssistantManagementSelectionPlugin
           core.uiSettings.register({
             [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
               ...securitySolutionSetting,
-              value: AIAssistantType.Security,
+              value: this.config.preferredAIAssistantType,
+            },
+          });
+          break;
+        case "chat":
+        case 'search':
+          break
+        case undefined:
+          console.log("HEREEE")
+          // This case should never happen, but we handle it for completeness.
+          core.uiSettings.register({
+            [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+              ...classicSetting,
+              value: this.config.preferredAIAssistantType,
             },
           });
           break;
         default:
-          break;
+          const _never: never = solution
+          throw new Error("Unsupported serverless project type: " + solution);
       }
     } else {
       core.uiSettings.register({
@@ -153,5 +167,5 @@ export class AIAssistantManagementSelectionPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }
