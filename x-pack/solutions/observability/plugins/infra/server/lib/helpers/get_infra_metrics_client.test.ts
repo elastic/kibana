@@ -65,9 +65,7 @@ describe('getInfraMetricsClient', () => {
     'defines an empty bool query if given no data tiers to filter by and no query',
     infraMetricsTestHarness([], undefined, {
       filter: undefined,
-      must: [
-        undefined,
-      ],
+      must: [undefined],
     })
   );
 
