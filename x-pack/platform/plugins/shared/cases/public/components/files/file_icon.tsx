@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
-import { EuiAvatar, EuiFlexItem } from '@elastic/eui';
+import type { EuiImageProps } from '@elastic/eui';
+import { EuiFlexItem, EuiIcon, EuiImage } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import {
   compressionMimeTypes,
@@ -38,36 +39,40 @@ const getIcon = (mimeType: string | undefined) => {
   return DEFAULT_ICON;
 };
 
-export const FileAvatar = React.memo(
+const IMAGE_SIZE = '32px';
+const componentStyle: EuiImageProps['css'] = {
+  cursor: 'pointer',
+  width: IMAGE_SIZE,
+  height: IMAGE_SIZE,
+};
+const commonDataTestSubj = 'cases-files-icon';
+
+export const FileIcon = React.memo(
   ({ file }: { file: Pick<FileJSON<unknown>, 'id' | 'name' | 'mimeType'> }) => {
     const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
     const { client: filesClient } = useFilesContext();
     const { owner } = useCasesContext();
 
-    const props = useMemo(() => {
-      return isImage(file)
-        ? {
-            imageUrl: filesClient.getDownloadHref({
-              id: file.id,
-              fileKind: constructFileKindIdByOwner(owner[0] as Owner),
-            }),
-            onClick: showPreview,
-            css: { cursor: 'pointer' },
-          }
-        : {
-            iconType: getIcon(file.mimeType),
-            color: 'subdued',
-            iconSize: 'l' as const,
-          };
-    }, [file, filesClient, owner, showPreview]);
-
     return (
       <EuiFlexItem grow={false}>
-        <EuiAvatar name={file.name} type="space" data-test-subj="cases-files-avatar" {...props} />
+        {isImage(file) ? (
+          <EuiImage
+            src={filesClient.getDownloadHref({
+              id: file.id,
+              fileKind: constructFileKindIdByOwner(owner[0] as Owner),
+            })}
+            alt=""
+            onClick={showPreview}
+            css={componentStyle}
+            data-test-subj={`${commonDataTestSubj}-image`}
+          />
+        ) : (
+          <EuiIcon type={getIcon(file.mimeType)} size="xl" data-test-subj={commonDataTestSubj} />
+        )}
         {isPreviewVisible && <FilePreview closePreview={closePreview} selectedFile={file} />}
       </EuiFlexItem>
     );
   }
 );
 
-FileAvatar.displayName = 'FileAvatar';
+FileIcon.displayName = 'FileIcon';

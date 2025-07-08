@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
-import { FileAvatar } from './file_avatar';
+import { FileIcon } from './file_icon';
 
 jest.mock('@kbn/shared-ux-file-context', () => ({
   useFilesContext: () => ({
@@ -37,45 +37,45 @@ const mockNonImageFile: Pick<FileJSON<unknown>, 'id' | 'name' | 'mimeType'> = {
   mimeType: 'application/pdf',
 };
 
-describe('FileAvatar', () => {
-  it('renders an avatar for image files', () => {
-    render(<FileAvatar file={mockFile} />);
+describe('FileIcon', () => {
+  it('renders an image for image files', () => {
+    render(<FileIcon file={mockFile} />);
 
-    const avatar = screen.getByTestId('cases-files-avatar');
-    expect(avatar).toBeInTheDocument();
-    // For image files, the avatar should have a clickable cursor style
-    expect(avatar).toHaveStyle('cursor: pointer');
+    const image = screen.getByTestId('cases-files-icon-image');
+    expect(image).toBeInTheDocument();
+    // For image files, the image should have a clickable cursor style
+    expect(image).toHaveStyle('cursor: pointer');
   });
 
-  it('renders an avatar for non-image files', () => {
-    render(<FileAvatar file={mockNonImageFile} />);
+  it('renders an icon for non-image files', () => {
+    render(<FileIcon file={mockNonImageFile} />);
 
-    const avatar = screen.getByTestId('cases-files-avatar');
-    expect(avatar).toBeInTheDocument();
+    const icon = screen.getByTestId('cases-files-icon');
+    expect(icon).toBeInTheDocument();
     // For non-image files, it should not have pointer cursor
-    expect(avatar).not.toHaveStyle('cursor: pointer');
+    expect(icon).not.toHaveStyle('cursor: pointer');
   });
 
-  it('shows file preview when image avatar is clicked', async () => {
+  it('shows file preview when the image is clicked', async () => {
     const user = userEvent.setup();
-    render(<FileAvatar file={mockFile} />);
+    render(<FileIcon file={mockFile} />);
 
-    const avatar = screen.getByTestId('cases-files-avatar');
+    const image = screen.getByTestId('cases-files-icon-image');
     expect(screen.queryByTestId('cases-files-image-preview')).not.toBeInTheDocument();
 
-    await user.click(avatar);
+    await user.click(image);
 
     expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
   });
 
-  it('does not show preview when non-image avatar is clicked', async () => {
+  it('does not show preview when the non-image icon is clicked', async () => {
     const user = userEvent.setup();
-    render(<FileAvatar file={mockNonImageFile} />);
+    render(<FileIcon file={mockNonImageFile} />);
 
-    const avatar = screen.getByTestId('cases-files-avatar');
+    const icon = screen.getByTestId('cases-files-icon');
     expect(screen.queryByTestId('cases-files-image-preview')).not.toBeInTheDocument();
 
-    await user.click(avatar);
+    await user.click(icon);
 
     expect(screen.queryByTestId('cases-files-image-preview')).not.toBeInTheDocument();
   });
