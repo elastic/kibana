@@ -34,7 +34,7 @@ import {
   type WhereCommandContext,
   RerankCommandContext,
   CompletionCommandContext,
-  RrfCommandContext,
+  FuseCommandContext,
   SampleCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
@@ -399,16 +399,15 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
   }
 
   /**
-   * Exit a parse tree produced by `esql_parser.rrfCommand`.
+   * Exit a parse tree produced by `esql_parser.fuseCommand`.
    *
-   * Parse the RRF (Reciprocal Rank Fusion) command:
+   * Parse the FUSE command:
    *
-   * RRF
-   *
+   * FUSE
    * @param ctx the parse tree
    */
-  exitRrfCommand(ctx: RrfCommandContext): void {
-    const command = createCommand('rrf', ctx);
+  exitFuseCommand(ctx: FuseCommandContext): void {
+    const command = createCommand('fuse', ctx);
     this.ast.push(command);
   }
 

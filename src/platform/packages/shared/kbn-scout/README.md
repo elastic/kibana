@@ -84,8 +84,8 @@ import { createPlaywrightConfig } from '@kbn/scout';
 
 // eslint-disable-next-line import/no-default-export
 export default createPlaywrightConfig({
-    testDir: './tests',
-    workers: 2,
+  testDir: './tests',
+  workers: 2,
 });
 ```
 
@@ -100,6 +100,7 @@ The `fixtures` directory contains core Scout capabilities required for testing t
 scoped to either `test` or `worker`. Scope decides when to init a new fixture instance: once per worker or for every test function. It is important to choose the correct scope to keep test execution optimally fast: if **a new instance is not needed for every test**, the fixture should be scoped to **worker**. Otherwise, it should be scoped to **test**.
 
 **Core `worker` scoped fixtures:**
+
 - `log`
 - `config`
 - `esClient`
@@ -108,20 +109,21 @@ scoped to either `test` or `worker`. Scope decides when to init a new fixture in
 - `samlAuth`
 
 ```ts
-    test.beforeAll(async ({ kbnClient }) => {
-      await kbnClient.importExport.load(testData.KBN_ARCHIVES.ECOMMERCE);
-    });
+test.beforeAll(async ({ kbnClient }) => {
+  await kbnClient.importExport.load(testData.KBN_ARCHIVES.ECOMMERCE);
+});
 ```
 
 **Core `test` scoped fixtures:**
+
 - `browserAuth`
 - `pageObjects`
 - `page`
 
 ```ts
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsViewer();
-    });
+test.beforeEach(async ({ browserAuth }) => {
+  await browserAuth.loginAsViewer();
+});
 ```
 
 If a new fixture depends on a fixture with a `test` scope, it must also be `test` scoped.
@@ -148,7 +150,7 @@ All registered Page Objects are available via the `pageObjects` fixture:
 
 ```ts
 test.beforeEach(async ({ pageObjects }) => {
-    await pageObjects.discover.goto();
+  await pageObjects.discover.goto();
 });
 ```
 
@@ -219,7 +221,7 @@ This command is useful for manual testing or running tests via an IDE.
 To start the servers locally and run tests in one step, use:
 
 ```bash
-node scripts/scout.js run-tests [--stateful|--serverless=[es|oblt|security]] --config <plugin-path>/ui_tests/playwright.config.ts
+node scripts/scout.js run-tests [--stateful|--serverless=[es|oblt|security]] --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 - **`--stateful`** or **`--serverless`**: Specifies the deployment type.
@@ -235,7 +237,7 @@ If the servers are already running, you can execute tests independently using on
 2. **Command Line**: Use the following command:
 
 ```bash
-npx playwright test --config <plugin-path>/ui_tests/playwright.config.ts --project local
+npx playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts --project local
 ```
 
 - **`--project`**: Specifies the test target as `local` ( `ech` or `mki` for Cloud targets, see below).
@@ -250,14 +252,14 @@ To run tests against a Cloud deployment, you can use either the Scout CLI or the
 node scripts/scout.js run-tests \
   --stateful \
   --testTarget=cloud \
-  --config <plugin-path>/ui_tests/playwright.config.ts
+  --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 ```bash
 node scripts/scout.js run-tests \
   --serverless=oblt \
   --testTarget=cloud \
-  --config <plugin-path>/ui_tests/playwright.config.ts
+  --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 - **`--testTarget=cloud`**: Specifies that tests should run against a Cloud deployment.
@@ -268,14 +270,14 @@ node scripts/scout.js run-tests \
 npx playwright test \
   --project=ech \
   --grep=@ess \
-  --config <plugin-path>/ui_tests/playwright.config.ts
+  --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 ```bash
 npx playwright test \
   --project=mki \
   --grep=@svlOblt \
-  --config <plugin-path>/ui_tests/playwright.config.ts
+  --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
 - **`--project`**: Specifies the test target (`ech` for Stateful or `mki` for Serverless).
@@ -298,6 +300,7 @@ node scripts/jest --config src/platform/packages/shared/kbn-scout/jest.config.js
 Ensure you have the latest local copy of the Kibana repository.
 
 Install dependencies by running the following commands:
+
 - `yarn kbn bootstrap` to install dependencies.
 - `node scripts/build_kibana_platform_plugins.js` to build plugins.
 
@@ -317,7 +320,9 @@ export class NewPage {
   // implementation
 }
 ```
+
 2. **Register the Page Object:** Update the index file to include the new Page Object:
+
 ```ts
 export function createCorePageObjects(page: ScoutPage): PageObjects {
   return {
@@ -326,6 +331,7 @@ export function createCorePageObjects(page: ScoutPage): PageObjects {
   };
 }
 ```
+
 #### Adding API service
 
 1. **Create a New API service:** Add your service to the `src/playwright/fixtures/worker/apis` directory. For instance:
@@ -351,7 +357,9 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
   };
 };
 ```
+
 2. **Register the API service:** Update the index file to include the new service:
+
 ```ts
 export const apiServicesFixture = coreWorkerFixtures.extend<
   {},
@@ -367,7 +375,9 @@ export const apiServicesFixture = coreWorkerFixtures.extend<
   ],
 });
 ```
+
 #### Adding Fixture
+
 1. **Determine Fixture Scope:** Decide if your fixture should apply to the `test` (per-test) or `worker` (per-worker) scope.
 
 2. **Implement the Fixture:** Add the implementation to `src/playwright/fixtures/test` or `src/playwright/fixtures/worker`.
@@ -376,20 +386,20 @@ export const apiServicesFixture = coreWorkerFixtures.extend<
 export const newTestFixture = base.extend<ScoutTestFixtures, ScoutWorkerFixtures>({
   newFixture: async ({}, use) => {
     const myFn = // implementation
-    await use(myFn);
+      await use(myFn);
     // optionally, cleanup on test completion
   },
 });
 ```
+
 3. **Register the Fixture:** Add the fixture to the appropriate scope:
+
 ```ts
-export const scoutTestFixtures = mergeTests(
-  ...
-  newTestFixture,
-);
+export const scoutTestFixtures = mergeTests(coreFixtures, newTestFixture);
 ```
 
 #### Best Practices
+
 - **Reusable Code:** When creating Page Objects, API services or Fixtures that apply to more than one plugin, ensure they are added to the `kbn-scout` package.
 - **Adhere to Existing Structure:** Maintain consistency with the project's architecture.
 - **Keep the Scope of Components Clear** When designing test components, keep in naming conventions, scope, maintainability and performance.
@@ -399,10 +409,10 @@ export const scoutTestFixtures = mergeTests(
 - **Add Unit Tests:** Include tests for new logic where applicable, ensuring it works as expected.
 - **Playwright documentation:** [Official best practices](https://playwright.dev/docs/best-practices)
 
-
 ### Running tests on CI
 
 #### Enabling tests for execution
+
 Scout is still in active development, which means frequent code changes may sometimes cause test failures. To maintain stability, we currently do not run Scout tests for every PR and encourage teams to limit the number of tests they add for now.
 
 If a test is difficult to stabilize within a reasonable timeframe, we reserve the right to disable it or even all tests for particular plugin.
@@ -410,9 +420,11 @@ If a test is difficult to stabilize within a reasonable timeframe, we reserve th
 To manage Scout test execution, we use the `.buildkite/scout_ci_config.yml` file, where Kibana plugins with Scout tests are registered. If you're unsure about the stability of your tests, please add your plugin under the `disabled` section.
 
 You can check whether your plugin is already registered by running:
+
 ```bash
 node scripts/scout discover-playwright-configs --validate
 ```
+
 On CI we run Scout tests only for `enabled` plugins:
 
 For PRs, Scout tests run only if there are changes to registered plugins or Scout-related packages.
@@ -420,9 +432,9 @@ On merge commits, Scout tests run in a non-blocking mode.
 
 #### Scout exit codes
 
-| Exit code | Description |
-|--------|--------|
-| 0 | All tests passed |
-| 1 | Missing configuration (e.g. SCOUT_CONFIG_GROUP_KEY and SCOUT_CONFIG_GROUP_TYPE environment variables not set) |
-| 2 | No tests in Playwright config | 
-| 10| Tests failed | 
+| Exit code | Description                                                                                                   |
+| --------- | ------------------------------------------------------------------------------------------------------------- |
+| 0         | All tests passed                                                                                              |
+| 1         | Missing configuration (e.g. SCOUT_CONFIG_GROUP_KEY and SCOUT_CONFIG_GROUP_TYPE environment variables not set) |
+| 2         | No tests in Playwright config                                                                                 |
+| 10        | Tests failed                                                                                                  |
