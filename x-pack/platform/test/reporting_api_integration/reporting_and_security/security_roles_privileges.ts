@@ -11,7 +11,6 @@ import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const supertest = getService('supertest');
