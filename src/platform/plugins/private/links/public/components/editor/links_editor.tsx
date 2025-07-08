@@ -70,6 +70,7 @@ export interface LinksEditorProps {
   parentDashboardId?: string;
   isByReference: boolean;
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
+  ariaLabelledBy: string; // used to set the title of the flyout
 }
 
 const LinksEditor = ({
@@ -81,6 +82,7 @@ const LinksEditor = ({
   parentDashboardId,
   isByReference,
   flyoutId,
+  ariaLabelledBy,
 }: LinksEditorProps) => {
   const toasts = coreServices.notifications.toasts;
   const isMounted = useMountedState();
@@ -165,11 +167,11 @@ const LinksEditor = ({
   return (
     <>
       <div css={styles.flyoutStyles} ref={editLinkFlyoutRef} />
-      <EuiFlyoutHeader hasBorder>
+      <EuiFlyoutHeader hasBorder data-test-subj="links--panelEditor--flyout">
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="s" data-test-subj="links--panelEditor--title">
-              <h2>
+              <h2 id={ariaLabelledBy}>
                 {isEditingExisting
                   ? LinksStrings.editor.panelEditor.getEditFlyoutTitle()
                   : LinksStrings.editor.panelEditor.getCreateFlyoutTitle()}
