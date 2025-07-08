@@ -30,14 +30,30 @@ export class FeatureFlagsExamplePlugin implements Plugin {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: any) {
     const router = core.http.createRouter();
+    console.log('FeatureFlagsExamplePluginA: SetupALA');
 
     // Register server side APIs
     defineRoutes(router);
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: any) {
+    setInterval(() => {
+      plugins.workflows.pushEvent('detection-rule', {
+        ruleId: '123',
+        ruleName: 'Example Detection Rule',
+        timestamp: new Date().toISOString(),
+        severity: 'high',
+        description: 'This is an example detection rule that was triggered.',
+        additionalData: {
+          user: 'jdoe',
+          ip: '109.87.123.433',
+          action: 'login',
+          location: 'New York, USA',
+        },
+      });
+    }, 10000);
     // Promise form: when we need to fetch it once, like in an HTTP request
     void Promise.all([
       core.featureFlags.getBooleanValue(FeatureFlagExampleBoolean, false),
