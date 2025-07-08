@@ -55,7 +55,7 @@ export abstract class StreamActiveRecord<
     return this._changeStatus;
   }
 
-  // Used only when we try to rollback an existing stream or resync the stored State
+  // Used only when we try to resync the stored State
   markAsUpserted(): void {
     this._changeStatus = 'upserted';
   }

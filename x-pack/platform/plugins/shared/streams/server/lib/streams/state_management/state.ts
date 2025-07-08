@@ -116,7 +116,6 @@ export class State {
     const emptyState = new State([], dependencies);
 
     // We skip validation since we assume the stored state to be correct
-    // And we don't attempt rollback since if it fails we can simply invoke resync again
     await currentState.commitChanges(emptyState);
   }
 
