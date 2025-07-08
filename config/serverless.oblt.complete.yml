@@ -1,5 +1,8 @@
 # Observability Complete tier config
 
+## Cloud settings
+xpack.cloud.serverless.product_tier: complete
+
 ## Enabled plugins
 xpack.infra.enabled: true
 xpack.slo.enabled: true

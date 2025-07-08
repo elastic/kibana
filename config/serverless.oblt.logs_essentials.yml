@@ -1,5 +1,8 @@
 # Observability Logs Essentials tier config
 
+## Cloud settings
+xpack.cloud.serverless.product_tier: logs_essentials
+
 ## Disable xpack plugins
 xpack.infra.enabled: false
 xpack.slo.enabled: false
