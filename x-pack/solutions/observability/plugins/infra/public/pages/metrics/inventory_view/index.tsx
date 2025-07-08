@@ -9,7 +9,6 @@ import React from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
@@ -33,32 +32,30 @@ export const SnapshotPage = () => {
   ]);
 
   return (
-    <KibanaErrorBoundary>
-      <WaffleOptionsProvider>
-        <WaffleTimeProvider>
-          <WaffleFiltersProvider>
-            <div className={APP_WRAPPER_CLASS}>
-              <InfraPageTemplate
-                onboardingFlow={OnboardingFlow.Infra}
-                pageHeader={{
-                  pageTitle: inventoryTitle,
-                  rightSideItems: [<SavedViews />, <SurveySection />],
-                }}
-                pageSectionProps={{
-                  contentProps: {
-                    css: css`
-                      ${fullHeightContentStyles};
-                      padding-bottom: 0;
-                    `,
-                  },
-                }}
-              >
-                <SnapshotContainer />
-              </InfraPageTemplate>
-            </div>
-          </WaffleFiltersProvider>
-        </WaffleTimeProvider>
-      </WaffleOptionsProvider>
-    </KibanaErrorBoundary>
+    <WaffleOptionsProvider>
+      <WaffleTimeProvider>
+        <WaffleFiltersProvider>
+          <div className={APP_WRAPPER_CLASS}>
+            <InfraPageTemplate
+              onboardingFlow={OnboardingFlow.Infra}
+              pageHeader={{
+                pageTitle: inventoryTitle,
+                rightSideItems: [<SavedViews />, <SurveySection />],
+              }}
+              pageSectionProps={{
+                contentProps: {
+                  css: css`
+                    ${fullHeightContentStyles};
+                    padding-bottom: 0;
+                  `,
+                },
+              }}
+            >
+              <SnapshotContainer />
+            </InfraPageTemplate>
+          </div>
+        </WaffleFiltersProvider>
+      </WaffleTimeProvider>
+    </WaffleOptionsProvider>
   );
 };
