@@ -5,11 +5,7 @@
     "types": [
       "jest",
       "node",
-      "react",
-      "@kbn/ambient-ui-types",
-      "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop",
-      "../../../../../../typings/emotion.d.ts"
+      "react"
     ]
   },
   "include": [
@@ -19,7 +15,5 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/core-chrome-layout-constants",
-  ]
+  "kbn_references": []
 }
