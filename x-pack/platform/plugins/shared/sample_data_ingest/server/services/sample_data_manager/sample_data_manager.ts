@@ -65,6 +65,7 @@ export class SampleDataManager {
     this.log.info(`Installing sample data for [${sampleType}]`);
 
     let archive: ZipArchive | undefined;
+    const indexName = this.getSampleDataIndexName(sampleType);
 
     try {
       await this.removeSampleData({ sampleType, esClient });
@@ -75,7 +76,6 @@ export class SampleDataManager {
         mappings,
       } = await this.artifactManager.prepareArtifact(sampleType);
       archive = artifactsArchive;
-      const indexName = this.getSampleDataIndexName(sampleType);
 
       await this.indexManager.createAndPopulateIndex({
         indexName,
@@ -88,6 +88,7 @@ export class SampleDataManager {
       this.log.info(`Sample data installation successful for [${sampleType}]`);
       return indexName;
     } catch (error) {
+      await this.indexManager.deleteIndex({ indexName, esClient });
       this.log.error(
         `Sample data installation failed for [${sampleType}]: ${error?.message || error}`
       );

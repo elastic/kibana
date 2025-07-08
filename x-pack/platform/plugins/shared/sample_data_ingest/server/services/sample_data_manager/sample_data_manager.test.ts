@@ -197,6 +197,21 @@ describe('SampleDataManager', () => {
       );
     });
 
+    it('should delete index when installation fails', async () => {
+      const error = new Error('Installation failed');
+      mockIndexManager.createAndPopulateIndex.mockRejectedValue(error);
+
+      await expect(sampleDataManager.installSampleData({ sampleType, esClient })).rejects.toThrow(
+        'Installation failed'
+      );
+
+      expect(mockIndexManager.deleteIndex).toHaveBeenCalledWith({
+        indexName: expectedIndexName,
+        esClient,
+      });
+      expect(mockIndexManager.deleteIndex).toHaveBeenCalledTimes(2); // Once in removeSampleData, once in error handler
+    });
+
     it('should handle different sample types correctly', async () => {
       const elasticsearchSampleType = 'elasticsearch' as DatasetSampleType;
       const expectedElasticsearchIndexName = 'sample-data-elasticsearch';
