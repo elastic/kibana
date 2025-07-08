@@ -18,6 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     const observability = getService('observability');
     const retry = getService('retry');
+    const rulesService = getService('rules');
 
     describe('Without data', function () {
       it('navigate and open alerts section', async () => {
@@ -28,13 +29,28 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('With data', function () {
       before(async () => {
+        await rulesService.api.createRule({
+          name: 'Test',
+          consumer: 'logs',
+          ruleTypeId: '.es-query',
+          params: {
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            index: ['alert-test-data'],
+            timeField: 'date',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            timeWindowSize: 20,
+            timeWindowUnit: 's',
+          },
+          schedule: { interval: '1m' },
+        });
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
 
       after(async () => {
+        await rulesService.api.deleteAllRules();
         await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
 
       it('navigate and open alerts section', async () => {
