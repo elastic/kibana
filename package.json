@@ -1086,7 +1086,6 @@
     "@kbn/workchat-app": "link:x-pack/solutions/chat/plugins/workchat-app",
     "@kbn/workchat-framework-plugin": "link:x-pack/solutions/chat/plugins/workchat-framework",
     "@kbn/workflows-plugin": "link:src/platform/plugins/shared/workflows",
-    "@kbn/workflows-plugin-example": "link:examples/workflows",
     "@kbn/xstate-utils": "link:src/platform/packages/shared/kbn-xstate-utils",
     "@kbn/zod": "link:src/platform/packages/shared/kbn-zod",
     "@kbn/zod-helpers": "link:src/platform/packages/shared/kbn-zod-helpers",
