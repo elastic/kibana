@@ -11,8 +11,9 @@ import {
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
+import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
-import { from, map, Observable } from 'rxjs';
+import { from as fromRxjs, map, Observable } from 'rxjs';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
@@ -20,6 +21,7 @@ import {
 import { SecurityError } from '../../../lib/streams/errors/security_error';
 import { createServerRoute } from '../../create_server_route';
 import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
+import { generateSignificantEventDefinitions } from './generate_significant_events';
 import { previewSignificantEvents } from './preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from './read_significant_events_from_alerts_indices';
 
@@ -197,24 +199,28 @@ const generateSignificantEventsRoute = createServerRoute({
     if (!isAvailableForTier) {
       throw new SecurityError(`Cannot access API on the current pricing tier`);
     }
-    const { streamsClient, licensing, inferenceClient } = await getScopedClients({
-      request,
-    });
-    await assertEnterpriseLicense(licensing);
 
+    const { streamsClient, scopedClusterClient, licensing, inferenceClient } =
+      await getScopedClients({ request });
+
+    await assertEnterpriseLicense(licensing);
     const isStreamEnabled = await streamsClient.isStreamsEnabled();
     if (!isStreamEnabled) {
       throw badRequest('Streams are not enabled');
     }
 
-    const dummyQueries: GeneratedSignificantEventQuery[] = [
-      {
-        title: 'significant_event',
-        kql: 'something',
-      },
-    ];
+    const generatedSignificantEventDefinitions = await generateSignificantEventDefinitions({
+      name: params.path.name,
+      inferenceClient,
+      esClient: createTracedEsClient({
+        client: scopedClusterClient.asCurrentUser,
+        logger,
+        plugin: 'streams',
+      }),
+      logger,
+    });
 
-    return from([dummyQueries]).pipe(
+    return fromRxjs([generatedSignificantEventDefinitions]).pipe(
       map(
         (
           queries
