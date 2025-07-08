@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { OnechatInternalService } from './services';
 import { OnechatPluginStart } from './types';
 import { ONECHAT_APP_ID, ONECHAT_PATH, ONECHAT_TITLE } from '../common/features';
-import { ONECHAT_TOOLS_UI_SETTING_ID, ONECHAT_AGENT_API_UI_SETTING_ID } from '../common/constants';
 
 export const registerApp = ({
   core,
@@ -21,9 +20,6 @@ export const registerApp = ({
   core: CoreSetup<OnechatPluginStart>;
   getServices: () => OnechatInternalService;
 }) => {
-  const isToolsPageEnabled = core.uiSettings.get<boolean>(ONECHAT_TOOLS_UI_SETTING_ID, false);
-  const isAgentPageEnabled = core.uiSettings.get<boolean>(ONECHAT_AGENT_API_UI_SETTING_ID, false);
-
   core.application.register({
     id: ONECHAT_APP_ID,
     appRoute: ONECHAT_PATH,
@@ -39,24 +35,16 @@ export const registerApp = ({
           defaultMessage: 'Conversations',
         }),
       },
-      ...(isToolsPageEnabled
-        ? [
-            {
-              id: 'tools',
-              path: '/tools',
-              title: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }),
-            },
-          ]
-        : []),
-      ...(isAgentPageEnabled
-        ? [
-            {
-              id: 'agents',
-              path: '/agents',
-              title: i18n.translate('xpack.onechat.agents.title', { defaultMessage: 'Agents' }),
-            },
-          ]
-        : []),
+      {
+        id: 'tools',
+        path: '/tools',
+        title: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }),
+      },
+      {
+        id: 'agents',
+        path: '/agents',
+        title: i18n.translate('xpack.onechat.agents.title', { defaultMessage: 'Agents' }),
+      },
     ],
     async mount({ element, history }: AppMountParameters) {
       const { mountApp } = await import('./application');
