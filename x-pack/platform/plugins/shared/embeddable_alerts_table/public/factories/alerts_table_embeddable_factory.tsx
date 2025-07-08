@@ -9,7 +9,6 @@ import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { PresentationContainer } from '@kbn/presentation-containers';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -21,6 +20,7 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { openLazyFlyout } from '@kbn/presentation-utils';
 import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/solutions';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
 import { ALERTS_PANEL_LABEL } from '../translations';
@@ -30,7 +30,6 @@ import type {
   EmbeddableAlertsTablePublicStartDependencies,
   EmbeddableAlertsTableSerializedState,
 } from '../types';
-import { openConfigEditor } from '../components/open_config_editor';
 import { EMBEDDABLE_ALERTS_TABLE_ID, PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
 import { EmbeddableAlertsTable } from '../components/embeddable_alerts_table';
 import { queryClient } from '../query_client';
@@ -101,12 +100,21 @@ export const getAlertsTableEmbeddableFactory = (
       getTypeDisplayName: () => ALERTS_PANEL_LABEL,
       onEdit: async () => {
         try {
-          const newTableConfig = await openConfigEditor({
-            coreServices,
-            parentApi: api.parentApi as PresentationContainer,
-            initialConfig: tableConfig$.getValue(),
+          openLazyFlyout({
+            core: coreServices,
+            parentApi: api.parentApi,
+            loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+              const { openConfigEditor } = await import('../components/open_config_editor');
+              return await openConfigEditor({
+                ariaLabelledBy,
+                coreServices,
+                closeFlyout,
+                onSave: (newConfig: EmbeddableAlertsTableConfig) => {
+                  tableConfig$.next(newConfig);
+                },
+              });
+            },
           });
-          tableConfig$.next(newTableConfig);
         } catch {
           // The user closed without saving, discard the edits
         }

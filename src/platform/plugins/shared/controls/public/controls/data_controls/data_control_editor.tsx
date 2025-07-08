@@ -69,6 +69,7 @@ export interface ControlEditorProps<
   controlGroupApi: ControlGroupApi; // controls must always have a parent API
   onCancel: (newState: Partial<State>) => void;
   onSave: (newState: Partial<State>, type: string) => void;
+  ariaLabelledBy: string;
 }
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
@@ -179,6 +180,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   onSave,
   onCancel,
   controlGroupApi,
+  ariaLabelledBy,
 }: ControlEditorProps<State>) => {
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
@@ -266,7 +268,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2>
+          <h2 id={ariaLabelledBy}>
             {!controlId // if no ID, then we are creating a new control
               ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle()
               : DataControlEditorStrings.manageControl.getFlyoutEditTitle()}

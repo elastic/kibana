@@ -32,7 +32,15 @@ import { MenuItem, MenuItemGroup } from '../types';
 import { getMenuItemGroups } from '../get_menu_item_groups';
 import { Groups } from './groups';
 
-export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi }) {
+export function AddPanelFlyout({
+  dashboardApi,
+  closeFlyout,
+  ariaLabelledBy,
+}: {
+  dashboardApi: DashboardApi;
+  closeFlyout: () => void;
+  ariaLabelledBy: string;
+}) {
   const { euiTheme } = useEuiTheme();
 
   const {
@@ -87,7 +95,7 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h1 id="addPanelsFlyout">
+          <h1 id={ariaLabelledBy}>
             <FormattedMessage
               id="dashboard.solutionToolbar.addPanelFlyout.headingText"
               defaultMessage="Add panel"
@@ -110,6 +118,7 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
               <EuiForm component="form" fullWidth>
                 <EuiFormRow css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}>
                   <EuiFieldSearch
+                    autoFocus
                     compressed
                     value={searchTerm}
                     onChange={(e) => {
@@ -159,10 +168,7 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={dashboardApi.clearOverlays}
-              data-test-subj="dashboardPanelSelectionCloseBtn"
-            >
+            <EuiButtonEmpty onClick={closeFlyout} data-test-subj="dashboardPanelSelectionCloseBtn">
               <FormattedMessage
                 id="dashboard.solutionToolbar.addPanelFlyout.cancelButtonText"
                 defaultMessage="Cancel"

@@ -55,7 +55,12 @@ describe('ConfigEditorFlyout', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ConfigEditorFlyout onSave={jest.fn()} onCancel={jest.fn()} services={core} />
+          <ConfigEditorFlyout
+            onSave={jest.fn()}
+            onCancel={jest.fn()}
+            services={core}
+            ariaLabelledBy="configEditorFlyout"
+          />
         </QueryClientProvider>
       </IntlProvider>
     );
@@ -77,6 +82,7 @@ describe('ConfigEditorFlyout', () => {
               },
             }}
             services={core}
+            ariaLabelledBy="configEditorFlyout"
           />
         </QueryClientProvider>
       </IntlProvider>
@@ -92,6 +98,7 @@ describe('ConfigEditorFlyout', () => {
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <ConfigEditorFlyout
+            ariaLabelledBy="configEditorFlyout"
             onSave={jest.fn()}
             onCancel={jest.fn()}
             initialConfig={{
@@ -117,6 +124,7 @@ describe('ConfigEditorFlyout', () => {
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <ConfigEditorFlyout
+            ariaLabelledBy="configEditorFlyout"
             onSave={jest.fn()}
             onCancel={jest.fn()}
             initialConfig={{

@@ -19,6 +19,10 @@ export interface HasEditCapabilities extends HasTypeDisplayName {
   onEdit: () => Promise<void>;
   isEditingEnabled: () => boolean;
   getEditHref?: () => Promise<string | undefined>;
+  getEditPanel?: (options?: {
+    closeFlyout?: () => void;
+    showOnly?: boolean;
+  }) => Promise<JSX.Element | undefined>;
 }
 
 /**

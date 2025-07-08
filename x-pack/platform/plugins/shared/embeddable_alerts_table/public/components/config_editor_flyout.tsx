@@ -68,6 +68,7 @@ export interface ConfigEditorFlyoutProps {
     notifications: CoreStart['notifications'];
     overlays: CoreStart['overlays'];
   };
+  ariaLabelledBy: string;
 }
 
 const EMPTY_FILTERS: AlertsFiltersExpression = [{ filter: {} }];
@@ -99,6 +100,7 @@ export const ConfigEditorFlyout = ({
   onSave,
   onCancel,
   services,
+  ariaLabelledBy,
 }: ConfigEditorFlyoutProps) => {
   const { http, overlays } = services;
   const flyoutBodyRef = useRef<HTMLDivElement>(null);
@@ -186,7 +188,7 @@ export const ConfigEditorFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder={true}>
-        <EuiTitle size="s">
+        <EuiTitle size="s" id={ariaLabelledBy}>
           <h2>{!initialConfig ? CONFIG_EDITOR_ADD_TABLE_TITLE : CONFIG_EDITOR_EDIT_TABLE_TITLE}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>

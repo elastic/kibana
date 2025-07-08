@@ -7,12 +7,8 @@
 
 import React from 'react';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import {
-  tracksOverlays,
-  type PresentationContainer,
-  type TracksOverlays,
-} from '@kbn/presentation-containers';
+import { type PresentationContainer, type TracksOverlays } from '@kbn/presentation-containers';
+import { openLazyFlyout } from '@kbn/presentation-utils';
 import {
   apiCanAccessViewMode,
   apiHasSupportedTriggers,
@@ -22,6 +18,7 @@ import {
   type HasUniqueId,
   type HasParentApi,
   type HasSupportedTriggers,
+  apiHasUniqueId,
 } from '@kbn/presentation-publishing';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
@@ -81,35 +78,31 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     const { core, plugins } = this.params.start();
 
-    const templates = createDrilldownTemplatesFromSiblings(embeddable);
-    const overlayTracker = tracksOverlays(embeddable.parentApi) ? embeddable.parentApi : undefined;
-    const close = () => {
-      if (overlayTracker) overlayTracker.clearOverlays();
-      handle.close();
-    };
-
-    const handle = core.overlays.openFlyout(
-      toMountPoint(
-        <plugins.uiActionsEnhanced.DrilldownManager
-          initialRoute={'/manage'}
-          dynamicActionManager={embeddable.enhancements.dynamicActions}
-          triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
-          placeContext={{ embeddable }}
-          templates={templates}
-          onClose={close}
-        />,
-        core
-      ),
-      {
+    openLazyFlyout({
+      core,
+      parentApi: embeddable.parentApi,
+      loadContent: async ({ closeFlyout }) => {
+        const templates = createDrilldownTemplatesFromSiblings(embeddable);
+        return (
+          <plugins.uiActionsEnhanced.DrilldownManager
+            initialRoute={'/manage'}
+            dynamicActionManager={embeddable.enhancements.dynamicActions}
+            triggers={[
+              ...ensureNestedTriggers(embeddable.supportedTriggers()),
+              CONTEXT_MENU_TRIGGER,
+            ]}
+            placeContext={{ embeddable }}
+            templates={templates}
+            onClose={closeFlyout}
+          />
+        );
+      },
+      flyoutProps: {
         maxWidth: DRILLDOWN_MAX_WIDTH,
         ownFocus: true,
         'data-test-subj': 'editDrilldownFlyout',
-        onClose: () => {
-          close();
-        },
-      }
-    );
-
-    overlayTracker?.openOverlay(handle);
+      },
+      uuid: apiHasUniqueId(embeddable) ? embeddable.uuid : undefined,
+    });
   }
 }

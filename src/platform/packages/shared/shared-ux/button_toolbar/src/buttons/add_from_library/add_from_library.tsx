@@ -29,6 +29,7 @@ export const AddFromLibraryButton = ({ onClick, size = 'm', ...rest }: Props) =>
     type="empty"
     onClick={onClick}
     iconType="folderOpen"
+    id="addFromLibraryButton"
     size={size}
     label={label.getLibraryButtonLabel()}
   />
