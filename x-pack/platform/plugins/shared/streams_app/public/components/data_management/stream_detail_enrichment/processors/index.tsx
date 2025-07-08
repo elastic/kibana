@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import React, { PropsWithChildren, useEffect, useMemo } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch, DeepPartial } from 'react-hook-form';
 import { css } from '@emotion/react';
@@ -219,7 +219,7 @@ const ProcessorConfigurationEditor = ({
   const canSave = useSelector(processorRef, (snapshot) => snapshot.can({ type: 'processor.save' }));
 
   const handleCancel = useDiscardConfirm(() => processorRef.send({ type: 'processor.cancel' }), {
-    enabled: canSave,
+    enabled: !isEqual(previousProcessor, processor),
     ...discardChangesPromptOptions,
   });
 
@@ -268,7 +268,7 @@ const ProcessorConfigurationEditor = ({
               size="s"
               fill
               onClick={methods.handleSubmit(handleSubmit)}
-              disabled={!canSave || !methods.formState.isValid}
+              disabled={!canSave}
             >
               {isConfigured
                 ? i18n.translate(
