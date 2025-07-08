@@ -8,7 +8,7 @@
 import React from 'react';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import type { EuiImageProps } from '@elastic/eui';
-import { EuiFlexItem, EuiIcon, EuiImage } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiImage } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import {
   compressionMimeTypes,
@@ -54,7 +54,7 @@ export const FileIcon = React.memo(
     const { owner } = useCasesContext();
 
     return (
-      <EuiFlexItem grow={false}>
+      <EuiFlexGroup>
         {isImage(file) ? (
           <EuiImage
             src={filesClient.getDownloadHref({
@@ -70,7 +70,7 @@ export const FileIcon = React.memo(
           <EuiIcon type={getIcon(file.mimeType)} size="xl" data-test-subj={commonDataTestSubj} />
         )}
         {isPreviewVisible && <FilePreview closePreview={closePreview} selectedFile={file} />}
-      </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );

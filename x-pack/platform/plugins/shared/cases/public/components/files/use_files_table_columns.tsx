@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { type EuiBasicTableColumn, EuiFlexGroup } from '@elastic/eui';
+import { type EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import * as i18n from './translations';
@@ -32,7 +32,9 @@ export const useFilesTableColumns = ({
       'data-test-subj': 'cases-files-table-filename',
       render: (name: string, file: FileJSON) => (
         <EuiFlexGroup alignItems="center">
-          <FileIcon file={file} />
+          <EuiFlexItem grow={false}>
+            <FileIcon file={file} />
+          </EuiFlexItem>
           <FileNameLink file={file} showPreview={() => showPreview(file)} />
         </EuiFlexGroup>
       ),
