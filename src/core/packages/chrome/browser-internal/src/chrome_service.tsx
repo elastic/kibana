@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil, filter } from 'rxjs';
+import { isPrinting$ } from './utils/printing_observable';
 import { parse } from 'url';
 import { setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
@@ -137,8 +138,8 @@ export class ChromeService {
         )
       )
     );
-    this.isVisible$ = combineLatest([appHidden$, this.isForceHidden$]).pipe(
-      map(([appHidden, forceHidden]) => !appHidden && !forceHidden),
+    this.isVisible$ = combineLatest([appHidden$, this.isForceHidden$, isPrinting$]).pipe(
+      map(([appHidden, forceHidden, isPrinting]) => !appHidden && !forceHidden && !isPrinting),
       takeUntil(this.stop$)
     );
   }
