@@ -118,7 +118,7 @@ export async function suggest(
     // resolve particular commands suggestions after
     // filter source commands if already defined
     const commands = esqlCommandRegistry.getAllCommandNames();
-    let suggestions = getCommandAutocompleteDefinitions(commands);
+    const suggestions = getCommandAutocompleteDefinitions(commands);
     if (!ast.length) {
       // Display the recommended queries if there are no commands (empty state)
       const recommendedQueriesSuggestions: ISuggestionItem[] = [];
@@ -156,12 +156,6 @@ export async function suggest(
       }
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
       return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
-    }
-
-    // If the last command is not a FORK, RRF should not be suggested.
-    const lastCommand = root.commands[root.commands.length - 1];
-    if (lastCommand.name !== 'fork') {
-      suggestions = suggestions.filter((def) => def.label !== 'RRF');
     }
 
     return suggestions.filter((def) => !isSourceCommand(def));

@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import type { OpenRuleDiffFlyoutParams } from '../../../../rule_management/hooks/use_prebuilt_rules_view_base_diff';
+import { usePrebuiltRuleBaseVersionContext } from '../../../../rule_management/components/rule_details/base_version_diff/base_version_context';
 import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine';
 import { useScheduleRuleRun } from '../../../../rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../rule_gaps/types';
@@ -57,8 +57,6 @@ interface RuleActionsOverflowComponentProps {
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
-  openRuleDiffFlyout: (params: OpenRuleDiffFlyoutParams) => void;
-  isRevertBaseVersionDisabled: boolean;
 }
 
 /**
@@ -71,8 +69,6 @@ const RuleActionsOverflowComponent = ({
   showBulkDuplicateExceptionsConfirmation,
   showManualRuleRunConfirmation,
   confirmDeletion,
-  openRuleDiffFlyout,
-  isRevertBaseVersionDisabled,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const {
@@ -91,6 +87,11 @@ const RuleActionsOverflowComponent = ({
       path: getRulesUrl(),
     });
   }, [navigateToApp]);
+
+  const {
+    actions: { openCustomizationsRevertFlyout },
+    state: { doesBaseVersionExist },
+  } = usePrebuiltRuleBaseVersionContext();
 
   const actions = useMemo(
     () =>
@@ -188,22 +189,20 @@ const RuleActionsOverflowComponent = ({
                   <EuiContextMenuItem
                     key={i18nActions.REVERT_RULE}
                     toolTipContent={
-                      isRevertBaseVersionDisabled
-                        ? i18nActions.REVERT_RULE_TOOLTIP_CONTENT
-                        : undefined
+                      !doesBaseVersionExist ? i18nActions.REVERT_RULE_TOOLTIP_CONTENT : undefined
                     }
                     toolTipProps={{
-                      title: isRevertBaseVersionDisabled
+                      title: !doesBaseVersionExist
                         ? i18nActions.REVERT_RULE_TOOLTIP_TITLE
                         : undefined,
                       'data-test-subj': 'rules-details-revert-rule-tooltip',
                     }}
                     icon="timeRefresh"
-                    disabled={!userHasPermissions || isRevertBaseVersionDisabled}
+                    disabled={!userHasPermissions || !doesBaseVersionExist}
                     data-test-subj="rules-details-revert-rule"
                     onClick={() => {
                       closePopover();
-                      openRuleDiffFlyout({ isReverting: true });
+                      openCustomizationsRevertFlyout();
                     }}
                   >
                     {i18nActions.REVERT_RULE}
@@ -240,7 +239,7 @@ const RuleActionsOverflowComponent = ({
       rule,
       canDuplicateRuleWithActions,
       userHasPermissions,
-      isRevertBaseVersionDisabled,
+      doesBaseVersionExist,
       startTransaction,
       closePopover,
       showBulkDuplicateExceptionsConfirmation,
@@ -251,7 +250,7 @@ const RuleActionsOverflowComponent = ({
       showManualRuleRunConfirmation,
       telemetry,
       scheduleRuleRun,
-      openRuleDiffFlyout,
+      openCustomizationsRevertFlyout,
       confirmDeletion,
       onRuleDeletedCallback,
     ]

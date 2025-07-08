@@ -11,6 +11,7 @@ import { deploymentAgnosticServices } from './deployment_agnostic_services';
 import { PackageApiProvider } from './package_api';
 import { RoleScopedSupertestProvider, SupertestWithRoleScope } from './role_scoped_supertest';
 import { CustomRoleScopedSupertestProvider } from './custom_role_scoped_supertest';
+import { services as apiIntegrationServices } from '../../api_integration/services';
 
 export type {
   InternalRequestHeader,
@@ -22,6 +23,9 @@ export const services = {
   ...deploymentAgnosticServices,
   supertestWithoutAuth: commonFunctionalServices.supertestWithoutAuth,
   samlAuth: commonFunctionalServices.samlAuth,
+  ml: apiIntegrationServices.ml,
+  usageAPI: apiIntegrationServices.usageAPI,
+  spaces: apiIntegrationServices.spaces,
   dataViewApi: DataViewApiProvider,
   packageApi: PackageApiProvider,
   roleScopedSupertest: RoleScopedSupertestProvider,

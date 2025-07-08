@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { startCase, camelCase } from 'lodash';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import type { PartialRuleDiff, RuleResponse } from '../../../../../../common/api/detection_engine';
@@ -16,11 +16,13 @@ import { fieldToDisplayNameMap } from '../diff_components/translations';
 interface BaseVersionDiffFlyoutSubheaderProps {
   currentRule: RuleResponse;
   diff: PartialRuleDiff;
+  isOutdated: boolean;
 }
 
 export const BaseVersionDiffFlyoutSubheader = ({
   currentRule,
   diff,
+  isOutdated,
 }: BaseVersionDiffFlyoutSubheaderProps) => {
   const lastUpdate = (
     <EuiText size="s">
@@ -36,10 +38,10 @@ export const BaseVersionDiffFlyoutSubheader = ({
   );
 
   const fieldsDiff = Object.keys(diff.fields);
-  const fieldUpdates = fieldsDiff.length > 0 && (
+  const fieldModifications = fieldsDiff.length > 0 && (
     <EuiText size="s">
       <strong>
-        {i18n.FIELD_UPDATES}
+        {i18n.FIELD_MODIFICATIONS}
         {':'}
       </strong>{' '}
       {fieldsDiff
@@ -55,8 +57,16 @@ export const BaseVersionDiffFlyoutSubheader = ({
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>{fieldUpdates}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{fieldModifications}</EuiFlexItem>
       </EuiFlexGroup>
+      {isOutdated && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiCallOut color="warning" iconType="warning">
+            <p>{i18n.OUTDATED_DIFF_CALLOUT_MESSAGE}</p>
+          </EuiCallOut>
+        </>
+      )}
     </>
   );
 };

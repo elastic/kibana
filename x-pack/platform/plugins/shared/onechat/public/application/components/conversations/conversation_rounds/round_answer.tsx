@@ -25,7 +25,7 @@ export interface RoundAnswerProps {
 
 export const RoundAnswer: React.FC<RoundAnswerProps> = ({ round }) => {
   const { euiTheme } = useEuiTheme();
-  const { assistantResponse, steps } = round;
+  const { response, steps } = round;
 
   const toolCallPanelClass = css`
     margin-bottom: ${euiTheme.size.m};
@@ -50,17 +50,17 @@ export const RoundAnswer: React.FC<RoundAnswerProps> = ({ round }) => {
       {steps?.map((step) => {
         if (step.type === ConversationRoundStepType.toolCall) {
           return (
-            <div key={step.toolCallId}>
+            <div key={step.tool_call_id}>
               <EuiPanel className={toolCallPanelClass} hasShadow={false} hasBorder={true}>
                 <div className={stepHeaderClass}>
                   <EuiIcon type="wrench" color="primary" />
                   <EuiText size="s" color="subdued">
-                    Tool: {step.toolId.toolId}
+                    Tool: {step.tool_id}
                   </EuiText>
                 </div>
                 <EuiSpacer size="xs" />
                 <EuiAccordion
-                  id={`args-${step.toolCallId}`}
+                  id={`args-${step.tool_call_id}`}
                   buttonContent={
                     <EuiText size="xs" color="subdued">
                       Tool call args
@@ -76,7 +76,7 @@ export const RoundAnswer: React.FC<RoundAnswerProps> = ({ round }) => {
                       isCopyable={false}
                       transparentBackground
                     >
-                      {JSON.stringify(step.args, null, 2)}
+                      {JSON.stringify(step.params, null, 2)}
                     </EuiCodeBlock>
                   </div>
                 </EuiAccordion>
@@ -105,7 +105,7 @@ export const RoundAnswer: React.FC<RoundAnswerProps> = ({ round }) => {
         }
         return null;
       })}
-      <ChatMessageText content={assistantResponse?.message ?? ''} />
+      <ChatMessageText content={response?.message ?? ''} />
     </>
   );
 };

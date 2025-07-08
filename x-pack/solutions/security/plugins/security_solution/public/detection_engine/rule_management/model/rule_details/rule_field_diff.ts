@@ -21,3 +21,8 @@ export interface FieldsGroupDiff {
   formattedDiffs: FormattedFieldDiff;
   fieldsGroupName: keyof AllFieldsDiff;
 }
+
+export enum DiffLayout {
+  LeftToRight,
+  RightToLeft,
+}

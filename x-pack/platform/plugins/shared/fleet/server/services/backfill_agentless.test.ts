@@ -29,6 +29,10 @@ jest.mock('.', () => ({
                   inputs: [],
                   policy_ids: ['agent_policy_1'],
                   supports_agentless: false,
+                  package: {
+                    name: 'cloud_asset_inventory',
+                    version: '0.19.0',
+                  },
                 },
               },
             ],

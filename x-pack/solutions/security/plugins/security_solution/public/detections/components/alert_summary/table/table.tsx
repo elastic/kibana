@@ -31,11 +31,12 @@ import type {
 } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import styled from '@emotion/styled';
+import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 import { useAdditionalBulkActions } from '../../../hooks/alert_summary/use_additional_bulk_actions';
 import { APP_ID, CASES_FEATURE_ID } from '../../../../../common';
 import { ActionsCell } from './actions_cell';
 import { AdditionalToolbarControls } from './additional_toolbar_controls';
-import { getDataViewStateFromIndexFields } from '../../../../common/containers/source/use_data_view';
 import { inputsSelectors } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { combineQueries } from '../../../../common/lib/kuery';
@@ -205,10 +206,7 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
 
   const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
 
-  const { browserFields } = useMemo(
-    () => getDataViewStateFromIndexFields('', dataViewSpec.fields),
-    [dataViewSpec.fields]
-  );
+  const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);

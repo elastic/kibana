@@ -16,7 +16,6 @@ import {
 import type { Role, User } from '../../../../common/lib/authentication/types';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 

@@ -2026,35 +2026,6 @@
       "warning": []
     },
     {
-      "query": "show",
-      "error": [
-        "SyntaxError: missing 'info' at '<EOF>'"
-      ],
-      "warning": []
-    },
-    {
-      "query": "show info",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "show doubleField",
-      "error": [
-        "SyntaxError: token recognition error at: 'd'",
-        "SyntaxError: token recognition error at: 'o'",
-        "SyntaxError: token recognition error at: 'u'",
-        "SyntaxError: token recognition error at: 'b'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'e'",
-        "SyntaxError: token recognition error at: 'F'",
-        "SyntaxError: token recognition error at: 'ie'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'd'",
-        "SyntaxError: missing 'info' at '<EOF>'"
-      ],
-      "warning": []
-    },
-    {
       "query": "from index | limit ",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"

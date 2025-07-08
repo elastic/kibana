@@ -24,7 +24,6 @@ import { validateEvent } from './event_log';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
-// eslint-disable-next-line import/no-default-export
 export default function createDisableRuleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

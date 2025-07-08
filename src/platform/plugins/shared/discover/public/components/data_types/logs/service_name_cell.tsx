@@ -60,7 +60,8 @@ export const getServiceNameCell =
         icon={getIcon}
         rawValue={serviceNameValue}
         value={value}
-        property={serviceNameField}
+        name={serviceNameField}
+        property={field}
         core={core}
         share={share}
       />
