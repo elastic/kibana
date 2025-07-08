@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StructuredToolIdentifier } from '../tools/tools';
+import type { PlainIdToolIdentifier } from '../tools/tools';
 import {
   oneChatDefaultAgentId,
   toSerializedAgentIdentifier,
@@ -35,7 +35,7 @@ export interface AssistantResponse {
 }
 
 export enum ConversationRoundStepType {
-  toolCall = 'toolCall',
+  toolCall = 'tool_call',
   reasoning = 'reasoning',
 }
 
@@ -52,15 +52,19 @@ export interface ToolCallWithResult {
   /**
    * Id of the tool call, as returned by the LLM
    */
-  toolCallId: string;
+  tool_call_id: string;
   /**
-   * Structured identifier of the tool.
+   * Identifier of the tool.
    */
-  toolId: StructuredToolIdentifier;
+  tool_id: PlainIdToolIdentifier;
+  /**
+   * Type of the tool.
+   */
+  tool_type: string;
   /**
    * Arguments the tool was called with.
    */
-  args: Record<string, any>;
+  params: Record<string, any>;
   /**
    * Result of the tool, serialized as string.
    */
@@ -110,11 +114,11 @@ export type ConversationRoundStep = ToolCallStep | ReasoningStep;
  */
 export interface ConversationRound {
   /** The user input that initiated the round */
-  userInput: RoundInput;
+  input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
-  assistantResponse: AssistantResponse;
+  response: AssistantResponse;
 }
 
 export interface Conversation {

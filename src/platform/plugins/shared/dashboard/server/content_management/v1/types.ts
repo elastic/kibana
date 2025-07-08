@@ -33,7 +33,6 @@ import {
   optionsSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
-import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 
@@ -45,6 +44,7 @@ export type DashboardPanel = Omit<TypeOf<typeof panelSchema>, 'panelConfig'> & {
   gridData: GridData;
 };
 export type DashboardSection = TypeOf<typeof sectionSchema>;
+// TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
 export type DashboardAttributes = Omit<TypeOf<typeof dashboardAttributesSchema>, 'panels'> & {
   panels: Array<DashboardPanel | DashboardSection>;
 };
@@ -72,41 +72,3 @@ export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
 export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardSearchResultsSchema>>;
-
-export type SavedObjectToItemReturn<T> =
-  | {
-      item: T;
-      error: null;
-    }
-  | {
-      item: null;
-      error: Error;
-    };
-
-export interface ItemAttrsToSavedObjectParams {
-  attributes: DashboardAttributes;
-  incomingReferences?: SavedObjectReference[];
-}
-
-export type ItemAttrsToSavedObjectReturn =
-  | {
-      attributes: DashboardSavedObjectAttributes;
-      references: SavedObjectReference[];
-      error: null;
-    }
-  | {
-      attributes: null;
-      references: null;
-      error: Error;
-    };
-
-export interface ItemAttrsToSavedObjectWithTagsParams extends ItemAttrsToSavedObjectParams {
-  replaceTagReferencesByName?: (
-    params: ReplaceTagReferencesByNameParams
-  ) => Promise<SavedObjectReference[]>;
-}
-
-export interface ReplaceTagReferencesByNameParams {
-  references: SavedObjectReference[];
-  newTagNames: string[];
-}
