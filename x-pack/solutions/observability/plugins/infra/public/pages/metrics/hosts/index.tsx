@@ -9,7 +9,6 @@ import React from 'react';
 import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { SYSTEM_INTEGRATION } from '../../../../common/constants';
@@ -37,43 +36,41 @@ export const HostsPage = () => {
   ]);
 
   return (
-    <KibanaErrorBoundary>
-      <div className={APP_WRAPPER_CLASS}>
-        <InfraPageTemplate
-          dataAvailabilityModules={DATA_AVAILABILITY_MODULES}
-          onboardingFlow={OnboardingFlow.Hosts}
-          pageHeader={{
-            alignItems: 'center',
-            pageTitle: (
-              <div
-                css={css`
-                  display: flex;
-                  align-items: center;
-                  gap: 0.75rem;
-                `}
-              >
-                <h1>{hostsTitle}</h1>
-              </div>
-            ),
-            rightSideItems: [
-              <FeatureFeedbackButton
-                data-test-subj="infraHostsPageTellUsWhatYouThinkButton"
-                formUrl={HOSTS_FEEDBACK_LINK}
-                kibanaVersion={kibanaVersion}
-                isCloudEnv={isCloudEnv}
-                isServerlessEnv={isServerlessEnv}
-              />,
-            ],
-          }}
-          pageSectionProps={{
-            contentProps: {
-              css: fullHeightContentStyles,
-            },
-          }}
-        >
-          <HostContainer />
-        </InfraPageTemplate>
-      </div>
-    </KibanaErrorBoundary>
+    <div className={APP_WRAPPER_CLASS}>
+      <InfraPageTemplate
+        dataAvailabilityModules={DATA_AVAILABILITY_MODULES}
+        onboardingFlow={OnboardingFlow.Hosts}
+        pageHeader={{
+          alignItems: 'center',
+          pageTitle: (
+            <div
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+              `}
+            >
+              <h1>{hostsTitle}</h1>
+            </div>
+          ),
+          rightSideItems: [
+            <FeatureFeedbackButton
+              data-test-subj="infraHostsPageTellUsWhatYouThinkButton"
+              formUrl={HOSTS_FEEDBACK_LINK}
+              kibanaVersion={kibanaVersion}
+              isCloudEnv={isCloudEnv}
+              isServerlessEnv={isServerlessEnv}
+            />,
+          ],
+        }}
+        pageSectionProps={{
+          contentProps: {
+            css: fullHeightContentStyles,
+          },
+        }}
+      >
+        <HostContainer />
+      </InfraPageTemplate>
+    </div>
   );
 };
