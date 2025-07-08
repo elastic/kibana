@@ -4401,6 +4401,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-layout-constants@link:src/core/packages/chrome/layout/core-chrome-layout-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
   version "0.0.0"
   uid ""
