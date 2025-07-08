@@ -13,7 +13,7 @@
     "browser": false,
     "configPath": [
       "xpack",
-      "indices_metadata"
+      "indicesMetadata"
     ],
     "requiredPlugins": [
       "taskManager"

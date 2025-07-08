@@ -8,6 +8,7 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 import { IndicesMetadataPlugin } from './plugin';
 
+export { config } from './config';
 export async function plugin(context: PluginInitializerContext) {
   return new IndicesMetadataPlugin(context);
 }

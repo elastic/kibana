@@ -10,10 +10,14 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
-export interface IndicesMetadataPluginSetup {
+export type IndicesMetadataPluginSetup = void;
+
+export type IndicesMetadataPluginStart = void;
+
+export interface IndicesMetadataPluginSetupDeps {
   taskManager: TaskManagerSetupContract;
 }
 
-export interface IndicesMetadataPluginStart {
+export interface IndicesMetadataPluginStartDeps {
   taskManager: TaskManagerStartContract;
 }

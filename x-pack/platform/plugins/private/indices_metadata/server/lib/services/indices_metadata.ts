@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Subscription } from 'rxjs';
 import type {
   ConcreteTaskInstance,
   TaskInstance,
@@ -17,51 +18,71 @@ import type {
   DataStreams,
   IlmPolicies,
   IlmsStats,
-  IndicesMetadataServiceInit,
-  IndicesMetadataServiceSetup,
-  IndicesMetadataServiceStart,
+  IndicesMetadataConfiguration,
   IndicesStats,
-} from './indices_metadata_service.types';
+} from './indices_metadata.types';
 
-import type { IMetadataReceiver } from './receiver.types';
-import type { IMetadataSender } from './sender.types';
 import {
   DATA_STREAM_EVENT,
   ILM_POLICY_EVENT,
   ILM_STATS_EVENT,
   INDEX_STATS_EVENT,
-} from './ebt/events';
+} from '../ebt/events';
+import { MetadataReceiver } from './receiver';
+import { MetadataSender } from './sender';
+import { ConfigurationService } from './configuration';
 
 const TASK_TYPE = 'IndicesMetadata:IndicesMetadataTask';
 const TASK_ID = 'indices-metadata:indices-metadata-task:1.0.0';
-const INTERVAL = '24h';
+const INTERVAL = '1m';
 
 export class IndicesMetadataService {
   private readonly logger: Logger;
-  private readonly receiver: IMetadataReceiver;
-  private readonly sender: IMetadataSender;
+  private readonly receiver: MetadataReceiver;
+  private readonly sender: MetadataSender;
+  private readonly configurationService: ConfigurationService;
 
-  constructor({ logger, receiver, sender }: IndicesMetadataServiceInit) {
+  private subscription?: Subscription;
+  private configuration: IndicesMetadataConfiguration;
+
+  constructor(
+    logger: Logger,
+    sender: MetadataSender,
+    receiver: MetadataReceiver,
+    configurationService: ConfigurationService,
+    defaultConfiguration: IndicesMetadataConfiguration
+  ) {
     this.logger = logger.get(IndicesMetadataService.name);
+
     this.receiver = receiver;
     this.sender = sender;
+    this.configurationService = configurationService;
+    this.configuration = defaultConfiguration;
   }
 
-  public setup(setup: IndicesMetadataServiceSetup) {
+  public setup(taskManager: TaskManagerSetupContract) {
     this.logger.debug('Setting up indices metadata service');
-    this.registerIndicesMetadataTask(setup.taskManager);
+    this.registerIndicesMetadataTask(taskManager);
   }
 
-  public async start(start: IndicesMetadataServiceStart) {
+  public start(taskManager: TaskManagerStartContract) {
     this.logger.debug('Starting indices metadata service');
 
-    await this.scheduleIndicesMetadataTask(start.taskManager)
-      .catch((error) => {
-        this.logger.error('Failed to schedule Indices Metadata Task', { error });
-      })
-      .then(() => {
-        this.logger.debug('Indices Metadata Task scheduled');
+    this.subscription = this.configurationService
+      .getIndicesMetadataConfiguration$()
+      .subscribe((configuration) => {
+        this.logger.debug('Indices metadata configuration updated', { configuration } as LogMeta);
+        this.configuration = configuration;
       });
+
+    this.scheduleIndicesMetadataTask(taskManager).catch((error) => {
+      this.logger.error('Failed to schedule Indices Metadata Task', { error });
+    });
+  }
+
+  public stop() {
+    this.subscription?.unsubscribe();
+    this.configurationService.stop();
   }
 
   private async publishIndicesMetadata() {
@@ -75,12 +96,12 @@ export class IndicesMetadataService {
 
     // 2. Publish datastreams stats
     const dsCount = this.publishDatastreamsStats(
-      dataStreams.slice(0, 1000) // TODO threshold should be configured somewhere
+      dataStreams.slice(0, this.configuration.datastreams_threshold)
     );
 
     // 3. Get and publish indices stats
     const indicesCount: number = await this.publishIndicesStats(
-      indices.slice(0, 1000) // TODO threshold should be configured somewhere
+      indices.slice(0, this.configuration.indices_threshold)
     )
       .then((count) => {
         return count;
@@ -94,7 +115,9 @@ export class IndicesMetadataService {
     let ilmNames = new Set<string>();
 
     if (await this.receiver.isIlmStatsAvailable()) {
-      ilmNames = await this.publishIlmStats(indices.slice(0, 1000)) // TODO threshold should be configured somewhere
+      ilmNames = await this.publishIlmStats(
+        indices.slice(0, this.configuration.ilm_stats_query_size)
+      )
         .then((names) => {
           return names;
         })
@@ -194,7 +217,10 @@ export class IndicesMetadataService {
       items: [],
     };
 
-    for await (const stat of this.receiver.getIndicesStats(indices)) {
+    for await (const stat of this.receiver.getIndicesStats(
+      indices,
+      this.configuration.index_query_size
+    )) {
       indicesStats.items.push(stat);
     }
     this.sender.reportEBT(INDEX_STATS_EVENT, indicesStats);
@@ -226,7 +252,10 @@ export class IndicesMetadataService {
       items: [],
     };
 
-    for await (const policy of this.receiver.getIlmsPolicies(Array.from(ilmNames.values()))) {
+    for await (const policy of this.receiver.getIlmsPolicies(
+      Array.from(ilmNames.values()),
+      this.configuration.ilm_policy_query_size
+    )) {
       ilmPolicies.items.push(policy);
     }
     this.sender.reportEBT(ILM_POLICY_EVENT, ilmPolicies);

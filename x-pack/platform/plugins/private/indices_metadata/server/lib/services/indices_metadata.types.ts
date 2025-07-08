@@ -5,27 +5,17 @@
  * 2.0.
  */
 import type { DateTime } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import type { Logger } from '@kbn/core/server';
-import { IMetadataSender } from './sender.types';
-import { IMetadataReceiver } from './receiver.types';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export interface IndicesMetadataServiceInit {
-  logger: Logger;
-  sender: IMetadataSender;
-  receiver: IMetadataReceiver;
-}
+export const IndicesMetadataConfigurationSchema = schema.object({
+  indices_threshold: schema.number(),
+  datastreams_threshold: schema.number(),
+  index_query_size: schema.number(),
+  ilm_stats_query_size: schema.number(),
+  ilm_policy_query_size: schema.number(),
+});
 
-export interface IndicesMetadataServiceSetup {
-  taskManager: TaskManagerSetupContract;
-}
-
-export interface IndicesMetadataServiceStart {
-  taskManager: TaskManagerStartContract;
-}
+export type IndicesMetadataConfiguration = TypeOf<typeof IndicesMetadataConfigurationSchema>;
 
 export interface IlmPolicies {
   items: IlmPolicy[];

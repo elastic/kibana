@@ -21,19 +21,16 @@ import type {
   IlmStats,
   Index,
   IndexStats,
-} from './indices_metadata_service.types';
-import { chunkedBy } from './utils';
-import { IMetadataReceiver } from './receiver.types';
+} from './indices_metadata.types';
+import { chunkedBy } from '../utils';
 
-export class MetadataReceiver implements IMetadataReceiver {
+export class MetadataReceiver {
   private readonly logger: Logger;
   private _esClient?: ElasticsearchClient;
 
   constructor(logger: Logger) {
     this.logger = logger.get(MetadataReceiver.name);
   }
-
-  public setup() {}
 
   public start(esClient: ElasticsearchClient) {
     this.logger.debug('Starting receiver');
@@ -93,12 +90,13 @@ export class MetadataReceiver implements IMetadataReceiver {
       });
   }
 
-  public async *getIndicesStats(indices: string[]) {
+  public async *getIndicesStats(indices: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
     this.logger.debug('Fetching indices stats');
 
-    const groupedIndices = this.chunkStringsByMaxLength(indices);
+    const groupedIndices = this.chunkStringsByMaxLength(indices, safeChunkSize);
 
     this.logger.debug('Splitted indices into groups', {
       groups: groupedIndices.length,
@@ -153,7 +151,7 @@ export class MetadataReceiver implements IMetadataReceiver {
         return true;
       })
       .catch((error) => {
-        return error?.meta?.statusCode === 404 ?? false;
+        return error.meta.statusCode === 404;
       });
 
     return result;
@@ -196,8 +194,9 @@ export class MetadataReceiver implements IMetadataReceiver {
     }
   }
 
-  public async *getIlmsPolicies(ilms: string[]) {
+  public async *getIlmsPolicies(ilms: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
     const phase = (obj: unknown): IlmPhase | null | undefined => {
       let value: IlmPhase | null | undefined;
@@ -209,7 +208,7 @@ export class MetadataReceiver implements IMetadataReceiver {
       return value;
     };
 
-    const groupedIlms = this.chunkStringsByMaxLength(ilms);
+    const groupedIlms = this.chunkStringsByMaxLength(ilms, safeChunkSize);
 
     this.logger.debug('Splitted ilms into groups', {
       groups: groupedIlms.length,

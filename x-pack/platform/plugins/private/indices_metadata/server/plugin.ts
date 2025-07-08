@@ -5,54 +5,99 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
-import { IndicesMetadataService } from './lib/indices_metadata_service';
+import { Observable } from 'rxjs';
+import {
+  type CoreSetup,
+  type CoreStart,
+  type PluginInitializerContext,
+  type Plugin,
+} from '@kbn/core/server';
+import type { Logger, LogMeta } from '@kbn/core/server';
+import { IndicesMetadataService } from './lib/services/indices_metadata';
 import { registerEbtEvents } from './lib/ebt/events';
-import { MetadataReceiver } from './lib/receiver';
-import { MetadataSender } from './lib/sender';
-import type { IndicesMetadataPluginSetup, IndicesMetadataPluginStart } from './lib/plugin.types';
-import type { IMetadataReceiver } from './lib/receiver.types';
-import type { IMetadataSender } from './lib/sender.types';
+import { MetadataReceiver } from './lib/services/receiver';
+import { MetadataSender } from './lib/services/sender';
+import type {
+  IndicesMetadataPluginSetup,
+  IndicesMetadataPluginStart,
+  IndicesMetadataPluginSetupDeps,
+  IndicesMetadataPluginStartDeps,
+} from './plugin.types';
+import { DEFAULT_CDN_CONFIG, INDICES_METADATA_CONFIGURATION_DEFAULTS } from './lib/constants';
+import { PluginConfig } from './config';
+import { CdnConfig } from './lib/services/artifact.types';
+import { ArtifactService } from './lib/services/artifact';
+import { ConfigurationService } from './lib/services/configuration';
 
-export class IndicesMetadataPlugin {
+export class IndicesMetadataPlugin
+  implements
+    Plugin<
+      IndicesMetadataPluginSetup,
+      IndicesMetadataPluginStart,
+      IndicesMetadataPluginSetupDeps,
+      IndicesMetadataPluginStartDeps
+    >
+{
   private readonly logger: Logger;
+  private readonly config$: Observable<PluginConfig>;
+
   private readonly indicesMetadataService: IndicesMetadataService;
-  private readonly receiver: IMetadataReceiver;
-  private readonly sender: IMetadataSender;
+  private readonly receiver: MetadataReceiver;
+  private readonly sender: MetadataSender;
+  private readonly artifactService: ArtifactService;
+  private readonly configurationService: ConfigurationService;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
+    this.config$ = context.config.create<PluginConfig>();
+
     this.receiver = new MetadataReceiver(this.logger);
     this.sender = new MetadataSender(this.logger);
-    this.indicesMetadataService = new IndicesMetadataService({
-      sender: this.sender,
-      receiver: this.receiver,
-      logger: this.logger,
-    });
+    this.artifactService = new ArtifactService(this.logger);
+    this.configurationService = new ConfigurationService(this.logger, this.artifactService);
+
+    this.indicesMetadataService = new IndicesMetadataService(
+      this.logger,
+      this.sender,
+      this.receiver,
+      this.configurationService,
+      INDICES_METADATA_CONFIGURATION_DEFAULTS
+    );
   }
 
-  public setup(core: CoreSetup, plugin: IndicesMetadataPluginSetup) {
+  public setup(core: CoreSetup, plugin: IndicesMetadataPluginSetupDeps) {
     const { taskManager } = plugin;
 
-    this.indicesMetadataService.setup({ taskManager });
-    this.sender.setup();
-    this.receiver.setup();
+    this.indicesMetadataService.setup(taskManager);
 
     registerEbtEvents(core.analytics);
   }
 
-  public start(core: CoreStart, plugin: IndicesMetadataPluginStart) {
+  public start(core: CoreStart, plugin: IndicesMetadataPluginStartDeps) {
+    this.logger.debug('Starting indices metadata plugin');
+
     this.sender.start(core.analytics);
     this.receiver.start(core.elasticsearch.client.asInternalUser);
-    this.indicesMetadataService
-      .start({
-        taskManager: plugin.taskManager,
-      })
-      .catch((error) => {
-        this.logger.error('Failed to start indices metadata service', {
-          error,
-        });
-      });
+    this.indicesMetadataService.start(plugin.taskManager);
+
+    this.config$.subscribe(async (pluginConfig) => {
+      this.logger.debug('PluginConfig changed', { pluginConfig } as LogMeta);
+      const info = await core.elasticsearch.client.asInternalUser.info();
+      this.artifactService.start(info, this.effectiveCdnConfig(pluginConfig));
+    });
+  }
+
+  public stop() {
+    this.logger.debug('Stopping indices metadata plugin');
+    this.indicesMetadataService.stop();
+    this.configurationService.stop();
+  }
+
+  private effectiveCdnConfig({ cdnUrl, publicKey }: PluginConfig): CdnConfig {
+    return {
+      url: cdnUrl ?? DEFAULT_CDN_CONFIG.url,
+      pubKey: publicKey ?? DEFAULT_CDN_CONFIG.pubKey,
+      requestTimeout: DEFAULT_CDN_CONFIG.requestTimeout,
+    };
   }
 }

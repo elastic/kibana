@@ -12,7 +12,7 @@ import type {
   IlmPolicies,
   IlmsStats,
   IndicesStats,
-} from '../indices_metadata_service.types';
+} from '../services/indices_metadata.types';
 
 export const DATA_STREAM_EVENT: EventTypeOpts<DataStreams> = {
   eventType: 'indices-metadata-data-stream-event',

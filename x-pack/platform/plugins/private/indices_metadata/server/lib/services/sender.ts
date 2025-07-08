@@ -6,17 +6,14 @@
  */
 
 import type { AnalyticsServiceStart, EventTypeOpts, LogMeta, Logger } from '@kbn/core/server';
-import { IMetadataSender } from './sender.types';
 
-export class MetadataSender implements IMetadataSender {
+export class MetadataSender {
   private readonly logger: Logger;
   private analytics?: AnalyticsServiceStart;
 
   constructor(logger: Logger) {
     this.logger = logger.get(MetadataSender.name);
   }
-
-  public setup() {}
 
   public start(analytics: AnalyticsServiceStart) {
     this.logger.debug('Starting sender');
