@@ -14,12 +14,8 @@ import { EXCEPTIONS_FEATURE_ID } from '../constants';
 export const getRulesFeature = (params: SecurityFeatureParams): ProductFeatureParams => ({
   baseKibanaFeature: getRulesBaseKibanaFeature({
     ...params,
-    savedObjects: params.savedObjects.filter(
-      (savedObjectType) => savedObjectType !== 'exceptions-list'
-    ),
+    savedObjects: params.savedObjects,
   }),
   baseKibanaSubFeatureIds: [EXCEPTIONS_FEATURE_ID],
-  subFeaturesMap: getExceptionsSubFeaturesMapV3(
-    params.savedObjects.filter((savedObjectType) => savedObjectType === 'exceptions-list')
-  ),
+  subFeaturesMap: getExceptionsSubFeaturesMapV3(params.savedObjects),
 });

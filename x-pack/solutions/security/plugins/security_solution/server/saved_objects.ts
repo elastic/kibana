@@ -47,12 +47,15 @@ const types = [
   protectionUpdatesNoteType,
   promptType,
   referenceDataSavedObjectType,
+  // exceptionListType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);
 
 export const savedObjectTypesWithoutTimelineAndWithoutNotes = savedObjectTypes.filter((type) => {
   switch (type) {
+    // case exceptionListType.name:
+    //   return false;
     case noteType.name:
     case pinnedEventType.name:
     case timelineType.name:

@@ -22,7 +22,6 @@ const CLOUD_SECURITY_POSTURE_SETTINGS = 'cloud-security-posture-settings';
 const CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE = 'csp-rule-template';
 
 export const securityDefaultSavedObjects = [
-  'exception-list',
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
   DATA_VIEW_SAVED_OBJECT_TYPE,
   ...savedObjectTypesWithoutTimelineAndWithoutNotes,
@@ -30,6 +29,8 @@ export const securityDefaultSavedObjects = [
   CLOUD_SECURITY_POSTURE_SETTINGS,
   CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE,
 ];
+
+export const securityV3SavedObjects = [...securityDefaultSavedObjects, ...savedObjectTypes];
 
 export const securityV1SavedObjects = [...securityDefaultSavedObjects, ...savedObjectTypes];
 
