@@ -61,7 +61,7 @@ export interface WorkflowTrigger {
   config?: Record<string, any>;
 }
 
-interface WorkflowDefinition {
+interface WorkflowStep {
   id: string;
   type: 'trigger' | 'step';
   config: Record<string, any>;
@@ -110,7 +110,7 @@ export interface WorkflowListModel {
 
 export interface WorkflowModel extends WorkflowBaseModel {
   yaml: string;
-  definition: WorkflowDefinition[];
+  definition: WorkflowStep[];
 
   executions: WorkflowExecutionModel[];
 }
