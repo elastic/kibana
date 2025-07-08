@@ -9,10 +9,10 @@
 
 import * as helpers from '../helpers';
 
-export const validationRrfCommandTestSuite = (setup: helpers.Setup) => {
+export const validationFuseCommandTestSuite = (setup: helpers.Setup) => {
   describe('validation', () => {
     describe('command', () => {
-      describe('RRF', () => {
+      describe('FUSE', () => {
         test('no errors for valid command', async () => {
           const { expectErrors } = await setup();
 
@@ -21,30 +21,8 @@ export const validationRrfCommandTestSuite = (setup: helpers.Setup) => {
                     | FORK
                       (WHERE keywordField != "" | LIMIT 100)
                       (SORT doubleField ASC NULLS LAST)
-                    | RRF`,
+                    | FUSE`,
             []
-          );
-        });
-
-        test('requires to be preceded by a FORK command', async () => {
-          const { expectErrors } = await setup();
-
-          await expectErrors(`FROM index METADATA _id, _score, _index | RRF`, [
-            '[RRF] Must be immediately preceded by a FORK command.',
-          ]);
-        });
-
-        test('requires to be immediately preceded by a FORK command', async () => {
-          const { expectErrors } = await setup();
-
-          await expectErrors(
-            `FROM index METADATA _id, _score, _index
-                    | FORK
-                      (WHERE keywordField != "" | LIMIT 100)
-                      (SORT doubleField ASC NULLS LAST)
-                    | SORT _id
-                    | RRF`,
-            ['[RRF] Must be immediately preceded by a FORK command.']
           );
         });
 
@@ -56,11 +34,11 @@ export const validationRrfCommandTestSuite = (setup: helpers.Setup) => {
                     | FORK
                       (WHERE keywordField != "" | LIMIT 100)
                       (SORT doubleField ASC NULLS LAST)
-                    | RRF`,
+                    | FUSE`,
             [
-              '[RRF] The FROM command is missing the _id METADATA field.',
-              '[RRF] The FROM command is missing the _index METADATA field.',
-              '[RRF] The FROM command is missing the _score METADATA field.',
+              '[FUSE] The FROM command is missing the _id METADATA field.',
+              '[FUSE] The FROM command is missing the _index METADATA field.',
+              '[FUSE] The FROM command is missing the _score METADATA field.',
             ]
           );
         });

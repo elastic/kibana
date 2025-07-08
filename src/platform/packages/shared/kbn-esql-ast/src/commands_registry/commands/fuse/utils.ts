@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand, ESQLMessage, ESQLAst } from '../../../types';
+import type { ESQLCommand, ESQLMessage } from '../../../types';
 
 export function buildMissingMetadataMessage(
   command: ESQLCommand,
@@ -15,18 +15,11 @@ export function buildMissingMetadataMessage(
 ): ESQLMessage {
   return {
     location: command.location,
-    text: i18n.translate('kbn-esql-ast.esql.validation.rrfMissingMetadata', {
-      defaultMessage: `[RRF] The FROM command is missing the {metadataField} METADATA field.`,
+    text: i18n.translate('kbn-esql-ast.esql.validation.fuseMissingMetadata', {
+      defaultMessage: `[FUSE] The FROM command is missing the {metadataField} METADATA field.`,
       values: { metadataField },
     }),
     type: 'error',
-    code: `rrfMissingMetadata`,
+    code: `fuseMissingMetadata`,
   };
-}
-
-export function isRrfImmediatelyAfterFork(ast: ESQLAst): boolean {
-  const forkIndex = ast.findIndex((cmd) => cmd.name === 'fork');
-  const rrfIndex = ast.findIndex((cmd) => cmd.name === 'rrf');
-
-  return forkIndex !== -1 && rrfIndex === forkIndex + 1;
 }

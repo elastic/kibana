@@ -12,23 +12,23 @@ import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import type { ICommandContext } from '../../types';
 
-const rrfCommandMethods: ICommandMethods<ICommandContext> = {
+const fuseCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
 };
 
-export const rrfCommand = {
-  name: 'rrf',
-  methods: rrfCommandMethods,
+export const fuseCommand = {
+  name: 'fuse',
+  methods: fuseCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-ast.esql.definitions.rrfDoc', {
+    description: i18n.translate('kbn-esql-ast.esql.definitions.fuseDoc', {
       defaultMessage:
         'Combines multiple result sets with different scoring functions into a single result set.',
     }),
-    declaration: `RRF`,
-    examples: ['… FORK (LIMIT 1) (LIMIT 2) | RRF'],
+    declaration: `FUSE`,
+    examples: ['… FORK (LIMIT 1) (LIMIT 2) | FUSE'],
     hidden: true,
     preview: true,
-    name: 'rrf',
+    name: 'fuse',
   },
 };
