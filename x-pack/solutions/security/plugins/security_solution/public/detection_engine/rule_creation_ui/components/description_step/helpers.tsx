@@ -30,7 +30,12 @@ import type {
   RequiredFieldArray,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { AND, MATCHES, OR } from '../../../../common/components/threat_match/translations';
+import {
+  AND,
+  MATCHES,
+  OR,
+  NOT_MATCHES,
+} from '../../../../common/components/threat_match/translations';
 import type { EqlOptions } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
@@ -520,12 +525,14 @@ export const buildThreatMappingDescription = (
     (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
       const matches = threatMap.entries.reduce<string>(
         (accumItems, item, itemsIndex, { length: threatMapLength }) => {
+          const matchOperator = item.negate ? NOT_MATCHES : MATCHES;
+
           if (threatMapLength === 1) {
-            return `${item.field} ${MATCHES} ${item.value}`;
+            return `${item.field} ${matchOperator} ${item.value}`;
           } else if (itemsIndex === 0) {
-            return `(${item.field} ${MATCHES} ${item.value})`;
+            return `(${item.field} ${matchOperator} ${item.value})`;
           } else {
-            return `${accumItems} ${AND} (${item.field} ${MATCHES} ${item.value})`;
+            return `${accumItems} ${AND} (${item.field} ${matchOperator} ${item.value})`;
           }
         },
         ''

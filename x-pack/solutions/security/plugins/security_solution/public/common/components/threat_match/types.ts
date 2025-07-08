@@ -14,12 +14,14 @@ export interface FormattedEntry {
   type: 'mapping';
   value: DataViewFieldBase | undefined;
   entryIndex: number;
+  negate?: boolean;
 }
 
 export interface EmptyEntry {
   field: string | undefined;
   type: 'mapping';
   value: string | undefined;
+  negate?: boolean;
 }
 
 export type Entry = ThreatMapEntry | EmptyEntry;

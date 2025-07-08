@@ -43,6 +43,7 @@ export const ThreatMapping = z
           field: NonEmptyString,
           type: z.literal('mapping'),
           value: NonEmptyString,
+          negate: z.boolean().optional(),
         })
       ),
     })

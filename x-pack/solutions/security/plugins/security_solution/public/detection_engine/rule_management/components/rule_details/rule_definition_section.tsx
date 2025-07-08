@@ -18,10 +18,7 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import type {
-  ThreatMapping as ThreatMappingType,
-  Type,
-} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
@@ -33,6 +30,7 @@ import type {
   RequiredFieldArray,
   RuleResponse,
   Threshold as ThresholdType,
+  ThreatMapping as ThreatMappingType,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -390,12 +388,14 @@ export const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
     (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
       const matches = threatMap.entries.reduce<string>(
         (accumItems, item, itemsIndex, { length: threatMapLength }) => {
+          const matchOperator = item.negate ? threatMatchI18n.NOT_MATCHES : threatMatchI18n.MATCHES;
+
           if (threatMapLength === 1) {
-            return `${item.field} ${threatMatchI18n.MATCHES} ${item.value}`;
+            return `${item.field} ${matchOperator} ${item.value}`;
           } else if (itemsIndex === 0) {
-            return `(${item.field} ${threatMatchI18n.MATCHES} ${item.value})`;
+            return `(${item.field} ${matchOperator} ${item.value})`;
           } else {
-            return `${accumItems} ${threatMatchI18n.AND} (${item.field} ${threatMatchI18n.MATCHES} ${item.value})`;
+            return `${accumItems} ${threatMatchI18n.AND} (${item.field} ${matchOperator} ${item.value})`;
           }
         },
         ''
