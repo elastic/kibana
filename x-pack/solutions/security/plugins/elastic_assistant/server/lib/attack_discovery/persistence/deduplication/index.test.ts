@@ -32,6 +32,7 @@ describe('deduplicateAttackDiscoveries', () => {
     indexPattern: '.test.alerts-*,.adhoc.alerts-*',
     logger: mockLogger,
     ownerId: 'test-owner-1',
+    replacements: undefined,
     spaceId: 'test-space',
   };
 

@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
-import { AttackDiscoveries } from '@kbn/elastic-assistant-common';
+import { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
 
 import { AttackDiscoveryAlertDocument } from '../../schedules/types';
 import { generateAttackDiscoveryAlertHash } from '../transforms/transform_to_alert_documents';
@@ -19,6 +19,7 @@ interface DeduplicateAttackDiscoveriesParams {
   indexPattern: string;
   logger: Logger;
   ownerId: string;
+  replacements: Replacements | undefined;
   spaceId: string;
 }
 
@@ -29,6 +30,7 @@ export const deduplicateAttackDiscoveries = async ({
   indexPattern,
   logger,
   ownerId,
+  replacements,
   spaceId,
 }: DeduplicateAttackDiscoveriesParams): Promise<AttackDiscoveries> => {
   if (!attackDiscoveries || attackDiscoveries.length === 0) {
@@ -41,6 +43,7 @@ export const deduplicateAttackDiscoveries = async ({
       attackDiscovery: attack,
       connectorId,
       ownerId,
+      replacements,
       spaceId,
     });
     return { attack, alertHash };
