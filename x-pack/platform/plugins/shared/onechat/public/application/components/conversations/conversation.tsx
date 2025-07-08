@@ -65,10 +65,8 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId }) => {
       responsive={false}
     >
       {hasActiveConversation ? (
-        <EuiFlexItem grow css={scrollContainerStyles}>
-          <div ref={scrollContainerRef}>
-            <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
-          </div>
+        <EuiFlexItem ref={scrollContainerRef} grow css={scrollContainerStyles}>
+          <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow>
