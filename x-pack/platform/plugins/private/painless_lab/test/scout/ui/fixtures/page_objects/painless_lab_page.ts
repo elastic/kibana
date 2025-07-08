@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Locator } from '@kbn/scout';
-import { ScoutPage } from '@kbn/scout/src/playwright';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 export class PainlessLab {
   public editorOutputPane: Locator;

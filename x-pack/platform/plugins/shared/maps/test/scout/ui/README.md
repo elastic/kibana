@@ -17,6 +17,6 @@ run_tests() {
 }
 
 for run_mode in "--stateful" "--serverless=es" "--serverless=oblt" "--serverless=security"; do
-  run_tests "Maps" "x-pack/platform/plugins/shared/maps/ui_tests/playwright.config.ts" "$run_mode"
+  run_tests "Maps" "x-pack/platform/plugins/shared/maps/test/scout/ui/playwright.config.ts" "$run_mode"
 done
 ```

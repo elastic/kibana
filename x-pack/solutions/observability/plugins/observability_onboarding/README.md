@@ -53,6 +53,7 @@ node scripts/functional_test_runner --config x-pack/test/api_integration/deploym
 ### API integration tests
 
 #### Basic config
+
 ```sh
 # start server
 yarn test:ftr:server --config ./x-pack/test/observability_onboarding_api_integration/basic/config.ts
@@ -62,6 +63,7 @@ yarn test:ftr:runner --config ./x-pack/test/observability_onboarding_api_integra
 ```
 
 #### Cloud config
+
 ```sh
 # start server
 yarn test:ftr:server --config ./x-pack/test/observability_onboarding_api_integration/cloud/config.ts
@@ -73,6 +75,7 @@ yarn test:ftr:runner --config ./x-pack/test/observability_onboarding_api_integra
 ### Functional Tests
 
 #### Start server and run test (serverless)
+
 ```sh
 # start server
 yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
@@ -82,13 +85,15 @@ yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/ob
 ```
 
 ##### Running Individual Tests
+
 ```sh
 yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/onboarding/index.ts/$1
 ```
 
 ### Playwright tests (Scout)
-See [./ui_tests/README.md](./ui_tests/README.md)
 
+See [./test/scout/README.md](./test/scout/README.md)
 
 ### Playwright tests (Ensemble)
+
 See [./e2e/playwright/README.md](./e2e/playwright/README.md)
