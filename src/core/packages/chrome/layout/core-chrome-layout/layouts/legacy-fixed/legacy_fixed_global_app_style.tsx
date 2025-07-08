@@ -34,7 +34,7 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 
   // Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header
-  #${APP_FIXED_VIEWPORT_ID} { {
+  #${APP_FIXED_VIEWPORT_ID} {
     pointer-events: none;
     visibility: hidden;
     position: fixed;
