@@ -98,7 +98,7 @@ const ShoppingCartContent: React.FC<ShoppingCartContentProps> = ({
           <p>Item: Flux Capacitor</p>
         </EuiText>
         <EuiButton onClick={isChildFlyoutOpen ? closeChildFlyout : handleOpenItemDetails}>
-          {isChildFlyoutOpen ? 'Close item details' : 'View item details'}
+          {isChildFlyoutOpen ? 'Close item details' : 'View item details'} (child flyout)
         </EuiButton>
         <EuiSpacer />
         <EuiText>Quantity: {itemQuantity}</EuiText>
@@ -273,9 +273,12 @@ export const ECommerceApp: React.FC = () => {
 
   return (
     <>
-      <EuiTitle>
-        <h2>Advanced History Management</h2>
-      </EuiTitle>
+      <EuiText>
+        <p>
+          This demo shows how to use the <code>openSystemFlyout</code> function to open a flyout
+          that systematically handles top menu bars for parent and child flyouts.
+        </p>
+      </EuiText>
       <EuiSpacer />
       <EuiFlyoutSessionProvider
         renderMainFlyoutContent={renderMainFlyoutContent}

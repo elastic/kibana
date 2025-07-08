@@ -9,21 +9,27 @@
 
 /* eslint-disable no-console */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButton,
   EuiFlyoutBody,
+  EuiFlyoutChildProps,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFlyoutSessionOpenGroupOptions,
   EuiFlyoutSessionProvider,
+  EuiRadioGroup,
+  EuiRadioGroupOption,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiFlyoutSession,
 } from '@elastic/eui';
 
-const GroupOpenerControls: React.FC = () => {
+const GroupOpenerControls: React.FC<Pick<EuiFlyoutChildProps, 'backgroundStyle'>> = ({
+  backgroundStyle,
+}) => {
   const { openFlyoutGroup, isFlyoutOpen, isChildFlyoutOpen, clearHistory } = useEuiFlyoutSession();
 
   const handleOpenGroup = () => {
@@ -42,6 +48,7 @@ const GroupOpenerControls: React.FC = () => {
         title: 'Group opener, child flyout',
         size: 's',
         flyoutProps: {
+          backgroundStyle,
           className: 'groupOpenerChildFlyout',
           'aria-label': 'Child flyout',
         },
@@ -136,12 +143,15 @@ export const GroupOpenerApp: React.FC = () => {
     return <ChildFlyoutContent />;
   };
 
+  const [backgroundStyle, setBackgroundStyle] =
+    useState<EuiFlyoutChildProps['backgroundStyle']>('default');
+  const backgroundStyleRadios: EuiRadioGroupOption[] = [
+    { id: 'default', label: 'Default' },
+    { id: 'shaded', label: 'Shaded' },
+  ];
+
   return (
     <>
-      <EuiTitle>
-        <h2>openFlyoutGroup: Group Opener</h2>
-      </EuiTitle>
-      <EuiSpacer />
       <EuiText>
         <p>
           This demo shows how to use the <code>openFlyoutGroup</code> function to simultaneously
@@ -149,12 +159,20 @@ export const GroupOpenerApp: React.FC = () => {
         </p>
       </EuiText>
       <EuiSpacer />
+      <EuiRadioGroup
+        options={backgroundStyleRadios}
+        idSelected={backgroundStyle}
+        onChange={(id) => setBackgroundStyle(id as EuiFlyoutChildProps['backgroundStyle'])}
+        legend={{ children: 'Child flyout background style' }}
+        name="statefulFlyoutBackgroundStyleToggle"
+      />
+      <EuiSpacer />
       <EuiFlyoutSessionProvider
         renderMainFlyoutContent={renderMainFlyoutContent}
         renderChildFlyoutContent={renderChildFlyoutContent}
         onUnmount={() => console.log('FlyoutGroup flyouts have been unmounted')}
       >
-        <GroupOpenerControls />
+        <GroupOpenerControls backgroundStyle={backgroundStyle} />
       </EuiFlyoutSessionProvider>
     </>
   );
