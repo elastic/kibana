@@ -495,15 +495,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
-  'onechat:agentApi:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'onechat:mcpServer:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'onechat:esqlToolApi:enabled': {
+  'onechat:mcp:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -511,7 +503,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'onechat:tools:enabled': {
+  'onechat:api:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
