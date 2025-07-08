@@ -227,32 +227,36 @@ export const getLinksEmbeddableFactory = () => {
         },
         onEdit: async () => {
           const { openEditorFlyout } = await import('../editor/open_editor_flyout');
-          const newState = await openEditorFlyout({
+          await openEditorFlyout({
             initialState: {
               ...stateManager.getLatestState(),
               savedObjectId,
             },
             parentDashboard: parentApi,
+            onConfirm: async (newState) => {
+              if (!newState) return;
+
+              // if the by reference state has changed during this edit, reinitialize the panel.
+              const nextSavedObjectId = newState?.savedObjectId;
+              const nextIsByReference = nextSavedObjectId !== undefined;
+              if (
+                nextIsByReference !== isByReference &&
+                apiIsPresentationContainer(api.parentApi)
+              ) {
+                const serializedState = nextIsByReference
+                  ? serializeByReference(nextSavedObjectId)
+                  : serializeByValue();
+                (serializedState.rawState as SerializedTitles).title = newState.title;
+
+                api.parentApi.replacePanel<LinksSerializedState>(api.uuid, {
+                  serializedState,
+                  panelType: api.type,
+                });
+                return;
+              }
+              stateManager.reinitializeState(newState);
+            },
           });
-          if (!newState) return;
-
-          // if the by reference state has changed during this edit, reinitialize the panel.
-          const nextSavedObjectId = newState?.savedObjectId;
-          const nextIsByReference = nextSavedObjectId !== undefined;
-          if (nextIsByReference !== isByReference && apiIsPresentationContainer(api.parentApi)) {
-            const serializedState = nextIsByReference
-              ? serializeByReference(nextSavedObjectId)
-              : serializeByValue();
-            (serializedState.rawState as SerializedTitles).title = newState.title;
-
-            api.parentApi.replacePanel<LinksSerializedState>(api.uuid, {
-              serializedState,
-              panelType: api.type,
-            });
-            return;
-          }
-
-          stateManager.reinitializeState(newState);
         },
       });
 

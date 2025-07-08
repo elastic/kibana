@@ -38,34 +38,36 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
   },
   execute: async ({ embeddable }) => {
     if (!isParentApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const runtimeState = await openEditorFlyout({
+    await openEditorFlyout({
       parentDashboard: embeddable,
-    });
-    if (!runtimeState) return;
+      onConfirm: async (runtimeState) => {
+        if (!runtimeState) return;
 
-    function serializeState() {
-      if (!runtimeState) return;
+        function serializeState() {
+          if (!runtimeState) return;
 
-      if (runtimeState.savedObjectId !== undefined) {
-        return {
-          rawState: {
-            savedObjectId: runtimeState.savedObjectId,
-          },
-        };
-      }
+          if (runtimeState.savedObjectId !== undefined) {
+            return {
+              rawState: {
+                savedObjectId: runtimeState.savedObjectId,
+              },
+            };
+          }
 
-      const { attributes, references } = serializeLinksAttributes(runtimeState);
-      return {
-        rawState: {
-          attributes,
-        },
-        references,
-      };
-    }
+          const { attributes, references } = serializeLinksAttributes(runtimeState);
+          return {
+            rawState: {
+              attributes,
+            },
+            references,
+          };
+        }
 
-    await embeddable.addNewPanel<LinksSerializedState>({
-      panelType: CONTENT_ID,
-      serializedState: serializeState(),
+        await embeddable.addNewPanel<LinksSerializedState>({
+          panelType: CONTENT_ID,
+          serializedState: serializeState(),
+        });
+      },
     });
   },
   grouping: [ADD_PANEL_ANNOTATION_GROUP],
