@@ -6,8 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { isNotFoundError } from '@kbn/es-errors';
-import { Client } from '@elastic/elasticsearch';
 import { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
