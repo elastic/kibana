@@ -9,7 +9,8 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ISearchGeneric } from '@kbn/search-types';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import React, { CSSProperties, useCallback } from 'react';
+import hash from 'object-hash';
+import React, { CSSProperties, useCallback, useMemo } from 'react';
 import {
   CategorizeLogsServiceContext,
   categorizeLogsService,
@@ -62,8 +63,18 @@ export const LogCategories = React.memo<LogCategoriesProps>(
     groupingCapabilities,
     onChangeGrouping,
   }) => {
+    // This is a rather crude way to ensure the categories are re-fetched when
+    // the document filters, logs source, or time range change. As soon as this
+    // component gains more state that needs to be preserved, we should move the
+    // refetch logic to the state machines.
+    const key = useMemo(
+      () => hash({ documentFilters, logsSource, timeRange }),
+      [documentFilters, logsSource, timeRange]
+    );
+
     return (
       <CategorizeLogsServiceContext.Provider
+        key={key}
         logic={categorizeLogsService.provide(
           createCategorizeLogsServiceImplementations({ search: dependencies.search })
         )}

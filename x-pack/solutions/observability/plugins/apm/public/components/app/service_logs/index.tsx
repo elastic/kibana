@@ -53,7 +53,7 @@ export function ServiceLogs() {
     [environment, kuery, serviceName, start, end]
   );
 
-  if (status === FETCH_STATUS.SUCCESS) {
+  if (status === FETCH_STATUS.SUCCESS || (status === FETCH_STATUS.LOADING && logFilters != null)) {
     return (
       <logsShared.LogsOverview documentFilters={logFilters} timeRange={timeRange} height="60vh" />
     );
