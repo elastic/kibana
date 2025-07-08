@@ -18,6 +18,7 @@ import { discoverServiceMock } from '../../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
 import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
+import type { AppMenuExtensionParams } from '../../../../../context_awareness';
 
 const mount = (
   dataView = dataViewMock,
@@ -27,14 +28,14 @@ const mount = (
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.actions.setDataView(dataView);
 
-  const discoverParamsMock = {
+  const discoverParamsMock: AppMenuExtensionParams = {
     dataView,
     adHocDataViews: [],
     isEsqlMode,
     authorizedRuleTypeIds,
-    onNewSearch: jest.fn(),
-    onOpenSavedSearch: jest.fn(),
-    onUpdateAdHocDataViews: jest.fn(),
+    actions: {
+      updateAdHocDataViews: jest.fn(),
+    },
   };
 
   const alertsAppMenuItem = getAlertsAppMenuItem({
