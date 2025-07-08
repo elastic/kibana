@@ -407,17 +407,14 @@ class AgentlessAgentService {
       throw new AgentlessAgentConfigError('missing Fleet enrollment token');
     }
 
-    const { fleetServerId: defaultFleetServerId } = this.getDefaultSettings();
-    const fleetServerHostId = policy.fleet_server_host_id ?? defaultFleetServerId;
-
-    if (!fleetServerHostId) {
+    if (!policy.fleet_server_host_id) {
       throw new AgentlessAgentConfigError('missing fleet_server_host_id');
     }
 
     let defaultFleetHost: FleetServerHost;
 
     try {
-      defaultFleetHost = await fleetServerHostService.get(soClient, fleetServerHostId);
+      defaultFleetHost = await fleetServerHostService.get(soClient, policy.fleet_server_host_id);
     } catch (e) {
       throw new AgentlessAgentConfigError('missing default Fleet server host');
     }
