@@ -40,15 +40,23 @@ type Props = EuiBadgeProps & {
   fromDetails?: boolean;
 };
 
+type StatusProps =
+  | {
+      agent: Agent;
+      previousStatus?: Agent['status'];
+    }
+  | {
+      agent?: Agent;
+      previousStatus: Agent['status'];
+    };
+
 function getStatusComponent({
   agent,
   previousStatus,
   ...restOfProps
-}: {
-  agent?: Agent;
-  previousStatus?: Agent['status'];
-} & EuiBadgeProps): React.ReactElement {
-  switch (agent?.status || previousStatus) {
+}: StatusProps & EuiBadgeProps): React.ReactElement {
+  const status = agent?.status || previousStatus;
+  switch (status) {
     case 'error':
     case 'degraded':
       return (
