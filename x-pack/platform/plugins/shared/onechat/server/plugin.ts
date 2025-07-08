@@ -7,11 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 import type { OnechatConfig } from './config';
-import { registerFeatures } from './features';
-import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
 import type {
   OnechatPluginSetup,
@@ -19,7 +15,8 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { ESQL_TOOL_API_UI_SETTING_ID } from '../common/constants';
+import { registerFeatures } from './features';
+import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
 
 export class OnechatPlugin
@@ -52,21 +49,6 @@ export class OnechatPlugin
     registerFeatures({ features: pluginsSetup.features });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
-
-    coreSetup.uiSettings.register({
-      [ESQL_TOOL_API_UI_SETTING_ID]: {
-        description: i18n.translate('xpack.onechat.uiSettings.esqlToolApi.description', {
-          defaultMessage: 'Enables ESQL Tool API to create your own ESQL-based tools.',
-        }),
-        name: i18n.translate('xpack.onechat.uiSettings.esqlToolApi.name', {
-          defaultMessage: 'ESQL Tool API',
-        }),
-        schema: schema.boolean(),
-        value: false,
-        readonly: true,
-        readonlyMode: 'ui',
-      },
-    });
 
     const router = coreSetup.http.createRouter();
     registerRoutes({
