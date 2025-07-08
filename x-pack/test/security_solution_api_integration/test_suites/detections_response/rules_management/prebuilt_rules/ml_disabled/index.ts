@@ -12,9 +12,9 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     /* Note: some tests below include skips when running in FIPS mode.
      * "ML Disabled" currently assumes a basic license, which does not apply to
      * FIPS, though any passing tests have been preserved.
-     * FIPS skips are placed at the lowest possible level to retain fliexibility,
-     * granularity, and coverage. New additions to this index should consider
-     * this.
+     * FIPS skips are placed at the lowest possible level to refrain from un-
+     * intentional skips, and to retain flexibility, granularity, and coverage.
+     * New additions to this index should consider this.
      */
     loadTestFile(require.resolve('./review_installation'));
     loadTestFile(require.resolve('./perform_installation'));
