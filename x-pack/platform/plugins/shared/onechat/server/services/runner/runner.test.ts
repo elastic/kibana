@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunAgentParams,
@@ -36,12 +37,16 @@ describe('Onechat runner', () => {
         toolsService: { registry },
       } = runnerDeps;
 
-      tool = createMockedTool({});
+      tool = createMockedTool({
+        schema: z.object({
+          foo: z.string(),
+        }),
+      });
       registry.get.mockResolvedValue(tool);
     });
 
     it('can be invoked through a scoped runner', async () => {
-      tool.handler.mockReturnValue({ someProp: 'someValue' });
+      tool.handler.mockReturnValue({ result: { someProp: 'someValue' } });
 
       const params: ScopedRunnerRunToolsParams = {
         toolId: 'test-tool',
@@ -61,7 +66,7 @@ describe('Onechat runner', () => {
     });
 
     it('can be invoked through a runner', async () => {
-      tool.handler.mockReturnValue({ someProp: 'someValue' });
+      tool.handler.mockReturnValue({ result: { someProp: 'someValue' } });
 
       const { request, ...otherRunnerDeps } = runnerDeps;
 

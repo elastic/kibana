@@ -34,13 +34,23 @@ describe('createChatCompleteApi', () => {
   let inferenceExecutor: ReturnType<typeof createInferenceExecutorMock>;
 
   let chatComplete: ChatCompleteAPI;
-
+  const mockEsClient = {
+    ml: {
+      inferTrainedModel: jest.fn(),
+    },
+  } as any;
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
     logger = loggerMock.create();
     actions = actionsMock.createStart();
 
-    chatComplete = createChatCompleteApi({ request, actions, logger });
+    chatComplete = createChatCompleteApi({
+      request,
+      actions,
+      logger,
+      esClient: mockEsClient,
+      anonymizationRulesPromise: Promise.resolve([]),
+    });
 
     inferenceAdapter = createInferenceConnectorAdapterMock();
     inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));

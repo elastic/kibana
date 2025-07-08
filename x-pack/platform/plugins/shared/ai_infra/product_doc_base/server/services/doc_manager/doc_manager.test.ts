@@ -20,6 +20,7 @@ import {
   getTaskStatus,
   waitUntilTaskCompleted,
 } from '../../tasks';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 const scheduleInstallAllTaskMock = scheduleInstallAllTask as jest.MockedFn<
   typeof scheduleInstallAllTask
@@ -35,6 +36,7 @@ const waitUntilTaskCompletedMock = waitUntilTaskCompleted as jest.MockedFn<
 >;
 const getTaskStatusMock = getTaskStatus as jest.MockedFn<typeof getTaskStatus>;
 
+const DEFAULT_INFERENCE_ID = defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
 describe('DocumentationManager', () => {
   let logger: MockedLogger;
   let taskManager: ReturnType<typeof taskManagerMock.createStart>;
@@ -85,19 +87,20 @@ describe('DocumentationManager', () => {
     });
 
     it('calls `scheduleInstallAllTask`', async () => {
-      await docManager.install({});
+      await docManager.install({ inferenceId: DEFAULT_INFERENCE_ID });
 
       expect(scheduleInstallAllTaskMock).toHaveBeenCalledTimes(1);
       expect(scheduleInstallAllTaskMock).toHaveBeenCalledWith({
         taskManager,
         logger,
+        inferenceId: DEFAULT_INFERENCE_ID,
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
     });
 
     it('calls waitUntilTaskCompleted if wait=true', async () => {
-      await docManager.install({ wait: true });
+      await docManager.install({ wait: true, inferenceId: DEFAULT_INFERENCE_ID });
 
       expect(scheduleInstallAllTaskMock).toHaveBeenCalledTimes(1);
       expect(waitUntilTaskCompletedMock).toHaveBeenCalledTimes(1);
@@ -108,7 +111,7 @@ describe('DocumentationManager', () => {
         kibana: { status: 'installed' },
       } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
 
-      await docManager.install({ wait: true });
+      await docManager.install({ wait: true, inferenceId: DEFAULT_INFERENCE_ID });
 
       expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
@@ -120,7 +123,12 @@ describe('DocumentationManager', () => {
       const auditLog = auditService.withoutRequest;
       auditService.asScoped = jest.fn(() => auditLog);
 
-      await docManager.install({ force: false, wait: false, request });
+      await docManager.install({
+        force: false,
+        wait: false,
+        request,
+        inferenceId: DEFAULT_INFERENCE_ID,
+      });
 
       expect(auditLog.log).toHaveBeenCalledTimes(1);
       expect(auditLog.log).toHaveBeenCalledWith({
@@ -140,7 +148,7 @@ describe('DocumentationManager', () => {
       );
 
       await expect(
-        docManager.install({ force: false, wait: false })
+        docManager.install({ force: false, wait: false, inferenceId: DEFAULT_INFERENCE_ID })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Elastic documentation requires an enterprise license"`
       );
@@ -157,19 +165,20 @@ describe('DocumentationManager', () => {
     });
 
     it('calls `scheduleEnsureUpToDateTask`', async () => {
-      await docManager.update({});
+      await docManager.update({ inferenceId: DEFAULT_INFERENCE_ID });
 
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(1);
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
         taskManager,
         logger,
+        inferenceId: DEFAULT_INFERENCE_ID,
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
     });
 
     it('calls waitUntilTaskCompleted if wait=true', async () => {
-      await docManager.update({ wait: true });
+      await docManager.update({ wait: true, inferenceId: DEFAULT_INFERENCE_ID });
 
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(1);
       expect(waitUntilTaskCompletedMock).toHaveBeenCalledTimes(1);
@@ -181,7 +190,7 @@ describe('DocumentationManager', () => {
       const auditLog = auditService.withoutRequest;
       auditService.asScoped = jest.fn(() => auditLog);
 
-      await docManager.update({ wait: false, request });
+      await docManager.update({ wait: false, request, inferenceId: DEFAULT_INFERENCE_ID });
 
       expect(auditLog.log).toHaveBeenCalledTimes(1);
       expect(auditLog.log).toHaveBeenCalledWith({
@@ -206,19 +215,20 @@ describe('DocumentationManager', () => {
     });
 
     it('calls `scheduleUninstallAllTask`', async () => {
-      await docManager.uninstall({});
+      await docManager.uninstall({ inferenceId: DEFAULT_INFERENCE_ID });
 
       expect(scheduleUninstallAllTaskMock).toHaveBeenCalledTimes(1);
       expect(scheduleUninstallAllTaskMock).toHaveBeenCalledWith({
         taskManager,
         logger,
+        inferenceId: DEFAULT_INFERENCE_ID,
       });
 
       expect(waitUntilTaskCompletedMock).not.toHaveBeenCalled();
     });
 
     it('calls waitUntilTaskCompleted if wait=true', async () => {
-      await docManager.uninstall({ wait: true });
+      await docManager.uninstall({ wait: true, inferenceId: DEFAULT_INFERENCE_ID });
 
       expect(scheduleUninstallAllTaskMock).toHaveBeenCalledTimes(1);
       expect(waitUntilTaskCompletedMock).toHaveBeenCalledTimes(1);
@@ -230,7 +240,7 @@ describe('DocumentationManager', () => {
       const auditLog = auditService.withoutRequest;
       auditService.asScoped = jest.fn(() => auditLog);
 
-      await docManager.uninstall({ wait: false, request });
+      await docManager.uninstall({ wait: false, request, inferenceId: DEFAULT_INFERENCE_ID });
 
       expect(auditLog.log).toHaveBeenCalledTimes(1);
       expect(auditLog.log).toHaveBeenCalledWith({
