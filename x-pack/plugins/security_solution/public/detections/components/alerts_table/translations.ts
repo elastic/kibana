@@ -397,3 +397,10 @@ export const EVENT_RENDERED_VIEW_COLUMNS = {
     defaultMessage: 'Event Summary',
   }),
 };
+
+export const INSUFFICIENT_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.insufficientPrivileges',
+  {
+    defaultMessage: 'Insufficient privileges',
+  }
+);
