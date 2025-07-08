@@ -38,7 +38,7 @@ export interface AgentClient {
   has(agentId: string): Promise<boolean>;
   get(agentId: string): Promise<AgentDefinition>;
   create(profile: AgentCreateRequest): Promise<AgentDefinition>;
-  update(profile: AgentUpdateRequest): Promise<AgentDefinition>;
+  update(agentId: string, profile: AgentUpdateRequest): Promise<AgentDefinition>;
   list(options?: AgentListOptions): Promise<AgentDefinition[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
 }
@@ -175,9 +175,7 @@ class AgentClientImpl implements AgentClient {
     return this.get(profile.id);
   }
 
-  async update(profileUpdate: AgentUpdateRequest): Promise<AgentDefinition> {
-    const agentId = profileUpdate.id;
-
+  async update(agentId: string, profileUpdate: AgentUpdateRequest): Promise<AgentDefinition> {
     // temporary, until we enable default agent update
     if (agentId === oneChatDefaultAgentId) {
       throw createBadRequestError(`Default agent cannot be updated.`);
@@ -201,11 +199,11 @@ class AgentClientImpl implements AgentClient {
     });
 
     await this.storage.getClient().index({
-      id: profileUpdate.id,
+      id: agentId,
       document: updatedConversation,
     });
 
-    return this.get(profileUpdate.id);
+    return this.get(agentId);
   }
 
   async delete(options: AgentDeleteRequest): Promise<boolean> {

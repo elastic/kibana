@@ -120,7 +120,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
               name: schema.string(),
               description: schema.string(),
               configuration: schema.object({
-                instructions: schema.string(),
+                instructions: schema.maybe(schema.string()),
                 tools: TOOL_SELECTION_SCHEMA,
               }),
             }),
@@ -174,8 +174,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
         const service = await agents.getScopedClient({ request });
-        const update = { id: request.params.id, ...request.body };
-        const profile = await service.update(update);
+        const profile = await service.update(request.params.id, request.body);
         return response.ok<UpdateAgentResponse>({ body: profile });
       })
     );

@@ -12,9 +12,8 @@ export interface AgentListOptions {}
 
 export type AgentCreateRequest = Omit<AgentDefinition, 'type'>;
 
-export type AgentUpdateRequest = Pick<AgentDefinition, 'id'> &
-  Partial<Pick<AgentDefinition, 'name' | 'description'>> & {
-    configuration?: Partial<AgentConfiguration>;
-  };
+export type AgentUpdateRequest = Partial<Pick<AgentDefinition, 'name' | 'description'>> & {
+  configuration?: Partial<AgentConfiguration>;
+};
 
 export type AgentDeleteRequest = Pick<AgentDefinition, 'id'>;
