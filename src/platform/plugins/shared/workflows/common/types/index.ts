@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PLUGIN_ID = 'workflows';
-export const PLUGIN_NAME = 'Workflows';
+export * as workflowModelV1 from './v1';

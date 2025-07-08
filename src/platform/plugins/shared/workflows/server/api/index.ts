@@ -1,45 +1,58 @@
-import { RunStatus, WorkflowDetailDTO, WorkflowListDTO } from '../../common/workflows/models/types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
 
-const mockWorkflow: WorkflowDetailDTO = {
-  id: '1',
-  name: 'Mock Workflow',
-  description: 'Description 1',
-  triggers: [],
-  tags: [],
-  enabled: true,
-  runHistory: [
+import {
+  ExecutionStatus,
+  WorkflowListModel,
+  WorkflowModel,
+  WorkflowStatus,
+} from '../../common/types/latest';
+
+export const mockWorkflow: WorkflowModel = {
+  id: 'workflow-1',
+  name: 'Sample Workflow',
+  description: 'A sample workflow for testing',
+  triggers: [
     {
-      id: '1',
-      status: RunStatus.FAILED,
-      startedAt: '2025-06-01T12:00:00.000Z',
-      finishedAt: '2025-06-01T12:00:01.000Z',
-      duration: 1,
-    },
-    {
-      id: '2',
-      status: RunStatus.SUCCESS,
-      startedAt: '2025-06-01T13:00:00.000Z',
-      finishedAt: '2025-06-01T13:10:00.000Z',
-      duration: 600,
-    },
-    {
-      id: '3',
-      status: RunStatus.RUNNING,
-      startedAt: '2025-06-01T14:00:00.000Z',
-      finishedAt: null,
-      duration: null,
+      id: 'trigger1',
+      type: 'manual',
+      enabled: true,
     },
   ],
-  definition: {
-    steps: [],
-  },
-  createdBy: {
-    id: '1',
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-  },
-  createdAt: '2025-06-01T12:00:00.000Z',
-  updatedAt: '2025-06-01T09:20:00.000Z',
+  tags: ['test', 'sample'],
+  status: WorkflowStatus.ACTIVE,
+
+  createdAt: '2025-07-08T10:00:00Z',
+  createdBy: 'Kirill Chernakov',
+
+  lastUpdatedAt: '2025-07-08T10:00:00Z',
+  lastUpdatedBy: 'Kirill Chernakov',
+
+  history: [],
+
+  executions: [
+    {
+      id: '27701bca-1df2-43f4-a2b1-798cfd298a9e',
+      finishedAt: '2025-07-08T10:00:10Z',
+      startedAt: '2025-07-08T10:00:00Z',
+      status: ExecutionStatus.SUCCESS,
+      logs: [
+        {
+          timestamp: '2025-07-08T10:00:01Z',
+          level: 'INFO',
+          message: 'Test log',
+        },
+      ],
+    },
+  ],
+  yaml: '',
+  definition: [],
 };
 
 export interface GetWorkflowsParams {
@@ -48,17 +61,24 @@ export interface GetWorkflowsParams {
 }
 
 export const WorkflowsManagementApi = {
-  getWorkflows: async (params: GetWorkflowsParams): Promise<WorkflowListDTO> => {
+  getWorkflows: async (params: GetWorkflowsParams): Promise<WorkflowListModel> => {
     return Promise.resolve({
       results: [
         {
           id: mockWorkflow.id,
           name: mockWorkflow.name,
           description: mockWorkflow.description,
+          status: mockWorkflow.status,
           triggers: mockWorkflow.triggers,
           tags: mockWorkflow.tags,
-          enabled: mockWorkflow.enabled,
-          runHistory: mockWorkflow.runHistory,
+          yaml: mockWorkflow.yaml,
+          definition: mockWorkflow.definition,
+          executions: mockWorkflow.executions,
+          history: mockWorkflow.history,
+          createdAt: mockWorkflow.createdAt,
+          createdBy: mockWorkflow.createdBy,
+          lastUpdatedAt: mockWorkflow.lastUpdatedAt,
+          lastUpdatedBy: mockWorkflow.lastUpdatedBy,
         },
       ],
       _pagination: {
@@ -68,7 +88,7 @@ export const WorkflowsManagementApi = {
       },
     });
   },
-  getWorkflow: async (id: string): Promise<WorkflowDetailDTO> => {
+  getWorkflow: async (id: string): Promise<WorkflowModel> => {
     return Promise.resolve(mockWorkflow);
   },
 };
