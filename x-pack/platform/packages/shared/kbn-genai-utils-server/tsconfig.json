@@ -13,5 +13,13 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/aiops-log-pattern-analysis",
+    "@kbn/es-types",
+    "@kbn/genai-utils-common",
+    "@kbn/calculate-auto",
+    "@kbn/traced-es-client",
+    "@kbn/es-query",
+    "@kbn/inference-common",
+  ]
 }
