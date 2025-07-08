@@ -44,7 +44,7 @@ describe('execute_connector function', () => {
       const conversation = await chatClient.complete({ messages: EMAIL_PROMPT });
       const result = await chatClient.evaluate(conversation, [
         `Does not use ${EXECUTE_CONNECTOR_FUNCTION_NAME} function.`,
-        'explains that no connectors are available to send the email.',
+        'Explains that no connectors are available to send the email.',
         'Does not attempt to send an email.',
         'unsuccessfully sends an email.',
       ]);
