@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const synthtraceService = getService('synthtrace');
   const logger = getService('log');
   const dataViewPattern =
-    'traces-apm*,apm-*,traces-*.otel-*,logs-apm*,apm-*,logs-*.otel-*,metrics-apm*,apm-*,metrics-*.otel-*';
+    'apm-*,logs-*.otel-*,logs-apm*,metrics-*.otel-*,metrics-apm*,traces-*.otel-*,traces-apm*';
 
   function createDataViewWithWriteUser({ spaceId }: { spaceId: string }) {
     return apmApiClient.writeUser({
@@ -141,7 +141,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(dataView.id).to.be('apm_static_data_view_id_default');
           expect(dataView.name).to.be('APM');
           expect(dataView.title).to.be(
-            'traces-apm*,apm-*,traces-*.otel-*,logs-apm*,apm-*,logs-*.otel-*,metrics-apm*,apm-*,metrics-*.otel-*'
+            'apm-*,logs-*.otel-*,logs-apm*,metrics-*.otel-*,metrics-apm*,traces-*.otel-*,traces-apm*'
           );
         });
       });
