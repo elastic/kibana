@@ -39,6 +39,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { NoProcessorsEmptyPrompt } from './empty_prompts';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -151,6 +152,10 @@ const ProcessorsEditor = React.memo(() => {
   const { addProcessor, reorderProcessors } = useStreamEnrichmentEvents();
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
 
+  const canReorderProcessors = useStreamEnrichmentSelector((state) =>
+    state.can({ type: 'processors.reorder', processorsRefs: state.context.processorsRefs })
+  );
+
   const processorsRefs = useStreamEnrichmentSelector((state) => state.context.processorsRefs);
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
@@ -227,7 +232,7 @@ const ProcessorsEditor = React.memo(() => {
           )}
         </EuiFlexGroup>
       </EuiPanel>
-      {hasProcessors && (
+      {hasProcessors ? (
         <EuiPanel
           hasShadow={false}
           borderRadius="none"
@@ -239,7 +244,7 @@ const ProcessorsEditor = React.memo(() => {
           <SortableList onDragItem={handlerItemDrag}>
             {processorsRefs.map((processorRef, idx) => (
               <DraggableProcessorListItem
-                disableDrag={!definition.privileges.simulate}
+                isDragDisabled={!canReorderProcessors}
                 key={processorRef.id}
                 idx={idx}
                 processorRef={processorRef}
@@ -248,6 +253,8 @@ const ProcessorsEditor = React.memo(() => {
             ))}
           </SortableList>
         </EuiPanel>
+      ) : (
+        <NoProcessorsEmptyPrompt />
       )}
       <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
         {!isEmpty(errors.ignoredFields) && (

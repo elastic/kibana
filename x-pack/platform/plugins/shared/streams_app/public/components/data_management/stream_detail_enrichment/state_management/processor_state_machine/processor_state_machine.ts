@@ -88,10 +88,7 @@ export const processorMachine = setup({
           target: '#configured',
           actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
         },
-        'processor.cancel': {
-          target: '#deleted',
-          actions: [{ type: 'resetToPrevious' }],
-        },
+        'processor.cancel': '#deleted',
         'processor.change': {
           actions: [
             { type: 'changeProcessor', params: ({ event }) => event },
@@ -122,13 +119,13 @@ export const processorMachine = setup({
                 { type: 'forwardEventToParent' },
               ],
             },
-            'processor.delete': '#deleted',
             'processor.change': {
               actions: [
                 { type: 'changeProcessor', params: ({ event }) => event },
                 { type: 'forwardChangeEventToParent' },
               ],
             },
+            'processor.delete': '#deleted',
           },
         },
       },

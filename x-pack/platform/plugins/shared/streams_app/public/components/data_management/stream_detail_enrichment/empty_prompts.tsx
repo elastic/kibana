@@ -37,3 +37,31 @@ export const RootStreamEmptyPrompt = () => {
     />
   );
 };
+
+export const NoProcessorsEmptyPrompt = () => {
+  return (
+    <EuiEmptyPrompt
+      titleSize="xs"
+      icon={<AssetImage type="extractFields" />}
+      title={
+        <h2>
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.noProcessorsEmptyPrompt.title',
+            { defaultMessage: 'Extract useful fields from your data' }
+          )}
+        </h2>
+      }
+      body={
+        <p>
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.noProcessorsEmptyPrompt.body',
+            {
+              defaultMessage:
+                'Transform your data before indexing with processors. You can start from scratch or let AI generate a set of processors based on your data.',
+            }
+          )}
+        </p>
+      }
+    />
+  );
+};

@@ -9,7 +9,6 @@
 
 import {
   EuiBadge,
-  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiCallOut,
   EuiCallOutProps,
@@ -41,7 +40,7 @@ export const ProcessorMetricBadges = ({
   const failedRate = failed_rate > 0 ? formatter.format(failed_rate) : null;
 
   return (
-    <EuiBadgeGroup gutterSize="xs">
+    <EuiFlexGroup gutterSize="none" alignItems="center">
       {parsedRate && (
         <EuiBadge
           color="hollow"
@@ -95,7 +94,7 @@ export const ProcessorMetricBadges = ({
           })}
         </EuiBadge>
       )}
-    </EuiBadgeGroup>
+    </EuiFlexGroup>
   );
 };
 

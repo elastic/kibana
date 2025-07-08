@@ -20,11 +20,12 @@ import {
   EuiIcon,
   EuiText,
   EuiBadge,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
+import React, { PropsWithChildren, useEffect, useMemo } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch, DeepPartial } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { DiscardPromptOptions, useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
@@ -64,7 +65,6 @@ export function ProcessorPanel({
   processorRef,
   processorMetrics,
 }: ProcessorPanelProps) {
-  const { euiTheme } = useEuiTheme();
   const processorSnapshot = useSelector(processorRef, (s) => s);
   const getEnrichmentState = useGetStreamEnrichmentState();
 
@@ -119,14 +119,15 @@ export function ProcessorPanel({
     return () => subscription.unsubscribe();
   }, [getEnrichmentState, grokCollection, methods, previousProcessor, processorRef]);
 
-  const canDelete = processorSnapshot.can({ type: 'processor.delete' });
-  const canSave = processorSnapshot.can({ type: 'processor.save' });
-
   const isConfigured = processorSnapshot.matches('configured');
   const isOpen =
     processorSnapshot.matches('draft') || processorSnapshot.matches({ configured: 'editing' });
   const isNew = processorSnapshot.context.isNew;
   const isUnsaved = isNew || processorSnapshot.context.isUpdated;
+
+  const canDelete = processorSnapshot.can({ type: 'processor.delete' });
+  const canSave = processorSnapshot.can({ type: 'processor.save' });
+  const canDragAndDrop = isConfigured && dragHandleProps;
 
   const handleCancel = useDiscardConfirm(() => processorRef.send({ type: 'processor.cancel' }), {
     enabled: canSave,
@@ -146,84 +147,29 @@ export function ProcessorPanel({
     processorRef.send({ type: 'processor.edit' });
   };
 
-  const buttonContent = isOpen ? (
-    <strong>{processor.type.toUpperCase()}</strong>
-  ) : (
-    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiPanel
-        hasShadow={false}
-        color="transparent"
-        paddingSize="xs"
-        {...(isConfigured && dragHandleProps)}
-      >
-        <EuiIcon type="grab" />
-      </EuiPanel>
-      <strong>{processor.type.toUpperCase()}</strong>
-      <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
-        {processorDescription}
-      </EuiText>
-    </EuiFlexGroup>
-  );
+  if (!isOpen) {
+    return (
+      <StyledProcessorPanel isNew={isNew}>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+          {canDragAndDrop && (
+            <EuiPanel
+              grow={false}
+              hasShadow={false}
+              color="transparent"
+              paddingSize="xs"
+              {...dragHandleProps}
+            >
+              <EuiIcon type="grab" />
+            </EuiPanel>
+          )}
 
-  return (
-    <EuiPanel
-      hasBorder
-      color={isNew ? 'subdued' : undefined}
-      css={css`
-        border: ${euiTheme.border.thin};
-        padding: ${euiTheme.size.m};
-      `}
-    >
-      <EuiAccordion
-        id="processor-accordion"
-        arrowProps={{
-          css: { display: 'none' },
-        }}
-        buttonContent={buttonContent}
-        buttonContentClassName="eui-textTruncate"
-        buttonElement="legend"
-        buttonProps={{
-          /* Allow text ellipsis in flex child nodes */
-          css: css`
-            min-width: 0;
-            &:hover {
-              text-decoration: none;
-            }
-          `,
-        }}
-        forceState={isOpen ? 'open' : 'closed'}
-        extraAction={
-          isOpen ? (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiButtonEmpty
-                data-test-subj="streamsAppProcessorPanelCancelButton"
-                onClick={handleCancel}
-                size="s"
-              >
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.cancel',
-                  { defaultMessage: 'Cancel' }
-                )}
-              </EuiButtonEmpty>
-              <EuiButton
-                data-test-subj="streamsAppProcessorPanelSaveProcessorButton"
-                size="s"
-                fill
-                onClick={methods.handleSubmit(handleSubmit)}
-                disabled={!canSave || !methods.formState.isValid}
-              >
-                {isConfigured
-                  ? i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.confirmProcessor',
-                      { defaultMessage: 'Update processor' }
-                    )
-                  : i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.confirmCreateProcessor',
-                      { defaultMessage: 'Create processor' }
-                    )}
-              </EuiButton>
-            </EuiFlexGroup>
-          ) : (
+          <strong>{processor.type.toUpperCase()}</strong>
+
+          <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
+            {processorDescription}
+          </EuiText>
+          <EuiFlexItem grow={1} />
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               {processorMetrics && <ProcessorMetricBadges {...processorMetrics} />}
               {isUnsaved && (
@@ -247,7 +193,59 @@ export function ProcessorPanel({
                 )}
               />
             </EuiFlexGroup>
-          )
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </StyledProcessorPanel>
+    );
+  }
+
+  return (
+    <StyledProcessorPanel isNew={isNew}>
+      <EuiAccordion
+        id="processor-accordion"
+        arrowProps={{
+          css: { display: 'none' },
+        }}
+        buttonContent={<strong>{processor.type.toUpperCase()}</strong>}
+        buttonElement="legend"
+        buttonProps={{
+          css: css`
+            &:hover {
+              text-decoration: none;
+            }
+          `,
+        }}
+        forceState={isOpen ? 'open' : 'closed'}
+        extraAction={
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiButtonEmpty
+              data-test-subj="streamsAppProcessorPanelCancelButton"
+              onClick={handleCancel}
+              size="s"
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.cancel',
+                { defaultMessage: 'Cancel' }
+              )}
+            </EuiButtonEmpty>
+            <EuiButton
+              data-test-subj="streamsAppProcessorPanelSaveProcessorButton"
+              size="s"
+              fill
+              onClick={methods.handleSubmit(handleSubmit)}
+              disabled={!canSave || !methods.formState.isValid}
+            >
+              {isConfigured
+                ? i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.confirmProcessor',
+                    { defaultMessage: 'Update processor' }
+                  )
+                : i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.confirmCreateProcessor',
+                    { defaultMessage: 'Create processor' }
+                  )}
+            </EuiButton>
+          </EuiFlexGroup>
         }
       >
         <EuiSpacer size="s" />
@@ -284,9 +282,25 @@ export function ProcessorPanel({
           )}
         </FormProvider>
       </EuiAccordion>
-    </EuiPanel>
+    </StyledProcessorPanel>
   );
 }
+
+const StyledProcessorPanel = ({ isNew, ...props }: PropsWithChildren<{ isNew: boolean }>) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiPanel
+      hasBorder
+      color={isNew ? 'subdued' : undefined}
+      css={css`
+        border: ${euiTheme.border.thin};
+        padding: ${euiTheme.size.m};
+      `}
+      {...props}
+    />
+  );
+};
 
 const ProcessorMetricsHeader = ({ metrics }: { metrics?: ProcessorMetrics }) => {
   if (!metrics) return null;

@@ -12,7 +12,6 @@ import {
   ProcessorDefinition,
   ProcessorDefinitionWithId,
   ProcessorType,
-  SampleDocument,
   getProcessorType,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';

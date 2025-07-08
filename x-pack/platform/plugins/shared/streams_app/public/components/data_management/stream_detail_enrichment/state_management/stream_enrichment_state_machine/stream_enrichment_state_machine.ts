@@ -200,7 +200,10 @@ export const streamEnrichmentMachine = setup({
     }),
   },
   guards: {
-    hasMultipleProcessors: ({ context }) => context.processorsRefs.length > 1,
+    canReorderProcessors: ({ context }) =>
+      context.definition.privileges.simulate &&
+      context.processorsRefs.length >= 2 &&
+      context.processorsRefs.every((p) => p.getSnapshot().matches('configured')),
     hasStagedChanges: ({ context }) => {
       const { initialProcessorsRefs, processorsRefs } = context;
       return (
@@ -371,7 +374,7 @@ export const streamEnrichmentMachine = setup({
                   ],
                 },
                 'processors.reorder': {
-                  guard: 'hasMultipleProcessors',
+                  guard: 'canReorderProcessors',
                   actions: [
                     { type: 'reorderProcessors', params: ({ event }) => event },
                     { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },

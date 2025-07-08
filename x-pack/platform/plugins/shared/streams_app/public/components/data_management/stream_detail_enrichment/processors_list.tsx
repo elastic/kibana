@@ -11,17 +11,22 @@ import { ProcessorPanel, ProcessorPanelProps } from './processors';
 
 export const DraggableProcessorListItem = ({
   idx,
-  disableDrag,
+  isDragDisabled,
   ...props
-}: Omit<ProcessorPanelProps, 'dragHandleProps'> & { idx: number; disableDrag: boolean }) => (
+}: Omit<ProcessorPanelProps, 'dragHandleProps'> & { idx: number; isDragDisabled: boolean }) => (
   <EuiDraggable
     index={idx}
     spacing="m"
     draggableId={props.processorRef.id}
     hasInteractiveChildren
     customDragHandle
-    isDragDisabled={disableDrag}
+    isDragDisabled={isDragDisabled}
   >
-    {(provided) => <ProcessorPanel {...props} dragHandleProps={provided.dragHandleProps} />}
+    {(provided) => (
+      <ProcessorPanel
+        {...props}
+        dragHandleProps={isDragDisabled ? null : provided.dragHandleProps}
+      />
+    )}
   </EuiDraggable>
 );
