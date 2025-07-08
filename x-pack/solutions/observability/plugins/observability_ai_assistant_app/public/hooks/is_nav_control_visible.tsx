@@ -10,6 +10,7 @@ import { combineLatest } from 'rxjs';
 import { CoreStart, DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import { Space } from '@kbn/spaces-plugin/common';
 
 interface UseIsNavControlVisibleProps {
   coreStart: CoreStart;
@@ -19,7 +20,8 @@ interface UseIsNavControlVisibleProps {
 function getVisibility(
   appId: string | undefined,
   applications: ReadonlyMap<string, PublicAppInfo>,
-  preferredAssistantType: AIAssistantType
+  preferredAssistantType: AIAssistantType,
+  space: Space
 ) {
   if (preferredAssistantType === AIAssistantType.Never) {
     return false;
@@ -28,7 +30,7 @@ function getVisibility(
   const categoryId =
     (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
 
-  if (preferredAssistantType === AIAssistantType.Observability) {
+  if (preferredAssistantType === AIAssistantType.Observability || space.solution === 'es') {
     return categoryId !== DEFAULT_APP_CATEGORIES.security.id;
   }
 
@@ -41,17 +43,20 @@ function getVisibility(
 export function useIsNavControlVisible({ coreStart, pluginsStart }: UseIsNavControlVisibleProps) {
   const [isVisible, setIsVisible] = useState(false);
 
-  const { currentAppId$, applications$ } = coreStart.application;
-  const { aiAssistantManagementSelection } = pluginsStart;
+  const { currentAppId$, applications$, } = coreStart.application;
+  const { aiAssistantManagementSelection, spaces } = pluginsStart;
+
+  const space$ = spaces.getActiveSpace$();
 
   useEffect(() => {
     const appSubscription = combineLatest([
       currentAppId$,
       applications$,
       aiAssistantManagementSelection.aiAssistantType$,
+      space$,
     ]).subscribe({
-      next: ([appId, applications, preferredAssistantType]) => {
-        setIsVisible(getVisibility(appId, applications, preferredAssistantType));
+      next: ([appId, applications, preferredAssistantType, space]) => {
+        setIsVisible(getVisibility(appId, applications, preferredAssistantType, space));
       },
     });
 

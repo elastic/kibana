@@ -32,6 +32,7 @@ import type {
   AIAssistantManagementSelectionPluginPublicSetup,
 } from '@kbn/ai-assistant-management-plugin/public';
 import type { RootCauseAnalysisContainer } from './components/rca/rca_container';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export interface ObservabilityAIAssistantAppPublicStart {
   RootCauseAnalysisContainer: React.ExoticComponent<
@@ -53,6 +54,7 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
