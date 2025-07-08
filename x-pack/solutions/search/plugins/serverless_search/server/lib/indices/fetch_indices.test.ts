@@ -38,7 +38,7 @@ describe('fetch indices lib functions', () => {
 
       await expect(
         fetchIndices(mockClient as unknown as ElasticsearchClient, 0, 20, 'search')
-      ).resolves.toEqual([{ count: 100, name: 'search-regular-index' }]);
+      ).resolves.toEqual([{ name: 'search-regular-index' }]);
       expect(mockClient.indices.get).toHaveBeenCalledWith({
         expand_wildcards: ['open'],
         features: ['aliases', 'settings'],
