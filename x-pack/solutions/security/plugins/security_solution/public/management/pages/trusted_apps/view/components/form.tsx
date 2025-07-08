@@ -372,7 +372,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             : undefined,
         });
       },
-      [isAdvancedModeEnabled, conditionsState.areValid, onChange]
+      [conditionsState.areValid, onChange]
     );
 
     const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
@@ -660,7 +660,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           osTypes: trustedApp.os_types,
           showValueListModal: ShowValueListModal,
         }),
-      [http, indexPatterns, trustedApp.entries, trustedApp.os_types, handleOnBuilderChange]
+      [autocompleteSuggestions, http, indexPatterns, trustedApp, handleOnBuilderChange]
     );
 
     if (isIndexPatternLoading || !trustedApp) {
