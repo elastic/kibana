@@ -79,7 +79,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${join(__dirname, 'plugins/cases')}`,
         `--plugin-path=${join(
           __dirname,
-          '../../platform/test/alerting_api_integration/common/plugins/actions_simulators'
+          '../alerting_api_integration/common/plugins/actions_simulators'
         )}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
           'stackAlertsPage',
