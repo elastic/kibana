@@ -6,6 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { services } from './ftr_provider_context';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
@@ -15,6 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...xpackFunctionalConfig.getAll(),
     testFiles: [require.resolve('./apps')],
+    services,
     junit: {
       ...xpackFunctionalConfig.get('junit'),
       reportName: 'Chrome X-Pack UI Screenshot Creation',

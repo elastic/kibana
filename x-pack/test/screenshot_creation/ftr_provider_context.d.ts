@@ -8,6 +8,12 @@
 import { GenericFtrProviderContext } from '@kbn/test';
 
 import { pageObjects } from '@kbn/test-suites-xpack-platform/screenshot_creation/page_objects';
-import { services } from '@kbn/test-suites-xpack-platform/screenshot_creation/services';
+import { services as platformServices } from '@kbn/test-suites-xpack-platform/screenshot_creation/services';
+import { ObservabilityProvider } from '../functional/services/observability';
+
+export const services = {
+  ...platformServices,
+  observability: ObservabilityProvider,
+};
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
