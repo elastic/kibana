@@ -16,6 +16,7 @@ export const serviceEntityEngineDescription: EntityDescription = {
   entityType: 'service',
   version: SERVICE_DEFINITION_VERSION,
   identityField: SERVICE_IDENTITY_FIELD,
+  identityFieldMapping: { type: 'keyword' },
   settings: {
     timestampField: '@timestamp',
   },
