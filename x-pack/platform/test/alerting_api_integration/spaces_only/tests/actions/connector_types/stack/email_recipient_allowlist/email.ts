@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { ObjectRemover } from '../../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function emailTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);

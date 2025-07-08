@@ -9,7 +9,6 @@ import { createTestConfig } from '../../../../../../common/config';
 
 export const recipientAllowList = ['*.bar@example.org', '*@test.com'];
 
-// eslint-disable-next-line import/no-default-export
 export default createTestConfig('spaces_only-recipient_allowlist', {
   disabledPlugins: ['security'],
   license: 'trial',
