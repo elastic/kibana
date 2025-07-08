@@ -166,7 +166,7 @@ describe('getAll', () => {
         Object {
           "context": Object {
             "loggingOptions": Object {
-              "loggerName": "synthetics",
+              "loggerName": "uptime",
             },
           },
           "meta": true,
@@ -231,7 +231,7 @@ describe('getAll', () => {
         Object {
           "context": Object {
             "loggingOptions": Object {
-              "loggerName": "synthetics",
+              "loggerName": "uptime",
             },
           },
           "meta": true,
@@ -296,7 +296,7 @@ describe('getAll', () => {
         Object {
           "context": Object {
             "loggingOptions": Object {
-              "loggerName": "synthetics",
+              "loggerName": "uptime",
             },
           },
           "meta": true,
@@ -366,7 +366,7 @@ describe('getAll', () => {
         Object {
           "context": Object {
             "loggingOptions": Object {
-              "loggerName": "synthetics",
+              "loggerName": "uptime",
             },
           },
           "meta": true,
@@ -477,7 +477,7 @@ describe('getAll', () => {
         Object {
           "context": Object {
             "loggingOptions": Object {
-              "loggerName": "synthetics",
+              "loggerName": "uptime",
             },
           },
           "meta": true,
