@@ -16,7 +16,6 @@ import { UsageAPIProvider } from './usage_api';
 
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
-import { TransformProvider } from './transform';
 import { IngestPipelinesProvider } from './ingest_pipelines';
 import { DataViewApiProvider } from './data_view_api';
 import { SloApiProvider } from './slo';
@@ -35,7 +34,6 @@ export const services = {
   usageAPI: UsageAPIProvider,
   ml: MachineLearningProvider,
   ingestManager: IngestManagerProvider,
-  transform: TransformProvider,
   ingestPipelines: IngestPipelinesProvider,
   slo: SloApiProvider,
   securitySolutionApi: SecuritySolutionApiProvider,
