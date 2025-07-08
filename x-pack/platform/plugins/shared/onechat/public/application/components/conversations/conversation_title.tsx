@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiTitle, EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
+import { EuiTitle, EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useConversation } from '../../hooks/use_conversation';
 import { conversationsCommonLabels } from './i18n';
@@ -31,7 +31,6 @@ export const ConversationTitle: React.FC<{}> = () => {
       <EuiTitle aria-label="Conversation Title" size="xxs">
         <h1>{title || conversationsCommonLabels.header.newConversationTitle}</h1>
       </EuiTitle>
-      <EuiButtonIcon aria-label="Edit Conversation Title" iconType="pencil" disabled />
     </EuiPageHeaderSection>
   );
 };
