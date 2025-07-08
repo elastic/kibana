@@ -11,7 +11,6 @@ import type { RuleFormData } from '@kbn/response-ops-rule-form';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
-import { tracksOverlays } from '@kbn/presentation-containers';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import React from 'react';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -40,8 +39,9 @@ export async function getRuleFlyoutComponent(
   ruleTypeRegistry: RuleTypeRegistryContract,
   actionTypeRegistry: ActionTypeRegistryContract,
   parentApi: unknown,
+  closeFlyout: () => void,
   passedInitialValues?: RuleFormData<EsQueryRuleParams>
-): Promise<React.ComponentType<{}>> {
+): Promise<JSX.Element> {
   const { coreStart } = startDependencies;
   const ruleFormPlugins = {
     ...startDependencies,
@@ -77,17 +77,11 @@ export async function getRuleFlyoutComponent(
         }
   ) as RuleFormData<EsQueryRuleParams>;
 
-  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
+  const { RuleForm } = await import('@kbn/response-ops-rule-form/flyout');
 
-  const closeRuleForm = () => {
-    overlayTracker?.clearOverlays();
-  };
-
-  const { RuleFormFlyout } = await import('@kbn/response-ops-rule-form/flyout');
-
-  return () => (
+  return (
     <KibanaContextProvider services={ruleFormPlugins}>
-      <RuleFormFlyout
+      <RuleForm
         data-test-subj="lensEmbeddableRuleForm"
         plugins={{
           ...ruleFormPlugins,
@@ -99,8 +93,9 @@ export async function getRuleFlyoutComponent(
         initialMetadata={{
           isManagementPage: false,
         }}
-        onCancel={closeRuleForm}
-        onSubmit={closeRuleForm}
+        onCancel={closeFlyout}
+        onSubmit={closeFlyout}
+        isFlyout
       />
     </KibanaContextProvider>
   );

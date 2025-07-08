@@ -7,6 +7,7 @@
 
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { LensApi } from '@kbn/lens-plugin/public';
+import { act } from '@testing-library/react';
 import {
   createParentApiMock,
   getLensApiMock,
@@ -19,6 +20,21 @@ import { AlertRuleFromVisAction } from './alert_rule_from_vis_ui_action';
 import * as AlertFlyoutComponentModule from './rule_flyout_component';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { AggregateQuery, Query } from '@kbn/es-query';
+
+// mock lazy flyout component
+jest.mock('@kbn/presentation-utils', () => ({
+  openLazyFlyout: async ({
+    loadContent,
+  }: {
+    loadContent: ({
+      closeFlyout,
+    }: {
+      closeFlyout: () => void;
+    }) => Promise<JSX.Element | null | void>;
+  }) => {
+    return await loadContent({ closeFlyout: jest.fn() });
+  },
+}));
 
 const ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract> = {
   has: jest.fn(),
@@ -61,9 +77,18 @@ const embeddableMock = getLensApiMock({
   parentApi: parentApiMock,
 });
 
+const embeddableServices = makeEmbeddableServices();
+
 const startDependenciesMock = {
-  ...makeEmbeddableServices(),
+  ...embeddableServices,
   fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
+  coreStart: {
+    ...embeddableServices.coreStart,
+    overlays: {
+      ...embeddableServices.coreStart.overlays,
+      openFlyout: jest.fn((a) => a),
+    },
+  },
 };
 const spy = jest.spyOn(AlertFlyoutComponentModule, 'getRuleFlyoutComponent');
 
@@ -74,7 +99,7 @@ describe('AlertRuleFromVisAction', () => {
     startDependenciesMock
   );
 
-  const getCreateAlertRuleLastCalledInitialValues = () => last(spy.mock.calls ?? [])?.[4];
+  const getCreateAlertRuleLastCalledInitialValues = () => last(spy.mock.calls ?? [])?.[5];
 
   afterAll(() => {
     // clear the spy created with spyOn
@@ -520,6 +545,9 @@ describe('AlertRuleFromVisAction', () => {
         })) as unknown as LensApi['serializeState'],
       });
       await action.execute({ embeddable });
+      // wait for the async operations to complete
+
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
       expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
         Object {
           "name": "Elasticsearch query rule from visualization",
