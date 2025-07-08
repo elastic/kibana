@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 const MIGRATED_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
 const MIGRATED_TASK_ID = '329798f0-b0b0-11ea-9510-fdf248d5f2a4';
 
-// eslint-disable-next-line import/no-default-export
 export default function createScheduledTaskIdTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
