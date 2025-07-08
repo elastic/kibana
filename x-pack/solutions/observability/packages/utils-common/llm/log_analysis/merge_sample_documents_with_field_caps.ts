@@ -6,7 +6,7 @@
  */
 
 import { castArray, sortBy, uniq } from 'lodash';
-import type { DocumentAnalysis } from './document_analysis';
+import type { DocumentAnalysis } from '../../../../../../platform/packages/shared/kbn-genai-utils-common/log_analysis/document_analysis';
 
 export function mergeSampleDocumentsWithFieldCaps({
   total,

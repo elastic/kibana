@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { ShortIdTable } from './short_id/short_id_table';
+export { highlightPatternFromRegex } from './log_analysis/highlight_patterns_from_regex';
