@@ -71,6 +71,28 @@ describe('createIndex', () => {
     });
   });
 
+  it('calls esClient.indices.create with the right parameters for serverless', async () => {
+    const mappings: MappingTypeMapping = {
+      properties: {},
+    };
+    const indexName = '.some-index';
+
+    await createIndex({
+      indexName,
+      mappings,
+      legacySemanticText: true,
+      log,
+      esClient,
+      isServerless: true,
+    });
+
+    expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.create).toHaveBeenCalledWith({
+      index: indexName,
+      mappings,
+    });
+  });
+
   it('rewrites the inference_id attribute of semantic_text fields in the mapping', async () => {
     const mappings: MappingTypeMapping = {
       properties: {

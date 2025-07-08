@@ -69,6 +69,7 @@ describe('IndexManager', () => {
     indexManager = new IndexManager({
       elserInferenceId,
       logger,
+      isServerlessPlatform: false,
     });
 
     createIndexMock.mockResolvedValue(undefined);
@@ -106,6 +107,7 @@ describe('IndexManager', () => {
         esClient,
         elserInferenceId,
         log: logger,
+        isServerless: false,
       });
 
       expect(populateIndexMock).toHaveBeenCalledWith({
@@ -123,6 +125,7 @@ describe('IndexManager', () => {
       const customIndexManager = new IndexManager({
         elserInferenceId: customInferenceId,
         logger,
+        isServerlessPlatform: true,
       });
 
       await customIndexManager.createAndPopulateIndex({
@@ -142,6 +145,7 @@ describe('IndexManager', () => {
         esClient,
         elserInferenceId: customInferenceId,
         log: logger,
+        isServerless: true,
       });
 
       expect(populateIndexMock).toHaveBeenCalledWith({
@@ -172,6 +176,7 @@ describe('IndexManager', () => {
         esClient,
         elserInferenceId,
         log: logger,
+        isServerless: false,
       });
 
       expect(populateIndexMock).toHaveBeenCalledWith({
@@ -298,6 +303,7 @@ describe('IndexManager', () => {
     const manager = new IndexManager({
       elserInferenceId: customInferenceId,
       logger: customLogger,
+      isServerlessPlatform: false,
     });
 
     expect(manager).toBeInstanceOf(IndexManager);

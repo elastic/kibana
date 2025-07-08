@@ -60,12 +60,12 @@ export class IndexManager {
       esClient,
       elserInferenceId: this.elserInferenceId,
       log: this.log,
-      isServerless: this.isServerlessPlatform,
     };
 
     await createIndex({
       ...params,
       mappings,
+      isServerless: this.isServerlessPlatform,
     });
 
     await populateIndex({

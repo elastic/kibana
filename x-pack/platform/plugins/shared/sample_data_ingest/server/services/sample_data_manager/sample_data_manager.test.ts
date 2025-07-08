@@ -82,6 +82,7 @@ describe('SampleDataManager', () => {
     sampleDataManager = new SampleDataManager({
       ...sampleDataManagerOpts,
       logger,
+      isServerlessPlatform: false,
     });
 
     mockArtifactManager.prepareArtifact.mockResolvedValue({
@@ -111,6 +112,7 @@ describe('SampleDataManager', () => {
       expect(MockedIndexManager).toHaveBeenCalledWith({
         elserInferenceId: defaultInferenceEndpoints.ELSER,
         logger: expect.any(Object),
+        isServerlessPlatform: false,
       });
     });
 
@@ -121,11 +123,13 @@ describe('SampleDataManager', () => {
         ...sampleDataManagerOpts,
         logger,
         elserInferenceId: customElserInferenceId,
+        isServerlessPlatform: true,
       });
 
       expect(MockedIndexManager).toHaveBeenCalledWith({
         elserInferenceId: customElserInferenceId,
         logger: expect.any(Object),
+        isServerlessPlatform: true,
       });
     });
   });
