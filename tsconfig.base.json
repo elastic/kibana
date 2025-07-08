@@ -1058,6 +1058,8 @@
       "@kbn/generate-csv/*": ["src/platform/packages/private/kbn-generate-csv/*"],
       "@kbn/get-repo-files": ["src/platform/packages/private/kbn-get-repo-files"],
       "@kbn/get-repo-files/*": ["src/platform/packages/private/kbn-get-repo-files/*"],
+      "@kbn/global-flyout-orchestrator-example-plugin": ["examples/global_flyout_orchestrator"],
+      "@kbn/global-flyout-orchestrator-example-plugin/*": ["examples/global_flyout_orchestrator/*"],
       "@kbn/global-search-bar-plugin": ["x-pack/platform/plugins/private/global_search_bar"],
       "@kbn/global-search-bar-plugin/*": ["x-pack/platform/plugins/private/global_search_bar/*"],
       "@kbn/global-search-plugin": ["x-pack/platform/plugins/shared/global_search"],

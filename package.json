@@ -578,6 +578,7 @@
     "@kbn/functional-with-es-ssl-cases-test-plugin": "link:x-pack/platform/test/functional_with_es_ssl/plugins/cases",
     "@kbn/gen-ai-streaming-response-example-plugin": "link:x-pack/examples/gen_ai_streaming_response_example",
     "@kbn/generate-csv": "link:src/platform/packages/private/kbn-generate-csv",
+    "@kbn/global-flyout-orchestrator-example-plugin": "link:examples/global_flyout_orchestrator",
     "@kbn/global-search-bar-plugin": "link:x-pack/platform/plugins/private/global_search_bar",
     "@kbn/global-search-plugin": "link:x-pack/platform/plugins/shared/global_search",
     "@kbn/global-search-providers-plugin": "link:x-pack/platform/plugins/private/global_search_providers",

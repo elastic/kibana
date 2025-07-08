@@ -26,6 +26,7 @@ examples/hello_world @elastic/kibana-core
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 examples/partial_results_example @elastic/kibana-data-discovery
+examples/global_flyout_orchestrator @elastic/appex-sharedux
 examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 examples/resizable_layout_examples @elastic/kibana-data-discovery

@@ -5897,6 +5897,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/global-flyout-orchestrator-example-plugin@link:examples/global_flyout_orchestrator":
+  version "0.0.0"
+  uid ""
+
 "@kbn/global-search-bar-plugin@link:x-pack/platform/plugins/private/global_search_bar":
   version "0.0.0"
   uid ""
