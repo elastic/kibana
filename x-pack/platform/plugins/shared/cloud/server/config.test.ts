@@ -22,8 +22,30 @@ describe('Cloud plugin config', () => {
     });
   });
 
-  describe('product_tier', () => {
+  describe('Serverless config', () => {
+    test('Fails on invalid project_type', () => {
+      expect(() =>
+        config.schema.validate({
+          serverless: {
+            project_type: 'invalid_solution',
+          },
+        })
+      ).toThrowErrorMatchingSnapshot();
+    });
+
     describe.each(KIBANA_SOLUTIONS)('For Kibana Solution "%s"', (solution) => {
+      test('Accepts valid project_type without product_tier', () => {
+        const output = config.schema.validate({
+          serverless: {
+            project_type: solution,
+          },
+        });
+
+        expect(output.serverless).toEqual({
+          project_type: solution,
+        });
+      });
+
       if (KIBANA_PRODUCT_TIERS[solution].length) {
         test.each(KIBANA_PRODUCT_TIERS[solution])('Validates product tier "%s"', (productTier) => {
           const output = config.schema.validate({
@@ -33,11 +55,25 @@ describe('Cloud plugin config', () => {
             },
           });
 
-          expect(output.serverless).toEqual(output.serverless);
+          expect(output.serverless).toEqual({
+            product_tier: productTier,
+            project_type: solution,
+          });
+        });
+      } else {
+        test('Does not allow product tier for this solution', () => {
+          expect(() =>
+            config.schema.validate({
+              serverless: {
+                product_tier: 'complete', // Using 'complete' because it is a valid product tier
+                project_type: solution,
+              },
+            })
+          ).toThrowError("[serverless.product_tier]: a value wasn't expected to be present");
         });
       }
 
-      test('throws when any other product tier is provided', () => {
+      test('Throws when any other product tier is provided', () => {
         expect(() =>
           config.schema.validate({
             serverless: {
