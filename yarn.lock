@@ -4005,7 +4005,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/application-usage-test-plugin@link:x-pack/test/usage_collection/plugins/application_usage_test":
+"@kbn/application-usage-test-plugin@link:x-pack/platform/test/usage_collection/plugins/application_usage_test":
   version "0.0.0"
   uid ""
 
@@ -4398,6 +4398,10 @@
   uid ""
 
 "@kbn/core-chrome-layout-components@link:src/core/packages/chrome/layout/core-chrome-layout-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-layout-constants@link:src/core/packages/chrome/layout/core-chrome-layout-constants":
   version "0.0.0"
   uid ""
 
@@ -7729,7 +7733,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stack-management-usage-test-plugin@link:x-pack/test/usage_collection/plugins/stack_management_usage_test":
+"@kbn/stack-management-usage-test-plugin@link:x-pack/platform/test/usage_collection/plugins/stack_management_usage_test":
   version "0.0.0"
   uid ""
 
@@ -7849,7 +7853,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-feature-usage-plugin@link:x-pack/test/licensing_plugin/plugins/test_feature_usage":
+"@kbn/test-feature-usage-plugin@link:x-pack/platform/test/licensing_plugin/plugins/test_feature_usage":
   version "0.0.0"
   uid ""
 
