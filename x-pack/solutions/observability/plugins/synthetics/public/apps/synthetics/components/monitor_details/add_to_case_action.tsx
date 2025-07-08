@@ -105,7 +105,7 @@ function AddToCaseButtonContent() {
             pathAndQuery: url,
             label: monitor.name,
             actionLabel: i18n.translate(
-              'xpack.synthetics.cases.addToCaseModal.goToDashboardActionLabel',
+              'xpack.synthetics.cases.addToCaseModal.goToMonitorHistoryActionLabel',
               {
                 defaultMessage: 'Go to Monitor History',
               }
