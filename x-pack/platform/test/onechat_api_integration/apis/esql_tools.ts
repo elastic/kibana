@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -17,28 +17,22 @@ export default function ({ getService }: FtrProviderContext) {
     let createdToolIds: string[] = [];
 
     const mockTool = {
-      id: 'test-tool',
-      name: 'Test ES|QL Tool',
-      description: 'A test tool for ES|QL queries',
-      query: 'FROM logs | LIMIT 10',
-      params: {
-        limit: {
-          type: 'number' as const,
-          description: 'Number of records to return',
-        },
-        index: {
-          type: 'string' as const,
-          description: 'Index pattern to query',
-        },
-      },
+      id: 'cases-tool',
+      name: 'existing-tool',
+      description: 'A test tool',
+      query: 'FROM my_cases | WHERE case_id == ?case_id',
+      params: { case_id: { type: 'keyword', description: 'Case ID' } },
       meta: {
-        tags: ['test', 'esql'],
+        providerId: 'esql',
+        tags: ["test"],
       },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     before(async () => {
       await kibanaServer.uiSettings.update({
-        'observability:esqlToolApiEnabled': true,
+        'onechat:api:enabled': true,
       });
     });
 
@@ -50,12 +44,12 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'kibana')
             .expect(200);
         } catch (error) {
-          log.warning(`Failed to cleanup tool ${toolId}: ${error.message}`);
+          log.warning(`Failed to delete tool ${toolId}: ${error.message}`);
         }
       }
 
       await kibanaServer.uiSettings.update({
-        'observability:esqlToolApiEnabled': false,
+        'onechat:api:enabled': false,
       });
     });
 
@@ -132,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when ES|QL tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'observability:esqlToolApiEnabled': false,
+          'onechat:api:enabled: true': false,
         });
 
         await supertest
@@ -142,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'observability:esqlToolApiEnabled': true,
+          'onechat:api:enabled: true': true,
         });
       });
     });
@@ -171,10 +165,11 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/api/chat/tools/esql/${testToolId}`)
           .expect(200);
 
-        expect(response.body).to.have.property('description');
-        expect(response.body).to.have.property('query');
-        expect(response.body).to.have.property('params');
-        expect(response.body).to.have.property('meta');
+        expect(response.body).to.have.property('tool');
+        expect(response.body.tool).to.have.property('description');
+        expect(response.body.tool).to.have.property('query');
+        expect(response.body.tool).to.have.property('params');
+        expect(response.body.tool).to.have.property('meta');
       });
 
       it('should return 404 for non-existent tool', async () => {
@@ -188,7 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when ES|QL tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'observability:esqlToolApiEnabled': false,
+          'onechat:api:enabled: true': false,
         });
 
         await supertest
@@ -196,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'observability:esqlToolApiEnabled': true,
+          'onechat:api:enabled: true': true,
         });
       });
     });
@@ -241,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when ES|QL tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'observability:esqlToolApiEnabled': false,
+          'onechat:api:enabled: true': false,
         });
 
         await supertest
@@ -249,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'observability:esqlToolApiEnabled': true,
+          'onechat:api:enabled: true': true,
         });
       });
     });
@@ -329,7 +324,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when ES|QL tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'observability:esqlToolApiEnabled': false,
+          'onechat:api:enabled: true': false,
         });
 
         await supertest
@@ -339,7 +334,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'observability:esqlToolApiEnabled': true,
+          'onechat:api:enabled: true': true,
         });
       });
     });
@@ -386,7 +381,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when ES|QL tool API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'observability:esqlToolApiEnabled': false,
+          'onechat:api:enabled: true': false,
         });
 
         await supertest
@@ -395,7 +390,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'observability:esqlToolApiEnabled': true,
+          'onechat:api:enabled: true': true,
         });
       });
     });

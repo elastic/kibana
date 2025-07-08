@@ -9,6 +9,6 @@ import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('OneChat Endpoints', function () {
-    loadTestFile(require.resolve('./esql'));
+    loadTestFile(require.resolve('./esql_tools.ts'));
   });
 }
