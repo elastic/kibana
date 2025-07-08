@@ -14,7 +14,12 @@ const includeRegex = includeGlobs.map((glob) => makeRe(glob));
 
 function matchesInclude(file) {
   for (let i = 0; i < includeRegex.length; i++) {
-    if (includeRegex[i].test(file.relativePath)) {
+    const includeRegexItem = includeRegex[i]; // can be false
+    if (!includeRegexItem) {
+      continue;
+    }
+
+    if (includeRegexItem.test(file.relativePath)) {
       return true;
     }
   }
