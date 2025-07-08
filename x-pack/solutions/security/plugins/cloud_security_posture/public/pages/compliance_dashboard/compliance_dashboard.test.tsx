@@ -36,7 +36,6 @@ import { ComplianceDashboardDataV2 } from '../../../common/types_old';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
@@ -44,12 +43,6 @@ jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_is_subscription_status_valid');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
-
-// jest.mock('../../common/experimental_features_service', () => ({
-//   ExperimentalFeaturesService: {
-//     get: jest.fn(() => ({ cloudSecurityNamespaceSupportEnabled: true })),
-//   },
-// }));
 
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {
@@ -79,18 +72,6 @@ describe('<ComplianceDashboard />', () => {
         status: 'success',
       })
     );
-    jest.mock('../../common/experimental_features_service', () => ({
-      ExperimentalFeaturesService: {
-        get: jest.fn(() => ({ cloudSecurityNamespaceSupportEnabled: true })),
-      },
-    }));
-
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockImplementation(() => {
-      return {
-        cloudSecurityNamespaceSupportEnabled: true,
-        cloudConnectorsEnabled: false,
-      };
-    });
   });
 
   const ComplianceDashboardWithTestProviders = (route: string) => {

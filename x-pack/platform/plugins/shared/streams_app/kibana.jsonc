@@ -25,7 +25,8 @@
       "savedObjectsTagging",
       "share",
       "streams",
-      "unifiedSearch"
+      "unifiedSearch",
+      "unifiedDocViewer"
     ],
     "optionalPlugins": ["observabilityAIAssistant"],
     "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"]
