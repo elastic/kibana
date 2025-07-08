@@ -7,7 +7,6 @@
 
 import type { OnechatEvent } from '../base/events';
 import type { ConversationRound } from './conversation';
-import type { StructuredToolIdentifier } from '../tools/tools';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -29,7 +28,8 @@ export type ChatEventBase<
 
 export interface ToolCallEventData {
   tool_call_id: string;
-  tool_id: StructuredToolIdentifier;
+  tool_id: string;
+  tool_type: string;
   params: Record<string, unknown>;
 }
 
@@ -43,8 +43,9 @@ export const isToolCallEvent = (event: OnechatEvent<string, any>): event is Tool
 
 export interface ToolResultEventData {
   tool_call_id: string;
-  toolId: StructuredToolIdentifier;
   tool_id: string;
+  tool_type: string;
+  result: string;
 }
 
 export type ToolResultEvent = ChatEventBase<ChatEventType.toolResult, ToolResultEventData>;

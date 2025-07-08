@@ -15,7 +15,7 @@ import {
   ToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common';
-import { StructuredToolIdentifier, toStructuredToolIdentifier } from '@kbn/onechat-common/tools';
+import { StructuredToolIdentifier } from '@kbn/onechat-common/tools';
 import {
   matchGraphName,
   matchEvent,
