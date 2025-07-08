@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import type {
   KibanaReactContextValue,
   KibanaServices,
@@ -92,7 +93,10 @@ export function createWithKibanaMock<Services extends KibanaServices = KibanaSer
     const EnhancedComponent: React.FC<any> = (props) => {
       return React.createElement(Component, {
         ...props,
-        kibana: mockKibanaContext,
+        kibana: {
+          ...coreMock.createStart(),
+          ...mockKibanaContext,
+        },
         ...additionalProps,
       });
     };
