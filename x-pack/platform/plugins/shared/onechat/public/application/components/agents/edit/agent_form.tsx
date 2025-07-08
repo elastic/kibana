@@ -236,8 +236,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
           label={i18n.translate('xpack.onechat.agents.form.descriptionLabel', {
             defaultMessage: 'Description',
           })}
-          isInvalid={!!formState.errors.description}
-          error={formState.errors.description?.message}
         >
           <Controller
             name="description"
@@ -253,10 +251,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('xpack.onechat.agents.form.customInstructionsLabel', {
-            defaultMessage: 'Extra Instructions',
+            defaultMessage: 'Custom Instructions',
           })}
-          isInvalid={!!formState.errors.customInstructions}
-          error={formState.errors.customInstructions?.message}
         >
           <Controller
             name="customInstructions"

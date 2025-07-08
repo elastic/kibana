@@ -7,7 +7,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AgentProfile, ToolSelection } from '@kbn/onechat-common';
+import {
+  builtinToolProviderId,
+  type AgentProfile,
+  type ToolSelection,
+  allToolsSelectionWildcard,
+} from '@kbn/onechat-common';
 import { useOnechatServices } from '../use_onechat_service';
 import { useOnechatAgentById } from './use_agent_by_id';
 import { useOnechatTools } from '../use_tools';
@@ -21,12 +26,19 @@ export interface AgentEditState {
   toolSelection: ToolSelection[];
 }
 
+const defaultToolSelection: ToolSelection[] = [
+  {
+    provider: builtinToolProviderId,
+    toolIds: [allToolsSelectionWildcard],
+  },
+];
+
 const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
   customInstructions: '',
-  toolSelection: [],
+  toolSelection: defaultToolSelection,
 });
 
 export function useAgentEdit({
@@ -87,7 +99,7 @@ export function useAgentEdit({
         name: agent.name,
         description: agent.description,
         customInstructions: agent.customInstructions,
-        toolSelection: agent.toolSelection || [],
+        toolSelection: agent.toolSelection || defaultToolSelection,
       });
     }
   }, [agentId, agent]);
