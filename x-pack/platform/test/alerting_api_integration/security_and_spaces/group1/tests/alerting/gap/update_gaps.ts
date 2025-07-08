@@ -132,7 +132,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
       });
     });
 
-    it.only('should mark intervals as in_progress immediately after scheduling backfill', async () => {
+    it('should mark intervals as in_progress immediately after scheduling backfill', async () => {
       const { space } = SuperuserAtSpace1;
 
       // Create a rule with timeout pattern to ensure it stays in progress
