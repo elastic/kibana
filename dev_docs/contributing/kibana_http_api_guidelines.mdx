@@ -66,11 +66,9 @@ GET /api/resource_bs?page=1
 
 ### Commitment
 
-Public HTTP APIs are 18+ month commitments to users. We must maintain them and ensure they work as expected.
+Exposing a public HTTP API is a long-term commitment to users and is not easily reversible. We must carefully design and plan APIs before they are made public, and then maintain them and ensure they work as expected.
 
-First release new public HTTP APIs as `Technical Preview` or `Beta` to derisk any aspects of the API design you are uncertain about.
-
-Getting your HTTP APIs into a stable state is a process based on feedback from actual users.
+First release new HTTP APIs internally or as `Technical Preview` behind a feature flag to ensure we aren't breaking our stability promises to users if the API needs to change while in development.
 
 #### Breaking changes to HTTP APIs include
 
