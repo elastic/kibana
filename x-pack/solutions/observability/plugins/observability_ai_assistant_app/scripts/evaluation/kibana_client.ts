@@ -534,7 +534,7 @@ export class KibanaClient {
                 ### Scoring Contract
 
                 * You MUST call the function "scores" exactly once.  
-                * The "criteria" array in the arguments MUST contain **one object for EVERY criterion** (total = ${criteriaCount}).  
+                * The "criteria" array in the arguments MUST contain **one object for EVERY criterion**.  
                   * If a criterion cannot be satisfied, still include it with \`"score": 0\` and a short \`"reasoning"\`.  
                 * Do NOT omit, merge, or reorder indices.  
                 * Do NOT place the scores in normal text; only in the "scores" function call.`,
