@@ -134,6 +134,6 @@ export async function createInternalESClient({
 
 function getElasticsearchRequestLoggingOptions(): ElasticsearchRequestLoggingOptions {
   return {
-    loggerName: 'synthetics',
+    loggerName: 'apm',
   };
 }
