@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { CreateExceptionListSchema, ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListSchema,
+  ExceptionListType,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
@@ -13,7 +16,8 @@ import {
   ENDPOINT_TRUSTED_APPS_LIST_NAME,
 } from '@kbn/securitysolution-list-constants';
 
-export const TRUSTED_APPS_LIST_TYPE: ExceptionListType = ExceptionListTypeEnum.ENDPOINT_TRUSTED_APPS;
+export const TRUSTED_APPS_LIST_TYPE: ExceptionListType =
+  ExceptionListTypeEnum.ENDPOINT_TRUSTED_APPS;
 
 export const SEARCHABLE_FIELDS: Readonly<string[]> = [
   `name`,

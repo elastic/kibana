@@ -68,7 +68,7 @@ export const useGetUpdatedTags = <TagFilters extends TagFiltersType = typeof DEF
           `getTagsUpdateBy() was called with an unknown tag type: ${String(tagType)}`
         );
       }
-      
+
       return (exception.tags ?? []).filter((tag) => !filters[tagType](tag)).concat(...newTags);
     },
     [exception, filters]

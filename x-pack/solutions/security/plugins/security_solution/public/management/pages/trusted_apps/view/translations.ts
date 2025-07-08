@@ -56,13 +56,14 @@ export const USING_ADVANCED_MODE = i18n.translate(
   'xpack.securitySolution.trustedApps.conditions.header.description.advancedMode',
   {
     defaultMessage: 'You are using advanced mode.',
-  });
-
+  }
+);
 
 export const USING_ADVANCED_MODE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.trustedApps.conditions.header.description.advancedMode2',
   {
-    defaultMessage: 'While advanced Trusted Application configuration allows for more complex conditions, use caution. Overly broad conditions can expose your systems to risk.', 
+    defaultMessage:
+      'While advanced Trusted Application configuration allows for more complex conditions, use caution. Overly broad conditions can expose your systems to risk.',
   }
 );
 
