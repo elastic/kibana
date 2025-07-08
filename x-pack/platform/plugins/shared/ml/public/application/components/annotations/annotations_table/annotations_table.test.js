@@ -11,6 +11,11 @@ import { AnnotationsTable } from './annotations_table';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
+const mockAnnotationUpdatesService = {
+  subscribe: jest.fn(),
+  unsubscribe: jest.fn(),
+};
+
 const mockReact = React;
 
 jest.mock('../../../services/job_service', () => {
@@ -48,27 +53,27 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+const mockKibanaContext = {
+  services: {
+    mlServices: {
+      mlApi: {},
+    },
+  },
+};
+
 // Mock withKibana HOC
 jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const { createWithKibanaMock } = require('@kbn/test-jest-helpers');
-
-  const mockKibanaContext = {
-    services: {
-      mlServices: {
-        mlApi: {},
-      },
-    },
-  };
-
-  const mockAnnotationUpdatesService = {
-    subscribe: jest.fn(),
-    unsubscribe: jest.fn(),
-  };
-
   return {
-    withKibana: createWithKibanaMock(mockKibanaContext, {
-      annotationUpdatesService: mockAnnotationUpdatesService,
-    }),
+    withKibana: (Component) => {
+      const EnhancedComponent = (props) => {
+        return mockReact.createElement(Component, {
+          ...props,
+          kibana: mockKibanaContext,
+          annotationUpdatesService: mockAnnotationUpdatesService,
+        });
+      };
+      return EnhancedComponent;
+    },
   };
 });
 

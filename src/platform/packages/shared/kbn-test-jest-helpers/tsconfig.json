@@ -4,18 +4,7 @@
     "outDir": "target/types",
     "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "kbn_references": [
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-router",
-    "@kbn/i18n",
-    "@kbn/kibana-react-plugin",
-    "@kbn/core",
-  ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "kbn_references": ["@kbn/i18n-react", "@kbn/shared-ux-router", "@kbn/i18n", "@kbn/core"],
+  "exclude": ["target/**/*"]
 }
