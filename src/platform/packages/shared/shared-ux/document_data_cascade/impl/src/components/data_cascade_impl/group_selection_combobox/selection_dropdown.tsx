@@ -73,7 +73,7 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
   );
 
   const button = (
-    <EuiButtonEmpty iconType={'inspect'} onClick={onButtonClick}>
+    <EuiButtonEmpty iconType={'inspect'} onClick={onButtonClick} flush="right">
       {i18n.translate('sharedUXPackages.data_cascade.selection_dropdown.selection_message', {
         defaultMessage: 'Group By: {groupedColumnsCount} groups selected',
         values: { groupedColumnsCount: currentGroupByColumns.length },
