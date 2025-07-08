@@ -6578,10 +6578,6 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/chat.ts"
-              },
-              {
-                "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
               },
               {
@@ -15480,6 +15476,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/monitoring_entity_source/monitoring_entity_source.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/users/update.ts"
               },
               {
@@ -16184,6 +16184,14 @@
               {
                 "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/chat.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/chat.ts"
               },
               {
                 "plugin": "onechat",
