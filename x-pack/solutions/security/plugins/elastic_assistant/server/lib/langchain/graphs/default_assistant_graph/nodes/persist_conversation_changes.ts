@@ -39,6 +39,16 @@ export async function persistConversationChanges({
     };
   }
 
+  let conversation;
+  if (state.conversation?.title !== state.chatTitle) {
+    conversation = await conversationsDataClient?.updateConversation({
+      conversationUpdateProps: {
+        id: state.conversationId,
+        title: state.chatTitle,
+      },
+    });
+  }
+
   const lastMessage = state.conversation.messages
     ? state.conversation.messages[state.conversation.messages.length - 1]
     : undefined;
@@ -54,7 +64,7 @@ export async function persistConversationChanges({
   }
 
   const updatedConversation = await conversationsDataClient?.appendConversationMessages({
-    existingConversation: state.conversation,
+    existingConversation: conversation ? conversation : state.conversation,
     messages: [
       {
         content: replaceAnonymizedValuesWithOriginalValues({
