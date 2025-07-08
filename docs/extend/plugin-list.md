@@ -99,6 +99,7 @@ mapped_pages:
 | [visTypeVislib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vislib) | WARNING: Missing or empty README. |
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
 | [visualizations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualizations) | WARNING: Missing or empty README. |
+| [workflows](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows/README.md) | This directory contains the foundational structure for the Workflows plugin. |
 
 ## x-pack/plugins [_x_packplugins]
 
