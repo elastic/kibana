@@ -224,7 +224,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
-        /^x-pack\/test\/defend_workflows_cypress/,
+        /^x-pack\/solutions\/security\/test\/defend_workflows_cypress/,
         /^x-pack\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
       ])) ||

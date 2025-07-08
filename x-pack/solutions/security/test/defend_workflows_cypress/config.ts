@@ -15,7 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
   );
 
   const hostIp = getLocalhostRealIp();
