@@ -61,7 +61,7 @@ export function useIsNavControlVisible({ coreStart, pluginsStart }: UseIsNavCont
     });
 
     return () => appSubscription.unsubscribe();
-  }, [currentAppId$, applications$, aiAssistantManagementSelection.aiAssistantType$]);
+  }, [currentAppId$, applications$, aiAssistantManagementSelection.aiAssistantType$, space$]);
 
   return {
     isVisible,
