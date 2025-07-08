@@ -11,9 +11,9 @@ export { config } from './config';
 
 export type { ObservabilitySharedPluginStart, ObservabilitySharedPluginSetup } from './plugin';
 export type {
-  CaseSuggestion,
+  SuggestionDefinitionServer,
+  SuggestionPayload,
   CaseSuggestionRegistry,
-  CaseSuggestionPayload,
 } from './services/case_suggestion_registry';
 
 export async function plugin(initializerContext: PluginInitializerContext) {

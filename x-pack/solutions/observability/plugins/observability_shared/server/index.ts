@@ -9,6 +9,8 @@ import { PluginInitializerContext } from '@kbn/core/server';
 
 export { config } from './config';
 
+export type { ObservabilitySharedPluginStart, ObservabilitySharedPluginSetup } from './plugin';
+
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { ObservabilitySharedPlugin } = await import('./plugin');
   return new ObservabilitySharedPlugin(initializerContext);

@@ -7,7 +7,7 @@
 
 import { ToolDefinition } from '@kbn/inference-common';
 
-export interface CaseSuggestionPayload<
+export interface SuggestionPayload<
   TPayload = Record<string, unknown>, // Generic type for the payload, defaults to a record of unknown key-value pairs
   TMetadata = Record<string, unknown> // Generic type for metadata, defaults to a record of unknown key-value pairs
 > {
@@ -21,20 +21,24 @@ export interface CaseSuggestionPayload<
   };
 }
 
-export interface CaseSuggestion {
+export type ToolHandler<TPayload = Record<string, unknown>, TMetadata = Record<string, unknown>> = (
+  params: any
+) => Promise<SuggestionPayload<TPayload, TMetadata>>; // Type for tool handlers that return a Promise of SuggestionPayload
+
+export interface SuggestionDefinitionServer<TPayload = {}, TMetadata = {}> {
   suggestionId: string; // Unique identifier for the case suggestion
   displayName: string; // Human-readable name for the suggestion
   description: string; // Description of the suggestion's purpose
   availableTools: Record<string, ToolDefinition>; // Tools available for this suggestion, keyed by tool name
-  toolHandlers: Record<string, () => Promise<CaseSuggestionPayload>>; // Handlers for tools, keyed to match the tool name
+  toolHandlers: Record<string, ToolHandler<TPayload, TMetadata>>; // Handlers for tools, keyed to match the tool name
 }
 
 export class CaseSuggestionRegistry {
-  private registry: Map<string, CaseSuggestion> = new Map();
+  private registry: Map<string, SuggestionDefinitionServer> = new Map();
   private tools: Map<string, ToolDefinition> = new Map();
-  private toolHandlers: Map<string, () => Promise<unknown>> = new Map();
+  private toolHandlers: Map<string, ToolHandler> = new Map();
 
-  public register(suggestion: CaseSuggestion): void {
+  public register(suggestion: SuggestionDefinitionServer): void {
     if (this.registry.has(suggestion.suggestionId)) {
       throw new Error(`Suggestion type '${suggestion.suggestionId}' is already registered.`);
     }
@@ -42,7 +46,7 @@ export class CaseSuggestionRegistry {
     Object.entries(suggestion.availableTools).forEach(([toolName, toolDefinition]) => {
       if (this.tools.has(toolName)) {
         throw new Error(
-          `Tool '${toolName}' is already registered for suggestion type '${suggestion.type}'.`
+          `Tool '${toolName}' is already registered for suggestion type '${suggestion.suggestionId}'.`
         );
       }
       this.tools.set(toolName, toolDefinition);
@@ -50,14 +54,14 @@ export class CaseSuggestionRegistry {
     Object.entries(suggestion.toolHandlers).forEach(([handlerName, handler]) => {
       if (this.toolHandlers.has(handlerName)) {
         throw new Error(
-          `Tool handler '${handlerName}' is already registered for suggestion type '${suggestion.type}'.`
+          `Tool handler '${handlerName}' is already registered for suggestion type '${suggestion.suggestionId}'.`
         );
       }
       this.toolHandlers.set(handlerName, handler);
     });
   }
 
-  get(type: string): CaseSuggestion | undefined {
+  get(type: string): SuggestionDefinitionServer | undefined {
     return this.registry.get(type);
   }
 
@@ -65,7 +69,7 @@ export class CaseSuggestionRegistry {
     return this.tools.get(toolName);
   }
 
-  getToolHandler(handlerName: string): (() => Promise<unknown>) | undefined {
+  getToolHandler(handlerName: string): ToolHandler | undefined {
     return this.toolHandlers.get(handlerName);
   }
 
@@ -73,15 +77,11 @@ export class CaseSuggestionRegistry {
     return Object.fromEntries(this.tools.entries());
   }
 
-  getAllToolHandlers(): Record<string, () => Promise<unknown>> {
+  getAllToolHandlers(): SuggestionDefinitionServer['toolHandlers'] {
     return Object.fromEntries(this.toolHandlers.entries());
   }
 
-  getAll(): CaseSuggestion[] {
+  getAll(): SuggestionDefinitionServer[] {
     return Array.from(this.registry.values());
-  }
-
-  filterBySignalType(signalType: string): CaseSuggestion[] {
-    return this.getAll().filter((s) => s.signalType === signalType);
   }
 }

@@ -10,3 +10,5 @@ import { ObservabilityCaseSuggestionRegistryPlugin } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new ObservabilityCaseSuggestionRegistryPlugin(initializerContext);
 };
+
+export type { SuggestionDefinitionPublic } from './services/case_suggestion_registry';

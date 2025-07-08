@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-export interface CaseDefinitionPublicProps<TPayload = {}, TMetadata = {}> {
+export interface SuggestionDefinitionPublicProps<TPayload = {}, TMetadata = {}> {
   data: {
     attachments: Array<{
       attachment: Array<Record<string, unknown>>;
@@ -16,32 +16,30 @@ export interface CaseDefinitionPublicProps<TPayload = {}, TMetadata = {}> {
   };
 }
 
-export interface CaseDefinitionPublic<TPayload = {}, TMetadata = {}> {
+export interface SuggestionDefinitionPublic<TPayload = {}, TMetadata = {}> {
   type: string;
   displayName: string;
   description: string;
-  children?: React.LazyExoticComponent<React.FC<CaseDefinitionPublicProps<TPayload, TMetadata>>>;
+  children?: React.LazyExoticComponent<
+    React.FC<SuggestionDefinitionPublicProps<TPayload, TMetadata>>
+  >;
 }
 
 export class CaseSuggestionRegistry {
-  private registry: Map<string, CaseSuggestion> = new Map();
+  private registry: Map<string, SuggestionDefinitionPublic> = new Map();
 
-  public register(suggestion: CaseSuggestion): void {
+  public register(suggestion: SuggestionDefinitionPublic): void {
     if (this.registry.has(suggestion.type)) {
       throw new Error(`Suggestion type '${suggestion.type}' is already registered.`);
     }
     this.registry.set(suggestion.type, suggestion);
   }
 
-  get(type: string): CaseSuggestion | undefined {
+  get(type: string): SuggestionDefinitionPublic | undefined {
     return this.registry.get(type);
   }
 
-  getAll(): CaseSuggestion[] {
+  getAll(): SuggestionDefinitionPublic[] {
     return Array.from(this.registry.values());
-  }
-
-  filterBySignalType(signalType: string): CaseSuggestion[] {
-    return this.getAll().filter((s) => s.signalType === signalType);
   }
 }
