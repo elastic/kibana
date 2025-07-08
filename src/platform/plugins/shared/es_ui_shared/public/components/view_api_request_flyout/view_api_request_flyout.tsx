@@ -24,6 +24,7 @@ import {
   EuiCodeBlock,
   EuiCopy,
   useGeneratedHtmlId,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import type { UrlService } from '@kbn/share-plugin/common/url_service';
 import { ApplicationStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -66,6 +67,7 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
   const shouldShowDevToolsLink = canShowDevtools && consolePreviewLink !== undefined;
 
   const flyoutTitleId = useGeneratedHtmlId();
+  const codeBlockTitleId = useGeneratedHtmlId();
 
   return (
     <EuiFlyout
@@ -122,7 +124,16 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
           )}
         </div>
         <EuiSpacer size="s" />
+        <EuiScreenReaderOnly>
+          <h3 id={codeBlockTitleId}>
+            <FormattedMessage
+              id="esUi.viewApiRequest.codeBlockTitle"
+              defaultMessage="Request code block"
+            />
+          </h3>
+        </EuiScreenReaderOnly>
         <EuiCodeBlock
+          aria-labelledby={codeBlockTitleId}
           language="json"
           data-test-subj="apiRequestFlyoutBody"
           overflowHeight={1200}
