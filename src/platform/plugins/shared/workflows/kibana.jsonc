@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workflows-plugin",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "This plugin contains the Workflows application.",
+  "plugin": {
+    "id": "workflows",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["kibanaReact", "navigation", "taskManager"]
+  }
+}
