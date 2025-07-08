@@ -6,13 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { IMinimatch } from 'minimatch';
 import { Minimatch } from 'minimatch';
 
 export class WildcardMatcher {
   pattern: string;
-  matcher: IMinimatch;
+  matcher: Minimatch;
 
   constructor(private readonly wildcardPattern: string, private readonly emptyVal?: string) {
     this.pattern = String(this.wildcardPattern || '*');
