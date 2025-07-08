@@ -21,6 +21,25 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.0.4 [kibana-9.0.4-release-notes]
+
+### Features and enhancements [kibana-9.0.4-features-enhancements]
+
+**Data ingestion and Fleet**:
+* Adds tooltip to Last activity column in Agent list UI [#224850]({{kib-pull}}224850).
+
+
+### Fixes [kibana-9.0.4-fixes]
+
+**Data ingestion and Fleet**:
+* Fixes export CSV in Agent list [#225050]({{kib-pull}}225050).
+* Replace call to registry when deleting kibana assets for custom packages [#224886]({{kib-pull}}224886).
+* Fixes bulk actions incorrectly selecting agents with namespaces filter [#224036]({{kib-pull}}224036).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.0.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+* No need to remove a task [#226481]({{kib-pull}}226481).
+
 ## 9.0.3 [kibana-9.0.3-release-notes]
 
 :::{important}
