@@ -11,11 +11,7 @@ import type { SavedObject } from '@kbn/core/server';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
-import {
-  WriteOperations,
-  AlertingAuthorizationEntity,
-  ReadOperations,
-} from '../../../../authorization';
+import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { getMappedParams } from '../../../../rules_client/common/mapped_params_utils';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -327,9 +323,6 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     validatedRuleTypeParams,
     artifacts
   );
-
-  console.error('update rule - extracted refs', JSON.stringify(extractedReferences, null, 2));
-  console.error('update rule - updated params', JSON.stringify(updatedParams, null, 2));
 
   // Increment revision if applicable field has changed
   const revision = shouldIncrementRevision(updatedParams as Params)
