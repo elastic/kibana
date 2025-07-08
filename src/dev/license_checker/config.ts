@@ -89,7 +89,7 @@ export const LICENSE_OVERRIDES = {
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
   '@elastic/ems-client@8.6.3': ['Elastic License 2.0'],
   '@elastic/eui@105.0.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
-  '@elastic/eui-amsterdam@104.1.0-amsterdam.0': [
+  '@elastic/eui-amsterdam@105.0.0-amsterdam.0': [
     'Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0',
   ],
   '@elastic/eui-theme-borealis@3.2.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
