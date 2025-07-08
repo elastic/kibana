@@ -8,7 +8,6 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { AssetDetailPage } from './asset_detail_page';
 import { MetricDetailPage } from './metric_detail_page';
 import { MetricsTimeProvider } from './hooks/use_metrics_time';
@@ -18,15 +17,11 @@ export const NodeDetail = () => {
     params: { type: nodeType },
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
 
-  return (
-    <KibanaErrorBoundary>
-      {nodeType === 'host' || nodeType === 'container' ? (
-        <AssetDetailPage />
-      ) : (
-        <MetricsTimeProvider>
-          <MetricDetailPage />
-        </MetricsTimeProvider>
-      )}
-    </KibanaErrorBoundary>
+  return nodeType === 'host' || nodeType === 'container' ? (
+    <AssetDetailPage />
+  ) : (
+    <MetricsTimeProvider>
+      <MetricDetailPage />
+    </MetricsTimeProvider>
   );
 };
