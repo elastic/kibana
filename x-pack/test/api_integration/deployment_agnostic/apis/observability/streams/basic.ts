@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { isNotFoundError } from '@kbn/es-errors';
+import { Client } from '@elastic/elasticsearch';
 import { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
@@ -576,6 +578,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await disableStreams(apiClient);
+
+        await esClient.indices.deleteDataStream({ name: 'logs.invalid_pipeline' });
+        await esClient.indices.deleteIndexTemplate({ name: 'logs.invalid_pipeline@stream' });
+        await esClient.cluster.deleteComponentTemplate({
+          name: 'logs.invalid_pipeline@stream.layer',
+        });
       });
 
       it('inherit fields', async () => {
@@ -641,6 +649,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
           500
+        );
+      });
+
+      it('reports when it fails to create a stream', async () => {
+        const body: Streams.WiredStream.UpsertRequest = {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: 'Should cause a failure due to invalid ingest pipeline',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [
+                {
+                  manual_ingest_pipeline: {
+                    processors: [
+                      {
+                        set: {
+                          field: 'fails',
+                          value: 'whatever',
+                          fail: 'because this property is not valid',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              wired: {
+                fields: {},
+                routing: [],
+              },
+            },
+          },
+        };
+
+        const response = await putStream(apiClient, 'logs.invalid_pipeline', body, 500);
+
+        expect((response as any).message).to.contain('Failed to change state:');
+        expect((response as any).message).to.contain(
+          `The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`
         );
       });
     });
