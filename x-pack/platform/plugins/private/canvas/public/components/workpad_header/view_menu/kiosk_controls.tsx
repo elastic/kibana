@@ -115,7 +115,11 @@ export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               {autoplayInterval > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip position="bottom" content={strings.getDisableTooltip()}>
+                  <EuiToolTip
+                    position="bottom"
+                    content={strings.getDisableTooltip()}
+                    disableScreenReaderOutput
+                  >
                     <EuiButtonIcon
                       iconType="cross"
                       onClick={disableAutoplay}

@@ -307,7 +307,7 @@ const DeleteConnectorModalAction: React.FC<{ connector: Connector; disabled: boo
           connectorName={connector.name}
         />
       )}
-      <EuiToolTip content={DELETE_CONNECTOR_LABEL}>
+      <EuiToolTip content={DELETE_CONNECTOR_LABEL} disableScreenReaderOutput>
         <EuiButtonIcon
           disabled={disabled}
           data-test-subj="serverlessSearchDeleteConnectorModalActionButton"

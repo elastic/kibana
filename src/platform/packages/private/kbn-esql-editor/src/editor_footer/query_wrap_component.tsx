@@ -36,6 +36,7 @@ export function QueryWrapComponent({
                 defaultMessage: 'Add line breaks on pipes',
               })
         }
+        disableScreenReaderOutput
       >
         <EuiButtonIcon
           iconType={isWrappedByPipes ? 'pipeNoBreaks' : 'pipeBreaks'}

@@ -77,7 +77,7 @@ export const RowMenuControlCell = ({
       id={`rowMenuActionsPopover_${props.rowIndex}`}
       className="unifiedDataTable__rowControl"
       button={
-        <EuiToolTip content={buttonLabel} delay="long">
+        <EuiToolTip content={buttonLabel} delay="long" disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj={`unifiedDataTable_additionalRowControl_${props.columnId}Menu`}
             iconSize="s"

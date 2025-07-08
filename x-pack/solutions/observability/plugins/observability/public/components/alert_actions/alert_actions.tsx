@@ -194,6 +194,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
             content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
               defaultMessage: 'View in app',
             })}
+            disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="o11yAlertActionsButton"
@@ -219,7 +220,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
         <EuiPopover
           anchorPosition="downLeft"
           button={
-            <EuiToolTip content={actionsToolTip}>
+            <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
               <EuiButtonIcon
                 aria-label={actionsToolTip}
                 color="text"

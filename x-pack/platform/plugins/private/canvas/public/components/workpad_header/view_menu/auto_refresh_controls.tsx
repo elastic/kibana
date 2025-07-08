@@ -112,7 +112,11 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
               {refreshInterval > 0 ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip position="bottom" content={strings.getDisableTooltip()}>
+                  <EuiToolTip
+                    position="bottom"
+                    content={strings.getDisableTooltip()}
+                    disableScreenReaderOutput
+                  >
                     <EuiButtonIcon
                       iconType="cross"
                       onClick={disableInterval}

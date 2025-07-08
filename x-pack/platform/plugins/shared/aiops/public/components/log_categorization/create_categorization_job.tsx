@@ -67,6 +67,7 @@ export const CreateCategorizationJobButton: FC<Props> = ({
         content={i18n.translate('xpack.aiops.categorizeFlyout.findAnomalies.tooltip', {
           defaultMessage: 'Create anomaly detection job to find anomalies in patterns',
         })}
+        disableScreenReaderOutput
       >
         <EuiButtonIcon
           data-test-subj="aiopsEmbeddableMenuOptionsButton"

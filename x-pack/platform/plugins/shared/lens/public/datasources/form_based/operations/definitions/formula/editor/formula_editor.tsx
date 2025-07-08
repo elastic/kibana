@@ -738,6 +738,7 @@ export function FormulaEditor({
                         })
                   }
                   position="top"
+                  disableScreenReaderOutput
                 >
                   <EuiButtonIcon
                     iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
