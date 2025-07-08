@@ -8,6 +8,6 @@
  */
 
 import * as helpers from './helpers';
-import { validationRrfCommandTestSuite } from './test_suites/validation.command.rrf';
+import { validationFuseCommandTestSuite } from './test_suites/validation.command.fuse';
 
-validationRrfCommandTestSuite(helpers.setup);
+validationFuseCommandTestSuite(helpers.setup);
