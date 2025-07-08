@@ -41,14 +41,14 @@ type Props = EuiBadgeProps & {
 };
 
 function getStatusComponent({
-  status,
-  inFailedUpgradeState,
+  agent,
+  previousStatus,
   ...restOfProps
 }: {
-  status: Agent['status'];
-  inFailedUpgradeState: boolean;
+  agent?: Agent;
+  previousStatus?: Agent['status'];
 } & EuiBadgeProps): React.ReactElement {
-  switch (status) {
+  switch (agent?.status || previousStatus) {
     case 'error':
     case 'degraded':
       return (
@@ -99,7 +99,7 @@ function getStatusComponent({
     case 'unenrolling':
     case 'enrolling':
     case 'updating':
-      return inFailedUpgradeState ? (
+      return isAgentInFailedUpgradeState(agent) ? (
         <EuiBadge color="danger" {...restOfProps}>
           <FormattedMessage
             id="xpack.fleet.agentHealth.upgradingFailedStatusText"
@@ -214,8 +214,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
         {isStuckInUpdating(agent) && !fromDetails ? (
           <div className="eui-textNoWrap">
             {getStatusComponent({
-              status: agent.status,
-              inFailedUpgradeState: isAgentInFailedUpgradeState(agent),
+              agent,
               ...restOfProps,
             })}
             &nbsp;
@@ -224,14 +223,12 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
         ) : (
           <>
             {getStatusComponent({
-              status: agent.status,
-              inFailedUpgradeState: isAgentInFailedUpgradeState(agent),
+              agent,
               ...restOfProps,
             })}
             {previousToOfflineStatus
               ? getStatusComponent({
-                  status: previousToOfflineStatus,
-                  inFailedUpgradeState: isAgentInFailedUpgradeState(agent),
+                  previousStatus: previousToOfflineStatus,
                   ...restOfProps,
                 })
               : null}
