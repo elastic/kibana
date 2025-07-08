@@ -979,7 +979,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
       kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND ${kuery}`
+        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
         : `${savedObjectType}.attributes.latest_revision:true`
     );
 
@@ -1040,7 +1040,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
       kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND ${kuery}`
+        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
         : `${savedObjectType}.attributes.latest_revision:true`
     );
 
@@ -2484,7 +2484,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
       kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND ${kuery}`
+        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
         : `${savedObjectType}.attributes.latest_revision:true`
     );
 
@@ -2532,7 +2532,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
       kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND ${kuery}`
+        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
         : `${savedObjectType}.attributes.latest_revision:true`
     );
 

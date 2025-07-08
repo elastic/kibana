@@ -109,6 +109,7 @@ export default function (providerContext: FtrProviderContext) {
                   name: 'synthetics',
                   version: '1.2.1',
                 },
+                latest_revision: true,
               },
             },
           ]),
