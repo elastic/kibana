@@ -1,4 +1,4 @@
-import { WorkflowStep, Provider } from '../models';
+import { WorkflowStep, Provider } from '../from-poc/models';
 import { TemplatingEngine } from '../templating-engine';
 
 export interface RunStepResult {
