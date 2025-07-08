@@ -219,20 +219,11 @@ const generateSignificantEventsRoute = createServerRoute({
       logger,
     });
 
-    return fromRxjs([generatedSignificantEventDefinitions]).pipe(
-      map(
-        (
-          queries
-        ): ServerSentEventBase<
-          'generated_queries',
-          { queries: GeneratedSignificantEventQuery[] }
-        > => {
-          return {
-            queries,
-            type: 'generated_queries',
-          };
-        }
-      )
+    return fromRxjs(generatedSignificantEventDefinitions).pipe(
+      map((query) => ({
+        queries: [query],
+        type: 'generated_queries',
+      }))
     );
   },
 });
