@@ -233,6 +233,7 @@ describe('CasesConnectorRunParamsSchema', () => {
         {
           alerts: [{ _id: 'alert-id-1', _index: 'alert-index-2' }],
           comments: ['comment-1'],
+          assistantComments: ['ai-comment-1'],
           grouping: { field_name: 'field_value' },
           title: 'custom-title',
         },
@@ -246,6 +247,9 @@ describe('CasesConnectorRunParamsSchema', () => {
                 "_id": "alert-id-1",
                 "_index": "alert-index-2",
               },
+            ],
+            "assistantComments": Array [
+              "ai-comment-1",
             ],
             "comments": Array [
               "comment-1",
@@ -264,6 +268,7 @@ describe('CasesConnectorRunParamsSchema', () => {
         {
           alerts: [{ _id: 'alert-id-1', _index: 'alert-index-2' }],
           comments: ['comment-1'],
+          assistantComments: ['ai-comment-1'],
           title: 'custom-title',
         },
       ];
@@ -274,6 +279,7 @@ describe('CasesConnectorRunParamsSchema', () => {
       const groupedAlerts = [
         {
           comments: ['comment-1'],
+          assistantComments: ['ai-comment-1'],
           grouping: { field_name: 'field_value' },
           title: 'custom-title',
         },
@@ -289,6 +295,7 @@ describe('CasesConnectorRunParamsSchema', () => {
             _index: 'alert-index-2',
           }),
           comments: ['comment-1'],
+          assistantComments: ['ai-comment-1'],
           grouping: { field_name: 'field_value' },
           title: 'custom-title',
         },
@@ -301,6 +308,7 @@ describe('CasesConnectorRunParamsSchema', () => {
         {
           alerts: [{ _id: 'alert-id-1', _index: 'alert-index-2' }],
           comments: new Array(MAX_DOCS_PER_PAGE / 2 + 1).fill('comment-1'),
+          assistantComments: ['ai-comment-1'],
           grouping: { field_name: 'field_value' },
           title: 'custom-title',
         },
@@ -321,11 +329,39 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).not.toThrow();
     });
 
+    it('does not accept more than `MAX_DOCS_PER_PAGE / 2` items in `assistantComments` field', () => {
+      const groupedAlerts = [
+        {
+          alerts: [{ _id: 'alert-id-1', _index: 'alert-index-2' }],
+          comments: ['comment-1'],
+          assistantComments: new Array(MAX_DOCS_PER_PAGE / 2 + 1).fill('ai-comment-1'),
+          grouping: { field_name: 'field_value' },
+          title: 'custom-title',
+        },
+      ];
+      expect(() => CasesConnectorRunParamsSchema.validate(getParams({ groupedAlerts }))).toThrow();
+    });
+
+    it('accept undefined `assistantComments` field', () => {
+      const groupedAlerts = [
+        {
+          alerts: [{ _id: 'alert-id-1', _index: 'alert-index-2' }],
+          comments: ['comment-1'],
+          grouping: { field_name: 'field_value' },
+          title: 'custom-title',
+        },
+      ];
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ groupedAlerts }))
+      ).not.toThrow();
+    });
+
     it('accept undefined `title` field', () => {
       const groupedAlerts = [
         {
           alerts: [{ _id: 'alert-id-1', _index: 'alert-index-2' }],
           comments: ['comment-1'],
+          assistantComments: ['ai-comment-1'],
           grouping: { field_name: 'field_value' },
         },
       ];

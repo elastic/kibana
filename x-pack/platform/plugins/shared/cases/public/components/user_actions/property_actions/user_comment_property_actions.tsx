@@ -18,7 +18,7 @@ import { useDeletePropertyAction } from './use_delete_property_action';
 interface Props {
   isLoading: boolean;
   commentContent?: string;
-  onEdit: () => void;
+  onEdit?: () => void;
   onDelete: () => void;
   onQuote: () => void;
 }
@@ -47,7 +47,7 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
     const showLensEditor = permissions.update && canUseEditor && actionConfig;
 
     return [
-      ...(showEditPencilIcon
+      ...(onEdit && showEditPencilIcon
         ? [
             {
               type: AttachmentActionType.BUTTON as const,

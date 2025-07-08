@@ -152,6 +152,7 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
     caseId: 'mock-id-3',
     attachments: [
+      { comment: 'ai-comment-1', owner: 'securitySolution', type: 'assistant' },
       {
         alertId: ['alert-id-5'],
         index: ['alert-index-3'],

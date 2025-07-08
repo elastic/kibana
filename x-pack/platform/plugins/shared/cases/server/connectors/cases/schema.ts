@@ -73,6 +73,9 @@ const TimeWindowSchema = schema.string({
 export const CasesGroupedAlertsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema, { maxSize: MAX_ALERTS_PER_CASE }),
   comments: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_DOCS_PER_PAGE / 2 })),
+  assistantComments: schema.maybe(
+    schema.arrayOf(schema.string(), { maxSize: MAX_DOCS_PER_PAGE / 2 })
+  ),
   grouping: schema.recordOf(schema.string(), schema.any()),
   title: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
 });

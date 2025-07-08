@@ -31,6 +31,7 @@ import {
   AttachmentType,
   AttachmentRt,
   AttachmentsRt,
+  AssistantCommentAttachmentPayloadRt,
 } from '../../domain/attachment/v1';
 
 /**
@@ -68,6 +69,7 @@ export type PostFileAttachmentRequest = rt.TypeOf<typeof PostFileAttachmentReque
 
 const BasicAttachmentRequestRt = rt.union([
   UserCommentAttachmentPayloadRt,
+  AssistantCommentAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
   ActionsAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
@@ -78,6 +80,11 @@ export const AttachmentRequestRt = rt.union([
   rt.strict({
     comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
     type: rt.literal(AttachmentType.user),
+    owner: rt.string,
+  }),
+  rt.strict({
+    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+    type: rt.literal(AttachmentType.assistant),
     owner: rt.string,
   }),
   AlertAttachmentPayloadRt,

@@ -52,6 +52,7 @@ export enum AttachmentType {
   actions = 'actions',
   externalReference = 'externalReference',
   persistableState = 'persistableState',
+  assistant = 'assistant',
 }
 
 export const UserCommentAttachmentPayloadRt = rt.strict({
@@ -76,6 +77,37 @@ export const UserCommentAttachmentRt = rt.intersection([
 export type UserCommentAttachmentPayload = rt.TypeOf<typeof UserCommentAttachmentPayloadRt>;
 export type UserCommentAttachmentAttributes = rt.TypeOf<typeof UserCommentAttachmentAttributesRt>;
 export type UserCommentAttachment = rt.TypeOf<typeof UserCommentAttachmentRt>;
+
+/**
+ * Assistant comment
+ */
+
+export const AssistantCommentAttachmentPayloadRt = rt.strict({
+  comment: rt.string,
+  type: rt.literal(AttachmentType.assistant),
+  owner: rt.string,
+});
+
+const AssistantCommentAttachmentAttributesRt = rt.intersection([
+  AssistantCommentAttachmentPayloadRt,
+  AttachmentAttributesBasicRt,
+]);
+
+export const AssistantCommentAttachmentRt = rt.intersection([
+  AssistantCommentAttachmentAttributesRt,
+  rt.strict({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
+export type AssistantCommentAttachmentPayload = rt.TypeOf<
+  typeof AssistantCommentAttachmentPayloadRt
+>;
+export type AssistantCommentAttachmentAttributes = rt.TypeOf<
+  typeof AssistantCommentAttachmentAttributesRt
+>;
+export type AssistantCommentAttachment = rt.TypeOf<typeof AssistantCommentAttachmentRt>;
 
 /**
  * Alerts
@@ -297,6 +329,7 @@ export type PersistableStateAttachmentAttributes = rt.TypeOf<
 
 export const AttachmentPayloadRt = rt.union([
   UserCommentAttachmentPayloadRt,
+  AssistantCommentAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
   ActionsAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
@@ -306,6 +339,7 @@ export const AttachmentPayloadRt = rt.union([
 
 export const AttachmentAttributesRt = rt.union([
   UserCommentAttachmentAttributesRt,
+  AssistantCommentAttachmentAttributesRt,
   AlertAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceAttachmentAttributesRt,
@@ -314,6 +348,7 @@ export const AttachmentAttributesRt = rt.union([
 
 const AttachmentAttributesNoSORt = rt.union([
   UserCommentAttachmentAttributesRt,
+  AssistantCommentAttachmentAttributesRt,
   AlertAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceNoSOAttachmentAttributesRt,
@@ -322,6 +357,7 @@ const AttachmentAttributesNoSORt = rt.union([
 
 const AttachmentAttributesWithoutRefsRt = rt.union([
   UserCommentAttachmentAttributesRt,
+  AssistantCommentAttachmentAttributesRt,
   AlertAttachmentAttributesRt,
   ActionsAttachmentAttributesRt,
   ExternalReferenceWithoutRefsAttachmentAttributesRt,
@@ -347,6 +383,7 @@ export const AttachmentsRt = rt.array(AttachmentRt);
 export const AttachmentPatchAttributesRt = rt.intersection([
   rt.union([
     rt.exact(rt.partial(UserCommentAttachmentPayloadRt.type.props)),
+    rt.exact(rt.partial(AssistantCommentAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(AlertAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(ActionsAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(ExternalReferenceNoSOAttachmentPayloadRt.type.props)),

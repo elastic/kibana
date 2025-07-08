@@ -84,7 +84,7 @@ export const getLatestPushInfo = (
 };
 
 const getCommentContent = (comment: Attachment): string => {
-  if (comment.type === AttachmentType.user) {
+  if (comment.type === AttachmentType.user || comment.type === AttachmentType.assistant) {
     return comment.comment;
   } else if (comment.type === AttachmentType.alert) {
     const ids = getAlertIds(comment);

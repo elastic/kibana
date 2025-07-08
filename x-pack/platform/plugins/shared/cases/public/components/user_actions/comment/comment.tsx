@@ -18,6 +18,7 @@ import * as i18n from './translations';
 import { createUserAttachmentUserActionBuilder } from './user';
 import { createAlertAttachmentUserActionBuilder } from './alert';
 import { createActionAttachmentUserActionBuilder } from './actions';
+import { createAssistantAttachmentUserActionBuilder } from './assistant';
 import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
@@ -190,6 +191,20 @@ const getCreateCommentUserAction = ({
       });
 
       return userBuilder.build();
+
+    case AttachmentType.assistant:
+      const assistantBuilder = createAssistantAttachmentUserActionBuilder({
+        attachment,
+        outlined: attachment.id === selectedOutlineCommentId,
+        commentRefs,
+        isLoading: loadingCommentIds.includes(attachment.id),
+        caseId: caseData.id,
+        euiTheme,
+        handleManageQuote,
+        handleDeleteComment,
+      });
+
+      return assistantBuilder.build();
 
     case AttachmentType.alert:
       const alertBuilder = createAlertAttachmentUserActionBuilder({

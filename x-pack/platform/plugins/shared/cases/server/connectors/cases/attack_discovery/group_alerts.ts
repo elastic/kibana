@@ -64,7 +64,7 @@ export const groupAttackDiscoveryAlerts = (alerts: CaseAlert[]): CasesGroupedAle
     return {
       alerts: alertIds.map((siemAlertId) => ({ _id: siemAlertId, _index: alertsIndexPattern })),
       grouping: { attack_discovery: attackDiscoveryId },
-      comments: caseComments,
+      assistantComments: caseComments,
       title: caseTitle,
     };
   });

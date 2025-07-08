@@ -107,6 +107,7 @@ export const groupedAlerts = [
   },
   {
     alerts: [{ _id: 'alert-id-5', _index: 'alert-index-3' }],
+    assistantComments: ['ai-comment-1'],
     grouping: { field_name_1: 'field_value_3' },
   },
 ];

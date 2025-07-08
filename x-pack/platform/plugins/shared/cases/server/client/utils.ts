@@ -32,6 +32,7 @@ import type {
 import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
+  AssistantCommentAttachmentPayloadRt,
   AttachmentType,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
@@ -61,6 +62,7 @@ import {
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
   assertUnreachable,
+  isCommentRequestTypeAssistant,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
@@ -74,6 +76,8 @@ export const decodeCommentRequest = (
 ) => {
   if (isCommentRequestTypeUser(comment)) {
     decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
+  } else if (isCommentRequestTypeAssistant(comment)) {
+    decodeWithExcessOrThrow(AssistantCommentAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
     decodeWithExcessOrThrow(ActionsAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeAlert(comment)) {

@@ -23,8 +23,8 @@ interface EditableMarkdownRendererProps {
   id: string;
   caseId: string;
   fieldName: string;
-  onChangeEditable: (id: string) => void;
-  onSaveContent: (content: string) => void;
+  onChangeEditable?: (id: string) => void;
+  onSaveContent?: (content: string) => void;
   editorRef: React.MutableRefObject<undefined | null | EditableMarkdownRefObject>;
   formSchema: FormSchema<{ content: string }> | undefined;
 }
@@ -62,7 +62,7 @@ const EditableMarkDownRenderer = forwardRef<
     }));
 
     const handleCancelAction = useCallback(() => {
-      onChangeEditable(id);
+      onChangeEditable?.(id);
       removeItemFromSessionStorage(draftStorageKey);
     }, [id, onChangeEditable, draftStorageKey]);
 
@@ -70,9 +70,9 @@ const EditableMarkDownRenderer = forwardRef<
       const { isValid, data } = await submit();
 
       if (isValid && data.content !== content) {
-        onSaveContent(data.content);
+        onSaveContent?.(data.content);
       }
-      onChangeEditable(id);
+      onChangeEditable?.(id);
       removeItemFromSessionStorage(draftStorageKey);
     }, [content, id, onChangeEditable, onSaveContent, submit, draftStorageKey]);
 

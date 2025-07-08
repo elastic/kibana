@@ -18,6 +18,7 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type {
   ActionsAttachmentPayload,
   AlertAttachmentPayload,
+  AssistantCommentAttachmentPayload,
   Attachment,
   AttachmentAttributes,
   Case,
@@ -239,6 +240,15 @@ export const isCommentRequestTypeUser = (
   context: AttachmentRequest
 ): context is UserCommentAttachmentPayload => {
   return context.type === AttachmentType.user;
+};
+
+/**
+ * A type narrowing function for Assistant comments.
+ */
+export const isCommentRequestTypeAssistant = (
+  context: AttachmentRequest
+): context is AssistantCommentAttachmentPayload => {
+  return context.type === AttachmentType.assistant;
 };
 
 /**

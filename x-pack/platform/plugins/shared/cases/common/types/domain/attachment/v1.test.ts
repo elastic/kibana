@@ -23,6 +23,8 @@ import {
   ExternalReferenceAttachmentRt,
   PersistableStateAttachmentRt,
   AttachmentPatchAttributesRt,
+  AssistantCommentAttachmentPayloadRt,
+  AssistantCommentAttachmentRt,
 } from './v1';
 
 describe('Attachments', () => {
@@ -148,6 +150,32 @@ describe('Attachments', () => {
 
     it('removes foo:bar attributes from request', () => {
       const query = UserCommentAttachmentPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+  });
+
+  describe('AssistantCommentAttachmentPayloadRt', () => {
+    const defaultRequest = {
+      comment: 'This is a sample assistant comment',
+      type: AttachmentType.assistant,
+      owner: 'cases',
+    };
+
+    it('has expected attributes in request', () => {
+      const query = AssistantCommentAttachmentPayloadRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = AssistantCommentAttachmentPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -448,6 +476,43 @@ describe('Attachments', () => {
 
     it('removes foo:bar attributes from request', () => {
       const query = UserCommentAttachmentRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+  });
+
+  describe('AssistantCommentAttachmentRt', () => {
+    const defaultRequest = {
+      comment: 'I am machine!',
+      type: AttachmentType.assistant,
+      owner: 'cases',
+      id: 'basic-comment-id',
+      version: 'WzQ3LDFc',
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: {
+        full_name: 'Leslie Knope',
+        username: 'lknope',
+        email: 'leslie.knope@elastic.co',
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+    };
+    it('has expected attributes in request', () => {
+      const query = AssistantCommentAttachmentRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: defaultRequest,
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = AssistantCommentAttachmentRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',

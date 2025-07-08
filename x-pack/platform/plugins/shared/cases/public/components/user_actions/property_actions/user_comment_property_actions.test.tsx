@@ -42,6 +42,19 @@ describe('UserCommentPropertyActions', () => {
     expect(screen.getByTestId('property-actions-user-action-quote')).toBeInTheDocument();
   });
 
+  it('renders the correct number of actions if `onEdit` is undefined', async () => {
+    renderWithTestingProviders(<UserCommentPropertyActions {...{ ...props, onEdit: undefined }} />);
+
+    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await waitForEuiPopoverOpen();
+
+    expect(screen.queryByTestId('property-actions-user-action-pencil')).not.toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-user-action-trash')).toBeInTheDocument();
+    expect(screen.getByTestId('property-actions-user-action-quote')).toBeInTheDocument();
+  });
+
   it('edits the comment correctly', async () => {
     renderWithTestingProviders(<UserCommentPropertyActions {...props} />);
 

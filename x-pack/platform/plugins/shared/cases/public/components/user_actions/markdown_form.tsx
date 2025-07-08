@@ -15,8 +15,8 @@ interface UserActionMarkdownProps {
   id: string;
   caseId: string;
   isEditable: boolean;
-  onChangeEditable: (id: string) => void;
-  onSaveContent: (content: string) => void;
+  onChangeEditable?: (id: string) => void;
+  onSaveContent?: (content: string) => void;
 }
 
 export interface UserActionMarkdownRefObject {

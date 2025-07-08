@@ -14,6 +14,7 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
 import type {
+  AssistantCommentAttachmentPayload,
   CustomFieldsConfiguration,
   TemplatesConfiguration,
   UserCommentAttachmentPayload,
@@ -287,7 +288,7 @@ export class CasesConnectorExecutor {
 
     const oracleMap = new Map<string, GroupedAlertsWithOracleKey>();
 
-    for (const { grouping, alerts, comments, title } of groupedAlerts) {
+    for (const { grouping, alerts, comments, assistantComments, title } of groupedAlerts) {
       const getRecordIdParams = {
         ruleId: rule.id,
         grouping,
@@ -307,7 +308,7 @@ export class CasesConnectorExecutor {
         );
       }
 
-      oracleMap.set(oracleKey, { oracleKey, grouping, alerts, comments, title });
+      oracleMap.set(oracleKey, { oracleKey, grouping, alerts, comments, assistantComments, title });
     }
 
     if (this.logger.isLevelEnabled('debug')) {
@@ -618,6 +619,7 @@ export class CasesConnectorExecutor {
         alerts: entry.alerts,
         grouping: entry.grouping,
         comments: entry.comments,
+        assistantComments: entry.assistantComments,
         title: entry.title,
         oracleKey: recordId,
         oracleRecord: entry.oracleRecord,
@@ -1142,10 +1144,16 @@ export class CasesConnectorExecutor {
     );
 
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
-      ({ theCase, alerts, comments }) => {
+      ({ theCase, alerts, comments, assistantComments }) => {
         const extraComments: UserCommentAttachmentPayload[] =
           comments?.map((comment) => ({
             type: AttachmentType.user,
+            comment,
+            owner: theCase.owner,
+          })) ?? [];
+        const extraAssistantComments: AssistantCommentAttachmentPayload[] =
+          assistantComments?.map((comment) => ({
+            type: AttachmentType.assistant,
             comment,
             owner: theCase.owner,
           })) ?? [];
@@ -1153,6 +1161,7 @@ export class CasesConnectorExecutor {
           caseId: theCase.id,
           attachments: [
             ...extraComments,
+            ...extraAssistantComments,
             {
               type: AttachmentType.alert,
               rule: internallyManagedAlerts
