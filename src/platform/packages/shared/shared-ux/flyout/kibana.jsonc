@@ -1,9 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/shared-ux-flyout",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}

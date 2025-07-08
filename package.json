@@ -945,7 +945,6 @@
     "@kbn/shared-ux-file-types": "link:src/platform/packages/shared/shared-ux/file/types",
     "@kbn/shared-ux-file-upload": "link:src/platform/packages/shared/shared-ux/file/file_upload/impl",
     "@kbn/shared-ux-file-util": "link:src/platform/packages/shared/shared-ux/file/util",
-    "@kbn/shared-ux-flyout": "link:src/platform/packages/shared/shared-ux/flyout",
     "@kbn/shared-ux-link-redirect-app": "link:src/platform/packages/shared/shared-ux/link/redirect_app/impl",
     "@kbn/shared-ux-link-redirect-app-types": "link:src/platform/packages/shared/shared-ux/link/redirect_app/types",
     "@kbn/shared-ux-markdown": "link:src/platform/packages/shared/shared-ux/markdown/impl",
