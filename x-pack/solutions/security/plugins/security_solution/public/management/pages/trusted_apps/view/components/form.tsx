@@ -750,20 +750,24 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="warningFilled" size="s" color="warning" />
-          </EuiFlexItem>
-          <EuiFlexItem>
+        {isTAAdvancedModeFeatureFlagEnabled && isFormAdvancedMode && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="warningFilled" size="s" color="warning" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s" color="warning">
+                  {USING_ADVANCED_MODE}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiText size="s" color="warning">
-              {USING_ADVANCED_MODE}
+              {USING_ADVANCED_MODE_DESCRIPTION}
             </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiText size="s" color="warning">
-          {USING_ADVANCED_MODE_DESCRIPTION}
-        </EuiText>
+          </>
+        )}
         <EuiSpacer size="m" />
         <EuiFormRow
           label={SELECT_OS_LABEL}
@@ -789,7 +793,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           error={validationResult.result.entries?.errors}
           helpText={validationResult.result.entries?.warnings}
         >
-          {isTAAdvancedModeFeatureFlagEnabled && !isFormAdvancedMode ? (
+          {isTAAdvancedModeFeatureFlagEnabled && isFormAdvancedMode ? (
+            <>
+              {exceptionBuilderComponentMemo}
+              {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+              {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+            </>
+          ) : (
             <LogicalConditionBuilder
               entries={trustedApp.entries as NewTrustedApp['entries']}
               os={selectedOs}
@@ -799,11 +809,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
               onVisited={handleConditionBuilderOnVisited}
               data-test-subj={getTestId('conditionsBuilder')}
             />
-          ) : (<>
-            {exceptionBuilderComponentMemo}
-            {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
-            {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
-          </>
           )}
         </EuiFormRow>
         {showAssignmentSection ? (
