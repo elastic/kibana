@@ -52,10 +52,8 @@ export async function createInternalESClient({
     operationName: string,
     {
       makeRequestWithSignal,
-      requestType,
       params,
     }: {
-      requestType: string;
       makeRequestWithSignal: (signal: AbortSignal) => Promise<T>;
       params: Record<string, any>;
     }
@@ -81,7 +79,6 @@ export async function createInternalESClient({
       params: TSearchRequest
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       return callEs(operationName, {
-        requestType: 'search',
         makeRequestWithSignal: (signal) =>
           elasticsearchClient.search(params, {
             signal,
@@ -95,7 +92,6 @@ export async function createInternalESClient({
     },
     index: <T>(operationName: string, params: APMIndexDocumentParams<T>) => {
       return callEs(operationName, {
-        requestType: 'index',
         makeRequestWithSignal: (signal) =>
           elasticsearchClient.index(params, {
             signal,
@@ -109,7 +105,6 @@ export async function createInternalESClient({
     },
     delete: (operationName: string, params: estypes.DeleteRequest): Promise<{ result: string }> => {
       return callEs(operationName, {
-        requestType: 'delete',
         makeRequestWithSignal: (signal) =>
           elasticsearchClient.delete(params, {
             signal,
@@ -123,7 +118,6 @@ export async function createInternalESClient({
     },
     indicesCreate: (operationName: string, params: estypes.IndicesCreateRequest) => {
       return callEs(operationName, {
-        requestType: 'indices.create',
         makeRequestWithSignal: (signal) =>
           elasticsearchClient.indices.create(params, {
             signal,
