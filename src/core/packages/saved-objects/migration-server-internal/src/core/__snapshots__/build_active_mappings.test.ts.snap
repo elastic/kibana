@@ -14,7 +14,6 @@ Object {
           "type": "keyword",
         },
       },
-      "type": "object",
     },
     "bbb": Object {
       "type": "long",
@@ -81,7 +80,6 @@ Object {
           "type": "keyword",
         },
       },
-      "type": "object",
     },
     "coreMigrationVersion": Object {
       "type": "keyword",
