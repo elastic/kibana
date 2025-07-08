@@ -50,7 +50,7 @@ export const useChat = ({ conversationId, agentId, connectorId, onError }: UseCh
       setStatus('loading');
 
       const events$ = chatService.chat({
-        nextMessage,
+        input: nextMessage,
         conversationId,
         agentId,
         connectorId,
@@ -60,28 +60,30 @@ export const useChat = ({ conversationId, agentId, connectorId, onError }: UseCh
         next: (event) => {
           // chunk received, we append it to the chunk buffer
           if (isMessageChunkEvent(event)) {
-            actions.addAssistantMessageChunk({ messageChunk: event.data.textChunk });
+            actions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
           }
 
           // full message received - we purge the chunk buffer
           // and insert the received message into the temporary list
           else if (isMessageCompleteEvent(event)) {
-            actions.setAssistantMessage({ assistantMessage: event.data.messageContent });
+            actions.setAssistantMessage({ assistantMessage: event.data.message_content });
           } else if (isToolCallEvent(event)) {
-            const { toolCallId, toolId, args } = event.data;
             actions.addToolCall({
               step: createToolCallStep({
-                args,
+                params: event.data.params,
                 result: '',
-                toolCallId,
-                toolId,
+                tool_call_id: event.data.tool_call_id,
+                tool_id: event.data.tool_id,
+                tool_type: event.data.tool_type,
               }),
             });
           } else if (isToolResultEvent(event)) {
-            const { toolCallId, result } = event.data;
-            actions.setToolCallResult({ result, toolCallId });
+            actions.setToolCallResult({
+              result: event.data.result,
+              toolCallId: event.data.tool_call_id,
+            });
           } else if (isConversationCreatedEvent(event) || isConversationUpdatedEvent(event)) {
-            const { conversationId: id, title } = event.data;
+            const { conversation_id: id, title } = event.data;
             actions.onConversationUpdate({ conversationId: id, title });
           }
         },
