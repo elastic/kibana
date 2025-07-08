@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import moment from 'moment';
 import { Logger } from '@kbn/core/server';
+import { highlightPatternFromRegex, ShortIdTable } from '@kbn/genai-utils-common';
+import {
+  analyzeDocuments,
+  getLogPatterns,
+  sortAndTruncateAnalyzedFields,
+} from '@kbn/genai-utils-server';
+import type { InferenceClient } from '@kbn/inference-common';
+import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import dedent from 'dedent';
+import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
-import type { InferenceClient } from '@kbn/inference-common';
-import {
-  sortAndTruncateAnalyzedFields,
-  getLogPatterns,
-  analyzeDocuments,
-} from '@kbn/genai-utils-server';
-import { highlightPatternFromRegex, ShortIdTable } from '@kbn/genai-utils-common';
-import { KQL_GUIDE } from './kql_guide';
 import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
+import { KQL_GUIDE } from './kql_guide';
 
 const LOOKBACK_DAYS = 7;
 
@@ -104,7 +105,7 @@ export async function generateSignificantEventDefinitions({
 
   const short = sortAndTruncateAnalyzedFields(analysis);
 
-  const instruction = `I want to generate KQL queries that help me find
+  const instruction = dedent(`I want to generate KQL queries that help me find
     important log messages. Each pattern should have its own
     query. I will use these queries to help me see changes in
     these patterns. Only generate queries for patterns that
@@ -118,13 +119,13 @@ export async function generateSignificantEventDefinitions({
     - \`message: "CircuitBreakingException"\`
     - \`message: "max number of clients reached"\`
     - \`message: "Unable to connect * Connection refused"\`
-    `;
+    `);
 
   const chunks = [
     instruction,
     KQL_GUIDE,
     logPatterns
-      ? `## Log patterns
+      ? dedent(`## Log patterns
     
     The following log patterns where found over the last
     ${LOOKBACK_DAYS} days. The field used is \`${categorizationField}\`:
@@ -137,11 +138,11 @@ export async function generateSignificantEventDefinitions({
           count,
         };
       })
-    )}`
+    )}`)
       : '',
-    `## Dataset analysis
+    dedent(`## Dataset analysis
     
-    ${JSON.stringify(short)}`,
+    ${JSON.stringify(short)}`),
   ];
 
   logger.debug(() => {
