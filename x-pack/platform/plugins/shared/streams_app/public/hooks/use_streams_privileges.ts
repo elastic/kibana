@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
 import {
   OBSERVABILITY_ENABLE_STREAMS_UI,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
 } from '@kbn/management-settings-ids';
+import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
+import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
 
 export interface StreamsFeatures {
@@ -34,6 +35,7 @@ export interface StreamsPrivileges {
 export function useStreamsPrivileges(): StreamsPrivileges {
   const {
     core: {
+      pricing,
       application: {
         capabilities: { streams },
       },
@@ -49,7 +51,12 @@ export function useStreamsPrivileges(): StreamsPrivileges {
   const uiEnabled = uiSettings.get<boolean>(OBSERVABILITY_ENABLE_STREAMS_UI);
 
   const significantEventsEnabled = uiSettings.get<boolean>(
-    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS
+    OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+    false // Default to false if the setting is not defined or not available
+  );
+
+  const significantEventsAvailableForTier = pricing.isFeatureAvailable(
+    STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
   );
 
   return {
@@ -63,7 +70,10 @@ export function useStreamsPrivileges(): StreamsPrivileges {
       },
       significantEvents: license && {
         enabled: significantEventsEnabled,
-        available: significantEventsEnabled && license.hasAtLeast('enterprise'),
+        available:
+          significantEventsEnabled &&
+          license.hasAtLeast('enterprise') &&
+          significantEventsAvailableForTier,
       },
     },
   };
