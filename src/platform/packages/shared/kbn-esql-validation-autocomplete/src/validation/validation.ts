@@ -11,10 +11,8 @@ import {
   ESQLAst,
   ESQLColumn,
   ESQLCommand,
-  ESQLCommandOption,
   ESQLMessage,
   ESQLSource,
-  isIdentifier,
   parse,
   walk,
   esqlCommandRegistry,
@@ -30,16 +28,10 @@ import {
   areFieldAndUserDefinedColumnTypesCompatible,
   getColumnExists,
   hasWildcard,
-  isColumnItem,
-  isFunctionItem,
-  isOptionItem,
   isParametrized,
-  isSourceItem,
-  isTimeIntervalItem,
 } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
-import { validateFunction } from './function_validation';
 import {
   retrieveFields,
   retrieveFieldsFromStringSources,
@@ -175,8 +167,8 @@ async function validateAst(
     query: queryString,
     joinIndices: joinIndices?.indices || [],
   };
-  for (const [index, command] of ast.entries()) {
-    const commandMessages = validateCommand(command, references, ast, index);
+  for (const [_, command] of ast.entries()) {
+    const commandMessages = validateCommand(command, references, ast);
     messages.push(...commandMessages);
   }
 
@@ -196,8 +188,7 @@ async function validateAst(
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
-  ast: ESQLAst,
-  currentCommandIndex: number
+  ast: ESQLAst
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
@@ -214,7 +205,9 @@ function validateCommand(
     fields: references.fields,
     policies: references.policies,
     userDefinedColumns: references.userDefinedColumns,
-    sources: references.sources,
+    sources: [...references.sources].map((source) => ({
+      name: source,
+    })),
     joinSources: references.joinIndices,
   };
 
@@ -222,90 +215,8 @@ function validateCommand(
     messages.push(...commandDefinition.methods.validate(command, ast, context));
   }
 
-  switch (commandDefinition.name) {
-    default: {
-      // Now validate arguments
-      for (const arg of command.args) {
-        if (!Array.isArray(arg)) {
-          if (isFunctionItem(arg)) {
-            messages.push(
-              ...validateFunction({
-                fn: arg,
-                parentCommand: command.name,
-                parentOption: undefined,
-                references,
-                parentAst: ast,
-                currentCommandIndex,
-              })
-            );
-          } else if (isOptionItem(arg)) {
-            messages.push(...validateOption(arg, command, references));
-          } else if (isColumnItem(arg) || isIdentifier(arg)) {
-            if (command.name === 'stats' || command.name === 'inlinestats') {
-              messages.push(errors.unknownAggFunction(arg));
-            } else {
-              messages.push(...validateColumnForCommand(arg, command.name, references));
-            }
-          } else if (isTimeIntervalItem(arg)) {
-            messages.push(
-              getMessageFromId({
-                messageId: 'unsupportedTypeForCommand',
-                values: {
-                  command: command.name.toUpperCase(),
-                  type: 'date_period',
-                  value: arg.name,
-                },
-                locations: arg.location,
-              })
-            );
-          }
-        }
-      }
-
-      const sources = command.args.filter((arg) => isSourceItem(arg)) as ESQLSource[];
-      messages.push(...validateSources(sources, references));
-    }
-  }
-
   // no need to check for mandatory options passed
   // as they are already validated at syntax level
-  return messages;
-}
-
-function validateOption(
-  option: ESQLCommandOption,
-  command: ESQLCommand,
-  referenceMaps: ReferenceMaps
-): ESQLMessage[] {
-  // check if the arguments of the option are of the correct type
-  const messages: ESQLMessage[] = [];
-  if (option.incomplete || command.incomplete || option.name === 'metadata') {
-    return messages;
-  }
-
-  if (option.name === 'metadata') {
-    // Validation for the metadata statement is handled in the FROM command's validate method
-    return messages;
-  }
-
-  for (const arg of option.args) {
-    if (Array.isArray(arg)) {
-      continue;
-    }
-    if (isColumnItem(arg)) {
-      messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
-    } else if (isFunctionItem(arg)) {
-      messages.push(
-        ...validateFunction({
-          fn: arg,
-          parentCommand: command.name,
-          parentOption: option.name,
-          references: referenceMaps,
-        })
-      );
-    }
-  }
-
   return messages;
 }
 

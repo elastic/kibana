@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand, ESQLMessage, ESQLFunction } from '../../../types';
+import type { ESQLCommand, ESQLMessage, ESQLFunction, ESQLAst } from '../../../types';
 import { isFunctionExpression, isWhereExpression } from '../../../ast/is';
 import { isAssignment, checkAggExistence, checkFunctionContent } from './utils';
+import { validateCommandArguments } from '../../../definitions/utils/validation/validate_command_arguments';
+import { ICommandContext } from '../../types';
 
-export const validate = (command: ESQLCommand): ESQLMessage[] => {
+export const validate = (
+  command: ESQLCommand,
+  ast: ESQLAst,
+  context?: ICommandContext
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const commandName = command.name.toUpperCase();
   if (!command.args.length) {
@@ -87,6 +93,17 @@ export const validate = (command: ESQLCommand): ESQLMessage[] => {
       }
     }
   }
+
+  messages.push(
+    ...validateCommandArguments(
+      command,
+      ast,
+      context ?? {
+        userDefinedColumns: new Map(), // Ensure context is always defined
+        fields: new Map(),
+      }
+    )
+  );
 
   return messages;
 };

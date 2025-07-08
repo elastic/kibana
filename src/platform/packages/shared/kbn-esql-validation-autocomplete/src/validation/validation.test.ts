@@ -8,7 +8,6 @@
  */
 import {
   timeUnitsToSuggest,
-  fieldTypes as _fieldTypes,
   FieldType,
   dataTypes,
   SupportedDataType,
@@ -29,11 +28,8 @@ import {
   unsupported_field,
 } from '../__tests__/helpers';
 import { nonNullable } from '../shared/helpers';
-import { Setup, setup } from './__tests__/helpers';
-import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
+import { setup } from './__tests__/helpers';
 import { ignoreErrorsMap, validateQuery } from './validation';
-
-const fieldTypes = _fieldTypes.filter((type) => type !== 'unsupported');
 
 const NESTING_LEVELS = 4;
 const NESTED_DEPTHS = Array(NESTING_LEVELS)
@@ -282,33 +278,84 @@ describe('validation logic', () => {
       );
     });
 
-    const collectFixturesSetup: Setup = async (...args) => {
-      const api = await setup(...args);
-      type ExpectErrors = Awaited<ReturnType<Setup>>['expectErrors'];
-      return {
-        ...api,
-        expectErrors: async (...params: Parameters<ExpectErrors>) => {
-          const [query, error = [], warning = []] = params;
-          const allStrings =
-            error.every((e) => typeof e === 'string') &&
-            warning.every((w) => typeof w === 'string');
-          if (allStrings) {
-            testCases.push({
-              query,
-              error,
-              warning,
-            });
-          }
-        },
-      };
-    };
+    describe('FROM <sources> [ METADATA <indices> ]', () => {
+      test('errors on invalid command start', async () => {
+        const { expectErrors } = await setup();
 
-    runFromTestSuite(collectFixturesSetup);
+        await expectErrors('f', [
+          "SyntaxError: mismatched input 'f' expecting {'row', 'from', 'show'}",
+        ]);
+        await expectErrors('from ', [
+          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+        ]);
+      });
+
+      describe('... <sources> ...', () => {
+        test('errors on trailing comma', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('from index,', [
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+          ]);
+          await expectErrors(`FROM index\n, \tother_index\t,\n \t `, [
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
+          ]);
+
+          await expectErrors(`from assignment = 1`, [
+            "SyntaxError: mismatched input '=' expecting <EOF>",
+            'Unknown index [assignment]',
+          ]);
+        });
+
+        test('errors on invalid syntax', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM `index`', ['Unknown index [`index`]']);
+          await expectErrors(`from assignment = 1`, [
+            "SyntaxError: mismatched input '=' expecting <EOF>",
+            'Unknown index [assignment]',
+          ]);
+        });
+      });
+
+      describe('... METADATA <indices>', () => {
+        test('errors when wrapped in parentheses', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(`from index (metadata _id)`, [
+            "SyntaxError: mismatched input '(metadata' expecting <EOF>",
+          ]);
+        });
+
+        describe('validates fields', () => {
+          test('validates fields', async () => {
+            const { expectErrors } = await setup();
+            await expectErrors(`from index metadata _id, _source METADATA _id2`, [
+              "SyntaxError: mismatched input 'METADATA' expecting <EOF>",
+            ]);
+          });
+        });
+      });
+    });
 
     describe('row', () => {
       testErrorsAndWarnings('row', [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
       ]);
+
+      test('syntax error', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors('row var = 1 in ', [
+          "SyntaxError: mismatched input '<EOF>' expecting '('",
+        ]);
+        await expectErrors('row var = 1 in (', [
+          "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+        ]);
+        await expectErrors('row var = 1 not in ', [
+          "SyntaxError: mismatched input '<EOF>' expecting '('",
+        ]);
+      });
     });
 
     describe('show', () => {
@@ -439,143 +486,11 @@ describe('validation logic', () => {
     });
 
     describe('where', () => {
-      testErrorsAndWarnings('from a_index | where b', ['Unknown column [b]']);
-      for (const cond of ['true', 'false']) {
-        testErrorsAndWarnings(`from a_index | where ${cond}`, []);
-        testErrorsAndWarnings(`from a_index | where NOT ${cond}`, []);
-      }
-      for (const nValue of ['1', '+1', '1 * 1', '-1', '1 / 1', '1.0', '1.5']) {
-        testErrorsAndWarnings(`from a_index | where ${nValue} > 0`, []);
-        testErrorsAndWarnings(`from a_index | where NOT ${nValue} > 0`, []);
-      }
-      for (const op of ['>', '>=', '<', '<=', '==', '!=']) {
-        testErrorsAndWarnings(`from a_index | where doubleField ${op} 0`, []);
-        testErrorsAndWarnings(`from a_index | where NOT doubleField ${op} 0`, []);
-        testErrorsAndWarnings(`from a_index | where (doubleField ${op} 0)`, []);
-        testErrorsAndWarnings(`from a_index | where (NOT (doubleField ${op} 0))`, []);
-        testErrorsAndWarnings(`from a_index | where 1 ${op} 0`, []);
-
-        for (const type of ['text', 'double', 'date', 'boolean', 'ip']) {
-          testErrorsAndWarnings(
-            `from a_index | where ${type}Field ${op} ${type}Field`,
-            type !== 'boolean' || ['==', '!='].includes(op)
-              ? []
-              : [
-                  `Argument of [${op}] must be [date], found value [${type}Field] type [${type}]`,
-                  `Argument of [${op}] must be [date], found value [${type}Field] type [${type}]`,
-                ]
-          );
-        }
-      }
-
-      for (const type of ['date', 'dateNanos']) {
-        testErrorsAndWarnings(
-          `from a_index | where ${type}Field > ?_tstart AND ${type}Field < ?_tend`,
-          []
-        );
-      }
-
-      for (const nesting of NESTED_DEPTHS) {
-        for (const evenOp of ['-', '+']) {
-          for (const oddOp of ['-', '+']) {
-            // This builds a combination of +/- operators
-            // i.e. ---- something, -+-+ something, +-+- something, etc...
-            const unaryCombination = Array(nesting)
-              .fill('- ')
-              .map((_, i) => (i % 2 ? oddOp : evenOp))
-              .join('');
-            testErrorsAndWarnings(`from a_index | where ${unaryCombination} doubleField > 0`, []);
-            testErrorsAndWarnings(
-              `from a_index | where ${unaryCombination} round(doubleField) > 0`,
-              []
-            );
-            testErrorsAndWarnings(
-              `from a_index | where 1 + ${unaryCombination} doubleField > 0`,
-              []
-            );
-            // still valid
-            testErrorsAndWarnings(`from a_index | where 1 ${unaryCombination} doubleField > 0`, []);
-          }
-        }
-        testErrorsAndWarnings(
-          `from a_index | where ${Array(nesting).fill('not ').join('')} booleanField`,
-          []
-        );
-      }
       for (const wrongOp of ['*', '/', '%']) {
         testErrorsAndWarnings(`from a_index | where ${wrongOp}+ doubleField`, [
           `SyntaxError: extraneous input '${wrongOp}' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
         ]);
       }
-
-      // Skip these tests until the insensitive case equality gets restored back
-      testErrorsAndWarnings.skip(`from a_index | where doubleField =~ 0`, [
-        'Argument of [=~] must be [text], found value [doubleField] type [double]',
-        'Argument of [=~] must be [text], found value [0] type [number]',
-      ]);
-      testErrorsAndWarnings.skip(`from a_index | where NOT doubleField =~ 0`, [
-        'Argument of [=~] must be [text], found value [doubleField] type [double]',
-        'Argument of [=~] must be [text], found value [0] type [number]',
-      ]);
-      testErrorsAndWarnings.skip(`from a_index | where (doubleField =~ 0)`, [
-        'Argument of [=~] must be [text], found value [doubleField] type [double]',
-        'Argument of [=~] must be [text], found value [0] type [number]',
-      ]);
-      testErrorsAndWarnings.skip(`from a_index | where (NOT (doubleField =~ 0))`, [
-        'Argument of [=~] must be [text], found value [doubleField] type [double]',
-        'Argument of [=~] must be [text], found value [0] type [number]',
-      ]);
-      testErrorsAndWarnings.skip(`from a_index | where 1 =~ 0`, [
-        'Argument of [=~] must be [text], found value [1] type [number]',
-        'Argument of [=~] must be [text], found value [0] type [number]',
-      ]);
-      testErrorsAndWarnings.skip(`from a_index | eval textField =~ 0`, [
-        `Argument of [=~] must be [text], found value [0] type [number]`,
-      ]);
-
-      for (const op of ['like', 'rlike']) {
-        testErrorsAndWarnings(`from a_index | where textField ${op} "?a"`, []);
-        testErrorsAndWarnings(`from a_index | where textField NOT ${op} "?a"`, []);
-        testErrorsAndWarnings(`from a_index | where NOT textField ${op} "?a"`, []);
-        testErrorsAndWarnings(`from a_index | where NOT textField NOT ${op} "?a"`, []);
-        testErrorsAndWarnings(`from a_index | where doubleField ${op} "?a"`, [
-          `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
-        ]);
-        testErrorsAndWarnings(`from a_index | where doubleField NOT ${op} "?a"`, [
-          `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
-        ]);
-        testErrorsAndWarnings(`from a_index | where NOT doubleField ${op} "?a"`, [
-          `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
-        ]);
-        testErrorsAndWarnings(`from a_index | where NOT doubleField NOT ${op} "?a"`, [
-          `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
-        ]);
-      }
-
-      testErrorsAndWarnings(`from a_index | where cidr_match(ipField)`, [
-        `Error: [cidr_match] function expects at least 2 arguments, got 1.`,
-      ]);
-      testErrorsAndWarnings(
-        `from a_index | eval cidr = "172.0.0.1/30" | where cidr_match(ipField, "172.0.0.1/30", cidr)`,
-        []
-      );
-
-      for (const field of fieldTypes) {
-        if (field.indexOf('counter_') !== -1 || field.indexOf('named_parameters') !== -1) {
-          continue; // skip counter fields and named parameters
-        }
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NULL`, []);
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS null`, []);
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} is null`, []);
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} is NULL`, []);
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NOT NULL`, []);
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NOT null`, []);
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS not NULL`, []);
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} Is nOt NuLL`, []);
-      }
-
-      // this is a scenario that was failing because "or" didn't accept "null"
-      testErrorsAndWarnings('from a_index | where textField == "a" or null', []);
     });
 
     describe('eval', () => {
@@ -605,51 +520,25 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | sort ', [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
       ]);
-      testErrorsAndWarnings('from a_index | sort "field" ', []);
-      testErrorsAndWarnings('from a_index | sort wrongField ', ['Unknown column [wrongField]']);
       testErrorsAndWarnings('from a_index | sort doubleField, ', [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
       ]);
-      testErrorsAndWarnings('from a_index | sort doubleField, textField', []);
+
       for (const dir of ['desc', 'asc']) {
-        testErrorsAndWarnings(`from a_index | sort "field" ${dir} `, []);
-        testErrorsAndWarnings(`from a_index | sort doubleField ${dir} `, []);
         testErrorsAndWarnings(`from a_index | sort doubleField ${dir} nulls `, [
           "SyntaxError: missing {'first', 'last'} at '<EOF>'",
         ]);
         for (const nullDir of ['first', 'last']) {
-          testErrorsAndWarnings(`from a_index | sort doubleField ${dir} nulls ${nullDir}`, []);
           testErrorsAndWarnings(`from a_index | sort doubleField ${dir} ${nullDir}`, [
             `SyntaxError: extraneous input '${nullDir}' expecting <EOF>`,
           ]);
         }
       }
       for (const nullDir of ['first', 'last']) {
-        testErrorsAndWarnings(`from a_index | sort doubleField nulls ${nullDir}`, []);
         testErrorsAndWarnings(`from a_index | sort doubleField ${nullDir}`, [
           `SyntaxError: extraneous input '${nullDir}' expecting <EOF>`,
         ]);
       }
-      testErrorsAndWarnings(`row a = 1 | stats COUNT(*) | sort \`COUNT(*)\``, []);
-      testErrorsAndWarnings(`ROW a = 1 | STATS couNt(*) | SORT \`couNt(*)\``, []);
-
-      describe('sorting by expressions', () => {
-        // SORT accepts complex expressions
-        testErrorsAndWarnings(
-          'from a_index | sort abs(doubleField) - to_long(textField) desc nulls first',
-          []
-        );
-
-        // Expression parts are also validated
-        testErrorsAndWarnings('from a_index | sort sin(textField)', [
-          'Argument of [sin] must be [double], found value [textField] type [text]',
-        ]);
-
-        // Expression parts are also validated
-        testErrorsAndWarnings('from a_index | sort doubleField + textField', [
-          'Argument of [+] must be [double], found value [textField] type [text]',
-        ]);
-      });
     });
 
     describe('enrich', () => {

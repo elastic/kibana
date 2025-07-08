@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand } from '../../../types';
-import { pipeCompleteItem, commaCompleteItem } from '../../../definitions/utils/validation/complete_items';
+import {
+  pipeCompleteItem,
+  commaCompleteItem,
+} from '../../../definitions/utils/validation/complete_items';
 import { specialIndicesToSuggestions } from '../../../definitions/utils/sources';
 import {
   getSourcesFromCommands,
