@@ -23,6 +23,7 @@ export type EntityDescription = PickPartial<
   | 'indexMappings'
   | 'settings'
   | 'pipeline'
-  | 'dynamic',
+  | 'dynamic'
+  | 'identityFieldMapping',
   'indexPatterns' | 'indexMappings' | 'settings' | 'dynamic'
 >;
