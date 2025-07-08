@@ -14,14 +14,13 @@ import {
 import { Link } from 'react-router-dom';
 import { Chart, BarSeries, ScaleType, Settings } from '@elastic/charts';
 import { useWorkflows } from '../../../entities/workflows/model/useWorkflows';
-import { WorkflowListItemDto } from '../../../../common/workflows/models/types';
-import { WorkflowExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, WorkflowListItemModel } from '@kbn/workflows';
 
 export function WorkflowList() {
   const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows();
   const { euiTheme } = useEuiTheme();
 
-  const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
+  const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemModel>>>(
     () => [
       {
         field: 'name',
@@ -72,20 +71,20 @@ export function WorkflowList() {
         name: 'Run history',
         field: 'runHistory',
         render: (value, item) => {
-          if (!item.runHistory.length) {
+          if (!item.history.length) {
             return (
               <EuiText size="s" color="subdued">
                 No runs
               </EuiText>
             );
           }
-          const data = item.runHistory.map((run) => ({
+          const data = item.history.map((run) => ({
             x: new Date(run.startedAt).getTime(),
             y: run.duration,
             color:
-              run.status === WorkflowExecutionStatus.SUCCESS
+              run.status === ExecutionStatus.SUCCESS
                 ? euiTheme.colors.vis.euiColorVis0
-                : run.status === WorkflowExecutionStatus.FAILED
+                : run.status === ExecutionStatus.FAILED
                 ? euiTheme.colors.vis.euiColorVis6
                 : euiTheme.colors.vis.euiColorVis1,
           }));

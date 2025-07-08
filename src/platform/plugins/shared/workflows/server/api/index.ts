@@ -1,40 +1,64 @@
-import { WorkflowExecutionStatus } from '@kbn/workflows';
-import { WorkflowDetailDto, WorkflowListDto } from '../../common/workflows/models/types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
 
-const mockWorkflow: WorkflowDetailDto = {
-  id: '1',
+import { ExecutionStatus, WorkflowListModel, WorkflowModel, WorkflowStatus } from '@kbn/workflows';
+
+export const mockWorkflow: WorkflowModel = {
+  id: 'workflow-1',
   name: 'JAMF Enrollment Reminder',
   description: 'Check if the user has enrolled in JAMF, reminds in Slack if not every 7 days.',
   triggers: [
     {
+      id: 'trigger1',
       type: 'schedule',
-      id: '1',
+      enabled: true,
     },
   ],
   tags: ['InfoSec', 'Slack'],
-  enabled: true,
-  runHistory: Array.from({ length: 14 }, (_, i) => ({
+  status: WorkflowStatus.ACTIVE,
+
+  createdAt: '2025-06-01T12:00:00.000Z',
+  createdBy: 'John Doe',
+
+  lastUpdatedAt: '2025-06-01T09:20:00.000Z',
+  lastUpdatedBy: 'John Doe',
+
+  history: Array.from({ length: 14 }, (_, i) => ({
     id: i.toString(),
     status:
       i === 13
-        ? WorkflowExecutionStatus.RUNNING
+        ? ExecutionStatus.RUNNING
         : i % 5 === 0
-        ? WorkflowExecutionStatus.FAILED
-        : WorkflowExecutionStatus.SUCCESS,
+        ? ExecutionStatus.FAILED
+        : ExecutionStatus.SUCCESS,
     startedAt: new Date(2025, 0, 1, 12, 0, 0 + i, 0).toISOString(),
     finishedAt: new Date(2025, 0, 1, 12, 0, 1 + i, 0).toISOString(),
-    duration: i % 2 === 0 ? 5 : i % 3 === 1 ? 2 : 1,
+    duration: i % 2 === 0 ? 10 : null,
   })),
-  definition: {
-    steps: [],
-  },
-  createdBy: {
-    id: '1',
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-  },
-  createdAt: '2025-06-01T12:00:00.000Z',
-  updatedAt: '2025-06-01T09:20:00.000Z',
+
+  executions: [
+    {
+      id: '27701bca-1df2-43f4-a2b1-798cfd298a9e',
+      finishedAt: '2025-07-08T10:00:10Z',
+      startedAt: '2025-07-08T10:00:00Z',
+      status: ExecutionStatus.SUCCESS,
+      logs: [
+        {
+          timestamp: '2025-07-08T10:00:01Z',
+          level: 'INFO',
+          message: 'Test log',
+        },
+      ],
+    },
+  ],
+  yaml: '',
+  definition: [],
 };
 
 export interface GetWorkflowsParams {
@@ -43,27 +67,31 @@ export interface GetWorkflowsParams {
 }
 
 export const WorkflowsManagementApi = {
-  getWorkflows: async (params: GetWorkflowsParams): Promise<WorkflowListDto> => {
+  getWorkflows: async (params: GetWorkflowsParams): Promise<WorkflowListModel> => {
     return Promise.resolve({
       results: [
         {
           id: mockWorkflow.id,
           name: mockWorkflow.name,
           description: mockWorkflow.description,
+          status: mockWorkflow.status,
           triggers: mockWorkflow.triggers,
           tags: mockWorkflow.tags,
-          enabled: mockWorkflow.enabled,
-          runHistory: mockWorkflow.runHistory,
+          history: mockWorkflow.history,
+          createdAt: mockWorkflow.createdAt,
+          createdBy: mockWorkflow.createdBy,
+          lastUpdatedAt: mockWorkflow.lastUpdatedAt,
+          lastUpdatedBy: mockWorkflow.lastUpdatedBy,
         },
       ],
       _pagination: {
-        limit: 10,
-        offset: 0,
+        limit: params.limit,
+        offset: params.offset,
         total: 1,
       },
     });
   },
-  getWorkflow: async (id: string): Promise<WorkflowDetailDto> => {
+  getWorkflow: async (id: string): Promise<WorkflowModel> => {
     return Promise.resolve(mockWorkflow);
   },
 };
