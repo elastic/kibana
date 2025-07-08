@@ -21,7 +21,6 @@ import { GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useMemo } from 'react';
 import { getPercentageFormatter } from '../../../util/formatters';
 import { useKibana } from '../../../hooks/use_kibana';
 import { PreviewTable } from '../preview_table';
