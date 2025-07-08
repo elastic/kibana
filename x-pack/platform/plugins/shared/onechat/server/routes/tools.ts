@@ -11,7 +11,6 @@ import { getHandlerWrapper } from './wrap_handler';
 import { toolToDescriptor } from '../services/tools/utils/tool_conversion';
 import type { ListToolsResponse } from '../../common/http_api/tools';
 import { apiPrivileges } from '../../common/features';
-import { ONECHAT_TOOLS_UI_SETTING_ID } from '../../common/constants';
 
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -64,12 +63,6 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_TOOLS_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
         const { id, params } = request.body;
         const { tools: toolService } = getInternalServices();
         const registry = toolService.registry.asScopedPublicRegistry({ request });
