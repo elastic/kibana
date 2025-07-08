@@ -1,0 +1,15 @@
+{
+  "streams.logs_enable": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_streams/logs/_enable"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/streams-logs-enable.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

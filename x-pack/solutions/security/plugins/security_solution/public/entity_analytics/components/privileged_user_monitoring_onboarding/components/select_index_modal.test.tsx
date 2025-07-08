@@ -6,9 +6,18 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { IndexSelectorModal } from './select_index_modal';
 import { TestProviders } from '../../../../common/mock';
+
+const mockUpdatePrivMonMonitoredIndices = jest.fn().mockImplementation(() => Promise.resolve({}));
+const mockRegisterPrivMonMonitoredIndices = jest.fn().mockImplementation(() => Promise.resolve({}));
+jest.mock('../../../api/api', () => ({
+  useEntityAnalyticsRoutes: () => ({
+    updatePrivMonMonitoredIndices: () => mockUpdatePrivMonMonitoredIndices(),
+    registerPrivMonMonitoredIndices: () => mockRegisterPrivMonMonitoredIndices(),
+  }),
+}));
 
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
@@ -89,5 +98,39 @@ describe('IndexSelectorModal', () => {
     });
 
     expect(screen.queryByLabelText('Select index')).toBeInTheDocument();
+  });
+
+  it('pre-selects indices when editDataSource is provided', () => {
+    render(
+      <IndexSelectorModal
+        onClose={onCloseMock}
+        onImport={onImportMock}
+        editDataSource={{ id: '123', indexPattern: 'index1,index2' }}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    // The selected options should be visible in the combo box
+    expect(screen.getByText('index1')).toBeInTheDocument();
+    expect(screen.getByText('index2')).toBeInTheDocument();
+  });
+
+  it('calls updatePrivMonMonitoredIndices and onImport when editing and clicking add', async () => {
+    render(
+      <IndexSelectorModal
+        onClose={onCloseMock}
+        onImport={onImportMock}
+        editDataSource={{ id: 'edit-id', indexPattern: 'index1' }}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    // Add button should be enabled since index1 is preselected
+    fireEvent.click(screen.getByText('Add privileged users'));
+
+    waitFor(() => {
+      expect(mockUpdatePrivMonMonitoredIndices).toHaveBeenCalledWith('edit-id', 'index1');
+      expect(onImportMock).toHaveBeenCalledWith(0);
+    });
   });
 });
