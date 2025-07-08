@@ -31,8 +31,12 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
+  EuiSteps,
+  EuiText,
+  EuiCheckableCard,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/common';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -40,18 +44,30 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 
 import { asyncMap } from '@kbn/std';
+import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
   type ControlWidth,
   type DefaultDataControlState,
+  ControlGroupEditorConfig,
+  ControlInputOption,
+  ControlOutputOption,
+  DEFAULT_CONTROL_INPUT,
+  DEFAULT_CONTROL_OUTPUT,
+  ESQL_COMPATIBLE_CONTROL_TYPES,
 } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
 import type { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditorStrings } from './data_control_constants';
 import { getDataControlFieldRegistry } from './data_control_editor_utils';
-import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
+import {
+  CONTROL_INPUT_OPTIONS,
+  CONTROL_OUTPUT_OPTIONS,
+  CONTROL_WIDTH_OPTIONS,
+  DEFAULT_ESQL_VARIABLE_NAME,
+} from './editor_constants';
 import {
   isDataControlFactory,
   type DataControlFactory,
@@ -79,11 +95,13 @@ const CompatibleControlTypesComponent = ({
   selectedFieldName,
   selectedControlType,
   setSelectedControlType,
+  isESQLOutputMode,
 }: {
   fieldRegistry?: DataControlFieldRegistry;
   selectedFieldName?: string;
   selectedControlType?: string;
   setSelectedControlType: (type: string) => void;
+  isESQLOutputMode: boolean;
 }) => {
   const [dataControlFactories, setDataControlFactories] = useState<
     DataControlFactory[] | undefined
@@ -131,10 +149,11 @@ const CompatibleControlTypesComponent = ({
     >
       <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
         {(dataControlFactories ?? []).map((factory) => {
-          const disabled =
-            fieldRegistry && selectedFieldName
-              ? !fieldRegistry[selectedFieldName]?.compatibleControlTypes.includes(factory.type)
-              : true;
+          const disabled = isESQLOutputMode
+            ? !ESQL_COMPATIBLE_CONTROL_TYPES.includes(factory.type)
+            : fieldRegistry && selectedFieldName
+            ? !fieldRegistry[selectedFieldName]?.compatibleControlTypes.includes(factory.type)
+            : true;
           const keyPadMenuItem = (
             <EuiKeyPadMenuItem
               key={factory.type}
@@ -156,7 +175,8 @@ const CompatibleControlTypesComponent = ({
               content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
                 {
                   fieldSelected: Boolean(selectedFieldName),
-                  controlType: factory.getDisplayName(),
+                  controlType: factory.type,
+                  isESQLOutputMode,
                 }
               )}
             >
@@ -188,6 +208,59 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
   const editorConfig = useMemo(() => controlGroupApi.getEditorConfig(), [controlGroupApi]);
+
+  const isEdit = useMemo(() => !!controlId, [controlId]); // if no ID, then we are creating a new control
+
+  const isDSLInputMode = useMemo(
+    () => (editorState.input ?? DEFAULT_CONTROL_INPUT) === ControlInputOption.DSL,
+    [editorState.input]
+  );
+  const isESQLOutputMode = useMemo(
+    () => editorState.output === ControlOutputOption.ESQL,
+    [editorState.output]
+  );
+
+  const [hasTouchedOutput, setHasTouchedOutput] = useState(isEdit);
+
+  const isESQLVariableEmpty = useMemo(
+    () => !editorState.esqlVariableString || editorState.esqlVariableString === '?',
+    [editorState.esqlVariableString]
+  );
+
+  useEffect(() => {
+    // Set the default control label to either the selected field name or entered ES|QL variable name
+    switch (editorState.output) {
+      case ControlOutputOption.DSL:
+        if (defaultPanelTitle !== (editorState.fieldName ?? '')) {
+          setDefaultPanelTitle(editorState.fieldName ?? '');
+        }
+        break;
+      case ControlOutputOption.ESQL:
+        if (defaultPanelTitle !== (editorState.esqlVariableString ?? DEFAULT_ESQL_VARIABLE_NAME)) {
+          setDefaultPanelTitle(editorState.esqlVariableString ?? DEFAULT_ESQL_VARIABLE_NAME);
+        }
+        break;
+    }
+
+    // When creating a new control, sync up the output mode with the input mode, unless the user
+    // has already modified the output mode
+    if (hasTouchedOutput) return;
+    switch (editorState.input) {
+      case ControlInputOption.DSL:
+      case ControlInputOption.STATIC:
+        if (editorState.output !== ControlOutputOption.DSL) {
+          setEditorState({ ...editorState, output: ControlOutputOption.DSL });
+          setDefaultPanelTitle(editorState.fieldName ?? '');
+        }
+        break;
+      case ControlInputOption.ESQL:
+        if (editorState.output !== ControlOutputOption.ESQL) {
+          setEditorState({ ...editorState, output: ControlOutputOption.ESQL });
+          setDefaultPanelTitle(editorState.esqlVariableString ?? DEFAULT_ESQL_VARIABLE_NAME);
+        }
+        break;
+    }
+  }, [hasTouchedOutput, editorState, defaultPanelTitle]);
 
   const {
     loading: dataViewListLoading,
@@ -257,105 +330,160 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
           setControlEditorValid={setControlOptionsValid}
           controlGroupApi={controlGroupApi}
+          output={editorState.output ?? DEFAULT_CONTROL_OUTPUT}
         />
       </div>
     );
   }, [fieldRegistry, controlFactory, initialState, editorState, controlGroupApi]);
 
-  return (
-    <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2>
-            {!controlId // if no ID, then we are creating a new control
-              ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle()
-              : DataControlEditorStrings.manageControl.getFlyoutEditTitle()}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="control-editor-flyout">
-        <EuiForm fullWidth>
-          {!editorConfig?.hideDataViewSelector && (
-            <EuiFormRow
-              data-test-subj="control-editor-data-view-picker"
-              label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
-            >
-              {dataViewListError ? (
-                <EuiCallOut
-                  color="danger"
-                  iconType="error"
-                  title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
-                >
-                  <p>{dataViewListError.message}</p>
-                </EuiCallOut>
-              ) : (
-                <DataViewPicker
-                  dataViews={dataViewListItems}
-                  selectedDataViewId={editorState.dataViewId}
-                  onChangeDataViewId={(newDataViewId) => {
-                    setEditorState({ ...editorState, dataViewId: newDataViewId });
-                    setSelectedControlType(undefined);
-                  }}
-                  trigger={{
-                    label:
-                      selectedDataView?.getName() ??
-                      DataControlEditorStrings.manageControl.dataSource.getSelectDataViewMessage(),
-                  }}
-                  selectableProps={{ isLoading: dataViewListLoading }}
-                />
-              )}
-            </EuiFormRow>
-          )}
-
-          <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
-            {fieldListError ? (
-              <EuiCallOut
-                color="danger"
-                iconType="error"
-                title={DataControlEditorStrings.manageControl.dataSource.getFieldListErrorTitle()}
-              >
-                <p>{fieldListError.message}</p>
-              </EuiCallOut>
-            ) : (
-              <FieldPicker
-                filterPredicate={(field: DataViewField) => {
-                  const customPredicate = editorConfig?.fieldFilterPredicate?.(field) ?? true;
-                  return Boolean(fieldRegistry?.[field.name]) && customPredicate;
-                }}
-                selectedFieldName={editorState.fieldName}
-                dataView={selectedDataView}
-                onSelectField={(field) => {
-                  setEditorState({ ...editorState, fieldName: field.name });
-
-                  /**
-                   * make sure that the new field is compatible with the selected control type and, if it's not,
-                   * reset the selected control type to the **first** compatible control type
-                   */
-                  const newCompatibleControlTypes =
-                    fieldRegistry?.[field.name]?.compatibleControlTypes ?? [];
-                  if (
-                    !selectedControlType ||
-                    !newCompatibleControlTypes.includes(selectedControlType!)
-                  ) {
-                    setSelectedControlType(newCompatibleControlTypes[0]);
-                  }
-
-                  /**
-                   * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
-                   */
-                  const newDefaultTitle = field.displayName ?? field.name;
-                  setDefaultPanelTitle(newDefaultTitle);
-                  const currentTitle = editorState.title;
-                  if (!currentTitle || currentTitle === newDefaultTitle) {
-                    setPanelTitle(newDefaultTitle);
-                  }
-
-                  setControlOptionsValid(true); // reset options state
-                }}
-                selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
-              />
-            )}
+  const steps: EuiContainedStepProps[] = [
+    {
+      title: 'Select input',
+      children: (
+        <>
+          <EuiFormRow data-test-subj="control-editor-input-select">
+            <EuiButtonGroup
+              isFullWidth
+              options={CONTROL_INPUT_OPTIONS}
+              idSelected={editorState.input ?? DEFAULT_CONTROL_INPUT}
+              onChange={(input) => {
+                setEditorState({ ...editorState, input });
+              }}
+              legend="Select control input"
+            />
           </EuiFormRow>
+          {isDSLInputMode && (
+            <DataViewAndFieldPicker
+              editorConfig={editorConfig}
+              dataViewId={editorState.dataViewId}
+              onChangeDataViewId={(newDataViewId) => {
+                setEditorState({ ...editorState, dataViewId: newDataViewId });
+                setSelectedControlType(undefined);
+              }}
+              onSelectField={(field) => {
+                const newFieldName = field.name;
+                const prevFieldName = editorState.fieldName;
+                if (
+                  // If the user is not in ES|QL output mode
+                  editorState.output !== ControlOutputOption.ESQL ||
+                  // Or, if the user the user is in ES|QL output mode, but has not changed the variable name
+                  isESQLVariableEmpty ||
+                  editorState.esqlVariableString === fieldToESQLVariable(prevFieldName ?? '')
+                ) {
+                  /**
+                   * create a default ES|QL variable name from the selected field before setting the field name;
+                   * we still want to do this even if the user is not in ES|QL output mode, to prepare the variable
+                   * name in case they switch
+                   */
+                  const esqlVariableString = fieldToESQLVariable(newFieldName);
+                  setEditorState({ ...editorState, fieldName: newFieldName, esqlVariableString });
+                  setDefaultPanelTitle(esqlVariableString);
+                } else {
+                  /**
+                   * if the variable name doesn't need changing, just set the field name
+                   */
+                  setEditorState({ ...editorState, fieldName: newFieldName });
+                }
+                /**
+                 * make sure that the new field is compatible with the selected control type and, if it's not,
+                 * reset the selected control type to the **first** compatible control type
+                 */
+                const newCompatibleControlTypes =
+                  fieldRegistry?.[newFieldName]?.compatibleControlTypes ?? [];
+                if (
+                  !selectedControlType ||
+                  !newCompatibleControlTypes.includes(selectedControlType!)
+                ) {
+                  setSelectedControlType(newCompatibleControlTypes[0]);
+                }
+
+                /**
+                 * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
+                 */
+                const newDefaultTitle = field.displayName ?? newFieldName;
+                setDefaultPanelTitle(newDefaultTitle);
+
+                setControlOptionsValid(true); // reset options state
+              }}
+              dataViewListError={dataViewListError}
+              dataViewListItems={dataViewListItems}
+              dataViewListLoading={dataViewListLoading}
+              dataViewLoading={dataViewLoading}
+              selectedDataView={selectedDataView}
+              fieldListError={fieldListError}
+              fieldName={editorState.fieldName}
+              fieldRegistry={fieldRegistry}
+            />
+          )}
+        </>
+      ),
+    },
+    {
+      title: 'Select output',
+      children: (
+        <>
+          <EuiFormRow data-test-subj="control-editor-output-settings">
+            <div>
+              <OutputSelectRadioGroup
+                idSelected={editorState.output ?? DEFAULT_CONTROL_OUTPUT}
+                onChangeOutput={(output) => {
+                  setEditorState({ ...editorState, output });
+                  setHasTouchedOutput(true);
+                }}
+                isDSLInputMode={isDSLInputMode}
+                fieldName={editorState.fieldName}
+              />
+            </div>
+          </EuiFormRow>
+          {editorState.output === ControlOutputOption.ESQL ? (
+            <EuiFormRow label="Variable name">
+              <EuiFieldText
+                placeholder={DEFAULT_ESQL_VARIABLE_NAME}
+                value={editorState.esqlVariableString}
+                compressed
+                onChange={({ target: { value } }) => {
+                  const esqlVariableString = value.startsWith('?')
+                    ? value.startsWith('???')
+                      ? `??${value.replace(/\?/g, '')}`
+                      : value
+                    : `?${value}`;
+                  setEditorState({ ...editorState, esqlVariableString });
+                  setDefaultPanelTitle(esqlVariableString);
+                }}
+              />
+            </EuiFormRow>
+          ) : !isDSLInputMode ? (
+            <DataViewAndFieldPicker
+              editorConfig={editorConfig}
+              dataViewId={editorState.dataViewId}
+              onChangeDataViewId={(newDataViewId) => {
+                setEditorState({ ...editorState, dataViewId: newDataViewId });
+              }}
+              onSelectField={(field) => {
+                setEditorState({ ...editorState, fieldName: field.name });
+                /**
+                 * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
+                 */
+                const newDefaultTitle = field.displayName ?? field.name;
+                setDefaultPanelTitle(newDefaultTitle);
+              }}
+              dataViewListError={dataViewListError}
+              dataViewListItems={dataViewListItems}
+              dataViewListLoading={dataViewListLoading}
+              dataViewLoading={dataViewLoading}
+              selectedDataView={selectedDataView}
+              fieldListError={fieldListError}
+              fieldName={editorState.fieldName}
+              fieldRegistry={fieldRegistry}
+            />
+          ) : null}
+        </>
+      ),
+    },
+    {
+      title: 'Configure control',
+      children: (
+        <>
           <EuiFormRow
             label={DataControlEditorStrings.manageControl.dataSource.getControlTypeTitle()}
           >
@@ -366,11 +494,17 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 selectedFieldName={editorState.fieldName}
                 selectedControlType={selectedControlType}
                 setSelectedControlType={setSelectedControlType}
+                isESQLOutputMode={isESQLOutputMode}
               />
             </div>
           </EuiFormRow>
           <EuiFormRow
             label={DataControlEditorStrings.manageControl.displaySettings.getTitleInputTitle()}
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                {DataControlEditorStrings.manageControl.displaySettings.getTitleInputOptionalText()}
+              </EuiText>
+            }
           >
             <EuiFieldText
               data-test-subj="control-editor-title-input"
@@ -414,6 +548,25 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             </EuiFormRow>
           )}
           {!editorConfig?.hideAdditionalSettings && CustomSettingsComponent}
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2>
+            {!isEdit
+              ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle()
+              : DataControlEditorStrings.manageControl.getFlyoutEditTitle()}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody data-test-subj="control-editor-flyout">
+        <EuiForm fullWidth>
+          <EuiSteps steps={steps} titleSize="xxs" />
           {controlId && (
             <>
               <EuiSpacer size="l" />
@@ -456,7 +609,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 !(
                   controlOptionsValid &&
                   Boolean(editorState.fieldName) &&
-                  Boolean(selectedDataView) &&
+                  (Boolean(selectedDataView) || !isDSLInputMode) &&
                   Boolean(selectedControlType)
                 )
               }
@@ -472,3 +625,114 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     </>
   );
 };
+
+const fieldToESQLVariable = (fieldName: string) =>
+  `?${fieldName.replace(/\./g, '_').replace(/[^a-zA-Z0-9_]/g, '')}`;
+
+const OutputSelectRadioGroup: React.FC<{
+  idSelected?: ControlOutputOption;
+  onChangeOutput: (option: string) => void;
+  fieldName?: string;
+  isDSLInputMode: boolean;
+}> = ({ idSelected = DEFAULT_CONTROL_OUTPUT, onChangeOutput, fieldName, isDSLInputMode }) => {
+  const radioGroupId = useGeneratedHtmlId({ prefix: 'radioGroup' });
+  return CONTROL_OUTPUT_OPTIONS.map(
+    ({ id, label, description, 'data-test-subj': dataTestSubj }) => (
+      <>
+        <EuiCheckableCard
+          id={id}
+          name={radioGroupId}
+          key={id}
+          checkableType="radio"
+          label={<strong>{label}</strong>}
+          checked={idSelected === id}
+          onChange={() => onChangeOutput(id)}
+        >
+          <EuiText size="s">{description(isDSLInputMode, fieldName)}</EuiText>
+        </EuiCheckableCard>
+        <EuiSpacer size="s" />
+      </>
+    )
+  );
+};
+
+const DataViewAndFieldPicker: React.FC<{
+  dataViewId?: string;
+  onChangeDataViewId: (dataView: string) => void;
+  onSelectField: (field: DataViewField) => void;
+  dataViewListItems: DataViewListItem[];
+  dataViewListLoading: boolean;
+  dataViewLoading: boolean;
+  fieldName?: string;
+  selectedDataView?: DataView;
+  dataViewListError?: Error;
+  fieldListError?: Error;
+  editorConfig?: ControlGroupEditorConfig;
+  fieldRegistry?: DataControlFieldRegistry;
+}> = ({
+  dataViewId,
+  editorConfig,
+  dataViewListError,
+  onChangeDataViewId,
+  onSelectField,
+  dataViewListItems,
+  dataViewListLoading,
+  dataViewLoading,
+  selectedDataView,
+  fieldListError,
+  fieldName,
+  fieldRegistry,
+}) => (
+  <>
+    {!editorConfig?.hideDataViewSelector && (
+      <EuiFormRow
+        data-test-subj="control-editor-data-view-picker"
+        label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
+      >
+        {dataViewListError ? (
+          <EuiCallOut
+            color="danger"
+            iconType="error"
+            title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
+          >
+            <p>{dataViewListError.message}</p>
+          </EuiCallOut>
+        ) : (
+          <DataViewPicker
+            dataViews={dataViewListItems}
+            selectedDataViewId={dataViewId}
+            onChangeDataViewId={onChangeDataViewId}
+            trigger={{
+              label:
+                selectedDataView?.getName() ??
+                DataControlEditorStrings.manageControl.dataSource.getSelectDataViewMessage(),
+            }}
+            selectableProps={{ isLoading: dataViewListLoading }}
+          />
+        )}
+      </EuiFormRow>
+    )}
+    <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
+      {fieldListError ? (
+        <EuiCallOut
+          color="danger"
+          iconType="error"
+          title={DataControlEditorStrings.manageControl.dataSource.getFieldListErrorTitle()}
+        >
+          <p>{fieldListError.message}</p>
+        </EuiCallOut>
+      ) : (
+        <FieldPicker
+          filterPredicate={(field: DataViewField) => {
+            const customPredicate = editorConfig?.fieldFilterPredicate?.(field) ?? true;
+            return Boolean(fieldRegistry?.[field.name]) && customPredicate;
+          }}
+          selectedFieldName={fieldName}
+          dataView={selectedDataView}
+          onSelectField={onSelectField}
+          selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
+        />
+      )}
+    </EuiFormRow>
+  </>
+);

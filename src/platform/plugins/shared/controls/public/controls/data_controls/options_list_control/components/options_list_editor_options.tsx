@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
+import { ControlOutputOption } from '../../../../../common';
 import type {
   OptionsListControlState,
   OptionsListSearchTechnique,
@@ -73,12 +74,16 @@ export const OptionsListEditorOptions = ({
   field,
   updateState,
   controlGroupApi,
+  output,
 }: CustomOptionsComponentProps<OptionsListControlState>) => {
   const allowExpensiveQueries = useStateFromPublishingSubject(
     controlGroupApi.allowExpensiveQueries$
   );
 
-  const [singleSelect, setSingleSelect] = useState<boolean>(initialState.singleSelect ?? false);
+  const isESQLOutputMode = useMemo(() => output === ControlOutputOption.ESQL, [output]);
+  const [singleSelect, setSingleSelect] = useState<boolean>(
+    isESQLOutputMode || (initialState.singleSelect ?? false)
+  );
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
     initialState.runPastTimeout ?? false
   );
@@ -126,21 +131,24 @@ export const OptionsListEditorOptions = ({
 
   return (
     <>
-      <EuiFormRow
-        label={OptionsListStrings.editor.getSelectionOptionsTitle()}
-        data-test-subj="optionsListControl__selectionOptionsRadioGroup"
-      >
-        <EuiRadioGroup
-          compressed
-          options={selectionOptions}
-          idSelected={singleSelect ? 'single' : 'multi'}
-          onChange={(id) => {
-            const newSingleSelect = id === 'single';
-            setSingleSelect(newSingleSelect);
-            updateState({ singleSelect: newSingleSelect });
-          }}
-        />
-      </EuiFormRow>
+      {!isESQLOutputMode && (
+        <EuiFormRow
+          label={OptionsListStrings.editor.getSelectionOptionsTitle()}
+          data-test-subj="optionsListControl__selectionOptionsRadioGroup"
+        >
+          <EuiRadioGroup
+            compressed
+            options={selectionOptions}
+            idSelected={singleSelect ? 'single' : 'multi'}
+            disabled={isESQLOutputMode}
+            onChange={(id) => {
+              const newSingleSelect = id === 'single';
+              setSingleSelect(newSingleSelect);
+              updateState({ singleSelect: newSingleSelect });
+            }}
+          />
+        </EuiFormRow>
+      )}
       {allowExpensiveQueries && compatibleSearchTechniques.length > 1 && (
         <EuiFormRow
           label={OptionsListStrings.editor.getSearchOptionsTitle()}

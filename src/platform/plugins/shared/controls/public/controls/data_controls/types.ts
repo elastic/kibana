@@ -16,7 +16,8 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { DefaultDataControlState } from '../../../common';
+import { PublishesESQLVariable } from '@kbn/esql-types';
+import { ControlOutputOption, DefaultDataControlState } from '../../../common';
 import { ControlGroupApi } from '../../control_group/types';
 import { ControlFactory, DefaultControlApi } from '../types';
 import { PublishesAsyncFilters } from './publishes_async_filters';
@@ -33,7 +34,8 @@ export type DataControlApi = DefaultControlApi &
   HasEditCapabilities &
   PublishesDataViews &
   PublishesField &
-  PublishesAsyncFilters;
+  PublishesAsyncFilters &
+  PublishesESQLVariable;
 
 export interface CustomOptionsComponentProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -43,6 +45,7 @@ export interface CustomOptionsComponentProps<
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
   controlGroupApi: ControlGroupApi;
+  output: ControlOutputOption;
 }
 
 export interface DataControlFactory<

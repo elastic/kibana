@@ -30,6 +30,8 @@ import { StateComparators } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import { ESQLControlVariable } from '@kbn/esql-types';
+import { ControlOutputOption, ControlInputOption } from '../../../common';
 import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';
@@ -44,6 +46,9 @@ export const defaultDataControlComparators: StateComparators<DefaultDataControlS
   title: 'referenceEquality',
   dataViewId: 'referenceEquality',
   fieldName: 'referenceEquality',
+  output: 'referenceEquality',
+  input: 'referenceEquality',
+  esqlVariableString: 'referenceEquality',
 };
 
 export const initializeDataControlManager = <EditorState extends object = {}>(
@@ -61,6 +66,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     extractReferences: (referenceNameSuffix: string) => Reference[];
     onSelectionChange: () => void;
     setOutputFilter: (filter: Filter | undefined) => void;
+    setESQLVariable: (variable: ESQLControlVariable | undefined) => void;
   };
   anyStateChange$: Observable<void>;
   getLatestState: () => DefaultDataControlState;
@@ -73,6 +79,9 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       dataViewId: '',
       fieldName: '',
       title: undefined,
+      output: ControlOutputOption.DSL,
+      input: ControlInputOption.DSL,
+      esqlVariableString: undefined,
     },
     defaultDataControlComparators
   );
@@ -94,6 +103,8 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
     String(toFormat)
   );
+
+  const esqlVariable$ = new BehaviorSubject<ESQLControlVariable | undefined>(undefined);
 
   const dataViewIdSubscription = dataControlManager.api.dataViewId$
     .pipe(
@@ -120,13 +131,17 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       dataViews$.next(dataView ? [dataView] : undefined);
     });
 
-  const fieldNameSubscription = combineLatest([dataViews$, dataControlManager.api.fieldName$])
+  const fieldNameSubscription = combineLatest([
+    dataViews$,
+    dataControlManager.api.fieldName$,
+    dataControlManager.api.output$,
+  ])
     .pipe(
       tap(() => {
         filtersReady$.next(false);
       })
     )
-    .subscribe(([nextDataViews, nextFieldName]) => {
+    .subscribe(([nextDataViews, nextFieldName, nextOutput]) => {
       const dataView = nextDataViews
         ? nextDataViews.find(({ id }) => dataControlManager.api.dataViewId$.value === id)
         : undefined;
@@ -149,10 +164,27 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       }
 
       field$.next(field);
-      defaultTitle$.next(field ? field.displayName || field.name : nextFieldName);
+      if (nextOutput !== ControlOutputOption.ESQL) {
+        defaultTitle$.next(field ? field.displayName || field.name : nextFieldName);
+      }
       const spec = field?.toSpec();
       if (spec) {
         fieldFormatter.next(dataView.getFormatterForField(spec).getConverterFor('text'));
+      }
+    });
+
+  const esqlVariableStringSubscription = combineLatest([
+    dataControlManager.api.esqlVariableString$,
+    dataControlManager.api.output$,
+  ])
+    .pipe(
+      tap(() => {
+        filtersReady$.next(false);
+      })
+    )
+    .subscribe(([nextEsqlVariableString, nextOutput]) => {
+      if (nextOutput === ControlOutputOption.ESQL) {
+        defaultTitle$.next(nextEsqlVariableString);
       }
     });
 
@@ -206,6 +238,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       fieldFormatter,
       onEdit,
       filters$,
+      esqlVariable$,
       isEditingEnabled: () => true,
       untilFiltersReady: async () => {
         return new Promise((resolve) => {
@@ -223,6 +256,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       dataViewIdSubscription.unsubscribe();
       fieldNameSubscription.unsubscribe();
       filtersReadySubscription.unsubscribe();
+      esqlVariableStringSubscription.unsubscribe();
     },
     internalApi: {
       extractReferences: (referenceNameSuffix: string) => {
@@ -238,7 +272,12 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
         filtersReady$.next(false);
       },
       setOutputFilter: (newFilter: Filter | undefined) => {
+        esqlVariable$.next(undefined);
         filters$.next(newFilter ? [newFilter] : undefined);
+      },
+      setESQLVariable: (newVariable: ESQLControlVariable | undefined) => {
+        esqlVariable$.next(newVariable);
+        filters$.next(undefined);
       },
     },
     anyStateChange$: dataControlManager.anyStateChange$,

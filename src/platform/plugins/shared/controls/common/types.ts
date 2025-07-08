@@ -8,7 +8,12 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { CONTROL_LABEL_POSITION_OPTIONS, CONTROL_WIDTH_OPTIONS } from './constants';
+import {
+  CONTROL_LABEL_POSITION_OPTIONS,
+  CONTROL_WIDTH_OPTIONS,
+  ControlInputOption,
+  ControlOutputOption,
+} from './constants';
 
 export type ControlWidth = (typeof CONTROL_WIDTH_OPTIONS)[keyof typeof CONTROL_WIDTH_OPTIONS];
 export type ControlLabelPosition =
@@ -38,4 +43,7 @@ export interface DefaultDataControlState extends DefaultControlState {
   dataViewId: string;
   fieldName: string;
   title?: string; // custom control label
+  output: ControlOutputOption;
+  input: ControlInputOption;
+  esqlVariableString?: string;
 }

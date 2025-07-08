@@ -48,15 +48,26 @@ export const DataControlEditorStrings = {
       getControlTypeErrorMessage: ({
         fieldSelected,
         controlType,
+        isESQLOutputMode,
       }: {
         fieldSelected?: boolean;
         controlType?: string;
+        isESQLOutputMode?: boolean;
       }) => {
         if (!fieldSelected) {
           return i18n.translate(
             'controls.controlGroup.manageControl.dataSource.controlTypErrorMessage.noField',
             {
               defaultMessage: 'Select a field first.',
+            }
+          );
+        }
+
+        if (isESQLOutputMode) {
+          return i18n.translate(
+            'controls.controlGroup.manageControl.dataSource.controlTypErrorMessage.notESQLCompatible',
+            {
+              defaultMessage: 'This control type cannot output an ES|QL variable.',
             }
           );
         }
@@ -91,6 +102,13 @@ export const DataControlEditorStrings = {
         i18n.translate('controls.controlGroup.manageControl.displaySettings.titleInputTitle', {
           defaultMessage: 'Label',
         }),
+      getTitleInputOptionalText: () =>
+        i18n.translate(
+          'controls.controlGroup.manageControl.displaySettings.titleInputOptionalText',
+          {
+            defaultMessage: 'Optional',
+          }
+        ),
       getWidthInputTitle: () =>
         i18n.translate('controls.controlGroup.manageControl.displaySettings.widthInputTitle', {
           defaultMessage: 'Minimum width',
