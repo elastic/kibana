@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { capitalize } from 'lodash';
+import { capitalize, omit, isEqual } from 'lodash';
 import {
   BehaviorSubject,
   distinctUntilChanged,
@@ -17,6 +17,8 @@ import {
   type Observable,
   Subject,
   takeUntil,
+  scan,
+  filter,
 } from 'rxjs';
 import type { CoreService } from '@kbn/core-base-server-internal';
 import type { OnPreAuthHandler } from '@kbn/core-http-server';
@@ -32,7 +34,14 @@ export interface SetupDeps {
   metrics: InternalMetricsServiceSetup;
 }
 
-type RateLimiterState = { overloaded: false } | { overloaded: true; retryAfter: number };
+interface State {
+  overloaded: boolean;
+  retryAfter?: number;
+  timestamp: number;
+}
+
+// type State = { overloaded: false } | { overloaded: true; retryAfter: number };
+// type StateWithTimestamp = State & { timestamp: number };
 
 /** @internal */
 export type InternalRateLimiterSetup = void;
@@ -44,19 +53,19 @@ export type InternalRateLimiterStart = void;
 export class HttpRateLimiterService
   implements CoreService<InternalRateLimiterSetup, InternalRateLimiterStart>
 {
-  private state$ = new BehaviorSubject<RateLimiterState>({
-    overloaded: false,
-  });
+  private state$ = new BehaviorSubject<State | undefined>(undefined);
   private ready$ = new Subject<boolean>();
   private stopped$ = new Subject<boolean>();
 
   private handler: OnPreAuthHandler = (request, response, toolkit) => {
     const state = this.state$.getValue();
-    if (request.route.options.excludeFromRateLimiter || !state.overloaded) {
+    if (request.route.options.excludeFromRateLimiter || !state?.overloaded) {
       return toolkit.next();
     }
 
-    const timeout = Math.ceil((state.retryAfter - Date.now()) / 1000);
+    const timeout = state.retryAfter
+      ? Math.max(Math.ceil((state.retryAfter - Date.now()) / 1000), 0)
+      : 0;
 
     return response.customError({
       statusCode: 429,
@@ -83,18 +92,29 @@ export class HttpRateLimiterService
             short >= elu && (term === 'short' || medium >= elu) && (term !== 'long' || long >= elu)
         ),
         endWith(false),
-        map((overloaded) =>
-          overloaded
-            ? {
-                overloaded,
-                retryAfter: Date.now() + period,
-              }
-            : { overloaded }
-        ),
-        distinctUntilChanged(
-          (previous, current) =>
-            previous.overloaded === current.overloaded &&
-            (!previous.overloaded || previous.retryAfter - Date.now() > 0)
+        map((overloaded) => ({
+          overloaded,
+          timestamp: Date.now(),
+        })),
+        scan((previous: State | undefined, current: State) => {
+          if (!current.overloaded) {
+            return current;
+          }
+
+          const interval = previous?.timestamp ? current.timestamp - previous.timestamp : 0;
+          const retryAfter =
+            previous?.retryAfter && previous.retryAfter - current.timestamp > interval
+              ? previous.retryAfter
+              : current.timestamp + period + interval;
+
+          return {
+            ...current,
+            retryAfter,
+          };
+        }, undefined),
+        filter(Boolean),
+        distinctUntilChanged((previous, current) =>
+          isEqual(omit(previous, 'timestamp'), omit(current, 'timestamp'))
         )
       )
       .subscribe(this.state$);
