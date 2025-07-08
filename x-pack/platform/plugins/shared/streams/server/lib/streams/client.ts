@@ -673,7 +673,7 @@ export class StreamsClient {
       throw new SecurityError(`Cannot delete stream, insufficient privileges`);
     }
 
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'delete',
@@ -685,10 +685,6 @@ export class StreamsClient {
         streamsClient: this,
       }
     );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
 
     await this.dependencies.queryClient.syncQueries(name, []);
 

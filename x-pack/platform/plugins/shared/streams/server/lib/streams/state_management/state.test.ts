@@ -176,7 +176,7 @@ describe('State', () => {
 
     jest
       .spyOn(streamFromDefinition, 'streamFromDefinition')
-      .mockImplementation((definition) => failingStream(definition.name, stateDependenciesMock));
+      .mockImplementation((definition) => failingStream(stateDependenciesMock));
 
     await expect(
       async () =>
@@ -395,7 +395,7 @@ function failingStream(stateDependenciesMock: any) {
 
   return new FailingStream(
     {
-      name: 'failing_stream',
+      name: 'stream_that_fails',
     },
     stateDependenciesMock
   );
