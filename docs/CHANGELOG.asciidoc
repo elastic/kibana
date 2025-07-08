@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.18.4>>
 * <<release-notes-8.18.3>>
 * <<release-notes-8.18.2>>
 * <<release-notes-8.18.1>>
@@ -95,7 +96,25 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.18.4]]
+== {kib} 8.18.4
 
+The 8.18.4 release includes the following fixes.
+
+[float]
+[[fixes-v8.18.4]]
+=== Fixes
+Dashboards and Visualizations::
+* Register ML embeddables synchronously ({kibana-pull}225110[#225110]).
+Data ingestion and Fleet::
+* Fixes backfill agentless logic for all packages ({kibana-pull}225767[#225767]).
+* Update query in delete unenrolled agents task ({kibana-pull}224808[#224808]).
+Elastic Observability solution::
+For the Elastic Observability 8.18.4 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+Elastic Security solution::
+For the Elastic Security 8.18.4 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+Search::
+* Fixes handling of context limit errors in Playground when using the Elastic Managed LLM ({kibana-pull}225360[#225360]).
 
 include::upgrade-notes.asciidoc[]
 
