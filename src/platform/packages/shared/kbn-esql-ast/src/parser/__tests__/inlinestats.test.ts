@@ -10,21 +10,20 @@
 import { EsqlQuery } from '../../query';
 import { Walker } from '../../walker';
 
-describe('RENAME', () => {
+describe('INLINESTATS', () => {
   describe('correctly formatted', () => {
-    it('parses basic example from documentation', () => {
+    it('smoke test', () => {
       const src = `
-        FROM employees
-        | KEEP first_name, last_name, still_hired
-        | RENAME still_hired AS employed`;
+        FROM index
+        | INLINESTATS a BY b`;
       const { ast, errors } = EsqlQuery.fromSrc(src);
-      const rename = Walker.match(ast, { type: 'command', name: 'rename' });
+      const inlinestats = Walker.match(ast, { type: 'command', name: 'inlinestats' });
 
       expect(errors.length).toBe(0);
-      expect(rename).toMatchObject({
+      expect(inlinestats).toMatchObject({
         type: 'command',
-        name: 'rename',
-        args: [{}],
+        name: 'inlinestats',
+        args: [{ name: 'a' }, { type: 'option', name: 'by' }],
       });
     });
   });

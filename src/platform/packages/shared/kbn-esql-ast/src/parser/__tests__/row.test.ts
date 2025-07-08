@@ -7,16 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RowCommandContext } from '../../antlr/esql_parser';
-import { ESQLCommand } from '../../types';
-import { createCommand } from '../factories';
-import { collectAllFields } from '../walkers';
+import { EsqlQuery } from '../../query';
 
-export const createRowCommand = (ctx: RowCommandContext): ESQLCommand<'row'> => {
-  const command = createCommand('row', ctx);
-  const fields = collectAllFields(ctx.fields());
+describe('ROW', () => {
+  describe('correctly formatted', () => {
+    it('parses basic command', () => {
+      const query = 'ROW 123';
+      const { ast } = EsqlQuery.fromSrc(query);
 
-  command.args.push(...fields);
-
-  return command;
-};
+      expect(ast.commands).toMatchObject([
+        {
+          type: 'command',
+          name: 'row',
+          args: [
+            {
+              type: 'literal',
+            },
+          ],
+        },
+      ]);
+    });
+  });
+});
