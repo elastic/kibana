@@ -31,6 +31,7 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import { getSuggestionTypes } from './case_suggestions';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -117,6 +118,17 @@ export class Plugin implements PluginType {
     }
     this.syncPrivateLocationMonitorsTask?.start().catch((e) => {
       this.logger.error('Failed to start sync private location monitors task', { error: e });
+    });
+
+    const suggestionTypes = getSuggestionTypes({
+      savedObjectsClient: this.savedObjectsClient,
+      encryptedSavedObjectsClient: pluginsStart.encryptedSavedObjects.getClient(),
+    });
+
+    suggestionTypes.forEach((suggestionType) => {
+      pluginsStart.observabilityCaseSuggestionRegistry.caseSuggestionRegistry.register(
+        suggestionType
+      );
     });
 
     this.syntheticsService?.start(pluginsStart.taskManager);

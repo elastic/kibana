@@ -71,6 +71,20 @@ export const getLegacySyntheticsMonitorSavedObjectType = (
           },
         ],
       },
+      '3': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              service: {
+                properties: {
+                  name: { type: 'keyword' },
+                },
+              },
+            },
+          },
+        ],
+      },
     },
   };
 };

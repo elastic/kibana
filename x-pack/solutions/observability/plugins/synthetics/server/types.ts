@@ -36,6 +36,8 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/server';
+import { ObservabilityCaseSuggestionRegistryPluginStart } from '@kbn/observability-case-suggestion-registry-plugin/server';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { UptimeConfig } from './config';
 import { SyntheticsEsClient } from './lib';
@@ -86,6 +88,8 @@ export interface SyntheticsPluginsStartDependencies {
   telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
   alerting: AlertingServerStart;
+  observabilityShared: ObservabilitySharedPluginStart;
+  observabilityCaseSuggestionRegistry: ObservabilityCaseSuggestionRegistryPluginStart;
 }
 
 export type UptimeRequestHandlerContext = CustomRequestHandlerContext<{

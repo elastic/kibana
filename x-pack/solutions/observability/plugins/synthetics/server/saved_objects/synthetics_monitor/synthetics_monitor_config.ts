@@ -25,7 +25,22 @@ export const getSyntheticsMonitorConfigSavedObjectType = (): SavedObjectsType =>
           values: { name: savedObject.attributes.name },
         }),
     },
-    modelVersions: {},
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              service: {
+                properties: {
+                  name: { type: 'keyword' },
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
   };
 };
 

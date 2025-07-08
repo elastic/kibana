@@ -32,6 +32,7 @@
       "licensing",
       "observability",
       "observabilityShared",
+      "observabilityCaseSuggestionRegistry",
       "ruleRegistry",
       "security",
       "share",

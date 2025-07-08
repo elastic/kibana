@@ -135,5 +135,18 @@ export const monitorConfigMappings: SavedObjectsTypeMappingDefinition = {
     maintenance_windows: {
       type: 'keyword',
     },
+    service: {
+      properties: {
+        name: {
+          type: 'keyword',
+          ignore_above: 256,
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
+        },
+      },
+    },
   },
 };
