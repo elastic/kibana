@@ -21,12 +21,10 @@ import {
   useBatchedPublishingSubjects,
   initializeStateManager,
   titleComparators,
-  apiHasUniqueId,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 
 import { apiIsPresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { openLazyFlyout } from '@kbn/presentation-utils';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
@@ -54,7 +52,6 @@ import {
 } from '../lib/deserialize_from_library';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
 import { isParentApiCompatible } from '../actions/add_links_panel_action';
-import { coreServices } from '../services/kibana_services';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
@@ -229,48 +226,33 @@ export const getLinksEmbeddableFactory = () => {
           });
         },
         onEdit: async () => {
-          openLazyFlyout({
-            core: coreServices,
-            parentApi: api.parentApi,
-            loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-              const { getEditorFlyout } = await import('../editor/get_editor_flyout');
-
-              return await getEditorFlyout({
-                closeFlyout,
-                parentDashboard: parentApi,
-                ariaLabelledBy,
-                initialState: {
-                  ...stateManager.getLatestState(),
-                  savedObjectId,
-                },
-                onSave: async (runtimeState) => {
-                  if (!runtimeState) return;
-
-                  // if the by reference state has changed during this edit, reinitialize the panel.
-                  const nextSavedObjectId = runtimeState?.savedObjectId;
-                  const nextIsByReference = nextSavedObjectId !== undefined;
-                  if (
-                    nextIsByReference !== isByReference &&
-                    apiIsPresentationContainer(api.parentApi)
-                  ) {
-                    const serializedState = nextIsByReference
-                      ? serializeByReference(nextSavedObjectId)
-                      : serializeByValue();
-                    (serializedState.rawState as SerializedTitles).title = runtimeState.title;
-
-                    api.parentApi.replacePanel<LinksSerializedState>(api.uuid, {
-                      serializedState,
-                      panelType: api.type,
-                    });
-                    return;
-                  }
-
-                  stateManager.reinitializeState(runtimeState);
-                },
-              });
+          const { openEditorFlyout } = await import('../editor/open_editor_flyout');
+          const newState = await openEditorFlyout({
+            initialState: {
+              ...stateManager.getLatestState(),
+              savedObjectId,
             },
-            uuid: apiHasUniqueId(api) ? api.uuid : undefined,
+            parentDashboard: parentApi,
           });
+          if (!newState) return;
+
+          // if the by reference state has changed during this edit, reinitialize the panel.
+          const nextSavedObjectId = newState?.savedObjectId;
+          const nextIsByReference = nextSavedObjectId !== undefined;
+          if (nextIsByReference !== isByReference && apiIsPresentationContainer(api.parentApi)) {
+            const serializedState = nextIsByReference
+              ? serializeByReference(nextSavedObjectId)
+              : serializeByValue();
+            (serializedState.rawState as SerializedTitles).title = newState.title;
+
+            api.parentApi.replacePanel<LinksSerializedState>(api.uuid, {
+              serializedState,
+              panelType: api.type,
+            });
+            return;
+          }
+
+          stateManager.reinitializeState(newState);
         },
       });
 

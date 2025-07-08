@@ -12,16 +12,16 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { openLazyFlyout } from '@kbn/presentation-utils';
 import {
   apiPublishesDescription,
   apiPublishesTitle,
   apiPublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
-import type { LinksParentApi } from '../types';
-import { APP_ICON, APP_NAME } from '../../common';
+import type { LinksParentApi, LinksSerializedState } from '../types';
+import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
-import { coreServices } from '../services/kibana_services';
+import { openEditorFlyout } from '../editor/open_editor_flyout';
+import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 export const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
   apiIsPresentationContainer(parentApi) &&
@@ -38,18 +38,34 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
   },
   execute: async ({ embeddable }) => {
     if (!isParentApiCompatible(embeddable)) throw new IncompatibleActionError();
-    openLazyFlyout({
-      core: coreServices,
-      parentApi: embeddable,
-      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-        const { loadLinksFlyout } = await import('./load_links_flyout');
+    const runtimeState = await openEditorFlyout({
+      parentDashboard: embeddable,
+    });
+    if (!runtimeState) return;
 
-        return await loadLinksFlyout({
-          embeddable,
-          closeFlyout,
-          ariaLabelledBy,
-        });
-      },
+    function serializeState() {
+      if (!runtimeState) return;
+
+      if (runtimeState.savedObjectId !== undefined) {
+        return {
+          rawState: {
+            savedObjectId: runtimeState.savedObjectId,
+          },
+        };
+      }
+
+      const { attributes, references } = serializeLinksAttributes(runtimeState);
+      return {
+        rawState: {
+          attributes,
+        },
+        references,
+      };
+    }
+
+    await embeddable.addNewPanel<LinksSerializedState>({
+      panelType: CONTENT_ID,
+      serializedState: serializeState(),
     });
   },
   grouping: [ADD_PANEL_ANNOTATION_GROUP],

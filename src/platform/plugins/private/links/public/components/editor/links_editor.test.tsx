@@ -60,7 +60,6 @@ describe('LinksEditor', () => {
       onClose: jest.fn(),
       isByReference: false,
       flyoutId: 'test-id',
-      ariaLabelledBy: 'linksEditorFlyout',
     };
     return render(
       <EuiThemeProvider>
