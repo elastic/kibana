@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/presentation-utils",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

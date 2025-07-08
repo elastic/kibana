@@ -151,6 +151,7 @@
     "visualizations": "src/platform/plugins/shared/visualizations",
     "visualizationUiComponents": "src/platform/packages/shared/kbn-visualization-ui-components",
     "visualizationUtils": "src/platform/packages/shared/kbn-visualization-utils",
+    "presentationUtils": "src/platform/packages/shared/kbn-presentation-utils",
     "unifiedDocViewer": ["src/platform/plugins/shared/unified_doc_viewer", "src/platform/packages/shared/kbn-unified-doc-viewer"],
     "unifiedSearch": "src/platform/plugins/shared/unified_search",
     "unifiedFieldList": "src/platform/packages/shared/kbn-unified-field-list",
