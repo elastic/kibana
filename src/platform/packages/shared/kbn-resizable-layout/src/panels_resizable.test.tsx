@@ -9,7 +9,7 @@
 
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { ReactElement, useState } from 'react';
+import { ReactElement } from 'react';
 import React from 'react';
 import { PanelsResizable } from './panels_resizable';
 import { act } from 'react-dom/test-utils';
@@ -32,7 +32,6 @@ describe('Panels resizable', () => {
   const mountComponent = ({
     className = '',
     direction = ResizableLayoutDirection.Vertical,
-    container = null,
     initialFixedPanelSize = 0,
     minFixedPanelSize = 0,
     minFlexPanelSize = 0,
@@ -43,7 +42,6 @@ describe('Panels resizable', () => {
   }: {
     className?: string;
     direction?: ResizableLayoutDirection;
-    container?: HTMLElement | null;
     initialFixedPanelSize?: number;
     minFixedPanelSize?: number;
     minFlexPanelSize?: number;
@@ -52,28 +50,18 @@ describe('Panels resizable', () => {
     attachTo?: HTMLElement;
     onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
   }) => {
-    const PanelsWrapper = ({ fixedPanelSize }: { fixedPanelSize?: number }) => {
-      const [panelSizes, setPanelSizes] = useState({
-        fixedPanelSizePct: 50,
-        flexPanelSizePct: 50,
-      });
-
-      return (
-        <PanelsResizable
-          className={className}
-          direction={direction}
-          container={container}
-          fixedPanelSize={fixedPanelSize ?? initialFixedPanelSize}
-          minFixedPanelSize={minFixedPanelSize}
-          minFlexPanelSize={minFlexPanelSize}
-          panelSizes={panelSizes}
-          fixedPanel={fixedPanel}
-          flexPanel={flexPanel}
-          onFixedPanelSizeChange={onFixedPanelSizeChange}
-          setPanelSizes={setPanelSizes}
-        />
-      );
-    };
+    const PanelsWrapper = ({ fixedPanelSize }: { fixedPanelSize?: number }) => (
+      <PanelsResizable
+        className={className}
+        direction={direction}
+        fixedPanelSize={fixedPanelSize ?? initialFixedPanelSize}
+        minFixedPanelSize={minFixedPanelSize}
+        minFlexPanelSize={minFlexPanelSize}
+        fixedPanel={fixedPanel}
+        flexPanel={flexPanel}
+        onFixedPanelSizeChange={onFixedPanelSizeChange}
+      />
+    );
 
     return mount(<PanelsWrapper />, attachTo ? { attachTo } : undefined);
   };

@@ -26,34 +26,25 @@ import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
 export const PanelsResizable = ({
   className,
   direction,
-  // container,
   fixedPanelSize,
   minFixedPanelSize,
   minFlexPanelSize,
-  // panelSizes,
   fixedPanel,
   flexPanel,
   resizeButtonClassName,
   ['data-test-subj']: dataTestSubj = 'resizableLayout',
   onFixedPanelSizeChange,
-}: // setPanelSizes,
-{
+}: {
   className?: string;
   direction: ResizableLayoutDirection;
-  container: HTMLElement | null;
   fixedPanelSize: number;
   minFixedPanelSize: number;
   minFlexPanelSize: number;
-  panelSizes: {
-    fixedPanelSizePct: number;
-    flexPanelSizePct: number;
-  };
   fixedPanel: ReactNode;
   flexPanel: ReactNode;
   resizeButtonClassName?: string;
   ['data-test-subj']?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
-  setPanelSizes: (panelSizes: { fixedPanelSizePct: number; flexPanelSizePct: number }) => void;
 }) => {
   const fixedPanelId = useGeneratedHtmlId({ prefix: 'fixedPanel' });
   const [container, setContainer] = useState<HTMLDivElement | null>(null);

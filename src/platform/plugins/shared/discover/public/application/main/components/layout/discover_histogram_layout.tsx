@@ -13,15 +13,10 @@ import { OutPortal } from 'react-reverse-portal';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { useCurrentChartPortalNode, useCurrentTabRuntimeState } from '../../state_management/redux';
 
-export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
-  container: HTMLElement | null;
-}
-
 export const DiscoverHistogramLayout = ({
-  container,
   panelsToggle,
   ...mainContentProps
-}: DiscoverHistogramLayoutProps) => {
+}: DiscoverMainContentProps) => {
   const chartPortalNode = useCurrentChartPortalNode();
   const layoutProps = useCurrentTabRuntimeState(
     mainContentProps.stateContainer.runtimeStateManager,
@@ -34,7 +29,6 @@ export const DiscoverHistogramLayout = ({
 
   return (
     <UnifiedHistogramLayout
-      container={container}
       unifiedHistogramChart={
         chartPortalNode ? <OutPortal node={chartPortalNode} panelsToggle={panelsToggle} /> : null
       }
