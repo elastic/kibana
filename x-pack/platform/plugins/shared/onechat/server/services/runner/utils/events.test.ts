@@ -53,8 +53,8 @@ describe('Event utilities', () => {
       const testEvent: MessageChunkEvent = {
         type: ChatAgentEventType.messageChunk,
         data: {
-          messageId: 'test-message-id',
-          textChunk: 'test message',
+          message_id: 'test-message-id',
+          text_chunk: 'test message',
         },
       };
 
@@ -77,8 +77,8 @@ describe('Event utilities', () => {
       const testEvent: MessageChunkEvent = {
         type: ChatAgentEventType.messageChunk,
         data: {
-          messageId: 'test-message-id',
-          textChunk: 'test message',
+          message_id: 'test-message-id',
+          text_chunk: 'test message',
         },
       };
 
