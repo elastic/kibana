@@ -52,8 +52,8 @@ export const PageSelectionCheckbox = ({
 
   return (
     <EuiCheckbox
-      data-test-subj={`fieldPageSelect`}
-      id={`fieldPageSelect`}
+      data-test-subj={`checkboxSelectAll`}
+      id={`checkboxSelectAll`}
       checked={pageSelectionChecked}
       onChange={(e) => {
         if (e.target.checked) {

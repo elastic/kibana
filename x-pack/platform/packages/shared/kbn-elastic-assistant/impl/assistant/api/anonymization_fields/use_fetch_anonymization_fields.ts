@@ -25,7 +25,7 @@ export interface UseFetchAnonymizationFieldsParams {
 
 export interface FetchAnonymizationFields {
   refetch: () => void;
-  data: FindAnonymizationFieldsResponse; // Adjust type as per your data structure
+  data: FindAnonymizationFieldsResponse;
   isFetched: boolean;
   isFetching: boolean;
   isError: boolean;
@@ -134,7 +134,6 @@ export const useFetchAnonymizationFields = (
     [sortField, sortOrder]
   );
 
-  // Query key must include everything that can change the response
   const CACHING_KEYS = [
     sortField,
     sortOrder,
