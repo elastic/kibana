@@ -16,27 +16,25 @@ export const RiskScoreSaveBar: React.FC<{
 }> = ({ resetSelectedSettings, saveSelectedSettings, isLoading }) => {
   return (
     <EuiBottomBar paddingSize="s" position="fixed">
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={resetSelectedSettings}>
-              {i18n.DISCARD_CHANGES}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              fill
-              size="s"
-              iconType="check"
-              onClick={saveSelectedSettings}
-              isLoading={isLoading}
-              data-test-subj="riskScoreSaveButton"
-            >
-              {i18n.SAVE_CHANGES}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={resetSelectedSettings}>
+            {i18n.DISCARD_CHANGES}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="primary"
+            fill
+            size="s"
+            iconType="check"
+            onClick={saveSelectedSettings}
+            isLoading={isLoading}
+            data-test-subj="riskScoreSaveButton"
+          >
+            {i18n.SAVE_CHANGES}
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiBottomBar>
   );

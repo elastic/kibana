@@ -14,9 +14,7 @@ import {
   EuiButton,
   EuiLoadingSpinner,
   EuiText,
-  EuiCallOut,
   useEuiTheme,
-  EuiSpacer,
 } from '@elastic/eui';
 import moment from 'moment';
 import { RiskScorePreviewSection } from '../components/risk_score_management/risk_score_preview_section';
@@ -43,13 +41,12 @@ export const EntityAnalyticsManagementPage = () => {
   const {
     savedRiskEngineSettings,
     selectedRiskEngineSettings,
-    selectedSettingsMatchPersistedSettings,
+    selectedSettingsMatchSavedSettings,
     resetSelectedSettings,
-    saveSelectedSettings,
+    saveSelectedSettingsMutation,
     setSelectedDateSetting,
     toggleSelectedClosedAlertsSetting,
     isLoadingRiskEngineSettings,
-    isLoadingSaveSelectedSettings,
   } = useConfigurableRiskEngineSettings();
   const { data: riskEngineStatus } = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,
@@ -114,11 +111,9 @@ export const EntityAnalyticsManagementPage = () => {
 
             {/* Controls Section */}
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                {/* Run Engine Section */}
+              <EuiFlexGroup justifyContent={'center'} alignItems="center" gutterSize="m">
                 {runEngineEnabled && (
                   <>
-                    {/* Run Engine Button */}
                     <EuiButton
                       size="s"
                       iconType="play"
@@ -128,11 +123,7 @@ export const EntityAnalyticsManagementPage = () => {
                     >
                       {i18n.RUN_RISK_SCORE_ENGINE}
                     </EuiButton>
-
-                    {/* Vertical Line */}
                     <styles.VerticalSeparator />
-
-                    {/* Countdown Text */}
                     <div>
                       <EuiText size="s" color="subdued">
                         {countDownText}
@@ -140,11 +131,11 @@ export const EntityAnalyticsManagementPage = () => {
                     </div>
                   </>
                 )}
-
-                {/* Risk Score Enable Section */}
-                <div>
-                  <RiskScoreEnableSection privileges={privileges} />
-                </div>
+                <RiskScoreEnableSection
+                  selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
+                  saveSelectedSettingsMutation={saveSelectedSettingsMutation}
+                  privileges={privileges}
+                />
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -162,12 +153,6 @@ export const EntityAnalyticsManagementPage = () => {
                 setSelectedDateSetting={setSelectedDateSetting}
                 toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
               />
-              {!savedRiskEngineSettings && !selectedSettingsMatchPersistedSettings && (
-                <>
-                  <EuiSpacer size="m" />
-                  <EuiCallOut size="s" title={i18n.RISK_ENGINE_SAVE_CHANGES_AFTER_INITIALIZATION} />
-                </>
-              )}
               <EuiHorizontalRule />
               <RiskScoreUsefulLinksSection />
             </EuiFlexItem>
@@ -182,11 +167,11 @@ export const EntityAnalyticsManagementPage = () => {
           </>
         )}
       </EuiFlexGroup>
-      {savedRiskEngineSettings && !selectedSettingsMatchPersistedSettings && (
+      {savedRiskEngineSettings && !selectedSettingsMatchSavedSettings && (
         <RiskScoreSaveBar
           resetSelectedSettings={resetSelectedSettings}
-          saveSelectedSettings={saveSelectedSettings}
-          isLoading={isLoadingRiskEngineSettings || isLoadingSaveSelectedSettings}
+          saveSelectedSettings={saveSelectedSettingsMutation.mutateAsync}
+          isLoading={isLoadingRiskEngineSettings || saveSelectedSettingsMutation.isLoading}
         />
       )}
     </>

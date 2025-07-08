@@ -10,6 +10,7 @@ import {
   EuiSuperDatePicker,
   EuiText,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiSwitch,
   EuiSpacer,
@@ -17,14 +18,14 @@ import {
 } from '@elastic/eui';
 import * as i18n from '../../translations';
 import { getEntityAnalyticsRiskScorePageStyles } from './risk_score_page_styles';
-import type { RiskScoreConfigurationState } from './hooks/risk_score_configurable_risk_engine_settings_hooks';
+import type { RiskScoreConfiguration } from './hooks/risk_score_configurable_risk_engine_settings_hooks';
 
 export const RiskScoreConfigurationSection = ({
   selectedRiskEngineSettings,
   setSelectedDateSetting,
   toggleSelectedClosedAlertsSetting,
 }: {
-  selectedRiskEngineSettings: RiskScoreConfigurationState | undefined;
+  selectedRiskEngineSettings: RiskScoreConfiguration | undefined;
   setSelectedDateSetting: ({ start, end }: { start: string; end: string }) => void;
   toggleSelectedClosedAlertsSetting: () => void;
 }) => {
@@ -35,16 +36,14 @@ export const RiskScoreConfigurationSection = ({
   return (
     <>
       <EuiFlexGroup alignItems="center">
-        <div>
-          <EuiSwitch
-            label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}
-            checked={selectedRiskEngineSettings.includeClosedAlerts}
-            onChange={toggleSelectedClosedAlertsSetting}
-            data-test-subj="includeClosedAlertsSwitch"
-          />
-        </div>
+        <EuiSwitch
+          label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}
+          checked={selectedRiskEngineSettings.includeClosedAlerts}
+          onChange={toggleSelectedClosedAlertsSetting}
+          data-test-subj="includeClosedAlertsSwitch"
+        />
         <styles.VerticalSeparator />
-        <div>
+        <EuiFlexItem grow={false}>
           <EuiSuperDatePicker
             start={selectedRiskEngineSettings.range.start}
             end={selectedRiskEngineSettings.range.end}
@@ -53,7 +52,7 @@ export const RiskScoreConfigurationSection = ({
             compressed={false}
             showUpdateButton={false}
           />
-        </div>
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />

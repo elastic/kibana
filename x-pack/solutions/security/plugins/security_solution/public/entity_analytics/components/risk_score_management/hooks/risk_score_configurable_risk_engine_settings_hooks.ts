@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { useConfigureSORiskEngineMutation } from '../../../api/hooks/use_configure_risk_engine_saved_object';
 import * as i18n from '../../../translations';
 
-export interface RiskScoreConfigurationState {
+export interface RiskScoreConfiguration {
   includeClosedAlerts: boolean;
   range: {
     start: string;
@@ -21,8 +21,8 @@ export interface RiskScoreConfigurationState {
 }
 
 const settingsAreEqual = (
-  first?: Partial<RiskScoreConfigurationState>,
-  second?: Partial<RiskScoreConfigurationState>
+  first?: Partial<RiskScoreConfiguration>,
+  second?: Partial<RiskScoreConfiguration>
 ) => {
   return (
     first?.includeClosedAlerts === second?.includeClosedAlerts &&
@@ -31,9 +31,7 @@ const settingsAreEqual = (
   );
 };
 
-const riskEngineSettingsWithDefaults = (
-  riskEngineSettings?: Partial<RiskScoreConfigurationState>
-) => ({
+const riskEngineSettingsWithDefaults = (riskEngineSettings?: Partial<RiskScoreConfiguration>) => ({
   includeClosedAlerts: riskEngineSettings?.includeClosedAlerts ?? false,
   range: {
     start: riskEngineSettings?.range?.start ?? 'now-30d',
@@ -59,12 +57,13 @@ export const useConfigurableRiskEngineSettings = () => {
   const { fetchRiskEngineSettings } = useEntityAnalyticsRoutes();
 
   const [selectedRiskEngineSettings, setSelectedRiskEngineSettings] = useState<
-    RiskScoreConfigurationState | undefined
+    RiskScoreConfiguration | undefined
   >(undefined);
+
+  const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
 
   const {
     data: savedRiskEngineSettings,
-    refetch: refetchRiskEngineSettings,
     isLoading: isLoadingRiskEngineSettings,
     isError,
   } = useQuery(
@@ -90,10 +89,9 @@ export const useConfigurableRiskEngineSettings = () => {
     setSelectedRiskEngineSettings(riskEngineSettingsWithDefaults(savedRiskEngineSettings));
   };
 
-  const { mutateAsync: mutateRiskEngineSettingsAsync, isLoading: isLoadingSaveSelectedSettings } =
-    useConfigureSORiskEngineMutation();
+  const { mutateAsync: mutateRiskEngineSettingsAsync } = useConfigureSORiskEngineMutation();
 
-  const saveSelectedSettings = async () => {
+  const saveSelectedSettingsMutation = useMutation(async () => {
     if (selectedRiskEngineSettings) {
       await mutateRiskEngineSettingsAsync(
         {
@@ -111,9 +109,9 @@ export const useConfigurableRiskEngineSettings = () => {
           },
         }
       );
-      await refetchRiskEngineSettings();
+      await invalidateRiskEngineSettingsQuery();
     }
-  };
+  });
 
   const setSelectedDateSetting = ({ start, end }: { start: string; end: string }) => {
     setSelectedRiskEngineSettings((prevState) => {
@@ -129,19 +127,19 @@ export const useConfigurableRiskEngineSettings = () => {
     });
   };
 
-  const selectedSettingsMatchPersistedSettings = !isError
-    ? settingsAreEqual(selectedRiskEngineSettings, savedRiskEngineSettings)
-    : settingsAreEqual(selectedRiskEngineSettings, riskEngineSettingsWithDefaults());
+  const selectedSettingsMatchSavedSettings = settingsAreEqual(
+    selectedRiskEngineSettings,
+    riskEngineSettingsWithDefaults(savedRiskEngineSettings)
+  );
 
   return {
     savedRiskEngineSettings,
     selectedRiskEngineSettings,
-    selectedSettingsMatchPersistedSettings,
+    selectedSettingsMatchSavedSettings,
     resetSelectedSettings,
     setSelectedDateSetting,
     toggleSelectedClosedAlertsSetting,
-    saveSelectedSettings,
-    isLoadingSaveSelectedSettings,
+    saveSelectedSettingsMutation,
     isLoadingRiskEngineSettings,
   };
 };

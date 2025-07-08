@@ -56,28 +56,6 @@ jest.mock(
   })
 );
 
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  return {
-    ...actual,
-    useEuiTheme: () => ({
-      euiTheme: {
-        colors: {
-          lightShade: '',
-        },
-        size: {
-          l: '',
-        },
-        border: {
-          width: {
-            thin: '',
-          },
-        },
-      },
-    }),
-  };
-});
-
 jest.mock('../components/risk_score_management/risk_score_enable_section', () => ({
   RiskScoreEnableSection: () => 'Risk score enable section',
 }));
@@ -107,9 +85,11 @@ describe('EntityAnalyticsManagementPage', () => {
           end: 'now',
         },
       },
-      selectedSettingsMatchPersistedSettings: true,
+      selectedSettingsMatchSavedSettings: true,
       resetSelectedSettings: () => {},
-      saveSelectedSettings: () => {},
+      saveSelectedSettingsMutation: {
+        mutateAsync: () => {},
+      },
       setSelectedDateSetting: () => {},
       toggleSelectedClosedAlertsSetting: mockToggleSelectedClosedAlertsSetting,
       isLoadingRiskEngineSettings: false,
@@ -140,7 +120,7 @@ describe('EntityAnalyticsManagementPage', () => {
 
     mockUseConfigurableRiskEngineSettings.mockReturnValue({
       ...mockUseConfigurableRiskEngineSettings(),
-      selectedSettingsMatchPersistedSettings: false,
+      selectedSettingsMatchSavedSettings: false,
       selectedRiskEngineSettings: {
         includeClosedAlerts: true,
         range: {
@@ -171,7 +151,7 @@ describe('EntityAnalyticsManagementPage', () => {
 
     mockUseConfigurableRiskEngineSettings.mockReturnValue({
       ...mockUseConfigurableRiskEngineSettings(),
-      selectedSettingsMatchPersistedSettings: false,
+      selectedSettingsMatchSavedSettings: false,
       selectedRiskEngineSettings: {
         includeClosedAlerts: true,
         range: {
