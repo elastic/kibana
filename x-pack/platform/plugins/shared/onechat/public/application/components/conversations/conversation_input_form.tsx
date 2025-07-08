@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, KeyboardEvent } from 'react';
+import React, { useCallback, useState, KeyboardEvent, useEffect, useRef } from 'react';
 import { css } from '@emotion/css';
 import {
   EuiButtonIcon,
@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { conversationsCommonLabels } from './i18n';
+import { ConversationContent } from './conversation_grid';
 
 interface ConversationInputFormProps {
   disabled: boolean;
@@ -30,6 +31,13 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
 }) => {
   const [message, setMessage] = useState<string>('');
   const { euiTheme } = useEuiTheme();
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      textAreaRef.current?.focus();
+    }, 200);
+  }, []);
 
   const handleSubmit = useCallback(() => {
     if (loading || !message.trim()) {
@@ -63,36 +71,39 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
   `;
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      responsive={false}
-      alignItems="center"
-      justifyContent="center"
-      className={topContainerClass}
-    >
-      <EuiFlexItem className={inputFlexItemClass}>
-        <EuiTextArea
-          data-test-subj="onechatAppConversationInputFormTextArea"
-          fullWidth
-          rows={1}
-          value={message}
-          onChange={handleChange}
-          onKeyDown={handleTextAreaKeyDown}
-          placeholder={conversationsCommonLabels.userInputBox.placeholder}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label="Submit"
-          data-test-subj="onechatAppConversationInputFormSubmitButton"
-          iconType="kqlFunction"
-          display="fill"
-          size="m"
-          onClick={handleSubmit}
-          disabled={loading || disabled}
-          isLoading={loading}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <ConversationContent>
+      <EuiFlexGroup
+        gutterSize="s"
+        responsive={false}
+        alignItems="center"
+        justifyContent="center"
+        className={topContainerClass}
+      >
+        <EuiFlexItem className={inputFlexItemClass}>
+          <EuiTextArea
+            data-test-subj="onechatAppConversationInputFormTextArea"
+            fullWidth
+            rows={1}
+            value={message}
+            onChange={handleChange}
+            onKeyDown={handleTextAreaKeyDown}
+            placeholder={conversationsCommonLabels.userInputBox.placeholder}
+            inputRef={textAreaRef}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            aria-label="Submit"
+            data-test-subj="onechatAppConversationInputFormSubmitButton"
+            iconType="kqlFunction"
+            display="fill"
+            size="m"
+            onClick={handleSubmit}
+            disabled={loading || disabled}
+            isLoading={loading}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </ConversationContent>
   );
 };

@@ -5,116 +5,45 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { css } from '@emotion/css';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiTextArea,
-  EuiButtonIcon,
-  useEuiTheme,
-  keys,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import React from 'react';
+import { css } from '@emotion/react';
 import { conversationsCommonLabels } from './i18n';
+import { ConversationContent } from './conversation_grid';
 
-interface NewConversationPromptProps {
-  onSubmit: (message: string) => void;
-}
+const fullHeightStyles = css`
+  height: 100%;
+`;
 
-export const NewConversationPrompt: React.FC<NewConversationPromptProps> = ({ onSubmit }) => {
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [message, setMessage] = useState<string>('');
+export const NewConversationPrompt: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
-
-  useEffect(() => {
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 200);
-  }, [inputRef]);
-
-  const containerClass = css`
-    width: 100%;
-    max-width: 600px;
+  const promptStyles = css`
+    max-inline-size: calc(${euiTheme.size.l} * 19);
+    padding: ${euiTheme.size.l};
+    margin: 0 auto;
   `;
-
-  const inputContainerClass = css`
-    padding-top: ${euiTheme.size.l};
-    width: 100%;
-  `;
-
-  const inputFlexItemClass = css`
-    max-width: 900px;
-  `;
-
-  const handleSubmit = useCallback(() => {
-    if (!message.trim()) {
-      return;
-    }
-
-    onSubmit(message);
-    setMessage('');
-  }, [message, onSubmit]);
-
-  const handleChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(event.currentTarget.value);
-  }, []);
-
-  const handleTextAreaKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (!event.shiftKey && event.key === keys.ENTER) {
-        event.preventDefault();
-        handleSubmit();
-      }
-    },
-    [handleSubmit]
-  );
-
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center">
-      <EuiFlexItem grow={false} className={containerClass}>
-        <EuiPanel hasBorder={true} hasShadow={false} borderRadius="none" paddingSize="xl">
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <EuiFlexItem className={inputContainerClass}>
-              <EuiFlexGroup
-                gutterSize="s"
-                responsive={false}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <EuiFlexItem className={inputFlexItemClass}>
-                  <EuiTextArea
-                    inputRef={inputRef}
-                    data-test-subj="onechatAppChatNewConvTextArea"
-                    fullWidth
-                    rows={1}
-                    resize="vertical"
-                    value={message}
-                    onChange={handleChange}
-                    onKeyDown={handleTextAreaKeyDown}
-                    placeholder={conversationsCommonLabels.userInputBox.placeholder}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    aria-label="Submit"
-                    data-test-subj="onechatAppChatNewConvSubmitButton"
-                    iconType="kqlFunction"
-                    display="fill"
-                    size="m"
-                    onClick={handleSubmit}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <ConversationContent css={fullHeightStyles}>
+      <EuiFlexGroup
+        css={promptStyles}
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiIcon color="primary" size="xxl" type="logoElastic" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle>
+            <h2>{conversationsCommonLabels.content.newConversationPrompt.title}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText textAlign="center" color="subdued">
+            <p>{conversationsCommonLabels.content.newConversationPrompt.subtitle}</p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </ConversationContent>
   );
 };

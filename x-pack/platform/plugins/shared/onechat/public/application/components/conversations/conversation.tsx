@@ -15,7 +15,6 @@ import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ConversationInputForm } from './conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
-import { ConversationContent } from './conversation_grid';
 
 const conversationContainerStyles = css`
   width: 100%;
@@ -55,9 +54,7 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId }) => {
     [sendMessage, setStickToBottom]
   );
 
-  if (!conversationId && (!conversation || conversation.rounds.length === 0)) {
-    return <NewConversationPrompt onSubmit={onSubmit} />;
-  }
+  const hasActiveConversation = conversationId || (conversation && conversation.rounds.length > 0);
 
   return (
     <EuiFlexGroup
@@ -67,17 +64,19 @@ export const Conversation: React.FC<ConversationProps> = ({ agentId }) => {
       justifyContent="center"
       responsive={false}
     >
-      <EuiFlexItem grow css={scrollContainerStyles}>
-        <div ref={scrollContainerRef}>
-          <ConversationContent>
+      {hasActiveConversation ? (
+        <EuiFlexItem grow css={scrollContainerStyles}>
+          <div ref={scrollContainerRef}>
             <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
-          </ConversationContent>
-        </div>
-      </EuiFlexItem>
+          </div>
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow>
+          <NewConversationPrompt />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
-        <ConversationContent>
-          <ConversationInputForm disabled={!agentId} loading={false} onSubmit={onSubmit} />
-        </ConversationContent>
+        <ConversationInputForm disabled={!agentId} loading={false} onSubmit={onSubmit} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

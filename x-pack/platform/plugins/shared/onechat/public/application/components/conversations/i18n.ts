@@ -8,6 +8,17 @@
 import { i18n } from '@kbn/i18n';
 
 export const conversationsCommonLabels = {
+  content: {
+    newConversationPrompt: {
+      title: i18n.translate('xpack.onechat.newConversationPrompt', {
+        defaultMessage: 'How can I help today?',
+      }),
+      subtitle: i18n.translate('xpack.onechat.newConversationPrompt', {
+        defaultMessage:
+          'Whether you’re starting something new or jumping back into an old thread, I am ready when you are 💪',
+      }),
+    },
+  },
   header: {
     newConversationTitle: i18n.translate('xpack.onechat.newConversationTitle', {
       defaultMessage: 'New conversation',
