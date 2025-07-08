@@ -6,10 +6,10 @@
  */
 
 import { mapValues } from 'lodash';
-import { mergeSampleDocumentsWithFieldCaps } from '@kbn/genai-utils-server/log_analysis/merge_sample_documents_with_field_caps';
 import { DocumentAnalysis } from '@kbn/genai-utils-common/log_analysis/document_analysis';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, rangeQuery } from '@kbn/es-query';
+import { mergeSampleDocumentsWithFieldCaps } from './merge_sample_documents_with_field_caps';
 
 export async function analyzeDocuments({
   esClient,
