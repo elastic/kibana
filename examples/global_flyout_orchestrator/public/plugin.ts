@@ -40,7 +40,7 @@ export class GlobalFlyoutOrchestratorExamplePlugin
 
     deps.developerExamples.register({
       appId: 'globalFlyoutOrchestratorExample',
-      title: 'Global Flyout Orchestrator Example Application',
+      title: 'Global Flyout Orchestrator',
       description: `Demonstrates the impressive Global Flyout Orchestrator.`,
     });
   }

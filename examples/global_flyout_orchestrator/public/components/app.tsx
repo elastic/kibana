@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
+
 import React from 'react';
 
-import { BrowserRouter as Router } from '@kbn/shared-ux-router';
-import { EuiPageTemplate, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiPageTemplate, EuiSpacer, EuiTabbedContent, EuiTitle } from '@elastic/eui';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { BrowserRouter as Router } from '@kbn/shared-ux-router';
+import { ECommerceApp } from './ecommerce';
+import { DeepHistoryApp } from './deep_history';
+import { GroupOpenerApp } from './group_opener';
 
 interface AppDeps {
   basename: string;
@@ -19,6 +24,39 @@ interface AppDeps {
 }
 
 export const App = ({ basename, navigation }: AppDeps) => {
+  const tabs = [
+    {
+      id: 'deep-history--id',
+      name: 'Deep History Navigation',
+      content: (
+        <>
+          <EuiSpacer />
+          <DeepHistoryApp />
+        </>
+      ),
+    },
+    {
+      id: 'advanced-history--id',
+      name: 'Advanced History Management',
+      content: (
+        <>
+          <EuiSpacer />
+          <ECommerceApp />
+        </>
+      ),
+    },
+    {
+      id: 'group-opener--id',
+      name: 'Group Opener',
+      content: (
+        <>
+          <EuiSpacer />
+          <GroupOpenerApp />
+        </>
+      ),
+    },
+  ];
+
   return (
     <Router basename={basename}>
       <navigation.ui.TopNavMenu
@@ -29,16 +67,18 @@ export const App = ({ basename, navigation }: AppDeps) => {
       <EuiPageTemplate restrictWidth="1000px">
         <EuiPageTemplate.Header>
           <EuiTitle size="l">
-            <h1>Hello World</h1>
+            <h1>Flyout System</h1>
           </EuiTitle>
         </EuiPageTemplate.Header>
         <EuiPageTemplate.Section>
-          <EuiTitle>
-            <h2>Hello Title</h2>
-          </EuiTitle>
-          <EuiText>
-            <p>Hello Text</p>
-          </EuiText>
+          <EuiTabbedContent
+            tabs={tabs}
+            initialSelectedTab={tabs[1]}
+            autoFocus="selected"
+            onTabClick={(tab) => {
+              console.log('clicked tab', tab);
+            }}
+          />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
     </Router>
