@@ -136,6 +136,16 @@ See the section on [versioning](#versioning) for more details.
 
 `PUT /api/resource/{id}` ❌
 
+**Prefix actions against resource collections with `_`**
+
+Sometimes we want to designate a variation or action against a resource:
+
+```
+POST /api/resources/_bulk_delete
+```
+
+Carefully consider cases where this pattern may make sense as it is more user-friendly to expose simple paths and actions.
+
 ### Methods
 
 **GET does not accept a body**
