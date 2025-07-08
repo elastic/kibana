@@ -7,24 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  GridData,
-  DashboardPanel,
-  DashboardSection,
-  DashboardAttributes,
-  DashboardItem,
-  DashboardGetIn,
-  DashboardGetOut,
-  DashboardCreateIn,
-  DashboardCreateOut,
-  DashboardCreateOptions,
-  DashboardSearchIn,
-  DashboardSearchOut,
-  DashboardSearchOptions,
-  DashboardUpdateIn,
-  DashboardUpdateOut,
-  DashboardUpdateOptions,
-  DashboardOptions,
-} from './latest';
-
-export { DashboardStorage } from './dashboard_storage';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/controls/controls-constants'],
+};
