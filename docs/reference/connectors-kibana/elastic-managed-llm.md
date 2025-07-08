@@ -24,3 +24,7 @@ Only request metadata is logged in AWS CloudWatch.
 No information related to prompts is retained.
 Logged metadata includes the timestamp, model used, region, and request status.
 
+## Pricing
+
+The Elastic Managed LLM incurs a cost per million tokens for input and output tokens. Please see the Elastic Cloud [pricing pages](https://www.elastic.co/pricing) for details. 
+
