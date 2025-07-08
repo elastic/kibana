@@ -38,7 +38,7 @@ export function getCascadeRowNodePathValueRecord<G extends GroupNode>(
 }
 
 /**
- * @description This function generates a cache key for the leaf data of a cascade row.
+ * @description This function generates a cache key to persist and retrieve the leaf data of a cascade row.
  */
 export function getCascadeRowLeafDataCacheKey(
   nodePath: string[],
