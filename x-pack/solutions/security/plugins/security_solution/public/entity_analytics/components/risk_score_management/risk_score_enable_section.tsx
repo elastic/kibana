@@ -18,15 +18,17 @@ import {
   EuiCallOut,
   EuiAccordion,
 } from '@elastic/eui';
-import type { RiskEngineStatus } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import * as i18n from '../translations';
-import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
-import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
-import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
-import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
+import type { UseMutationResult } from '@tanstack/react-query';
+import type { RiskEngineStatus } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import * as i18n from '../../translations';
+import { useRiskEngineStatus } from '../../api/hooks/use_risk_engine_status';
+import { useInitRiskEngineMutation } from '../../api/hooks/use_init_risk_engine_mutation';
+import { useEnableRiskEngineMutation } from '../../api/hooks/use_enable_risk_engine_mutation';
+import { useDisableRiskEngineMutation } from '../../api/hooks/use_disable_risk_engine_mutation';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
+import { useInvalidateRiskEngineSettingsQuery } from './hooks/risk_score_configurable_risk_engine_settings_hooks';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 const toastOptions = {
@@ -93,7 +95,7 @@ const RiskEngineStatusRow: React.FC<{
       >
         <RiskEngineHealth currentRiskEngineStatus={currentRiskEngineStatus} />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexGroup alignItems={'center'} justifyContent={'center'}>
         <EuiSwitch
           label={i18n.RISK_ENGINE_STATUS_SWITCH_LABEL}
           data-test-subj="risk-score-switch"
@@ -103,18 +105,23 @@ const RiskEngineStatusRow: React.FC<{
           aria-describedby={'switchRiskModule'}
           showLabel={false}
         />
-      </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 };
 
 export const RiskScoreEnableSection: React.FC<{
   privileges: RiskEngineMissingPrivilegesResponse;
-}> = ({ privileges }) => {
+  selectedSettingsMatchSavedSettings: boolean;
+  saveSelectedSettingsMutation: UseMutationResult<void, unknown, void, unknown>;
+}> = ({ privileges, selectedSettingsMatchSavedSettings, saveSelectedSettingsMutation }) => {
   const { addSuccess } = useAppToasts();
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
+  const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
+
   const initRiskEngineMutation = useInitRiskEngineMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
+      await invalidateRiskEngineSettingsQuery();
       addSuccess(i18n.RISK_ENGINE_TURNED_ON, toastOptions);
     },
   });
@@ -133,19 +140,23 @@ export const RiskScoreEnableSection: React.FC<{
   const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
 
   const isLoading =
+    saveSelectedSettingsMutation.isLoading ||
     initRiskEngineMutation.isLoading ||
     enableRiskEngineMutation.isLoading ||
     disableRiskEngineMutation.isLoading ||
     privileges.isLoading ||
     isStatusLoading;
 
-  const onSwitchClick = () => {
+  const onSwitchClick = async () => {
     if (!currentRiskEngineStatus || isLoading) {
       return;
     }
 
     if (currentRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) {
-      initRiskEngineMutation.mutate();
+      if (!selectedSettingsMatchSavedSettings) {
+        await saveSelectedSettingsMutation.mutateAsync();
+      }
+      await initRiskEngineMutation.mutateAsync();
     } else if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
       disableRiskEngineMutation.mutate();
     } else if (currentRiskEngineStatus === RiskEngineStatusEnum.DISABLED) {
