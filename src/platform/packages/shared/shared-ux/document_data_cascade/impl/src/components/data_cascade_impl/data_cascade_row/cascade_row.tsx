@@ -29,7 +29,7 @@ export interface CascadeRowProps<G> {
   rowHeaderMetaSlots?: (props: { row: Row<G> }) => React.ReactNode[];
   rowInstance: Row<G>;
   /**
-   * The size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
+   * The size of the component, can be 's' (small), 'm' (medium), or 'l' (large).
    */
   size: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
   virtualRow: VirtualItem;
