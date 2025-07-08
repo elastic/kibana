@@ -811,6 +811,8 @@ export function defineRoutes(
         },
       });
 
+      await eventLogClient.refreshIndex();
+
       try {
         await pRetry(
           async () => {

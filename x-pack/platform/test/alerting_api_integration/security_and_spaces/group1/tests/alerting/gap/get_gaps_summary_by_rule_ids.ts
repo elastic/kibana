@@ -58,7 +58,7 @@ export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProvider
               .expect(200);
           });
 
-          it.only('should return gaps summary for multiple rules', async () => {
+          it('should return gaps summary for multiple rules', async () => {
             // Create 2 rules
             const rresponse1 = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)

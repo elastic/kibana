@@ -24,6 +24,16 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
     const gapStart = moment().subtract(14, 'days').startOf('day').toISOString();
     const gapEnd = moment().subtract(13, 'days').startOf('day').toISOString();
 
+    beforeEach(async () => {
+      const { space } = SuperuserAtSpace1;
+
+      await supertest
+        .post(`${getUrlPrefix(space.id)}/_test/delete_gaps`)
+        .set('kbn-xsrf', 'foo')
+        .send({})
+        .expect(200);
+    });
+
     afterEach(async () => {
       await objectRemover.removeAll();
     });
