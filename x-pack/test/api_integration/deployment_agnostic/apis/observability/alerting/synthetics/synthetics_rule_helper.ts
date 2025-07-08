@@ -15,7 +15,7 @@ import moment from 'moment';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
+import { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { AlertingApiProvider } from '../../../../services/alerting_api';
 
