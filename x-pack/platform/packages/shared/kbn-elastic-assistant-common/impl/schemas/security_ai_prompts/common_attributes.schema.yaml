@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info:
+  title: Common Security AI Prompts Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PromptItem:
+      type: object
+      properties:
+        promptId:
+          type: string
+          example: systemPrompt
+        prompt:
+          type: string
+          example: This is the prompt
+      required:
+        - promptId
+        - prompt
+
+    PromptItemArray:
+      type: array
+      description: Prompt array by prompt group id and prompt id.
+      items:
+        $ref: '#/components/schemas/PromptItem'

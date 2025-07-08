@@ -43,3 +43,4 @@ export {
 export { LogsExplorerTabs, type LogsExplorerTabsProps } from './components/logs_explorer_tabs';
 
 export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');
+export type { DiscoverServices } from './build_services';

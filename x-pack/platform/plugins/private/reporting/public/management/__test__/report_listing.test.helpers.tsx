@@ -31,10 +31,13 @@ import { act } from 'react-dom/test-utils';
 import { Observable } from 'rxjs';
 import { EuiThemeProvider } from '@elastic/eui';
 
-import { ListingProps as Props, ReportListing } from '..';
+import { RouteComponentProps } from 'react-router-dom';
+import { createLocation, createMemoryHistory } from 'history';
+import { ListingProps as Props, ReportingTabs } from '..';
 import { mockJobs } from '../../../common/test';
 import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
 import { ReportDiagnostic } from '../components';
+import { MatchParams } from '../components/reporting_tabs';
 
 export interface TestDependencies {
   http: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -94,6 +97,21 @@ const license$ = {
   },
 } as Observable<ILicense>;
 
+const routeProps: RouteComponentProps<MatchParams> = {
+  history: createMemoryHistory({
+    initialEntries: ['/exports'],
+  }),
+  location: createLocation('/exports'),
+  match: {
+    isExact: true,
+    path: `/exports`,
+    url: '',
+    params: {
+      section: 'exports',
+    },
+  },
+};
+
 export const createTestBed = registerTestBed(
   ({
     http,
@@ -111,14 +129,10 @@ export const createTestBed = registerTestBed(
       <KibanaContextProvider services={{ http, application, uiSettings, data, share }}>
         <InternalApiClientProvider apiClient={reportingAPIClient} http={http}>
           <IlmPolicyStatusContextProvider>
-            <ReportListing
-              license$={l$}
+            <ReportingTabs
               config={mockConfig}
-              redirect={jest.fn()}
-              navigateToUrl={jest.fn()}
-              urlService={urlService}
-              toasts={toasts}
               apiClient={reportingAPIClient}
+              {...routeProps}
               {...rest}
             />
           </IlmPolicyStatusContextProvider>

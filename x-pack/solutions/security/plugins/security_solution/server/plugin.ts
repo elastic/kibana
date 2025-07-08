@@ -179,7 +179,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
-    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
+    this.telemetryEventsSender = new TelemetryEventsSender(
+      this.logger,
+      this.config.experimentalFeatures
+    );
     this.asyncTelemetryEventsSender = new AsyncTelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 

@@ -7,7 +7,7 @@
 
 import React, { type ReactNode, useMemo } from 'react';
 import { css } from '@emotion/css';
-import { EuiCode, EuiCommentList, useEuiTheme } from '@elastic/eui';
+import { EuiCommentList, useEuiTheme } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
 import {
@@ -76,9 +76,14 @@ export interface ChatTimelineProps {
 }
 
 // helper using detected entity positions to transform user messages into react node to add text highlighting
-function highlightContent(
+export function highlightContent(
   content: string,
-  detectedEntities: Array<{ start_pos: number; end_pos: number; entity: string }>
+  detectedEntities: Array<{
+    start_pos: number;
+    end_pos: number;
+    entity: string;
+    class_name: string;
+  }>
 ): React.ReactNode {
   // Sort the entities by start position
   const sortedEntities = [...detectedEntities].sort((a, b) => a.start_pos - b.start_pos);
@@ -89,20 +94,40 @@ function highlightContent(
     if (entity.start_pos > lastIndex) {
       parts.push(content.substring(lastIndex, entity.start_pos));
     }
-    // Wrap the sensitive text in a span with highlight styles
-    parts.push(
-      <EuiCode key={`user-highlight-${index}`}>
-        {content.substring(entity.start_pos, entity.end_pos)}
-      </EuiCode>
-    );
+
+    // Currently only highlighting the content that's not inside code blocks
+    if (
+      isInsideInlineCode(content, entity.start_pos) ||
+      isInsideCodeBlock(content, entity.start_pos)
+    ) {
+      parts.push(`${content.substring(entity.start_pos, entity.end_pos)}`);
+    } else {
+      parts.push(
+        `!{anonymized{"entityClass":"${entity.class_name}","content":"${content.substring(
+          entity.start_pos,
+          entity.end_pos
+        )}"}}`
+      );
+    }
     lastIndex = entity.end_pos;
   });
   // Add any remaining text after the last entity
   if (lastIndex < content.length) {
     parts.push(content.substring(lastIndex));
   }
-  return parts;
+  return parts.join('');
 }
+
+// Count how many ``` fences exist before pos. An odd count means pos is inside a fenced block
+const isInsideCodeBlock = (src: string, pos: number): boolean =>
+  (src.slice(0, pos).match(/```/g) || []).length % 2 === 1;
+
+const isInsideInlineCode = (src: string, pos: number): boolean =>
+  Array.from(src.matchAll(/`([^`\\]|\\.)*?`/g)).some((m) => {
+    const start = m.index!;
+    return pos >= start && pos < start + m[0].length;
+  });
+
 const euiCommentListClassName = css`
   padding-bottom: 32px;
 `;
@@ -171,10 +196,10 @@ export function ChatTimeline({
     let currentGroup: ChatTimelineItem[] | null = null;
 
     for (const item of timelineItems) {
-      const { role, content, unredactions } = item.message.message;
+      const { content, unredactions } = item.message.message;
       if (item.display.hide || !item) continue;
 
-      if (anonymizationEnabled && role === 'user' && content && unredactions) {
+      if (anonymizationEnabled && content && unredactions) {
         item.anonymizedHighlightedContent = highlightContent(content, unredactions);
       }
 

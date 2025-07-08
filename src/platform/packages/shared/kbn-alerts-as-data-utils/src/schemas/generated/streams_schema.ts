@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import type { Either } from 'fp-ts/Either';
+import type { Either } from 'fp-ts/lib/Either';
 import { AlertSchema } from './alert_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
@@ -107,6 +107,9 @@ const StreamsAlertOptional = rt.partial({
   'kibana.alert.severity_improving': schemaBoolean,
   'kibana.alert.start': schemaDate,
   'kibana.alert.time_range': schemaDateRange,
+  'kibana.alert.updated_at': schemaDate,
+  'kibana.alert.updated_by.user.id': schemaString,
+  'kibana.alert.updated_by.user.name': schemaString,
   'kibana.alert.url': schemaString,
   'kibana.alert.workflow_assignee_ids': schemaStringArray,
   'kibana.alert.workflow_status': schemaString,

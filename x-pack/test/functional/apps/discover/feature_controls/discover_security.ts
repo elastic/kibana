@@ -22,17 +22,27 @@ export default function (ctx: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const securityService = getService('security');
   const globalNav = getService('globalNav');
-  const { common, error, discover, timePicker, security, share, header, unifiedFieldList } =
-    getPageObjects([
-      'common',
-      'error',
-      'discover',
-      'timePicker',
-      'security',
-      'share',
-      'header',
-      'unifiedFieldList',
-    ]);
+  const {
+    common,
+    error,
+    discover,
+    timePicker,
+    security,
+    share,
+    header,
+    unifiedFieldList,
+    exports,
+  } = getPageObjects([
+    'common',
+    'error',
+    'discover',
+    'timePicker',
+    'security',
+    'share',
+    'header',
+    'unifiedFieldList',
+    'exports',
+  ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
@@ -131,10 +141,9 @@ export default function (ctx: FtrProviderContext) {
       });
 
       it('shows CSV reports', async () => {
-        await share.clickShareTopNavButton();
-        await share.clickTab('Export');
+        await exports.clickExportTopNavButton();
         await testSubjects.existOrFail('generateReportButton');
-        await share.closeShareModal();
+        await exports.closeExportFlyout();
       });
 
       savedQuerySecurityUtils.shouldAllowSavingQueries();

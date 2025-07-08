@@ -21,7 +21,7 @@ export const ConnectorsCallout = () => {
         defaultMessage: 'Sync your data with a self-managed connector',
       })}
       size="s"
-      iconType="iInCircle"
+      iconType="info"
     >
       <p>
         <FormattedMessage

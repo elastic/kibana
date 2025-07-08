@@ -37,7 +37,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionInProgressText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {Migration}} in progress…',
+          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} delete {Deleting} other {Migration}} in progress…',
         values: { resolutionType },
       }
     ),
@@ -45,7 +45,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionCompleteText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {Migration}} complete',
+          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} delete {Deleting} other {Migration}} complete',
         values: { resolutionType },
       }
     ),
@@ -53,7 +53,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.resulutionFailedText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {Migration}} failed',
+          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} delete {Deleting} other {Migration}} failed',
         values: { resolutionType },
       }
     ),
@@ -61,7 +61,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionFetchFailedText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {Migration}} status not available',
+          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} delete {Deleting} other {Migration}} status not available',
         values: { resolutionType },
       }
     ),
@@ -69,7 +69,7 @@ const getI18nTexts = (resolutionType?: DataStreamResolutionType) => {
       'xpack.upgradeAssistant.esDeprecations.dataStream.resolutionCanceledText',
       {
         defaultMessage:
-          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} other {Migration}} cancelled',
+          '{resolutionType, select, reindex {Reindexing} readonly {Setting to read-only} delete {Deleting} other {Migration}} cancelled',
         values: { resolutionType },
       }
     ),
@@ -197,7 +197,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
                 content={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
               >
                 <EuiIcon
-                  type="iInCircle"
+                  type="info"
                   aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
                   size="s"
                 />

@@ -37,6 +37,7 @@
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-security-server",
     "@kbn/telemetry-config",
+    "@kbn/logging",
   ],
   "exclude": [
     "target/**/*",

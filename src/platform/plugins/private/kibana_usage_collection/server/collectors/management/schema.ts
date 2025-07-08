@@ -472,10 +472,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:entityCentricExperience': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
@@ -663,10 +659,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the new logs overview component.',
     },
   },
-  'observability:enableStreamsUI': {
+  'cases:incrementalIdDisplay:enabled': {
     type: 'boolean',
     _meta: {
-      description: 'Enable Streams UI.',
+      description: 'Display the incremental id of a case in the relevant pages',
     },
   },
 };

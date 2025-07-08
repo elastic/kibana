@@ -9,45 +9,75 @@
 
 import React, { type PropsWithChildren, createContext, useContext } from 'react';
 
-import { AnonymousAccessServiceContract } from '../../../common';
-import type {
-  ShareMenuItemV2,
-  UrlParamExtension,
-  BrowserUrlService,
-  ShareContext,
-} from '../../types';
+import type { ShareConfigs, ShareTypes, ShowShareMenuOptions } from '../../types';
 
-export type { ShareMenuItemV2, ShareContextObjectTypeConfig } from '../../types';
-
-export interface IShareContext extends ShareContext {
-  allowEmbed: boolean;
-  allowShortUrl: boolean;
-  shareMenuItems: ShareMenuItemV2[];
-  embedUrlParamExtensions?: UrlParamExtension[];
-  anonymousAccess?: AnonymousAccessServiceContract;
-  urlService: BrowserUrlService;
-  snapshotShareWarning?: string;
-  publicAPIEnabled?: boolean;
-  anchorElement?: HTMLElement;
+export interface IShareContext extends Omit<ShowShareMenuOptions, 'onClose'> {
+  onClose: () => void;
+  shareMenuItems: ShareConfigs[];
 }
 
-const ShareTabsContext = createContext<IShareContext | null>(null);
+const ShareContext = createContext<IShareContext | null>(null);
 
-export const ShareMenuProvider = ({
+export const ShareProvider = ({
   shareContext,
   children,
 }: PropsWithChildren<{ shareContext: IShareContext }>) => {
-  return <ShareTabsContext.Provider value={shareContext}>{children}</ShareTabsContext.Provider>;
+  return <ShareContext.Provider value={shareContext}>{children}</ShareContext.Provider>;
 };
 
-export const useShareTabsContext = () => {
-  const context = useContext(ShareTabsContext);
+export const useShareContext = () => {
+  const context = useContext(ShareContext);
 
   if (!context) {
     throw new Error(
-      'Failed to call `useShareTabsContext` because the context from ShareMenuProvider is missing. Ensure the component or React root is wrapped with ShareMenuProvider'
+      'Failed to call `useShareContext` because the context from ShareMenuProvider is missing. Ensure the component or React root is wrapped with ShareMenuProvider'
     );
   }
 
   return context;
+};
+
+export const useShareTypeContext = <
+  T extends Exclude<ShareTypes, 'legacy'>,
+  G extends T extends 'integration' ? string : never
+>(
+  shareType: T,
+  groupId?: G
+) => {
+  const context = useShareContext();
+
+  const { shareMenuItems, objectTypeMeta, ...rest } = context;
+
+  // the integration share type can have multiple implementations
+  const shareTypeImplementations: T extends 'integration'
+    ? Array<Extract<ShareConfigs, { shareType: T; groupId?: G }>>
+    : Extract<ShareConfigs, { shareType: T }> = (
+    shareType === 'integration' ? Array.prototype.filter : Array.prototype.find
+  ).call(
+    shareMenuItems,
+    (item) => item.shareType === shareType && item?.groupId === (groupId ?? item?.groupId)
+  );
+
+  type ObjectTypeMetaConfig = IShareContext['objectTypeMeta']['config'];
+
+  const shareTypeObjectMeta: Omit<ObjectTypeMetaConfig, 'config'> & {
+    config: T extends 'integration'
+      ? NonNullable<NonNullable<ObjectTypeMetaConfig>['integration']>[G] | undefined
+      : Exclude<NonNullable<ObjectTypeMetaConfig>, 'integration'>[T];
+  } = {
+    ...objectTypeMeta,
+    // @ts-expect-error -- this is a workaround for the type system
+    config:
+      shareType === 'integration'
+        ? groupId
+          ? objectTypeMeta.config?.integration?.[groupId]
+          : {}
+        : objectTypeMeta.config?.[shareType],
+  };
+
+  return {
+    ...rest,
+    objectTypeMeta: shareTypeObjectMeta,
+    shareMenuItems: shareTypeImplementations,
+  };
 };

@@ -643,6 +643,10 @@ describe('HomePage', () => {
         activeTab: 'query',
         graphEventId: '',
         isOpen: false,
+        query: {
+          expression: '',
+          kind: 'kuery',
+        },
       });
     });
 

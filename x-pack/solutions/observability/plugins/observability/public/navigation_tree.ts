@@ -83,10 +83,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'AI Assistant',
             }),
           },
-          {
-            link: 'inventory',
-            spaceBefore: 'm',
-          },
           ...(streamsAvailable
             ? [
                 {
@@ -104,6 +100,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             : []),
           {
             id: 'apm',
+            link: 'apm:services',
             title: i18n.translate('xpack.observability.obltNav.applications', {
               defaultMessage: 'Applications',
             }),
@@ -165,6 +162,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           },
           {
             id: 'metrics',
+            link: 'metrics:inventory',
             title: i18n.translate('xpack.observability.obltNav.infrastructure', {
               defaultMessage: 'Infrastructure',
             }),

@@ -123,7 +123,6 @@ export default function ({ getService }: FtrProviderContext) {
             'canvas',
             'generalCasesV3',
             'infrastructure',
-            'inventory',
             'logs',
             'maintenanceWindow',
             'manageReporting',
@@ -146,7 +145,6 @@ export default function ({ getService }: FtrProviderContext) {
             'securitySolutionSiemMigrations',
             'fleet',
             'fleetv2',
-            'entityManager',
           ].sort()
         );
       });
@@ -185,7 +183,6 @@ export default function ({ getService }: FtrProviderContext) {
           'canvas',
           'generalCasesV3',
           'infrastructure',
-          'inventory',
           'logs',
           'maintenanceWindow',
           'maps',
@@ -208,7 +205,6 @@ export default function ({ getService }: FtrProviderContext) {
           'securitySolutionSiemMigrations',
           'fleet',
           'fleetv2',
-          'entityManager',
           'manageReporting',
         ];
 

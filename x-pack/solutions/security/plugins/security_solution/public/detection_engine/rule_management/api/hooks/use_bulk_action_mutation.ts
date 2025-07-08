@@ -22,6 +22,7 @@ import { useInvalidateFetchPrebuiltRulesStatusQuery } from './prebuilt_rules/use
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';
+import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from './prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
 
 export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
@@ -41,6 +42,7 @@ export const useBulkActionMutation = (
   const invalidateFetchPrebuiltRulesUpgradeReviewQuery =
     useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
+  const invalidateFetchPrebuiltRuleBaseVerison = useInvalidateFetchPrebuiltRuleBaseVersionQuery();
   const updateRulesCache = useUpdateRulesCache();
 
   return useMutation<
@@ -84,6 +86,7 @@ export const useBulkActionMutation = (
           invalidateFetchPrebuiltRulesInstallReviewQuery();
           invalidateFetchPrebuiltRulesUpgradeReviewQuery();
           invalidateFetchCoverageOverviewQuery();
+          invalidateFetchPrebuiltRuleBaseVerison();
           break;
         case BulkActionTypeEnum.duplicate:
           invalidateFindRulesQuery();
@@ -102,6 +105,7 @@ export const useBulkActionMutation = (
           invalidateFetchRuleManagementFilters();
           invalidateFetchCoverageOverviewQuery();
           invalidateFetchPrebuiltRulesUpgradeReviewQuery();
+          invalidateFetchPrebuiltRuleBaseVerison();
           break;
       }
 

@@ -8,7 +8,9 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiModal, EuiModalBody } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 /**
  * By default the image formatter sets the max-width to "none" on the <img /> tag
@@ -34,11 +36,21 @@ export const ImagePreviewModal = ({ imgHTML, closeModal }: Props) => {
     <EuiModal onClose={closeModal}>
       <EuiModalBody>
         <div
-          className="indexPatternFieldEditor__previewImageModal__wrapper"
+          css={styles.previewImageModal}
           // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
           dangerouslySetInnerHTML={{ __html: setMaxWidthImage(imgHTML) }} // eslint-disable-line react/no-danger
         />
       </EuiModalBody>
     </EuiModal>
   );
+};
+
+const styles = {
+  previewImageModal: css({
+    padding: euiThemeVars.euiSize,
+
+    '& img': {
+      maxWidth: '100%',
+    },
+  }),
 };

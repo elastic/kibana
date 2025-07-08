@@ -224,6 +224,7 @@ export function getWebpackConfig(
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMap: true,
                       quietDeps: true,
+                      silenceDeprecations: ['import', 'legacy-js-api'],
                     },
                   },
                 },

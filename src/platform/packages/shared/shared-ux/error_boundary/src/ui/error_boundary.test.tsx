@@ -135,7 +135,7 @@ describe('<KibanaErrorBoundary>', () => {
     expect(apm.captureError).toHaveBeenCalledTimes(1);
     expect(apm.captureError).toHaveBeenCalledWith(
       new Error('This is an error to show the test user!'),
-      { labels: { errorType: 'PageFatalReactError' } }
+      { labels: { error_type: 'PageFatalReactError' } }
     );
   });
 });

@@ -54,6 +54,8 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
+
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import {
@@ -217,6 +219,13 @@ export interface ITelemetryReceiver {
       SearchResponse<RuleSearchResult, Record<string, AggregationsAggregate>>,
       unknown
     >
+  >;
+
+  fetchResponseActionsRules(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
   >;
 
   fetchDetectionExceptionList(
@@ -567,7 +576,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async *fetchDiagnosticAlertsBatch(executeFrom: string, executeTo: string) {
-    this.logger.l('Searching diagnostic alerts', {
+    this.logger.debug('Searching diagnostic alerts', {
       from: executeFrom,
       to: executeTo,
     } as LogMeta);
@@ -611,7 +620,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           fetchMore = false;
         }
 
-        this.logger.l('Diagnostic alerts to return', { numOfHits } as LogMeta);
+        this.logger.debug('Diagnostic alerts to return', { numOfHits } as LogMeta);
         fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
       } catch (e) {
         this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
@@ -749,6 +758,78 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.esClient().search<RuleSearchResult>(query, { meta: true });
   }
 
+  /**
+   * Find elastic rules SOs which are the rules that have immutable set to true and are of a particular rule type
+   * @returns custom elastic rules SOs with response actions enabled
+   */
+  public async fetchResponseActionsRules(executeFrom: string, executeTo: string) {
+    const query: SearchRequest = {
+      index: `${this.getIndexForType?.(RULE_SAVED_OBJECT_TYPE)}`,
+      ignore_unavailable: true,
+      size: 0, // no query results required - only aggregation quantity
+      from: 0,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                type: 'alert',
+              },
+            },
+            {
+              term: {
+                'alert.params.immutable': {
+                  value: false,
+                },
+              },
+            },
+            {
+              term: {
+                'alert.enabled': {
+                  value: true,
+                },
+              },
+            },
+            {
+              terms: {
+                'alert.consumer': ['siem', 'securitySolution'],
+              },
+            },
+            {
+              terms: {
+                'alert.params.responseActions.actionTypeId': ['.endpoint', '.osquery'],
+              },
+            },
+            {
+              range: {
+                'alert.updatedAt': {
+                  gte: executeFrom,
+                  lte: executeTo,
+                },
+              },
+            },
+          ],
+        },
+      },
+      sort: [
+        {
+          'alert.updatedAt': {
+            order: 'desc',
+          },
+        },
+      ],
+      aggs: {
+        actionTypes: {
+          terms: {
+            field: 'alert.params.responseActions.actionTypeId',
+          },
+        },
+      },
+    };
+
+    return this.esClient().search<unknown>(query, { meta: true });
+  }
+
   public async fetchDetectionExceptionList(listId: string, ruleVersion: number) {
     if (this?.exceptionListClient === undefined || this?.exceptionListClient === null) {
       throw Error('exception list client is unavailable: could not retrieve trusted applications');
@@ -785,7 +866,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     executeFrom: string,
     executeTo: string
   ) {
-    this.logger.l('Searching prebuilt rule alerts from', {
+    this.logger.debug('Searching prebuilt rule alerts from', {
       executeFrom,
       executeTo,
     } as LogMeta);
@@ -923,7 +1004,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           pitId = response?.pit_id;
         }
 
-        this.logger.l('Prebuilt rule alerts to return', { alerts: alerts.length } as LogMeta);
+        this.logger.debug('Prebuilt rule alerts to return', { alerts: alerts.length } as LogMeta);
 
         yield alerts;
       }
@@ -1065,7 +1146,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       } as LogMeta);
     }
 
-    this.logger.l('Timeline alerts to return', { alerts: alertsToReturn.length });
+    this.logger.debug('Timeline alerts to return', { alerts: alertsToReturn.length } as LogMeta);
 
     return alertsToReturn || [];
   }
@@ -1338,7 +1419,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async getIndices(): Promise<IndexSettings[]> {
     const es = this.esClient();
 
-    this.logger.l('Fetching indices');
+    this.logger.debug('Fetching indices');
 
     const request: IndicesGetRequest = {
       index: '*',
@@ -1374,7 +1455,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async getDataStreams(): Promise<DataStream[]> {
     const es = this.esClient();
 
-    this.logger.l('Fetching datstreams');
+    this.logger.debug('Fetching datstreams');
 
     const request: IndicesGetDataStreamRequest = {
       name: '*',
@@ -1416,11 +1497,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const es = this.esClient();
     const safeChunkSize = Math.min(chunkSize, 3000);
 
-    this.logger.l('Fetching indices stats');
+    this.logger.debug('Fetching indices stats');
 
     const groupedIndices = chunkStringsByMaxLength(indices, safeChunkSize);
 
-    this.logger.l('Splitted indices into groups', {
+    this.logger.debug('Splitted indices into groups', {
       groups: groupedIndices.length,
       indices: indices.length,
     } as LogMeta);
@@ -1484,7 +1565,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const groupedIndices = chunkStringsByMaxLength(indices, safeChunkSize);
 
-    this.logger.l('Splitted ilms into groups', {
+    this.logger.debug('Splitted ilms into groups', {
       groups: groupedIndices.length,
       indices: indices.length,
     } as LogMeta);
@@ -1519,7 +1600,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async getIndexTemplatesStats(): Promise<IndexTemplateInfo[]> {
     const es = this.esClient();
 
-    this.logger.l('Fetching datstreams');
+    this.logger.debug('Fetching datstreams');
 
     const request: IndicesGetIndexTemplateRequest = {
       name: '*',
@@ -1580,13 +1661,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const groupedIlms = chunkStringsByMaxLength(ilms, safeChunkSize);
 
-    this.logger.l('Splitted ilms into groups', {
+    this.logger.debug('Splitted ilms into groups', {
       groups: groupedIlms.length,
       ilms: ilms.length,
     } as LogMeta);
 
     for (const group of groupedIlms) {
-      this.logger.l('Fetching ilm policies');
+      this.logger.debug('Fetching ilm policies');
       const request: IlmGetLifecycleRequest = {
         name: group.join(','),
         filter_path: [
@@ -1626,7 +1707,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   public async getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]> {
     const es = this.esClient();
 
-    this.logger.l('Fetching ingest pipelines stats');
+    this.logger.debug('Fetching ingest pipelines stats');
 
     const request: NodesStatsRequest = {
       metric: 'ingest',

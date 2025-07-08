@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 
+import { findSecurityAIPromptsRoute } from './security_ai_prompts/find_prompts';
 import { findAlertSummaryRoute } from './alert_summary/find_route';
 import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
 import { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_discoveries';
@@ -107,6 +108,9 @@ export const registerRoutes = (
   // Prompts
   bulkPromptsRoute(router, logger);
   findPromptsRoute(router, logger);
+
+  // Security AI Prompts
+  findSecurityAIPromptsRoute(router, logger);
 
   // Anonymization Fields
   bulkActionAnonymizationFieldsRoute(router, logger);

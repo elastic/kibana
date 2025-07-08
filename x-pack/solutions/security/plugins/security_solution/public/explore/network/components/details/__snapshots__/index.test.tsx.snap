@@ -249,7 +249,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
               >
                 <button
                   class="euiLink emotion-euiLink-primary"
-                  data-test-subj="host-details-button"
+                  data-test-subj="securitySolutionFlyoutLink"
                   type="button"
                 >
                   b19a781f683541a7a25ee345133aa399
@@ -287,7 +287,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
                       >
                         <button
                           class="euiLink emotion-euiLink-primary"
-                          data-test-subj="host-details-button"
+                          data-test-subj="securitySolutionFlyoutLink"
                           type="button"
                         >
                           raspberrypi
@@ -589,7 +589,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
               >
                 <button
                   class="euiLink emotion-euiLink-primary"
-                  data-test-subj="host-details-button"
+                  data-test-subj="securitySolutionFlyoutLink"
                   type="button"
                 >
                   b19a781f683541a7a25ee345133aa399
@@ -627,7 +627,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
                       >
                         <button
                           class="euiLink emotion-euiLink-primary"
-                          data-test-subj="host-details-button"
+                          data-test-subj="securitySolutionFlyoutLink"
                           type="button"
                         >
                           raspberrypi

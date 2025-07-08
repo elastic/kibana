@@ -16,9 +16,13 @@ import { ClientPluginsStart } from '../../../../../plugin';
 
 interface SpaceSelectorProps {
   helpText: string;
+  isDisabled?: boolean;
 }
 
-export const SpaceSelector = <T extends FieldValues>({ helpText }: SpaceSelectorProps) => {
+export const SpaceSelector = <T extends FieldValues>({
+  helpText,
+  isDisabled = false,
+}: SpaceSelectorProps) => {
   const NAMESPACES_NAME = 'spaces' as Path<T>;
   const { services } = useKibana<ClientPluginsStart>();
   const [spacesList, setSpacesList] = React.useState<Array<{ id: string; label: string }>>([]);
@@ -34,7 +38,7 @@ export const SpaceSelector = <T extends FieldValues>({ helpText }: SpaceSelector
   const showFieldInvalid = (isSubmitted || isTouched) && !!error;
 
   useEffect(() => {
-    if (data) {
+    if (data?.spacesDataPromise) {
       data.spacesDataPromise.then((spacesData) => {
         setSpacesList([
           allSpacesOption,
@@ -61,6 +65,7 @@ export const SpaceSelector = <T extends FieldValues>({ helpText }: SpaceSelector
         rules={{ required: true }}
         render={({ field }) => (
           <EuiComboBox
+            isDisabled={isDisabled}
             fullWidth
             aria-label={SPACES_LABEL}
             placeholder={SPACES_LABEL}

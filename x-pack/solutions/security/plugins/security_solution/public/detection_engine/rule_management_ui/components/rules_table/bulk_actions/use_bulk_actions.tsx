@@ -14,7 +14,10 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback, useMemo } from 'react';
 import { BulkFillRuleGapsEventTypes } from '../../../../../common/lib/telemetry/events/bulk_fill_rule_gaps/types';
 import { ML_RULES_UNAVAILABLE } from './translations';
-import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
+import {
+  MAX_BULK_FILL_RULE_GAPS_BULK_SIZE,
+  MAX_MANUAL_RULE_RUN_BULK_SIZE,
+} from '../../../../../../common/constants';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
@@ -66,6 +69,7 @@ interface UseBulkActionsArgs {
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   showBulkFillRuleGapsConfirmation: () => Promise<TimeRange | null>;
   showManualRuleRunLimitError: () => void;
+  showBulkFillRuleGapsRuleLimitError: () => void;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
@@ -80,6 +84,7 @@ export const useBulkActions = ({
   showManualRuleRunConfirmation,
   showBulkFillRuleGapsConfirmation,
   showManualRuleRunLimitError,
+  showBulkFillRuleGapsRuleLimitError,
   completeBulkEditForm,
   executeBulkActionsDryRun,
 }: UseBulkActionsArgs) => {
@@ -314,8 +319,8 @@ export const useBulkActions = ({
 
         setIsPreflightInProgress(false);
 
-        if ((dryRunResult?.succeededRulesCount ?? 0) > MAX_MANUAL_RULE_RUN_BULK_SIZE) {
-          showManualRuleRunLimitError();
+        if ((dryRunResult?.succeededRulesCount ?? 0) > MAX_BULK_FILL_RULE_GAPS_BULK_SIZE) {
+          showBulkFillRuleGapsRuleLimitError();
           return;
         }
 
@@ -776,6 +781,7 @@ export const useBulkActions = ({
       showBulkDuplicateConfirmation,
       showManualRuleRunConfirmation,
       showManualRuleRunLimitError,
+      showBulkFillRuleGapsRuleLimitError,
       clearRulesSelection,
       confirmDeletion,
       bulkExport,

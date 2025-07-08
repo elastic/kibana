@@ -32,9 +32,6 @@ export const bootstrapPrebuiltRulesHandler = async (
   try {
     const ctx = await context.resolve(['securitySolution', 'alerting', 'core']);
     const securityContext = ctx.securitySolution;
-    const config = securityContext.getConfig();
-    const securityAIPromptsEnabled = config.experimentalFeatures.securityAIPromptsEnabled;
-
     const savedObjectsClient = ctx.core.savedObjects.client;
     const detectionRulesClient = securityContext.getDetectionRulesClient();
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
@@ -79,9 +76,7 @@ export const bootstrapPrebuiltRulesHandler = async (
       rules: ruleResults,
     };
 
-    const securityAiPromptsResult = securityAIPromptsEnabled
-      ? await installSecurityAiPromptsPackage(config, securityContext)
-      : null;
+    const securityAiPromptsResult = await installSecurityAiPromptsPackage(securityContext);
 
     if (securityAiPromptsResult !== null) {
       responseBody.packages.push({

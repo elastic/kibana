@@ -27,7 +27,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import type { ActionConnector } from '../../../common/types/domain';
 import { CaseSeverity } from '../../../common/types/domain';
-import type { CaseUI } from '../../../common/ui/types';
+import type { CaseUI, CasesSettings } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
 import { getEmptyCellValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -42,6 +42,7 @@ import { severities } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { IncrementalIdText } from '../incremental_id';
 
 type CasesColumns =
   | EuiTableActionsColumnType<CaseUI>
@@ -66,6 +67,7 @@ export interface GetCasesColumn {
   userProfiles: Map<string, UserProfileWithAvatar>;
   isSelectorView: boolean;
   selectedColumns: CasesColumnSelection[];
+  settings: CasesSettings;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: CaseUI) => void;
   disableActions?: boolean;
@@ -84,6 +86,7 @@ export const useCasesColumns = ({
   onRowClick,
   disableActions = false,
   selectedColumns,
+  settings,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
@@ -113,9 +116,14 @@ export const useCasesColumns = ({
             const caseDetailsLinkComponent = isSelectorView ? (
               theCase.title
             ) : (
-              <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
-                <TruncatedText text={theCase.title} />
-              </CaseDetailsLink>
+              <div>
+                <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+                  <TruncatedText text={theCase.title} />
+                </CaseDetailsLink>
+                {settings.displayIncrementalCaseId && typeof theCase.incrementalId === 'number' ? (
+                  <IncrementalIdText incrementalId={theCase.incrementalId} />
+                ) : null}
+              </div>
             );
 
             return caseDetailsLinkComponent;
@@ -334,7 +342,7 @@ export const useCasesColumns = ({
         width: '120px',
       },
     }),
-    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles]
+    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, settings]
   );
 
   // we need to extend the columnsDict with the columns of

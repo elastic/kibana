@@ -41,6 +41,7 @@ test.describe(
       page,
       pageObjects,
       perfTracker,
+      config,
     }) => {
       perfTracker.captureBundleResponses(cdp); // Start tracking
 
@@ -75,6 +76,7 @@ test.describe(
         'lens',
         'maps',
         'unifiedHistogram',
+        ...(config.projectType === 'security' ? ['securitySolution'] : []),
         'unifiedSearch',
       ]);
       // Validate individual plugin bundle sizes

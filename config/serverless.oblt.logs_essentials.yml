@@ -4,3 +4,4 @@
 xpack.infra.enabled: false
 xpack.slo.enabled: false
 xpack.observabilityAIAssistant.enabled: false
+xpack.aiops.ui.enabled: false

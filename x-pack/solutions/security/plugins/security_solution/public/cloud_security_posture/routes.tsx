@@ -9,13 +9,13 @@ import React from 'react';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import type { CloudSecurityPosturePageId } from '@kbn/cloud-security-posture-plugin/public';
 import { type CspSecuritySolutionContext } from '@kbn/cloud-security-posture-plugin/public';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
+import { SecurityPageName } from '../app/types';
+import type { SecuritySubPluginRoutes } from '../app/types';
 import { useKibana } from '../common/lib/kibana';
-import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { FiltersGlobal } from '../common/components/filters_global';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 // This exists only for the type signature cast
 const CloudPostureSpyRoute = ({ pageName, ...rest }: { pageName?: CloudSecurityPosturePageId }) => (
@@ -33,11 +33,7 @@ const CloudSecurityPosture = () => {
 
   return (
     <PluginTemplateWrapper>
-      <TrackApplicationView viewId="cloud_security_posture">
-        <SecuritySolutionPageWrapper noPadding noTimeline>
-          <CloudSecurityPostureRouter securitySolutionContext={cspSecuritySolutionContext} />
-        </SecuritySolutionPageWrapper>
-      </TrackApplicationView>
+      <CloudSecurityPostureRouter securitySolutionContext={cspSecuritySolutionContext} />
     </PluginTemplateWrapper>
   );
 };
@@ -47,6 +43,10 @@ CloudSecurityPosture.displayName = 'CloudSecurityPosture';
 export const routes: SecuritySubPluginRoutes = [
   {
     path: CLOUD_SECURITY_POSTURE_BASE_PATH,
-    component: CloudSecurityPosture,
+    component: withSecurityRoutePageWrapper(
+      CloudSecurityPosture,
+      SecurityPageName.cloudSecurityPostureDashboard,
+      { omitSpyRoute: true }
+    ),
   },
 ];

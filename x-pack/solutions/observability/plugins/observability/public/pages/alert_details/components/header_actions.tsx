@@ -8,7 +8,6 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
@@ -29,12 +28,15 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
-import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
 import { paths } from '../../../../common/locators/paths';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
+import {
+  AlertDetailsRuleFormFlyout,
+  type AlertDetailsRuleFormFlyoutBaseProps,
+} from './AlertDetailsRuleFormFlyout';
 
-export interface HeaderActionsProps {
+export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
   alertIndex?: string;
   alertStatus?: AlertStatus;
@@ -46,26 +48,20 @@ export function HeaderActions({
   alertIndex,
   alertStatus,
   onUntrackAlert,
+  onUpdate,
+  rule,
+  refetch,
 }: HeaderActionsProps) {
   const { services } = useKibana();
   const {
     cases: {
       hooks: { useCasesAddToExistingCaseModal },
     },
-    triggersActionsUi: {
-      ruleTypeRegistry,
-      actionTypeRegistry,
-      getRuleSnoozeModal: RuleSnoozeModal,
-    },
+    triggersActionsUi: { getRuleSnoozeModal: RuleSnoozeModal },
     http,
   } = services;
 
-  const { rule, refetch } = useFetchRule({
-    ruleId: alert?.fields[ALERT_RULE_UUID] || '',
-  });
-
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const [ruleConditionsFlyoutOpen, setRuleConditionsFlyoutOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
   const selectCaseModal = useCasesAddToExistingCaseModal();
@@ -81,6 +77,8 @@ export function HeaderActions({
       onUntrackAlert();
     }
   }, [alert, untrackAlerts, onUntrackAlert]);
+
+  const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => setIsPopoverOpen(false);
@@ -103,11 +101,6 @@ export function HeaderActions({
   const handleAddToCase = () => {
     setIsPopoverOpen(false);
     selectCaseModal.open({ getAttachments: () => attachments });
-  };
-
-  const handleEditRuleDetails = () => {
-    setIsPopoverOpen(false);
-    setRuleConditionsFlyoutOpen(true);
   };
 
   const handleOpenSnoozeModal = () => {
@@ -174,7 +167,10 @@ export function HeaderActions({
                   size="s"
                   color="text"
                   iconType="pencil"
-                  onClick={handleEditRuleDetails}
+                  onClick={() => {
+                    setIsPopoverOpen(false);
+                    setAlertDetailsRuleFormFlyoutOpen(true);
+                  }}
                   disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
                   data-test-subj="edit-rule-button"
                 >
@@ -224,19 +220,15 @@ export function HeaderActions({
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {rule && ruleConditionsFlyoutOpen ? (
-        <RuleFormFlyout
-          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
-          id={rule.id}
-          onCancel={() => {
-            setRuleConditionsFlyoutOpen(false);
-          }}
-          onSubmit={() => {
-            setRuleConditionsFlyoutOpen(false);
-            refetch();
-          }}
+      {rule && (
+        <AlertDetailsRuleFormFlyout
+          isRuleFormFlyoutOpen={alertDetailsRuleFormFlyoutOpen}
+          setIsRuleFormFlyoutOpen={setAlertDetailsRuleFormFlyoutOpen}
+          onUpdate={onUpdate}
+          refetch={refetch}
+          rule={rule}
         />
-      ) : null}
+      )}
 
       {rule && snoozeModalOpen ? (
         <RuleSnoozeModal
