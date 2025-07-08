@@ -1,4 +1,4 @@
-import { WorkflowStep, Provider } from '../from-poc/models';
+import { Provider, WorkflowStep } from '@kbn/workflows';
 import { TemplatingEngine } from '../templating-engine';
 
 export interface RunStepResult {
@@ -7,9 +7,6 @@ export interface RunStepResult {
 }
 
 export class StepRunner {
-  /**
-   *
-   */
   constructor(
     private providers: Record<string, Provider>,
     private templatingEngine: TemplatingEngine

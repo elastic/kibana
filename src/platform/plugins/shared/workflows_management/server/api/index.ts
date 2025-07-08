@@ -36,7 +36,7 @@ export const mockWorkflow: WorkflowModel = {
         ? ExecutionStatus.RUNNING
         : i % 5 === 0
         ? ExecutionStatus.FAILED
-        : ExecutionStatus.SUCCESS,
+        : ExecutionStatus.COMPLETED,
     startedAt: new Date(2025, 0, 1, 12, 0, 0 + i, 0).toISOString(),
     finishedAt: new Date(2025, 0, 1, 12, 0, 1 + i, 0).toISOString(),
     duration: i % 2 === 0 ? 10 : null,
@@ -47,7 +47,7 @@ export const mockWorkflow: WorkflowModel = {
       id: '27701bca-1df2-43f4-a2b1-798cfd298a9e',
       finishedAt: '2025-07-08T10:00:10Z',
       startedAt: '2025-07-08T10:00:00Z',
-      status: ExecutionStatus.SUCCESS,
+      status: ExecutionStatus.COMPLETED,
       logs: [
         {
           timestamp: '2025-07-08T10:00:01Z',
@@ -58,7 +58,8 @@ export const mockWorkflow: WorkflowModel = {
     },
   ],
   yaml: '',
-  definition: [],
+  steps: [],
+  nodes: [],
 };
 
 export interface GetWorkflowsParams {

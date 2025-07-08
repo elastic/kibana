@@ -1,13 +1,14 @@
 export enum ExecutionStatus {
   // In progress
   PENDING = 'pending',
-  RSVP = 'rsvp',
+  WAITING_FOR_INPUT = 'waiting_for_input',
   RUNNING = 'running',
 
   // Done
-  SUCCESS = 'success',
+  COMPLETED = 'completed',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
+  SKIPPED = 'skipped',
 }
 
 export interface WorkflowExecution {
@@ -19,7 +20,36 @@ export interface WorkflowExecution {
   duration: number | null;
 }
 
-// TODO: execution logs and results
+export interface ProviderInput {
+  type: 'string' | 'number' | 'boolean';
+  required: boolean;
+  defaultValue?: string | number | boolean;
+}
+
+export interface Provider {
+  type: string;
+  action: (stepInputs?: Record<string, any>) => Promise<Record<string, any> | void>;
+  inputsDefinition: Record<string, ProviderInput>;
+}
+
+export interface WorkflowStep {
+  id: string;
+  providerName: string;
+  inputs: Record<string, any>;
+  needs?: string[];
+}
+export interface WorkflowStepExecution {
+  id: string;
+  stepId: string;
+  workflowRunId: string;
+  workflowId: string;
+  status: ExecutionStatus;
+  startedAt: Date;
+  completedAt?: Date;
+  executionTimeMs?: number;
+  error?: string;
+  output?: Record<string, any>;
+}
 
 export enum WorkflowStatus {
   ACTIVE = 'active',
@@ -29,20 +59,21 @@ export enum WorkflowStatus {
 
 export interface WorkflowTrigger {
   id: string;
-  type: 'manual' | 'schedule';
+  type: 'manual' | 'schedule' | 'detection-rule';
   enabled: boolean;
   config?: Record<string, any>;
 }
 
-export interface WorkflowStep {
+export interface WorkflowNode {
   id: string;
-  type: 'trigger' | 'step';
+  type: 'trigger' | 'step' | 'container' | 'switch';
   config: Record<string, any>;
-  children: string[]; // List of children Nodes
-  next: string; // ID of next Node
+  children: string[];
+  next: string;
   position: { x: number; y: number };
   color: string;
   note: string;
+  workflowStepId: string;
 }
 
 export interface WorkflowExecutionHistoryModel {
@@ -71,7 +102,7 @@ export interface WorkflowExecutionModel {
   logs: WorkflowExecutionLogModel[];
 }
 
-// Full model - single source of truth
+// TODO: convert to actual elastic document spec
 export interface WorkflowModel {
   id: string;
   name: string;
@@ -79,14 +110,15 @@ export interface WorkflowModel {
   status: WorkflowStatus;
   triggers: WorkflowTrigger[];
   tags: string[];
-  yaml: string;
-  definition: WorkflowStep[];
   executions: WorkflowExecutionModel[];
   history: WorkflowExecutionHistoryModel[];
   createdAt: string;
   createdBy: string;
   lastUpdatedAt: string;
   lastUpdatedBy: string;
+  yaml: string;
+  steps: WorkflowStep[];
+  nodes: WorkflowNode[];
 }
 
 export type WorkflowListItemModel = Pick<
@@ -104,3 +136,8 @@ export interface WorkflowListModel {
   };
   results: WorkflowListItemModel[];
 }
+
+export type WorkflowExecutionEngineModel = Pick<
+  WorkflowModel,
+  'id' | 'name' | 'status' | 'triggers' | 'steps'
+>;

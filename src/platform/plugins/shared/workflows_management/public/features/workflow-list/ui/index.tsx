@@ -82,7 +82,7 @@ export function WorkflowList() {
             x: new Date(run.startedAt).getTime(),
             y: run.duration,
             color:
-              run.status === ExecutionStatus.SUCCESS
+              run.status === ExecutionStatus.COMPLETED
                 ? euiTheme.colors.vis.euiColorVis0
                 : run.status === ExecutionStatus.FAILED
                 ? euiTheme.colors.vis.euiColorVis6

@@ -9,20 +9,24 @@ import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { Client } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
 
-import type { WorkflowsPluginSetup, WorkflowsPluginSetupDeps, WorkflowsPluginStart } from './types';
-import { defineRoutes } from './routes';
-import { WorkflowsManagementApi } from './api';
-import {
-  providers,
-  Workflow,
-  WorkflowRunStatus,
-  workflows,
-  WorkflowStepExecution,
-} from './from-poc';
+import type {
+  WorkflowsExecutionEnginePluginSetup,
+  WorkflowsExecutionEnginePluginStart,
+  WorkflowsExecutionEnginePluginSetupDeps,
+  WorkflowsExecutionEnginePluginStartDeps,
+} from './types';
+import { providers, workflowsGrouppedByTriggerType } from './mock';
 import { StepRunner } from './step-runner/step-runner';
 import { TemplatingEngine } from './templating-engine';
+import {
+  ExecutionStatus,
+  WorkflowExecutionEngineModel,
+  WorkflowStepExecution,
+} from '@kbn/workflows';
 
-export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
+export class WorkflowsExecutionEnginePlugin
+  implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
+{
   private readonly logger: Logger;
   private esClient: Client = new Client({
     node: 'http://localhost:9200', // or your ES URL
@@ -36,14 +40,8 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: WorkflowsPluginSetupDeps) {
-    this.logger.debug('Workflows: Setup');
-    const router = core.http.createRouter();
-
-    // Register server side APIs
-    defineRoutes(router);
-
-    this.logger.debug('workflows: Setup');
+  public setup(core: CoreSetup, plugins: WorkflowsExecutionEnginePluginSetupDeps) {
+    this.logger.debug('workflows-execution-engine: Setup');
     async function getTaskManager(): Promise<TaskManagerStartContract> {
       const { taskManager } = await core.plugins.onStart<{ taskManager: TaskManagerStartContract }>(
         'taskManager'
@@ -57,7 +55,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
     const scheduleStep = async (
       workflowRunId: string,
-      workflow: Workflow,
+      workflow: WorkflowExecutionEngineModel,
       stepsStack: string[],
       context: Record<string, any>
     ) => {
@@ -77,18 +75,18 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           workflowId: workflow.id,
           workflowRunId,
           stepId: currentStepId,
-          status: WorkflowRunStatus.RUNNING,
+          status: ExecutionStatus.RUNNING,
           startedAt,
         } as WorkflowStepExecution,
       });
 
       const stepResult = await stepRunner.runStep(currentStep, context);
 
-      let status: WorkflowRunStatus;
+      let status: ExecutionStatus;
       if (stepResult.error) {
-        status = WorkflowRunStatus.FAILED;
+        status = ExecutionStatus.FAILED;
       } else {
-        status = WorkflowRunStatus.COMPLETED;
+        status = ExecutionStatus.COMPLETED;
       }
 
       const completedAt = new Date();
@@ -135,7 +133,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           run: async () => {
             const { eventType, rawEvent } = taskInstance.params;
             this.logger.debug(`Received workflow event: ${eventType}`, rawEvent);
-            const currentTriggerWorkflows = workflows[eventType];
+            const currentTriggerWorkflows = workflowsGrouppedByTriggerType[eventType];
 
             currentTriggerWorkflows?.forEach((workflow) => {
               const workflowRunId = generateUuid();
@@ -174,15 +172,11 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       },
     });
 
-    return {
-      management: WorkflowsManagementApi,
-    };
+    return {};
   }
 
-  public start(core: CoreStart, plugins: { taskManager: TaskManagerStartContract }) {
-    this.logger.debug('workflows: Start');
-
-    this.logger.debug('workflows: Started');
+  public start(core: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
+    this.logger.debug('workflows-execution-engine: Start');
 
     return {
       // async execute workflow
