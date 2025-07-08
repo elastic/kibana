@@ -136,9 +136,12 @@ export const DeepHistoryApp: React.FC = () => {
 
   return (
     <>
-      <EuiTitle>
-        <h2>openSystemFlyout: Advanced History Management</h2>
-      </EuiTitle>
+      <EuiText>
+        <p>
+          This demo shows how to use the <code>openSystemFlyout</code> function to systematically
+          navigate from one flyout to the next, with history controls shown in the top menu bar.
+        </p>
+      </EuiText>
       <EuiSpacer />
       <EuiFlyoutSessionProvider
         renderMainFlyoutContent={renderMainFlyoutContent}

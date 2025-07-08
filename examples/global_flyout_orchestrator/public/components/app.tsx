@@ -14,8 +14,9 @@ import React from 'react';
 import { EuiPageTemplate, EuiSpacer, EuiTabbedContent, EuiTitle } from '@elastic/eui';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
-import { ECommerceApp } from './ecommerce';
+import { BasicFlyoutApp } from './basic';
 import { DeepHistoryApp } from './deep_history';
+import { ECommerceApp } from './ecommerce';
 import { GroupOpenerApp } from './group_opener';
 
 interface AppDeps {
@@ -25,6 +26,16 @@ interface AppDeps {
 
 export const App = ({ basename, navigation }: AppDeps) => {
   const tabs = [
+    {
+      id: 'basic--id',
+      name: 'Basic Flyout',
+      content: (
+        <>
+          <EuiSpacer />
+          <BasicFlyoutApp />
+        </>
+      ),
+    },
     {
       id: 'deep-history--id',
       name: 'Deep History Navigation',
@@ -37,7 +48,7 @@ export const App = ({ basename, navigation }: AppDeps) => {
     },
     {
       id: 'advanced-history--id',
-      name: 'Advanced History Management',
+      name: 'Advanced Use Case',
       content: (
         <>
           <EuiSpacer />
@@ -73,7 +84,7 @@ export const App = ({ basename, navigation }: AppDeps) => {
         <EuiPageTemplate.Section>
           <EuiTabbedContent
             tabs={tabs}
-            initialSelectedTab={tabs[1]}
+            initialSelectedTab={tabs[0]}
             autoFocus="selected"
             onTabClick={(tab) => {
               console.log('clicked tab', tab);
