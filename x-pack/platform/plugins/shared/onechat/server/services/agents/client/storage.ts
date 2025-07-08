@@ -30,7 +30,7 @@ export interface AgentProfileProperties {
   type: AgentType;
   description: string;
   configuration: {
-    additional_prompt?: string;
+    instructions?: string;
     tools: ToolSelection[];
   };
   created_at: string;

@@ -25,7 +25,7 @@ export const fromEs = (document: Document): AgentDefinition => {
     name: document._source.name,
     description: document._source.description,
     configuration: {
-      additional_prompt: document._source.configuration.additional_prompt,
+      instructions: document._source.configuration.instructions,
       tools: document._source.configuration.tools,
     },
   };
@@ -43,7 +43,7 @@ export const createRequestToEs = ({
     type: defaultAgentType,
     description: profile.description,
     configuration: {
-      additional_prompt: profile.configuration.additional_prompt,
+      instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
     },
     created_at: creationDate.toISOString(),

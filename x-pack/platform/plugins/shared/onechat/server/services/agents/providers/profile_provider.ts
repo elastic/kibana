@@ -58,7 +58,7 @@ const profileToDescriptor = ({ agent }: { agent: AgentDefinition }): ProvidedAge
           { provider: builtinToolProviderId, tool_ids: [allTools] },
         ]),
       ],
-      customInstructions: agent.configuration.additional_prompt,
+      customInstructions: agent.configuration.instructions,
     }),
   };
 };

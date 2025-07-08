@@ -79,6 +79,12 @@ export interface AgentDefinition {
 }
 
 export interface AgentConfiguration {
-  additional_prompt?: string;
+  /**
+   * Custom instruction for the agent
+   */
+  instructions?: string;
+  /**
+   * List of tools exposed to the agent
+   */
   tools: ToolSelection[];
 }
