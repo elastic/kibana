@@ -74,7 +74,7 @@ First release new HTTP APIs internally or as `Technical Preview` behind a featur
 
  - Rename or delete an API
  - Rename or delete a path, query or body parameter
- - Modifying the type of a property (including expanding to a union type!)
+ - Modify the type of a property (including expanding to a union type!)
  - Add a new required property
  - Set an existing property as required
  - Add or delete a security requirement
@@ -122,7 +122,7 @@ Kibana HTTP APIs do not need to implement the full RESTful specification. We aim
 
 `/api/my-api`, `/api/myApi` ❌
 
-**Do not contain version numbers**
+**Should not contain version numbers**
 
 `/api/my_api` ✅
 
@@ -387,11 +387,27 @@ Utilities for working with KQL queries are available in the `@kbn/es-query` pack
 
 ### Observability
 
-Please [follow the advice](https://github.com/elastic/observability-dev/blob/main/docs/observability-experience/resources/development-practices/low-level-api-guidelines.md#7-observability) outlined by observability developers
+Consider common error states your API might face, as well the information you might need to answer unexpected questions about the behavior of the API. To this end, creating a dedicated logger could be a good idea.
+
+<DocCallOut title="Do not log too liberally, default to `debug`" color="warning">
+  Carefully choose the log level of any logs you emit. `info` level logs can generate a lot of log noise for Kibana operators. This increases costs and often provides little value.
+
+  Choose `info` if your API is called infrequently or if a truly noteworthy, usually one-off event, has occurred.
+</DocCallOut>
+
 
 ### Security
 
-Please [follow the advice](https://github.com/elastic/observability-dev/blob/main/docs/observability-experience/resources/development-practices/low-level-api-guidelines.md#8-security) outlined by observability developers
+User authentication is handled globally for all routes but as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API. This depends on the actions your API performs.
+
+<DocCallOut title="Do not expose sensitive information" color="warning">
+  Carefully consider the information you return from or log in your API handler. **Do not expose sensitive information**. This includes information that can be used to identify users. We have a separate <DocLink id="kibAuditLogging" text="audit logger" /> that you can use to log sensitive information about user actions.
+</DocCallOut>
+
+
+Assigning specific roles to your API will surface them in our code-generated OpenAPI spec. See the [documentation section](#documentation).
+
+_**If you have any hesitation or questions please reach out to the Kibana security team!**_
 
 ### Performance
 
