@@ -11,32 +11,33 @@ import {
   EuiResizableContainer,
   useGeneratedHtmlId,
   useResizeObserver,
-  useEuiTheme,
   mathWithUnits,
+  UseEuiTheme,
 } from '@elastic/eui';
 import type { ResizeTrigger } from '@elastic/eui/src/components/resizable_container/types';
 import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { ResizableLayoutDirection } from '../types';
 import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
 
 export const PanelsResizable = ({
   className,
   direction,
-  container,
+  // container,
   fixedPanelSize,
   minFixedPanelSize,
   minFlexPanelSize,
-  panelSizes,
+  // panelSizes,
   fixedPanel,
   flexPanel,
   resizeButtonClassName,
   ['data-test-subj']: dataTestSubj = 'resizableLayout',
   onFixedPanelSizeChange,
-  setPanelSizes,
-}: {
+}: // setPanelSizes,
+{
   className?: string;
   direction: ResizableLayoutDirection;
   container: HTMLElement | null;
@@ -54,37 +55,18 @@ export const PanelsResizable = ({
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
   setPanelSizes: (panelSizes: { fixedPanelSizePct: number; flexPanelSizePct: number }) => void;
 }) => {
-  const { euiTheme } = useEuiTheme();
   const fixedPanelId = useGeneratedHtmlId({ prefix: 'fixedPanel' });
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const { height: containerHeight, width: containerWidth } = useResizeObserver(container);
   const containerSize = getContainerSize(direction, containerWidth, containerHeight);
+  const [panelSizes, setPanelSizes] = useState({ fixedPanelSizePct: 50, flexPanelSizePct: 50 });
 
   // The resize overlay makes it so that other mouse events (e.g. tooltip hovers, etc)
   // don't occur when mouse dragging
   const [isResizing, setIsResizing] = useState(false);
 
   // Align the resizable button border to overlap exactly over existing panel/layout borders
-  const buttonBorderCss = css`
-    position: relative;
-    inset-${direction === 'horizontal' ? 'inline-start' : 'block-end'}: -${mathWithUnits(
-    euiTheme.border.width.thin,
-    (x) => x / 2
-  )};
-    `;
-  const defaultButtonCss = css`
-    z-index: 3;
-  `;
-  const resizingButtonCss = css`
-    z-index: 4;
-  `;
-  const resizingOverlayCss = css`
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 3;
-  `;
+  const buttonStyles = useMemoCss(buttonBorderStyles);
 
   // We convert the top panel size from a percentage of the container size
   // to a pixel value and emit the change to the parent component. We also convert
@@ -180,52 +162,82 @@ export const PanelsResizable = ({
     setIsResizing(false);
   }, [isResizing]);
 
-  // Don't render EuiResizableContainer until we have have valid
-  // panel sizes or it can cause the resize functionality to break.
-  if (!panelSizes.fixedPanelSizePct && !panelSizes.flexPanelSizePct) {
-    return null;
-  }
-
   return (
-    <EuiResizableContainer
-      className={className}
-      direction={direction}
-      onPanelWidthChange={onPanelSizeChange}
-      onResizeStart={onResizeStart}
-      onResizeEnd={onResizeEnd}
-      data-test-subj={`${dataTestSubj}ResizableContainer`}
-      css={css`
-        height: 100%;
-      `}
-    >
-      {(EuiResizablePanel, EuiResizableButton) => (
-        <>
-          <EuiResizablePanel
-            id={fixedPanelId}
-            minSize={`${minFixedPanelSize}px`}
-            size={panelSizes.fixedPanelSizePct}
-            paddingSize="none"
-            data-test-subj={`${dataTestSubj}ResizablePanelFixed`}
-          >
-            {fixedPanel}
-          </EuiResizablePanel>
-          <EuiResizableButton
-            className={resizeButtonClassName}
-            indicator="border"
-            css={[buttonBorderCss, isResizing ? resizingButtonCss : defaultButtonCss]}
-            data-test-subj={`${dataTestSubj}ResizableButton`}
-          />
-          <EuiResizablePanel
-            minSize={`${minFlexPanelSize}px`}
-            size={panelSizes.flexPanelSizePct}
-            paddingSize="none"
-            data-test-subj={`${dataTestSubj}ResizablePanelFlex`}
-          >
-            {flexPanel}
-          </EuiResizablePanel>
-          {isResizing ? <div css={resizingOverlayCss} /> : <></>}
-        </>
-      )}
-    </EuiResizableContainer>
+    <div ref={setContainer} css={containerCss}>
+      <EuiResizableContainer
+        className={className}
+        direction={direction}
+        onPanelWidthChange={onPanelSizeChange}
+        onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
+        data-test-subj={`${dataTestSubj}ResizableContainer`}
+        css={containerCss}
+      >
+        {(EuiResizablePanel, EuiResizableButton) => (
+          <>
+            <EuiResizablePanel
+              id={fixedPanelId}
+              minSize={`${minFixedPanelSize}px`}
+              size={panelSizes.fixedPanelSizePct}
+              paddingSize="none"
+              data-test-subj={`${dataTestSubj}ResizablePanelFixed`}
+            >
+              {fixedPanel}
+            </EuiResizablePanel>
+            <EuiResizableButton
+              className={resizeButtonClassName}
+              indicator="border"
+              css={[
+                direction === 'horizontal' ? buttonStyles.horizontal : buttonStyles.vertical,
+                isResizing ? resizingButtonCss : defaultButtonCss,
+              ]}
+              data-test-subj={`${dataTestSubj}ResizableButton`}
+            />
+            <EuiResizablePanel
+              minSize={`${minFlexPanelSize}px`}
+              size={panelSizes.flexPanelSizePct}
+              paddingSize="none"
+              data-test-subj={`${dataTestSubj}ResizablePanelFlex`}
+            >
+              {flexPanel}
+            </EuiResizablePanel>
+            {isResizing ? <div css={resizingOverlayCss} /> : <></>}
+          </>
+        )}
+      </EuiResizableContainer>
+    </div>
   );
+};
+
+const containerCss = css`
+  position: relative;
+  width: 100%;
+  height: 100%;
+`;
+const defaultButtonCss = css`
+  z-index: 3;
+`;
+const resizingButtonCss = css`
+  z-index: 4;
+`;
+const resizingOverlayCss = css`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+`;
+
+const getButtonBorderCss =
+  (insetValue: string) =>
+  ({ euiTheme }: UseEuiTheme) =>
+    css`
+    position: relative;
+    inset-${insetValue}: -${mathWithUnits(euiTheme.border.width.thin, (x) => x / 2)};
+    `;
+
+const buttonBorderStyles = {
+  horizontal: getButtonBorderCss('inline-start'),
+  vertical: getButtonBorderCss('block-end'),
 };
