@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
       const currentSoConfig = await getRiskEngineConfigSO({ kibanaServer });
 
       expect(currentSoConfig.attributes).to.not.have.property('excludeAlertTags');
-      expect(currentSoConfig.attributes).to.not.have.property('excludeAlertStatuses');
+      expect(currentSoConfig.attributes).to.have.property('excludeAlertStatuses', ['closed']);
 
       const updatedSoBody = {
         exclude_alert_tags: ['False Positive'],
@@ -89,8 +89,8 @@ export default ({ getService }: FtrProviderContext) => {
       await riskEngineRoutes.soConfig(updatedSoBody, 200);
       const currentSoConfig2 = await getRiskEngineConfigSO({ kibanaServer });
 
-      expect(currentSoConfig2.attributes).to.have.property('excludeAlertTags');
-      expect(currentSoConfig2.attributes).to.have.property('excludeAlertStatuses');
+      expect(currentSoConfig2.attributes).to.have.property('excludeAlertTags', ['False Positive']);
+      expect(currentSoConfig2.attributes).to.have.property('excludeAlertStatuses', ['open']);
 
       await riskEngineRoutes.disable();
       await waitForRiskEngineTaskToBeGone;
