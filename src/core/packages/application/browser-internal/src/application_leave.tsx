@@ -13,7 +13,9 @@ import {
   type AppLeaveActionFactory,
   type AppLeaveAction,
   type AppLeaveConfirmAction,
+  type AppLeaveCancelAction,
   type AppLeaveHandler,
+  NavigateToAppOptions,
 } from '@kbn/core-application-browser';
 
 const appLeaveActionFactory: AppLeaveActionFactory = {
@@ -36,15 +38,29 @@ const appLeaveActionFactory: AppLeaveActionFactory = {
   default() {
     return { type: AppLeaveActionType.default };
   },
+  cancel() {
+    return { type: AppLeaveActionType.cancel };
+  },
 };
 
 export function isConfirmAction(action: AppLeaveAction): action is AppLeaveConfirmAction {
   return action.type === AppLeaveActionType.confirm;
 }
 
-export function getLeaveAction(handler?: AppLeaveHandler, nextAppId?: string): AppLeaveAction {
+export function isCancelAction(action: AppLeaveAction): action is AppLeaveCancelAction {
+  return action.type === AppLeaveActionType.cancel;
+}
+
+export function getLeaveAction(
+  handler?: AppLeaveHandler,
+  next?: { nextAppId: string; options: NavigateToAppOptions }
+): AppLeaveAction {
   if (!handler) {
     return appLeaveActionFactory.default();
   }
-  return handler(appLeaveActionFactory, nextAppId);
+  if (!next) {
+    return handler(appLeaveActionFactory, { nextAppId: '', options: {} });
+  }
+
+  return handler(appLeaveActionFactory, next);
 }

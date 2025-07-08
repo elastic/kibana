@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import { EuiConfirmModal } from '@elastic/eui';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -60,6 +60,7 @@ export const DiscoverMainRoute = ({
   const services = useDiscoverServices();
   const rootProfileState = useRootProfile();
   const history = useHistory();
+  const [leaveModal, setLeaveModal] = useState<React.ReactNode>(null);
   const [urlStateStorage] = useState(
     () =>
       stateStorageContainer ??
@@ -110,7 +111,7 @@ export const DiscoverMainRoute = ({
   }, [initializeMainRoute, rootProfileState]);
 
   useEffect(() => {
-    onAppLeave?.((actions) => {
+    onAppLeave?.((actions, next) => {
       const tabs = runtimeStateManager.tabs.byId;
       const hasAnyUnsavedTab = Object.values(tabs).some((tab) => {
         const stateContainer = tab.stateContainer$.getValue();
@@ -125,17 +126,28 @@ export const DiscoverMainRoute = ({
       });
 
       if (!hasAnyUnsavedTab) return actions.default();
-
-      return actions.confirm(
-        i18n.translate('discover.confirmModal.confirmTextDescription', {
-          defaultMessage: 'Leaving Discover without saving may result in lost changes.',
-        }),
-        i18n.translate('discover.confirmModal.title', {
-          defaultMessage: 'Unsaved changes',
-        })
+      setLeaveModal(
+        <EuiConfirmModal
+          style={{ width: 600 }}
+          title="You have unsaved changes"
+          onCancel={() => setLeaveModal(null)}
+          onConfirm={() => {
+            // Do our thing an save
+            services.application.navigateToApp(next.nextAppId, {
+              ...next.options,
+              skipAppLeave: true,
+            });
+          }}
+          cancelButtonText="Leave anyway"
+          confirmButtonText="Save and leave"
+          defaultFocusedButton="confirm"
+        >
+          <p>Do you want to leave without saving?</p>
+        </EuiConfirmModal>
       );
+      return actions.cancel();
     });
-  }, [onAppLeave, runtimeStateManager]);
+  }, [onAppLeave, runtimeStateManager, services.application]);
 
   useUnmount(() => {
     for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
@@ -176,6 +188,7 @@ export const DiscoverMainRoute = ({
   return (
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
+        {leaveModal}
         <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
           {TABS_ENABLED ? (
             <TabsView {...sessionViewProps} />

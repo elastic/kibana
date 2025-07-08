@@ -8,6 +8,7 @@
  */
 
 import type { EuiButtonColor } from '@elastic/eui';
+import { NavigateToAppOptions } from './contracts';
 
 /**
  * A handler that will be executed before leaving the application, either when
@@ -24,7 +25,7 @@ import type { EuiButtonColor } from '@elastic/eui';
  */
 export type AppLeaveHandler = (
   factory: AppLeaveActionFactory,
-  nextAppId?: string
+  next: { nextAppId: string; options: NavigateToAppOptions }
 ) => AppLeaveAction;
 
 /**
@@ -35,6 +36,7 @@ export type AppLeaveHandler = (
 export enum AppLeaveActionType {
   confirm = 'confirm',
   default = 'default',
+  cancel = 'cancel',
 }
 
 /**
@@ -47,6 +49,10 @@ export enum AppLeaveActionType {
  */
 export interface AppLeaveDefaultAction {
   type: AppLeaveActionType.default;
+}
+
+export interface AppLeaveCancelAction {
+  type: AppLeaveActionType.cancel;
 }
 
 /**
@@ -73,7 +79,7 @@ export interface AppLeaveConfirmAction {
  *
  * @public
  * */
-export type AppLeaveAction = AppLeaveDefaultAction | AppLeaveConfirmAction;
+export type AppLeaveAction = AppLeaveDefaultAction | AppLeaveConfirmAction | AppLeaveCancelAction;
 
 /**
  * Factory provided when invoking a {@link AppLeaveHandler} to retrieve the {@link AppLeaveAction} to execute.
@@ -104,4 +110,5 @@ export interface AppLeaveActionFactory {
    * the user tries to leave an application
    */
   default(): AppLeaveDefaultAction;
+  cancel(): AppLeaveCancelAction;
 }
