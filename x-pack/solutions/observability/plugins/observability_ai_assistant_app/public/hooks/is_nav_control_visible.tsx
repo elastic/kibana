@@ -9,8 +9,8 @@ import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
 import { CoreStart, DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 import { Space } from '@kbn/spaces-plugin/common';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 interface UseIsNavControlVisibleProps {
   coreStart: CoreStart;
@@ -43,7 +43,7 @@ function getVisibility(
 export function useIsNavControlVisible({ coreStart, pluginsStart }: UseIsNavControlVisibleProps) {
   const [isVisible, setIsVisible] = useState(false);
 
-  const { currentAppId$, applications$, } = coreStart.application;
+  const { currentAppId$, applications$ } = coreStart.application;
   const { aiAssistantManagementSelection, spaces } = pluginsStart;
 
   const space$ = spaces.getActiveSpace$();

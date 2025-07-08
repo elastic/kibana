@@ -31,8 +31,8 @@ import type {
   AIAssistantManagementSelectionPluginPublicStart,
   AIAssistantManagementSelectionPluginPublicSetup,
 } from '@kbn/ai-assistant-management-plugin/public';
-import type { RootCauseAnalysisContainer } from './components/rca/rca_container';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { RootCauseAnalysisContainer } from './components/rca/rca_container';
 
 export interface ObservabilityAIAssistantAppPublicStart {
   RootCauseAnalysisContainer: React.ExoticComponent<
