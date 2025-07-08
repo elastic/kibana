@@ -77,7 +77,7 @@ export class RegexWorkerService {
             })
           );
         }
-        throw new Error('Regex anonymization timed out');
+        throw new Error('Regex anonymization task timed out');
       }
       throw err;
     } finally {
