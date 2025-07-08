@@ -36,9 +36,9 @@ export const CsvUploadManageDataSource = ({
 
   return (
     <>
-      <EuiFlexGroup alignItems={'flexStart'} direction={'column'}>
-        <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
-          <EuiIcon size={'l'} type={'importAction'} />
+      <EuiFlexGroup alignItems="flexStart" direction="column">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiIcon size="l" type="importAction" />
           <EuiText>
             <h1>
               <FormattedMessage
@@ -63,7 +63,7 @@ export const CsvUploadManageDataSource = ({
                   defaultMessage="There was an error retrieving previous CSV uploads."
                 />
               }
-              color={'danger'}
+              color="danger"
             />
           )}
           {isLoading && <EuiLoadingSpinner size="l" />}
@@ -89,7 +89,7 @@ export const CsvUploadManageDataSource = ({
           disabled={isError || isLoading}
           onClick={showImportFileModal}
           fullWidth={false}
-          iconType={'plusInCircle'}
+          iconType="plusInCircle"
         >
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.text"
