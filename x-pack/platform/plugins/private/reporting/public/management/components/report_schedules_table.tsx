@@ -220,7 +220,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
           icon: 'dashboardApp',
           available: (item) => Boolean((item.payload as BaseParamsV2)?.locatorParams),
           onClick: async (item) => {
-            const searchParams = stringify({ scheduledReportId: item.id });
+            const searchParams = stringify({ scheduledReportId: item.id, ...queryParams });
 
             const path = buildKibanaPath({
               basePath: http.basePath.serverBasePath,
