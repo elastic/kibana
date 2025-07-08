@@ -53,10 +53,10 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         validate: false,
       },
       wrapHandler(async (ctx, request, response) => {
-        const { agents } = getInternalServices();
-        const service = await agents.getScopedClient({ request });
-        const agentProfiles = await service.list();
-        return response.ok<ListAgentResponse>({ body: { agentProfiles } });
+        const { agents: agentsService } = getInternalServices();
+        const service = await agentsService.getScopedClient({ request });
+        const agents = await service.list();
+        return response.ok<ListAgentResponse>({ body: { agents } });
       })
     );
 

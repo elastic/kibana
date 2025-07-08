@@ -10,7 +10,7 @@ import type { AgentDefinition } from '@kbn/onechat-common';
 export type GetAgentResponse = AgentDefinition;
 
 export interface ListAgentResponse {
-  agentProfiles: AgentDefinition[];
+  agents: AgentDefinition[];
 }
 
 export type UpdateAgentResponse = AgentDefinition;
