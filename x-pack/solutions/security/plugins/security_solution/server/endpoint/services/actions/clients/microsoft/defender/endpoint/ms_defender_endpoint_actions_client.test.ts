@@ -1013,7 +1013,22 @@ describe('MS Defender response actions client', () => {
         msMachineActionsApiResponse.value[0] = {
           ...msMachineActionsApiResponse.value[0],
           type: 'LiveResponse',
-          commands: ['RunScript'],
+          commands: [
+            {
+              index: 0,
+              startTime: '2025-07-07T18:50:10.186354Z',
+              endTime: '2025-07-07T18:50:21.811356Z',
+              commandStatus: 'Completed',
+              errors: [],
+              command: {
+                type: 'RunScript',
+                params: [
+                  { key: 'ScriptName', value: 'hello.sh' },
+                  { key: 'Args', value: '--noargs' }
+                ]
+              }
+            }
+          ],
         };
 
         responseActionsClientMock.setConnectorActionsClientExecuteResponse(
@@ -1247,7 +1262,22 @@ describe('MS Defender response actions client', () => {
           msMachineActionsApiResponse.value[0] = {
             ...msMachineActionsApiResponse.value[0],
             type: 'LiveResponse',
-            commands: ['RunScript'],
+            commands: [
+              {
+                index: 0,
+                startTime: '2025-07-07T18:50:10.186354Z',
+                endTime: '2025-07-07T18:50:21.811356Z',
+                commandStatus: 'Completed',
+                errors: [],
+                command: {
+                  type: 'RunScript',
+                  params: [
+                    { key: 'ScriptName', value: 'hello.sh' },
+                    { key: 'Args', value: '--noargs' }
+                  ]
+                }
+              }
+            ],
           };
 
           responseActionsClientMock.setConnectorActionsClientExecuteResponse(

@@ -67,7 +67,7 @@ export const useGetCustomScripts = (
                       defaultMessage="Failed to fetch Microsoft Defender for Endpoint scripts"
                     />
                   </p>
-                  <p>{err.body.message}</p>
+                  <p>{error?.message || err.body.message}</p>
                 </EuiText>
               ),
             });
