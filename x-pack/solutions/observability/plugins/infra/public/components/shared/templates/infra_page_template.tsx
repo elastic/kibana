@@ -51,7 +51,7 @@ export const InfraPageTemplate = ({
       return await callApi<GetHasDataResponse>('/api/metrics/source/hasData', {
         method: 'GET',
         query: {
-          modules: dataSourceAvailability,
+          source: dataSourceAvailability,
         },
       });
     },
