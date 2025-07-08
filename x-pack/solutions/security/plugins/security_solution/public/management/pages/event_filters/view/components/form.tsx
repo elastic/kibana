@@ -61,6 +61,7 @@ import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import { getAddedFieldsCounts, computeHasDuplicateFields } from '../../../../common/utils';
 
 import {
   ABOUT_EVENT_FILTERS,
@@ -91,20 +92,6 @@ const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = OPERATING_SYSTEM
   value: os,
   inputDisplay: OS_TITLES[os],
 }));
-
-// TODO: move this somewhere common
-export const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
-  formFields.reduce<{ [k: string]: number }>((allFields, field) => {
-    if (field in allFields) {
-      allFields[field]++;
-    } else {
-      allFields[field] = 1;
-    }
-    return allFields;
-  }, {});
-
-export const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
-  Object.values(formFieldsList).some((e) => e > 1);
 
 const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
   {

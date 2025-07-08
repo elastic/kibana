@@ -75,3 +75,26 @@ export const parsePoliciesAndFilterToKql = ({
   const policiesKQL = parsePoliciesToKQL(policies, excludedPolicies);
   return `(${policiesKQL})${kuery ? ` AND (${kuery})` : ''}`;
 };
+
+/**
+ * Counts the number of conditions added for a new Event filter or Trusted app
+ * @param formFields
+ * @returns number of fields
+ */
+export const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
+  formFields.reduce<{ [k: string]: number }>((allFields, field) => {
+    if (field in allFields) {
+      allFields[field]++;
+    } else {
+      allFields[field] = 1;
+    }
+    return allFields;
+  }, {});
+
+/**
+ * Checks if conditions in Event filters or Trusted Apps forms have duplicate fields
+ * @param formFields 
+ * @returns boolean
+ */
+export const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
+  Object.values(formFieldsList).some((e) => e > 1);
