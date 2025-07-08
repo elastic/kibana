@@ -69,7 +69,7 @@ export const UseRunQueryRuleset = ({
 
     const reducedCriteria = criteriaData.reduce<Record<string, any>>(
       (acc, { metadata, values }) => {
-        if (metadata && values !== undefined) acc[metadata] = values;
+        if (metadata && values !== undefined) acc[metadata] = values ? values[0] : '';
         return acc;
       },
       {}
@@ -95,6 +95,7 @@ export const UseRunQueryRuleset = ({
     {
       "retriever": {
         "rule": {
+          // Update your criteria to test different results
           "match_criteria": ${matchCriteria},
           "ruleset_ids": [
             "${rulesetId}" // An array of one or more unique query ruleset IDs
