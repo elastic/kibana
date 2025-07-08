@@ -68,8 +68,9 @@ describe('fetchArtifactVersions', () => {
   const mockResponse = (responseText: string) => {
     const response = {
       text: () => Promise.resolve(responseText),
+      headers: { get: jest.fn().mockReturnValue('application/xml') },
     };
-    fetchMock.mockResolvedValue(response as Response);
+    fetchMock.mockResolvedValue(response as unknown as Response);
   };
 
   const mockFileResponse = (responseText: string) => {
