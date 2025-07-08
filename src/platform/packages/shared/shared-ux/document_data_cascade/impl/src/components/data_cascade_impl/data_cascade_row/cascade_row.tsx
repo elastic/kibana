@@ -27,7 +27,7 @@ export interface CascadeRowProps<T> {
   populateGroupNodeDataFn: (args: { row: Row<T> }) => Promise<void>;
   rowInstance: Row<T>;
   /**
-   * The size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
+   * The size of the component, can be 's' (small), 'm' (medium), or 'l' (large).
    */
   rowGapSize: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
   virtualRow: VirtualItem;
