@@ -34,7 +34,7 @@ interface CreateTestDefinition {
 
 export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const roleScopedSupertest = getService('roleScopedSupertest');
+  const spacesSupertest = getService('spacesSupertest');
   const config = getService('config');
   const isServerless = config.get('serverless');
   const noop = () => undefined;
@@ -118,7 +118,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         let supertest: SupertestWithRoleScopeType;
 
         before(async () => {
-          supertest = await roleScopedSupertest.getSupertestWithRoleScope(user!);
+          supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
         });
 
         after(async () => {

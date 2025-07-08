@@ -9,7 +9,32 @@ import { lastValueFrom, toArray } from 'rxjs';
 import expect from '@kbn/expect';
 import { supertestToObservable } from '@kbn/sse-utils-server';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
+import type SuperTest from 'supertest';
+import { aiAssistantAnonymizationSettings } from '@kbn/inference-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
+
+export const setAdvancedSettings = async (
+  supertest: SuperTest.Agent,
+  settings: Record<string, string[] | string | number | boolean | object>
+) => {
+  return supertest
+    .post('/internal/kibana/settings')
+    .set('kbn-xsrf', 'true')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+    .send({ changes: settings })
+    .expect(200);
+};
+const emailRule = {
+  entityClass: 'EMAIL',
+  type: 'RegExp',
+  pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+  enabled: true,
+};
 
 export const chatCompleteSuite = (
   { id: connectorId, actionTypeId: connectorType }: AvailableConnectorWithId,
@@ -146,6 +171,64 @@ export const chatCompleteSuite = (
           message: "No connector found for id 'do-not-exist'",
         });
       });
+
+      describe('anonymization enabled', () => {
+        before(async () => {
+          await setAdvancedSettings(supertest, {
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [emailRule] }, null, 2),
+          });
+        });
+        after(async () => {
+          await setAdvancedSettings(supertest, {
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
+          });
+        });
+        it('returns a chat completion message with deanonymization data', async () => {
+          const response = await supertest
+            .post(`/internal/inference/chat_complete`)
+            .set('kbn-xsrf', 'kibana')
+            .send({
+              connectorId,
+              temperature: 0.1,
+              system: 'Please answer the user question',
+              messages: [
+                { role: 'user', content: 'My email is jorge@gmail.com. What is my email?' },
+              ],
+            })
+            .expect(200);
+          const message = response.body;
+          expect(message.deanonymized_input[0].deanonymizations[0].entity.value).to.be(
+            'jorge@gmail.com'
+          );
+          const emailMask = message.deanonymized_output.deanonymizations[0].entity.mask;
+          expect(message.content.includes(emailMask)).to.be(false);
+        });
+      });
+      describe('anonymization disabled', () => {
+        before(async () => {
+          await setAdvancedSettings(supertest, {
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
+          });
+        });
+        it('returns a chat completion message without deanonymization data', async () => {
+          const response = await supertest
+            .post(`/internal/inference/chat_complete`)
+            .set('kbn-xsrf', 'kibana')
+            .send({
+              connectorId,
+              temperature: 0.1,
+              system: 'Please answer the user question',
+              messages: [
+                { role: 'user', content: 'My email is jorge@gmail.com. What is my email?' },
+              ],
+            })
+            .expect(200);
+
+          const message = response.body;
+          expect(message.deanonymized_input).to.be(undefined);
+          expect(message.deanonymized_output).to.be(undefined);
+        });
+      });
     });
 
     describe('streaming enabled', () => {
@@ -259,6 +342,107 @@ export const chatCompleteSuite = (
             },
           },
         ]);
+      });
+
+      describe('anonymization disabled', () => {
+        before(async () => {
+          await setAdvancedSettings(supertest, {
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
+          });
+        });
+        it('returns events without deanonymization data and streams', async () => {
+          const response = supertest
+            .post(`/internal/inference/chat_complete/stream`)
+            .set('kbn-xsrf', 'kibana')
+            .send({
+              connectorId,
+              temperature: 0.1,
+              system: 'Please answer the user question',
+              messages: [
+                { role: 'user', content: 'My email is jorge@gmail.com. What is my email?' },
+              ],
+            })
+            .expect(200);
+
+          const observable = supertestToObservable(response);
+          const events = await lastValueFrom(observable.pipe(toArray()));
+          // Should have multiple chunk events (confirming it's streaming)
+          const chunkEvents = events.filter((event) => event.type === 'chatCompletionChunk');
+          expect(chunkEvents.length).to.be.greaterThan(1);
+          const messageEvent = events.find((event) => event.type === 'chatCompletionMessage');
+          expect(messageEvent.deanonymized_input).to.be(undefined);
+          expect(messageEvent.deanonymized_output).to.be(undefined);
+        });
+      });
+
+      describe('anonymization enabled', () => {
+        before(async () => {
+          await setAdvancedSettings(supertest, {
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [emailRule] }, null, 2),
+          });
+        });
+        after(async () => {
+          await setAdvancedSettings(supertest, {
+            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
+          });
+        });
+        it('returns a chat completion message with deanonymization data and does not stream the response', async () => {
+          const response = supertest
+            .post(`/internal/inference/chat_complete/stream`)
+            .set('kbn-xsrf', 'kibana')
+            .send({
+              connectorId,
+              temperature: 0.1,
+              system: 'Please answer the user question',
+              messages: [
+                { role: 'user', content: 'My email is jorge@gmail.com.  what is my email?' },
+              ],
+            })
+            .expect(200);
+          const observable = supertestToObservable(response);
+          const events = await lastValueFrom(observable.pipe(toArray()));
+          expect(events.length).to.eql(3);
+          const chatCompletionChunks = events.filter(
+            (event) => event.type === 'chatCompletionChunk'
+          );
+          expect(chatCompletionChunks.length).to.eql(1);
+          const chatCompletionMessage = events.filter(
+            (event) => event.type === 'chatCompletionMessage'
+          );
+          expect(chatCompletionMessage.length).to.eql(1);
+          const relevantEvents = chatCompletionMessage.concat(chatCompletionChunks);
+          relevantEvents.forEach((event) => {
+            expect(event.deanonymized_input[0].deanonymizations[0].entity.value).to.be(
+              'jorge@gmail.com'
+            );
+            const emailMask = event.deanonymized_output.deanonymizations[0].entity.mask;
+            expect(event.content.includes(emailMask)).to.be(false);
+          });
+        });
+
+        it('streams normally when no PII is detected even with rules enabled', async () => {
+          const response = supertest
+            .post(`/internal/inference/chat_complete/stream`)
+            .set('kbn-xsrf', 'kibana')
+            .send({
+              connectorId,
+              temperature: 0.1,
+              system: 'Please answer the user question',
+              messages: [{ role: 'user', content: 'What is 2+2? No personal information here.' }],
+            })
+            .expect(200);
+
+          const observable = supertestToObservable(response);
+          const events = await lastValueFrom(observable.pipe(toArray()));
+
+          const messageEvent = events.find((event) => event.type === 'chatCompletionMessage');
+          expect(messageEvent.deanonymized_input).to.be(undefined);
+          expect(messageEvent.deanonymized_output).to.be(undefined);
+
+          // Should have multiple chunk events (confirming it's streaming)
+          const chunkEvents = events.filter((event) => event.type === 'chatCompletionChunk');
+          expect(chunkEvents.length).to.be.greaterThan(1);
+        });
       });
     });
   });
