@@ -34,6 +34,15 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+## 9.1.0 [kibana-9.1.0-deprecations]
+$$$kibana-221419$$$
+::::{dropdown} Removal of the deprecated `visualization:useLegacyTimeAxis` advanced setting 
+% **Details**<br> Description
+% **Impact**<br> Impact of the deprecation.
+% **Action**<br> Steps for mitigating impact.
+View [#221419]({{kib-pull}}221419).
+::::
+
 ## 9.0.0 [kibana-900-deprecations]
 
 ::::{dropdown} HTTP/2 becomes the default protocol when TLS is enabled

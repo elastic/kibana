@@ -21,6 +21,107 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.1.0 [kibana-9.1.0-release-notes]
+
+### Features and enhancements [kibana-9.1.0-features-enhancements]
+
+**Dashboards and Visualizations**:
+* Adds internal CRUD api routes in *Lens* [#223296]({{kib-pull}}223296).
+* Enable read only editor mode to inspect panel's configuration in *Lens* [#208554]({{kib-pull}}208554).
+* Shiny add panel highlight [#223614]({{kib-pull}}223614).
+* Favorite a dashboard from within [#201596]({{kib-pull}}201596).
+
+**Data ingestion and Fleet**:
+* Adds bulk migrations UI [#224334]({{kib-pull}}224334).
+% !!TODO!! The above PR had a lengthy release note description:
+% Added the ability to migrate bulk agents to another cluster via the bulk actions menu of the agent list table (experimental).
+* Enable tabular integrations UI feature flag [#222842]({{kib-pull}}222842).
+* Single agent migration UI [#222111]({{kib-pull}}222111).
+% !!TODO!! The above PR had a lengthy release note description:
+% Added the ability to migrate a single agent to another cluster via the actions menu in Fleet. Users can enter a remote cluster URL and enrollment token, as well as customize additional parameters in order to migrate an agent.
+* Adds single agent migration endpoint [#220601]({{kib-pull}}220601).
+% !!TODO!! The above PR had a lengthy release note description:
+% Added endpoint allowing a user to migrate an individual agent to another cluster by specifying the URL and Enrollment Token. Note: tamper protected and fleet agents can not be migrated and attempting to do so will return a `403` status code.
+* Adds integration flyout [#220229]({{kib-pull}}220229).
+* Enable feature flag enableSyncIntegrationsOnRemote [#220215]({{kib-pull}}220215).
+* Adds Edit ReadMe Functionality To Custom Integrations [#215259]({{kib-pull}}215259).
+% !!TODO!! The above PR had a lengthy release note description:
+% Adds edit functionality to custom integrations, allowing a user to edit the README file of a custom integration and save it to be persisted. Additionally, saving will automatically increment the version of the integration and update all associated policies.
+* Adds ssl fields to agent binary source settings [#213211]({{kib-pull}}213211).
+* Expose ssl options for ES and remote ES outputs in UI [#208745]({{kib-pull}}208745).
+* Adds SSL options to fleet server hosts settings [#208091]({{kib-pull}}208091).
+* Adds action to Add tags to Agent details page [#225433]({{kib-pull}}225433).
+* Support agentless traffic filters [#222082]({{kib-pull}}222082).
+* Fleet agents tag filter is searchable and sorted [#219639]({{kib-pull}}219639).
+* Callout breaking changes on integration upgrade [#217257]({{kib-pull}}217257).
+* Adds msi installer command for fleet server and agents [#217217]({{kib-pull}}217217).
+* Optional ssl for fleet logstash output [#216216]({{kib-pull}}216216).
+* Format last activity value in fleet agent details view as datetime [#215531]({{kib-pull}}215531).
+* Support `searchAfter` and PIT (point-in-time) parameters for get agents list API [#213486]({{kib-pull}}213486).
+* Register custom integrations search provider [#213013]({{kib-pull}}213013).
+
+**Discover**:
+* Apply compact Display options Popover layout [#210180]({{kib-pull}}210180).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Machine Learning**:
+* Moves job and trained model management features into Stack Management [#204290]({{kib-pull}}204290).
+* Update NL-2-ESQL docs [#224868]({{kib-pull}}224868).
+* Anomaly Explorer: New severity colors alignment & New UX for filtering anomalies [#221081]({{kib-pull}}221081).
+
+**Platform**:
+* Added an option to User Settings that allows the Kibana interface to display in a high contrast mode [#216242]({{kib-pull}}216242).
+
+**Search**:
+* Adds Search Home page in Stack Classic and Solution navigation [#225162]({{kib-pull}}225162).
+* Create a home page in serverless env [#223172]({{kib-pull}}223172).
+* Updates the side navigation for Serverless Elasticsearch streamlining available options [#225709]({{kib-pull}}225709).
+* Updated the Elasticsearch solution navigations and elasticsearch classic navigation items available [#224755]({{kib-pull}}224755).
+* Navigation for Overview Page in Entity Analytics [#221748]({{kib-pull}}221748).
+* Adds 'page reload' screen reader warning [#214822]({{kib-pull}}214822).
+
+
+### Fixes [kibana-9.1.0-fixes]
+
+**Dashboards and Visualizations**:
+* Hide Select All checkbox from single select controls [#226311]({{kib-pull}}226311).
+* Remove kebab case warnings [#226114]({{kib-pull}}226114).
+* Small visual fixes [#225430]({{kib-pull}}225430).
+
+**Data ingestion and Fleet**:
+* Ensure package policy names are unique when moving across spaces [#224804]({{kib-pull}}224804).
+* Fixes ssl config overridden from advanced yaml in full agent policy [#219902]({{kib-pull}}219902).
+* Fixes capability required for Siem Migrations Topic [#219427]({{kib-pull}}219427).
+* Make output and fleet server non-editable for agentless policies [#218905]({{kib-pull}}218905).
+* Support integrations having secrets with multiple values [#216918]({{kib-pull}}216918).
+* Adds remote cluster instructions for syncing integrations [#211997]({{kib-pull}}211997).
+* Update install snippets to include all platforms [#210249]({{kib-pull}}210249).
+
+**Discover**:
+* Fixes row highlight when reordering columns [#226584]({{kib-pull}}226584).
+* Left align content inside the rendered cell value [#226562]({{kib-pull}}226562).
+* Adds items count to fields accordion title aria-label [#216993]({{kib-pull}}216993).
+* Discover esc closes flyout when focus is on filter [#216630]({{kib-pull}}216630).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Custom link colour option for top banner [#214241]({{kib-pull}}214241).
+* Change in sortBy dropdown component option name wording [#206464]({{kib-pull}}206464).
+
+**Machine Learning**:
+* Fixes overflow of cards in Machine Learning Overview page [#223431]({{kib-pull}}223431).
+* Automatic Import now produces correct pipeline to parse CSV files with special characters in column names [#212513]({{kib-pull}}212513).
+
 ## 9.0.3 [kibana-9.0.3-release-notes]
 
 :::{important}
