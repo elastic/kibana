@@ -41,3 +41,6 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
 
+# Clear the cache after installation
+rm -rf ./.yarn-local-mirror
+yarn cache clean
