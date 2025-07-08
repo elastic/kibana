@@ -47,8 +47,6 @@ export async function anonymizeMessages({
     regexWorker,
     esClient,
   });
-  console.log('anonymizeMessages records ', records);
-  console.log('anonymizeMessages anonymizations ', anonymizations);
 
   const anonymizedMessages = messages.map((original, index) => {
     const map = records[index];
