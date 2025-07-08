@@ -27,9 +27,7 @@ import type {
 } from './types';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import {
-  OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-  SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
 } from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
@@ -37,12 +35,12 @@ import { securitySolutionSetting } from './src/settings/security_setting';
 
 export class AIAssistantManagementSelectionPlugin
   implements
-    Plugin<
-      AIAssistantManagementSelectionPluginServerSetup,
-      AIAssistantManagementSelectionPluginServerStart,
-      AIAssistantManagementSelectionPluginServerDependenciesSetup,
-      AIAssistantManagementSelectionPluginServerDependenciesStart
-    >
+  Plugin<
+    AIAssistantManagementSelectionPluginServerSetup,
+    AIAssistantManagementSelectionPluginServerStart,
+    AIAssistantManagementSelectionPluginServerDependenciesSetup,
+    AIAssistantManagementSelectionPluginServerDependenciesStart
+  >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
   private readonly buildFlavor: BuildFlavor;
@@ -56,29 +54,6 @@ export class AIAssistantManagementSelectionPlugin
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-    if (this.buildFlavor === 'serverless') {
-      core.uiSettings.register({
-        [OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-          ...observabilitySolutionSetting,
-          value: AIAssistantType.Observability,
-        },
-      });
-
-      core.uiSettings.register({
-        [SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-          ...securitySolutionSetting,
-          value: AIAssistantType.Security,
-        },
-      });
-    } else {
-      core.uiSettings.register({
-        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-          ...classicSetting,
-          value: this.config.preferredAIAssistantType,
-        },
-      });
-    }
-
     core.capabilities.registerProvider(() => {
       return {
         management: {
@@ -140,6 +115,39 @@ export class AIAssistantManagementSelectionPlugin
       },
     });
 
+    if (this.buildFlavor === 'serverless') {
+      const { cloud } = plugins;
+      const solution = cloud?.serverless.projectType;
+
+      switch (solution) {
+        case 'observability':
+          core.uiSettings.register({
+            [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+              ...observabilitySolutionSetting,
+              value: AIAssistantType.Observability,
+            },
+          });
+          break;
+        case 'security':
+          core.uiSettings.register({
+            [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+              ...securitySolutionSetting,
+              value: AIAssistantType.Security,
+            },
+          });
+          break;
+        default:
+          break;
+      }
+    } else {
+      core.uiSettings.register({
+        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...classicSetting,
+          value: this.config.preferredAIAssistantType,
+        },
+      });
+    }
+
     return {};
   }
 
@@ -147,5 +155,5 @@ export class AIAssistantManagementSelectionPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() { }
 }

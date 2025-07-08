@@ -9,6 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const TITLE = i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
+  defaultMessage: 'AI Assistant visibility',
+})
+
 export const ONLY_IN_THEIR_SOLUTIONS = i18n.translate(
   'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
   { defaultMessage: 'Only in their solutions' }

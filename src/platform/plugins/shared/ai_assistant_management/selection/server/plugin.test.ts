@@ -11,9 +11,7 @@ import { PluginInitializerContext, CoreSetup } from '@kbn/core/server';
 import type { AIAssistantManagementSelectionPluginServerDependenciesSetup } from './types';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import {
-  OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-  SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
 } from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
@@ -21,65 +19,107 @@ import { securitySolutionSetting } from './src/settings/security_setting';
 import { AIAssistantManagementSelectionPlugin } from './plugin';
 
 describe('plugin', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   describe('stateless', () => {
-    it('registers correct uiSettings for serverless', () => {
-      const initializerContext = {
-        env: {
-          packageInfo: {
-            buildFlavor: 'serverless',
-          },
+    const initializerContext = {
+      env: {
+        packageInfo: {
+          buildFlavor: 'serverless',
         },
-        config: {
-          get: jest.fn().mockReturnValue({
-            preferredAIAssistantType: AIAssistantType.Observability,
-          }),
-        },
-      } as unknown as PluginInitializerContext;
-      const aiAssistantManagementSelectionPlugin = new AIAssistantManagementSelectionPlugin(
-        initializerContext
-      );
+      },
+      config: {
+        get: jest.fn().mockReturnValue({
+          preferredAIAssistantType: AIAssistantType.Observability,
+        }),
+      },
+    } as unknown as PluginInitializerContext;
 
-      const coreSetup = {
+    const aiAssistantManagementSelectionPlugin = new AIAssistantManagementSelectionPlugin(
+      initializerContext
+    );
+
+    const coreSetup = {
+      uiSettings: {
+        register: jest.fn(),
+      },
+      capabilities: {
+        registerProvider: jest.fn(),
+      },
+    } as unknown as CoreSetup;
+
+    const setupDeps = {
+      management: {
+        sections: {
+          getSection: jest.fn(),
+        },
+      },
+      serverless: {
         uiSettings: {
           register: jest.fn(),
         },
-        capabilities: {
-          registerProvider: jest.fn(),
-        },
-      } as unknown as CoreSetup;
+      },
+    };
 
-      const setupDeps = {
-        management: {
-          sections: {
-            getSection: jest.fn(),
+    it('registers correct uiSettings for serverless oblt', () => {
+
+      aiAssistantManagementSelectionPlugin.setup(coreSetup, {
+        ...setupDeps,
+        cloud: {
+          serverless: {
+            projectType: 'observability',
           },
-        },
-        serverless: {
-          uiSettings: {
-            register: jest.fn(),
-          },
-        },
-      } as unknown as AIAssistantManagementSelectionPluginServerDependenciesSetup;
+        }
+      } as unknown as AIAssistantManagementSelectionPluginServerDependenciesSetup);
 
-      aiAssistantManagementSelectionPlugin.setup(coreSetup, setupDeps);
-
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(2);
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(1);
 
       expect(coreSetup.uiSettings.register).toHaveBeenCalledWith({
-        [OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
           ...observabilitySolutionSetting,
           value: AIAssistantType.Observability,
         },
       });
+    });
+
+    it('registers correct uiSettings for serverless security', () => {
+
+      aiAssistantManagementSelectionPlugin.setup(coreSetup, {
+        ...setupDeps,
+        cloud: {
+          serverless: {
+            projectType: 'security',
+          },
+        }
+      } as unknown as AIAssistantManagementSelectionPluginServerDependenciesSetup);
+
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(1);
 
       expect(coreSetup.uiSettings.register).toHaveBeenCalledWith({
-        [SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
           ...securitySolutionSetting,
           value: AIAssistantType.Security,
         },
       });
     });
-  });
+
+    it('registers correct uiSettings for serverless search', () => {
+
+      aiAssistantManagementSelectionPlugin.setup(coreSetup, {
+        ...setupDeps,
+        cloud: {
+          serverless: {
+            projectType: 'search',
+          },
+        }
+      } as unknown as AIAssistantManagementSelectionPluginServerDependenciesSetup);
+
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(0);
+    });
+
+  })
+
 
   describe('stateful', () => {
     it('uses the correct setting key to get the correct value from uiSettings', async () => {

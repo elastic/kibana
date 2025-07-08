@@ -44,14 +44,10 @@ export class AIAssistantManagementPlugin
 {
   private readonly kibanaBranch: string;
   private readonly buildFlavor: BuildFlavor;
-  private readonly config: {
-    serverlessUiSettingsKey?: string;
-  };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
-    this.config = initializerContext.config.get();
   }
 
   public setup(
@@ -101,25 +97,14 @@ export class AIAssistantManagementPlugin
   }
 
   public start(coreStart: CoreStart) {
+    const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
+      PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+    );
+
+    const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);
+
     return {
-      aiAssistantType$: this.getAiAssistantType$(coreStart),
+      aiAssistantType$: aiAssistantType$.asObservable(),
     };
-  }
-
-  private getAiAssistantType$(coreStart: CoreStart): Observable<AIAssistantType> {
-    if (this.buildFlavor === 'serverless') {
-      if (!this.config.serverlessUiSettingsKey) {
-        return new BehaviorSubject(AIAssistantType.Never);
-      }
-      const preferredAIAssistantType: AIAssistantType = coreStart.uiSettings.get(
-        this.config.serverlessUiSettingsKey
-      );
-
-      return new BehaviorSubject(preferredAIAssistantType).asObservable();
-    }
-
-    return new BehaviorSubject(
-      coreStart.uiSettings.get(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
-    ).asObservable();
   }
 }

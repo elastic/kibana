@@ -12,19 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
-import { SHOW_SECURITY, HIDE_ASSISTANT } from './translations';
+import { SHOW_SECURITY, HIDE_ASSISTANT, TITLE } from './translations';
 
 // Define the securitySolutionSetting with proper typing
 export const securitySolutionSetting: Omit<
   UiSettingsParams<AIAssistantType.Security | AIAssistantType.Never>,
   'value'
 > = {
-  name: i18n.translate(
-    'aiAssistantManagementSelection.securitySolutionSetting.preferredAIAssistantTypeSettingName',
-    {
-      defaultMessage: 'AI Assistant visibility',
-    }
-  ),
+  name: TITLE,
   description: i18n.translate(
     'aiAssistantManagementSelection.securitySolutionSetting.preferredAIAssistantTypeSettingDescription',
     {

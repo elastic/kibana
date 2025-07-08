@@ -9,36 +9,10 @@
 
 import { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { AIAssistantManagementPlugin } from './plugin';
-import { firstValueFrom } from 'rxjs';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 describe('AI Assistant Management Selection Plugin', () => {
-  describe('serverless', () => {
-    it('uses serverlessUiSettingsKey to get the correct value from uiSettings', async () => {
-      const serverlessUiSettingsKey = 'aiAssistant:preferredAIAssistantType:oblt';
-      const plugin = new AIAssistantManagementPlugin({
-        config: {
-          get: jest.fn(() => ({
-            serverlessUiSettingsKey,
-          })),
-        },
-        env: { packageInfo: { buildFlavor: 'serverless', branch: 'main' } },
-      } as unknown as PluginInitializerContext);
-
-      const coreStart = {
-        uiSettings: { get: jest.fn(() => AIAssistantType.Observability) },
-      } as unknown as CoreStart;
-
-      const result = plugin.start(coreStart);
-
-      expect(coreStart.uiSettings.get).toHaveBeenCalledWith(serverlessUiSettingsKey);
-      const aiAssistantType = await firstValueFrom(result.aiAssistantType$);
-      expect(aiAssistantType).toBe(AIAssistantType.Observability);
-    });
-  });
-
-  describe('stateful', () => {
     it('uses the correct setting key to get the correct value from uiSettings', async () => {
       const plugin = new AIAssistantManagementPlugin({
         config: {
@@ -69,5 +43,4 @@ describe('AI Assistant Management Selection Plugin', () => {
       expect(allCalls).toEqual([['aiAssistant:preferredAIAssistantType']]);
       expect(collected).toEqual([AIAssistantType.Default]);
     });
-  });
 });

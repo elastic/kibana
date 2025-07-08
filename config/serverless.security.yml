@@ -213,4 +213,4 @@ xpack.securitySolution.enableExperimental:
   - privilegedUserMonitoringDisabled
 
 # AI Assistant config
-aiAssistantManagementSelection.serverlessUiSettingsKey: "aiAssistant:preferredAIAssistantType:security"
+aiAssistantManagementSelection.preferredAIAssistantType: 'security'

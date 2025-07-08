@@ -8,7 +8,3 @@
  */
 
 export const PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY = 'aiAssistant:preferredAIAssistantType';
-export const OBSERVABILITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY =
-  'aiAssistant:preferredAIAssistantType:oblt';
-export const SECURITY_PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY =
-  'aiAssistant:preferredAIAssistantType:security';

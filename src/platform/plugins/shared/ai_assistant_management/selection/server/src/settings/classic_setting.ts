@@ -17,13 +17,12 @@ import {
   OBSERVABILITY_IN_OTHER_APPS,
   SECURITY_IN_OTHER_APPS,
   HIDE_ALL_ASSISTANTS,
+  TITLE,
 } from './translations';
 
 // Define the classicSetting with proper typing
 export const classicSetting: Omit<UiSettingsParams<AIAssistantType>, 'value'> = {
-  name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-    defaultMessage: 'AI Assistant visibility',
-  }),
+  name: TITLE,
   description: i18n.translate(
     'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
     {

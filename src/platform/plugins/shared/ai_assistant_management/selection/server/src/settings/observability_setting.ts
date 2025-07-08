@@ -12,19 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { AIAssistantType } from '../../../common/ai_assistant_type';
-import { SHOW_OBSERVABILITY, HIDE_ASSISTANT } from './translations';
+import { SHOW_OBSERVABILITY, HIDE_ASSISTANT, TITLE } from './translations';
 
 // Define the classicSetting with proper typing
 export const observabilitySolutionSetting: Omit<
   UiSettingsParams<AIAssistantType.Never | AIAssistantType.Observability>,
   'value'
 > = {
-  name: i18n.translate(
-    'aiAssistantManagementSelection.observabilitySolutionSetting.preferredAIAssistantTypeSettingName',
-    {
-      defaultMessage: 'AI Assistant visibility',
-    }
-  ),
+  name: TITLE,
   description: i18n.translate(
     'aiAssistantManagementSelection.observabilitySolutionSetting.preferredAIAssistantTypeSettingDescription',
     {
