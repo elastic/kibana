@@ -195,56 +195,6 @@ For more information about the features introduced in 8.19.0, refer to <<whats-n
 For detailed information about the 8.19.0 release, review the enhancements and fixes.
 
 [float]
-[[breaking-v8.19.0]]
-=== Breaking
-[discrete]
-[[breaking-213916]]
-* Now the fields / functions variables are being described with ?? in the query. The values variables use ? as before.
-[%collapsible]
-====
-*Details* +
-!!TODO!!
-
-*Impact* +
-!!TODO!!
-
-View ({kibana-pull}213916[#213916])
-====
-      
-
-[float]
-[[deprecation-v8.19.0]]
-=== Deprecations
-[discrete]
-[[deprecation-225536]]
-* Removes Default Quick Prompts.
-[%collapsible]
-====
-*Details* +
-!!TODO!!
-
-*Impact* +
-!!TODO!!
-
-View ({kibana-pull}225536[#225536])
-====
-      
-[discrete]
-[[deprecation-197684]]
-* Remove no longer used feature flags for GA features.
-[%collapsible]
-====
-*Details* +
-!!TODO!!
-
-*Impact* +
-!!TODO!!
-
-View ({kibana-pull}197684[#197684])
-====
-      
-
-[float]
 [[enhancement-v8.19.0]]
 === Enhancements
 Alerting::
