@@ -57,19 +57,6 @@ export class CstToAstConverter {
   // -------------------------------------------------------------------- utils
 
   /**
-   * Gets the source code slice for a given CST node.
-   *
-   * @param ctx A CST node to extract the source code for.
-   * @returns Source code for the given CST node.
-   */
-  private getSrc(ctx: antlr.ParserRuleContext): string {
-    const from = ctx.start.start;
-    const to = ctx.stop ? ctx.stop.stop + 1 : ctx.start.stop + 1;
-
-    return this.parser.src.slice(from, to);
-  }
-
-  /**
    * @todo Rename to `getParserFields`.
    */
   private createParserFields(ctx: antlr.ParserRuleContext): AstNodeParserFields {
@@ -78,10 +65,6 @@ export class CstToAstConverter {
       location: getPosition(ctx.start, ctx.stop),
       incomplete: Boolean(ctx.exception),
     };
-  }
-
-  private createParserFieldsFromTerminalNode(node: antlr.TerminalNode): AstNodeParserFields {
-    return this.createParserFieldsFromToken(node.symbol, node.getText());
   }
 
   private createParserFieldsFromToken(
