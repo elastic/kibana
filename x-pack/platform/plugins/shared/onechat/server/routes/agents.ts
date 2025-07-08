@@ -30,7 +30,7 @@ const TOOL_SELECTION_SCHEMA = schema.arrayOf(
 export function registerAgentRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  // List agent profiles
+  // List agents
   router.versioned
     .get({
       path: '/api/chat/agents',
@@ -60,7 +60,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       })
     );
 
-  // Get agent profile by id
+  // Get agent by id
   router.versioned
     .get({
       path: '/api/chat/agents/{id}',
@@ -93,7 +93,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       })
     );
 
-  // Create agent profile
+  // Create agent
   router.versioned
     .post({
       path: '/api/chat/agents',
@@ -135,7 +135,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       })
     );
 
-  // Update agent profile
+  // Update agent
   router.versioned
     .put({
       path: '/api/chat/agents/{id}',
