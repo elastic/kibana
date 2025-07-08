@@ -137,7 +137,6 @@ export class AIAssistantManagementSelectionPlugin
         case 'search':
           break;
         case undefined:
-          console.log('HEREEE');
           // This case should never happen, but we handle it for completeness.
           core.uiSettings.register({
             [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
