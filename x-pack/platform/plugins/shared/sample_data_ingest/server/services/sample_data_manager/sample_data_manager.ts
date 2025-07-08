@@ -20,6 +20,7 @@ interface SampleDataManagerOpts {
   kibanaVersion: string;
   elserInferenceId?: string;
   indexPrefixName: string;
+  isServerlessPlatform: boolean;
 }
 
 export class SampleDataManager {
@@ -35,6 +36,7 @@ export class SampleDataManager {
     elserInferenceId,
     kibanaVersion,
     indexPrefixName,
+    isServerlessPlatform,
   }: SampleDataManagerOpts) {
     this.log = logger;
     this.indexPrefixName = indexPrefixName;
@@ -49,6 +51,7 @@ export class SampleDataManager {
     this.indexManager = new IndexManager({
       elserInferenceId: elserInferenceId || defaultInferenceEndpoints.ELSER,
       logger: this.log,
+      isServerlessPlatform,
     });
   }
 

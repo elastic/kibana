@@ -24,10 +24,13 @@ export class SampleDataIngestPlugin
 {
   private readonly logger: Logger;
   private internalServices?: InternalServices;
+  private readonly isServerlessPlatform: boolean;
 
   constructor(private readonly context: PluginInitializerContext<SampleDataIngestConfig>) {
     this.logger = context.logger.get();
+    this.isServerlessPlatform = context.env.packageInfo.buildFlavor === 'serverless';
   }
+
   setup(coreSetup: CoreSetup): SampleDataSetupDependencies {
     const getServices = () => {
       if (!this.internalServices) {
@@ -53,6 +56,7 @@ export class SampleDataIngestPlugin
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger,
       indexPrefixName: 'sample-data',
+      isServerlessPlatform: this.isServerlessPlatform,
     });
 
     this.internalServices = {

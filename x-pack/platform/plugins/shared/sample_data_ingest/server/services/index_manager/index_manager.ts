@@ -19,6 +19,7 @@ import type { ZipArchive } from '../types';
 interface IndexManagerOpts {
   elserInferenceId: string;
   logger: Logger;
+  isServerlessPlatform: boolean;
 }
 
 interface CreateAndPopulateIndexOpts {
@@ -32,10 +33,12 @@ interface CreateAndPopulateIndexOpts {
 export class IndexManager {
   private readonly elserInferenceId: string;
   private readonly log: Logger;
+  private readonly isServerlessPlatform: boolean;
 
-  constructor({ elserInferenceId, logger }: IndexManagerOpts) {
+  constructor({ elserInferenceId, logger, isServerlessPlatform }: IndexManagerOpts) {
     this.elserInferenceId = elserInferenceId;
     this.log = logger;
+    this.isServerlessPlatform = isServerlessPlatform;
   }
 
   async createAndPopulateIndex({
@@ -57,6 +60,7 @@ export class IndexManager {
       esClient,
       elserInferenceId: this.elserInferenceId,
       log: this.log,
+      isServerless: this.isServerlessPlatform,
     };
 
     await createIndex({

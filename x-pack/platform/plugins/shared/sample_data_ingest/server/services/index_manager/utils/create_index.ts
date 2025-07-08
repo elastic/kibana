@@ -17,6 +17,7 @@ export const createIndex = async ({
   legacySemanticText,
   log,
   elserInferenceId = internalElserInferenceId,
+  isServerless = false,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
@@ -24,6 +25,7 @@ export const createIndex = async ({
   mappings: MappingTypeMapping;
   log: Logger;
   elserInferenceId?: string;
+  isServerless?: boolean;
 }) => {
   log.debug(`Creating index ${indexName}`);
 
@@ -32,10 +34,12 @@ export const createIndex = async ({
   await esClient.indices.create({
     index: indexName,
     mappings,
-    settings: {
-      auto_expand_replicas: '0-1',
-      'index.mapping.semantic_text.use_legacy_format': legacySemanticText,
-    },
+    settings: !isServerless
+      ? {
+          auto_expand_replicas: '0-1',
+          'index.mapping.semantic_text.use_legacy_format': legacySemanticText,
+        }
+      : undefined,
   });
 };
 
