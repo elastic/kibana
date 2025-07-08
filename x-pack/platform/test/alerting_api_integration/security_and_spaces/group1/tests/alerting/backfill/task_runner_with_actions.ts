@@ -15,7 +15,6 @@ import { SuperuserAtSpace1 } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { TEST_ACTIONS_INDEX, getSecurityRule, testDocTimestamps } from './test_utils';
 
-// eslint-disable-next-line import/no-default-export
 export default function scheduleBackfillTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
