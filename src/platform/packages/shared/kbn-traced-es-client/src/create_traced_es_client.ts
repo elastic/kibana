@@ -13,7 +13,6 @@ import type {
   FieldCapsResponse,
   MsearchRequest,
   ScalarValue,
-  SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -85,11 +84,13 @@ export interface TracedElasticsearchClient {
     operationName: string,
     parameters: TSearchRequest
   ): Promise<InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>>;
-  msearch<TDocument = unknown>(
+  msearch<TDocument = unknown, TSearchRequest extends MsearchRequest = MsearchRequest>(
     operationName: string,
-    parameters: MsearchRequest
+    parameters: TSearchRequest
   ): Promise<{
-    responses: Array<SearchResponse<TDocument>>;
+    responses: Array<
+      InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
+    >;
   }>;
   fieldCaps(
     operationName: string,
@@ -200,10 +201,15 @@ export function createTracedEsClient({
         >;
       });
     },
-    msearch<TDocument = unknown>(operationName: string, parameters: MsearchRequest) {
+    msearch<TDocument = unknown, TSearchRequest extends MsearchRequest = MsearchRequest>(
+      operationName: string,
+      parameters: TSearchRequest
+    ) {
       return callWithLogger(operationName, parameters, () => {
         return client.msearch<TDocument>(parameters) as unknown as Promise<{
-          responses: Array<SearchResponse<TDocument>>;
+          responses: Array<
+            InferSearchResponseOf<TDocument, TSearchRequest, { restTotalHitsAsInt: false }>
+          >;
         }>;
       });
     },
