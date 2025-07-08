@@ -7,12 +7,20 @@
 
 import React from 'react';
 import { EuiTreeView } from '@elastic/eui';
-import { Node } from '@elastic/eui/src/components/tree_view/tree_view';
+import type { PipelineTreeNode } from './types';
+import { createTreeNodesFromPipelines } from './create_tree_nodes';
 
-interface PipelineStructureTreeProps {
-  items: Node[];
+export interface PipelineStructureTreeProps {
+  pipelineTree: PipelineTreeNode;
 }
 
+/**
+ * A component for a Pipeline structure tree.
+ * If a pipeline node has children pipeline nodes, it means that those pipelines
+ * are pipeline processors of the current pipeline.
+ */
 export const PipelineStructureTree = (props: PipelineStructureTreeProps) => {
-  return <EuiTreeView items={props.items} showExpansionArrows={true} />;
+  const treeNode = createTreeNodesFromPipelines(props.pipelineTree);
+
+  return <EuiTreeView items={[treeNode]} showExpansionArrows={true} />;
 };

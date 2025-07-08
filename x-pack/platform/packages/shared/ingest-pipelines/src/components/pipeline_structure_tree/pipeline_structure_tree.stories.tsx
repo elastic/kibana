@@ -17,33 +17,55 @@ const meta: Meta<typeof PipelineStructureTree> = {
 export default meta;
 type Story = StoryObj<typeof PipelineStructureTree>;
 
+const pipelineTree = {
+  pipelineName: 'pipeline1',
+  isManaged: true,
+  children: [
+    {
+      pipelineName: 'pipeline2',
+      isManaged: true,
+      children: [
+        {
+          pipelineName: 'pipeline5',
+          isManaged: false,
+          children: [
+            {
+              pipelineName: 'pipeline6',
+              isManaged: false,
+              children: [
+                {
+                  pipelineName: 'pipeline7',
+                  isManaged: true,
+                  children: [
+                    {
+                      // This node shouldn't be displayed as it is on level 6
+                      pipelineName: 'pipeline8',
+                      isManaged: true,
+                      children: [],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      pipelineName: 'pipeline3',
+      isManaged: false,
+      children: [],
+    },
+    {
+      pipelineName: 'pipeline4',
+      isManaged: true,
+      children: [],
+    },
+  ],
+};
+
 export const Primary: Story = {
   args: {
-    items: [
-      {
-        label: 'Pipeline 1',
-        id: 'pipeline1',
-        children: [
-          {
-            label: 'Pipeline 2',
-            id: 'pipeline2',
-            children: [
-              {
-                label: 'Pipeline 5',
-                id: 'pipeline5'
-              },
-            ]
-          },
-          {
-            label: 'Pipeline 3',
-            id: 'pipeline3'
-          },
-          {
-            label: 'Pipeline 4',
-            id: 'pipeline4'
-          }
-        ]
-      }
-    ],
+    pipelineTree,
   },
 };

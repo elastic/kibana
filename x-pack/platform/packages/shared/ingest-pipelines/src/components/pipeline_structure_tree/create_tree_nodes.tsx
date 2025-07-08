@@ -1,0 +1,40 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiIcon } from '@elastic/eui';
+import type { Node } from '@elastic/eui/src/components/tree_view/tree_view';
+import type { PipelineTreeNode } from './types';
+import { MAX_TREE_LEVEL } from './constants';
+import { cssTreeNode } from './styles';
+
+const traverseTree = (treeNode: PipelineTreeNode, level: number): Node => {
+  const currentNode = {
+    id: treeNode.pipelineName,
+    label: treeNode.pipelineName,
+    'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}`,
+    css: cssTreeNode,
+    icon: treeNode.isManaged ? <EuiIcon type="lock" /> : undefined,
+    hasArrow: true,
+    children: [] as Node[],
+  };
+  if (level === MAX_TREE_LEVEL) {
+    return currentNode;
+  }
+  treeNode.children.forEach((node) => {
+    currentNode.children.push(traverseTree(node, level + 1));
+  });
+  return currentNode;
+};
+
+/**
+ * This function takes a {@link PipelineTree} tree of pipeline names, traverses it
+ * recursively, and returns a Node tree that can be passed the an {@link EuiTreeView}.
+ */
+export const createTreeNodesFromPipelines = (pipelines: PipelineTreeNode): Node => {
+  return traverseTree(pipelines, 1);
+};
