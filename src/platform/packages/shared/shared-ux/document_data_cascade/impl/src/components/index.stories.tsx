@@ -10,7 +10,15 @@
 import React, { type ComponentProps } from 'react';
 import { StoryObj, Meta } from '@storybook/react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiDescriptionList } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiDescriptionList,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import { DataCascade } from '.';
 import { getESQLStatsQueryMeta } from '../lib/parse_esql';
@@ -70,10 +78,21 @@ export const CascadeGridImplementation: StoryObj<
             )}
             rowHeaderMetaSlots={({ row }) => [
               <EuiText textAlign="right">
-                <p>
-                  Count: <EuiBadge color="hollow">{row.original.count}</EuiBadge>
-                </p>
+                <FormattedMessage
+                  id="sharedUXPackages.data_cascade.demo.row.count"
+                  defaultMessage="Count <badge>{countValue}</badge>"
+                  values={{
+                    countValue: row.original.count,
+                    badge: (chunks) => <EuiBadge color="hollow">{chunks}</EuiBadge>,
+                  }}
+                />
               </EuiText>,
+              <EuiButtonEmpty iconSide="right" iconType="arrowDown" flush="right">
+                <FormattedMessage
+                  id="sharedUXPackages.data_cascade.demo.row.action"
+                  defaultMessage="Take Action"
+                />
+              </EuiButtonEmpty>,
             ]}
             leafContentSlot={({ data }) => {
               return (
