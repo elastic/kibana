@@ -6,6 +6,7 @@
  */
 
 import { useHistory, useLocation } from 'react-router-dom';
+import { TabId } from '../types';
 
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 
@@ -19,7 +20,7 @@ export const useTabId = () => {
   };
 
   const setUrlTabId = (
-    tabId: string,
+    tabId: TabId,
     overrideSearchState?: boolean,
     newSearchState?: Record<string, string>
   ) => {
