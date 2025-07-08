@@ -26,7 +26,7 @@ export class GlobalFlyoutOrchestratorExamplePlugin
   public setup(core: CoreSetup<StartDeps>, deps: SetupDeps): void {
     // Register an application into the side navigation menu
     core.application.register({
-      id: 'global_flyout_orchestrator_example',
+      id: 'globalFlyoutOrchestratorExample',
       title: PLUGIN_NAME,
       async mount(params: AppMountParameters) {
         // Load application bundle

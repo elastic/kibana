@@ -22,8 +22,8 @@ export const App = ({ basename, navigation }: AppDeps) => {
   return (
     <Router basename={basename}>
       <navigation.ui.TopNavMenu
-        appName="global_flyout_orchestrator_example"
-        showSearchBar={true}
+        appName="globalFlyoutOrchestratorExample"
+        showSearchBar={false}
         useDefaultBehaviors={true}
       />
       <EuiPageTemplate restrictWidth="1000px">
