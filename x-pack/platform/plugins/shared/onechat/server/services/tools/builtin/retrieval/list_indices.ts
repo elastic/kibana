@@ -19,13 +19,22 @@ const listIndicesSchema = z.object({
     ),
 });
 
-export const listIndicesTool = (): RegisteredTool<typeof listIndicesSchema, ListIndexInfo[]> => {
+export interface ListIndexResponse {
+  indices: ListIndexInfo[];
+}
+
+export const listIndicesTool = (): RegisteredTool<typeof listIndicesSchema, ListIndexResponse> => {
   return {
     id: BuiltinToolIds.listIndices,
     description: 'List the indices in the Elasticsearch cluster the current user has access to.',
     schema: listIndicesSchema,
     handler: async ({ pattern = '*' }, { esClient }) => {
-      return listIndices({ pattern, esClient: esClient.asCurrentUser });
+      const result = await listIndices({ pattern, esClient: esClient.asCurrentUser });
+      return {
+        result: {
+          indices: result,
+        },
+      };
     },
     meta: {
       tags: [BuiltinTags.retrieval],
