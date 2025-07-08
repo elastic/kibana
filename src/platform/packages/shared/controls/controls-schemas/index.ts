@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { controlsGroupStateSchema } from './src/controls_group_state_schema';
+export { controlsGroupSchema } from './src/controls_group_schema';
 
 export type {
   ControlsGroupState,

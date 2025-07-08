@@ -18,9 +18,9 @@ import {
   DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '@kbn/controls-constants';
-import { controlStateSchema } from './control_state_schema';
+import { controlSchema } from './control_schema';
 
-export const controlsLabelPositionSchema = schema.oneOf(
+export const labelPositionSchema = schema.oneOf(
   [
     schema.literal(CONTROLS_LABEL_POSITION_ONE_LINE),
     schema.literal(CONTROLS_LABEL_POSITION_TWO_LINE),
@@ -33,7 +33,7 @@ export const controlsLabelPositionSchema = schema.oneOf(
   }
 );
 
-export const controlsChainingSchema = schema.oneOf(
+export const chainingSchema = schema.oneOf(
   [schema.literal(CONTROLS_CHAINING_HIERARCHICAL), schema.literal(CONTROLS_CHAINING_NONE)],
   {
     defaultValue: DEFAULT_CONTROLS_CHAINING,
@@ -63,13 +63,13 @@ export const ignoreParentSettingsSchema = schema.object({
   }),
 });
 
-export const controlsGroupStateSchema = schema.object({
-  controls: schema.arrayOf(controlStateSchema, {
+export const controlsGroupSchema = schema.object({
+  controls: schema.arrayOf(controlSchema, {
     defaultValue: [],
     meta: { description: 'An array of control panels and their state in the control group.' },
   }),
-  labelPosition: controlsLabelPositionSchema,
-  chainingSystem: controlsChainingSchema,
+  labelPosition: labelPositionSchema,
+  chainingSystem: chainingSchema,
   enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   ignoreParentSettings: ignoreParentSettingsSchema,
   autoApplySelections: schema.boolean({

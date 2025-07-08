@@ -9,18 +9,18 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  controlsChainingSchema,
-  controlsGroupStateSchema,
-  controlsLabelPositionSchema,
+  chainingSchema,
+  controlsGroupSchema,
+  labelPositionSchema,
   ignoreParentSettingsSchema,
-} from './controls_group_state_schema';
-import { controlStateSchema, controlWidthSchema } from './control_state_schema';
+} from './controls_group_schema';
+import { controlSchema, controlWidthSchema } from './control_schema';
 
-export type ControlsGroupState = TypeOf<typeof controlsGroupStateSchema>;
+export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
 
-export type ControlsLabelPosition = TypeOf<typeof controlsLabelPositionSchema>;
-export type ControlsChainingSystem = TypeOf<typeof controlsChainingSchema>;
+export type ControlsLabelPosition = TypeOf<typeof labelPositionSchema>;
+export type ControlsChainingSystem = TypeOf<typeof chainingSchema>;
 export type ControlsIgnoreParentSettings = TypeOf<typeof ignoreParentSettingsSchema>;
 
 export type ControlWidth = TypeOf<typeof controlWidthSchema>;
-export type ControlState = TypeOf<typeof controlStateSchema>;
+export type ControlState = TypeOf<typeof controlSchema>;

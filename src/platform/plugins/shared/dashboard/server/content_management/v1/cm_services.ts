@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { controlsGroupStateSchema } from '@kbn/controls-schemas';
+import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import { FilterStateStore } from '@kbn/es-query';
@@ -300,7 +300,7 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
   ),
 
   // Dashboard Content
-  controlGroupInput: schema.maybe(controlsGroupStateSchema),
+  controlGroupInput: schema.maybe(controlsGroupSchema),
   panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
   options: optionsSchema,
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
