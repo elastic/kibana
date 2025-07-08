@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { flushSync } from 'react-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, type EuiThemeShape } from '@elastic/eui';
 import type { CellContext, Row } from '@tanstack/react-table';
 import {
   getCascadeRowLeafDataCacheKey,
@@ -21,21 +20,20 @@ import { type GroupNode, type LeafNode, useDataCascadeState } from '../../data_c
 export interface CascadeRowCellProps<G extends GroupNode, L extends LeafNode>
   extends CellContext<G, unknown> {
   populateGroupLeafDataFn: (args: { row: Row<G> }) => Promise<void>;
-  rowHeaderTitleSlot: React.FC<{ row: Row<G> }>;
-  rowHeaderMetaSlots?: (props: { row: Row<G> }) => React.ReactNode[];
   leafContentSlot: React.FC<{ data: L[] | null }>;
+  size: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
 }
 
 export function CascadeRowCell<G extends GroupNode, L extends LeafNode>({
-  row,
-  populateGroupLeafDataFn,
-  rowHeaderTitleSlot: RowTitleSlot,
-  rowHeaderMetaSlots,
   leafContentSlot: LeafContentSlot,
+  populateGroupLeafDataFn,
+  row,
+  size,
 }: CascadeRowCellProps<G, L>) {
   const { leafNodes, currentGroupByColumns } = useDataCascadeState<G, L>();
-  const [isPendingRowLeafDataFetch, setRowLeafDataFetch] = React.useState<boolean>(false);
-  const isLeafNode = !row.getCanExpand();
+  const [isPendingRowLeafDataFetch, setRowLeafDataFetch] = useState<boolean>(false);
+  const hasPendingRequest = useRef<boolean>(false);
+
   const getLeafCacheKey = useCallback(() => {
     return getCascadeRowLeafDataCacheKey(
       getCascadeRowNodePath(currentGroupByColumns, row),
@@ -45,64 +43,36 @@ export function CascadeRowCell<G extends GroupNode, L extends LeafNode>({
   }, [currentGroupByColumns, row]);
 
   const leafData = useMemo(() => {
-    return isLeafNode ? leafNodes.get(getLeafCacheKey()) ?? null : null;
-  }, [getLeafCacheKey, isLeafNode, leafNodes]);
+    return leafNodes.get(getLeafCacheKey()) ?? null;
+  }, [getLeafCacheKey, leafNodes]);
 
-  const fetchCascadeRowGroupLeafData = React.useCallback(() => {
-    // synchronously mark request as pending to avoid multiple re-renders in turn causing multiple requests
-    flushSync(() => setRowLeafDataFetch(true));
-    populateGroupLeafDataFn({ row }).finally(() => {
-      setRowLeafDataFetch(false);
-    });
-  }, [populateGroupLeafDataFn, row]);
-
-  React.useEffect(() => {
-    if (!leafData && isLeafNode && row.getIsExpanded() && !isPendingRowLeafDataFetch) {
-      fetchCascadeRowGroupLeafData();
+  const fetchCascadeRowGroupLeafData = useCallback(() => {
+    if (!leafData && !hasPendingRequest.current) {
+      // synchronously mark request as pending to avoid multiple re-renders in turn causing multiple requests
+      hasPendingRequest.current = true;
+      setRowLeafDataFetch(true);
+      populateGroupLeafDataFn({ row }).finally(() => {
+        setRowLeafDataFetch(false);
+        hasPendingRequest.current = false;
+      });
     }
-  }, [fetchCascadeRowGroupLeafData, isLeafNode, isPendingRowLeafDataFetch, leafData, row]);
+  }, [populateGroupLeafDataFn, row, leafData]);
+
+  useEffect(() => {
+    fetchCascadeRowGroupLeafData();
+  }, [fetchCascadeRowGroupLeafData]);
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      css={({ euiTheme }) => ({ padding: `0 calc(${euiTheme.size.s} * ${row.depth})` })}
-    >
-      <EuiFlexItem>
-        <EuiFlexGroup direction="row">
-          <EuiFlexItem grow={4}>
-            <RowTitleSlot row={row} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={6}>
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="m"
-              alignItems="center"
-              justifyContent="flexEnd"
-            >
-              {rowHeaderMetaSlots?.({ row }).map((metaSlot, index) => (
-                <EuiFlexItem grow={false} key={index}>
-                  {metaSlot}
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+    <React.Fragment>
+      {isPendingRowLeafDataFetch || hasPendingRequest.current ? (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingChart size={size === 's' ? 'm' : size} />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <React.Fragment>
-        {isLeafNode && row.getIsAllParentsExpanded() && row.getIsExpanded() && (
-          <EuiFlexItem grow={10}>
-            {isPendingRowLeafDataFetch ? (
-              <EuiFlexGroup justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingChart size="l" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <LeafContentSlot data={leafData} />
-            )}
-          </EuiFlexItem>
-        )}
-      </React.Fragment>
-    </EuiFlexGroup>
+      ) : (
+        <LeafContentSlot data={leafData} />
+      )}
+    </React.Fragment>
   );
 }
