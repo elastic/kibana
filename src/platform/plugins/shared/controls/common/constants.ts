@@ -32,3 +32,17 @@ export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
 export const ESQL_CONTROL = 'esqlControl';
+
+export const ESQL_COMPATIBLE_CONTROL_TYPES = [OPTIONS_LIST_CONTROL];
+
+export enum ControlOutputOption {
+  DSL = 'dsl',
+  ESQL = 'esql',
+}
+export enum ControlInputOption {
+  DSL = 'dsl',
+  ESQL = 'esql',
+  STATIC = 'static',
+}
+export const DEFAULT_CONTROL_OUTPUT = ControlOutputOption.DSL;
+export const DEFAULT_CONTROL_INPUT = ControlInputOption.DSL;

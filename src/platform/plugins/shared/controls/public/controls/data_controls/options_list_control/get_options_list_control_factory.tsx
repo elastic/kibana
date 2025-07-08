@@ -21,10 +21,11 @@ import {
 } from 'rxjs';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { OPTIONS_LIST_CONTROL } from '../../../../common';
+import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlOutputOption, OPTIONS_LIST_CONTROL } from '../../../../common';
 import type {
   OptionsListControlState,
   OptionsListSortingType,
@@ -194,8 +195,15 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       });
 
       /** Remove all other selections if this control becomes a single select */
-      const singleSelectSubscription = editorStateManager.api.singleSelect$
-        .pipe(filter((singleSelect) => Boolean(singleSelect)))
+      const singleSelectSubscription = combineLatest([
+        editorStateManager.api.singleSelect$,
+        dataControlManager.api.output$,
+      ])
+        .pipe(
+          filter(
+            ([singleSelect, output]) => Boolean(singleSelect) || output === ControlOutputOption.ESQL
+          )
+        )
         .subscribe(() => {
           const currentSelections = selectionsManager.api.selectedOptions$.getValue() ?? [];
           if (currentSelections.length > 1)
@@ -220,34 +228,64 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         });
       /** Output filters when selections change */
       const outputFilterSubscription = combineLatest([
+        dataControlManager.api.output$,
         dataControlManager.api.dataViews$,
         dataControlManager.api.fieldName$,
         selectionsManager.api.selectedOptions$,
         selectionsManager.api.existsSelected$,
         selectionsManager.api.exclude$,
+        dataControlManager.api.esqlVariableString$,
       ])
         .pipe(debounceTime(0))
-        .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
-          const dataView = dataViews?.[0];
-          const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
+        .subscribe(
+          ([
+            output,
+            dataViews,
+            fieldName,
+            selectedOptions,
+            existsSelected,
+            exclude,
+            esqlVariableString,
+          ]) => {
+            if (output === ControlOutputOption.ESQL) {
+              if (!esqlVariableString || !selectedOptions) {
+                dataControlManager.internalApi.setESQLVariable(undefined);
+                return;
+              }
+              const variableType = esqlVariableString.startsWith('??')
+                ? ESQLVariableType.FIELDS
+                : ESQLVariableType.VALUES;
+              const variableName = esqlVariableString.replace('?', '');
+              dataControlManager.internalApi.setESQLVariable({
+                key: variableName,
+                type: variableType,
+                value: isNaN(Number(selectedOptions[0]))
+                  ? selectedOptions[0]
+                  : Number(selectedOptions[0]),
+              });
+            } else {
+              const dataView = dataViews?.[0];
+              const field = dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
 
-          let newFilter: Filter | undefined;
-          if (dataView && field) {
-            if (existsSelected) {
-              newFilter = buildExistsFilter(field, dataView);
-            } else if (selectedOptions && selectedOptions.length > 0) {
-              newFilter =
-                selectedOptions.length === 1
-                  ? buildPhraseFilter(field, selectedOptions[0], dataView)
-                  : buildPhrasesFilter(field, selectedOptions, dataView);
+              let newFilter: Filter | undefined;
+              if (dataView && field) {
+                if (existsSelected) {
+                  newFilter = buildExistsFilter(field, dataView);
+                } else if (selectedOptions && selectedOptions.length > 0) {
+                  newFilter =
+                    selectedOptions.length === 1
+                      ? buildPhraseFilter(field, selectedOptions[0], dataView)
+                      : buildPhrasesFilter(field, selectedOptions, dataView);
+                }
+              }
+              if (newFilter) {
+                newFilter.meta.key = field?.name;
+                if (exclude) newFilter.meta.negate = true;
+              }
+              dataControlManager.internalApi.setOutputFilter(newFilter);
             }
           }
-          if (newFilter) {
-            newFilter.meta.key = field?.name;
-            if (exclude) newFilter.meta.negate = true;
-          }
-          dataControlManager.internalApi.setOutputFilter(newFilter);
-        });
+        );
 
       function serializeState() {
         return {
@@ -383,7 +421,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
 
           const existsSelected = Boolean(selectionsManager.api.existsSelected$.getValue());
           const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
-          const singleSelect = editorStateManager.api.singleSelect$.getValue();
+          const singleSelect =
+            dataControlManager.api.output$.getValue() === ControlOutputOption.ESQL ||
+            editorStateManager.api.singleSelect$.getValue();
 
           // the order of these checks matters, so be careful if rearranging them
           const keyAsType = getSelectionAsFieldType(field, key);
@@ -464,11 +504,20 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             };
           }, []);
 
+          const outputMode = useStateFromPublishingSubject(dataControlManager.api.output$);
+          const isESQLOutputMode = outputMode === ControlOutputOption.ESQL;
+
           return (
             <OptionsListControlContext.Provider
               value={{
                 componentApi,
-                displaySettings: { placeholder, hideActionBar, hideExclude, hideExists, hideSort },
+                displaySettings: {
+                  placeholder,
+                  hideActionBar,
+                  hideExclude: isESQLOutputMode || hideExclude,
+                  hideExists: isESQLOutputMode || hideExists,
+                  hideSort,
+                },
               }}
             >
               <OptionsListControl controlPanelClassName={controlPanelClassName} />

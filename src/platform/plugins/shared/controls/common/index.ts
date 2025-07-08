@@ -30,6 +30,11 @@ export {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
   ESQL_CONTROL,
+  DEFAULT_CONTROL_OUTPUT,
+  ControlOutputOption,
+  DEFAULT_CONTROL_INPUT,
+  ControlInputOption,
+  ESQL_COMPATIBLE_CONTROL_TYPES,
 } from './constants';
 
 export { CONTROL_GROUP_TYPE } from './control_group';
