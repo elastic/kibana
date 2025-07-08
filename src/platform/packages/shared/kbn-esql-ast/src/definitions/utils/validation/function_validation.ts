@@ -21,12 +21,7 @@ import {
   UNSUPPORTED_COMMANDS_BEFORE_MATCH,
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
 } from '../../constants';
-import {
-  getMessageFromId,
-  errors,
-  getFunctionDefinition,
-  getColumnForASTNode,
-} from '..';
+import { getMessageFromId, errors, getFunctionDefinition, getColumnForASTNode } from '..';
 import {
   FunctionParameter,
   FunctionDefinitionTypes,

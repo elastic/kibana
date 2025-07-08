@@ -66,7 +66,7 @@ export { singleItems, resolveItem, lastItem, firstItem } from './src/visitor/uti
 
 export { esqlCommandRegistry } from './src/commands_registry';
 
-export * from './src/definitions/utils/validation/complete_items';
+export * from './src/commands_registry/complete_items';
 export * from './src/commands_registry/constants';
 export * from './src/definitions/constants';
 export * from './src/definitions/types';

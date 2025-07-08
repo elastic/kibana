@@ -14,7 +14,7 @@ import {
   pipeCompleteItem,
   getNewUserDefinedColumnSuggestion,
   assignCompletionItem,
-} from '../../../definitions/utils/validation/complete_items';
+} from '../../complete_items';
 import {
   getFieldsOrFunctionsSuggestions,
   findFinalWord,

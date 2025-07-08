@@ -41,6 +41,7 @@ import {
   buildFieldsDefinitionsWithMetadata,
   getFunctionSuggestions,
   getExpressionType,
+  getColumnExists,
 } from '@kbn/esql-ast/src/definitions/utils';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import {
@@ -61,7 +62,6 @@ import {
   isSourceCommand,
   getAllFunctions,
   isSingleItem,
-  getColumnExists,
 } from '../shared/helpers';
 import {
   collectUserDefinedColumns,

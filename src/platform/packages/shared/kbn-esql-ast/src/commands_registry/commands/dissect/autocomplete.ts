@@ -13,7 +13,7 @@ import {
   pipeCompleteItem,
   colonCompleteItem,
   semiColonCompleteItem,
-} from '../../../definitions/utils/validation/complete_items';
+} from '../../complete_items';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';

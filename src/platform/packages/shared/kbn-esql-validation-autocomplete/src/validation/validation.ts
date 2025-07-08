@@ -9,27 +9,19 @@
 
 import {
   ESQLAst,
-  ESQLColumn,
   ESQLCommand,
   ESQLMessage,
-  ESQLSource,
   parse,
   walk,
   esqlCommandRegistry,
   ErrorTypes,
 } from '@kbn/esql-ast';
-import { getMessageFromId, errors, sourceExists } from '@kbn/esql-ast/src/definitions/utils';
-import type { ESQLIdentifier } from '@kbn/esql-ast/src/types';
+import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import {
-  areFieldAndUserDefinedColumnTypesCompatible,
-  getColumnExists,
-  hasWildcard,
-  isParametrized,
-} from '../shared/helpers';
+import { areFieldAndUserDefinedColumnTypesCompatible } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
 import {
@@ -276,85 +268,5 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLFieldWithMetadata
       );
     }
   }
-  return messages;
-}
-
-export function validateSources(
-  sources: ESQLSource[],
-  { sources: availableSources }: ReferenceMaps
-) {
-  const messages: ESQLMessage[] = [];
-
-  const knownIndexNames = [];
-  const knownIndexPatterns = [];
-  const unknownIndexNames = [];
-  const unknownIndexPatterns = [];
-
-  for (const source of sources) {
-    if (source.incomplete) {
-      return messages;
-    }
-
-    if (source.sourceType === 'index') {
-      const index = source.index;
-      const sourceName = source.prefix ? source.name : index?.valueUnquoted;
-      if (!sourceName) continue;
-
-      if (sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {
-        knownIndexNames.push(source);
-      }
-      if (sourceExists(sourceName, availableSources) && hasWildcard(sourceName)) {
-        knownIndexPatterns.push(source);
-      }
-      if (!sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {
-        unknownIndexNames.push(source);
-      }
-      if (!sourceExists(sourceName, availableSources) && hasWildcard(sourceName)) {
-        unknownIndexPatterns.push(source);
-      }
-    }
-  }
-
-  unknownIndexNames.forEach((source) => {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownIndex',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
-  });
-
-  if (knownIndexNames.length + unknownIndexNames.length + knownIndexPatterns.length === 0) {
-    // only if there are no known index names, no known index patterns, and no unknown
-    // index names do we worry about creating errors for unknown index patterns
-    unknownIndexPatterns.forEach((source) => {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownIndex',
-          values: { name: source.name },
-          locations: source.location,
-        })
-      );
-    });
-  }
-
-  return messages;
-}
-
-export function validateColumnForCommand(
-  column: ESQLColumn | ESQLIdentifier,
-  commandName: string,
-  references: ReferenceMaps
-): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-  if (commandName === 'row') {
-    if (!references.userDefinedColumns.has(column.name) && !isParametrized(column)) {
-      messages.push(errors.unknownColumn(column));
-    }
-  } else if (!getColumnExists(column, references) && !isParametrized(column)) {
-    messages.push(errors.unknownColumn(column));
-  }
-
   return messages;
 }

@@ -8,7 +8,7 @@
  */
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
-import { listCompleteItem } from './validation/complete_items';
+import { listCompleteItem } from '../../commands_registry/complete_items';
 import { getFieldsOrFunctionsSuggestions } from './autocomplete';
 import {
   type FunctionFilterPredicates,

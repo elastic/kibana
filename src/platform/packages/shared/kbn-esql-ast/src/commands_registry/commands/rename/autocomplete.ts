@@ -14,7 +14,7 @@ import {
   assignCompletionItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
-} from '../../../definitions/utils/validation/complete_items';
+} from '../../complete_items';
 import { columnExists } from '../../../definitions/utils/autocomplete';
 
 export async function autocomplete(

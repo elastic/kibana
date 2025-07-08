@@ -26,8 +26,6 @@ export {
   getAllFunctions,
   isSupportedFunction,
   getFunctionDefinition,
-  printFunctionSignature,
-  checkFunctionArgMatchesDefinition as isEqualType,
   isSourceItem,
   isFunctionItem,
   isOptionItem,

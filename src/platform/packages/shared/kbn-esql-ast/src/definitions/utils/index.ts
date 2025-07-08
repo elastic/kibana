@@ -26,3 +26,4 @@ export { getColumnForASTNode, pipePrecedesCurrentWord } from './shared';
 export { getExpressionType } from './expressions';
 export { getMessageFromId, errors } from './errors';
 export { sourceExists } from './sources';
+export { getColumnExists } from './columns';
