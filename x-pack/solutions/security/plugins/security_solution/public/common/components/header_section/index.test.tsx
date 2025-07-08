@@ -336,6 +336,20 @@ describe('HeaderSection', () => {
     expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
   });
 
+  test('renders "Chart Closed" when toggleAriaLabel="Chart" and toggleStatus=false', () => {
+    renderHeaderSection({
+      id: 'id',
+      title: 'T',
+      subtitle: 'S',
+      headerFilters: null,
+      toggleQuery: jest.fn(),
+      toggleStatus: false,
+      toggleAriaLabel: 'Chart',
+      children: null,
+    });
+    expect(screen.getByTestId('query-toggle-header')).toHaveAttribute('aria-label', 'Chart Closed');
+  });
+
   test('it toggles query when icon is clicked', async () => {
     const mockToggle = jest.fn();
     renderHeaderSection({
