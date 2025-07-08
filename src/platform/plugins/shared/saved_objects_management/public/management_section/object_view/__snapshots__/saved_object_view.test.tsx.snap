@@ -58,7 +58,7 @@ exports[`SavedObjectEdition should render normally 1`] = `
   }
 >
   <EuiFlexGroup
-    className="savedObjectsManagementObjectView"
+    css="unknown styles"
     data-test-subject="savedObjectsEdit"
     direction="column"
   >
