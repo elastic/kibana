@@ -59,10 +59,8 @@ interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
 }
 
 export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
-  extends Pick<
-      CascadeRowCellProps<G, L>,
-      'rowHeaderTitleSlot' | 'rowHeaderMetaSlots' | 'leafContentSlot'
-    >,
+  extends Pick<CascadeRowProps<G>, 'rowHeaderTitleSlot' | 'rowHeaderMetaSlots'>,
+    Pick<CascadeRowCellProps<G, L>, 'leafContentSlot'>,
     Pick<Parameters<typeof useVirtualizer>[0], 'overscan'> {
   /**
    * @description The data to be displayed in the cascade. It should be an array of group nodes.
@@ -83,7 +81,7 @@ export interface DataCascadeImplProps<G extends GroupNode, L extends LeafNode>
   /**
    * @description The spacing size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
    */
-  size?: CascadeRowProps<G>['rowGapSize'];
+  size?: CascadeRowProps<G>['size'];
   tableTitleSlot: React.FC<{ rows: Array<Row<G>> }>;
   /**
    * @description Whether to cause the group root to stick to the top of the viewport.
@@ -219,10 +217,9 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
             <CascadeRowCell<G, L>
               {...{
                 ...props,
-                rowHeaderTitleSlot,
-                rowHeaderMetaSlots,
                 leafContentSlot,
                 populateGroupLeafDataFn: fetchGroupLeafData,
+                size,
               }}
             />
           );
@@ -397,8 +394,10 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                             innerRef={rowVirtualizer.measureElement}
                             isActiveSticky={isActiveSticky}
                             populateGroupNodeDataFn={fetchGroupNodeData}
+                            rowHeaderTitleSlot={rowHeaderTitleSlot}
+                            rowHeaderMetaSlots={rowHeaderMetaSlots}
                             rowInstance={row}
-                            rowGapSize={size}
+                            size={size}
                             virtualRow={virtualItem}
                             virtualRowStyle={getGridRowPositioningStyle(
                               renderIndex,
