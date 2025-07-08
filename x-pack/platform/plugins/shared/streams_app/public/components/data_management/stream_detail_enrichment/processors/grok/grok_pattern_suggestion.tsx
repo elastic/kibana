@@ -23,7 +23,7 @@ import { ValuesType } from 'utility-types';
 import { GrokCollection, DraftGrokExpression } from '@kbn/grok-ui';
 import { UseFormSetValue, FieldValues, useWatch } from 'react-hook-form';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
-import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
+import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
 import { ProcessorFormState } from '../../types';
 import { GeneratePatternButton, AdditionalChargesCallout } from './generate_pattern_button';
@@ -46,7 +46,7 @@ export const GrokPatternAISuggestions = ({
   } = useStreamDetail();
 
   const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
+    selectPreviewRecords(snapshot.context)
   );
 
   const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();
