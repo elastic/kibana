@@ -653,7 +653,6 @@ export class SearchInterceptor {
             ) {
               this.showRestoreWarning(sessionId);
             }
-
           }),
           finalize(() => {
             this.pendingCount$.next(this.pendingCount$.getValue() - 1);
