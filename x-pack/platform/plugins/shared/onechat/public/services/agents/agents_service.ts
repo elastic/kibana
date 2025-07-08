@@ -28,40 +28,40 @@ export class AgentService {
   }
 
   /**
-   * List all agent profiles
+   * List all agents
    */
   async list(options?: AgentListOptions): Promise<AgentDefinition[]> {
-    const res = await this.http.get<ListAgentResponse>('/api/chat/agents/profiles');
+    const res = await this.http.get<ListAgentResponse>('/api/chat/agents');
     return res.agentProfiles;
   }
 
   /**
-   * Get a single agent profile by id
+   * Get a single agent by id
    */
   async get(id: string): Promise<AgentDefinition> {
-    return await this.http.get<GetAgentResponse>(`/api/chat/agents/profiles/${id}`);
+    return await this.http.get<GetAgentResponse>(`/api/chat/agents/${id}`);
   }
 
   /**
-   * Create a new agent profile
+   * Create a new agent
    */
   async create(profile: AgentCreateRequest): Promise<AgentDefinition> {
-    return await this.http.post<CreateAgentResponse>(`/api/chat/agents/profiles`, {
+    return await this.http.post<CreateAgentResponse>(`/api/chat/agents`, {
       body: JSON.stringify(profile),
     });
   }
 
   /**
-   * Update an existing agent profile
+   * Update an existing agent
    */
   async update(id: string, update: AgentUpdateRequest): Promise<AgentDefinition> {
-    return await this.http.put<UpdateAgentResponse>(`/api/chat/agents/profiles/${id}`, {
+    return await this.http.put<UpdateAgentResponse>(`/api/chat/agents/${id}`, {
       body: JSON.stringify(update),
     });
   }
 
   /**
-   * Delete an agent profile by id
+   * Delete an agent by id
    */
   async delete(id: string): Promise<DeleteAgentResponse> {
     return await this.http.delete<DeleteAgentResponse>(`/api/chat/agents/profiles/${id}`);

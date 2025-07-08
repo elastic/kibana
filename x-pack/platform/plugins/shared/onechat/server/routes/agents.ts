@@ -16,9 +16,9 @@ import type {
   DeleteAgentResponse,
   ListAgentResponse,
 } from '../../common/http_api/agents';
+import { getTechnicalPreviewWarning } from './utils';
 
-const TECHNICAL_PREVIEW_WARNING =
-  'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
+const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Agent API');
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object({
@@ -33,12 +33,12 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // List agent profiles
   router.versioned
     .get({
-      path: '/api/chat/agents/profiles',
+      path: '/api/chat/agents',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'List agent profiles',
+      summary: 'List agents',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
         tags: ['agent'],
@@ -63,12 +63,12 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Get agent profile by id
   router.versioned
     .get({
-      path: '/api/chat/agents/profiles/{id}',
+      path: '/api/chat/agents/{id}',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'Get an agent profile',
+      summary: 'Get an agent',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
         tags: ['agent'],
@@ -96,12 +96,12 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Create agent profile
   router.versioned
     .post({
-      path: '/api/chat/agents/profiles',
+      path: '/api/chat/agents',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
       access: 'public',
-      summary: 'Create an agent profile',
+      summary: 'Create an agent',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
         tags: ['agent'],
@@ -138,12 +138,12 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Update agent profile
   router.versioned
     .put({
-      path: '/api/chat/agents/profiles/{id}',
+      path: '/api/chat/agents/{id}',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
       access: 'public',
-      summary: 'Update an agent profile',
+      summary: 'Update an agent',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
         tags: ['agent'],
@@ -183,12 +183,12 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   // Delete agent profile
   router.versioned
     .delete({
-      path: '/api/chat/agents/profiles/{id}',
+      path: '/api/chat/agents/{id}',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
       },
       access: 'public',
-      summary: 'Delete an agent profile',
+      summary: 'Delete an agent',
       description: TECHNICAL_PREVIEW_WARNING,
       options: {
         tags: ['agent'],
