@@ -34,8 +34,10 @@ import {
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
 import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
-import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/execute_connector';
-import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
+import {
+  EXECUTE_CONNECTOR_FUNCTION_NAME,
+  ObservabilityAIAssistantClient,
+} from '@kbn/observability-ai-assistant-plugin/server';
 import { ChatFunctionClient } from '@kbn/observability-ai-assistant-plugin/server/service/chat_function_client';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
