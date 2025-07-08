@@ -22,7 +22,6 @@
     "@kbn/management-settings-ids",
     "@kbn/server-route-repository-client",
     "@kbn/cloud-plugin",
-    "@kbn/core-ui-settings-common",
     "@kbn/i18n",
     "@kbn/core-plugins-server",
     "@kbn/content-packs-schema",
