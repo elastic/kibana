@@ -284,7 +284,7 @@ function collectDocuments({ data, input }: CollectorParams): Observable<SampleDo
     const subscription = data.search
       .search({ params }, { abortSignal: abortController.signal, retrieveResults: true })
       .pipe(
-        filter((result) => !isEmpty(result.rawResponse.hits.hits)),
+        filter((result) => !isRunningResponse(result) || !isEmpty(result.rawResponse.hits.hits)),
         timeout(SEARCH_TIMEOUT_MS),
         map((result) => result.rawResponse.hits.hits.map((hit) => hit._source)),
         catchError(handleTimeoutError)
