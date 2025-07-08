@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { apiPrivileges } from '../../common/features';
-import { ONECHAT_AGENT_API_UI_SETTING_ID } from '../../common/constants';
 import type {
   GetAgentResponse,
   CreateAgentResponse,
@@ -54,11 +53,6 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         validate: false,
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_AGENT_API_UI_SETTING_ID);
-        if (!enabled) {
-          return response.notFound();
-        }
         const { agents } = getInternalServices();
         const service = await agents.getScopedClient(request);
         const agentProfiles = await service.list();
@@ -91,11 +85,6 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_AGENT_API_UI_SETTING_ID);
-        if (!enabled) {
-          return response.notFound();
-        }
         const { agents } = getInternalServices();
         const service = await agents.getScopedClient(request);
 
@@ -139,11 +128,6 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_AGENT_API_UI_SETTING_ID);
-        if (!enabled) {
-          return response.notFound();
-        }
         const { agents } = getInternalServices();
         const service = await agents.getScopedClient(request);
         const profile = await service.create(request.body);
@@ -188,11 +172,6 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_AGENT_API_UI_SETTING_ID);
-        if (!enabled) {
-          return response.notFound();
-        }
         const { agents } = getInternalServices();
         const service = await agents.getScopedClient(request);
         const update = { id: request.params.id, ...request.body };
