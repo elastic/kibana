@@ -6,8 +6,8 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       diskSizeGb: 80
@@ -20,8 +20,8 @@ steps:
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-8
       preemptible: true
@@ -35,8 +35,8 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-highcpu-8
       preemptible: true
@@ -50,8 +50,8 @@ steps:
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
@@ -65,8 +65,8 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
@@ -80,8 +80,8 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-32
       preemptible: true
@@ -95,8 +95,8 @@ steps:
   - command: .buildkite/scripts/steps/check_types.sh
     label: 'Check Types'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: c4-standard-4
       diskType: 'hyperdisk-balanced'
@@ -112,8 +112,8 @@ steps:
   - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
     label: 'Check OAS Snapshot'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -129,8 +129,8 @@ steps:
     label: Check Public API Docs
     key: public-api-docs
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-highmem-4
       preemptible: true
@@ -146,8 +146,8 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       diskSizeGb: 80
@@ -163,8 +163,8 @@ steps:
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       diskSizeGb: 80
@@ -181,8 +181,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
     label: 'Serverless Entity Analytics - Security Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -196,8 +196,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
     label: 'Serverless Explore - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -211,8 +211,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -226,8 +226,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -241,8 +241,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
     label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -256,8 +256,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -271,8 +271,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -286,8 +286,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -301,8 +301,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
     label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -316,8 +316,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -331,8 +331,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -346,8 +346,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
     label: 'Serverless AI Assistant - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -361,8 +361,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
     label: 'AI Assistant - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -376,8 +376,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
     label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -391,8 +391,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
     label: 'Explore - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -406,8 +406,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -421,8 +421,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -436,8 +436,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Osquery Cypress Tests on Serverless'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -451,8 +451,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
@@ -466,8 +466,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
@@ -481,8 +481,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/profiling_cypress.sh
     label: 'Profiling Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -496,8 +496,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/apm_cypress.sh
     label: 'APM Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -512,16 +512,16 @@ steps:
     label: Trigger unsupported ftr tests
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
 
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-8
       preemptible: true
@@ -535,8 +535,8 @@ steps:
   - command: .buildkite/scripts/steps/openapi_publishing/publish_oas_docs.sh
     label: 'Publish OAS docs to bump.sh'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
@@ -550,8 +550,8 @@ steps:
   - command: .buildkite/scripts/steps/archive_so_migration_snapshot.sh target/plugin_so_types_snapshot.json
     label: 'Extract Saved Object migration plugin types'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -570,8 +570,8 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
 
@@ -581,7 +581,7 @@ steps:
     label: Trigger container image build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2

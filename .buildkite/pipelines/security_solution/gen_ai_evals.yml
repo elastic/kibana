@@ -4,8 +4,8 @@ steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
 
@@ -14,8 +14,8 @@ steps:
   - label: '🧑‍🏭 Build Kibana Distribution'
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-8
     key: build
@@ -33,8 +33,8 @@ steps:
     timeout_in_minutes: 50
     parallelism: 1
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
