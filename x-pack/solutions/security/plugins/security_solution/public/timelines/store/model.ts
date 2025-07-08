@@ -15,6 +15,7 @@ import type {
   SerializedFilterQuery,
   SortColumnTimeline,
   TimelineEventsType,
+  KueryFilterQuery,
   TimelineTabs,
 } from '../../../common/types/timeline';
 import type {
@@ -200,4 +201,5 @@ export interface TimelineUrl {
   isOpen: boolean;
   graphEventId?: string;
   savedSearchId?: string;
+  query?: KueryFilterQuery;
 }

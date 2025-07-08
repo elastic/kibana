@@ -28,11 +28,14 @@ import {
   previewRuleWithExceptionEntries,
   removeRandomValuedPropertiesFromAlert,
   patchRule,
+  runSoonRule,
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
   setAdvancedSettings,
   getOpenAlerts,
+  setBrokenRuntimeField,
+  unsetBrokenRuntimeField,
 } from '../../../../utils';
 import {
   deleteAllRules,
@@ -41,6 +44,7 @@ import {
 } from '../../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -635,6 +639,453 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           expect(previewAlerts.length).toBe(1);
+        });
+
+        describe('pagination', () => {
+          it('should create alerts from expanded values', async () => {
+            const id = uuidv4();
+            const rule: EsqlRuleCreateProps = {
+              ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+              query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | mv_expand agent.name`,
+              from: '2020-10-28T05:15:00.000Z',
+              to: '2020-10-28T06:00:00.000Z',
+              interval: '45m',
+              max_signals: 100,
+              enabled: true,
+            };
+
+            const doc1 = {
+              id,
+              '@timestamp': '2020-10-28T05:55:00.000Z',
+              agent: {
+                name: Array.from({ length: 80 }, (_, i) => `test_1_${1000 + i}`),
+                type: 'auditbeat',
+              },
+            };
+            const doc2 = {
+              id,
+              '@timestamp': '2020-10-28T05:55:00.000Z',
+              agent: {
+                name: Array.from({ length: 40 }, (_, i) => `test_2_${1000 + i}`),
+                type: 'auditbeat',
+              },
+            };
+            await indexListOfDocuments([doc1, doc2]);
+
+            const createdRule = await createRule(supertest, log, rule);
+
+            const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              200
+            );
+
+            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+            // re-trigger rule execution
+            runSoonRule(supertest, createdRule.id);
+
+            const alertsResponse = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              RuleExecutionStatusEnum.succeeded,
+              300,
+              new Date()
+            );
+
+            expect(alertsResponse.hits.hits.length).toBe(120);
+          });
+
+          it('should create alerts from all events(2 x max_signals)', async () => {
+            const id = uuidv4();
+            const rule: EsqlRuleCreateProps = {
+              ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+              query: `from ecs_compliant metadata _id ${internalIdPipe(id)}`,
+              from: '2020-10-28T05:15:00.000Z',
+              to: new Date().toISOString(),
+              max_signals: 100,
+              enabled: true,
+            };
+
+            const docs = Array.from({ length: 200 }, (_, i) => ({
+              id,
+              '@timestamp': '2020-10-28T05:55:00.000Z',
+              agent: {
+                name: `test_${i}`,
+                type: 'auditbeat',
+              },
+            }));
+
+            await indexListOfDocuments(docs);
+
+            const createdRule = await createRule(supertest, log, rule);
+
+            const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              200
+            );
+            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+            // re-trigger rule execution
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              enabled: false,
+            });
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              to: new Date().toISOString(),
+              enabled: true,
+            });
+
+            const alertsResponse = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              RuleExecutionStatusEnum.succeeded,
+              300,
+              new Date()
+            );
+
+            expect(alertsResponse.hits.hits.length).toBe(200);
+          });
+
+          it('should create alerts from all events(2 x max_signals) when used timestamp override', async () => {
+            const id = uuidv4();
+            const rule: EsqlRuleCreateProps = {
+              ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+              query: `from ecs_compliant metadata _id ${internalIdPipe(id)}`,
+              from: '2020-10-28T05:15:00.000Z',
+              to: new Date().toISOString(),
+              max_signals: 100,
+              enabled: true,
+              timestamp_override: 'event.ingested',
+              timestamp_override_fallback_disabled: false,
+            };
+
+            const docs = Array.from({ length: 200 }, (_, i) => ({
+              id,
+              '@timestamp': '2019-10-28T05:55:00.000Z',
+              agent: {
+                name: `test_${i}`,
+                type: 'auditbeat',
+              },
+              'event.ingested': '2020-10-28T05:55:00.000Z',
+            }));
+
+            await indexListOfDocuments(docs);
+
+            const createdRule = await createRule(supertest, log, rule);
+
+            const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              200
+            );
+            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+            // re-trigger rule execution
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              enabled: false,
+            });
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              to: new Date().toISOString(),
+              enabled: true,
+            });
+
+            const alertsResponse = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              RuleExecutionStatusEnum.succeeded,
+              300,
+              new Date()
+            );
+
+            expect(alertsResponse.hits.hits.length).toBe(200);
+          });
+
+          it('should create alerts from all events(2 x max_signals) when used timestamp override without fallback', async () => {
+            const id = uuidv4();
+            const rule: EsqlRuleCreateProps = {
+              ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+              query: `from ecs_compliant metadata _id ${internalIdPipe(id)}`,
+              from: '2020-10-28T05:15:00.000Z',
+              to: new Date().toISOString(),
+              max_signals: 100,
+              enabled: true,
+              timestamp_override: 'event.ingested',
+              timestamp_override_fallback_disabled: true,
+            };
+
+            const docs = Array.from({ length: 200 }, (_, i) => ({
+              id,
+              '@timestamp': '2019-10-28T05:55:00.000Z',
+              agent: {
+                name: `test_${i}`,
+                type: 'auditbeat',
+              },
+              'event.ingested': '2020-10-28T05:55:00.000Z',
+            }));
+
+            await indexListOfDocuments(docs);
+
+            const createdRule = await createRule(supertest, log, rule);
+
+            const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              200
+            );
+            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+            // re-trigger rule execution
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              enabled: false,
+            });
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              to: new Date().toISOString(),
+              enabled: true,
+            });
+
+            const alertsResponse = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              RuleExecutionStatusEnum.succeeded,
+              300,
+              new Date()
+            );
+
+            expect(alertsResponse.hits.hits.length).toBe(200);
+          });
+
+          it('should not create more than max_signals alerts from single document when paginate through results', async () => {
+            const id = uuidv4();
+            const rule: EsqlRuleCreateProps = {
+              ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+              query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | mv_expand agent.name`,
+              from: '2020-10-28T05:15:00.000Z',
+              to: '2020-10-28T06:00:00.000Z',
+              interval: '45m',
+              max_signals: 100,
+              enabled: true,
+            };
+
+            const doc1 = {
+              id,
+              '@timestamp': '2020-10-28T05:55:00.000Z',
+              agent: {
+                name: Array.from({ length: 150 }, (_, i) => `test_1_${1000 + i}`),
+                type: 'auditbeat',
+              },
+            };
+            const doc2 = {
+              id,
+              '@timestamp': '2020-10-28T05:55:00.000Z',
+              agent: {
+                name: Array.from({ length: 200 }, (_, i) => `test_2_${1000 + i}`),
+                type: 'filebeat',
+              },
+            };
+
+            await indexListOfDocuments([doc1, doc2]);
+
+            const createdRule = await createRule(supertest, log, rule);
+
+            const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              200
+            );
+
+            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+            // re-trigger rule execution
+            runSoonRule(supertest, createdRule.id);
+
+            const alertsResponse = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              300,
+              new Date()
+            );
+
+            expect(alertsResponse.hits.hits.length).toBe(200);
+
+            const agentTypeCounts = alertsResponse.hits.hits.reduce<Record<string, number>>(
+              (acc, curr) => {
+                const agentType = curr._source?.['agent.type'] as string;
+                if (agentType) {
+                  acc[agentType] = (acc[agentType] || 0) + 1;
+                }
+                return acc;
+              },
+              {}
+            );
+
+            expect(agentTypeCounts).toEqual({
+              auditbeat: 100,
+              filebeat: 100,
+            });
+          });
+
+          it('should create alerts from expanded values when expanded field renamed', async () => {
+            const id = uuidv4();
+            const rule: EsqlRuleCreateProps = {
+              ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+              query: `from ecs_compliant metadata _id ${internalIdPipe(
+                id
+              )} | mv_expand agent.name | rename agent.name as new_field`,
+              from: '2020-10-28T05:15:00.000Z',
+              to: '2020-10-28T06:00:00.000Z',
+              interval: '45m',
+              max_signals: 100,
+              enabled: true,
+            };
+
+            const doc1 = {
+              id,
+              '@timestamp': '2020-10-28T05:55:00.000Z',
+              agent: {
+                name: Array.from({ length: 80 }, (_, i) => `test_1_${1000 + i}`),
+                type: 'auditbeat',
+              },
+            };
+            const doc2 = {
+              id,
+              '@timestamp': '2020-10-28T05:55:00.000Z',
+              agent: {
+                name: Array.from({ length: 40 }, (_, i) => `test_2_${1000 + i}`),
+                type: 'auditbeat',
+              },
+            };
+            await indexListOfDocuments([doc1, doc2]);
+
+            const createdRule = await createRule(supertest, log, rule);
+
+            const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              200
+            );
+
+            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+            // re-trigger rule execution
+            runSoonRule(supertest, createdRule.id);
+
+            const alertsResponse = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              RuleExecutionStatusEnum.succeeded,
+              300,
+              new Date()
+            );
+
+            expect(alertsResponse.hits.hits.length).toBe(120);
+          });
+
+          it('should create alerts from multiple expanded values', async () => {
+            const id = uuidv4();
+            const rule: EsqlRuleCreateProps = {
+              ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+              query: `from ecs_compliant metadata _id ${internalIdPipe(
+                id
+              )} | mv_expand agent.name | mv_expand agent.type`,
+              from: '2020-10-28T05:15:00.000Z',
+              to: '2020-10-28T06:00:00.000Z',
+              interval: '45m',
+              max_signals: 100,
+              enabled: true,
+            };
+
+            const doc1 = {
+              id,
+              '@timestamp': '2020-10-28T05:55:00.000Z',
+              agent: {
+                name: Array.from({ length: 30 }, (_, i) => `test_1_${1000 + i}`),
+                type: ['test-1', 'test-2'],
+              },
+            };
+            const doc2 = {
+              id,
+              '@timestamp': '2020-10-28T05:55:00.000Z',
+              agent: {
+                name: Array.from({ length: 25 }, (_, i) => `test_2_${1000 + i}`),
+                type: ['test-1', 'test-2', 'test-3'],
+              },
+            };
+            await indexListOfDocuments([doc1, doc2]);
+
+            const createdRule = await createRule(supertest, log, rule);
+
+            const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              200
+            );
+
+            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+            // re-trigger rule execution
+            runSoonRule(supertest, createdRule.id);
+
+            const alertsResponse = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              RuleExecutionStatusEnum.succeeded,
+              300,
+              new Date()
+            );
+            // 60 from doc1 and 75 from doc2
+            expect(alertsResponse.hits.hits.length).toBe(135);
+          });
         });
       });
     });
@@ -1735,6 +2186,87 @@ export default ({ getService }: FtrProviderContext) => {
         expect(requests![0].request).toMatch(
           /"must_not":\s*\[\s*{\s*"terms":\s*{\s*"_tier":\s*\[\s*"data_frozen"\s*\]/
         );
+      });
+    });
+
+    // Failing: See https://github.com/elastic/kibana/issues/224699
+    describe.skip('shard failures', () => {
+      const config = getService('config');
+      const isServerless = config.get('serverless');
+      const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+      const packetBeatPath = dataPathBuilder.getPath('packetbeat/default');
+
+      before(async () => {
+        await esArchiver.load(packetBeatPath);
+        await setBrokenRuntimeField({ es, index: 'packetbeat-*' });
+      });
+
+      after(async () => {
+        await unsetBrokenRuntimeField({ es, index: 'packetbeat-*' });
+        await esArchiver.unload(packetBeatPath);
+      });
+
+      it('should handle shard failures and include warning in logs for query that is not aggregating', async () => {
+        const doc1 = { agent: { name: 'test-1' } };
+        await indexEnhancedDocuments({
+          documents: [doc1],
+          interval: ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'],
+          id: uuidv4(),
+        });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from packetbeat-*, ecs_compliant METADATA _id | limit 101`,
+          from: 'now-100000h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(logs).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              warnings: expect.arrayContaining([
+                expect.stringContaining(
+                  'The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards'
+                ),
+              ]),
+            }),
+          ])
+        );
+
+        expect(previewAlerts?.length).toBeGreaterThan(0);
+      });
+
+      it('should handle shard failures and include errors in logs for query that is aggregating', async () => {
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock(),
+          query: `from packetbeat-* | stats _count=count(broken) by @timestamp`,
+          from: 'now-100000h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(logs).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              errors: expect.arrayContaining([
+                expect.stringContaining('No field found for [non_existing] in mapping'),
+              ]),
+            }),
+          ])
+        );
+
+        expect(previewAlerts).toHaveLength(0);
       });
     });
 

@@ -54,7 +54,7 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
     (WHERE keywordField != "" | LIMIT 100)
     (SORT doubleField ASC NULLS LAST)
 | KEEP keywordField
-| FORK 
+| FORK
     (WHERE keywordField != "foo")
     (WHERE keywordField != "bar")`,
             ['[FORK] a query cannot have more than one FORK command.']
@@ -94,7 +94,7 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors(
-              `FROM index 
+              `FROM index
 | FORK
     (WHERE TO_UPPER(longField) != "" | LIMIT 100)
     (WHERE TO_LOWER(doubleField) == "" | WHERE TRIM(integerField))`,
@@ -110,13 +110,13 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors(
-              `FROM index 
-| FORK
-    (EVAL TO_UPPER(keywordField) | LIMIT 100)
-    (FORK (WHERE 1))`,
+              `FROM index
+              | FORK
+                  (EVAL TO_UPPER(keywordField) | LIMIT 100)
+                  (FORK (WHERE 1))`,
               [
-                "SyntaxError: mismatched input 'FORK' expecting {'dissect', 'eval', 'limit', 'sort', 'stats', 'where'}",
-                "SyntaxError: token recognition error at: ')'",
+                '[FORK] Must include at least two branches.',
+                '[FORK] a query cannot have more than one FORK command.',
               ]
             );
           });
@@ -126,7 +126,7 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
               const { expectErrors } = await setup();
 
               await expectErrors(
-                `FROM index 
+                `FROM index
   | FORK
       (EVAL foo = TO_UPPER(keywordField) | LIMIT 100)
       (EVAL bar = 1)`,
@@ -150,7 +150,7 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
               const { expectErrors } = await setup();
 
               await expectErrors(
-                `FROM index 
+                `FROM index
   | FORK
       (EVAL foo = TO_UPPER(keywordField) | LIMIT 100)
       (EVAL TO_LOWER(foo))`,

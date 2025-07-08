@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type { OnechatConfig } from './config';
+import { ServiceManager } from './services';
 import type {
   OnechatPluginSetup,
   OnechatPluginStart,
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { registerRoutes } from './routes';
-import { ServiceManager } from './services';
 import { registerFeatures } from './features';
+import { registerRoutes } from './routes';
+import { registerUISettings } from './ui_settings';
 
 export class OnechatPlugin
   implements
@@ -47,6 +48,8 @@ export class OnechatPlugin
 
     registerFeatures({ features: pluginsSetup.features });
 
+    registerUISettings({ uiSettings: coreSetup.uiSettings });
+
     const router = coreSetup.http.createRouter();
     registerRoutes({
       router,
@@ -64,6 +67,7 @@ export class OnechatPlugin
     return {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
+        registerProvider: serviceSetups.tools.registerProvider.bind(serviceSetups.tools),
       },
     };
   }

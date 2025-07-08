@@ -21,6 +21,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'svlCommonNavigation',
     'searchPlayground',
     'embeddedConsole',
+    'solutionNavigation',
+    'svlSearchElasticsearchStartPage',
+    'svlSearchCreateIndexPage',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonApi = getService('svlCommonApi');
@@ -30,7 +33,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const browser = getService('browser');
   const retry = getService('retry');
+  const es = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
+  const deleteIndex = async () => await esArchiver.unload(esArchiveIndex);
+
   let roleAuthc: RoleCredentials;
 
   describe('Serverless Playground Overview', function () {
@@ -38,8 +45,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['failsOnMKI']);
 
     let removeOpenAIConnector: () => Promise<void>;
-    let createConnector: () => Promise<void>;
+    let createOpenaiConnector: () => Promise<void>;
     let proxy: LlmProxy;
+    const openaiConnectorName = 'test-openai-connector';
+    const indexName = 'my-test-index';
 
     before(async () => {
       proxy = await createLlmProxy(log);
@@ -47,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       const requestHeader = svlCommonApi.getInternalRequestHeader();
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      createConnector = async () => {
+      createOpenaiConnector = async () => {
         removeOpenAIConnector = await createOpenAIConnector({
           supertest: supertestWithoutAuth,
           requestHeader,
@@ -66,22 +75,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       } catch {
         // we can ignore  if this fails
       }
-      await esArchiver.unload(esArchiveIndex);
+      await deleteIndex();
       proxy.close();
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    describe('setup Page', () => {
-      it('is loaded successfully', async () => {
+    describe('setup chat experience', () => {
+      it('setup page is loaded successfully', async () => {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToExist();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToDisabled();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageComponentsToExist();
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageIndexButtonExists();
       });
 
-      describe('with gen ai connectors', () => {
+      describe('with existing LLM connectors', () => {
         before(async () => {
-          await createConnector();
+          await createOpenaiConnector();
           await browser.refresh();
         });
 
@@ -89,44 +97,42 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await removeOpenAIConnector?.();
           await browser.refresh();
         });
-        it('show success llm button', async () => {
+        it('should show success llm button', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
         });
       });
 
-      describe('without gen ai connectors', () => {
-        it('should display the set up connectors button', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectAddConnectorButtonExists();
-        });
-
-        it('creates a connector successfully', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenConnectorPagePlayground();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSuccessButtonAfterCreatingConnector(
-            createConnector
+      describe('without existing LLM connectors', () => {
+        after(async () => {
+          await svlSearchNavigation.navigateToLandingPage();
+          await pageObjects.svlCommonNavigation.sidenav.openSection(
+            'search_project_nav_footer.project_settings_project_nav'
           );
-        });
 
-        after(async () => {
-          await removeOpenAIConnector?.();
+          await pageObjects.solutionNavigation.sidenav.clickLink({ navId: 'management' });
+          await pageObjects.solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
+          await pageObjects.svlCommonNavigation.sidenav.clickPanelLink(
+            'management:triggersActionsConnectors'
+          );
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.deleteConnector(
+            openaiConnectorName
+          );
+
           await browser.refresh();
         });
-      });
-
-      describe('without any indices', () => {
-        it('hide create index button when index added', async () => {
-          await createIndex();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
-        });
-
-        after(async () => {
-          await esArchiver.unload(esArchiveIndex);
-          await browser.refresh();
+        it('should be able to set up connectors from flyout', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.createOpenAiConnector(
+            openaiConnectorName
+          );
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
         });
       });
 
       describe('with existing indices', () => {
         before(async () => {
-          await createConnector();
+          await createOpenaiConnector();
           await createIndex();
         });
 
@@ -135,28 +141,91 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await browser.refresh();
         });
 
-        it('can select index from dropdown and load chat page', async () => {
+        it('load start page after selecting index', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
-        });
-
-        it('load start page after removing selected index', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
-          await esArchiver.unload(esArchiveIndex);
+          await deleteIndex();
           await browser.refresh();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
         });
 
         after(async () => {
           await removeOpenAIConnector?.();
-          await esArchiver.unload(esArchiveIndex);
+          await deleteIndex();
           await browser.refresh();
+        });
+      });
+
+      describe('when selecting indices with no fields should show error in add data flyout', () => {
+        before(async () => {
+          await es.indices.create({ index: indexName });
+        });
+        after(async () => {
+          await esDeleteAllIndices(indexName);
+        });
+        it('selecting index with no fields should show error', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSelectingIndicesWithNoFieldtoShowError();
+        });
+      });
+
+      describe('without any indices', () => {
+        describe('create index from API', () => {
+          it('show create index button', async () => {
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
+          });
+          it('add data source and creating an LLM should show chat start page', async () => {
+            await createOpenaiConnector();
+            await browser.refresh();
+            await createIndex();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
+            await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
+          });
+          after(async () => {
+            await deleteIndex();
+            await removeOpenAIConnector?.();
+            await browser.refresh();
+          });
+        });
+        describe('create index from UI', () => {
+          after(async () => {
+            await esDeleteAllIndices(indexName);
+            await removeOpenAIConnector?.();
+            await browser.refresh();
+          });
+          it('should be able to create index from UI', async () => {
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
+            await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
+            await pageObjects.svlSearchElasticsearchStartPage.setIndexNameValue(indexName);
+            await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
+            await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
+            await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+
+            // add mapping
+            await es.indices.putMapping({
+              index: indexName,
+              properties: {
+                text: {
+                  type: 'text',
+                },
+              },
+            });
+
+            await svlSearchNavigation.navigateToSearchPlayground();
+          });
+
+          it('add data source and creating an LLM should show chat start page', async () => {
+            await createOpenaiConnector();
+            await browser.refresh();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
+            await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
+          });
         });
       });
     });
 
     describe('chat page', () => {
       before(async () => {
-        await createConnector();
+        await createOpenaiConnector();
         await createIndex();
         await browser.refresh();
         await pageObjects.searchPlayground.session.clearSession();
@@ -167,7 +236,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('chat', () => {
-        it('works', async () => {
+        it('can send question and start chat ', async () => {
           const conversationInterceptor = proxy.intercept(
             'conversation',
             (body) =>
@@ -188,17 +257,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWorks();
           await pageObjects.searchPlayground.PlaygroundChatPage.expectTokenTooltipExists();
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectCanRegenerateQuestion();
+          await pageObjects.searchPlayground.PlaygroundChatPage.clearChat();
+        });
+        it('can toggle to include or remove citations', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectCanChangeCitations();
+        });
+        it('can change number of documents', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectCanChangeNumberOfDocumentsSent();
         });
 
         it('open view code', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectOpenViewCode();
         });
 
-        it('show edit context', async () => {
+        it('can edit context', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.openChatMode();
           await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens(
             'basic_index',
             ['bar', 'baz', 'baz.keyword', 'foo', 'nestedField', 'nestedField.child']
+          );
+          await pageObjects.searchPlayground.PlaygroundChatPage.editContext(
+            'basic_index',
+            'nestedField.child'
           );
         });
 
@@ -268,7 +349,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await removeOpenAIConnector?.();
-        await esArchiver.unload(esArchiveIndex);
+        await deleteIndex();
         await browser.refresh();
       });
     });
@@ -279,7 +360,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('connectors enabled on serverless search', () => {
       it('has all LLM connectors', async () => {
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenConnectorPagePlayground();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundLLMConnectorOptionsExists();
       });
     });

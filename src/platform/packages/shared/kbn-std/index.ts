@@ -35,3 +35,7 @@ export { stripVersionQualifier } from './src/strip_version_qualifier';
 
 export { safeJsonParse } from './src/safe_json_parse';
 export { safeJsonStringify } from './src/safe_json_stringify';
+
+export { bytePartition } from './src/byte_partition/byte_partition';
+
+export { type FromExternalVariant, fromExternalVariant } from './src/from_external_variant';

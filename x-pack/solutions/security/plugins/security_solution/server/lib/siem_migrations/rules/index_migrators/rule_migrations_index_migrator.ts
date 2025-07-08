@@ -33,10 +33,10 @@ export class RuleMigrationIndexMigrator {
   async run() {
     const allSpaces = await this.getSpaceListForMigrations();
     if (allSpaces.length === 0) {
-      this.logger.info('No spaces or index found for index migration');
+      this.logger.debug('No spaces or index found for index migration');
       return;
     }
-    this.logger.info(
+    this.logger.debug(
       `Starting index migration for rule migrations for spaces :${allSpaces.join(', ')}`
     );
     for (const spaceId of allSpaces) {
@@ -48,6 +48,6 @@ export class RuleMigrationIndexMigrator {
       );
       await migrator.run();
     }
-    this.logger.info('Finished index migration for rule migrations successfully');
+    this.logger.debug('Finished index migration for rule migrations successfully');
   }
 }

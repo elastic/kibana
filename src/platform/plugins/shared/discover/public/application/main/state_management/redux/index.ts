@@ -26,7 +26,12 @@ import {
   initializeTabs,
 } from './actions';
 
-export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
+export type {
+  DiscoverInternalState,
+  TabState,
+  TabStateGlobalState,
+  InternalStateDataRequestParams,
+} from './types';
 
 export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
@@ -68,9 +73,12 @@ export { selectAllTabs, selectRecentlyClosedTabs, selectTab } from './selectors'
 
 export {
   type RuntimeStateManager,
+  type CombinedRuntimeState,
+  type InitialUnifiedHistogramLayoutProps,
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  selectRestorableTabRuntimeHistogramLayoutProps,
   useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,

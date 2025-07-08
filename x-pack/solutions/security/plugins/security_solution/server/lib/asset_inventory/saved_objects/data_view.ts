@@ -38,5 +38,6 @@ export const installDataView = async (
     );
   } catch (error) {
     logger.error(`Failed to setup data view`, error);
+    throw error;
   }
 };

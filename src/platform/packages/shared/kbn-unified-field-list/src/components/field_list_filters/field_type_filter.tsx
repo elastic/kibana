@@ -29,6 +29,9 @@ import {
   useEuiTheme,
   EuiTitle,
   useGeneratedHtmlId,
+  logicalCSS,
+  UseEuiTheme,
+  mathWithUnits,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,7 +52,22 @@ const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after 
 const popoverTitleStyle = css`
   padding: ${EQUAL_HEIGHT_OFFSET}px 0;
 `;
-const filterButtonStyle = css`
+
+const filterPopoverStyle = ({ euiTheme }: UseEuiTheme) => css`
+  .euiFilterButton__wrapper {
+    ${logicalCSS('left', `-${euiTheme.size.s}`)}
+    ${logicalCSS('min-width', '0')}
+    ${logicalCSS('width', `calc(100% + ${mathWithUnits(euiTheme.size.s, (x) => x * 2)})`)}
+
+    &::before {
+      display: none;
+    }
+  }
+`;
+
+const filterButtonStyle = ({ euiTheme }: UseEuiTheme) => css`
+  padding: 0;
+
   &,
   & .euiFilterButton__text {
     min-width: 0;
@@ -166,12 +184,13 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
       display="block"
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
+      css={filterPopoverStyle}
       button={
         <EuiFilterButton
           aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.filterByTypeAriaLabel', {
             defaultMessage: 'Filter by type',
           })}
-          color="primary"
+          color="text"
           isSelected={isOpen}
           numFilters={selectedFieldTypes.length}
           hasActiveFilters={!!selectedFieldTypes.length}
@@ -255,7 +274,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                         <EuiFlexItem grow={false}>
                           <EuiIconTip
                             aria-label={getFieldTypeDescription(type)}
-                            type="questionInCircle"
+                            type="question"
                             color="subdued"
                             content={getFieldTypeDescription(type)}
                           />

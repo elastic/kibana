@@ -17,6 +17,7 @@ const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   return {
     tools: {
       register: jest.fn(),
+      registerProvider: jest.fn(),
     },
   };
 };

@@ -30,10 +30,55 @@ export interface PendingMessage {
   error?: any;
 }
 
+export interface Deanonymization {
+  start: number;
+  end: number;
+  entity: {
+    class_name: string;
+    value: string;
+    mask: string;
+  };
+}
+
+export interface DeanonymizationItem {
+  message: {
+    role: MessageRole;
+    content?: string;
+    toolCalls?: Array<{
+      function: {
+        name: string;
+        arguments: Record<string, any> | {};
+      };
+    }>;
+    name?: string;
+    response?: Record<string, any>;
+    toolCallId?: string;
+  };
+  deanonymizations: Deanonymization[];
+}
+
+export type DeanonymizationInput = DeanonymizationItem[];
+
+export interface DeanonymizationOutput {
+  message: {
+    content?: string;
+    toolCalls?: Array<{
+      toolCallId: string;
+      function: {
+        name: string;
+        arguments: Record<string, any>;
+      };
+    }>;
+    role: MessageRole;
+  };
+  deanonymizations: Deanonymization[];
+}
+
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
+    deanonymizations?: Deanonymization[];
     name?: string;
     role: MessageRole;
     function_call?: {
@@ -79,8 +124,6 @@ export interface KnowledgeBaseEntry {
   id: string;
   title?: string;
   text: string;
-  confidence: 'low' | 'medium' | 'high';
-  is_correction: boolean;
   type?: 'user_instruction' | 'contextual';
   public: boolean;
   labels?: Record<string, string>;
@@ -88,6 +131,8 @@ export interface KnowledgeBaseEntry {
   user?: {
     name: string;
   };
+  confidence?: 'low' | 'medium' | 'high'; // deprecated
+  is_correction?: boolean; // deprecated
 }
 
 export interface Instruction {

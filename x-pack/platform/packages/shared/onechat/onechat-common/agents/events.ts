@@ -7,14 +7,15 @@
 
 import type { OnechatEvent } from '../base/events';
 import type { ConversationRound } from '../chat';
-import type { StructuredToolIdentifier } from '../tools/tools';
+import type { PlainIdToolIdentifier } from '../tools/tools';
 
 export enum ChatAgentEventType {
-  toolCall = 'toolCall',
-  toolResult = 'toolResult',
-  messageChunk = 'messageChunk',
-  messageComplete = 'messageComplete',
-  roundComplete = 'roundComplete',
+  toolCall = 'tool_call',
+  toolResult = 'tool_result',
+  reasoning = 'reasoning',
+  messageChunk = 'message_chunk',
+  messageComplete = 'message_complete',
+  roundComplete = 'round_complete',
 }
 
 export type ChatAgentEventBase<
@@ -25,9 +26,10 @@ export type ChatAgentEventBase<
 // Tool call
 
 export interface ToolCallEventData {
-  toolCallId: string;
-  toolId: StructuredToolIdentifier;
-  args: Record<string, unknown>;
+  tool_call_id: string;
+  tool_id: PlainIdToolIdentifier;
+  tool_type: string;
+  params: Record<string, unknown>;
 }
 
 export type ToolCallEvent = ChatAgentEventBase<ChatAgentEventType.toolCall, ToolCallEventData>;
@@ -39,8 +41,9 @@ export const isToolCallEvent = (event: OnechatEvent<string, any>): event is Tool
 // Tool result
 
 export interface ToolResultEventData {
-  toolCallId: string;
-  toolId: StructuredToolIdentifier;
+  tool_call_id: string;
+  tool_id: PlainIdToolIdentifier;
+  tool_type: string;
   result: string;
 }
 
@@ -53,13 +56,25 @@ export const isToolResultEvent = (event: OnechatEvent<string, any>): event is To
   return event.type === ChatAgentEventType.toolResult;
 };
 
+// reasoning
+
+export interface ReasoningEventData {
+  reasoning: string;
+}
+
+export type ReasoningEvent = ChatAgentEventBase<ChatAgentEventType.reasoning, ReasoningEventData>;
+
+export const isReasoningEvent = (event: OnechatEvent<string, any>): event is ReasoningEvent => {
+  return event.type === ChatAgentEventType.reasoning;
+};
+
 // Message chunk
 
 export interface MessageChunkEventData {
   /** ID of the message this chunk is bound to */
-  messageId: string;
+  message_id: string;
   /** chunk (text delta) */
-  textChunk: string;
+  text_chunk: string;
 }
 
 export type MessageChunkEvent = ChatAgentEventBase<
@@ -77,9 +92,9 @@ export const isMessageChunkEvent = (
 
 export interface MessageCompleteEventData {
   /** ID of the message */
-  messageId: string;
+  message_id: string;
   /** full text content of the message */
-  messageContent: string;
+  message_content: string;
 }
 
 export type MessageCompleteEvent = ChatAgentEventBase<
@@ -116,6 +131,7 @@ export const isRoundCompleteEvent = (
 export type ChatAgentEvent =
   | ToolCallEvent
   | ToolResultEvent
+  | ReasoningEvent
   | MessageChunkEvent
   | MessageCompleteEvent
   | RoundCompleteEvent;

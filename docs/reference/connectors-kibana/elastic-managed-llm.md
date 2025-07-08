@@ -13,17 +13,14 @@ The default LLM may change in the future based on evaluations of performance, se
 
 ## Region and hosting
 
-The Elastic Managed LLM is currently hosted in AWS US regions, beginning with `us-east-1`.
+The Elastic Managed LLM is currently proxying to AWS Bedrock in AWS US regions, beginning with `us-east-1`. 
 
 ## Data protection
 
-Customer projects or deployments hosted in any cloud service provider or region have access to the Elastic Managed LLM hosted in the specified regions.
+Customer projects or deployments hosted in any cloud service provider or region have access to the Elastic Managed LLM in the AWS US region `us-east-1`.
 All data is encrypted in transit. The LLM is configured for zero data retention: none of the prompts or outputs are stored by the model.
 
 Only request metadata is logged in AWS CloudWatch.
 No information related to prompts is retained.
 Logged metadata includes the timestamp, model used, region, and request status.
 
-## Early access
-
-Early access is available by submitting the form provided [here](https://forms.gle/o1AwPMVYMziHbom28).

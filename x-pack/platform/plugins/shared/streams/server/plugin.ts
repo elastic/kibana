@@ -24,11 +24,14 @@ import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
+  STREAMS_TIERED_FEATURES,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
+import { registerFeatureFlags } from './feature_flags';
 import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
+import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
 import { StreamsTelemetryService } from './lib/telemetry/service';
 import { streamsRouteRepository } from './routes';
@@ -38,7 +41,6 @@ import {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
-import { QueryService } from './lib/streams/assets/query/query_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -63,7 +65,7 @@ export class StreamsPlugin
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
-  private telemtryService = new StreamsTelemetryService();
+  private telemetryService = new StreamsTelemetryService();
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -80,24 +82,19 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
-    this.telemtryService.setup(core.analytics);
+    this.telemetryService.setup(core.analytics);
 
-    const isSignificantEventsEnabled = this.config.experimental?.significantEventsEnabled === true;
-    const alertingFeatures = isSignificantEventsEnabled
-      ? STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
-          ruleTypeId,
-          consumers: [STREAMS_CONSUMER],
-        }))
-      : [];
+    const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
+      ruleTypeId,
+      consumers: [STREAMS_CONSUMER],
+    }));
 
-    if (isSignificantEventsEnabled) {
-      registerRules({ plugins, logger: this.logger.get('rules') });
-    }
+    registerRules({ plugins, logger: this.logger.get('rules') });
 
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, this.logger, this.config);
+    const queryService = new QueryService(core, this.logger);
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
@@ -152,12 +149,14 @@ export class StreamsPlugin
       },
     });
 
+    core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
+
     registerRoutes({
       repository: streamsRouteRepository,
       dependencies: {
         assets: assetService,
         server: this.server,
-        telemetry: this.telemtryService.getClient(),
+        telemetry: this.telemetryService.getClient(),
         getScopedClients: async ({
           request,
         }: {
@@ -183,6 +182,7 @@ export class StreamsPlugin
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const inferenceClient = pluginsStart.inference.getClient({ request });
+          const licensing = pluginsStart.licensing;
 
           return {
             scopedClusterClient,
@@ -192,6 +192,7 @@ export class StreamsPlugin
             inferenceClient,
             contentClient,
             queryClient,
+            licensing,
           };
         },
       },
@@ -199,6 +200,8 @@ export class StreamsPlugin
       logger: this.logger,
       runDevModeChecks: this.isDev,
     });
+
+    registerFeatureFlags(core, plugins, this.logger);
 
     return {};
   }

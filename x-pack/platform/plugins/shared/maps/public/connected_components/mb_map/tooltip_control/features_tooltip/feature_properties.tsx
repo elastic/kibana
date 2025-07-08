@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import React, { Component, CSSProperties, RefObject, ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import {
   EuiCallOut,
   EuiLoadingSpinner,
@@ -386,7 +386,7 @@ interface MapFeatureTooltipRowProps {
 }
 
 export const MapFeatureTooltipRow = ({ children, className }: MapFeatureTooltipRowProps) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
   return (
     <tr css={styles.mapFeatureTooltipRowStyles} className={className}>
       {children}

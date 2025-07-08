@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Rule execution logic API - Basic License/Essentials Tier', function () {
     loadTestFile(require.resolve('./es_archiver'));
+    // loadTestFile(require.resolve('./ecs_field_duplication'));
     // loadTestFile(require.resolve('./keyword_family'));
     // loadTestFile(require.resolve('./ignore_fields'));
     // loadTestFile(require.resolve('./runtime'));

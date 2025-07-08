@@ -7,8 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage, isIdentifier } from '@kbn/esql-ast';
+import {
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLMessage,
+  isIdentifier,
+  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+  isList,
+} from '@kbn/esql-ast';
+import { getMessageFromId, errors } from '@kbn/esql-ast/src/definitions/utils';
+import { FunctionParameter, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
+import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/utils';
 import {
   isLiteralItem,
   isTimeIntervalItem,
@@ -18,12 +30,6 @@ import {
   isColumnItem,
   isAssignment,
 } from '../..';
-import { FunctionParameter, FunctionDefinitionTypes } from '../definitions/types';
-import {
-  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
-  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-} from '../shared/constants';
-import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   isValidLiteralOption,
   checkFunctionArgMatchesDefinition,
@@ -31,17 +37,16 @@ import {
   isInlineCastItem,
   getQuotedColumnName,
   getColumnExists,
-  getColumnForASTNode,
   isFunctionOperatorParam,
   getSignaturesWithMatchingArity,
   getParamAtPosition,
-  extractSingularType,
+  unwrapArrayOneLevel,
   isArrayType,
   isParametrized,
 } from '../shared/helpers';
-import { getMessageFromId, errors } from './errors';
 import { getMaxMinNumberOfParams, collapseWrongArgumentTypeMessages } from './helpers';
 import { ReferenceMaps } from './types';
+import { compareTypesWithLiterals } from '../shared/esql_types';
 
 const NO_MESSAGE: ESQLMessage[] = [];
 
@@ -243,7 +248,7 @@ export function validateFunction({
   let relevantFuncSignatures = matchingSignatures;
   const enrichedArgs = fn.args;
 
-  if (fn.name === 'in' || fn.name === 'not_in') {
+  if (fn.name === 'in' || fn.name === 'not in') {
     for (let argIndex = 1; argIndex < fn.args.length; argIndex++) {
       relevantFuncSignatures = fnDefinition.signatures.filter(
         (s) =>
@@ -264,9 +269,15 @@ export function validateFunction({
 
   for (const signature of relevantFuncSignatures) {
     const failingSignature: ESQLMessage[] = [];
-    fn.args.forEach((outerArg, index) => {
-      const argDef = getParamAtPosition(signature, index);
-      if ((!outerArg && argDef?.optional) || !argDef) {
+    let args = fn.args;
+    const second = fn.args[1];
+    if (isList(second)) {
+      args = [fn.args[0], second.values];
+    }
+
+    args.forEach((argument, index) => {
+      const parameter = getParamAtPosition(signature, index);
+      if ((!argument && parameter?.optional) || !parameter) {
         // that's ok, just skip it
         // the else case is already catched with the argument counts check
         // few lines above
@@ -274,9 +285,9 @@ export function validateFunction({
       }
 
       // check every element of the argument (may be an array of elements, or may be a single element)
-      const hasMultipleElements = Array.isArray(outerArg);
-      const argElements = hasMultipleElements ? outerArg : [outerArg];
-      const singularType = extractSingularType(argDef.type);
+      const hasMultipleElements = Array.isArray(argument);
+      const argElements = hasMultipleElements ? argument : [argument];
+      const singularType = unwrapArrayOneLevel(parameter.type);
       const messagesFromAllArgElements = argElements.flatMap((arg) => {
         return [
           validateFunctionLiteralArg,
@@ -288,9 +299,9 @@ export function validateFunction({
             fn,
             arg,
             {
-              ...argDef,
+              ...parameter,
               type: singularType,
-              constantOnly: forceConstantOnly || argDef.constantOnly,
+              constantOnly: forceConstantOnly || parameter.constantOnly,
             },
             references,
             parentCommand
@@ -298,14 +309,15 @@ export function validateFunction({
         });
       });
 
-      const shouldCollapseMessages = isArrayType(argDef.type as string) && hasMultipleElements;
+      const shouldCollapseMessages = isArrayType(parameter.type as string) && hasMultipleElements;
+
       failingSignature.push(
         ...(shouldCollapseMessages
           ? collapseWrongArgumentTypeMessages(
               messagesFromAllArgElements,
-              outerArg,
+              argument,
               fn.name,
-              argDef.type as string,
+              parameter.type as string,
               parentCommand,
               references
             )
@@ -333,70 +345,70 @@ export function validateFunction({
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
-  actualArg: ESQLAstItem,
-  argDef: FunctionParameter,
+  argument: ESQLAstItem,
+  parameter: FunctionParameter,
   references: ReferenceMaps,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
-  if (isLiteralItem(actualArg)) {
+  if (isLiteralItem(argument)) {
     if (
-      actualArg.literalType === 'keyword' &&
-      argDef.acceptedValues &&
-      isValidLiteralOption(actualArg, argDef)
+      argument.literalType === 'keyword' &&
+      parameter.acceptedValues &&
+      isValidLiteralOption(argument, parameter)
     ) {
       messages.push(
         getMessageFromId({
           messageId: 'unsupportedLiteralOption',
           values: {
             name: astFunction.name,
-            value: actualArg.value,
-            supportedOptions: argDef.acceptedValues?.map((option) => `"${option}"`).join(', '),
+            value: argument.value,
+            supportedOptions: parameter.acceptedValues?.map((option) => `"${option}"`).join(', '),
           },
-          locations: actualArg.location,
+          locations: argument.location,
         })
       );
     }
 
-    if (!checkFunctionArgMatchesDefinition(actualArg, argDef, references, parentCommand)) {
+    if (!checkFunctionArgMatchesDefinition(argument, parameter, references, parentCommand)) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: argDef.type as string,
-            value: actualArg.text,
-            givenType: actualArg.literalType,
+            argType: parameter.type as string,
+            value: argument.text,
+            givenType: argument.literalType,
           },
-          locations: actualArg.location,
+          locations: argument.location,
         })
       );
     }
   }
-  if (isTimeIntervalItem(actualArg)) {
+  if (isTimeIntervalItem(argument)) {
     // check first if it's a valid interval string
-    if (!inKnownTimeInterval(actualArg.unit)) {
+    if (!inKnownTimeInterval(argument.unit)) {
       messages.push(
         getMessageFromId({
           messageId: 'unknownInterval',
           values: {
-            value: actualArg.unit,
+            value: argument.unit,
           },
-          locations: actualArg.location,
+          locations: argument.location,
         })
       );
     } else {
-      if (!checkFunctionArgMatchesDefinition(actualArg, argDef, references, parentCommand)) {
+      if (!checkFunctionArgMatchesDefinition(argument, parameter, references, parentCommand)) {
         messages.push(
           getMessageFromId({
             messageId: 'wrongArgumentType',
             values: {
               name: astFunction.name,
-              argType: argDef.type as string,
-              value: actualArg.name,
+              argType: parameter.type as string,
+              value: argument.name,
               givenType: 'duration',
             },
-            locations: actualArg.location,
+            locations: argument.location,
           })
         );
       }
@@ -436,43 +448,41 @@ function validateInlineCastArg(
 
 function validateNestedFunctionArg(
   astFunction: ESQLFunction,
-  actualArg: ESQLAstItem,
-  parameterDefinition: FunctionParameter,
+  argument: ESQLAstItem,
+  parameter: FunctionParameter,
   references: ReferenceMaps,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
   if (
-    isFunctionItem(actualArg) &&
+    isFunctionItem(argument) &&
     // no need to check the reason here, it is checked already above
-    isSupportedFunction(actualArg.name, parentCommand).supported
+    isSupportedFunction(argument.name, parentCommand).supported
   ) {
     // The isSupported check ensure the definition exists
-    const argFn = getFunctionDefinition(actualArg.name)!;
+    const argFn = getFunctionDefinition(argument.name)!;
     const fnDef = getFunctionDefinition(astFunction.name)!;
     // no nestying criteria should be enforced only for same type function
     if (fnDef.type === FunctionDefinitionTypes.AGG && argFn.type === FunctionDefinitionTypes.AGG) {
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
-          values: { name: actualArg.text, argType: argFn.signatures[0].returnType as string },
-          locations: actualArg.location,
+          values: { name: argument.text, argType: argFn.signatures[0].returnType as string },
+          locations: argument.location,
         })
       );
     }
-    if (
-      !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
-    ) {
+    if (!checkFunctionArgMatchesDefinition(argument, parameter, references, parentCommand)) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentType',
           values: {
             name: astFunction.name,
-            argType: parameterDefinition.type as string,
-            value: actualArg.text,
+            argType: parameter.type as string,
+            value: argument.text,
             givenType: argFn.signatures[0].returnType as string,
           },
-          locations: actualArg.location,
+          locations: argument.location,
         })
       );
     }
@@ -544,7 +554,10 @@ function validateFunctionColumnArg(
   if (
     !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
   ) {
-    const columnHit = getColumnForASTNode(actualArg, references);
+    const columnHit = getColumnForASTNode(actualArg, {
+      fields: references.fields,
+      userDefinedColumns: references.userDefinedColumns,
+    });
     const isConflictType = columnHit && 'hasConflict' in columnHit && columnHit.hasConflict;
     if (!isConflictType) {
       messages.push(

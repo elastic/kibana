@@ -62,7 +62,7 @@ describe('getViewInAppUrl', () => {
     expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
       {
         dataViewId: args.dataViewId,
-        dataViewSpec: {},
+        dataViewSpec: undefined,
         timeRange: returnedTimeRange,
         filters: [],
         query: {
@@ -92,6 +92,7 @@ describe('getViewInAppUrl', () => {
     expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
       {
         dataset: undefined,
+        dataViewSpec: undefined,
         timeRange: returnedTimeRange,
         filters: [],
         query: {
@@ -121,7 +122,7 @@ describe('getViewInAppUrl', () => {
     expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
       {
         dataViewId: undefined,
-        dataViewSpec: {},
+        dataViewSpec: undefined,
         timeRange: returnedTimeRange,
         filters: [],
         query: {
@@ -144,6 +145,7 @@ describe('getViewInAppUrl', () => {
     expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
       {
         dataset: undefined,
+        dataViewSpec: undefined,
         timeRange: returnedTimeRange,
         filters: [],
         query: {
@@ -178,6 +180,7 @@ describe('getViewInAppUrl', () => {
     expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
       {
         dataset: undefined,
+        dataViewSpec: undefined,
         timeRange: returnedTimeRange,
         filters: [],
         query: {
@@ -237,7 +240,7 @@ describe('getViewInAppUrl', () => {
     expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
       {
         dataViewId: undefined,
-        dataViewSpec: {},
+        dataViewSpec: undefined,
         timeRange: returnedTimeRange,
         filters: [
           {
@@ -288,10 +291,89 @@ describe('getViewInAppUrl', () => {
     expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
       {
         dataset: undefined,
+        dataViewSpec: undefined,
         timeRange: returnedTimeRange,
         filters: [],
         query: {
           query: 'mockedCountFilter',
+          language: 'kuery',
+        },
+      },
+      { spaceId }
+    );
+  });
+  it('should call getRedirectUrl with dataViewSpec of the AD-HOC data view', () => {
+    const spaceId = 'mockedSpaceId';
+    const dataViewSpec = {
+      id: 'mockedDataViewId',
+      title: 'mockedDataViewTitle',
+      timeFieldName: '@timestamp',
+      sourceFilters: [],
+      fieldFormats: {},
+      runtimeFieldMap: {},
+      allowNoIndex: false,
+      name: 'mockedDataViewName',
+      allowHidden: false,
+    };
+    const args: GetViewInAppUrlArgs = {
+      searchConfiguration: {
+        index: dataViewSpec,
+        query: {
+          language: '',
+          query: 'mockedFilter',
+        },
+        filter: [],
+      },
+      logsLocator,
+      startedAt,
+      endedAt,
+      spaceId,
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        dataViewSpec,
+        timeRange: returnedTimeRange,
+        filters: [],
+        query: {
+          query: 'mockedFilter',
+          language: 'kuery',
+        },
+      },
+      { spaceId }
+    );
+  });
+  it('should call getRedirectUrl with the id of the SAVED data view ', () => {
+    const spaceId = 'mockedSpaceId';
+    const mockedDataViewId = 'uuid-mocked-dataView-id';
+    const args: GetViewInAppUrlArgs = {
+      dataViewId: mockedDataViewId,
+      searchConfiguration: {
+        index: 'uuid-mockedDataViewId',
+        query: {
+          language: '',
+          query: 'mockedFilter',
+        },
+        filter: [],
+      },
+      logsLocator,
+      startedAt,
+      endedAt,
+      spaceId,
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        dataViewSpec: undefined,
+        dataViewId: mockedDataViewId,
+        timeRange: returnedTimeRange,
+        filters: [],
+        query: {
+          query: 'mockedFilter',
           language: 'kuery',
         },
       },

@@ -6,11 +6,22 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { getFunctionSuggestions } from '@kbn/esql-ast/src/definitions/utils';
+import { ESQL_STRING_TYPES } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { getFieldNamesByType, setup } from './helpers';
-import { ESQL_STRING_TYPES } from '../../shared/esql_types';
-import { getFunctionSuggestions } from '../factories';
-import { Location } from '../../definitions/types';
+
+// Suggest new user-defined column
+// Suggest fields of string types
+// Suggest functions that returns string types or unknown
+const PROMPT_SUGGESTIONS = [
+  { text: 'col0 = ' },
+  ...getFieldNamesByType(ESQL_STRING_TYPES).map((v) => `${v} `),
+  ...getFunctionSuggestions({
+    location: Location.COMPLETION,
+    returnTypes: ['text', 'keyword', 'unknown'],
+  }).map((fn) => `${fn.text} `),
+];
 
 describe('autocomplete.suggest', () => {
   describe('COMPLETION', () => {
@@ -21,21 +32,34 @@ describe('autocomplete.suggest', () => {
       assertSuggestions = setupResult.assertSuggestions;
     });
 
-    it('suggests columns of STRING types and functions with STRING or UNKNOWN types for the prompt', async () => {
-      const expectedSuggestions = [
-        ...getFieldNamesByType(ESQL_STRING_TYPES).map((v) => `${v} `),
-        ...getFunctionSuggestions({
-          location: Location.COMPLETION,
-          returnTypes: ['text', 'keyword', 'unknown'],
-        }).map((fn) => `${fn.text} `),
-      ];
-
+    it('suggests PROMPT_SUGGESTIONS + default prompt after COMPLETION keyword', async () => {
       await assertSuggestions(`FROM a | COMPLETION /`, [
-        '"${0:Your prompt to the LLM.}"',
-        ...expectedSuggestions,
+        { text: '"${0:Your prompt to the LLM.}"', asSnippet: true },
+        ...PROMPT_SUGGESTIONS,
       ]);
+    });
 
-      await assertSuggestions(`FROM a | COMPLETION kubernetes.some/`, expectedSuggestions);
+    it('suggests PROMPT_SUGGESTIONS when typing a column', async () => {
+      await assertSuggestions(`FROM a | COMPLETION kubernetes.some/`, PROMPT_SUGGESTIONS);
+    });
+
+    it('suggests PROMPT_SUGGESTIONS + default prompt after after defining a column', async () => {
+      await assertSuggestions(`FROM a | COMPLETION /`, [
+        { text: '"${0:Your prompt to the LLM.}"', asSnippet: true },
+        ...PROMPT_SUGGESTIONS,
+      ]);
+    });
+
+    it('suggests ASSIGN after the user writes a new custom colum name', async () => {
+      await assertSuggestions(`FROM a | COMPLETION newColumn /`, ['= ']);
+    });
+
+    it('suggests WITH after the user writes a colum name that already exists', async () => {
+      await assertSuggestions(`FROM a | COMPLETION textField /`, ['WITH ']);
+    });
+
+    it('suggests WITH after the user writes a param as prompt', async () => {
+      await assertSuggestions(`FROM a | COMPLETION ? /`, ['WITH ']);
     });
 
     it('suggests WITH after the prompt', async () => {
@@ -43,27 +67,14 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH ']);
     });
 
-    it('suggests nothing after WITH', async () => {
-      await assertSuggestions(`FROM a | COMPLETION "prompt" WITH /`, []);
+    it('suggests inference endpoints after WITH', async () => {
+      await assertSuggestions(`FROM a | COMPLETION "prompt" WITH /`, ['`inference_1` ']);
     });
 
-    describe('optional AS', () => {
-      it('suggests AS after WITH <inferenceId>', async () => {
-        await assertSuggestions(`FROM a | COMPLETION "prompt" WITH inferenceId /`, ['AS ', '| ']);
-        await assertSuggestions(`FROM a | COMPLETION "prompt" WITH inferenceId A/`, ['AS ', '| ']);
-      });
-
-      it('suggests default target field name for AS clauses', async () => {
-        await assertSuggestions(`FROM a | COMPLETION "prompt" WITH inferenceId AS / `, [
-          'completion ',
-        ]);
-      });
-
-      it('suggests pipe after complete command', async () => {
-        await assertSuggestions(`FROM a | COMPLETION "prompt" WITH inferenceId AS completion /`, [
-          '| ',
-        ]);
-      });
+    it('suggests pipe after complete command', async () => {
+      await assertSuggestions(`FROM a | COMPLETION "prompt" WITH inferenceId AS completion /`, [
+        '| ',
+      ]);
     });
   });
 });
