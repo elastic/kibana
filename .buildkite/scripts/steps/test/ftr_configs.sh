@@ -116,6 +116,6 @@ echo ""
 
 # Scout reporter
 echo "--- Upload Scout reporter events to AppEx QA's team cluster"
-node scripts/scout upload-events
+node scripts/scout upload-events --dontFailOnError
 
 exit $exitCode

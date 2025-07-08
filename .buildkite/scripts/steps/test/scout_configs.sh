@@ -123,6 +123,6 @@ if [[ ${#failedConfigs[@]} -gt 0 ]]; then
 fi
 
 echo "--- Upload Scout reporter events to AppEx QA's team cluster"
-node scripts/scout upload-events
+node scripts/scout upload-events --dontFailOnError
 
 exit $FINAL_EXIT_CODE  # Exit with 10 only if there were config failures

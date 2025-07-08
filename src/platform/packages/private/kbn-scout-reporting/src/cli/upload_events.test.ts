@@ -55,7 +55,7 @@ describe('runUploadEvents', () => {
     jest.clearAllMocks();
   });
 
-  it('should throw an error if eventLogPath is provided and does not exist', async () => {
+  it('should throw an error if eventLogPath is provided and does not exist and dontFailOnError is false', async () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(false);
 
     flagsReader.string.mockImplementation((flag) => {
@@ -64,9 +64,41 @@ describe('runUploadEvents', () => {
       }
     });
 
+    flagsReader.boolean.mockImplementation((flag) => {
+      if (flag === 'dontFailOnError') {
+        return false;
+      }
+
+      return false;
+    });
+
+    // When dontFailOnError is false the error is both logged and thrown
     await expect(runUploadEvents(flagsReader, log)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"The provided event log path 'non_existent_path' does not exist."`
     );
+    expect(log.error).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not throw an error if eventLogPath is provided and does not exist and dontFailOnError is true', async () => {
+    jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+
+    flagsReader.string.mockImplementation((flag) => {
+      if (flag === 'eventLogPath') {
+        return 'non_existent_path';
+      }
+    });
+
+    flagsReader.boolean.mockImplementation((flag) => {
+      if (flag === 'dontFailOnError') {
+        return true;
+      }
+
+      return false;
+    });
+
+    // When dontFailOnError is passed, the error shouldn't be thrown but should still be logged
+    await expect(runUploadEvents(flagsReader, log)).resolves.not.toThrowError();
+    expect(log.error).toHaveBeenCalledTimes(1);
   });
 
   it('should log if eventLogPath is not provided and the SCOUT_REPORT_OUTPUT_ROOT directory does not exist', async () => {

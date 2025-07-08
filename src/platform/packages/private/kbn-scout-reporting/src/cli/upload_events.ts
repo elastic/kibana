@@ -37,51 +37,59 @@ const readFilesRecursively = (directory: string, callback: Function) => {
 };
 
 export const runUploadEvents = async (flagsReader: FlagsReader, log: ToolingLog) => {
-  let eventLogPath = flagsReader.string('eventLogPath');
+  try {
+    let eventLogPath = flagsReader.string('eventLogPath');
 
-  // Validate CLI options
-  if (eventLogPath && !fs.existsSync(eventLogPath)) {
-    throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
-  }
-
-  if (!eventLogPath) {
-    // Default to the SCOUT_REPORT_OUTPUT_ROOT directory if no path is provided
-    eventLogPath = SCOUT_REPORT_OUTPUT_ROOT;
-
-    if (!fs.existsSync(eventLogPath)) {
-      log.info(`No Scout report output directory found at ${eventLogPath}. No events to upload.`);
-      return;
+    // Validate CLI options
+    if (eventLogPath && !fs.existsSync(eventLogPath)) {
+      throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
     }
-  }
 
-  // ES connection
-  const esURL = flagsReader.requiredString('esURL');
-  const esAPIKey = flagsReader.requiredString('esAPIKey');
-  const verifyTLSCerts = flagsReader.boolean('verifyTLSCerts');
+    if (!eventLogPath) {
+      // Default to the SCOUT_REPORT_OUTPUT_ROOT directory if no path is provided
+      eventLogPath = SCOUT_REPORT_OUTPUT_ROOT;
 
-  log.info(`Connecting to Elasticsearch at ${esURL}`);
-  const es = await getValidatedESClient(
-    {
-      node: esURL,
-      auth: { apiKey: esAPIKey },
-      tls: {
-        rejectUnauthorized: verifyTLSCerts,
-      },
-    },
-    { log, cli: true }
-  );
-
-  // Event log upload
-  const reportDataStream = new ScoutReportDataStream(es, log);
-
-  if (fs.statSync(eventLogPath).isDirectory()) {
-    readFilesRecursively(eventLogPath, (filePath: string) => {
-      if (filePath.endsWith('.ndjson')) {
-        reportDataStream.addEventsFromFile(filePath);
+      if (!fs.existsSync(eventLogPath)) {
+        log.info(`No Scout report output directory found at ${eventLogPath}. No events to upload.`);
+        return;
       }
-    });
-  } else if (eventLogPath.endsWith('.ndjson')) {
-    reportDataStream.addEventsFromFile(eventLogPath);
+    }
+
+    // ES connection
+    const esURL = flagsReader.requiredString('esURL');
+    const esAPIKey = flagsReader.requiredString('esAPIKey');
+    const verifyTLSCerts = flagsReader.boolean('verifyTLSCerts');
+
+    log.info(`Connecting to Elasticsearch at ${esURL}`);
+    const es = await getValidatedESClient(
+      {
+        node: esURL,
+        auth: { apiKey: esAPIKey },
+        tls: {
+          rejectUnauthorized: verifyTLSCerts,
+        },
+      },
+      { log, cli: true }
+    );
+
+    // Event log upload
+    const reportDataStream = new ScoutReportDataStream(es, log);
+
+    if (fs.statSync(eventLogPath).isDirectory()) {
+      readFilesRecursively(eventLogPath, (filePath: string) => {
+        if (filePath.endsWith('.ndjson')) {
+          reportDataStream.addEventsFromFile(filePath);
+        }
+      });
+    } else if (eventLogPath.endsWith('.ndjson')) {
+      reportDataStream.addEventsFromFile(eventLogPath);
+    }
+  } catch (error) {
+    log.error(error);
+
+    if (!flagsReader.boolean('dontFailOnError')) {
+      throw error;
+    }
   }
 };
 
@@ -90,17 +98,19 @@ export const uploadEvents: Command<void> = {
   description: 'Upload events recorded by the Scout reporter to Elasticsearch',
   flags: {
     string: ['eventLogPath', 'esURL', 'esAPIKey'],
-    boolean: ['verifyTLSCerts'],
+    boolean: ['verifyTLSCerts', 'dontFailOnError'],
     default: {
       esURL: SCOUT_REPORTER_ES_URL,
       esAPIKey: SCOUT_REPORTER_ES_API_KEY,
       verifyTLSCerts: SCOUT_REPORTER_ES_VERIFY_CERTS,
+      dontFailOnError: false,
     },
     help: `
     --esURL           (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
     --esAPIKey        (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
     --verifyTLSCerts  (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
     --eventLogPath    (optional)  Path to an event log file or directory. If omitted, all events in the Scout reports output directory will be uploaded
+    --dontFailOnError (optional)  If present, errors during upload will be logged but not thrown, allowing the process to complete without failure (default: false)
     `,
   },
   run: async ({ flagsReader, log }) => {
