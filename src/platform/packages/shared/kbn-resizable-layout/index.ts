@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { withSuspense } from '@kbn/shared-ux-utility';
-import { lazy } from 'react';
-
 export { ResizableLayoutMode, ResizableLayoutDirection } from './types';
 export type { ResizableLayoutProps } from './src/resizable_layout';
-export const ResizableLayout = withSuspense(lazy(() => import('./src/resizable_layout')));
+export { ResizableLayout } from './src/resizable_layout';

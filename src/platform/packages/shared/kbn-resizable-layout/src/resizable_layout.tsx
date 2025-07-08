@@ -68,7 +68,7 @@ export interface ResizableLayoutProps {
 
 const staticModes = [ResizableLayoutMode.Single, ResizableLayoutMode.Static];
 
-const ResizableLayout = ({
+export const ResizableLayout = ({
   className,
   mode,
   direction,
@@ -126,6 +126,3 @@ const ResizableLayout = ({
     />
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export default ResizableLayout;
