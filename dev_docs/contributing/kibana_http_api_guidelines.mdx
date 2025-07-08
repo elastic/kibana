@@ -312,7 +312,7 @@ See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/S
 </DocCallOut>
 
 ```
-GET /api/resources?search_after="pitId.valueA.valueB",size=10
+GET /api/resources?pit_id=abc&search_after=valueA,valueB&size=10
 ```
 
 **OR** if you have reserved `POST` and expect sophisticated search use cases with a lot of inputs:
@@ -320,12 +320,13 @@ GET /api/resources?search_after="pitId.valueA.valueB",size=10
 ```
 POST /api/resources
 {
-  search_after: "pitId.valueA.valueB"
+  pit_id: "abc",
+  search_after: ["valueA", 123],
   size: 10,
 }
 ```
 
-Where `pitId` is the PIT ID  and `valueA` and `valueB` are the sort values that identify the last hit from ES ([docs](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after)).
+Where `pit_id` is the PIT ID  and `["valueA", 123]` are the sort values that identify the last hit from ES ([docs](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after)).
 
 **Cursor based response**
 
@@ -333,7 +334,8 @@ Where `pitId` is the PIT ID  and `valueA` and `valueB` are the sort values that 
 {
   "items": [...],
   "total": 100,
-  "search_after": "pitId.valueA1.valueB1", // The next search_after value
+  pit_id: "abc",
+  "search_after": ["valueA", 123], // The next search_after value
   "size": 10
 }
 ```
