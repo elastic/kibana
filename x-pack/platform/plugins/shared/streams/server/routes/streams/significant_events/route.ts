@@ -21,7 +21,10 @@ import {
 import { SecurityError } from '../../../lib/streams/errors/security_error';
 import { createServerRoute } from '../../create_server_route';
 import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
-import { generateSignificantEventDefinitions } from './generate_significant_events';
+import {
+  generateSignificantEventDefinitions,
+  type GeneratedSignificantEventQuery,
+} from './generate_significant_events';
 import { previewSignificantEvents } from './preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from './read_significant_events_from_alerts_indices';
 
@@ -155,11 +158,6 @@ const readSignificantEventsRoute = createServerRoute({
   },
 });
 
-interface GeneratedSignificantEventQuery {
-  title: string;
-  kql: string;
-}
-
 const generateSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events/_generate 2023-10-31',
   params: z.object({
@@ -211,6 +209,7 @@ const generateSignificantEventsRoute = createServerRoute({
 
     const generatedSignificantEventDefinitions = await generateSignificantEventDefinitions({
       name: params.path.name,
+      connectorId: params.query.connectorId,
       inferenceClient,
       esClient: createTracedEsClient({
         client: scopedClusterClient.asCurrentUser,

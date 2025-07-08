@@ -16,7 +16,7 @@ import {
   getLogPatterns,
   analyzeDocuments,
 } from '@kbn/genai-utils-server';
-import { highlightPatternFromRegex } from '@kbn/genai-utils-common';
+import { highlightPatternFromRegex, ShortIdTable } from '@kbn/genai-utils-common';
 import { KQL_GUIDE } from './kql_guide';
 import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
 
@@ -29,11 +29,13 @@ export interface GeneratedSignificantEventQuery {
 
 export async function generateSignificantEventDefinitions({
   name,
+  connectorId,
   inferenceClient,
   esClient,
   logger,
 }: {
   name: string;
+  connectorId: string;
   inferenceClient: InferenceClient;
   esClient: TracedElasticsearchClient;
   logger: Logger;
@@ -149,6 +151,7 @@ export async function generateSignificantEventDefinitions({
 
   const { output } = await inferenceClient.output({
     id: 'generate_kql_queries',
+    connectorId,
     input: chunks.filter(Boolean).join('\n\n'),
     schema: {
       type: 'object',
@@ -250,6 +253,7 @@ export async function generateSignificantEventDefinitions({
 
   const { output: selectedQueries } = await inferenceClient.output({
     id: 'verify_kql_queries',
+    connectorId,
     input: [
       instruction,
       `You've previously generated some queries. I've ran those queries
