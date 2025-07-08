@@ -100,7 +100,7 @@ function AddToCaseButtonContent() {
       getAttachments: () => {
         const url = redirectUrl;
         const persistableStateAttachmentState: PageAttachmentPersistedState = {
-          type: 'dashboard',
+          type: 'synthetics_monitor',
           url: {
             pathAndQuery: url,
             label: monitor.name,
