@@ -7,13 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const path = require('path');
+/**
+ * @typedef {string} RestrictedImportString
+ * A string specifying a module name to restrict.
+ */
 
+/**
+ * @typedef {Object} RestrictedImportPath
+ * Configuration for restricting a specific import path.
+ * @property {string} name - The name of the module to restrict.
+ * @property {string} [message] - Custom message appended to the lint error.
+ * @property {string[]} [importNames] - Specific named imports to restrict.
+ * @property {string[]} [allowImportNames] - Named imports to allow (restricts all others).
+ */
+
+/**
+ * @typedef {Object} CreateOverrideOptions
+ * Options for creating override configurations.
+ * @property {string} childConfigDir - Directory path for nested eslint configuration
+ * @property {Array<RestrictedImportString | RestrictedImportPath>} restrictedImports - Additional restricted imports to add.
+ */
+
+const path = require('path');
 const minimatch = require('minimatch');
 
-const { transformSinglePattern } = require('./utils/pattern_transformer');
 // eslint-disable-next-line import/no-dynamic-require, @kbn/imports/no_boundary_crossing
 const rootConfig = require('../../../../.eslintrc');
+const { transformSinglePattern } = require('./utils/pattern_transformer');
 
 const rootDir = path.resolve(__dirname, '..', '..', '..', '..');
 
@@ -25,9 +45,10 @@ const clonedRootConfig = JSON.parse(JSON.stringify(rootConfig));
  * @param {string|string[]} patterns - File patterns to transform
  * @param {string} rootDir - Root directory path
  * @param {string} targetDir - Target nested directory path
+ * @param {boolean} isExcludedFiles - Whether these are excludedFiles patterns
  * @returns {string[]|null} Transformed patterns array or null if not applicable
  */
-function transformFilePatterns(patterns, rootDir, targetDir) {
+function transformFilePatterns(patterns, rootDir, targetDir, isExcludedFiles = false) {
   if (!patterns) return null;
 
   const patternArray = Array.isArray(patterns) ? patterns : [patterns];
@@ -54,10 +75,8 @@ function transformFilePatterns(patterns, rootDir, targetDir) {
         expandedPatterns = [cleanPattern];
       }
 
-      // For negated patterns, check if ANY expanded pattern would exclude target
-      if (isNegated) {
-        const shouldExcludeOverride = false;
-
+      // For negated FILES patterns (not excludedFiles), check if ANY expanded pattern would exclude target
+      if (isNegated && !isExcludedFiles) {
         for (const expandedPattern of expandedPatterns) {
           const wouldMatch = minimatch(targetDir, path.resolve(rootDir, expandedPattern), {
             partial: true,
@@ -72,21 +91,14 @@ function transformFilePatterns(patterns, rootDir, targetDir) {
             return null;
           }
         }
+      }
 
-        // None of the expanded patterns exclude target, transform each
-        for (const expandedPattern of expandedPatterns) {
-          const transformed = transformSinglePattern(expandedPattern, rootDir, targetDir);
-          if (transformed) {
-            transformedPatterns.push(`!${transformed}`);
-          }
-        }
-      } else {
-        // Positive patterns - transform each expanded pattern
-        for (const expandedPattern of expandedPatterns) {
-          const transformed = transformSinglePattern(expandedPattern, rootDir, targetDir);
-          if (transformed) {
-            transformedPatterns.push(transformed);
-          }
+      // Transform each expanded pattern normally
+      for (const expandedPattern of expandedPatterns) {
+        const transformed = transformSinglePattern(expandedPattern, rootDir, targetDir);
+        if (transformed) {
+          const result = isNegated ? `!${transformed}` : transformed;
+          transformedPatterns.push(result);
         }
       }
     } catch (error) {
@@ -178,16 +190,24 @@ function createNoRestrictedImportsOverride(options = {}) {
 
   for (const override of overridesWithNoRestrictedImportRule) {
     try {
-      // Transform both files and excludedFiles patterns
-      const transformedFiles = transformFilePatterns(override.files, rootDir, childConfigDir);
+      // Transform files patterns (negated patterns may exclude entire override)
+      const transformedFiles = transformFilePatterns(
+        override.files,
+        rootDir,
+        childConfigDir,
+        false
+      );
+
+      // Skip this override if files pattern doesn't apply or is excluded
+      if (!transformedFiles) continue;
+
+      // Transform excludedFiles patterns (negated patterns are treated normally)
       const transformedExcludedFiles = transformFilePatterns(
         override.excludedFiles,
         rootDir,
-        childConfigDir
+        childConfigDir,
+        true
       );
-
-      // Skip this override if files pattern doesn't apply
-      if (!transformedFiles) continue;
 
       const newOverride = {
         ...override,

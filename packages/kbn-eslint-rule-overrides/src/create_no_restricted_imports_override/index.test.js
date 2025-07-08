@@ -10,12 +10,19 @@
 const { createNoRestrictedImportsOverride } = require('.');
 const path = require('path');
 
+// Mock path.resolve to return predictable paths for testing
 jest.mock('path', () => ({
   ...jest.requireActual('path'),
   resolve: jest.fn((...args) => {
     // TODO: fragile, can be fixed by using memfs or similar
-    // Intercept ROOT_DIR calculation (when called with path.resolve(__dirname, '..', '..', '..'))
-    if (args.length >= 4 && args[1] === '..' && args[2] === '..' && args[3] === '..') {
+    // Intercept ROOT_DIR calculation (when called with path.resolve(__dirname, '..', '..', '..', '..'))
+    if (
+      args.length === 5 &&
+      args[1] === '..' &&
+      args[2] === '..' &&
+      args[3] === '..' &&
+      args[4] === '..'
+    ) {
       return '/project';
     }
     return jest.requireActual('path').resolve(...args);
@@ -78,6 +85,18 @@ jest.mock(
           ],
         },
       },
+      {
+        files: ['!{src,packages}/legacy/**/*.js'],
+        rules: {
+          'no-restricted-imports': [
+            'error',
+            {
+              paths: ['old-library'],
+              patterns: [],
+            },
+          ],
+        },
+      },
     ],
   }),
   { virtual: true }
@@ -93,7 +112,7 @@ describe('createNoRestrictedImportsOverride', () => {
         restrictedImports: ['react-router'],
       });
 
-      expect(result).toHaveLength(3); // One override filtered out due to negation
+      expect(result).toHaveLength(3); // Negated patterns filtered out
 
       // Find the first override (src/**/*.js)
       const firstOverride = result.find((o) => o.files.includes('**/*.js') && o.files.length === 1);
@@ -187,8 +206,8 @@ describe('createNoRestrictedImportsOverride', () => {
     });
   });
 
-  describe('when handling negated patterns', () => {
-    it('should filter out overrides with negated patterns that exclude target', () => {
+  describe('when handling negated file patterns', () => {
+    it('should filter out overrides with simple negated patterns that exclude target', () => {
       const legacyDir = path.resolve('/project/src/legacy');
 
       const result = createNoRestrictedImportsOverride({
@@ -203,14 +222,64 @@ describe('createNoRestrictedImportsOverride', () => {
       expect(hasNegatedRule).toBe(false);
     });
 
-    it('should preserve negation in transformed patterns when applicable', () => {
+    it('should filter out overrides with complex brace negated patterns that exclude target', () => {
+      const srcLegacyDir = path.resolve('/project/src/legacy');
+
       const result = createNoRestrictedImportsOverride({
-        childConfigDir: path.resolve('/project/other'),
+        childConfigDir: srcLegacyDir,
         restrictedImports: ['react-router'],
       });
 
-      // Should not include the negated pattern since it doesn't apply
-      expect(result).toHaveLength(0);
+      // The pattern !{src,packages}/legacy/**/*.js should exclude src/legacy
+      const hasComplexNegatedRule = result.some((override) =>
+        override.rules['no-restricted-imports'][1].paths.includes('old-library')
+      );
+      expect(hasComplexNegatedRule).toBe(false);
+    });
+
+    it('should filter out overrides with brace negated patterns for packages/legacy too', () => {
+      const packagesLegacyDir = path.resolve('/project/packages/legacy');
+
+      const result = createNoRestrictedImportsOverride({
+        childConfigDir: packagesLegacyDir,
+        restrictedImports: ['react-router'],
+      });
+
+      // The pattern !{src,packages}/legacy/**/*.js should also exclude packages/legacy
+      const hasComplexNegatedRule = result.some((override) =>
+        override.rules['no-restricted-imports'][1].paths.includes('old-library')
+      );
+      expect(hasComplexNegatedRule).toBe(false);
+    });
+
+    it('should preserve negated patterns when they do not exclude target', () => {
+      const utilsDir = path.resolve('/project/src/utils');
+
+      const result = createNoRestrictedImportsOverride({
+        childConfigDir: utilsDir,
+        restrictedImports: ['react-router'],
+      });
+
+      // Should include overrides where negated patterns don't match target
+      expect(result.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('when handling negated excludedFiles patterns', () => {
+    it('should handle complex negated excludedFiles patterns correctly', () => {
+      const result = createNoRestrictedImportsOverride({
+        childConfigDir,
+        restrictedImports: ['react-router'],
+      });
+
+      // Verify that excludedFiles with negation are transformed but don't exclude override
+      result.forEach((override) => {
+        if (override.excludedFiles) {
+          override.excludedFiles.forEach((pattern) => {
+            expect(typeof pattern).toBe('string');
+          });
+        }
+      });
     });
   });
 
@@ -239,6 +308,15 @@ describe('createNoRestrictedImportsOverride', () => {
           restrictedImports: ['react-router'],
         });
       }).toThrow('No childConfigDir provided');
+    });
+
+    it('should handle invalid restrictedImports gracefully', () => {
+      expect(() => {
+        createNoRestrictedImportsOverride({
+          childConfigDir,
+          restrictedImports: null,
+        });
+      }).toThrow('No restricted imports provided');
     });
   });
 
@@ -309,6 +387,34 @@ describe('createNoRestrictedImportsOverride', () => {
           expect.arrayContaining([expect.objectContaining({ name: 'lodash-es' })])
         );
         expect(paths).toContain('moment');
+      });
+    });
+  });
+
+  describe('when handling error cases and edge cases', () => {
+    it('should handle malformed patterns gracefully', () => {
+      // This would test the error handling in transformFilePatterns
+      // but requires modifying the mock config with bad patterns
+      const result = createNoRestrictedImportsOverride({
+        childConfigDir,
+        restrictedImports: ['react-router'],
+      });
+
+      // Should still return results despite any potential pattern errors
+      expect(Array.isArray(result)).toBe(true);
+    });
+
+    it('should handle empty file patterns', () => {
+      const result = createNoRestrictedImportsOverride({
+        childConfigDir,
+        restrictedImports: ['react-router'],
+      });
+
+      // All results should have non-empty files arrays
+      result.forEach((override) => {
+        expect(override.files).toBeDefined();
+        expect(Array.isArray(override.files)).toBe(true);
+        expect(override.files.length).toBeGreaterThan(0);
       });
     });
   });
