@@ -9,7 +9,7 @@ import { IndexStorageSettings, StorageIndexAdapter, types } from '@kbn/storage-a
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AgentType, ToolSelection } from '@kbn/onechat-common';
 
-export const agentProfilesIndexName = '.kibana_onechat_agent_profiles';
+export const agentProfilesIndexName = '.kibana_onechat_agents';
 
 const storageSettings = {
   name: agentProfilesIndexName,

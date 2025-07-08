@@ -180,7 +180,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       })
     );
 
-  // Delete agent profile
+  // Delete agent
   router.versioned
     .delete({
       path: '/api/chat/agents/{id}',
