@@ -11,7 +11,6 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil, filter } from 'rxjs';
-import { isPrinting$ } from './utils/printing_observable';
 import { parse } from 'url';
 import { setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
@@ -51,6 +50,7 @@ import type {
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 
 import { Logger } from '@kbn/logging';
+import { isPrinting$ } from './utils/printing_observable';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
