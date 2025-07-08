@@ -129,7 +129,6 @@ export class AIAssistantService {
   private initPromise: Promise<InitializationPromise>;
   private isKBSetupInProgress: Map<string, boolean> = new Map();
   private hasInitializedV2KnowledgeBase: boolean = false;
-  private productDocManager?: ProductDocBaseStartContract['management'];
   private isProductDocumentationInProgress: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
@@ -181,13 +180,6 @@ export class AIAssistantService {
       this.initPromise,
       this.installAndUpdateSpaceLevelResources.bind(this)
     );
-    options.productDocManager
-      .then((productDocManager) => {
-        this.productDocManager = productDocManager;
-      })
-      .catch((error) => {
-        this.options.logger.warn(`Failed to initialize productDocManager: ${error.message}`);
-      });
   }
 
   public isInitialized() {
@@ -329,11 +321,12 @@ export class AIAssistantService {
     try {
       this.options.logger.debug(`Initializing resources for AIAssistantService`);
       const esClient = await this.options.elasticsearchClientPromise;
-
-      if (this.productDocManager) {
+      const productDocManager = await this.options.productDocManager;
+      console.log('productDocManager', productDocManager);
+      if (productDocManager) {
         // install product documentation without blocking other resources
         void ensureProductDocumentationInstalled({
-          productDocManager: this.productDocManager,
+          productDocManager,
           logger: this.options.logger,
           setIsProductDocumentationInProgress: this.setIsProductDocumentationInProgress.bind(this),
         });
@@ -542,7 +535,8 @@ export class AIAssistantService {
   }
 
   public async getProductDocumentationStatus(): Promise<InstallationStatus> {
-    const status = await this.productDocManager?.getStatus({
+    const productDocManager = await this.options.productDocManager;
+    const status = await productDocManager?.getStatus({
       inferenceId: defaultInferenceEndpoints.ELSER,
     });
 

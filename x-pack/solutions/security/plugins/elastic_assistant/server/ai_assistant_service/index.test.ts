@@ -23,9 +23,16 @@ import { retryUntil } from './create_resource_installation_helper.test';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import { ensureProductDocumentationInstalled } from './helpers';
 
 jest.mock('../ai_assistant_data_clients/conversations', () => ({
   AIAssistantConversationsDataClient: jest.fn(),
+}));
+
+jest.mock('./helpers', () => ({
+  ...jest.requireActual('./helpers'),
+  ensureProductDocumentationInstalled: jest.fn(),
 }));
 
 const licensing = Promise.resolve(
@@ -651,6 +658,39 @@ describe('AI Assistant Service', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId \"test\" - Retry failed with errors: Failure during installation of create or update .kibana-elastic-ai-assistant-index-template-conversations index template. No mappings would be generated for .kibana-elastic-ai-assistant-index-template-conversations, possibly due to failed/misconfigured bootstrapping`
       );
+    });
+
+    test('should await productDocManager before calling ensureProductDocumentationInstalled', async () => {
+      const ensureProductDocumentationInstalledMock =
+        ensureProductDocumentationInstalled as jest.Mock;
+      let resolveProductDocManager: (value: ProductDocBaseStartContract['management']) => void;
+      const productDocManagerPromise = new Promise<ProductDocBaseStartContract['management']>(
+        (resolve) => {
+          resolveProductDocManager = resolve;
+        }
+      );
+      assistantServiceOpts.productDocManager = productDocManagerPromise;
+      assistantService = new AIAssistantService(assistantServiceOpts);
+      await retryUntil(
+        'AI Assistant service initialized',
+        async () => assistantService.isInitialized() === true
+      );
+      const createPromise = assistantService.createAIAssistantConversationsDataClient({
+        logger,
+        spaceId: 'default',
+        currentUser: mockUser1,
+        licensing,
+      });
+      expect(ensureProductDocumentationInstalledMock).not.toHaveBeenCalled();
+      // @ts-ignore
+      resolveProductDocManager({
+        getStatus: jest.fn(),
+        install: jest.fn(),
+        update: jest.fn(),
+        uninstall: jest.fn(),
+      });
+      await createPromise;
+      expect(ensureProductDocumentationInstalledMock).toHaveBeenCalled();
     });
   });
 
