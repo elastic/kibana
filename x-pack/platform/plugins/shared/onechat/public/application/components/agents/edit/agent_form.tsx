@@ -20,33 +20,32 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AgentProfile, ToolSelection } from '@kbn/onechat-common';
+import { AgentProfile } from '@kbn/onechat-common';
 import { useForm, Controller, FormProvider } from 'react-hook-form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
-import { useOnechatServices } from '../../../hooks/use_onechat_service';
-import { queryKeys } from '../../../query_keys';
+import { useAgentDelete } from '../../../hooks/agents/use_agent_delete';
 import { ToolsSelection } from './tools_selection';
 
 export interface AgentFormProps {
-  mode: 'edit' | 'create';
   agentId?: string;
 }
 
 type AgentFormData = Omit<AgentProfile, 'createdAt' | 'updatedAt'>;
 
-export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
+export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
   const { navigateToOnechatUrl } = useNavigation();
   const {
     services: { notifications },
   } = useKibana();
 
+  const isCreateMode = !agentId;
+
   const onSaveSuccess = () => {
     notifications.toasts.addSuccess(
-      mode === 'create'
+      isCreateMode
         ? i18n.translate('xpack.onechat.agents.createSuccessMessage', {
             defaultMessage: 'Agent created successfully',
           })
@@ -58,32 +57,20 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
   };
 
   const onSaveError = (err: Error) => {
-    const errorMessage =
-      mode === 'create'
-        ? i18n.translate('xpack.onechat.agents.createErrorMessage', {
-            defaultMessage: 'Failed to create agent',
-          })
-        : i18n.translate('xpack.onechat.agents.updateErrorMessage', {
-            defaultMessage: 'Failed to update agent',
-          });
+    const errorMessage = isCreateMode
+      ? i18n.translate('xpack.onechat.agents.createErrorMessage', {
+          defaultMessage: 'Failed to create agent',
+        })
+      : i18n.translate('xpack.onechat.agents.updateErrorMessage', {
+          defaultMessage: 'Failed to update agent',
+        });
     notifications.toasts.addError(err, {
       title: errorMessage,
     });
   };
 
-  const { agentProfilesService } = useOnechatServices();
-  const queryClient = useQueryClient();
-
-  const deleteAgentMutation = useMutation({
-    mutationFn: (id: string) => {
-      if (!id) {
-        throw new Error('Agent ID is required for delete');
-      }
-      return agentProfilesService.delete(id);
-    },
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId!) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
+  const { deleteAgent, isDeleting } = useAgentDelete({
+    onSuccess: () => {
       notifications.toasts.addSuccess(
         i18n.translate('xpack.onechat.agents.deleteSuccessMessage', {
           defaultMessage: 'Agent deleted successfully',
@@ -117,15 +104,13 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
     defaultValues: { ...agentState },
     mode: 'onChange',
   });
-  const { control, handleSubmit, reset, formState, setValue, watch } = formMethods;
+  const { control, handleSubmit, reset, formState } = formMethods;
 
   useEffect(() => {
     if (agentState && !isLoading) {
       reset(agentState);
     }
   }, [agentState, isLoading, reset]);
-
-  const toolSelection = watch('toolSelection');
 
   if (isLoading) {
     return (
@@ -168,11 +153,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
     submit(data);
   };
 
-  const handleToolsChange = (newToolSelection: ToolSelection[]) => {
-    setValue('toolSelection', newToolSelection);
-  };
-
-  const isFormDisabled = isLoading || isSubmitting || deleteAgentMutation.isLoading;
+  const isFormDisabled = isLoading || isSubmitting || isDeleting;
 
   return (
     <FormProvider {...formMethods}>
@@ -195,9 +176,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
             render={({ field }) => (
               <EuiFieldText
                 {...field}
-                disabled={isFormDisabled || mode === 'edit'}
+                disabled={isFormDisabled || !isCreateMode}
                 placeholder={
-                  mode === 'create'
+                  isCreateMode
                     ? i18n.translate('xpack.onechat.agents.form.idPlaceholder', {
                         defaultMessage: 'Enter agent ID',
                       })
@@ -277,12 +258,18 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
           </h4>
         </EuiTitle>
         <EuiSpacer size="l" />
-        <ToolsSelection
-          tools={tools}
-          toolsLoading={isLoading}
-          selectedTools={toolSelection || []}
-          onToolsChange={handleToolsChange}
-          disabled={isFormDisabled}
+        <Controller
+          name="toolSelection"
+          control={control}
+          render={({ field }) => (
+            <ToolsSelection
+              tools={tools}
+              toolsLoading={isLoading}
+              selectedTools={field.value}
+              onToolsChange={field.onChange}
+              disabled={isFormDisabled}
+            />
+          )}
         />
 
         <EuiSpacer size="m" />
@@ -297,7 +284,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
                   isLoading={isSubmitting}
                   disabled={isFormDisabled || !formState.isValid}
                 >
-                  {mode === 'create'
+                  {isCreateMode
                     ? i18n.translate('xpack.onechat.agents.form.createButton', {
                         defaultMessage: 'Create Agent',
                       })
@@ -318,14 +305,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ mode, agentId }) => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {mode === 'edit' && (
+          {!isCreateMode && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 color="danger"
                 iconType="trash"
-                onClick={() => deleteAgentMutation.mutate(agentId!)}
+                onClick={() => deleteAgent(agentId!)}
                 disabled={isFormDisabled}
-                isLoading={deleteAgentMutation.isLoading}
+                isLoading={isDeleting}
               >
                 {i18n.translate('xpack.onechat.agents.form.deleteButton', {
                   defaultMessage: 'Delete',

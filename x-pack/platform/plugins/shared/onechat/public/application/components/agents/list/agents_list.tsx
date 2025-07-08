@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AgentProfile } from '@kbn/onechat-common';
@@ -18,40 +18,47 @@ export const AgentsList: React.FC = () => {
 
   const { createOnechatUrl } = useNavigation();
 
-  const columns: Array<EuiBasicTableColumn<AgentProfile>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.onechat.agents.nameLabel', { defaultMessage: 'Name' }),
-      valign: 'top',
-      render: (name: string, item: AgentProfile) => (
-        <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: item.id }))}>
-          {name}
-        </EuiLink>
-      ),
-    },
-    {
-      field: 'description',
-      name: i18n.translate('xpack.onechat.agents.descriptionLabel', {
-        defaultMessage: 'Description',
-      }),
-      valign: 'top',
-      render: (description: string) => <EuiText size="s">{description}</EuiText>,
-    },
-    {
-      field: 'customInstructions',
-      name: i18n.translate('xpack.onechat.agents.customInstructionsLabel', {
-        defaultMessage: 'Custom Instructions',
-      }),
-      valign: 'top',
-      render: (customInstructions: string) => <EuiText size="s">{customInstructions}</EuiText>,
-    },
-  ];
+  const columns: Array<EuiBasicTableColumn<AgentProfile>> = useMemo(
+    () => [
+      {
+        field: 'name',
+        name: i18n.translate('xpack.onechat.agents.nameLabel', { defaultMessage: 'Name' }),
+        valign: 'top',
+        render: (name: string, item: AgentProfile) => (
+          <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: item.id }))}>
+            {name}
+          </EuiLink>
+        ),
+      },
+      {
+        field: 'description',
+        name: i18n.translate('xpack.onechat.agents.descriptionLabel', {
+          defaultMessage: 'Description',
+        }),
+        valign: 'top',
+        render: (description: string) => <EuiText size="s">{description}</EuiText>,
+      },
+      {
+        field: 'customInstructions',
+        name: i18n.translate('xpack.onechat.agents.customInstructionsLabel', {
+          defaultMessage: 'Custom Instructions',
+        }),
+        valign: 'top',
+        render: (customInstructions: string) => <EuiText size="s">{customInstructions}</EuiText>,
+      },
+    ],
+    [createOnechatUrl]
+  );
 
-  const errorMessage = error
-    ? i18n.translate('xpack.onechat.agents.listErrorMessage', {
-        defaultMessage: 'Failed to fetch agents',
-      })
-    : undefined;
+  const errorMessage = useMemo(
+    () =>
+      error
+        ? i18n.translate('xpack.onechat.agents.listErrorMessage', {
+            defaultMessage: 'Failed to fetch agents',
+          })
+        : undefined,
+    [error]
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

@@ -21,7 +21,7 @@ export const CreateAgent = () => {
         })}
       />
       <KibanaPageTemplate.Section>
-        <AgentForm mode={'create'} />
+        <AgentForm />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

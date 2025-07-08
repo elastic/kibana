@@ -261,7 +261,9 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
               columns={columns}
               items={providerTools}
               itemId="id"
-              noItemsMessage="No tools available"
+              noItemsMessage={i18n.translate('xpack.onechat.tools.noToolsAvailable', {
+                defaultMessage: 'No tools available',
+              })}
             />
 
             <EuiSpacer size="m" />
