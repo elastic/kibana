@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
-import { EuiAvatar } from '@elastic/eui';
+import { EuiAvatar, EuiFlexItem } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import {
   compressionMimeTypes,
@@ -38,36 +38,36 @@ const getIcon = (mimeType: string | undefined) => {
   return DEFAULT_ICON;
 };
 
-export const FileAvatar = ({
-  file,
-}: {
-  file: Pick<FileJSON<unknown>, 'id' | 'name' | 'mimeType'>;
-}) => {
-  const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
-  const { client: filesClient } = useFilesContext();
-  const { owner } = useCasesContext();
+export const FileAvatar = React.memo(
+  ({ file }: { file: Pick<FileJSON<unknown>, 'id' | 'name' | 'mimeType'> }) => {
+    const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
+    const { client: filesClient } = useFilesContext();
+    const { owner } = useCasesContext();
 
-  const props = isImage(file)
-    ? {
-        imageUrl: filesClient.getDownloadHref({
-          id: file.id,
-          fileKind: constructFileKindIdByOwner(owner[0] as Owner),
-        }),
-        onClick: showPreview,
-        css: { cursor: 'pointer' },
-      }
-    : {
-        iconType: getIcon(file.mimeType),
-        color: 'subdued',
-        iconSize: 'l' as const,
-      };
+    const props = useMemo(() => {
+      return isImage(file)
+        ? {
+            imageUrl: filesClient.getDownloadHref({
+              id: file.id,
+              fileKind: constructFileKindIdByOwner(owner[0] as Owner),
+            }),
+            onClick: showPreview,
+            css: { cursor: 'pointer' },
+          }
+        : {
+            iconType: getIcon(file.mimeType),
+            color: 'subdued',
+            iconSize: 'l' as const,
+          };
+    }, [file, filesClient, owner, showPreview]);
 
-  return (
-    <>
-      <EuiAvatar name={file.name} type="space" data-test-subj="cases-files-avatar" {...props} />
-      {isPreviewVisible && <FilePreview closePreview={closePreview} selectedFile={file} />}
-    </>
-  );
-};
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiAvatar name={file.name} type="space" data-test-subj="cases-files-avatar" {...props} />
+        {isPreviewVisible && <FilePreview closePreview={closePreview} selectedFile={file} />}
+      </EuiFlexItem>
+    );
+  }
+);
 
 FileAvatar.displayName = 'FileAvatar';

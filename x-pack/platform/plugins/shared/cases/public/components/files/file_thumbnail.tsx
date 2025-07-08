@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
-import { EuiImage } from '@elastic/eui';
+import type { EuiImageProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiImage } from '@elastic/eui';
 import type { Owner } from '../../../common/constants/types';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { useFilePreview } from './use_file_preview';
@@ -16,7 +17,9 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import type { ExternalReferenceAttachmentViewProps } from '../../client/attachment_framework/types';
 import { getFileFromReferenceMetadata, isValidFileExternalReferenceMetadata } from './utils';
 
-export const FileThumbnail = (props: ExternalReferenceAttachmentViewProps) => {
+const componentStyle: EuiImageProps['css'] = { cursor: 'pointer' };
+
+export const FileThumbnail = React.memo((props: ExternalReferenceAttachmentViewProps) => {
   const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
   const { client: filesClient } = useFilesContext();
   const { owner } = useCasesContext();
@@ -36,18 +39,18 @@ export const FileThumbnail = (props: ExternalReferenceAttachmentViewProps) => {
   });
 
   return (
-    <>
+    <EuiFlexGroup>
       <EuiImage
         src={imageUrl}
         alt={file.name}
         size="s"
         data-test-subj="cases-files-image-thumbnail"
         onClick={showPreview}
-        css={{ cursor: 'pointer' }}
+        css={componentStyle}
       />
       {isPreviewVisible && <FilePreview closePreview={closePreview} selectedFile={file} />}
-    </>
+    </EuiFlexGroup>
   );
-};
+});
 
 FileThumbnail.displayName = 'FileThumbnail';
