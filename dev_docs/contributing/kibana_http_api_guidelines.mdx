@@ -185,7 +185,7 @@ DELETE /api/resources/{id}
 
 `GET`, `POST`, `PUT`, `PATCH`, `DELETE` should cover almost all cases. If you are considering `HEAD` or some other method make sure you have a good justification for your HTTP API.
 
-### Path parameters
+### Path and query parameters
 
 **Should use snake case**
 
@@ -193,25 +193,15 @@ DELETE /api/resources/{id}
 
 `/api/my_api/{myId}` ❌
 
-**BEWARE: path parameters should not expect values of unknown length**
-
-Accepting very long strings in path parameters can cause issues for HTTP servers that limit the byte length of certain parts of requests.
-
-Use a body parameter for long strings instead and consider using validation to limit a path param's length.
-
-### Query parameters
-
-**Should use snake case**
-
 `/api/my_api?snake_case=true` ✅
 
 `/api/my_api?snakeCase=false` ❌
 
-**BEWARE: query parameters should not expect values of unknown length**
+**BEWARE: path or query parameters should not expect values of unknown length**
 
-Accepting very long strings in query parameters can cause issues for HTTP servers that limit the byte length of certain parts of requests.
+Accepting very long strings in path or query parameters can cause issues for HTTP servers that limit the byte length of certain parts of requests.
 
-Use a body parameter for long strings instead and consider using validation to limit a query param's length.
+Use a body parameter for long strings instead and consider using validation to limit a path param's length.
 
 ### Bodies
 
