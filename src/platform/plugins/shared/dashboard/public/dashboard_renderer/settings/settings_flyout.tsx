@@ -328,7 +328,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
                         }}
                         position="top"
                         size="s"
-                        type="questionInCircle"
+                        type="question"
                       />
                     </EuiText>
                   }

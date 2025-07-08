@@ -15,7 +15,10 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_RULE_UUID,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_STATUS,
+  ALERT_INSTANCE_ID,
 } from '@kbn/rule-data-utils';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
 import type { TaskManagerDoc } from '../../../../../common/lib';
@@ -28,7 +31,6 @@ import {
 } from '../../../../../common/lib';
 import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 
-// eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataFlappingTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
@@ -799,6 +801,264 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       // Never flapped, since globl flapping is off
       expect(runWhichItFlapped).eql(0);
     });
+
+    it('should drop tracked alerts early after hitting the alert limit', async () => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .auth('superuser', 'superuser')
+        .send({
+          enabled: true,
+          look_back_window: 6,
+          status_change_threshold: 4,
+        })
+        .expect(200);
+      // wait so cache expires
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
+
+      const pattern = {
+        alertA: [true].concat(new Array(5).fill(false)),
+        alertB: [true].concat(new Array(5).fill(false)),
+        alertC: [true].concat(new Array(5).fill(false)),
+        alertD: [true].concat(new Array(5).fill(false)),
+        alertE: [true].concat(new Array(5).fill(false)),
+        alertF: [true].concat(new Array(5).fill(false)),
+        alertG: [true].concat(new Array(5).fill(false)),
+        alertH: [true].concat(new Array(5).fill(false)),
+        alertI: [true].concat(new Array(5).fill(false)),
+        alertJ: [true].concat(new Array(5).fill(false)),
+        alertK: [false, true].concat(new Array(4).fill(false)),
+        alertL: [false, true].concat(new Array(4).fill(false)),
+        alertM: [false, true].concat(new Array(4).fill(false)),
+        alertN: [false, true].concat(new Array(4).fill(false)),
+        alertO: [false, true].concat(new Array(4).fill(false)),
+        alertP: [false, true].concat(new Array(4).fill(false)),
+        alertQ: [false, true].concat(new Array(4).fill(false)),
+        alertR: [false, true].concat(new Array(4).fill(false)),
+        alertS: [false, true].concat(new Array(4).fill(false)),
+        alertT: [false, true].concat(new Array(4).fill(false)),
+        alertU: [false, true].concat(new Array(4).fill(false)),
+        alertV: [false, true].concat(new Array(4).fill(false)),
+      };
+      const ruleParameters = { pattern };
+      const createdRule = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            schedule: { interval: '1d' },
+            throttle: null,
+            params: ruleParameters,
+            actions: [],
+            notify_when: RuleNotifyWhen.CHANGE,
+          })
+        );
+
+      expect(createdRule.status).to.eql(200);
+      const ruleId = createdRule.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      // --------------------------
+      // RUN 1 - 10 new alerts
+      // --------------------------
+      let events: IValidatedEvent[] = await waitForEventLogDocs(
+        ruleId,
+        new Map([['execute', { equal: 1 }]])
+      );
+      let executeEvent = events[0];
+      let executionUuid = executeEvent?.kibana?.alert?.rule?.execution?.uuid;
+      expect(executionUuid).not.to.be(undefined);
+
+      const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+
+      let state: any = await getRuleState(ruleId);
+      expect(state.alertInstances.alertA.state.patternIndex).to.be(0);
+      expect(state.alertInstances.alertB.state.patternIndex).to.be(0);
+      expect(state.alertInstances.alertC.state.patternIndex).to.be(0);
+      expect(state.alertInstances.alertD.state.patternIndex).to.be(0);
+      expect(state.alertInstances.alertE.state.patternIndex).to.be(0);
+      expect(state.alertInstances.alertF.state.patternIndex).to.be(0);
+      expect(state.alertInstances.alertG.state.patternIndex).to.be(0);
+      expect(state.alertInstances.alertH.state.patternIndex).to.be(0);
+      expect(state.alertInstances.alertI.state.patternIndex).to.be(0);
+      expect(state.alertInstances.alertJ.state.patternIndex).to.be(0);
+
+      expect(alertDocsRun1.length).to.equal(10);
+
+      expect(
+        alertDocsRun1
+          .filter((doc) => doc._source![ALERT_STATUS] === 'active')
+          .map((doc) => doc._source![ALERT_INSTANCE_ID])
+      ).to.eql([
+        'alertA',
+        'alertB',
+        'alertC',
+        'alertD',
+        'alertE',
+        'alertF',
+        'alertG',
+        'alertH',
+        'alertI',
+        'alertJ',
+      ]);
+      expect(
+        alertDocsRun1
+          .filter((doc) => doc._source![ALERT_STATUS] === 'recovered')
+          .map((doc) => doc._source![ALERT_INSTANCE_ID])
+      ).to.eql([]);
+
+      // --------------------------
+      // RUN 2 - 10 recovered, 12 new
+      // --------------------------
+      let response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(response.status).to.eql(204);
+
+      events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
+      executeEvent = events[1];
+      executionUuid = executeEvent?.kibana?.alert?.rule?.execution?.uuid;
+      expect(executionUuid).not.to.be(undefined);
+
+      const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+
+      state = await getRuleState(ruleId);
+      expect(state.alertRecoveredInstances.alertA).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertB).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertC).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertD).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertE).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertF).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertG).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertH).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertI).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertJ).not.to.be(undefined);
+      expect(state.alertInstances.alertK.state.patternIndex).to.be(1);
+      expect(state.alertInstances.alertL.state.patternIndex).to.be(1);
+      expect(state.alertInstances.alertM.state.patternIndex).to.be(1);
+      expect(state.alertInstances.alertN.state.patternIndex).to.be(1);
+      expect(state.alertInstances.alertO.state.patternIndex).to.be(1);
+      expect(state.alertInstances.alertP.state.patternIndex).to.be(1);
+      expect(state.alertInstances.alertQ.state.patternIndex).to.be(1);
+      expect(state.alertInstances.alertR.state.patternIndex).to.be(1);
+      expect(state.alertInstances.alertS.state.patternIndex).to.be(1);
+      expect(state.alertInstances.alertT.state.patternIndex).to.be(1);
+      expect(state.alertInstances.alertU.state.patternIndex).to.be(1);
+      expect(state.alertInstances.alertV.state.patternIndex).to.be(1);
+
+      expect(alertDocsRun2.length).to.equal(22);
+
+      expect(
+        alertDocsRun2
+          .filter((doc) => doc._source![ALERT_STATUS] === 'active')
+          .map((doc) => doc._source![ALERT_INSTANCE_ID])
+      ).to.eql([
+        'alertK',
+        'alertL',
+        'alertM',
+        'alertN',
+        'alertO',
+        'alertP',
+        'alertQ',
+        'alertR',
+        'alertS',
+        'alertT',
+        'alertU',
+        'alertV',
+      ]);
+      expect(
+        alertDocsRun2
+          .filter((doc) => doc._source![ALERT_STATUS] === 'recovered')
+          .map((doc) => doc._source![ALERT_INSTANCE_ID])
+      ).to.eql([
+        'alertA',
+        'alertB',
+        'alertC',
+        'alertD',
+        'alertE',
+        'alertF',
+        'alertG',
+        'alertH',
+        'alertI',
+        'alertJ',
+      ]);
+
+      // --------------------------
+      // RUN 3 - 22 recovered, 5 new
+      // --------------------------
+      response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(response.status).to.eql(204);
+
+      events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
+      executeEvent = events[1];
+      executionUuid = executeEvent?.kibana?.alert?.rule?.execution?.uuid;
+      expect(executionUuid).not.to.be(undefined);
+
+      const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+
+      state = await getRuleState(ruleId);
+      expect(state.alertRecoveredInstances.alertA).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertB).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertC).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertD).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertE).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertF).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertG).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertH).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertK).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertL).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertM).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertN).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertO).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertP).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertQ).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertR).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertS).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertT).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertU).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertV).not.to.be(undefined);
+      expect(state.alertRecoveredInstances.alertI).to.be(undefined);
+      expect(state.alertRecoveredInstances.alertJ).to.be(undefined);
+
+      expect(alertDocsRun3.length).to.equal(22);
+
+      expect(
+        alertDocsRun3
+          .filter((doc) => doc._source![ALERT_STATUS] === 'active')
+          .map((doc) => doc._source![ALERT_INSTANCE_ID])
+      ).to.eql([]);
+      expect(
+        alertDocsRun3
+          .filter((doc) => doc._source![ALERT_STATUS] === 'recovered')
+          .map((doc) => doc._source![ALERT_INSTANCE_ID])
+      ).to.eql([
+        'alertK',
+        'alertL',
+        'alertM',
+        'alertN',
+        'alertO',
+        'alertP',
+        'alertQ',
+        'alertR',
+        'alertS',
+        'alertT',
+        'alertU',
+        'alertV',
+        'alertA',
+        'alertB',
+        'alertC',
+        'alertD',
+        'alertE',
+        'alertF',
+        'alertG',
+        'alertH',
+        'alertI',
+        'alertJ',
+      ]);
+    });
   });
 
   async function getRuleState(ruleId: string) {
@@ -827,6 +1087,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
           },
         },
       },
+      size: 25,
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }

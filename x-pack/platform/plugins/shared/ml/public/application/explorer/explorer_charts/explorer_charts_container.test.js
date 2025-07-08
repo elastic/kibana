@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 
-import { I18nProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { getDefaultChartsData } from './explorer_charts_container_service';
@@ -78,21 +78,19 @@ describe('ExplorerChartsContainer', () => {
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Minimal Initialization', () => {
-    const wrapper = shallow(
-      <I18nProvider>
+    const { container } = render(
+      <IntlProvider>
         <KibanaContextProvider services={kibanaContextMock.services}>
           <ExplorerChartsContainer
             {...getDefaultChartsData()}
             {...getUtilityProps()}
-            severity={10}
+            severity={[{ min: 0, max: 3 }]}
           />
         </KibanaContextProvider>
-      </I18nProvider>
+      </IntlProvider>
     );
 
-    expect(wrapper.html()).toEqual(
-      '<div class="euiFlexGrid css-3oynhh-euiFlexGrid-m-row-stretch-responsive" data-test-subj="mlExplorerChartsContainer"></div>'
-    );
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('Initialization with chart data', () => {
@@ -107,24 +105,22 @@ describe('ExplorerChartsContainer', () => {
       ],
       chartsPerRow: 1,
       tooManyBuckets: false,
-      severity: 10,
+      severity: [{ min: 0, max: 3 }],
     };
-    const wrapper = mount(
-      <I18nProvider>
+    const { container, getByTestId } = render(
+      <IntlProvider>
         <KibanaContextProvider services={kibanaContextMock.services}>
           <ExplorerChartsContainer {...props} {...getUtilityProps()} />
         </KibanaContextProvider>
-      </I18nProvider>
+      </IntlProvider>
     );
 
     // We test child components with snapshots separately
     // so we just do a high level check here.
-    expect(
-      wrapper.find('div[data-test-subj="mlExplorerChartContainerItem"]').children()
-    ).toHaveLength(1);
+    expect(getByTestId('mlExplorerChartContainerItem').children.length).toBe(3);
 
     // Check if the additional y-axis information for rare charts is not part of the chart
-    expect(wrapper.html().search(rareChartUniqueString)).toBe(-1);
+    expect(container.innerHTML.search(rareChartUniqueString)).toBe(-1);
   });
 
   test('Initialization with rare detector', () => {
@@ -138,24 +134,22 @@ describe('ExplorerChartsContainer', () => {
       ],
       chartsPerRow: 1,
       tooManyBuckets: false,
-      severity: 10,
+      severity: [{ min: 0, max: 3 }],
     };
-    const wrapper = mount(
-      <I18nProvider>
+    const { container, getByTestId } = render(
+      <IntlProvider>
         <KibanaContextProvider services={kibanaContextMock.services}>
           <ExplorerChartsContainer {...props} {...getUtilityProps()} />
         </KibanaContextProvider>
-      </I18nProvider>
+      </IntlProvider>
     );
 
     // We test child components with snapshots separately
     // so we just do a high level check here.
-    expect(
-      wrapper.find('div[data-test-subj="mlExplorerChartContainerItem"]').children()
-    ).toHaveLength(1);
+    expect(getByTestId('mlExplorerChartContainerItem').children.length).toBe(3);
 
     // Check if the additional y-axis information for rare charts is part of the chart
-    expect(wrapper.html().search(rareChartUniqueString)).toBeGreaterThan(0);
+    expect(container.innerHTML.search(rareChartUniqueString)).toBeGreaterThan(0);
   });
 
   describe('getEntitiesQuery', () => {

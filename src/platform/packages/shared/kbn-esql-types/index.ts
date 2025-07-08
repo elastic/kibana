@@ -27,6 +27,7 @@ export {
 
 export {
   type RecommendedQuery,
+  type RecommendedField,
   type ResolveIndexResponse,
 } from './src/extensions_autocomplete_types';
 

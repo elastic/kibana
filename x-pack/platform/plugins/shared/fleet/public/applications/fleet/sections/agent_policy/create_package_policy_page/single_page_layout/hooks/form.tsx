@@ -239,6 +239,7 @@ export function useOnSubmit({
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     ...DEFAULT_PACKAGE_POLICY,
   });
+  const [integration, setIntegration] = useState<string | undefined>(integrationToEnable);
 
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
@@ -310,8 +311,14 @@ export function useOnSubmit({
   // Initial loading of package info
   useEffect(() => {
     async function init() {
-      if (!packageInfo || packageInfo.name === packagePolicy.package?.name) {
+      if (
+        !packageInfo ||
+        (packageInfo.name === packagePolicy.package?.name && integrationToEnable === integration)
+      ) {
         return;
+      }
+      if (integrationToEnable !== integration) {
+        setIntegration(integrationToEnable);
       }
 
       // Fetch all packagePolicies having the package name
@@ -341,6 +348,8 @@ export function useOnSubmit({
     integrationToEnable,
     isInitialized,
     packagePolicy.package?.name,
+    integration,
+    setIntegration,
   ]);
 
   useEffect(() => {

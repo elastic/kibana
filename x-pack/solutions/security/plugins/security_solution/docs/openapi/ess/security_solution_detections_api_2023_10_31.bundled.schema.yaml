@@ -2056,6 +2056,69 @@ paths:
                               timestamp: 2023-10-31T00:00:00.000Z
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
+              example27:
+                description: >-
+                  The following request set alert suppression to the rules with
+                  the specified IDs.
+                summary: Edit - Set alert suppression to rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_alert_suppression
+                      value:
+                        duration:
+                          unit: h
+                          value: 1
+                        group_by:
+                          - source.ip
+                        missing_fields_strategy: suppress
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example28:
+                description: >-
+                  The following request set alert suppression to threshold rules
+                  with the specified IDs.
+                summary: Edit - Set alert suppression to threshold rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_alert_suppression_for_threshold
+                      value:
+                        duration:
+                          unit: h
+                          value: 1
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example29:
+                description: >-
+                  The following request removes alert suppression from the rules
+                  with the specified IDs. If the rules do not have alert
+                  suppression, no changes are made.
+                summary: Edit - Removes alert suppression from rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: delete_alert_suppression
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example30:
+                description: >-
+                  The following request triggers the filling of gaps for the
+                  specified rule ids and time range
+                summary: >-
+                  Fill Gaps - Manually trigger the filling of gaps for specified
+                  rules
+                value:
+                  action: fill_gaps
+                  ids:
+                    - 748694f0-6977-4ea5-8384-cd2e39730779
+                    - 164d0918-f720-4c9f-9f5c-c5122587cf19
+                  run:
+                    end_date: '2025-03-10T23:59:59.999Z'
+                    start_date: '2025-03-01T00:00:00.000Z'
             schema:
               oneOf:
                 - $ref: '#/components/schemas/BulkDeleteRules'
@@ -2064,6 +2127,7 @@ paths:
                 - $ref: '#/components/schemas/BulkExportRules'
                 - $ref: '#/components/schemas/BulkDuplicateRules'
                 - $ref: '#/components/schemas/BulkManualRuleRun'
+                - $ref: '#/components/schemas/BulkManualRuleFillGaps'
                 - $ref: '#/components/schemas/BulkEditRules'
       responses:
         '200':
@@ -4477,6 +4541,22 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
+        - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
+    BulkActionEditPayloadAlertSuppression:
+      anyOf:
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppression'
+        - $ref: >-
+            #/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold
+        - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
+    BulkActionEditPayloadDeleteAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - delete_alert_suppression
+          type: string
+      required:
+        - type
     BulkActionEditPayloadIndexPatterns:
       description: >
         Edits index patterns of rulesClient.
@@ -4615,6 +4695,30 @@ components:
       required:
         - type
         - value
+    BulkActionEditPayloadSetAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_alert_suppression
+          type: string
+        value:
+          $ref: '#/components/schemas/AlertSuppression'
+      required:
+        - type
+        - value
+    BulkActionEditPayloadSetAlertSuppressionForThreshold:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_alert_suppression_for_threshold
+          type: string
+        value:
+          $ref: '#/components/schemas/ThresholdAlertSuppression'
+      required:
+        - type
+        - value
     BulkActionEditPayloadTags:
       description: >
         Edits tags of rules.
@@ -4676,6 +4780,9 @@ components:
         - ESQL_INDEX_PATTERN
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
+        - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
+        - UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
+        - RULE_FILL_GAPS_DISABLED_RULE
       type: string
     BulkActionSkipResult:
       type: object
@@ -4685,7 +4792,9 @@ components:
         name:
           type: string
         skip_reason:
-          $ref: '#/components/schemas/BulkEditSkipReason'
+          oneOf:
+            - $ref: '#/components/schemas/BulkEditSkipReason'
+            - $ref: '#/components/schemas/BulkGapsFillingSkipReason'
       required:
         - id
         - skip_reason
@@ -4945,6 +5054,52 @@ components:
           type: string
       required:
         - action
+    BulkGapsFillingSkipReason:
+      enum:
+        - NO_GAPS_TO_FILL
+      type: string
+    BulkManualRuleFillGaps:
+      type: object
+      properties:
+        action:
+          enum:
+            - fill_gaps
+          type: string
+        fill_gaps:
+          description: >-
+            Object that describes applying a manual gap fill action for the
+            specified time range.
+          type: object
+          properties:
+            end_date:
+              description: End date of the manual gap fill
+              type: string
+            start_date:
+              description: Start date of the manual gap fill
+              type: string
+          required:
+            - start_date
+            - end_date
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
+        ids:
+          description: >-
+            Array of rule IDs. Array of rule IDs to which a bulk action will be
+            applied. Only valid when query property is undefined.
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules.
+          type: string
+      required:
+        - action
+        - fill_gaps
     BulkManualRuleRun:
       type: object
       properties:

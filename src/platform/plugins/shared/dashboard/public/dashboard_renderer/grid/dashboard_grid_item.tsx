@@ -8,17 +8,17 @@
  */
 
 import { EuiLoadingChart, UseEuiTheme } from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useMemoCss } from '@kbn/unified-search-plugin/public/use_memo_css';
 import classNames from 'classnames';
 import React, { useLayoutEffect, useMemo } from 'react';
-import { DashboardPanelState } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { printViewportVisStyles } from '../print_styles';
 import { DASHBOARD_MARGIN_SIZE } from './constants';
+import { getHighlightStyles } from './highlight_styles';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
@@ -27,7 +27,7 @@ export interface Props extends DivProps {
   dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
   id: string;
   index?: number;
-  type: DashboardPanelState['type'];
+  type: string;
   key: string;
   isRenderable?: boolean;
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
@@ -104,7 +104,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
 
     const dashboardContainerTopOffset = dashboardContainerRef?.current?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
-    const styles = useMemoizedStyles(dashboardGridItemStyles);
+    const styles = useMemoCss(dashboardGridItemStyles);
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
@@ -167,12 +167,6 @@ const dashboardGridItemStyles = {
     css([
       {
         height: '100%',
-        '&.dshDashboardGrid__item--highlighted .embPanel': {
-          borderRadius: context.euiTheme.border.radius.small,
-          animationName: highlightOutline(context.euiTheme),
-          animationDuration: '4s',
-          animationTimingFunction: 'ease-out',
-        },
         // Remove padding in fullscreen mode
         '.kbnAppWrapper--hiddenChrome &.dshDashboardGrid__item--expanded': {
           padding: 0,
@@ -181,6 +175,7 @@ const dashboardGridItemStyles = {
           padding: 0,
         },
       },
+      getHighlightStyles(context),
       printViewportVisStyles(context),
     ]),
   focusPanelBlur: css({
@@ -188,16 +183,3 @@ const dashboardGridItemStyles = {
     opacity: '0.25',
   }),
 };
-
-const highlightOutline = (euiTheme: UseEuiTheme['euiTheme']) =>
-  keyframes({
-    '0%': {
-      outline: `solid ${euiTheme.size.xs} transparent`,
-    },
-    '25%': {
-      outline: `solid ${euiTheme.size.xs} ${euiTheme.colors.backgroundLightSuccess}`,
-    },
-    '100%': {
-      outline: `solid ${euiTheme.size.xs} transparent`,
-    },
-  });

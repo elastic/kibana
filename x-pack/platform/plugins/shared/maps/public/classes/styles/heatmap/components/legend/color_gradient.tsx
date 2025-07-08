@@ -8,7 +8,7 @@
 import React from 'react';
 import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getColorPalette, getLinearGradient } from '../../../color_palettes';
 
 interface Props {
@@ -29,7 +29,7 @@ const componentStyles = {
 };
 export const ColorGradient = ({ colorPaletteId }: Props) => {
   const palette = getColorPalette(colorPaletteId);
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
   return palette.length ? (
     <div css={styles.mapColorGradientStyles} style={{ background: getLinearGradient(palette) }} />
   ) : null;

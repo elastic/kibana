@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await migrationRulesRoutes.stats({ migrationId });
       expect(response.body).toEqual(
         expect.objectContaining({
-          status: 'stopped',
+          status: 'interrupted',
           id: migrationId,
           rules: {
             total,
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await migrationRulesRoutes.statsAll({});
       const expectedStats = expect.arrayContaining([
         expect.objectContaining({
-          status: 'stopped',
+          status: 'interrupted',
           id: migrationId1,
           rules: { total: 42, pending: 4, processing: 3, completed: 33, failed: 2 },
           last_execution: {
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         }),
         expect.objectContaining({
-          status: 'stopped',
+          status: 'interrupted',
           id: migrationId2,
           rules: { total: 28, pending: 2, processing: 5, completed: 14, failed: 7 },
           last_execution: {

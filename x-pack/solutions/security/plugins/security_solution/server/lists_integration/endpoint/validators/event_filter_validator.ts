@@ -60,6 +60,7 @@ export class EventFilterValidator extends BaseValidator {
     }
 
     await this.validateCreateOwnerSpaceIds(item);
+    await this.validateCanCreateGlobalArtifacts(item);
 
     return item;
   }

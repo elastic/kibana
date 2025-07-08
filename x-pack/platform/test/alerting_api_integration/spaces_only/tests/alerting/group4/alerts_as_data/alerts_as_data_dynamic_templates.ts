@@ -23,7 +23,6 @@ import {
   ObjectRemover,
 } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataDynamicTemplatesTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
@@ -70,8 +69,8 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
         // there is no way to get the real number of fields from ES.
         // Eventhough we have only as many as alertFieldMap fields,
         // ES counts the each childs of the nested objects and multi_fields as seperate fields.
-        // therefore we add 9 to get the real number.
-        const nestedObjectsAndMultiFields = 9;
+        // therefore we add 11 to get the real number.
+        const nestedObjectsAndMultiFields = 11;
         // Number of free slots that we want to have, so we can add dynamic fields as many
         const numberofFreeSlots = 2;
         const totalFields =

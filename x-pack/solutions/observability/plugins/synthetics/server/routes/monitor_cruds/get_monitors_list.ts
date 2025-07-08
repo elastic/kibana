@@ -4,10 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { getMonitors, isMonitorsQueryFiltered, QuerySchema } from '../common';
+import {
+  getMonitorFilters,
+  isMonitorsQueryFiltered,
+  MonitorsQuery,
+  parseMappingKey,
+  QuerySchema,
+  SEARCH_FIELDS,
+} from '../common';
 
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -28,9 +36,22 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
         });
       }
     };
+    const queryParams = routeContext.request.query as MonitorsQuery;
+
+    const { filtersStr } = await getMonitorFilters(routeContext);
 
     const [queryResultSavedObjects, totalCount] = await Promise.all([
-      getMonitors(routeContext),
+      monitorConfigRepository.find<EncryptedSyntheticsMonitorAttributes>({
+        perPage: queryParams.perPage ?? 50,
+        page: queryParams.page ?? 1,
+        sortField: parseMappingKey(queryParams.sortField),
+        sortOrder: queryParams.sortOrder,
+        searchFields: SEARCH_FIELDS,
+        search: queryParams.query,
+        filter: filtersStr,
+        searchAfter: queryParams.searchAfter,
+        ...(queryParams.showFromAllSpaces && { namespaces: ['*'] }),
+      }),
       totalCountQuery(),
     ]);
 
@@ -46,8 +67,9 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
           internal: request.query?.internal,
         });
         return {
-          spaceId: monitor.namespaces?.[0],
           ...mon,
+          spaceId: monitor.namespaces?.[0],
+          spaces: monitor.namespaces ?? [],
         };
       }),
       absoluteTotal,

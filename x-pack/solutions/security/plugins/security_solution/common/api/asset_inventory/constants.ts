@@ -8,3 +8,4 @@
 export const ASSET_INVENTORY_ENABLE_API_PATH = '/api/asset_inventory/enable';
 export const ASSET_INVENTORY_STATUS_API_PATH = '/api/asset_inventory/status';
 export const ASSET_INVENTORY_DELETE_API_PATH = '/api/asset_inventory/delete';
+export const ASSET_INVENTORY_INSTALL_DATA_VIEW_API_PATH = '/api/asset_inventory/install_data_view';

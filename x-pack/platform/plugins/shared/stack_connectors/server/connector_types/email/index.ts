@@ -34,6 +34,7 @@ import { AdditionalEmailServices } from '../../../common';
 import type { SendEmailOptions, Transport } from './send_email';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
 import { portSchema } from '../lib/schemas';
+import { serviceParamValueToKbnSettingMap as emailKbnSettings } from '../../../common/email/constants';
 
 export type EmailConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -82,6 +83,20 @@ function validateConfig(
   const config = configObject;
   const { configurationUtilities } = validatorServices;
   const awsSesConfig = configurationUtilities.getAwsSesConfig();
+  const enabledServices = configurationUtilities.getEnabledEmailServices();
+
+  const serviceKey = config.service as keyof typeof emailKbnSettings;
+  if (
+    !enabledServices.includes('*') &&
+    config.service in emailKbnSettings &&
+    !enabledServices.includes(emailKbnSettings[serviceKey])
+  ) {
+    throw new Error(
+      `[service]: "${
+        emailKbnSettings[serviceKey]
+      }" is not in the list of enabled email services: ${enabledServices.join(',')}`
+    );
+  }
 
   const emails = [config.from];
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);

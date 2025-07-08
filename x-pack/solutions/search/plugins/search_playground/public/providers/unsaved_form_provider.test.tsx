@@ -54,10 +54,6 @@ const DEFAULT_FORM_STATE: Partial<PlaygroundForm> = {
   indices: [],
   summarization_model: undefined,
   user_elasticsearch_query: null,
-  user_elasticsearch_query_validations: {
-    isUserCustomized: false,
-    isValid: false,
-  },
 };
 
 describe('UnsavedFormProvider', () => {

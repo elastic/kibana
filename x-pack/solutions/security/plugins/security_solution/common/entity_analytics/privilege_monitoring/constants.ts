@@ -14,3 +14,5 @@ export const getPrivilegedMonitorUsersIndex = (namespace: string) =>
 // Not required in phase 0.
 export const getPrivilegedMonitorGroupsIndex = (namespace: string) =>
   `${privilegedMonitorBaseIndexName}.groups-${namespace}`;
+// Default index for privileged monitoring users. Not required.
+export const defaultMonitoringUsersIndex = 'entity_analytics.privileged_monitoring';
