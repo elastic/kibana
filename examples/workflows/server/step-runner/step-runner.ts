@@ -1,5 +1,5 @@
-import nunjucks from 'nunjucks';
 import { WorkflowStep, Provider } from '../models';
+import { TemplatingEngine } from '../templating-engine';
 
 export interface RunStepResult {
   output: Record<string, any> | undefined;
@@ -10,7 +10,10 @@ export class StepRunner {
   /**
    *
    */
-  constructor(private providers: Record<string, Provider>) {}
+  constructor(
+    private providers: Record<string, Provider>,
+    private templatingEngine: TemplatingEngine
+  ) {}
 
   public async runStep(step: WorkflowStep, context: Record<string, any>): Promise<RunStepResult> {
     const stepProvider = this.providers[step.providerName]; // integrate with connector
@@ -23,7 +26,7 @@ export class StepRunner {
 
     const renderedInputs = Object.entries(providerInputs).reduce((accumulator, [key, value]) => {
       if (typeof value === 'string') {
-        accumulator[key] = nunjucks.renderString(String(value), context);
+        accumulator[key] = this.templatingEngine.render('nunjucks', value, context);
       } else {
         accumulator[key] = value;
       }
