@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { MaybePromise } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import {
-  AgentType,
   AgentMode,
   type ConversationRound,
   type RoundInput,
@@ -105,20 +103,4 @@ export interface AgentResponse {
    * The full round of conversation, can be used for persistence for example.
    */
   round: ConversationRound;
-}
-
-export interface ProvidedAgent {
-  type: AgentType;
-  id: string;
-  description: string;
-  handler: AgentHandlerFn;
-}
-
-/**
- * Provider that can be registered to expose agents to onechat
- */
-export interface AgentProvider<TAgent = ProvidedAgent> {
-  has(opts: { agentId: string; request: KibanaRequest }): MaybePromise<boolean>;
-  get(opts: { agentId: string; request: KibanaRequest }): MaybePromise<TAgent>;
-  list(opts: { request: KibanaRequest }): MaybePromise<TAgent[]>;
 }

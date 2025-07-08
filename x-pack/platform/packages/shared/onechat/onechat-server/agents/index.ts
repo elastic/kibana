@@ -11,8 +11,6 @@ export type {
   AgentHandlerReturn,
   AgentHandlerFn,
   AgentEventEmitter,
-  ProvidedAgent,
-  AgentProvider,
 } from './provider';
 export type {
   RunAgentFn,
@@ -22,9 +20,3 @@ export type {
   ScopedRunnerRunAgentParams,
   RunAgentOnEventFn,
 } from './runner';
-export type {
-  ExecutableAgent,
-  ExecutableAgentHandlerFn,
-  ExecutableAgentHandlerParams,
-  AgentRegistry,
-} from './registry';

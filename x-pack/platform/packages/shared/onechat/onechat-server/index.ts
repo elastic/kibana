@@ -53,10 +53,4 @@ export type {
   ScopedRunnerRunAgentParams,
   AgentEventEmitter,
   RunAgentOnEventFn,
-  ProvidedAgent,
-  AgentProvider,
-  ExecutableAgent,
-  ExecutableAgentHandlerFn,
-  ExecutableAgentHandlerParams,
-  AgentRegistry,
 } from './agents';
