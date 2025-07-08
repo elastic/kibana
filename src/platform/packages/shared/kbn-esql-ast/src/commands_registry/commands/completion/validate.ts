@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLAstCompletionCommand, ESQLCommand, ESQLMessage } from '../../../types';
 import type { ICommandContext } from '../../types';
 import { getExpressionType } from '../../../definitions/utils/expressions';
+import { validateCommandArguments } from '../../../definitions/utils/validation/validate_command_arguments';
 
 const supportedPromptTypes = ['text', 'keyword', 'unknown', 'param'];
 
@@ -40,6 +41,17 @@ export const validate = (
       code: 'completionUnsupportedFieldType',
     });
   }
+
+  messages.push(
+    ...validateCommandArguments(
+      command,
+      ast,
+      context ?? {
+        userDefinedColumns: new Map(), // Ensure context is always defined
+        fields: new Map(),
+      }
+    )
+  );
 
   const targetName = targetField?.name || 'completion';
 

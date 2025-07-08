@@ -8,9 +8,15 @@
  */
 import { i18n } from '@kbn/i18n';
 import { isColumn } from '../../../ast/is';
-import type { ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
+import type { ESQLAst, ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
+import { validateCommandArguments } from '../../../definitions/utils/validation/validate_command_arguments';
+import { ICommandContext } from '../../types';
 
-export const validate = (command: ESQLCommand): ESQLMessage[] => {
+export const validate = (
+  command: ESQLCommand,
+  ast: ESQLAst,
+  context?: ICommandContext
+): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const wildcardItems = command.args.filter((arg) => isColumn(arg) && arg.name === '*');
   if (wildcardItems.length) {
@@ -36,5 +42,16 @@ export const validate = (command: ESQLCommand): ESQLMessage[] => {
       code: 'dropTimestampWarning',
     });
   }
+
+  messages.push(
+    ...validateCommandArguments(
+      command,
+      ast,
+      context ?? {
+        userDefinedColumns: new Map(), // Ensure context is always defined
+        fields: new Map(),
+      }
+    )
+  );
   return messages;
 };

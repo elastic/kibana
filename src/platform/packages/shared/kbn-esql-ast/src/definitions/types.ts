@@ -126,6 +126,8 @@ export enum FunctionDefinitionTypes {
   GROUPING = 'grouping',
 }
 
+export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
+
 /**
  * This is the type of a parameter in a function definition.
  */

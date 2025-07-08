@@ -9,6 +9,9 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { ICommandContext } from '../../types';
+import { validateCommandArguments } from '../../../definitions/utils/validation/validate_command_arguments';
+import { esqlCommandRegistry } from '../..';
+import { errors } from '../../../definitions/utils';
 
 export const validate = (
   command: ESQLCommand,
@@ -26,6 +29,38 @@ export const validate = (
       type: 'error',
       code: 'forkTooFewBranches',
     });
+  }
+
+  messages.push(
+    ...validateCommandArguments(
+      command,
+      ast,
+      context ?? {
+        userDefinedColumns: new Map(),
+        fields: new Map(),
+      }
+    )
+  );
+  for (const arg of command.args.flat()) {
+    if (!Array.isArray(arg) && arg.type === 'query') {
+      // all the args should be commands
+      arg.commands.forEach((subCommand) => {
+        const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
+        const validationMessages = subCommandMethods?.validate?.(subCommand, ast, context);
+        messages.push(...(validationMessages || []));
+      });
+    }
+  }
+
+  let seenFork = false;
+  for (const [_, astCommand] of ast.entries()) {
+    if (astCommand.name === 'fork') {
+      if (seenFork) {
+        messages.push(errors.tooManyForks(astCommand));
+      } else {
+        seenFork = true;
+      }
+    }
   }
 
   context?.fields.set('_fork', {

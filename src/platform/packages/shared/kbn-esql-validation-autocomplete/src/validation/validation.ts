@@ -175,15 +175,7 @@ async function validateAst(
     query: queryString,
     joinIndices: joinIndices?.indices || [],
   };
-  let seenFork = false;
   for (const [index, command] of ast.entries()) {
-    if (command.name === 'fork') {
-      if (seenFork) {
-        messages.push(errors.tooManyForks(command));
-      } else {
-        seenFork = true;
-      }
-    }
     const commandMessages = validateCommand(command, references, ast, index);
     messages.push(...commandMessages);
   }
@@ -231,18 +223,6 @@ function validateCommand(
   }
 
   switch (commandDefinition.name) {
-    case 'join':
-      break;
-    case 'fork': {
-      for (const arg of command.args.flat()) {
-        if (!Array.isArray(arg) && arg.type === 'query') {
-          // all the args should be commands
-          arg.commands.forEach((subCommand) => {
-            messages.push(...validateCommand(subCommand, references, ast, currentCommandIndex));
-          });
-        }
-      }
-    }
     default: {
       // Now validate arguments
       for (const arg of command.args) {

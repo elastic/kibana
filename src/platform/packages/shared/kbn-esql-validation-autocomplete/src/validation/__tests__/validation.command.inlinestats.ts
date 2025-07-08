@@ -10,4 +10,5 @@
 import * as helpers from './helpers';
 import { validationStatsCommandTestSuite } from './test_suites/validation.command.stats';
 
+// this runs the STATS tests instead of the INLINESTATS tests :D
 validationStatsCommandTestSuite(helpers.setup);

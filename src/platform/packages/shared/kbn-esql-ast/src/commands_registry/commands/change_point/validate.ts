@@ -11,6 +11,7 @@ import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { isColumn, isOptionNode } from '../../../ast/is';
 import { isNumericType } from '../../../definitions/types';
 import type { ICommandContext } from '../../types';
+import { validateCommandArguments } from '../../../definitions/utils/validation/validate_command_arguments';
 
 export const validate = (
   command: ESQLCommand,
@@ -75,6 +76,17 @@ export const validate = (
       }
     });
   }
+
+  messages.push(
+    ...validateCommandArguments(
+      command,
+      ast,
+      context ?? {
+        userDefinedColumns: new Map(), // Ensure context is always defined
+        fields: new Map(),
+      }
+    )
+  );
 
   return messages;
 };

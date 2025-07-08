@@ -6,11 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAst, ESQLCommand, ESQLMessage, ESQLCommandOption } from '../../../types';
-import { isColumn, isOptionNode } from '../../../ast/is';
+import type {
+  ESQLAst,
+  ESQLCommand,
+  ESQLMessage,
+  ESQLCommandOption,
+  ESQLSource,
+} from '../../../types';
+import { isColumn, isOptionNode, isSource } from '../../../ast/is';
 import type { ICommandContext } from '../../types';
 import { METADATA_FIELDS } from '../../options/metadata';
 import { getMessageFromId } from '../../../definitions/utils';
+import { validateSources } from '../../../definitions/utils/validation/sources_validation';
 
 export const validate = (
   command: ESQLCommand,
@@ -21,13 +28,9 @@ export const validate = (
     (arg) => isOptionNode(arg) && arg.name === 'metadata'
   ) as ESQLCommandOption | undefined;
 
-  if (!metadataStatement) {
-    return [];
-  }
-
   const messages: ESQLMessage[] = [];
 
-  const fields = metadataStatement.args.filter(isColumn);
+  const fields = metadataStatement?.args.filter(isColumn) ?? [];
   for (const field of fields) {
     if (!METADATA_FIELDS.includes(field.name)) {
       messages.push(
@@ -42,5 +45,8 @@ export const validate = (
       );
     }
   }
+  const sources = command.args.filter((arg) => isSource(arg)) as ESQLSource[];
+  messages.push(...validateSources(sources, context));
+
   return messages;
 };

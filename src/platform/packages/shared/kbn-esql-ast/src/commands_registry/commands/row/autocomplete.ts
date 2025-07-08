@@ -12,7 +12,7 @@ import {
   pipeCompleteItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
-} from '../../utils/complete_items';
+} from '../../../definitions/utils/validation/complete_items';
 import { Location } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getFunctionSuggestions } from '../../../definitions/utils';

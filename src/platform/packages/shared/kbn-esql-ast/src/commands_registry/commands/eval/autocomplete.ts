@@ -11,7 +11,7 @@ import {
   pipeCompleteItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
-} from '../../utils/complete_items';
+} from '../../../definitions/utils/validation/complete_items';
 import {
   suggestForExpression,
   getExpressionPosition,

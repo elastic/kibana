@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
 import { ESQL_NUMBER_TYPES } from '../../../definitions/types';
-import { pipeCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem } from '../../../definitions/utils/validation/complete_items';
 import type { ISuggestionItem, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import {

@@ -10,6 +10,7 @@ import { getMessageFromId } from '../../../definitions/utils/errors';
 import type { ESQLSource, ESQLCommand, ESQLMessage, ESQLAst } from '../../../types';
 import { ENRICH_MODES } from './util';
 import type { ESQLPolicy, ICommandContext } from '../../types';
+import { validateCommandArguments } from '../../../definitions/utils/validation/validate_command_arguments';
 
 function hasWildcard(name: string) {
   return /\*/.test(name);
@@ -64,6 +65,17 @@ export const validate = (
       );
     }
   }
+
+  messages.push(
+    ...validateCommandArguments(
+      command,
+      ast,
+      context ?? {
+        userDefinedColumns: new Map(), // Ensure context is always defined
+        fields: new Map(),
+      }
+    )
+  );
 
   return messages;
 };

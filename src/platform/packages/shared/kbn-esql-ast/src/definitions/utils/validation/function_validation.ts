@@ -15,34 +15,39 @@ import {
   ESQLSingleAstItem,
   ESQLLiteral,
   ESQLParamLiteral,
-} from '../../types';
-import { isAssignment, isInlineCast } from '../../ast/is';
+} from '../../../types';
+import { isAssignment, isInlineCast } from '../../../ast/is';
 import {
   UNSUPPORTED_COMMANDS_BEFORE_MATCH,
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-} from '../../definitions/constants';
+} from '../../constants';
 import {
   getMessageFromId,
   errors,
   getFunctionDefinition,
   getColumnForASTNode,
-} from '../../definitions/utils';
+} from '..';
 import {
   FunctionParameter,
   FunctionDefinitionTypes,
   FunctionDefinition,
-} from '../../definitions/types';
-import { buildFunctionLookup, printFunctionSignature } from '../../definitions/utils/functions';
+  FunctionParameterType,
+  ReasonTypes,
+} from '../../types';
+import { getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
+import { buildFunctionLookup, printFunctionSignature } from '../functions';
 import {
   getSignaturesWithMatchingArity,
   getExpressionType,
-} from '../../definitions/utils/expressions';
-import { isArrayType } from '../../definitions/utils/operators';
+  getParamAtPosition,
+} from '../expressions';
+import { isArrayType } from '../operators';
 import {
   compareTypesWithLiterals,
   doesLiteralMatchParameterType,
-} from '../../definitions/utils/literals';
-import { getQuotedColumnName, getColumnExists } from '../../definitions/utils/columns';
+  inKnownTimeInterval,
+} from '../literals';
+import { getQuotedColumnName, getColumnExists } from '../columns';
 import {
   isLiteral,
   isTimeInterval,
@@ -52,8 +57,8 @@ import {
   isIdentifier,
   isParamLiteral,
   isParametrized,
-} from '../../ast/is';
-import { ICommandContext } from '../types';
+} from '../../../ast/is';
+import { ICommandContext } from '../../../commands_registry/types';
 
 export function getAllArrayValues(arg: ESQLAstItem) {
   const values: string[] = [];
@@ -119,6 +124,18 @@ const isParam = (x: unknown): x is ESQLParamLiteral =>
   typeof x === 'object' &&
   (x as ESQLParamLiteral).type === 'literal' &&
   (x as ESQLParamLiteral).literalType === 'param';
+
+/**
+ * Checks if both types are string types.
+ *
+ * Functions in ES|QL accept `text` and `keyword` types interchangeably.
+ * @param type1
+ * @param type2
+ * @returns
+ */
+function bothStringTypes(type1: string, type2: string): boolean {
+  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
+}
 
 /**
  * Checks if an AST function argument is of the correct type
@@ -259,6 +276,13 @@ export function collapseWrongArgumentTypeMessages(
 
 const isFunctionOperatorParam = (fn: ESQLFunction): boolean =>
   !!fn.operator && isParamLiteral(fn.operator);
+
+/**
+ * Given an array type for example `string[]` it will return `string`
+ */
+function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType {
+  return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
+}
 
 const NO_MESSAGE: ESQLMessage[] = [];
 
@@ -789,7 +813,7 @@ function validateFunctionColumnArg(
 }
 
 function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
-  if (isInlineCastItem(arg)) {
+  if (isInlineCast(arg)) {
     return removeInlineCasts(arg.value);
   }
   return arg;

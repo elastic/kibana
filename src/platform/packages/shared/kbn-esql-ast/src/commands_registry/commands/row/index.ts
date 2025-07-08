@@ -10,9 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { ICommandMethods } from '../../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../../types';
+import { validate } from './validate';
 
 const rowCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
+  validate,
 };
 
 export const rowCommand = {

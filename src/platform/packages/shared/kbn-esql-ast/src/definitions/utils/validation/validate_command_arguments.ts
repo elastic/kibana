@@ -6,24 +6,28 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { isEqual } from 'lodash';
 import {
   isFunctionExpression,
   isOptionNode,
   isColumn,
   isIdentifier,
   isTimeInterval,
-} from '../../ast/is';
+} from '../../../ast/is';
 import { validateFunction } from './function_validation';
-import { getMessageFromId } from '../../definitions/utils/errors';
-import { ESQLAst, ESQLCommand, ESQLMessage } from '../../types';
-import { ICommandContext } from '../types';
+import { validateOption } from './option_validation';
+import { validateColumnForCommand } from './column_validation';
+import { errors } from '../errors';
+import { getMessageFromId } from '../errors';
+import { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import { ICommandContext } from '../../../commands_registry/types';
 
 export const validateCommandArguments = (
   command: ESQLCommand,
   ast: ESQLAst,
-  currentCommandIndex: number,
   context: ICommandContext
 ) => {
+  const currentCommandIndex = ast.findIndex((astCommand) => isEqual(astCommand, command));
   const messages: ESQLMessage[] = [];
   for (const arg of command.args) {
     if (!Array.isArray(arg)) {
