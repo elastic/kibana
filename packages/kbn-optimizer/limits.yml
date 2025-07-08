@@ -42,10 +42,10 @@ pageLoadAssetSize:
   elasticAssistant: 279115
   elasticAssistantSharedState: 19295
   embeddable: 24000
-  embeddableAlertsTable: 19615
+  embeddableAlertsTable: 7000
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
-  esql: 37000
+  esql: 10000
   esqlDataGrid: 24582
   esUiShared: 326654
   eventAnnotation: 30000
