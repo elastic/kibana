@@ -11,7 +11,6 @@ Object {
           "type": "keyword",
         },
       },
-      "type": "object",
     },
     "amap": Object {
       "properties": Object {
