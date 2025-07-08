@@ -332,6 +332,12 @@ export class CstToAstConverter {
       return this.fromRrfCommand(rrfCommandCtx);
     }
 
+    const fuseCommandCtx = ctx.fuseCommand();
+
+    if (fuseCommandCtx) {
+      return this.fromFuseCommand(fuseCommandCtx);
+    }
+
     const forkCommandCtx = ctx.forkCommand();
 
     if (forkCommandCtx) {
@@ -783,6 +789,14 @@ export class CstToAstConverter {
 
   private fromRrfCommand(ctx: cst.RrfCommandContext): ast.ESQLCommand<'rrf'> {
     const command = this.createCommand('rrf', ctx);
+
+    return command;
+  }
+
+  // --------------------------------------------------------------------- FUSE
+
+  private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLCommand<'fuse'> {
+    const command = this.createCommand('fuse', ctx);
 
     return command;
   }
