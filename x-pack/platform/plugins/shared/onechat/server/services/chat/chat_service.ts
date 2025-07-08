@@ -35,7 +35,6 @@ import {
   isOnechatError,
   createInternalError,
 } from '@kbn/onechat-common';
-import type { ExecutableAgent } from '@kbn/onechat-server';
 import { getConnectorList, getDefaultConnector } from '../runner/utils';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
@@ -127,9 +126,10 @@ class ChatServiceImpl implements ChatService {
 
     return forkJoin({
       conversationClient: defer(async () => this.conversationService.getScopedClient({ request })),
-      agent: defer(async () =>
-        this.agentService.registry.asPublicRegistry().get({ agentId, request })
-      ),
+      agent: defer(async () => {
+        const agentClient = await this.agentService.getScopedClient({ request });
+        return agentClient.get(agentId);
+      }),
       chatModel: defer(async () => {
         if (connectorId) {
           return connectorId;
@@ -153,7 +153,14 @@ class ChatServiceImpl implements ChatService {
           conversationId,
           conversationClient,
         });
-        const agentEvents$ = getExecutionEvents$({ agent, mode, conversation$, nextInput });
+        const agentEvents$ = getExecutionEvents$({
+          agentId,
+          request,
+          mode,
+          conversation$,
+          nextInput,
+          agentService: this.agentService,
+        });
 
         const title$ = isNewConversation
           ? generatedTitle$({ chatModel, conversation$, nextInput })
@@ -283,21 +290,27 @@ const updateConversation$ = ({
 };
 
 const getExecutionEvents$ = ({
+  agentId,
+  request,
+  agentService,
   conversation$,
   mode,
   nextInput,
-  agent,
 }: {
+  agentId: string;
+  request: KibanaRequest;
+  agentService: AgentsServiceStart;
   conversation$: Observable<Conversation>;
   mode: AgentMode;
   nextInput: RoundInput;
-  agent: ExecutableAgent;
 }): Observable<ChatAgentEvent> => {
   return conversation$.pipe(
     switchMap((conversation) => {
       return new Observable<ChatAgentEvent>((observer) => {
-        agent
+        agentService
           .execute({
+            request,
+            agentId,
             agentParams: {
               agentMode: mode,
               nextInput,

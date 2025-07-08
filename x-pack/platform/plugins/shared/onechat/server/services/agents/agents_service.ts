@@ -10,8 +10,6 @@ import type { SecurityServiceStart, ElasticsearchServiceStart } from '@kbn/core/
 import type { Runner } from '@kbn/onechat-server';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import type { ToolsServiceStart } from '../tools';
-import { createInternalRegistry } from './utils';
-import { createDefaultAgentProvider, creatProfileProvider } from './providers';
 import { createClient } from './client';
 
 export interface AgentsServiceSetupDeps {
@@ -41,7 +39,7 @@ export class AgentsService {
     const { logger } = this.setupDeps;
     const { getRunner, security, elasticsearch, toolsService } = startDeps;
 
-    const getScopedClient: AgentsServiceStart['getScopedClient'] = (request) => {
+    const getScopedClient: AgentsServiceStart['getScopedClient'] = ({ request }) => {
       return createClient({
         request,
         toolsService,
@@ -51,17 +49,7 @@ export class AgentsService {
       });
     };
 
-    // TODO - only one - persisted agent provider
-    const defaultAgentProvider = createDefaultAgentProvider();
-    const profileAgentsProvider = creatProfileProvider({ getScopedClient });
-
-    const registry = createInternalRegistry({
-      providers: [defaultAgentProvider, profileAgentsProvider],
-      getRunner,
-    });
-
     return {
-      registry,
       getScopedClient,
       execute: async (args) => {
         return getRunner().runAgent(args);

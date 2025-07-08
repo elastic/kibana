@@ -54,7 +54,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
-        const service = await agents.getScopedClient(request);
+        const service = await agents.getScopedClient({ request });
         const agentProfiles = await service.list();
         return response.ok<ListAgentResponse>({ body: { agentProfiles } });
       })
@@ -86,7 +86,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
-        const service = await agents.getScopedClient(request);
+        const service = await agents.getScopedClient({ request });
 
         const profile = await service.get(request.params.id);
         return response.ok<GetAgentResponse>({ body: profile });
@@ -129,7 +129,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
-        const service = await agents.getScopedClient(request);
+        const service = await agents.getScopedClient({ request });
         const profile = await service.create(request.body);
         return response.ok<CreateAgentResponse>({ body: profile });
       })
@@ -173,7 +173,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
-        const service = await agents.getScopedClient(request);
+        const service = await agents.getScopedClient({ request });
         const update = { id: request.params.id, ...request.body };
         const profile = await service.update(update);
         return response.ok<UpdateAgentResponse>({ body: profile });
@@ -206,7 +206,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { agents } = getInternalServices();
-        const service = await agents.getScopedClient(request);
+        const service = await agents.getScopedClient({ request });
 
         const result = await service.delete({ id: request.params.id });
         return response.ok<DeleteAgentResponse>({

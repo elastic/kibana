@@ -13,9 +13,8 @@ import type { AgentClient } from './client';
 export interface AgentsServiceSetup {}
 
 export interface AgentsServiceStart {
-  registry: InternalAgentRegistry;
   execute: RunAgentFn;
-  getScopedClient: (request: KibanaRequest) => Promise<AgentClient>;
+  getScopedClient: (opts: { request: KibanaRequest }) => Promise<AgentClient>;
 }
 
 // TODO: we can probably cleanup some of those.

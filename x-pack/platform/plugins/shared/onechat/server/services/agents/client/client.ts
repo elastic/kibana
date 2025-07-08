@@ -7,29 +7,31 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type {
-  SecurityServiceStart,
   ElasticsearchServiceStart,
   KibanaRequest,
   Logger,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import {
-  type UserIdAndName,
   type AgentDefinition,
-  type ToolSelection,
+  AgentType,
   createAgentNotFoundError,
   createBadRequestError,
   isAgentNotFoundError,
   oneChatDefaultAgentId,
+  allToolsSelectionWildcard as allTools,
+  type ToolSelection,
+  type UserIdAndName,
 } from '@kbn/onechat-common';
 import type {
-  AgentListOptions,
   AgentCreateRequest,
-  AgentUpdateRequest,
   AgentDeleteRequest,
+  AgentListOptions,
+  AgentUpdateRequest,
 } from '../../../../common/agents';
 import type { ToolsServiceStart } from '../../tools';
 import { AgentProfileStorage, createStorage } from './storage';
-import { fromEs, createRequestToEs, updateProfile, type Document } from './converters';
+import { createRequestToEs, type Document, fromEs, updateProfile } from './converters';
 import { ensureValidId, validateToolSelection } from './utils';
 
 export interface AgentClient {
@@ -95,6 +97,10 @@ class AgentClientImpl implements AgentClient {
       document = await this.storage.getClient().get({ id: agentId });
     } catch (e) {
       if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
+        // if the config for the default agent isn't persisted, we return the default definition
+        if (agentId === oneChatDefaultAgentId) {
+          return createDefaultAgentDefinition();
+        }
         throw createAgentNotFoundError({ agentId });
       } else {
         throw e;
@@ -109,6 +115,11 @@ class AgentClientImpl implements AgentClient {
   }
 
   async has(agentId: string): Promise<boolean> {
+    // default agent is always present
+    if (agentId === oneChatDefaultAgentId) {
+      return true;
+    }
+
     try {
       await this.get(agentId);
       return true;
@@ -130,7 +141,14 @@ class AgentClientImpl implements AgentClient {
       },
     });
 
-    return response.hits.hits.map((hit) => fromEs(hit as Document));
+    const agents = response.hits.hits.map((hit) => fromEs(hit as Document));
+
+    // if default agent not in the list, we add the definition
+    if (!agents.find((a) => a.id === oneChatDefaultAgentId)) {
+      agents.unshift(createDefaultAgentDefinition());
+    }
+
+    return agents;
   }
 
   async create(profile: AgentCreateRequest): Promise<AgentDefinition> {
@@ -158,11 +176,18 @@ class AgentClientImpl implements AgentClient {
   }
 
   async update(profileUpdate: AgentUpdateRequest): Promise<AgentDefinition> {
+    const agentId = profileUpdate.id;
+
+    // temporary, until we enable default agent update
+    if (agentId === oneChatDefaultAgentId) {
+      throw createBadRequestError(`Default agent cannot be updated.`);
+    }
+
     const now = new Date();
-    const document = await this.storage.getClient().get({ id: profileUpdate.id });
+    const document = await this.storage.getClient().get({ id: agentId });
 
     if (!hasAccess({ profile: document, user: this.user })) {
-      throw createAgentNotFoundError({ agentId: profileUpdate.id });
+      throw createAgentNotFoundError({ agentId });
     }
 
     if (profileUpdate.configuration?.tools) {
@@ -185,6 +210,11 @@ class AgentClientImpl implements AgentClient {
 
   async delete(options: AgentDeleteRequest): Promise<boolean> {
     const { id } = options;
+
+    if (id === oneChatDefaultAgentId) {
+      throw createBadRequestError(`Default agent cannot be deleted.`);
+    }
+
     let document: Document;
     try {
       document = await this.storage.getClient().get({ id });
@@ -234,6 +264,18 @@ class AgentClientImpl implements AgentClient {
     }
   }
 }
+
+const createDefaultAgentDefinition = (): AgentDefinition => {
+  return {
+    id: oneChatDefaultAgentId,
+    type: AgentType.chat,
+    name: 'Onechat default agent',
+    description: 'The default onechat agent',
+    configuration: {
+      tools: [{ tool_ids: [allTools] }],
+    },
+  };
+};
 
 const hasAccess = ({
   profile,

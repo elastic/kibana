@@ -11,6 +11,7 @@ import type {
   RunAgentReturn,
 } from '@kbn/onechat-server';
 import { internalProviderToPublic } from '../tools/utils';
+import { createAgentHandler } from '../agents/modes/create_handler';
 import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
 import type { RunnerManager } from './runner';
 
@@ -51,9 +52,12 @@ export const runAgent = async ({
   const manager = parentManager.createChild(context);
 
   const { agentsService, request } = manager.deps;
-  const agent = await agentsService.registry.get({ agentId, request });
+  const agentClient = await agentsService.getScopedClient({ request });
+  const agent = await agentClient.get(agentId);
+  const agentHandler = createAgentHandler({ agent });
+
   const agentHandlerContext = createAgentHandlerContext({ agentExecutionParams, manager });
-  const agentResult = await agent.handler(
+  const agentResult = await agentHandler(
     {
       runId: manager.context.runId,
       agentParams,
