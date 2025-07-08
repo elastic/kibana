@@ -8269,7 +8269,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/workflows-plugin@link:src/platform/plugins/shared/workflows":
+"@kbn/workflows-execution-engine@link:src/platform/plugins/shared/workflows_execution_engine":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-management-plugin@link:src/platform/plugins/shared/workflows_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
   version "0.0.0"
   uid ""
 
