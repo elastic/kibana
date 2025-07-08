@@ -12,9 +12,9 @@ import type {
 } from '@kbn/transform-plugin/common/types/transform';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getCommonRequestHeader } from '@kbn/test-suites-xpack-platform/functional/services/ml/common_api';
+import { USER } from '@kbn/test-suites-xpack-platform/functional/services/transform/security_common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getLatestTransformConfig, getPivotTransformConfig } from '../helpers';
-import { USER } from '../../../services/transform/security_common';
 
 interface TestDataPivot {
   suiteTitle: string;

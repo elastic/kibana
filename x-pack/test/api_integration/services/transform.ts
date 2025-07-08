@@ -7,10 +7,10 @@
 
 import { MachineLearningAPIProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 import { MachineLearningTestResourcesProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml/test_resources';
-import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
-import { TransformAPIProvider } from '../../functional/services/transform/api';
-import { TransformSecurityCommonProvider } from '../../functional/services/transform/security_common';
+import { TransformAPIProvider } from '@kbn/test-suites-xpack-platform/functional/services/transform/api';
+import { TransformSecurityCommonProvider } from '@kbn/test-suites-xpack-platform/functional/services/transform/security_common';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export function TransformProvider(context: FtrProviderContext) {
   const api = TransformAPIProvider(context);
