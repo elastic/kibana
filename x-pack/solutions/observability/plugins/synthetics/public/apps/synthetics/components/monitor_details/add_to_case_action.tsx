@@ -127,7 +127,7 @@ function AddToCaseButtonContent() {
   return (
     <EuiContextMenuItem
       key="addToCase"
-      data-test-subj="sloAddToCaseButton"
+      data-test-subj="syntheticsMonitorAddToCaseButton"
       icon="plusInCircle"
       onClick={onClick}
     >
