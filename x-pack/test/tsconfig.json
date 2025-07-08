@@ -99,7 +99,6 @@
     "@kbn/uptime-plugin",
     "@kbn/ml-category-validator",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/es",
     "@kbn/metrics-data-access-plugin",
     "@kbn/dataset-quality-plugin",
     "@kbn/io-ts-utils",
@@ -120,8 +119,6 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/osquery-plugin",
-    "@kbn/mock-idp-utils",
-    "@kbn/saved-objects-management-plugin",
     "@kbn/alerting-types",
     "@kbn/ai-assistant-common",
     "@kbn/core-deprecations-common",
@@ -143,7 +140,6 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
-    "@kbn/intercepts-plugin",
     "@kbn/core-provider-plugin",
   ]
 }
