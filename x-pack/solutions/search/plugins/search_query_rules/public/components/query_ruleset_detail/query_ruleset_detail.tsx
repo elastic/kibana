@@ -173,6 +173,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
       `}
       key="delete"
       icon="trash"
+      disabled={createMode || isInitialLoading}
       onClick={() => setRulesetToDelete(rulesetId)}
       data-test-subj="queryRulesetDetailDeleteButton"
     >
@@ -359,7 +360,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                     color="primary"
                     data-test-subj="queryRulesetDetailHeaderSaveButton"
                     onClick={handleSave}
-                    disabled={!isFormDirty || isInitialLoading}
+                    disabled={!isFormDirty || isInitialLoading || rules.length === 0}
                   >
                     <FormattedMessage
                       id="xpack.queryRules.queryRulesetDetail.saveButton"
@@ -372,6 +373,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                     id={splitButtonPopoverActionsId}
                     button={
                       <EuiButtonIcon
+                        disabled={createMode || isInitialLoading || rules.length === 0}
                         data-test-subj="searchQueryRulesQueryRulesetActionsButton"
                         size="m"
                         iconType="boxesVertical"
