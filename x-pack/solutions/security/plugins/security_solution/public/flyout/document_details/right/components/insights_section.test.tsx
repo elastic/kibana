@@ -29,7 +29,6 @@ import { useAlertPrevalence } from '../../shared/hooks/use_alert_prevalence';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 
 jest.mock('../../shared/hooks/use_alert_prevalence');
 
@@ -97,11 +96,6 @@ jest.mock('../hooks/use_fetch_threat_intelligence');
 
 jest.mock('../../shared/hooks/use_prevalence');
 
-const mockUseTourContext = useTourContext as jest.Mock;
-jest.mock('../../../../common/components/guided_onboarding_tour', () => ({
-  useTourContext: jest.fn().mockReturnValue({ activeStep: 1, isTourShown: jest.fn(() => true) }),
-}));
-
 const renderInsightsSection = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
@@ -158,20 +152,6 @@ describe('<InsightsSection />', () => {
 
   it('should render the component expanded if value is true in local storage', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
-
-    const contextValue = {
-      eventId: 'some_Id',
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-      getFieldsData: mockGetFieldsData,
-    } as unknown as DocumentDetailsContext;
-
-    const wrapper = renderInsightsSection(contextValue);
-    expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).toBeVisible();
-  });
-
-  it('should render the component expanded if guided onboarding tour is shown', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(false);
-    mockUseTourContext.mockReturnValue({ activeStep: 5, isTourShown: jest.fn(() => true) });
 
     const contextValue = {
       eventId: 'some_Id',

@@ -16,8 +16,6 @@ import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
-import { TourContextProvider } from '../../common/components/guided_onboarding_tour';
-
 import { useUrlState } from '../../common/hooks/use_url_state';
 import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
 import { useUpdateExecutionContext } from '../../common/hooks/use_update_execution_context';
@@ -37,7 +35,6 @@ interface HomePageProps {
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const { pathname } = useLocation();
   const sourcererScope = getScopeFromPath(pathname);
   const { browserFields: oldBrowserFields } = useInitSourcerer(sourcererScope);
@@ -64,16 +61,12 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   return (
     <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">
       <ConsoleManager>
-        <TourContextProvider>
-          <>
-            <GlobalHeader />
-            <DragDropContextWrapper browserFields={browserFields}>
-              {children}
-            </DragDropContextWrapper>
-            <HelpMenu />
-            <TopValuesPopover />
-          </>
-        </TourContextProvider>
+        <>
+          <GlobalHeader />
+          <DragDropContextWrapper browserFields={browserFields}>{children}</DragDropContextWrapper>
+          <HelpMenu />
+          <TopValuesPopover />
+        </>
       </ConsoleManager>
     </SecuritySolutionAppWrapper>
   );
@@ -81,4 +74,4 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
 
 HomePageComponent.displayName = 'HomePage';
 
-export const HomePage = React.memo(HomePageComponent);
+export const HomePage = HomePageComponent;

@@ -9,17 +9,12 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TableId } from '@kbn/securitysolution-data-table';
+// import { TableId } from '@kbn/securitysolution-data-table';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
-import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding_tour/tour_step';
-import {
-  AlertsCasesTourSteps,
-  SecurityStepId,
-} from '../../../../common/components/guided_onboarding_tour/tour_config';
-import { isActiveTimeline } from '../../../../helpers';
+// import { isActiveTimeline } from '../../../../helpers';
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
@@ -28,7 +23,7 @@ import { useResponderActionItem } from '../../../../common/components/endpoint/r
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
+// import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getOsqueryActionItem } from '../../../../detections/components/osquery/osquery_action_item';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
@@ -134,9 +129,7 @@ export const TakeActionDropdown = memo(
     const closePopoverHandler = useCallback(() => {
       setIsPopoverOpen(false);
     }, []);
-    const onMenuItemClick = useCallback(() => {
-      closePopoverHandler();
-    }, [closePopoverHandler]);
+
     const closePopoverAndFlyout = useCallback(() => {
       handleOnEventClosed();
       setIsPopoverOpen(false);
@@ -302,21 +295,6 @@ export const TakeActionDropdown = memo(
       ]
     );
 
-    // cases interaction
-    const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
-      scopeId as TableId
-    );
-    const { addToCaseActionItems, handleAddToNewCaseClick } = useAddToCaseActions({
-      ecsData: dataAsNestedObject,
-      nonEcsData:
-        dataFormattedForFieldBrowser?.map((d) => ({ field: d.field, value: d.values })) ?? [],
-      onMenuItemClick,
-      onSuccess: refetchFlyoutData,
-      isActiveTimelines: isActiveTimeline(scopeId),
-      isInDetections,
-      refetch,
-    });
-
     // responder action items
     const endpointResponseActionsConsoleItems = useResponderActionItem(
       dataFormattedForFieldBrowser,
@@ -326,7 +304,6 @@ export const TakeActionDropdown = memo(
     // items to render in the dropdown
     const items: AlertTableContextMenuItem[] = useMemo(
       () => [
-        ...addToCaseActionItems,
         ...alertsActionItems,
         ...hostIsolationActionItems,
         ...endpointResponseActionsConsoleItems,
@@ -334,7 +311,6 @@ export const TakeActionDropdown = memo(
         ...investigateInTimelineActionItems,
       ],
       [
-        addToCaseActionItems,
         alertsActionItems,
         hostIsolationActionItems,
         endpointResponseActionsConsoleItems,
@@ -356,24 +332,18 @@ export const TakeActionDropdown = memo(
 
     const takeActionButton = useMemo(
       () => (
-        <GuidedOnboardingTourStep
-          onClick={handleAddToNewCaseClick}
-          step={AlertsCasesTourSteps.addAlertToCase}
-          tourId={SecurityStepId.alertsCases}
+        <EuiButton
+          data-test-subj={FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}
+          fill
+          iconSide="right"
+          iconType="arrowDown"
+          onClick={togglePopoverHandler}
         >
-          <EuiButton
-            data-test-subj={FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}
-            fill
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={togglePopoverHandler}
-          >
-            {TAKE_ACTION}
-          </EuiButton>
-        </GuidedOnboardingTourStep>
+          {TAKE_ACTION}
+        </EuiButton>
       ),
 
-      [handleAddToNewCaseClick, togglePopoverHandler]
+      [togglePopoverHandler]
     );
 
     return items.length && dataAsNestedObject ? (

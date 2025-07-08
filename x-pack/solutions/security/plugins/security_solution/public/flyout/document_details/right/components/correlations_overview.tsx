@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
@@ -28,11 +28,6 @@ import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { isActiveTimeline } from '../../../../helpers';
-import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
-import {
-  AlertsCasesTourSteps,
-  SecurityStepId,
-} from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 /**
@@ -43,7 +38,6 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
 export const CorrelationsOverview: React.FC = () => {
   const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview, isPreviewMode } =
     useDocumentDetailsContext();
-  const { isTourShown, activeStep } = useTourContext();
 
   const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
 
@@ -52,12 +46,6 @@ export const CorrelationsOverview: React.FC = () => {
       tab: LeftPanelInsightsTab,
       subTab: CORRELATIONS_TAB_ID,
     });
-
-  useEffect(() => {
-    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.createCase) {
-      goToCorrelationsTab();
-    }
-  }, [activeStep, goToCorrelationsTab, isTourShown]);
 
   const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
