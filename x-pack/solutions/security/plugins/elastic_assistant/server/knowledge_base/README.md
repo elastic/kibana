@@ -36,20 +36,20 @@ The content is often delivered to us as a zip of `.mdx` files that are in kebab 
 
 1. Delete all existing files in the `x-pack/solutions/security/plugins/elastic_assistant/server/knowledge_base/security_labs` to ensure any removed articles are not left behind.
 
-```
+```bash
 cd x-pack/solutions/security/plugins/elastic_assistant/server/knowledge_base/security_labs
 rm -rf ./*
 ```
 
 2. Extract the zip of `.mdx` files into the same directory
 3. Remove `callout_example.md` if present, this was a leftover example document
-3. Open your terminal to this directory and run this script to convert the files to the required format:
+4. Open your terminal to this directory and run this script to convert the files to the required format:
 
-```
+```bash
 for f in *; do [ -f "$f" ] && n=$(echo "$f" | sed 's/-/_/g' | tr '[:upper:]' '[:lower:]') && n="${n%.mdx}.${n##*.}" && [ "${n##*.}" = "mdx" ] && n="${n%.mdx}.md" && [ "$f" != "$n" ] && mv "$f" "$n" && echo "Renamed: $f -> $n"; done
 ```
 
-After adding new articles run the following to create the encoded article:
+5. Run the following to create the encoded articles:
 
 ```bash
 cd x-pack/solutions/security/plugins/elastic_assistant
