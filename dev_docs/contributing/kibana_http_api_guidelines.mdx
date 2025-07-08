@@ -61,14 +61,14 @@ GET /api/resource_bs?page=1
 ```
 
 <DocCallOut title="Internal vs Public APIs">
-  To further reinforce these different purposes Kibana HTTP APIs serve, we categorize them as either **internal** or **public**. See the [Internal vs Public APIs](#internal-vs-public-apis) section for more details.
+  We categorize HTTP APIs as either **internal** or **public** to further reinforce the different purposes they serve. See the [Internal vs Public APIs](#internal-vs-public-apis) section for more details.
 </DocCallOut>
 
 ### Commitment
 
 Exposing a public HTTP API is a long-term commitment to users and is not easily reversible. We must carefully design and plan APIs before they are made public, and then maintain them and ensure they work as expected.
 
-First release new HTTP APIs internally or as `Technical Preview` behind a feature flag to ensure we aren't breaking our stability promises to users if the API needs to change while in development.
+First release new HTTP APIs internally or as `Technical Preview` behind a <DocLink id="kibFeatureFlagsService" text="feature flag" /> to ensure we aren't breaking our stability promises to users if the API needs to change while in development.
 
 #### Breaking changes to HTTP APIs include
 
@@ -90,7 +90,7 @@ First release new HTTP APIs internally or as `Technical Preview` behind a featur
 
 ## Internal vs Public APIs
 
-Public HTTP APIs are those that are exposed to users and are used by plugins and external tools. They are the focus of this document.
+Public HTTP APIs are exposed to users. They are also used by plugins and external tools. They are the focus of this document.
 
 Internal HTTP APIs are only used by code Elastic owns, like the UI. By default, when you register a new HTTP API it will be classified as `internal`. For example, this API is internal:
 
