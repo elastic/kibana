@@ -150,21 +150,6 @@ export function ChatTimeline({
     services: { uiSettings },
   } = useKibana();
 
-  const { anonymizationEnabled } = useMemo(() => {
-    // the response is JSON but will be a string while the setting is hidden temporarily (unregistered)
-    const anonymizationRulesSettingsStr = uiSettings?.get<string | undefined>(
-      aiAssistantAnonymizationSettings,
-      JSON.stringify({ rules: [] })
-    );
-
-    const settings = anonymizationRulesSettingsStr
-      ? (JSON.parse(anonymizationRulesSettingsStr) as AnonymizationSettings)
-      : undefined;
-
-    return {
-      anonymizationEnabled: settings && settings.rules.some((rule) => rule.enabled),
-    };
-  }, [uiSettings]);
   const { euiTheme } = useEuiTheme();
 
   const stickyCalloutContainerClassName = css`
@@ -176,6 +161,20 @@ export function ChatTimeline({
       display: none;
     }
   `;
+
+  const { anonymizationEnabled } = useMemo(() => {
+    const settings = uiSettings?.get<AnonymizationSettings | undefined>(
+      aiAssistantAnonymizationSettings
+    );
+
+    if (!settings) {
+      return { anonymizationEnabled: false };
+    }
+
+    return {
+      anonymizationEnabled: settings.rules.some((rule) => rule.enabled),
+    };
+  }, [uiSettings]);
 
   const items = useMemo(() => {
     const timelineItems = getTimelineItemsfromConversation({

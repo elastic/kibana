@@ -47,8 +47,7 @@ export class InferencePlugin
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
-    const { [aiAssistantAnonymizationSettings]: anonymizationRules, ...restSettings } = uiSettings;
-    coreSetup.uiSettings.register(restSettings);
+    coreSetup.uiSettings.register(uiSettings);
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -72,8 +71,15 @@ export class InferencePlugin
         return [];
       }
 
-      return (JSON.parse(settingsStr) as AnonymizationSettings).rules;
+      try {
+        const settings = JSON.parse(settingsStr) as AnonymizationSettings;
+        return settings.rules || [];
+      } catch (error) {
+        this.logger.error('Failed to parse anonymization settings:', error);
+        return [];
+      }
     };
+
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         return createInferenceClient({
