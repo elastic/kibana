@@ -62,5 +62,17 @@ export default function ({ getService }: FtrProviderContext) {
         'datasetQuality.degradedDocs',
       ]);
     });
+
+    it('does not register annotations API', async () => {
+      await supertestAdminWithCookieCredentials
+        .post('/api/observability/annotation')
+        .send({})
+        .set(svlCommonApi.getInternalRequestHeader())
+        .expect(404, {
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Not Found',
+        });
+    });
   });
 }
