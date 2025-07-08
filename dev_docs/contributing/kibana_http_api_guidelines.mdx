@@ -389,6 +389,32 @@ Utilities for working with KQL queries are available in the `@kbn/es-query` pack
 }
 ```
 
+### Bulk operations
+
+Resources collections with 10,000+ instances should consider supporting bulk operations.
+
+```
+POST /api/resources/_bulk
+```
+
+That accepts an array of operations:
+
+```json
+[
+  { "create": { "id": "1", "name": "New resource" } },
+  { "update": { "id": "2", "name": "Updated resource" } },
+  { "delete": { "id": "1" } },
+]
+```
+
+And either returns a task ID for tracking long running executions or a response with the result of the bulk operation.
+
+<DocCallOut title="Bulk operations against Elasticsearch are not atomic" color="warning">
+  Bulk operations are not atomic. If an operation fails, the previous operations will not be rolled back automatically.
+
+  Bulk operations add complexity, ensure that your use case merits the added complexity. Reach out to the Kibana Core team for more guidance.
+</DocCallOut>
+
 ### Observability
 
 Consider common error states your API might face, as well the information you might need to answer unexpected questions about the behavior of the API. To this end, creating a dedicated logger could be a good idea.
