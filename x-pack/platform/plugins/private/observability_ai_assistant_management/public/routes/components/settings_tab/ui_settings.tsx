@@ -10,6 +10,7 @@ import {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantPreferredAIAssistantType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { isEmpty } from 'lodash';
@@ -33,6 +34,7 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
   const settingsKeys = [
     aiAssistantSimulatedFunctionCalling,
     ...(knowledgeBase.status.value?.enabled ? [aiAssistantSearchConnectorIndexPattern] : []),
+    ...(config.visibilityEnabled ? [aiAssistantPreferredAIAssistantType] : []),
   ];
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
