@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
       if (basic) {
         this.tags('skipFIPS');
       }
-      
+
       it('silently skips ML rules in ALL_RULES mode', async () => {
         await setUpRuleUpgrade({
           assets: {
@@ -117,8 +117,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
           });
         });
-      })
-
+      });
 
       describe('upgrades successfully', function () {
         it('if current rule is an ML rule, but target is a non-ML rule', async () => {
