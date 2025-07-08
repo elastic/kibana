@@ -21,8 +21,7 @@ import {
 } from '@kbn/unified-data-table';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { difference, intersection } from 'lodash';
-import times from 'lodash/times';
+import { difference, intersection, times } from 'lodash';
 import { KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './value_input_control';
 import { AddColumnHeader } from './add_column_header';

@@ -190,28 +190,7 @@ export class IndexUpdateService {
   );
 
   private _pendingColumnsToBeSaved$ = new BehaviorSubject<ColumnAddition[]>([]);
-  public readonly pendingColumnsToBeSaved$: Observable<ColumnAddition[]> = this.actions$.pipe(
-    scan((acc: ColumnAddition[], action) => {
-      if (action.type === 'add-column') {
-        return [...acc, action.payload];
-      }
-      if (action.type === 'saved') {
-        // Filter out columns that were saved with a value
-        return acc.filter((column) =>
-          action.payload.updates.every((update) => update.value[column.name] === undefined)
-        );
-      }
-      if (action.type === 'new-row-added') {
-        // Filter out columns that were populated when adding a new row
-        return acc.filter((column) => action.payload[column.name] === undefined);
-      }
-      if (action.type === 'discard-unsaved-columns') {
-        return [];
-      }
-      return acc;
-    }, []),
-    shareReplay({ bufferSize: 1, refCount: true })
-  );
+  public readonly pendingColumnsToBeSaved$ = this._pendingColumnsToBeSaved$.asObservable();
 
   public readonly dataTableColumns$: Observable<DatatableColumn[]> = combineLatest([
     this.dataView$,
@@ -408,9 +387,29 @@ export class IndexUpdateService {
 
     // Subscribe to pendingColumnsToBeSaved$ and update _pendingColumnsToBeSaved$
     this._subscription.add(
-      this.pendingColumnsToBeSaved$.subscribe((columns) => {
-        this._pendingColumnsToBeSaved$.next(columns);
-      })
+      this.actions$
+        .pipe(
+          scan((acc: ColumnAddition[], action) => {
+            if (action.type === 'add-column') {
+              return [...acc, action.payload];
+            }
+            if (action.type === 'saved') {
+              // Filter out columns that were saved with a value
+              return acc.filter((column) =>
+                action.payload.updates.every((update) => update.value[column.name] === undefined)
+              );
+            }
+            if (action.type === 'new-row-added') {
+              // Filter out columns that were populated when adding a new row
+              return acc.filter((column) => action.payload[column.name] === undefined);
+            }
+            if (action.type === 'discard-unsaved-columns') {
+              return [];
+            }
+            return acc;
+          }, [])
+        )
+        .subscribe(this._pendingColumnsToBeSaved$)
     );
   }
 
@@ -429,10 +428,6 @@ export class IndexUpdateService {
 
   public getIndexName(): string | null {
     return this._indexName$.getValue();
-  }
-
-  public getPendingFieldsToBeSaved(): string[] {
-    return this._pendingColumnsToBeSaved$.getValue().map((col) => col.name);
   }
 
   // Add a new index
