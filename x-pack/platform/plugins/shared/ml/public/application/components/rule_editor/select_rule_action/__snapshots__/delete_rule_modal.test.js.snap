@@ -3,6 +3,7 @@
 exports[`DeleteRuleModal renders as delete button after opening and closing modal 1`] = `
 <button
   class="euiLink emotion-euiLink-danger"
+  data-test-subj="deleteRuleModalLink"
   type="button"
 >
   Delete rule
@@ -12,6 +13,7 @@ exports[`DeleteRuleModal renders as delete button after opening and closing moda
 exports[`DeleteRuleModal renders as delete button when not visible 1`] = `
 <button
   class="euiLink emotion-euiLink-danger"
+  data-test-subj="deleteRuleModalLink"
   type="button"
 >
   Delete rule
@@ -21,6 +23,7 @@ exports[`DeleteRuleModal renders as delete button when not visible 1`] = `
 exports[`DeleteRuleModal renders modal after clicking delete rule link 1`] = `
 <button
   class="euiLink emotion-euiLink-danger"
+  data-test-subj="deleteRuleModalLink"
   type="button"
 >
   Delete rule

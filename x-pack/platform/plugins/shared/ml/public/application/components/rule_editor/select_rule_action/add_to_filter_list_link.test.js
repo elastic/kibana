@@ -15,7 +15,7 @@ describe('AddToFilterListLink', () => {
   test(`renders the add to filter list link for a value`, () => {
     const addItemToFilterList = jest.fn();
 
-    const { container, getByRole } = renderWithI18n(
+    const { container, getByTestId } = renderWithI18n(
       <AddToFilterListLink
         fieldValue="elastic.co"
         filterId="safe_domains"
@@ -25,7 +25,7 @@ describe('AddToFilterListLink', () => {
 
     expect(container.firstChild).toMatchSnapshot();
 
-    fireEvent.click(getByRole('button', { name: 'Add elastic.co to safe_domains' }));
+    fireEvent.click(getByTestId('mlAddToFilterListLink'));
 
     expect(addItemToFilterList).toHaveBeenCalledWith('elastic.co', 'safe_domains', true);
   });

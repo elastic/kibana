@@ -29,7 +29,7 @@ describe('DeleteRuleModal', () => {
     const { container } = renderWithI18n(<DeleteRuleModal {...requiredProps} />);
 
     // Find and click the delete link
-    const deleteLink = screen.getByRole('button', { name: 'Delete rule' });
+    const deleteLink = screen.getByTestId('deleteRuleModalLink');
     fireEvent.click(deleteLink);
 
     // Modal should be visible now
@@ -40,11 +40,11 @@ describe('DeleteRuleModal', () => {
     const { container } = renderWithI18n(<DeleteRuleModal {...requiredProps} />);
 
     // Open the modal
-    const deleteLink = screen.getByRole('button', { name: 'Delete rule' });
+    const deleteLink = screen.getByTestId('deleteRuleModalLink');
     fireEvent.click(deleteLink);
 
     // Find and click the cancel button
-    const cancelButton = screen.getByRole('button', { name: 'Cancel' });
+    const cancelButton = screen.getByTestId('confirmModalCancelButton');
     fireEvent.click(cancelButton);
 
     // Modal should be closed now
@@ -55,11 +55,11 @@ describe('DeleteRuleModal', () => {
     renderWithI18n(<DeleteRuleModal {...requiredProps} />);
 
     // Open the modal
-    const deleteLink = screen.getByRole('button', { name: 'Delete rule' });
+    const deleteLink = screen.getByTestId('deleteRuleModalLink');
     fireEvent.click(deleteLink);
 
     // Find and click the delete button
-    const deleteButton = screen.getByRole('button', { name: 'Delete' });
+    const deleteButton = screen.getByTestId('confirmModalConfirmButton');
     fireEvent.click(deleteButton);
 
     // Verify the function was called with the correct index

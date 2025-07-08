@@ -8,10 +8,8 @@
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent } from '@testing-library/react';
-import moment from 'moment';
 
 import { NewEventModal } from './new_event_modal';
-import { TIME_FORMAT } from '@kbn/ml-date-utils';
 
 const testProps = {
   closeModal: jest.fn(),
@@ -21,16 +19,16 @@ const testProps = {
 describe('NewEventModal', () => {
   it('Add button disabled if description empty', () => {
     // Render the component
-    const { getByRole, getByLabelText } = renderWithI18n(<NewEventModal {...testProps} />);
+    const { getByTestId } = renderWithI18n(<NewEventModal {...testProps} />);
 
     // Find the Add button by its role
-    const addButton = getByRole('button', { name: 'Add' });
+    const addButton = getByTestId('mlCalendarAddEventButton');
 
     // Verify it's disabled when description is empty
     expect(addButton).toBeDisabled();
 
     // Enter a description
-    const descriptionField = getByLabelText('Description');
+    const descriptionField = getByTestId('mlCalendarEventDescriptionInput');
     fireEvent.change(descriptionField, { target: { value: 'Test event' } });
 
     // Verify button is now enabled
@@ -39,14 +37,14 @@ describe('NewEventModal', () => {
 
   it('enables adding event when description is provided', () => {
     // Render the component
-    const { getByRole, getByLabelText } = renderWithI18n(<NewEventModal {...testProps} />);
+    const { getByTestId } = renderWithI18n(<NewEventModal {...testProps} />);
 
     // Find the Add button by its role and verify it's initially disabled
-    const addButton = getByRole('button', { name: 'Add' });
+    const addButton = getByTestId('mlCalendarAddEventButton');
     expect(addButton).toBeDisabled();
 
     // Enter a description
-    const descriptionField = getByLabelText('Description');
+    const descriptionField = getByTestId('mlCalendarEventDescriptionInput');
     fireEvent.change(descriptionField, { target: { value: 'Test event' } });
 
     // Verify button is now enabled
@@ -61,26 +59,24 @@ describe('NewEventModal', () => {
 
   it('updates date fields when text inputs are changed', () => {
     // Render the component
-    const { getByDisplayValue } = renderWithI18n(<NewEventModal {...testProps} />);
+    const { getByTestId } = renderWithI18n(<NewEventModal {...testProps} />);
 
     // Get the initial date inputs
-    const initialStartDate = getByDisplayValue(moment().startOf('day').format(TIME_FORMAT));
-    const initialEndDate = getByDisplayValue(
-      moment().startOf('day').add(1, 'days').format(TIME_FORMAT)
-    );
+    const startDateInput = getByTestId('mlCalendarEventStartDateInput');
+    const endDateInput = getByTestId('mlCalendarEventEndDateInput');
 
     // Change the start date to a specific value
     const newStartDateString = '2023-01-15 00:00:00';
-    fireEvent.change(initialStartDate, { target: { value: newStartDateString } });
+    fireEvent.change(startDateInput, { target: { value: newStartDateString } });
 
     // Verify the input value was updated
-    expect(initialStartDate.value).toBe(newStartDateString);
+    expect(startDateInput.value).toBe(newStartDateString);
 
     // Change the end date to a specific value
     const newEndDateString = '2023-01-20 00:00:00';
-    fireEvent.change(initialEndDate, { target: { value: newEndDateString } });
+    fireEvent.change(endDateInput, { target: { value: newEndDateString } });
 
     // Verify the input value was updated
-    expect(initialEndDate.value).toBe(newEndDateString);
+    expect(endDateInput.value).toBe(newEndDateString);
   });
 });
