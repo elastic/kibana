@@ -178,6 +178,26 @@ describe('HttpRateLimiterService', () => {
           })
         );
       });
+
+      it('should reset timer when it is below collection interval', () => {
+        jest.useFakeTimers();
+        service.start();
+        for (let i = 0; i < 3; i++) {
+          jest.setSystemTime(Date.now() + 5 * 1000);
+          elu$.next({ short: 0.9, medium: 0.9, long: 0.9 });
+        }
+        handler(request, response, toolkit);
+        jest.useRealTimers();
+
+        expect(response.customError).toHaveBeenCalledWith(
+          expect.objectContaining({
+            headers: {
+              'Retry-After': '20',
+              RateLimit: `"elu";r=0;t=20`,
+            },
+          })
+        );
+      });
     });
   });
 });
