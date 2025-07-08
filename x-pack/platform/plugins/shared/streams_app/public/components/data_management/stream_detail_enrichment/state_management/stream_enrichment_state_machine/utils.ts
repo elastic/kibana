@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldDefinition, Streams } from '@kbn/streams-schema';
+import { FieldDefinition, ProcessorDefinition, Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { AssignArgs } from 'xstate5';
 import { StreamEnrichmentContextType } from './types';
@@ -21,7 +21,7 @@ import {
   CustomSamplesDataSource,
   EnrichmentDataSource,
 } from '../../../../../../common/url_schema';
-import { dataSourceConverter } from '../../utils';
+import { dataSourceConverter, processorConverter } from '../../utils';
 
 export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
   type: 'random-samples',
@@ -115,6 +115,24 @@ export function getUpsertWiredFields(
 
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
+
+export const spawnProcessor = <TAssignArgs extends AssignArgs<any, any, any, any>>(
+  processor: ProcessorDefinition,
+  assignArgs: Pick<TAssignArgs, 'spawn' | 'self'>,
+  options?: { isNew: boolean }
+) => {
+  const { spawn, self } = assignArgs;
+  const processorWithUIAttributes = processorConverter.toUIDefinition(processor);
+
+  return spawn('processorMachine', {
+    id: processorWithUIAttributes.id,
+    input: {
+      parentRef: self,
+      processor: processorWithUIAttributes,
+      isNew: options?.isNew ?? false,
+    },
+  });
+};
 
 export const spawnDataSource = <TAssignArgs extends AssignArgs<any, any, any, any>>(
   dataSource: EnrichmentDataSource,

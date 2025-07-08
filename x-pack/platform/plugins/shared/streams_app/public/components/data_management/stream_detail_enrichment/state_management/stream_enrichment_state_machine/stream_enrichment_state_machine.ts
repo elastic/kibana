@@ -19,7 +19,6 @@ import {
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isRootStreamDefinition, ProcessorDefinition, Streams } from '@kbn/streams-schema';
-import { htmlIdGenerator } from '@elastic/eui';
 import { GrokCollection } from '@kbn/grok-ui';
 import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import {
@@ -35,7 +34,6 @@ import {
   createUpsertStreamSuccessNofitier,
 } from './upsert_stream_actor';
 
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import {
   simulationMachine,
   createSimulationMachineImplementations,
@@ -49,6 +47,7 @@ import {
   getStagedProcessors,
   getUpsertWiredFields,
   spawnDataSource,
+  spawnProcessor,
 } from './utils';
 import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
@@ -98,49 +97,34 @@ export const streamEnrichmentMachine = setup({
       definition: params.definition,
     })),
     /* Processors actions */
-    setupProcessors: assign(({ context, self, spawn }) => {
+    setupProcessors: assign((assignArgs) => {
       // Clean-up pre-existing processors
-      context.processorsRefs.forEach(stopChild);
+      assignArgs.context.processorsRefs.forEach(stopChild);
       // Setup processors from the stream definition
-      const processorsRefs = context.definition.stream.ingest.processing.map((processor) => {
-        const processorWithUIAttributes = processorConverter.toUIDefinition(processor);
-        return spawn('processorMachine', {
-          id: processorWithUIAttributes.id,
-          input: {
-            parentRef: self,
-            processor: processorWithUIAttributes,
-          },
-        });
-      });
+      const processorsRefs = assignArgs.context.definition.stream.ingest.processing.map(
+        (processor) => spawnProcessor(processor, assignArgs)
+      );
 
       return {
         initialProcessorsRefs: processorsRefs,
         processorsRefs,
       };
     }),
-    addProcessor: assign(
-      ({ context, spawn, self }, { processor }: { processor?: ProcessorDefinition }) => {
-        if (!processor) {
-          processor = getDefaultGrokProcessor({
-            sampleDocs: selectPreviewDocuments(context.simulatorRef?.getSnapshot().context),
-          });
-        }
-
-        const processorWithUIAttributes = processorConverter.toUIDefinition(processor);
-        return {
-          processorsRefs: context.processorsRefs.concat(
-            spawn('processorMachine', {
-              id: processorWithUIAttributes.id,
-              input: {
-                parentRef: self,
-                processor: processorWithUIAttributes,
-                isNew: true,
-              },
-            })
+    addProcessor: assign((assignArgs, { processor }: { processor?: ProcessorDefinition }) => {
+      if (!processor) {
+        processor = getDefaultGrokProcessor({
+          sampleDocs: selectPreviewDocuments(
+            assignArgs.context.simulatorRef?.getSnapshot().context
           ),
-        };
+        });
       }
-    ),
+
+      const newProcessorRef = spawnProcessor(processor, assignArgs, { isNew: true });
+
+      return {
+        processorsRefs: assignArgs.context.processorsRefs.concat(newProcessorRef),
+      };
+    }),
     deleteProcessor: assign(({ context }, params: { id: string }) => ({
       processorsRefs: context.processorsRefs.filter((proc) => proc.id !== params.id),
     })),
