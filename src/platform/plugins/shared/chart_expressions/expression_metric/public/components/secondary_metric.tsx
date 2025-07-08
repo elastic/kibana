@@ -18,8 +18,8 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { FormatOverrides } from './helpers';
 
 export interface TrendConfig {
-  icon: boolean;
-  value: boolean;
+  showIcon: boolean;
+  showValue: boolean;
   palette: [string, string, string];
   baselineValue: number | undefined;
   borderColor?: string;
@@ -48,7 +48,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue < 0) {
     return {
-      icon: trendConfig.icon ? '\u{2193}' : undefined, // ↓
+      icon: trendConfig.showIcon ? '\u{2193}' : undefined, // ↓
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.decrease', {
         defaultMessage: 'downward direction',
       }),
@@ -57,7 +57,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue > 0) {
     return {
-      icon: trendConfig.icon ? '\u{2191}' : undefined, // ↑
+      icon: trendConfig.showIcon ? '\u{2191}' : undefined, // ↑
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.increase', {
         defaultMessage: 'upward direction',
       }),
@@ -65,7 +65,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
     };
   }
   return {
-    icon: trendConfig.icon ? '\u{003D}' : undefined, // =
+    icon: trendConfig.showIcon ? '\u{003D}' : undefined, // =
     iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.stable', {
       defaultMessage: 'stable',
     }),
@@ -152,31 +152,38 @@ function SecondaryMetricValue({
       trendConfig.compareToPrimary
     );
     // If no value is shown and no icon should be shown (i.e. N/A) then do not render the badge at all
-    if (trendConfig.icon && !trendConfig.value && !icon) {
+    if (trendConfig.showIcon && !trendConfig.showValue && !icon) {
       return (
         <span
           data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
-          aria-label={getTrendDescription(trendConfig.value, icon != null, valueToShow, iconLabel)}
+          aria-label={getTrendDescription(
+            trendConfig.showValue,
+            icon != null,
+            valueToShow,
+            iconLabel
+          )}
         />
       );
     }
+
     return (
       <EuiBadge
         aria-label={
           // Make the information accessible also for screen readers
           // so show it only when icon only mode to avoid to be reduntant
-          getTrendDescription(trendConfig.value, icon != null, valueToShow, iconLabel)
+          getTrendDescription(trendConfig.showValue, icon != null, valueToShow, iconLabel)
         }
         color={trendColor}
         data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
         css={badgeCss}
       >
-        {trendConfig.value ? valueToShow : null}
-        {trendConfig.value && trendConfig.icon && icon ? ' ' : ''}
-        {trendConfig.icon && icon ? icon : null}
+        {trendConfig.showValue ? valueToShow : null}
+        {trendConfig.showValue && trendConfig.showIcon && icon ? ' ' : ''}
+        {trendConfig.showIcon && icon ? icon : null}
       </EuiBadge>
     );
   }
+
   if (color) {
     return (
       <EuiBadge

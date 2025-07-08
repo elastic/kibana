@@ -35,7 +35,7 @@ import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elast
 import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { VisParams } from '../../common';
+import { MetricVisParam, VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
 import { getColor, getMetricFormatter } from './helpers';
 import { SecondaryMetric, TrendConfig } from './secondary_metric';
@@ -61,6 +61,22 @@ const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
     <EuiIcon type={type} fill={color} css={{ width, height }} />;
+
+function buildTrendConfig(
+  { palette, visuals, baseline }: MetricVisParam['secondaryTrend'],
+  value: number | string
+) {
+  if (!palette) return undefined;
+
+  return {
+    showIcon: visuals !== 'value',
+    showValue: visuals !== 'icon',
+    baselineValue: baseline === 'primary' && typeof value === 'number' ? value : Number(baseline),
+    palette,
+    borderColor: undefined, // TODO: Remove this as it is handled by elastic-charts
+    compareToPrimary: baseline === 'primary',
+  } satisfies TrendConfig;
+}
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -165,19 +181,7 @@ export const MetricVis = ({
           ) ?? defaultColor
         : config.metric.color ?? defaultColor;
 
-    const trendConfig: TrendConfig | undefined = config.metric.secondaryTrend.palette
-      ? {
-          icon: config.metric.secondaryTrend.visuals !== 'value',
-          value: config.metric.secondaryTrend.visuals !== 'icon',
-          baselineValue:
-            config.metric.secondaryTrend.baseline === 'primary' && typeof value === 'number'
-              ? value
-              : Number(config.metric.secondaryTrend.baseline),
-          palette: config.metric.secondaryTrend.palette,
-          borderColor: undefined,
-          compareToPrimary: config.metric.secondaryTrend.baseline === 'primary',
-        }
-      : undefined;
+    const trendConfig = buildTrendConfig(config.metric.secondaryTrend, value);
 
     if (typeof value !== 'number') {
       const nonNumericMetricBase: Omit<MetricWText, 'value'> = {

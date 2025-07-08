@@ -8,18 +8,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { EuiBadge } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { type FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import { type VisParams } from '@kbn/visualizations-plugin/common';
+import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type { VisParams } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { FormatOverrides } from './helpers';
 
 interface TrendConfig {
-  icon: boolean;
-  value: boolean;
+  /**
+   * If the icon is shown
+   */
+  showIcon: boolean;
+  /**
+   * If the value is shown
+   */
+  showValue: boolean;
   palette: [string, string, string];
   baselineValue: number | undefined;
   borderColor?: string;
@@ -48,7 +51,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue < 0) {
     return {
-      icon: trendConfig.icon ? '\u{2193}' : undefined, // ↓
+      icon: trendConfig.showIcon ? '\u{2193}' : undefined, // ↓
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.decrease', {
         defaultMessage: 'downward direction',
       }),
@@ -57,7 +60,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue > 0) {
     return {
-      icon: trendConfig.icon ? '\u{2191}' : undefined, // ↑
+      icon: trendConfig.showIcon ? '\u{2191}' : undefined, // ↑
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.increase', {
         defaultMessage: 'upward direction',
       }),
@@ -65,7 +68,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
     };
   }
   return {
-    icon: trendConfig.icon ? '\u{003D}' : undefined, // =
+    icon: trendConfig.showIcon ? '\u{003D}' : undefined, // =
     iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.stable', {
       defaultMessage: 'stable',
     }),
@@ -89,15 +92,7 @@ function getValueToShow(
   return String(value);
 }
 
-function getTrendDescription(
-  showValue: boolean,
-  hasIcon: boolean,
-  value: string,
-  direction: string
-) {
-  if (showValue) {
-    return undefined;
-  }
+function getTrendDescription(hasIcon: boolean, value: string, direction: string) {
   if (hasIcon) {
     return i18n.translate('expressionMetricVis.secondaryMetric.trend', {
       defaultMessage: 'Value: {value} - Changed to {direction}',
@@ -107,31 +102,35 @@ function getTrendDescription(
       },
     });
   }
+
   return i18n.translate('expressionMetricVis.secondaryMetric.trendnoDifferences', {
     defaultMessage: 'Value: {value} - No differences',
-    values: {
-      value,
-    },
+    values: { value },
   });
 }
 
-interface UseSecondaryMetric {
+type GetMetricFormatter = (
+  accessor: string,
+  columns: DatatableColumn[],
+  formatOverrides?: FormatOverrides
+) => FieldFormatConvertFunction;
+
+export interface SecondaryMetricInfoArgs {
   columns: DatatableColumn[];
   row: DatatableRow;
   config: Pick<VisParams, 'metric' | 'dimensions'>;
-  trendConfig2?: TrendConfig;
-  color2?: string;
-  getMetricFormatter: (
-    accessor: string,
-    columns: DatatableColumn[],
-    formatOverrides?: FormatOverrides | undefined
-  ) => FieldFormatConvertFunction;
+  /**
+   * Trend configuration, updated with border color?
+   */
+  trendConfig?: TrendConfig;
+  staticColor?: string;
+  getMetricFormatter: GetMetricFormatter;
 }
 
 function getMetricColumnAndFormatter(
-  columns: UseSecondaryMetric['columns'],
-  config: UseSecondaryMetric['config'],
-  getMetricFormatter: UseSecondaryMetric['getMetricFormatter'],
+  columns: SecondaryMetricInfoArgs['columns'],
+  config: SecondaryMetricInfoArgs['config'],
+  getMetricFormatter: SecondaryMetricInfoArgs['getMetricFormatter'],
   formatOverrides: FormatOverrides | undefined
 ) {
   if (!config.dimensions.secondaryMetric) {
@@ -161,51 +160,42 @@ function getEnhancedNumberSignFormatter(
   };
 }
 
-export function useSecondaryMetric({
+export interface SecondaryMetricInfo {
+  value: string;
+  label?: string;
+  badgeColor?: string;
+  description?: string;
+}
+
+/**
+ * Computes the display information for the secondary metric
+ * @returns An object with value, label, badgeColor and description for rendering.
+ */
+export function getSecondaryMetricInfo({
   columns,
   row,
   config,
   getMetricFormatter,
-  trendConfig2,
-  color2,
-}: UseSecondaryMetric) {
+  trendConfig,
+  staticColor,
+}: SecondaryMetricInfoArgs): SecondaryMetricInfo {
+  const formatOverrides = getEnhancedNumberSignFormatter(trendConfig);
   const { metricFormatter, metricColumn } =
-    getMetricColumnAndFormatter(
-      columns,
-      config,
-      getMetricFormatter,
-      getEnhancedNumberSignFormatter(trendConfig2)
-    ) || {};
+    getMetricColumnAndFormatter(columns, config, getMetricFormatter, formatOverrides) || {};
 
-  const prefix = config.metric.secondaryPrefix ?? metricColumn?.name;
-  const value = metricColumn ? row[metricColumn.id] : undefined;
+  // TODO: Fix when prefix is None?
+  const label = config.metric.secondaryPrefix ?? metricColumn?.name;
 
-  //
-
-  const rawValue = value;
-  const formattedValue = metricFormatter?.(value);
-  const trendConfig = color2 ? undefined : trendConfig2;
-  const color = color2;
-  const formatter = metricFormatter;
-
+  const rawValue = metricColumn ? row[metricColumn.id] : undefined;
+  const formattedValue = metricFormatter?.(rawValue);
   const safeFormattedValue = formattedValue ?? notAvailable;
 
-  const badgeCss = css(`
-    font-size:  inherit;
-    line-height:  inherit;
-    ${
-      trendConfig && typeof rawValue === 'number'
-        ? `border: 1px solid ${trendConfig.borderColor};`
-        : ''
-    }
-  `);
+  // Color by value Static
+  if (staticColor) {
+    return { value: safeFormattedValue, label, badgeColor: staticColor };
+  }
 
-  //
-
-  const resultLabel = prefix;
-
-  //
-
+  // Color by value Dynamic
   if (trendConfig && (typeof rawValue === 'number' || rawValue == null)) {
     // When comparing with primary metric we want to change the order of the difference (primary - secondary)
     const deltaFactor = trendConfig.compareToPrimary ? -1 : 1;
@@ -214,31 +204,26 @@ export function useSecondaryMetric({
     const valueToShow = getValueToShow(
       safeFormattedValue,
       deltaValue,
-      formatter,
+      metricFormatter,
       trendConfig.compareToPrimary
     );
+    const trendDrescription = !trendConfig.showValue
+      ? getTrendDescription(!!icon, valueToShow, iconLabel)
+      : undefined;
+
     // If no value is shown and no icon should be shown (i.e. N/A) then do not render the badge at all
-    if (trendConfig.icon && !trendConfig.value && !icon) {
-      const trendDrescription = getTrendDescription(
-        trendConfig.value,
-        icon != null,
-        valueToShow,
-        iconLabel
-      );
-      return { resultValue: '', resultLabel: '', resultBadgeColor: '' };
+    // TODO: think how to do this because the description is always undefined
+    if (trendConfig.showIcon && !trendConfig.showValue && !icon) {
+      return { value: '', label: '', badgeColor: '', description: trendDrescription };
     }
-    const trendDrescription = getTrendDescription(
-      trendConfig.value,
-      icon != null,
-      valueToShow,
-      iconLabel
-    );
-    return { resultValue: trendDrescription, resultLabel, resultBadgeColor: trendColor };
+
+    const valueContent = `${trendConfig.showValue ? valueToShow : ''}${
+      trendConfig.showValue && trendConfig.showIcon && icon ? ' ' : ''
+    }${trendConfig.showIcon && icon ? icon : ''}`;
+
+    return { value: valueContent, label, badgeColor: trendColor, description: trendDrescription };
   }
 
-  if (color) {
-    return { resultValue: safeFormattedValue, resultLabel, resultBadgeColor: color };
-  }
-
-  return { resultValue: formattedValue, resultLabel, resultBadgeColor: '' };
+  // Color by value None
+  return { value: formattedValue ?? '', label };
 }
