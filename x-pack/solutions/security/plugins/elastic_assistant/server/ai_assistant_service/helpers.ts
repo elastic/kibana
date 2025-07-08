@@ -158,7 +158,7 @@ export const ensureProductDocumentationInstalled = async ({
     const { status } = await productDocManager.getStatus({
       inferenceId: defaultInferenceEndpoints.ELSER,
     });
-    if (status !== 'installed') {
+    if (status !== 'installed' && status !== 'installing') {
       logger.debug(`Installing product documentation for AIAssistantService`);
       setIsProductDocumentationInProgress(true);
       try {
