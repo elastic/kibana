@@ -32,6 +32,23 @@ category: <list of slugs>
 
 The file name should be the article title in snakecase e.g. vulnerability_summary_follina.md
 
+The content is often delivered to us as a zip of `.mdx` files that are in kebab case with some upper case letters. Follow the below steps to convert them to the required format:
+
+1. Delete all existing files in the `x-pack/solutions/security/plugins/elastic_assistant/server/knowledge_base/security_labs` to ensure any removed articles are not left behind.
+
+```
+cd x-pack/solutions/security/plugins/elastic_assistant/server/knowledge_base/security_labs
+rm -rf ./*
+```
+
+2. Extract the zip of `.mdx` files into the same directory
+3. Remove `callout_example.md` if present, this was a leftover example document
+3. Open your terminal to this directory and run this script to convert the files to the required format:
+
+```
+for f in *; do [ -f "$f" ] && n=$(echo "$f" | sed 's/-/_/g' | tr '[:upper:]' '[:lower:]') && n="${n%.mdx}.${n##*.}" && [ "${n##*.}" = "mdx" ] && n="${n%.mdx}.md" && [ "$f" != "$n" ] && mv "$f" "$n" && echo "Renamed: $f -> $n"; done
+```
+
 After adding new articles run the following to create the encoded article:
 
 ```bash
