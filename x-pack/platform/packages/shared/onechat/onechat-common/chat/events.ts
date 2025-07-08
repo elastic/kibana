@@ -9,8 +9,8 @@ import type { OnechatEvent } from '../base/events';
 import type { ChatAgentEvent } from '../agents';
 
 export enum ChatEventType {
-  conversationCreated = 'conversationCreated',
-  conversationUpdated = 'conversationUpdated',
+  conversationCreated = 'conversation_created',
+  conversationUpdated = 'conversation_updated',
 }
 
 export type ChatEventBase<
@@ -21,7 +21,7 @@ export type ChatEventBase<
 // conversation created
 
 export interface ConversationCreatedEventData {
-  conversationId: string;
+  conversation_id: string;
   title: string;
 }
 
@@ -39,7 +39,7 @@ export const isConversationCreatedEvent = (
 // conversation updated
 
 export interface ConversationUpdatedEventData {
-  conversationId: string;
+  conversation_id: string;
   title: string;
 }
 
