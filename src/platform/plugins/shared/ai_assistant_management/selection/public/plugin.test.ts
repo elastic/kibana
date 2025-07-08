@@ -13,34 +13,34 @@ import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
 describe('AI Assistant Management Selection Plugin', () => {
-    it('uses the correct setting key to get the correct value from uiSettings', async () => {
-      const plugin = new AIAssistantManagementPlugin({
-        config: {
-          get: jest.fn(),
-        },
-        env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
-      } as unknown as PluginInitializerContext);
+  it('uses the correct setting key to get the correct value from uiSettings', async () => {
+    const plugin = new AIAssistantManagementPlugin({
+      config: {
+        get: jest.fn(),
+      },
+      env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
+    } as unknown as PluginInitializerContext);
 
-      const coreStart = {
-        uiSettings: {
-          get: jest.fn((key: string) => {
-            if (key === PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY) {
-              return AIAssistantType.Default;
-            }
-          }),
-        },
-      } as unknown as CoreStart;
+    const coreStart = {
+      uiSettings: {
+        get: jest.fn((key: string) => {
+          if (key === PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY) {
+            return AIAssistantType.Default;
+          }
+        }),
+      },
+    } as unknown as CoreStart;
 
-      const result = plugin.start(coreStart);
+    const result = plugin.start(coreStart);
 
-      const collected: any[] = [];
-      const subscription = result.aiAssistantType$.subscribe((value) => {
-        collected.push(value);
-      });
-      subscription.unsubscribe();
-
-      const allCalls = (coreStart.uiSettings.get as jest.Mock).mock.calls;
-      expect(allCalls).toEqual([['aiAssistant:preferredAIAssistantType']]);
-      expect(collected).toEqual([AIAssistantType.Default]);
+    const collected: any[] = [];
+    const subscription = result.aiAssistantType$.subscribe((value) => {
+      collected.push(value);
     });
+    subscription.unsubscribe();
+
+    const allCalls = (coreStart.uiSettings.get as jest.Mock).mock.calls;
+    expect(allCalls).toEqual([['aiAssistant:preferredAIAssistantType']]);
+    expect(collected).toEqual([AIAssistantType.Default]);
+  });
 });

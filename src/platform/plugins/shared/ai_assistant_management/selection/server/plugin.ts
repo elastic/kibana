@@ -26,21 +26,19 @@ import type {
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import {
-  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-} from '../common/ui_setting_keys';
+import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
 import { securitySolutionSetting } from './src/settings/security_setting';
 
 export class AIAssistantManagementSelectionPlugin
   implements
-  Plugin<
-    AIAssistantManagementSelectionPluginServerSetup,
-    AIAssistantManagementSelectionPluginServerStart,
-    AIAssistantManagementSelectionPluginServerDependenciesSetup,
-    AIAssistantManagementSelectionPluginServerDependenciesStart
-  >
+    Plugin<
+      AIAssistantManagementSelectionPluginServerSetup,
+      AIAssistantManagementSelectionPluginServerStart,
+      AIAssistantManagementSelectionPluginServerDependenciesSetup,
+      AIAssistantManagementSelectionPluginServerDependenciesStart
+    >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
   private readonly buildFlavor: BuildFlavor;
@@ -155,5 +153,5 @@ export class AIAssistantManagementSelectionPlugin
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }

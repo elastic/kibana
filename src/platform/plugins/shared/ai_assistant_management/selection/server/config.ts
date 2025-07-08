@@ -21,7 +21,7 @@ const configSchema = schema.object({
       schema.literal(AIAssistantType.Security),
     ],
     { defaultValue: AIAssistantType.Default }
-  )
+  ),
 });
 
 export type AIAssistantManagementSelectionConfig = TypeOf<typeof configSchema>;

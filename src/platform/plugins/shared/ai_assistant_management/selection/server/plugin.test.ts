@@ -10,9 +10,7 @@
 import { PluginInitializerContext, CoreSetup } from '@kbn/core/server';
 import type { AIAssistantManagementSelectionPluginServerDependenciesSetup } from './types';
 import { AIAssistantType } from '../common/ai_assistant_type';
-import {
-  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
-} from '../common/ui_setting_keys';
+import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
 import { securitySolutionSetting } from './src/settings/security_setting';
@@ -63,14 +61,13 @@ describe('plugin', () => {
     };
 
     it('registers correct uiSettings for serverless oblt', () => {
-
       aiAssistantManagementSelectionPlugin.setup(coreSetup, {
         ...setupDeps,
         cloud: {
           serverless: {
             projectType: 'observability',
           },
-        }
+        },
       } as unknown as AIAssistantManagementSelectionPluginServerDependenciesSetup);
 
       expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(1);
@@ -84,14 +81,13 @@ describe('plugin', () => {
     });
 
     it('registers correct uiSettings for serverless security', () => {
-
       aiAssistantManagementSelectionPlugin.setup(coreSetup, {
         ...setupDeps,
         cloud: {
           serverless: {
             projectType: 'security',
           },
-        }
+        },
       } as unknown as AIAssistantManagementSelectionPluginServerDependenciesSetup);
 
       expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(1);
@@ -105,21 +101,18 @@ describe('plugin', () => {
     });
 
     it('registers correct uiSettings for serverless search', () => {
-
       aiAssistantManagementSelectionPlugin.setup(coreSetup, {
         ...setupDeps,
         cloud: {
           serverless: {
             projectType: 'search',
           },
-        }
+        },
       } as unknown as AIAssistantManagementSelectionPluginServerDependenciesSetup);
 
       expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(0);
     });
-
-  })
-
+  });
 
   describe('stateful', () => {
     it('uses the correct setting key to get the correct value from uiSettings', async () => {
