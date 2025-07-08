@@ -7,7 +7,7 @@
     "id": "globalFlyoutOrchestratorExamples",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["developerExamples"],
+    "requiredPlugins": ["developerExamples", "navigation"],
     "requiredBundles": []
   }
 }

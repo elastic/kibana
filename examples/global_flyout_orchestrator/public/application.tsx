@@ -15,15 +15,12 @@ import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { App } from './components/app';
 
 export const renderApp = (
-  _core: CoreStart,
+  { rendering }: CoreStart,
   { navigation }: { navigation: NavigationPublicPluginStart },
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
-    <App
-      basename={appBasePath}
-      navigation={navigation}
-    />,
+    rendering.addContext(<App basename={appBasePath} navigation={navigation} />),
     element
   );
 
