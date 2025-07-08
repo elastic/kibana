@@ -484,7 +484,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'aiAssistant:anonymizationRules': {
+  'aiAssistant:anonymizationSettings': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
