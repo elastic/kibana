@@ -21,8 +21,7 @@ import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { kqlQuery } from '../es/queries/kql_query';
-import { rangeQuery } from '../es/queries/range_query';
+import { kqlQuery, rangeQuery } from '@kbn/es-query';
 
 interface FieldPatternResultBase {
   field: string;
@@ -184,6 +183,7 @@ export async function runCategorizeTextAggregation({
     index,
     size: 0,
     track_total_hits: false,
+    timeout: '10s',
     query: {
       bool: {
         filter: [query, ...rangeQuery(start, end)],
@@ -346,15 +346,18 @@ export async function getLogPatterns({
         return [];
       }
 
-      const patternsToExclude = topMessagePatterns.filter((pattern) => {
-        // elasticsearch will barf because the query is too complex. this measures
-        // the # of groups to capture for a measure of complexity.
-        const complexity = pattern.regex.match(/(\.\+\?)|(\.\*\?)/g)?.length ?? 0;
-        return (
-          complexity <= 25 &&
-          // anything less than 50 messages should be re-processed with the ml_standard tokenizer
-          pattern.count > 50
-        );
+      const patternsToExclude = topMessagePatterns.filter((pattern) => pattern.count >= 50);
+      const excludeQueries = patternsToExclude.map((pattern) => {
+        return {
+          match: {
+            [pattern.field]: {
+              query: pattern.pattern,
+              fuzziness: 0,
+              operator: 'and' as const,
+              auto_generate_synonyms_phrase_query: false,
+            },
+          },
+        };
       });
 
       const rareMessagePatterns = await runCategorizeTextAggregation({
@@ -366,33 +369,7 @@ export async function getLogPatterns({
         query: {
           bool: {
             filter: kqlQuery(kuery),
-            must_not: [
-              ...patternsToExclude.map((pattern) => {
-                return {
-                  bool: {
-                    filter: [
-                      {
-                        regexp: {
-                          [pattern.field]: {
-                            value: pattern.regex,
-                          },
-                        },
-                      },
-                      {
-                        match: {
-                          [pattern.field]: {
-                            query: pattern.pattern,
-                            fuzziness: 0,
-                            operator: 'and' as const,
-                            auto_generate_synonyms_phrase_query: false,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                };
-              }),
-            ],
+            must_not: excludeQueries,
           },
         },
         size: 1000,

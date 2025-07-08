@@ -11,7 +11,12 @@ import { Logger } from '@kbn/core/server';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
 import type { InferenceClient } from '@kbn/inference-common';
-import { analyzeDocuments } from '@kbn/observability-utils-server/entities/analyze_documents';
+import {
+  sortAndTruncateAnalyzedFields,
+  getLogPatterns,
+  analyzeDocuments,
+} from '@kbn/genai-utils-server';
+import { highlightPatternFromRegex } from '@kbn/genai-utils-common';
 import { KQL_GUIDE } from './kql_guide';
 import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
 

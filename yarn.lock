@@ -5861,6 +5861,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/genai-utils-server@link:x-pack/platform/packages/shared/kbn-genai-utils-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate-console-definitions@link:packages/kbn-generate-console-definitions":
   version "0.0.0"
   uid ""
