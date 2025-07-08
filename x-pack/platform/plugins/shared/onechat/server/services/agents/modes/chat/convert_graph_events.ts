@@ -77,7 +77,14 @@ export const convertGraphEvents = ({
               const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
               const { toolCallId, args } = toolCall;
               toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-              toolCallEvents.push(createToolCallEvent({ toolId, toolCallId, args }));
+              toolCallEvents.push(
+                createToolCallEvent({
+                  toolId: toolId.toolId,
+                  toolType: toolId.providerId,
+                  toolCallId,
+                  params: args,
+                })
+              );
             }
 
             return of(...toolCallEvents);
@@ -103,7 +110,8 @@ export const convertGraphEvents = ({
             toolResultEvents.push(
               createToolResultEvent({
                 toolCallId: toolMessage.tool_call_id,
-                toolId: toolId ?? toStructuredToolIdentifier('unknown'),
+                toolId: toolId?.toolId ?? 'unknown',
+                toolType: toolId?.providerId ?? 'unknown',
                 result: JSON.stringify(toolReturn.result),
               })
             );

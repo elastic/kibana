@@ -28,9 +28,9 @@ export type ChatEventBase<
 // Tool call
 
 export interface ToolCallEventData {
-  toolCallId: string;
-  toolId: StructuredToolIdentifier;
-  args: Record<string, unknown>;
+  tool_call_id: string;
+  tool_id: StructuredToolIdentifier;
+  params: Record<string, unknown>;
 }
 
 export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventData>;
@@ -42,9 +42,9 @@ export const isToolCallEvent = (event: OnechatEvent<string, any>): event is Tool
 // Tool result
 
 export interface ToolResultEventData {
-  toolCallId: string;
+  tool_call_id: string;
   toolId: StructuredToolIdentifier;
-  result: string;
+  tool_id: string;
 }
 
 export type ToolResultEvent = ChatEventBase<ChatEventType.toolResult, ToolResultEventData>;
@@ -69,9 +69,9 @@ export const isReasoningEvent = (event: OnechatEvent<string, any>): event is Rea
 
 export interface MessageChunkEventData {
   /** ID of the message this chunk is bound to */
-  messageId: string;
+  message_id: string;
   /** chunk (text delta) */
-  textChunk: string;
+  text_chunk: string;
 }
 
 export type MessageChunkEvent = ChatEventBase<ChatEventType.messageChunk, MessageChunkEventData>;
@@ -86,9 +86,9 @@ export const isMessageChunkEvent = (
 
 export interface MessageCompleteEventData {
   /** ID of the message */
-  messageId: string;
+  message_id: string;
   /** full text content of the message */
-  messageContent: string;
+  message_content: string;
 }
 
 export type MessageCompleteEvent = ChatEventBase<
@@ -120,7 +120,7 @@ export const isRoundCompleteEvent = (
 // conversation created
 
 export interface ConversationCreatedEventData {
-  conversationId: string;
+  conversation_id: string;
   title: string;
 }
 
@@ -138,7 +138,7 @@ export const isConversationCreatedEvent = (
 // conversation updated
 
 export interface ConversationUpdatedEventData {
-  conversationId: string;
+  conversation_id: string;
   title: string;
 }
 
