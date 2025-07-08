@@ -99,7 +99,7 @@ function getStatusComponent({
     case 'unenrolling':
     case 'enrolling':
     case 'updating':
-      return isAgentInFailedUpgradeState(agent) ? (
+      return agent && isAgentInFailedUpgradeState(agent) ? (
         <EuiBadge color="danger" {...restOfProps}>
           <FormattedMessage
             id="xpack.fleet.agentHealth.upgradingFailedStatusText"
