@@ -19,7 +19,6 @@ import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generat
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { readFile, writeFile } from 'fs/promises';
 import { camelCase } from 'lodash';
-import capitalize from 'lodash/capitalize';
 import { join } from 'path';
 import {
   enrichFields,

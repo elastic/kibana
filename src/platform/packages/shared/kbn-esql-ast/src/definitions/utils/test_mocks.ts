@@ -74,6 +74,28 @@ const indexes = [
   'unsupported_index',
 ];
 
+// const initialFields: Array<[string, ESQLFieldWithMetadata]> = [
+//   ['keywordField', { name: 'keywordField', type: 'keyword' }],
+//   ['any#Char$Field', { name: 'any#Char$Field', type: 'keyword' }],
+//   ['textField', { name: 'textField', type: 'text' }],
+//   ['doubleField', { name: 'doubleField', type: 'double' }],
+//   ['integerField', { name: 'integerField', type: 'integer' }],
+//   ['counterIntegerField', { name: 'counterIntegerField', type: 'counter_integer' }],
+//   ['dateField', { name: 'dateField', type: 'date' }],
+//   ['@timestamp', { name: '@timestamp', type: 'date' }],
+//   ['ipField', { name: 'ipField', type: 'ip' }],
+//   ['booleanField', { name: 'booleanField', type: 'boolean' }],
+//   ['geoPointField', { name: 'geoPointField', type: 'geo_point' }],
+//   ['geoShapeField', { name: 'geoShapeField', type: 'geo_shape' }],
+//   ['versionField', { name: 'versionField', type: 'version' }],
+// ];
+
+// const fields = new Map<string, ESQLFieldWithMetadata>(initialFields);
+
+// METADATA_FIELDS.forEach((fieldName) => {
+//   fields.set(fieldName, { name: fieldName, type: 'keyword' });
+// });
+
 export const mockContext: ICommandContext = {
   userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([
     [
