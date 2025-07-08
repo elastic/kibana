@@ -53,6 +53,7 @@ export const config: PluginConfigDescriptor = {
     },
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,
+    hideDashboards: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -170,6 +171,12 @@ export const config: PluginConfigDescriptor = {
               ),
             })
           ),
+          deploymentSecrets: schema.maybe(
+            schema.object({
+              fleetAppToken: schema.maybe(schema.string()),
+              elasticsearchAppToken: schema.maybe(schema.string()),
+            })
+          ),
           customIntegrations: schema.maybe(
             schema.object({
               enabled: schema.maybe(schema.boolean({ defaultValue: false })),
@@ -269,6 +276,9 @@ export const config: PluginConfigDescriptor = {
               ]),
               { defaultValue: [] }
             ),
+            searchAiLakePackageAllowlistEnabled: schema.maybe(
+              schema.boolean({ defaultValue: false })
+            ),
           },
           {
             defaultValue: {
@@ -316,6 +326,7 @@ export const config: PluginConfigDescriptor = {
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
+      hideDashboards: schema.boolean({ defaultValue: false }),
     },
     {
       validate: (configToValidate) => {

@@ -157,7 +157,6 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           pendingActions: pendingActions?.pending_actions ?? {},
         };
 
-        // console.log({ acc });
         return acc;
       }, {});
     } catch (err) {

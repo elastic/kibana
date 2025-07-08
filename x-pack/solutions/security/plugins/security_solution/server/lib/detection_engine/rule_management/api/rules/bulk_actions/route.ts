@@ -43,6 +43,9 @@ import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import type { ConfigType } from '../../../../../../config';
+import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
+import { bulkScheduleRuleGapFilling } from './bulk_schedule_rule_gap_filling';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 // Set a lower limit for bulk edit as the rules client might fail with a "Query
@@ -96,7 +99,8 @@ const validateBulkAction = (
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  config: ConfigType
 ) => {
   router.versioned
     .post({
@@ -342,6 +346,16 @@ export const performBulkActionRoute = (
             }
 
             case BulkActionTypeEnum.edit: {
+              const suppressionSupportError = await checkAlertSuppressionBulkEditSupport({
+                editActions: body.edit,
+                licensing: ctx.licensing,
+                experimentalFeatures: config.experimentalFeatures,
+              });
+
+              if (suppressionSupportError) {
+                return siemResponse.error(suppressionSupportError);
+              }
+
               if (isDryRun) {
                 // during dry run only validation is getting performed and rule is not saved in ES
                 const bulkActionOutcome = await initPromisePool({
@@ -390,6 +404,29 @@ export const performBulkActionRoute = (
               });
               errors.push(...bulkActionErrors);
               updated = backfilled.filter((rule): rule is RuleAlertType => rule !== null);
+              break;
+            }
+
+            case BulkActionTypeEnum.fill_gaps: {
+              const {
+                backfilled,
+                errors: bulkActionErrors,
+                skipped: skippedRules,
+              } = await bulkScheduleRuleGapFilling({
+                rules,
+                isDryRun,
+                rulesClient,
+                mlAuthz,
+                fillGapsPayload: body.fill_gaps,
+              });
+              errors.push(...bulkActionErrors);
+              updated = backfilled;
+              skipped = skippedRules.map((rule) => {
+                return {
+                  ...rule,
+                  skip_reason: 'NO_GAPS_TO_FILL',
+                };
+              });
             }
           }
 

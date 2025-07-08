@@ -13,31 +13,11 @@ plugins.allowlistPluginGroups: ['platform', 'observability']
 xpack.ux.enabled: false
 xpack.legacy_uptime.enabled: false
 
-xpack.features.overrides:
-  ### By default, this feature named as `APM and User Experience`, but should be renamed to `Applications`.
-  apm.name: 'Applications'
-  ### Dashboards feature should be moved from Analytics category to the Observability one.
-  dashboard_v2.category: 'observability'
-  ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
-  ### fine-tuned to grant access to Observability app.
-  discover_v2.category: 'observability'
-  ### Machine Learning feature should be moved from Analytics category to the Observability one and renamed to `AI Ops`.
-  ml:
-    category: 'observability'
-    order: 1200
-  ### Stack alerts is hidden in Role management since it's not needed.
-  stackAlerts.hidden: true
-  ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.
-  uptime.name: 'Synthetics'
-
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
 
 ## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true
-
-## Set the home route
-uiSettings.overrides.defaultRoute: /app/observability/landing
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
@@ -119,10 +99,10 @@ xpack.ml.nlp:
         min: 0
         max: 2
       medium:
-        min: 1
+        min: 0
         max: 32
       high:
-        min: 1
+        min: 0
         max: 128
 xpack.ml.compatibleModuleType: 'observability'
 

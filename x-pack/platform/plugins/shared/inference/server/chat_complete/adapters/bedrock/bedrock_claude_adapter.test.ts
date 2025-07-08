@@ -7,12 +7,12 @@
 
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
-import { lastValueFrom, toArray, noop } from 'rxjs';
+import { noop } from 'rxjs';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import { bedrockClaudeAdapter } from './bedrock_claude_adapter';
 import { addNoToolUsageDirective } from './prompts';
-
+import { lastValueFrom, toArray } from 'rxjs';
 describe('bedrockClaudeAdapter', () => {
   const logger = loggerMock.create();
   const executorMock = {
@@ -57,24 +57,45 @@ describe('bedrockClaudeAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'converseStream',
         subActionParams: {
           messages: [
             {
+              content: [
+                {
+                  text: 'question',
+                  type: 'text',
+                },
+              ],
               role: 'user',
-              rawContent: [{ type: 'text', text: 'question' }],
+            },
+          ],
+          model: undefined,
+          signal: undefined,
+          stopSequences: [
+            `
+
+Human:`,
+          ],
+          system: [
+            {
+              text: 'You are a helpful assistant for Elastic.',
             },
           ],
           temperature: 0,
-          stopSequences: ['\n\nHuman:'],
+          toolChoice: undefined,
           tools: [
             {
-              description: 'Do not call this tool, it is strictly forbidden',
-              input_schema: {
-                properties: {},
-                type: 'object',
+              toolSpec: {
+                name: 'do_not_call_this_tool',
+                description: 'Do not call this tool, it is strictly forbidden',
+                inputSchema: {
+                  json: {
+                    properties: {},
+                    type: 'object',
+                  },
+                },
               },
-              name: 'do_not_call_this_tool',
             },
           ],
         },
@@ -118,25 +139,33 @@ describe('bedrockClaudeAdapter', () => {
       const { tools } = getCallParams();
       expect(tools).toEqual([
         {
-          name: 'myFunction',
-          description: 'myFunction',
-          input_schema: {
-            properties: {},
-            type: 'object',
+          toolSpec: {
+            name: 'myFunction',
+            description: 'myFunction',
+            inputSchema: {
+              json: {
+                properties: {},
+                type: 'object',
+              },
+            },
           },
         },
         {
-          name: 'myFunctionWithArgs',
-          description: 'myFunctionWithArgs',
-          input_schema: {
-            properties: {
-              foo: {
-                description: 'foo',
-                type: 'string',
+          toolSpec: {
+            name: 'myFunctionWithArgs',
+            description: 'myFunctionWithArgs',
+            inputSchema: {
+              json: {
+                properties: {
+                  foo: {
+                    description: 'foo',
+                    type: 'string',
+                  },
+                },
+                required: ['foo'],
+                type: 'object',
               },
             },
-            required: ['foo'],
-            type: 'object',
           },
         },
       ]);
@@ -191,55 +220,16 @@ describe('bedrockClaudeAdapter', () => {
 
       const { messages } = getCallParams();
       expect(messages).toEqual([
+        { role: 'user', content: [{ text: 'question', type: 'text' }] },
+        { role: 'assistant', content: [{ type: 'text', text: 'answer' }] },
+        { role: 'user', content: [{ text: 'another question', type: 'text' }] },
         {
-          rawContent: [
-            {
-              text: 'question',
-              type: 'text',
-            },
-          ],
-          role: 'user',
-        },
-        {
-          rawContent: [
-            {
-              text: 'answer',
-              type: 'text',
-            },
-          ],
           role: 'assistant',
+          content: [{ toolUse: { toolUseId: '0', name: 'my_function', input: { foo: 'bar' } } }],
         },
         {
-          rawContent: [
-            {
-              text: 'another question',
-              type: 'text',
-            },
-          ],
           role: 'user',
-        },
-        {
-          rawContent: [
-            {
-              id: '0',
-              input: {
-                foo: 'bar',
-              },
-              name: 'my_function',
-              type: 'tool_use',
-            },
-          ],
-          role: 'assistant',
-        },
-        {
-          rawContent: [
-            {
-              content: '{"bar":"foo"}',
-              tool_use_id: '0',
-              type: 'tool_result',
-            },
-          ],
-          role: 'user',
+          content: [{ toolResult: { toolUseId: '0', content: [{ json: { bar: 'foo' } }] } }],
         },
       ]);
     });
@@ -262,7 +252,7 @@ describe('bedrockClaudeAdapter', () => {
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
       const { system } = getCallParams();
-      expect(system).toEqual('Some system message');
+      expect(system).toEqual([{ text: 'Some system message' }]);
     });
 
     it('correctly formats messages with content parts', () => {
@@ -275,8 +265,8 @@ describe('bedrockClaudeAdapter', () => {
               role: MessageRole.User,
               content: [
                 {
-                  type: 'text',
                   text: 'question',
+                  type: 'text',
                 },
               ],
             },
@@ -311,44 +301,24 @@ describe('bedrockClaudeAdapter', () => {
 
       const { messages } = getCallParams();
       expect(messages).toEqual([
+        { role: 'user', content: [{ text: 'question', type: 'text' }] },
+        { role: 'assistant', content: [{ type: 'text', text: 'answer' }] },
         {
-          rawContent: [
-            {
-              text: 'question',
-              type: 'text',
-            },
-          ],
           role: 'user',
-        },
-        {
-          rawContent: [
+          content: [
             {
-              text: 'answer',
-              type: 'text',
-            },
-          ],
-          role: 'assistant',
-        },
-        {
-          rawContent: [
-            {
-              type: 'image',
-              source: {
-                data: 'aaaaaa',
-                mediaType: 'image/png',
-                type: 'base64',
+              image: {
+                format: 'png',
+                source: { bytes: new Uint8Array(Buffer.from('aaaaaa', 'utf-8')) },
               },
             },
             {
-              type: 'image',
-              source: {
-                data: 'bbbbbb',
-                mediaType: 'image/png',
-                type: 'base64',
+              image: {
+                format: 'png',
+                source: { bytes: new Uint8Array(Buffer.from('bbbbbb', 'utf-8')) },
               },
             },
           ],
-          role: 'user',
         },
       ]);
     });
@@ -371,9 +341,7 @@ describe('bedrockClaudeAdapter', () => {
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
       const { toolChoice } = getCallParams();
-      expect(toolChoice).toEqual({
-        type: 'any',
-      });
+      expect(toolChoice).toEqual({ any: {} });
     });
 
     it('correctly format tool choice for named function', () => {
@@ -394,10 +362,7 @@ describe('bedrockClaudeAdapter', () => {
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
       const { toolChoice } = getCallParams();
-      expect(toolChoice).toEqual({
-        type: 'tool',
-        name: 'foobar',
-      });
+      expect(toolChoice).toEqual({ tool: { name: 'foobar' } });
     });
 
     it('correctly adapt the request for ToolChoiceType.None', () => {
@@ -425,8 +390,9 @@ describe('bedrockClaudeAdapter', () => {
 
       const { toolChoice, tools, system } = getCallParams();
       expect(toolChoice).toBeUndefined();
-      expect(tools).toEqual([]);
-      expect(system).toEqual(addNoToolUsageDirective('some system instruction'));
+      expect(tools).toEqual(undefined); // Claude requires tools to be undefined when no tools are available
+
+      expect(system).toEqual([{ text: addNoToolUsageDirective('some system instruction') }]);
     });
 
     it('propagates the abort signal when provided', () => {
@@ -443,7 +409,7 @@ describe('bedrockClaudeAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'converseStream',
         subActionParams: expect.objectContaining({
           signal: abortController.signal,
         }),
@@ -462,7 +428,7 @@ describe('bedrockClaudeAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'converseStream',
         subActionParams: expect.objectContaining({
           temperature: 0.9,
         }),
@@ -481,7 +447,7 @@ describe('bedrockClaudeAdapter', () => {
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
-        subAction: 'invokeStream',
+        subAction: 'converseStream',
         subActionParams: expect.objectContaining({
           model: 'claude-opus-3.5',
         }),

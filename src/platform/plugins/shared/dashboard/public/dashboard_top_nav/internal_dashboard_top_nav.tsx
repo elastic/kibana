@@ -21,7 +21,8 @@ import {
   UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MountPoint, useMemoizedStyles } from '@kbn/core/public';
+import { MountPoint } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
@@ -30,7 +31,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 
-import { UI_SETTINGS } from '../../common/constants';
+import { DASHBOARD_APP_ID, UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import {
   dashboardManagedBadge,
@@ -43,7 +44,6 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
-import { LEGACY_DASHBOARD_APP_ID } from '../../common/constants';
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
 import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
@@ -114,7 +114,7 @@ export function InternalDashboardTopNav({
     return getDashboardTitle(title, viewMode, !lastSavedId);
   }, [title, viewMode, lastSavedId]);
 
-  const styles = useMemoizedStyles(topNavStyles);
+  const styles = useMemoCss(topNavStyles);
 
   /**
    * focus on the top header when title or view mode is changed
@@ -367,7 +367,7 @@ export function InternalDashboardTopNav({
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews ?? []}
         allowSavingQueries
-        appName={LEGACY_DASHBOARD_APP_ID}
+        appName={DASHBOARD_APP_ID}
         visible={viewMode !== 'print'}
         setMenuMountPoint={
           embedSettings || fullScreenMode
@@ -407,7 +407,7 @@ const topNavStyles = {
         width: '100%',
         position: 'sticky',
         zIndex: euiTheme.levels.mask,
-        top: `var(--euiFixedHeadersOffset, ${euiTheme.size.base})`,
+        top: `var(--kbn-application--sticky-headers-offset, 0px)`,
         background: euiTheme.colors.backgroundBasePlain,
       },
     }),

@@ -236,3 +236,46 @@ export const clipDateInterval = (
 
   return { start: new Date(clippedStart), end: new Date(clippedEnd) };
 };
+
+/**
+ * Clamps the list `intervals` (in ascending order) to the dates provided in the `range`
+ * @param intervals
+ * @param boundary
+ * @returns
+ */
+export const clampIntervals = (intervals: Interval[], boundary: Interval) => {
+  const clampedIntervals = [];
+  const { gte: start, lte: end } = boundary;
+
+  const boundaryStartTime = start.getTime();
+  const boundaryEndTime = end.getTime();
+
+  for (const { gte, lte } of intervals) {
+    const intervalStart = gte.getTime();
+    const intervalEnd = lte.getTime();
+    // If the interval ends before the range starts, skip it
+    if (intervalEnd < boundaryStartTime) {
+      continue;
+    }
+
+    // If the interval starts after the range ends, stop processing (since the list is sorted)
+    if (intervalStart > boundaryEndTime) {
+      break;
+    }
+
+    const clamped = {
+      gte: new Date(intervalStart < boundaryStartTime ? boundaryStartTime : intervalStart),
+      lte: new Date(intervalEnd > boundaryEndTime ? boundaryEndTime : intervalEnd),
+    };
+
+    // Atter clamping the intervals the limits cannot be the same
+    if (clamped.gte.getTime() >= clamped.lte.getTime()) {
+      continue;
+    }
+
+    // Clamp the interval to the range
+    clampedIntervals.push(clamped);
+  }
+
+  return clampedIntervals;
+};

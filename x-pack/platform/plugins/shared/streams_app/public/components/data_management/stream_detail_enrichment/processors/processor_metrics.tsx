@@ -26,7 +26,7 @@ type ProcessorMetricBadgesProps = ProcessorMetrics;
 
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'percent',
-  maximumFractionDigits: 0,
+  maximumFractionDigits: 1,
 });
 
 export const ProcessorMetricBadges = ({
@@ -115,9 +115,7 @@ export const ProcessorErrors = ({ metrics }: { metrics: ProcessorMetrics }) => {
   const shouldDisplayErrorToggle = remainingCount > 0;
 
   const getCalloutProps = (type: ProcessorMetrics['errors'][number]['type']): EuiCallOutProps => {
-    const isWarningError =
-      type === 'non_additive_processor_failure' ||
-      (type === 'generic_processor_failure' && parsed_rate > 0);
+    const isWarningError = type === 'generic_processor_failure' && parsed_rate > 0;
 
     return {
       color: isWarningError ? 'warning' : 'danger',

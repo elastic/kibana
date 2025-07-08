@@ -4,19 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiSuperDatePicker } from '@elastic/eui';
-import { waitFor } from '@testing-library/react';
-import { mount } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
+import { useLocation } from 'react-router-dom';
 import qs from 'query-string';
 import { DatePicker } from './date_picker';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { of } from 'rxjs';
 import { DatePickerContextProvider } from '../../../../context/date_picker_context/date_picker_context';
+import userEvent from '@testing-library/user-event';
 
 let history: MemoryHistory;
 
@@ -48,7 +46,7 @@ function DatePickerWrapper() {
   );
 }
 
-function mountDatePicker(initialParams: {
+function renderDatePicker(initialParams: {
   rangeFrom?: string;
   rangeTo?: string;
   refreshInterval?: number;
@@ -64,37 +62,39 @@ function mountDatePicker(initialParams: {
   mockHistoryPush = jest.spyOn(history, 'push');
   mockHistoryReplace = jest.spyOn(history, 'replace');
 
-  const wrapper = mount(
-    <Router history={history}>
-      <KibanaContextProvider
-        services={{
-          data: {
-            query: {
-              timefilter: {
+  return {
+    ...render(
+      <Router history={history}>
+        <KibanaContextProvider
+          services={{
+            data: {
+              query: {
                 timefilter: {
-                  setTime: setTimeSpy,
-                  getTime: getTimeSpy,
-                  getTimeDefaults: jest.fn().mockReturnValue({}),
-                  getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
-                  getRefreshInterval: jest.fn().mockReturnValue({}),
+                  timefilter: {
+                    setTime: setTimeSpy,
+                    getTime: getTimeSpy,
+                    getTimeDefaults: jest.fn().mockReturnValue({}),
+                    getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
+                    getRefreshInterval: jest.fn().mockReturnValue({}),
+                  },
                 },
               },
             },
-          },
-          uiSettings: {
-            get: (key: string) => [],
-            get$: (key: string) => of(true),
-          },
-        }}
-      >
-        <DatePickerContextProvider>
-          <DatePickerWrapper />
-        </DatePickerContextProvider>
-      </KibanaContextProvider>
-    </Router>
-  );
-
-  return { wrapper, setTimeSpy, getTimeSpy };
+            uiSettings: {
+              get: (key: string) => [],
+              get$: (key: string) => of(true),
+            },
+          }}
+        >
+          <DatePickerContextProvider>
+            <DatePickerWrapper />
+          </DatePickerContextProvider>
+        </KibanaContextProvider>
+      </Router>
+    ),
+    setTimeSpy,
+    getTimeSpy,
+  };
 }
 
 describe('DatePicker', () => {
@@ -110,8 +110,9 @@ describe('DatePicker', () => {
     jest.resetAllMocks();
   });
 
-  it('updates the URL when the date range changes', () => {
-    const { wrapper } = mountDatePicker({
+  it('updates the URL when the date range changes', async () => {
+    const user = userEvent.setup();
+    renderDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
     });
@@ -120,23 +121,30 @@ describe('DatePicker', () => {
     expect(mockHistoryReplace).toHaveBeenCalledTimes(1);
     expect(mockHistoryPush).toHaveBeenCalledTimes(0);
 
-    wrapper.find(EuiSuperDatePicker).props().onTimeChange({
-      start: 'now-90m',
-      end: 'now-60m',
-      isInvalid: false,
-      isQuickSelection: true,
+    const datePicker = screen.getByTestId('superDatePickerShowDatesButton');
+    await user.click(datePicker);
+
+    const lastDayButton = await screen.findByTestId('superDatePickerRelativeDateInputNumber');
+    await user.clear(lastDayButton);
+    await user.type(lastDayButton, '30');
+
+    const updateButton = screen.getByTestId('superDatePickerApplyTimeButton');
+    await user.click(updateButton);
+
+    // Wait for URL update
+    await waitFor(() => {
+      expect(mockHistoryPush).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: expect.stringContaining('rangeFrom=now-30m&rangeTo=now'),
+        })
+      );
     });
-    expect(mockHistoryPush).toHaveBeenCalledTimes(1);
-    expect(mockHistoryPush).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        search: 'rangeFrom=now-90m&rangeTo=now-60m',
-      })
-    );
   });
 
   it('enables auto-refresh when refreshPaused is false', async () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
-    const { wrapper } = mountDatePicker({
+
+    renderDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
       refreshPaused: false,
@@ -144,14 +152,14 @@ describe('DatePicker', () => {
     });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1000);
-    await waitFor(() => {});
-    expect(mockRefreshTimeRange).toHaveBeenCalled();
-    wrapper.unmount();
+    await waitFor(() => {
+      expect(mockRefreshTimeRange).toHaveBeenCalled();
+    });
   });
 
   it('disables auto-refresh when refreshPaused is true', async () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
-    mountDatePicker({
+    renderDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
       refreshPaused: true,
@@ -159,13 +167,8 @@ describe('DatePicker', () => {
     });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1000);
-    await waitFor(() => {});
-    expect(mockRefreshTimeRange).not.toHaveBeenCalled();
-  });
-
-  describe('if both `rangeTo` and `rangeFrom` is set', () => {
-    it('does not update the url', () => {
-      expect(mockHistoryReplace).toHaveBeenCalledTimes(0);
+    await waitFor(() => {
+      expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     });
   });
 });

@@ -6,10 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { METADATA_FIELDS } from '../../shared/constants';
+import { METADATA_FIELDS } from '@kbn/esql-ast';
+import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { setup, indexes, integrations } from './helpers';
-import { getRecommendedQueries } from '../recommended_queries/templates';
 
 const visibleIndices = indexes
   .filter(({ hidden }) => !hidden)
@@ -107,9 +106,10 @@ describe('autocomplete.suggest', () => {
       const metadataFieldsAndIndex = metadataFields.filter((field) => field !== '_index');
 
       test('on <// FROM something METADATA field1, /kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
-        const recommendedQueries = getRecommendedQueries({
+        const recommendedQueries = getRecommendedQueriesTemplates({
           fromCommand: '',
           timeField: 'dateField',
+          categorizationField: 'textField',
         });
         const { assertSuggestions } = await setup();
         const expected = [

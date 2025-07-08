@@ -6,7 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import {
+  timeUnitsToSuggest,
+  timeUnits,
+  fieldTypes as _fieldTypes,
+  FieldType,
+  dataTypes,
+  SupportedDataType,
+  FunctionDefinition,
+} from '@kbn/esql-ast';
+import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { readFile, writeFile } from 'fs/promises';
 import { camelCase } from 'lodash';
 import capitalize from 'lodash/capitalize';
@@ -19,17 +30,6 @@ import {
   policies,
   unsupported_field,
 } from '../__tests__/helpers';
-import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
-import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { getFunctionSignatures } from '../definitions/helpers';
-import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
-import {
-  FieldType,
-  FunctionDefinition,
-  SupportedDataType,
-  fieldTypes as _fieldTypes,
-  dataTypes,
-} from '../definitions/types';
 import { nonNullable } from '../shared/helpers';
 import { Setup, setup } from './__tests__/helpers';
 import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
@@ -263,19 +263,23 @@ describe('validation logic', () => {
       },
     });
 
-    // The following block tests a case that is allowed in Kibana
-    // by suppressing the parser error in src/platform/packages/shared/kbn-esql-ast/src/ast_parser.ts
-    describe('ESQL query can be empty', () => {
-      testErrorsAndWarnings('', []);
-      testErrorsAndWarnings(' ', []);
-      testErrorsAndWarnings('     ', []);
+    describe('ESQL query cannot be empty', () => {
+      testErrorsAndWarnings('', [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
+      ]);
+      testErrorsAndWarnings(' ', [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
+      ]);
+      testErrorsAndWarnings('     ', [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
+      ]);
     });
 
     describe('ESQL query should start with a source command', () => {
       ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
         (command) =>
           testErrorsAndWarnings(command, [
-            `SyntaxError: mismatched input '${command}' expecting {'explain', 'row', 'from', 'show'}`,
+            `SyntaxError: mismatched input '${command}' expecting {'row', 'from', 'show'}`,
           ])
       );
     });
@@ -325,40 +329,11 @@ describe('validation logic', () => {
         "SyntaxError: no viable alternative at input '(1,'",
         "SyntaxError: extraneous input ')' expecting <EOF>",
       ]);
+
       for (const bool of ['true', 'false']) {
         testErrorsAndWarnings(`row a=NOT ${bool}`, []);
         testErrorsAndWarnings(`row NOT ${bool}`, []);
       }
-
-      testErrorsAndWarnings('row var = 1 in ', [
-        "SyntaxError: mismatched input '<EOF>' expecting '('",
-      ]);
-      testErrorsAndWarnings('row var = 1 in (', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        'Error: [in] function expects at least 2 arguments, got 1.',
-      ]);
-      testErrorsAndWarnings('row var = 1 not in ', [
-        "SyntaxError: mismatched input '<EOF>' expecting '('",
-      ]);
-      testErrorsAndWarnings('row var = 1 in (1, 2, 3)', []);
-      testErrorsAndWarnings('row var = 5 in (1, 2, 3)', []);
-      testErrorsAndWarnings('row var = 5 not in (1, 2, 3)', []);
-      testErrorsAndWarnings('row var = 1 in (1, 2, 3, round(5))', []);
-      testErrorsAndWarnings('row var = "a" in ("a", "b", "c")', []);
-      testErrorsAndWarnings('row var = "a" in ("a", "b", "c")', []);
-      testErrorsAndWarnings('row var = "a" not in ("a", "b", "c")', []);
-      testErrorsAndWarnings('row var = 1 in ("a", "b", "c")', [
-        'Argument of [in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
-      ]);
-      testErrorsAndWarnings('row var = 5 in ("a", "b", "c")', [
-        'Argument of [in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
-      ]);
-      testErrorsAndWarnings('row var = 5 not in ("a", "b", "c")', [
-        'Argument of [not_in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
-      ]);
-      testErrorsAndWarnings('row var = 5 not in (1, 2, 3, "a")', [
-        'Argument of [not_in] must be [integer[]], found value [(1, 2, 3, "a")] type [(integer, integer, integer, keyword)]',
-      ]);
 
       // test that "and" and "or" accept null... not sure if this is the best place or not...
       for (const op of ['and', 'or']) {
@@ -414,13 +389,13 @@ describe('validation logic', () => {
           `Argument of [${op}] must be [keyword], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = 5 NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [5] type [integer]`,
+          `Argument of [not ${op}] must be [keyword], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = NOT 5 ${op} "?a"`, [
           `Argument of [${op}] must be [keyword], found value [5] type [integer]`,
         ]);
         testErrorsAndWarnings(`row var = NOT 5 NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [5] type [integer]`,
+          `Argument of [not ${op}] must be [keyword], found value [5] type [integer]`,
         ]);
       }
 
@@ -531,16 +506,16 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
       testErrorsAndWarnings('from index | project ', [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | project textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | PROJECT textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | project missingField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | keep k*', []);
       testErrorsAndWarnings('from index | keep *Field', []);
@@ -636,28 +611,32 @@ describe('validation logic', () => {
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
       ]);
       testErrorsAndWarnings('from a_index | rename textField', [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'",
+        "SyntaxError: no viable alternative at input 'textField'",
       ]);
       testErrorsAndWarnings('from a_index | rename a', [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'",
-        'Unknown column [a]',
+        "SyntaxError: no viable alternative at input 'a'",
       ]);
       testErrorsAndWarnings('from a_index | rename textField as', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        'Error: [as] function expects exactly 2 arguments, got 1.',
       ]);
       testErrorsAndWarnings('from a_index | rename missingField as', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        'Unknown column [missingField]',
+        'Error: [as] function expects exactly 2 arguments, got 1.',
       ]);
       testErrorsAndWarnings('from a_index | rename textField as b', []);
       testErrorsAndWarnings('from a_index | rename textField AS b', []);
       testErrorsAndWarnings('from a_index | rename textField As b', []);
       testErrorsAndWarnings('from a_index | rename textField As b, b AS c', []);
+      testErrorsAndWarnings('from a_index | rename b = textField', []);
+      testErrorsAndWarnings('from a_index | rename b = textField, b AS c', []);
+      testErrorsAndWarnings(
+        'from a_index | rename textField = a',
+        ['Unknown column [a]'],
+        ['Column [textField] of type text has been overwritten as new type: unknown']
+      );
       testErrorsAndWarnings('from a_index | rename fn() as a', [
-        "SyntaxError: token recognition error at: '('",
-        "SyntaxError: token recognition error at: ')'",
-        'Unknown column [fn]',
-        'Unknown column [a]',
+        'Invalid query [from a_index | rename fn() as a]',
       ]);
       testErrorsAndWarnings(
         'from a_index | eval doubleField + 1 | rename `doubleField + 1` as a',
@@ -669,6 +648,7 @@ describe('validation logic', () => {
       );
       testErrorsAndWarnings('from a_index |eval doubleField + 1 | rename `doubleField + 1` as ', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        'Error: [as] function expects exactly 2 arguments, got 1.',
       ]);
       testErrorsAndWarnings('from a_index | rename key* as keywords', [
         'Unknown column [keywords]',
@@ -869,13 +849,13 @@ describe('validation logic', () => {
           `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [doubleField] type [double]`,
+          `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where NOT doubleField ${op} "?a"`, [
           `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | where NOT doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [doubleField] type [double]`,
+          `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
       }
 
@@ -1176,13 +1156,13 @@ describe('validation logic', () => {
           `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [doubleField] type [double]`,
+          `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval NOT doubleField ${op} "?a"`, [
           `Argument of [${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
         testErrorsAndWarnings(`from a_index | eval NOT doubleField NOT ${op} "?a"`, [
-          `Argument of [not_${op}] must be [keyword], found value [doubleField] type [double]`,
+          `Argument of [not ${op}] must be [keyword], found value [doubleField] type [double]`,
         ]);
       }
       // test lists

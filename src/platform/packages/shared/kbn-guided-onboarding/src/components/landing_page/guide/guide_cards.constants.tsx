@@ -83,16 +83,6 @@ export const getGuideCards = (
       order: 7,
     },
     {
-      solution: 'search',
-      icon: 'search',
-      title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title', {
-        defaultMessage: 'Add search to my website',
-      }),
-      guideId: 'websiteSearch',
-      telemetryId: 'onboarding--search--website',
-      order: 13,
-    },
-    {
       solution: 'observability',
       icon: 'logstashInput',
       title: i18n.translate(
