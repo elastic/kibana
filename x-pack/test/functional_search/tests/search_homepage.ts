@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'searchStart',
     'searchOverview',
+    'apiKeys',
     'searchHomePage',
     'searchNavigation',
   ]);
@@ -23,6 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const spaces = getService('spaces');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
@@ -106,6 +108,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.existOrFail('createApiKeyButton');
             await testSubjects.existOrFail('manageApiKeysButton');
             await testSubjects.existOrFail('activeApiKeysBadge');
+          });
+
+          it('opens create_api_key flyout on clicking CreateApiKey button', async () => {
+            await testSubjects.click('createApiKeyButton');
+            await retry.try(async () => {
+              expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API key');
+            });
           });
 
           it('opens API keys management page on clicking Manage API Keys', async () => {
