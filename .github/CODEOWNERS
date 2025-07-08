@@ -1624,7 +1624,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/test/api_integration/apis/dashboards @elastic/kibana-presentation
 /src/platform/test/interpreter_functional/snapshots @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/54342
 /src/platform/test/functional/services/inspector.ts @elastic/kibana-presentation
-/x-pack/test/functional/services/canvas_element.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/services/canvas_element.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/page_objects/canvas_page.ts @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group3/canvas.ts @elastic/kibana-presentation

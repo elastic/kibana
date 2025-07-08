@@ -17,6 +17,7 @@ import { ActionsServiceProvider } from '@kbn/test-suites-xpack-platform/function
 import { AiopsProvider } from '@kbn/test-suites-xpack-platform/functional/services/aiops';
 import { RulesServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/rules';
 import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
+import { CanvasElementProvider } from '@kbn/test-suites-xpack-platform/functional/services/canvas_element';
 import { TransformProvider } from '@kbn/test-suites-xpack-platform/functional/services/transform';
 import { ReportingFunctionalProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
@@ -60,9 +61,6 @@ import { PipelineListProvider } from './pipeline_list';
 import { PipelineEditorProvider } from './pipeline_editor';
 // @ts-ignore not ts yet
 import { RandomProvider } from './random';
-// @ts-ignore not ts yet
-import { CanvasElementProvider } from './canvas_element';
-// @ts-ignore not ts yet
 // @ts-ignore not ts yet
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
