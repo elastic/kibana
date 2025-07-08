@@ -418,7 +418,7 @@ Consider common error states your API might face, as well the information you mi
 
 ### Security
 
-User authentication is handled globally for all routes but as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API. This depends on the actions your API performs.
+User authentication is handled globally for all routes but as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API (see <DocLink id="kibDevFeaturePrivileges" text="Feature Privileges" />). This depends on the actions your API performs.
 
 <DocCallOut title="Do not expose sensitive information" color="warning">
   Carefully consider the information you return from or log in your API handler. **Do not expose sensitive information**. This includes information that can be used to identify users. We have a separate <DocLink id="kibAuditLogging" text="audit logger" /> that you can use to log sensitive information about user actions.
