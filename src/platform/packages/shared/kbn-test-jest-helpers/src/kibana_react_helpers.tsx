@@ -86,7 +86,7 @@ import type {
  * ```
  */
 export function createWithKibanaMock<Services extends KibanaServices = KibanaServices, T = unknown>(
-  mockKibanaContext: KibanaReactContextValue<Services>,
+  mockKibanaContext: Partial<KibanaReactContextValue<Services>> = {},
   additionalProps: T = {} as T
 ): (Component: React.ComponentType<any>) => React.FC<any> {
   return (Component: React.ComponentType<any>) => {
