@@ -15,7 +15,7 @@ import {
 import {
   FieldPatternResultWithChanges,
   getLogPatterns,
-} from '@kbn/observability-utils-server/entities/get_log_patterns';
+} from '@kbn/genai-utils-server/log_analysis/get_log_patterns';
 import { castArray, compact, groupBy, orderBy } from 'lodash';
 import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES } from '../../prompts';
 import { RootCauseAnalysisContext } from '../../types';

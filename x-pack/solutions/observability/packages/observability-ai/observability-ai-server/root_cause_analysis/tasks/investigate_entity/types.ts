@@ -6,7 +6,7 @@
  */
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import type { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
+import type { TruncatedDocumentAnalysis } from '@kbn/genai-utils-common/log_analysis/document_analysis';
 import type { AnalyzeLogPatternOutput } from '../analyze_log_patterns';
 import type { RelatedEntityDescription } from '../find_related_entities/extract_related_entities';
 import type { RelatedEntityKeywordSearch } from '../find_related_entities/write_keyword_searches_for_related_entities';
