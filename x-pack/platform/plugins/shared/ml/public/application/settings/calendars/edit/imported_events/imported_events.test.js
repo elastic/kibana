@@ -10,22 +10,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ImportedEvents } from './imported_events';
 
-jest.mock('../../../../capabilities/check_capabilities', () => ({
-  usePermissionCheck: () => [true, true],
-}));
-
-jest.mock('../../../../contexts/kibana/kibana_context', () => ({
-  useMlKibana: () => ({
-    services: {
-      mlServices: {
-        mlCapabilities: {
-          canCreateCalendar: jest.fn(() => true),
-          canDeleteCalendar: jest.fn(() => true),
-        },
-      },
-    },
-  }),
-}));
+jest.mock('../../../../capabilities/check_capabilities');
 
 const testProps = {
   events: [
