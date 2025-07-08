@@ -6,12 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type {
-  AgentProvider,
-  AgentRegistry,
-  ProvidedAgent,
-  RunAgentFn,
-} from '@kbn/onechat-server';
+import type { AgentProvider, AgentRegistry, ProvidedAgent, RunAgentFn } from '@kbn/onechat-server';
 import type { AgentClient } from './client';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
