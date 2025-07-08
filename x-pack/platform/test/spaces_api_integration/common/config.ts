@@ -51,7 +51,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
         spaces: config.xpack.api.get('services.spaces'),
         usageAPI: config.xpack.api.get('services.usageAPI'),
-        roleScopedSupertest: services.roleScopedSupertest,
+        spacesSupertest: services.spacesSupertest,
         samlAuth: () => {},
       },
       junit: {

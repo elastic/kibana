@@ -8,7 +8,7 @@
  */
 
 import { DashboardPanel } from '../../types';
-import { transformPanelsIn } from './panels_in_transforms';
+import { transformPanelsIn } from './transform_panels_in';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),

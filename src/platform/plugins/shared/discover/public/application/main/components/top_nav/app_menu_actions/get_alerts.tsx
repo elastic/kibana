@@ -46,7 +46,12 @@ const CreateAlertFlyout: React.FC<{
 }> = ({ stateContainer, discoverParams, services, onFinishAction }) => {
   const query = stateContainer.appState.getState().query;
 
-  const { dataView, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = discoverParams;
+  const {
+    dataView,
+    isEsqlMode,
+    adHocDataViews,
+    actions: { updateAdHocDataViews },
+  } = discoverParams;
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
@@ -98,7 +103,7 @@ const CreateAlertFlyout: React.FC<{
       onCancel={onFinishAction}
       onSubmit={onFinishAction}
       onChangeMetaData={(metadata: EsQueryAlertMetaData) =>
-        onUpdateAdHocDataViews(metadata.adHocDataViewList)
+        updateAdHocDataViews(metadata.adHocDataViewList)
       }
       ruleTypeId={ES_QUERY_ID}
       initialValues={{ params: getParams() }}

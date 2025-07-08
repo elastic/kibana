@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { apiPrivileges } from '../../common/features';
-import { ONECHAT_AGENT_API_UI_SETTING_ID } from '../../common/constants';
 import type {
   GetAgentProfileResponse,
   CreateAgentProfileResponse,
@@ -16,9 +16,9 @@ import type {
   DeleteAgentProfileResponse,
   ListAgentProfilesResponse,
 } from '../../common/http_api/agent_profiles';
+import { getTechnicalPreviewWarning } from './utils';
 
-const TECHNICAL_PREVIEW_WARNING =
-  'Elastic Agent API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
+const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Agent API');
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object({
@@ -57,11 +57,6 @@ export function registerAgentProfileRoutes({
         validate: false,
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_AGENT_API_UI_SETTING_ID);
-        if (!enabled) {
-          return response.notFound();
-        }
         const { agents } = getInternalServices();
         const service = await agents.getProfileService(request);
         const agentProfiles = await service.list();
@@ -94,11 +89,6 @@ export function registerAgentProfileRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_AGENT_API_UI_SETTING_ID);
-        if (!enabled) {
-          return response.notFound();
-        }
         const { agents } = getInternalServices();
         const service = await agents.getProfileService(request);
 
@@ -140,11 +130,6 @@ export function registerAgentProfileRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_AGENT_API_UI_SETTING_ID);
-        if (!enabled) {
-          return response.notFound();
-        }
         const { agents } = getInternalServices();
         const service = await agents.getProfileService(request);
         const profile = await service.create(request.body);
@@ -185,11 +170,6 @@ export function registerAgentProfileRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_AGENT_API_UI_SETTING_ID);
-        if (!enabled) {
-          return response.notFound();
-        }
         const { agents } = getInternalServices();
         const service = await agents.getProfileService(request);
         const update = { id: request.params.id, ...request.body };

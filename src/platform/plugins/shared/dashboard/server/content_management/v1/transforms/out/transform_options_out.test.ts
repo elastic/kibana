@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformOptionsOut } from './options_out_transforms';
+import { transformOptionsOut } from './transform_options_out';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 
 describe('transformOptionsOut', () => {

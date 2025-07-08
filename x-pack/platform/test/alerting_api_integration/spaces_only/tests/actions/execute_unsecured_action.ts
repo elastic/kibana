@@ -14,7 +14,6 @@ import { ObjectRemover } from '../../../common/lib';
 import { Spaces } from '../../scenarios';
 import { createWebhookConnector } from './connector_types/stack/webhook';
 
-// eslint-disable-next-line import/no-default-export
 export default function createUnsecuredActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');

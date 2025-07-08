@@ -34,7 +34,6 @@ function parsePort(url: Record<string, string>): Record<string, string | null | 
   };
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');

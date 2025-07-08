@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { createServerlessFeatureFlagTestConfig } from '../../default_configs/feature_flag.serverless.config.base';
+import { createServerlessFeatureFlagTestConfig } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/feature_flag.serverless.config.base';
+import { services } from '../../services';
 
-export default createServerlessFeatureFlagTestConfig({
+export default createServerlessFeatureFlagTestConfig<typeof services>({
+  services,
   serverlessProject: 'oblt',
   kbnServerArgs: [
     '--xpack.actions.preconfigured',

@@ -16,7 +16,7 @@ import { getDefaultFormStateByType } from '../utils';
 import { ProcessorFormState } from '../types';
 import { configDrivenProcessors } from './config_driven';
 import { useGetStreamEnrichmentState } from '../state_management/stream_enrichment_state_machine';
-import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
+import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
 import { useStreamEnrichmentSelector } from '../state_management/stream_enrichment_state_machine';
 
 interface TAvailableProcessor {
@@ -47,7 +47,7 @@ export const ProcessorTypeSelector = ({
   const handleChange = (type: ProcessorType) => {
     const formState = getDefaultFormStateByType(
       type,
-      selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+      selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
       { grokCollection }
     );
     reset(formState);

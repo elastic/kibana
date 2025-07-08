@@ -43,7 +43,6 @@ import {
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertestService = getService('supertest');
   const es = getService('es');

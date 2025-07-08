@@ -18,7 +18,6 @@ import {
   ObjectRemover,
 } from '../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function createEnableAlertTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

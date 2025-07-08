@@ -48,7 +48,7 @@ interface ConnectorNamesAggregation {
   }>;
 }
 
-const sumBucketAggregationHasValue = (aggregation: unknown): aggregation is HasNumericValue =>
+const aggregationHasValue = (aggregation: unknown): aggregation is HasNumericValue =>
   typeof aggregation === 'object' &&
   aggregation !== null &&
   'value' in aggregation &&
@@ -126,7 +126,7 @@ export const transformSearchResponseToAlerts = ({
 
   const uniqueAlertIdsCountAggregation = response.aggregations?.unique_alert_ids_count;
 
-  const uniqueAlertIdsCount = sumBucketAggregationHasValue(uniqueAlertIdsCountAggregation)
+  const uniqueAlertIdsCount = aggregationHasValue(uniqueAlertIdsCountAggregation)
     ? uniqueAlertIdsCountAggregation.value
     : 0;
 

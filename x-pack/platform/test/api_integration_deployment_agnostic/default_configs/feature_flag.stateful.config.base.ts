@@ -4,30 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import path from 'path';
-
-import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import {
-  MOCK_IDP_ATTRIBUTE_EMAIL,
-  MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_ENTITY_ID,
   MOCK_IDP_ATTRIBUTE_PRINCIPAL,
   MOCK_IDP_ATTRIBUTE_ROLES,
-  MOCK_IDP_ENTITY_ID,
-  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_ATTRIBUTE_EMAIL,
+  MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import type { FtrConfigProviderContext } from '@kbn/test';
 import {
-  defineDockerServersConfig,
-  esTestConfig,
   fleetPackageRegistryDockerImage,
+  esTestConfig,
   kbnTestConfig,
   systemIndicesSuperuser,
+  FtrConfigProviderContext,
+  defineDockerServersConfig,
 } from '@kbn/test';
-
-import type { DeploymentAgnosticCommonServices } from '../services';
-import { services } from '../services';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import path from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
+import { DeploymentAgnosticCommonServices, services } from '../services';
+import { AI_ASSISTANT_SNAPSHOT_REPO_PATH, LOCAL_PRODUCT_DOC_PATH } from './common_paths';
+import { updateKbnServerArguments } from './helpers';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   esServerArgs?: string[];
@@ -38,22 +37,20 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   suiteTags?: { include?: string[]; exclude?: string[] };
 }
 
-export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
+export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnosticCommonServices>(
   options: CreateTestConfigOptions<T>
 ) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    if (options.esServerArgs || options.kbnServerArgs) {
-      throw new Error(
-        `FTR doesn't provision custom ES/Kibana server arguments into the ESS deployment.
-  It may lead to unexpected test failures on Cloud. Please contact #appex-qa.`
-      );
-    }
-
     // if config is executed on CI or locally
     const isRunOnCI = process.env.CI;
 
     const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+    let kbnServerArgs: string[] = [];
+
+    if (options.kbnServerArgs) {
+      kbnServerArgs = await updateKbnServerArguments(options.kbnServerArgs);
+    }
 
     /**
      * This is used by CI to set the docker registry port
@@ -64,7 +61,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const xPackAPITestsConfig = await readConfigFile(
-      require.resolve('../../../api_integration/config.ts')
+      require.resolve('../../api_integration/config.ts')
     );
 
     // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
@@ -73,7 +70,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     );
     const samlIdPPlugin = path.resolve(
       __dirname,
-      '../../../../../test/security_api_integration/plugins/saml_provider'
+      '../../../../test/security_api_integration/plugins/saml_provider'
     );
 
     const servers = {
@@ -100,7 +97,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
         },
       }),
       testFiles: options.testFiles,
@@ -128,6 +125,8 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
+          `path.repo=${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`,
+          ...(options.esServerArgs || []),
         ],
         files: [
           // Passing the roles that are equivalent to the ones we have in serverless
@@ -155,11 +154,16 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
             basic: { 'cloud-basic': { order: 1 } },
           })}`,
           `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+          '--xpack.uptime.service.password=test',
+          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          '--xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true',
+          `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
           ...(dockerRegistryPort
             ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
             : []),
-          // @ts-expect-error
-          ...(options?.kbnTestServer?.serverArgs ?? []),
+          ...kbnServerArgs,
         ],
       },
     };

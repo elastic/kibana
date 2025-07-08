@@ -688,6 +688,10 @@
                 "path": "src/platform/plugins/shared/dashboard/public/dashboard_api/track_contentful_render.ts"
               },
               {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/case_view/use_case_page_view_ebt.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/application/services/telemetry/telemetry_client.ts"
               },
@@ -986,6 +990,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/async_sender.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "observability",

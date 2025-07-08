@@ -22,7 +22,6 @@ import { secOnlySpacesAll, superUser } from '../../../../common/lib/authenticati
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');

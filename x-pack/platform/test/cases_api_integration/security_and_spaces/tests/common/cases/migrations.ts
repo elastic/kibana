@@ -23,7 +23,6 @@ import {
 import { superUser } from '../../../../common/lib/authentication/users';
 import { findAttachments } from '../../../../common/lib/api/attachments';
 
-// eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
