@@ -10,6 +10,7 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { debounce } from 'lodash';
 import { EuiResizableButton, useEuiTheme, keys, EuiThemeComputed } from '@elastic/eui';
+import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-chrome-layout-constants';
 import { WELCOME_TOUR_DELAY } from '../../../../common/constants';
 
 const CONSOLE_MIN_HEIGHT = 200;
@@ -31,7 +32,7 @@ export interface EmbeddedConsoleResizeButtonProps {
 
 export function getCurrentConsoleMaxSize(euiTheme: EuiThemeComputed<{}>) {
   const euiBaseSize = euiTheme.base;
-  const appRect = document.getElementById('app-fixed-viewport')?.getBoundingClientRect();
+  const appRect = document.getElementById(APP_FIXED_VIEWPORT_ID)?.getBoundingClientRect();
   if (!appRect) return CONSOLE_MIN_HEIGHT;
 
   // We leave a buffer of baseSize to allow room for the user to hover on the top border for resizing
