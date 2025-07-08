@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-case-suggestion-registry-plugin",
+  "owner": [
+    "@elastic/obs-ux-management-team"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "observabilityCaseSuggestionRegistry",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "observabilityCaseSuggestionRegistry"
+    ],
+    "requiredPlugins": [
+    ],
+    "optionalPlugins": [
+    ],
+    "requiredBundles": [
+    ],
+    "extraPublicDirs": [
+    ]
+  }
+}
