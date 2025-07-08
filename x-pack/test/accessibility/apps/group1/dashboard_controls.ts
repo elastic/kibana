@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Options control panel & dashboard with options control', async () => {
-      await dashboardControls.controlsEditorSetfield('OriginCityName');
+      await dashboardControls.controlsEditorSetfield('DestCityName');
       await a11y.testAppSnapshot();
       await testSubjects.click('control-editor-save');
       await a11y.testAppSnapshot();
