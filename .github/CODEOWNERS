@@ -400,8 +400,6 @@ src/platform/packages/shared/content-management/table_list_view @elastic/appex-s
 src/platform/packages/shared/content-management/table_list_view_common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/table_list_view_table @elastic/appex-sharedux
 src/platform/packages/shared/content-management/user_profiles @elastic/appex-sharedux
-src/platform/packages/shared/controls/controls-constants @elastic/kibana-presentation
-src/platform/packages/shared/controls/controls-schemas @elastic/kibana-presentation
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/chat @elastic/search-kibana
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
@@ -2598,7 +2596,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/sentinelone @elastic/security-defend-workflows
-/x-pack/solutions/security/test/alerting_api_integration/security_and_spaces @elastic/security-defend-workflows
+/x-pack/solutions/security/test/api_integration_basic @elastic/security-defend-workflows
 /x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/sentinelone.ts @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/crowdstrike @elastic/security-defend-workflows
