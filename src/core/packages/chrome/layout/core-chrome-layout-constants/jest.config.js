@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as helpers from './helpers';
-import { validationRrfCommandTestSuite } from './test_suites/validation.command.rrf';
-
-validationRrfCommandTestSuite(helpers.setup);
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/core/packages/chrome/layout/core-chrome-layout-constants'],
+};

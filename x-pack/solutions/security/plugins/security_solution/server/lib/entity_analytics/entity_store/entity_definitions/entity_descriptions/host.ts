@@ -15,6 +15,7 @@ export const hostEntityEngineDescription: EntityDescription = {
   entityType: 'host',
   version: HOST_DEFINITION_VERSION,
   identityField: HOST_IDENTITY_FIELD,
+  identityFieldMapping: { type: 'keyword' },
   settings: {
     timestampField: '@timestamp',
   },
