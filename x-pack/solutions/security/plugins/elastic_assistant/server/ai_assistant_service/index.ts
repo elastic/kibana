@@ -322,7 +322,6 @@ export class AIAssistantService {
       this.options.logger.debug(`Initializing resources for AIAssistantService`);
       const esClient = await this.options.elasticsearchClientPromise;
       const productDocManager = await this.options.productDocManager;
-      console.log('productDocManager', productDocManager);
       if (productDocManager) {
         // install product documentation without blocking other resources
         void ensureProductDocumentationInstalled({
