@@ -25,7 +25,7 @@ describe('AnnotationDescriptionList', () => {
 
   test('Initialization with annotation.', () => {
     const { container } = renderWithI18n(
-      <AnnotationDescriptionList annotation={mockAnnotations[0] as unknown as Annotation} />
+      <AnnotationDescriptionList annotation={mockAnnotations[0] as Annotation} />
     );
     expect(container.firstChild).toMatchSnapshot();
   });
