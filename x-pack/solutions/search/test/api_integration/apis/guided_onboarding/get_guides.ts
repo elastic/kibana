@@ -21,8 +21,7 @@ export default function testGetGuidesState({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/217198
-  describe.skip(`GET ${getGuidesPath}`, () => {
+  describe(`GET ${getGuidesPath}`, () => {
     afterEach(async () => {
       // Clean up saved objects
       await kibanaServer.savedObjects.clean({
@@ -41,12 +40,18 @@ export default function testGetGuidesState({ getService }: FtrProviderContext) {
 
     it('returns all created guides (active and inactive)', async () => {
       await createGuides(kibanaServer, [testGuideStep1ActiveState]);
-      const response = await supertest
+      const { body: responseBody } = await supertest
         .get(getGuidesPath)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
-      expect(response.body).not.to.be.empty();
-      expect(response.body.state).to.eql([testGuideStep1ActiveState]);
+
+      expect(responseBody).not.to.be.empty();
+
+      const sortById = (a: { guideId: string }, b: { guideId: string }) =>
+        a.guideId.localeCompare(b.guideId);
+
+      // sort the guides in the response by ID for stable comparison
+      expect(responseBody.state.sort(sortById)).to.eql([testGuideStep1ActiveState]);
     });
   });
 }
