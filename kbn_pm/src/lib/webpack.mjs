@@ -18,9 +18,9 @@ import path from 'path';
  * @returns {Promise<void>}
  */
 export async function buildPackage(packagePath, { log, quiet, dist }) {
-  log.info(`build package @ ${packagePath}`);
+  log.info('build package @ ' + packagePath);
 
-  await run('yarn', ['build'].concat(dist ? ['--dist'] : []), {
+  await run('moon', ['build'].concat(dist ? ['--dist'] : []), {
     env: {
       ...process.env,
       REPO_ROOT,
