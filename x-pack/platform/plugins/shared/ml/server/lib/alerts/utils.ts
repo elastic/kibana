@@ -21,7 +21,7 @@ const isUserMisconfigurationError = (err: unknown): boolean => {
     return true;
   }
 
-  if ((err as any)?.statusCode === 404) {
+  if (err !== null && typeof err === 'object' && 'statusCode' in err && err.statusCode === 404) {
     return true;
   }
 
