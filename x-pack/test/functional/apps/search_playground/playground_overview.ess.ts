@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { MachineLearningCommonAPIProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml/common_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createOpenAIConnector } from './utils/create_openai_connector';
-import { MachineLearningCommonAPIProvider } from '../../services/ml/common_api';
 
 import {
   createLlmProxy,
