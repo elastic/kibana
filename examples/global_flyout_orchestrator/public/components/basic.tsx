@@ -33,7 +33,7 @@ const BasicFlyoutContent: React.FC = () => {
   const { clearHistory } = useEuiFlyoutSession();
   return (
     <>
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="flyout-basic-title">Basic Flyout</h2>
         </EuiTitle>
@@ -54,10 +54,10 @@ const BasicFlyoutContent: React.FC = () => {
     </>
   );
 };
-const BasicFlyoutControls: React.FC<{ flyoutType: 'push' | 'overlay'; flyoutSize: 's' | 'm' }> = ({
-  flyoutSize,
-  flyoutType,
-}) => {
+const BasicFlyoutControls: React.FC<{
+  flyoutType: 'push' | 'overlay';
+  flyoutSize: 's' | 'm' | 'l';
+}> = ({ flyoutSize, flyoutType }) => {
   const { openFlyout, isFlyoutOpen, isChildFlyoutOpen } = useEuiFlyoutSession();
   const handleOpenFlyout = () => {
     const options: EuiFlyoutSessionOpenMainOptions = {
@@ -84,16 +84,17 @@ const BasicFlyoutControls: React.FC<{ flyoutType: 'push' | 'overlay'; flyoutSize
 };
 
 export const BasicFlyoutApp: React.FC = () => {
-  const [flyoutType, setFlyoutType] = useState<'push' | 'overlay'>('push');
+  const [flyoutType, setFlyoutType] = useState<'push' | 'overlay'>('overlay');
   const typeRadios: EuiRadioGroupOption[] = [
-    { id: 'overlay', label: 'Overlay' },
     { id: 'push', label: 'Push' },
+    { id: 'overlay', label: 'Overlay' },
   ];
 
-  const [size, setSize] = useState<'s' | 'm'>('m');
+  const [size, setSize] = useState<'s' | 'm' | 'l'>('l');
   const sizeRadios: EuiRadioGroupOption[] = [
     { id: 's', label: 'Small' },
     { id: 'm', label: 'Medium' },
+    { id: 'l', label: 'Large' },
   ];
 
   const renderMainFlyoutContent = () => {
@@ -125,7 +126,7 @@ export const BasicFlyoutApp: React.FC = () => {
         <EuiRadioGroup
           options={sizeRadios}
           idSelected={size}
-          onChange={(id) => setSize(id as 's' | 'm')}
+          onChange={(id) => setSize(id as 's' | 'm' | 'l')}
           legend={{ children: 'Flyout size' }}
           name="statefulFlyoutSizeToggle"
         />

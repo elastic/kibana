@@ -27,12 +27,12 @@ interface AppDeps {
 export const App = ({ basename, navigation }: AppDeps) => {
   const tabs = [
     {
-      id: 'basic--id',
-      name: 'Basic Flyout',
+      id: 'advanced-history--id',
+      name: 'Advanced Use Case',
       content: (
         <>
           <EuiSpacer />
-          <BasicFlyoutApp />
+          <ECommerceApp />
         </>
       ),
     },
@@ -47,22 +47,22 @@ export const App = ({ basename, navigation }: AppDeps) => {
       ),
     },
     {
-      id: 'advanced-history--id',
-      name: 'Advanced Use Case',
-      content: (
-        <>
-          <EuiSpacer />
-          <ECommerceApp />
-        </>
-      ),
-    },
-    {
       id: 'group-opener--id',
       name: 'Group Opener',
       content: (
         <>
           <EuiSpacer />
           <GroupOpenerApp />
+        </>
+      ),
+    },
+    {
+      id: 'basic--id',
+      name: 'Basic Flyout',
+      content: (
+        <>
+          <EuiSpacer />
+          <BasicFlyoutApp />
         </>
       ),
     },

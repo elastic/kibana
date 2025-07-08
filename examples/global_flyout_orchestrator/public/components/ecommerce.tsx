@@ -21,6 +21,7 @@ import {
   EuiFlyoutSessionOpenSystemOptions,
   EuiFlyoutSessionProvider,
   EuiFlyoutSessionRenderContext,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -229,14 +230,27 @@ const ECommerceAppControls: React.FC = () => {
       <EuiButton onClick={handleOpenShoppingCart} isDisabled={isFlyoutOpen} fill>
         Open shopping cart
       </EuiButton>
-      <EuiSpacer size="s" />
-      <EuiButton onClick={closeChildFlyout} isDisabled={!isChildFlyoutOpen} color="warning">
-        Close child flyout
-      </EuiButton>
-      <EuiSpacer size="s" />
-      <EuiButton onClick={handleCloseOrGoBack} isDisabled={!isFlyoutOpen} color="warning">
-        Close/Go back
-      </EuiButton>
+      {isFlyoutOpen && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiPanel>
+            <EuiText>
+              <p>
+                Note that the parent page is able to call hook functions that control flyouts in the
+                system.
+              </p>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiButton onClick={closeChildFlyout} isDisabled={!isChildFlyoutOpen} color="warning">
+              Close child flyout
+            </EuiButton>
+            <EuiSpacer size="s" />
+            <EuiButton onClick={handleCloseOrGoBack} isDisabled={!isFlyoutOpen} color="warning">
+              Close/Go back
+            </EuiButton>
+          </EuiPanel>
+        </>
+      )}
     </>
   );
 };
@@ -276,7 +290,8 @@ export const ECommerceApp: React.FC = () => {
       <EuiText>
         <p>
           This demo shows how to use the <code>openSystemFlyout</code> function to open a flyout
-          that systematically handles top menu bars for parent and child flyouts.
+          that systematically handles top menu bars for parent and child flyouts. This also shows
+          data passing between parent and child, and one flyout to the next.
         </p>
       </EuiText>
       <EuiSpacer />

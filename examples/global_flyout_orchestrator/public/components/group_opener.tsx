@@ -27,18 +27,20 @@ import {
   useEuiFlyoutSession,
 } from '@elastic/eui';
 
-const GroupOpenerControls: React.FC<Pick<EuiFlyoutChildProps, 'backgroundStyle'>> = ({
-  backgroundStyle,
-}) => {
+const GroupOpenerControls: React.FC<{
+  childBackgroundStyle: EuiFlyoutChildProps['backgroundStyle'];
+  childSize: 's' | 'm';
+  parentType: 'push' | 'overlay';
+}> = ({ childBackgroundStyle: backgroundStyle, childSize, parentType }) => {
   const { openFlyoutGroup, isFlyoutOpen, isChildFlyoutOpen, clearHistory } = useEuiFlyoutSession();
 
   const handleOpenGroup = () => {
     const options: EuiFlyoutSessionOpenGroupOptions = {
       main: {
         title: 'Group opener, main flyout',
-        size: 'm',
+        size: 's',
         flyoutProps: {
-          type: 'push',
+          type: parentType,
           pushMinBreakpoint: 'xs',
           className: 'groupOpenerMainFlyout',
           'aria-label': 'Main flyout',
@@ -46,7 +48,7 @@ const GroupOpenerControls: React.FC<Pick<EuiFlyoutChildProps, 'backgroundStyle'>
       },
       child: {
         title: 'Group opener, child flyout',
-        size: 's',
+        size: childSize,
         flyoutProps: {
           backgroundStyle,
           className: 'groupOpenerChildFlyout',
@@ -121,8 +123,7 @@ export const GroupOpenerApp: React.FC = () => {
           <EuiText>
             <p>
               This is the child flyout content. It was opened simultaneously with the main flyout
-              using the <code>openFlyoutGroup</code>
-              function.
+              using the <code>openFlyoutGroup</code> function.
             </p>
           </EuiText>
         </EuiFlyoutBody>
@@ -149,15 +150,34 @@ export const GroupOpenerApp: React.FC = () => {
     { id: 'default', label: 'Default' },
     { id: 'shaded', label: 'Shaded' },
   ];
+  const [parentType, setParentType] = useState<'push' | 'overlay'>('push');
+  const parentTypeRadios: EuiRadioGroupOption[] = [
+    { id: 'push', label: 'Push' },
+    { id: 'overlay', label: 'Overlay' },
+  ];
+  const [childSize, setChildSize] = useState<'s' | 'm'>('s');
+  const childSizeRadios: EuiRadioGroupOption[] = [
+    { id: 's', label: 'Small' },
+    { id: 'm', label: 'Medium' },
+  ];
 
   return (
     <>
       <EuiText>
         <p>
           This demo shows how to use the <code>openFlyoutGroup</code> function to simultaneously
-          open both main and child flyouts.
+          open both main and child flyouts. We also see an example of the child flyout
+          &quot;shaded&quot; background style.
         </p>
       </EuiText>
+      <EuiSpacer />
+      <EuiRadioGroup
+        options={parentTypeRadios}
+        idSelected={parentType}
+        onChange={(id) => setParentType(id as 'push' | 'overlay')}
+        legend={{ children: 'Main flyout type' }}
+        name="statefulFlyoutTypeToggle"
+      />
       <EuiSpacer />
       <EuiRadioGroup
         options={backgroundStyleRadios}
@@ -167,12 +187,24 @@ export const GroupOpenerApp: React.FC = () => {
         name="statefulFlyoutBackgroundStyleToggle"
       />
       <EuiSpacer />
+      <EuiRadioGroup
+        options={childSizeRadios}
+        idSelected={childSize}
+        onChange={(id) => setChildSize(id as 's' | 'm')}
+        legend={{ children: 'Child flyout size' }}
+        name="statefulFlyoutSizeToggle"
+      />
+      <EuiSpacer />
       <EuiFlyoutSessionProvider
         renderMainFlyoutContent={renderMainFlyoutContent}
         renderChildFlyoutContent={renderChildFlyoutContent}
         onUnmount={() => console.log('FlyoutGroup flyouts have been unmounted')}
       >
-        <GroupOpenerControls backgroundStyle={backgroundStyle} />
+        <GroupOpenerControls
+          parentType={parentType}
+          childBackgroundStyle={backgroundStyle}
+          childSize={childSize}
+        />
       </EuiFlyoutSessionProvider>
     </>
   );
