@@ -25,5 +25,6 @@
     "@kbn/observability-ai-common",
     "@kbn/observability-utils-server",
     "@kbn/traced-es-client",
+    "@kbn/genai-utils-common",
   ]
 }

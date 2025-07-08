@@ -21,9 +21,5 @@
     "@kbn/alerting-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/rule-data-utils",
-    "@kbn/observability-utils-common",
-    "@kbn/aiops-log-pattern-analysis",
-    "@kbn/es-types",
-    "@kbn/calculate-auto",
   ]
 }
