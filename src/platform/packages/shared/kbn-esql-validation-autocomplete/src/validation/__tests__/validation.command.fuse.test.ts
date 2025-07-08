@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useRef } from 'react';
-import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-chrome-layout-constants';
+import * as helpers from './helpers';
+import { validationFuseCommandTestSuite } from './test_suites/validation.command.fuse';
 
-export { APP_FIXED_VIEWPORT_ID };
-
-export function useAppFixedViewport() {
-  const ref = useRef(document.getElementById(APP_FIXED_VIEWPORT_ID) ?? undefined);
-  return ref.current;
-}
+validationFuseCommandTestSuite(helpers.setup);
