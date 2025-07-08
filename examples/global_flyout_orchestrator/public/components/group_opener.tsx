@@ -29,18 +29,26 @@ import {
 
 const GroupOpenerControls: React.FC<{
   childBackgroundStyle: EuiFlyoutChildProps['backgroundStyle'];
-  childSize: 's' | 'm';
+  parentSize: 's' | 'm';
   parentType: 'push' | 'overlay';
-}> = ({ childBackgroundStyle: backgroundStyle, childSize, parentType }) => {
+}> = ({ childBackgroundStyle: backgroundStyle, parentSize, parentType }) => {
   const { openFlyoutGroup, isFlyoutOpen, isChildFlyoutOpen, clearHistory } = useEuiFlyoutSession();
 
   const handleOpenGroup = () => {
+    // make the child flyout size be different than the main
+    let childSize: 's' | 'm' = 's';
+    if (parentSize === 's') {
+      childSize = 'm';
+    }
+
     const options: EuiFlyoutSessionOpenGroupOptions = {
       main: {
         title: 'Group opener, main flyout',
-        size: 's',
+        size: parentSize,
         flyoutProps: {
           type: parentType,
+          ownFocus: true,
+          outsideClickCloses: true,
           pushMinBreakpoint: 'xs',
           className: 'groupOpenerMainFlyout',
           'aria-label': 'Main flyout',
@@ -155,8 +163,8 @@ export const GroupOpenerApp: React.FC = () => {
     { id: 'push', label: 'Push' },
     { id: 'overlay', label: 'Overlay' },
   ];
-  const [childSize, setChildSize] = useState<'s' | 'm'>('s');
-  const childSizeRadios: EuiRadioGroupOption[] = [
+  const [parentSize, setParentSize] = useState<'s' | 'm'>('s');
+  const parentSizeRadios: EuiRadioGroupOption[] = [
     { id: 's', label: 'Small' },
     { id: 'm', label: 'Medium' },
   ];
@@ -188,10 +196,10 @@ export const GroupOpenerApp: React.FC = () => {
       />
       <EuiSpacer />
       <EuiRadioGroup
-        options={childSizeRadios}
-        idSelected={childSize}
-        onChange={(id) => setChildSize(id as 's' | 'm')}
-        legend={{ children: 'Child flyout size' }}
+        options={parentSizeRadios}
+        idSelected={parentSize}
+        onChange={(id) => setParentSize(id as 's' | 'm')}
+        legend={{ children: 'Parent flyout size' }}
         name="statefulFlyoutSizeToggle"
       />
       <EuiSpacer />
@@ -203,7 +211,7 @@ export const GroupOpenerApp: React.FC = () => {
         <GroupOpenerControls
           parentType={parentType}
           childBackgroundStyle={backgroundStyle}
-          childSize={childSize}
+          parentSize={parentSize}
         />
       </EuiFlyoutSessionProvider>
     </>
