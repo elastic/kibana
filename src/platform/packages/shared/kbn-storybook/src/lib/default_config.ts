@@ -20,7 +20,7 @@ import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
 
 const MOCKS_DIRECTORY = '__storybook_mocks__';
-const EXTENSIONS = ['.ts', '.js'];
+const EXTENSIONS = ['.ts', '.js', '.tsx'];
 
 /*
  * false is a valid option for typescript.reactDocgen,
@@ -92,6 +92,7 @@ export const defaultConfig: StorybookConfig = {
                   sassOptions: {
                     includePaths: [resolve(REPO_ROOT, 'node_modules')],
                     quietDeps: true,
+                    silenceDeprecations: ['import', 'legacy-js-api'],
                   },
                 },
               },
