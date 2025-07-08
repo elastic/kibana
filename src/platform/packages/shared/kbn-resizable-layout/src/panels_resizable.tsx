@@ -83,6 +83,8 @@ export const PanelsResizable = ({
     [fixedPanelId, onFixedPanelSizeChange]
   );
 
+  // Adjusts the panel sizes based on the fixed panel size, allowing us
+  // to maintain the size of the fixed panel when the window is resized.
   const adjustPanelSizes = useCallback(() => {
     const containerSize = containerSizeRef.current;
 
@@ -124,9 +126,12 @@ export const PanelsResizable = ({
     );
   }, [fixedPanelSize, minFixedPanelSize, minFlexPanelSize]);
 
-  const latestDirection = useLatest(direction);
-  const latestAdjustPanelSizes = useLatest(adjustPanelSizes);
+  const adjustPanelsOnResize = useLatest((width: number, height: number) => {
+    containerSizeRef.current = getContainerSize(direction, width, height);
+    adjustPanelSizes();
+  });
 
+  // Handles setting initial panel sizes and updates on container resize
   useLayoutEffect(() => {
     const container = containerRef.current;
 
@@ -135,13 +140,11 @@ export const PanelsResizable = ({
     }
 
     const { width, height } = container.getBoundingClientRect();
-    containerSizeRef.current = getContainerSize(latestDirection.current, width, height);
-    latestAdjustPanelSizes.current();
+    adjustPanelsOnResize.current(width, height);
 
     const observer = new ResizeObserver(([entry]) => {
       const { inlineSize, blockSize } = entry.borderBoxSize[0];
-      containerSizeRef.current = getContainerSize(latestDirection.current, inlineSize, blockSize);
-      latestAdjustPanelSizes.current();
+      adjustPanelsOnResize.current(inlineSize, blockSize);
     });
 
     observer.observe(container);
@@ -149,11 +152,10 @@ export const PanelsResizable = ({
     return () => {
       observer.disconnect();
     };
-  }, [latestAdjustPanelSizes, latestDirection]);
+  }, [adjustPanelsOnResize]);
 
-  // Updates the panel sizes based on the fixed panel size whenever
-  // it or the container size changes. This allows us to maintain the size of the
-  // fixed panel when the window is resized.
+  // Adjusts the panel sizes when the relevant props change,
+  // such as the fixed panel size or minimum sizes
   useLayoutEffect(() => {
     adjustPanelSizes();
   }, [adjustPanelSizes]);
