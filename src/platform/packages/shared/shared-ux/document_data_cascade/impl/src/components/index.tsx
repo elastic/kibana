@@ -13,13 +13,13 @@ import { DataCascadeProvider, type GroupNode, type LeafNode } from './data_casca
 
 export type { GroupNode } from './data_cascade_provider';
 
-export function DataCascade<N extends GroupNode = GroupNode, L extends LeafNode = LeafNode>({
+export function DataCascade<G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>({
   cascadeGroups,
   ...props
-}: DataCascadeImplProps<N, L> & ComponentProps<typeof DataCascadeProvider>) {
+}: DataCascadeImplProps<G, L> & ComponentProps<typeof DataCascadeProvider>) {
   return (
     <DataCascadeProvider cascadeGroups={cascadeGroups}>
-      <DataCascadeImpl<N, L> {...props} />
+      <DataCascadeImpl<G, L> {...props} />
     </DataCascadeProvider>
   );
 }

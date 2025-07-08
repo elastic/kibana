@@ -14,22 +14,24 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
-  type EuiThemeShape,
   useEuiTheme,
+  type EuiThemeShape,
 } from '@elastic/eui';
 import { flexRender, type Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import { type GroupNode } from '../../data_cascade_provider';
 
-export interface CascadeRowProps<T> {
+export interface CascadeRowProps<G> {
   isActiveSticky: boolean;
   innerRef: React.LegacyRef<HTMLLIElement>;
-  populateGroupNodeDataFn: (args: { row: Row<T> }) => Promise<void>;
-  rowInstance: Row<T>;
+  populateGroupNodeDataFn: (args: { row: Row<G> }) => Promise<void>;
+  rowHeaderTitleSlot: React.FC<{ row: Row<G> }>;
+  rowHeaderMetaSlots?: (props: { row: Row<G> }) => React.ReactNode[];
+  rowInstance: Row<G>;
   /**
    * The size of the component, can be 's' (small), 'm' (medium), or 'l' (large).
    */
-  rowGapSize: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
+  size: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
   virtualRow: VirtualItem;
   virtualRowStyle: React.CSSProperties;
 }
@@ -38,13 +40,18 @@ export function CascadeRow<G extends GroupNode>({
   isActiveSticky,
   innerRef,
   populateGroupNodeDataFn,
+  rowHeaderTitleSlot: RowTitleSlot,
+  rowHeaderMetaSlots,
   rowInstance,
-  rowGapSize,
+  size,
   virtualRow,
   virtualRowStyle,
 }: CascadeRowProps<G>) {
   const { euiTheme } = useEuiTheme();
   const [isPendingRowGroupDataFetch, setRowGroupDataFetch] = React.useState<boolean>(false);
+
+  // rows that can be expanded are denoted to be group nodes
+  const isGroupNode = rowInstance.getCanExpand();
 
   const fetchCascadeRowGroupNodeData = React.useCallback(() => {
     setRowGroupDataFetch(true);
@@ -54,9 +61,9 @@ export function CascadeRow<G extends GroupNode>({
   }, [populateGroupNodeDataFn, rowInstance]);
 
   const onCascadeRowClick = React.useCallback(
-    (isGroupNode: boolean) => {
+    (_isGroupNode: boolean) => {
       rowInstance.toggleExpanded();
-      if (isGroupNode) {
+      if (_isGroupNode) {
         // can expand here denotes it still has some nesting, hence we need to fetch the data for the sub-rows
         fetchCascadeRowGroupNodeData();
       }
@@ -76,8 +83,8 @@ export function CascadeRow<G extends GroupNode>({
         display: 'flex',
         position: 'absolute',
         width: '100%',
-        padding: euiTheme.size[rowGapSize],
-        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        padding: euiTheme.size[size],
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
         borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
         borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
         '&[data-row-type="sub-group"]': {
@@ -101,21 +108,21 @@ export function CascadeRow<G extends GroupNode>({
       }}
     >
       <EuiFlexGroup
-        direction="row"
-        gutterSize="s"
-        alignItems="flexStart"
-        justifyContent="spaceBetween"
+        direction="column"
+        gutterSize={size}
         css={{
           position: 'relative',
           ...(rowInstance.parentId && rowInstance.getIsAllParentsExpanded()
             ? {
-                padding: `${euiTheme.size[rowGapSize]} calc(${euiTheme.size[rowGapSize]} * ${
+                padding: `${euiTheme.size[size]} calc(${euiTheme.size[size]} * ${
                   rowInstance.depth + 1
                 })`,
                 borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
                 borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
                 borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                backgroundColor: euiTheme.colors.backgroundBasePlain,
+                ...(rowInstance.depth % 2 === 1
+                  ? { backgroundColor: euiTheme.colors.backgroundBaseSubdued }
+                  : {}),
               }
             : {}),
           '[data-row-type="root"] + [data-row-type="sub-group"] &': {
@@ -123,23 +130,13 @@ export function CascadeRow<G extends GroupNode>({
             borderTopRightRadius: euiTheme.border.radius.small,
           },
           '[data-row-type="sub-group"]:has(+ [data-row-type="root"]) &': {
-            marginBottom: euiTheme.size[rowGapSize],
+            marginBottom: euiTheme.size[size],
             borderBottomLeftRadius: euiTheme.border.radius.small,
             borderBottomRightRadius: euiTheme.border.radius.small,
             borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
           },
         }}
       >
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={rowInstance.getIsExpanded() ? 'arrowDown' : 'arrowRight'}
-            onClick={onCascadeRowClick.bind(null, rowInstance.getCanExpand())}
-            aria-label={i18n.translate('sharedUXPackages.dataCascade.removeRowButtonLabel', {
-              defaultMessage: 'expand row',
-            })}
-            data-test-subj={`expand-row-${rowInstance.id}-button`}
-          />
-        </EuiFlexItem>
         <EuiFlexItem>
           <React.Fragment>
             {isPendingRowGroupDataFetch && (
@@ -150,16 +147,58 @@ export function CascadeRow<G extends GroupNode>({
               />
             )}
           </React.Fragment>
-          <React.Fragment>
-            {rowInstance.getVisibleCells().map((cell) => {
-              return (
-                <React.Fragment key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </React.Fragment>
-              );
-            })}
-          </React.Fragment>
+          <EuiFlexGroup
+            gutterSize={size}
+            direction="row"
+            alignItems="center"
+            justifyContent="spaceBetween"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType={rowInstance.getIsExpanded() ? 'arrowDown' : 'arrowRight'}
+                onClick={onCascadeRowClick.bind(null, isGroupNode)}
+                aria-label={i18n.translate('sharedUXPackages.dataCascade.removeRowButtonLabel', {
+                  defaultMessage: 'expand row',
+                })}
+                data-test-subj={`expand-row-${rowInstance.id}-button`}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="row">
+                <EuiFlexItem grow={4} css={{ justifyContent: 'center' }}>
+                  <RowTitleSlot row={rowInstance} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={6}>
+                  <EuiFlexGroup
+                    direction="row"
+                    gutterSize={size}
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                  >
+                    {rowHeaderMetaSlots?.({ row: rowInstance }).map((metaSlot, index) => (
+                      <EuiFlexItem grow={false} key={index}>
+                        {metaSlot}
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
+        {!isGroupNode && rowInstance.getIsExpanded() && rowInstance.getIsAllParentsExpanded() && (
+          <React.Fragment>
+            <EuiFlexItem css={{ padding: `0 calc(${euiTheme.size[size]} * ${rowInstance.depth})` }}>
+              {rowInstance.getVisibleCells().map((cell) => {
+                return (
+                  <React.Fragment key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </React.Fragment>
+                );
+              })}
+            </EuiFlexItem>
+          </React.Fragment>
+        )}
       </EuiFlexGroup>
     </li>
   );
