@@ -198,7 +198,7 @@ const getDetailsList = (
       </EuiFlexGroup>
     ),
     description: data.rule?.description ? (
-      <EuiText size="s">{data.rule?.description}</EuiText>
+      <CspFlyoutMarkdown>{data.rule?.description}</CspFlyoutMarkdown>
     ) : (
       EMPTY_VALUE
     ),
