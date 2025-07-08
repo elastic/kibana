@@ -31,7 +31,10 @@ function getVisibility(
   const categoryId =
     (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
 
-  if (preferredAssistantType === AIAssistantType.Observability || ['es', 'oblt'].includes(space.solution || '')) {
+  if (
+    preferredAssistantType === AIAssistantType.Observability ||
+    ['es', 'oblt'].includes(space.solution || '')
+  ) {
     return categoryId !== DEFAULT_APP_CATEGORIES.security.id;
   }
 
