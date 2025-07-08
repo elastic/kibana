@@ -32,7 +32,7 @@ interface UseImagePasteUploadArgs {
 /**
  * Returns a placeholder string for the file that is being uploaded
  */
-function getUploadPlaceholderCopy(filename: string, extension?: string) {
+function generatePlaceholderCopy(filename: string, extension?: string) {
   return `<!-- uploading "${filename}${extension ? `.${extension}` : ''}" -->`;
 }
 
@@ -152,7 +152,7 @@ export function useImagePasteUpload({
     }
 
     const { selectionStart, selectionEnd } = textarea;
-    const placeholder = getUploadPlaceholderCopy(uploadingFile.file.name);
+    const placeholder = generatePlaceholderCopy(uploadingFile.file.name);
     const before = field.value.slice(0, selectionStart);
     const after = field.value.slice(selectionEnd);
     field.setValue(before + placeholder + after);
