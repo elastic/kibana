@@ -38,7 +38,7 @@ export function WorkflowsPage() {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageTemplate.Header>
-      <EuiPageTemplate.Section>
+      <EuiPageTemplate.Section restrictWidth={false}>
         <WorkflowList />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

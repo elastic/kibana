@@ -1,35 +1,30 @@
-import { RunStatus, WorkflowDetailDTO, WorkflowListDTO } from '../../common/workflows/models/types';
+import { WorkflowExecutionStatus } from '@kbn/workflows';
+import { WorkflowDetailDto, WorkflowListDto } from '../../common/workflows/models/types';
 
-const mockWorkflow: WorkflowDetailDTO = {
+const mockWorkflow: WorkflowDetailDto = {
   id: '1',
-  name: 'Mock Workflow',
-  description: 'Description 1',
-  triggers: [],
-  tags: [],
-  enabled: true,
-  runHistory: [
+  name: 'JAMF Enrollment Reminder',
+  description: 'Check if the user has enrolled in JAMF, reminds in Slack if not every 7 days.',
+  triggers: [
     {
+      type: 'schedule',
       id: '1',
-      status: RunStatus.FAILED,
-      startedAt: '2025-06-01T12:00:00.000Z',
-      finishedAt: '2025-06-01T12:00:01.000Z',
-      duration: 1,
-    },
-    {
-      id: '2',
-      status: RunStatus.SUCCESS,
-      startedAt: '2025-06-01T13:00:00.000Z',
-      finishedAt: '2025-06-01T13:10:00.000Z',
-      duration: 600,
-    },
-    {
-      id: '3',
-      status: RunStatus.RUNNING,
-      startedAt: '2025-06-01T14:00:00.000Z',
-      finishedAt: null,
-      duration: null,
     },
   ],
+  tags: ['InfoSec', 'Slack'],
+  enabled: true,
+  runHistory: Array.from({ length: 14 }, (_, i) => ({
+    id: i.toString(),
+    status:
+      i === 13
+        ? WorkflowExecutionStatus.RUNNING
+        : i % 5 === 0
+        ? WorkflowExecutionStatus.FAILED
+        : WorkflowExecutionStatus.SUCCESS,
+    startedAt: new Date(2025, 0, 1, 12, 0, 0 + i, 0).toISOString(),
+    finishedAt: new Date(2025, 0, 1, 12, 0, 1 + i, 0).toISOString(),
+    duration: i % 2 === 0 ? 5 : i % 3 === 1 ? 2 : 1,
+  })),
   definition: {
     steps: [],
   },
@@ -48,7 +43,7 @@ export interface GetWorkflowsParams {
 }
 
 export const WorkflowsManagementApi = {
-  getWorkflows: async (params: GetWorkflowsParams): Promise<WorkflowListDTO> => {
+  getWorkflows: async (params: GetWorkflowsParams): Promise<WorkflowListDto> => {
     return Promise.resolve({
       results: [
         {
@@ -68,7 +63,7 @@ export const WorkflowsManagementApi = {
       },
     });
   },
-  getWorkflow: async (id: string): Promise<WorkflowDetailDTO> => {
+  getWorkflow: async (id: string): Promise<WorkflowDetailDto> => {
     return Promise.resolve(mockWorkflow);
   },
 };

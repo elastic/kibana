@@ -1085,6 +1085,7 @@
     "@kbn/wci-server": "link:x-pack/solutions/chat/packages/wci-server",
     "@kbn/workchat-app": "link:x-pack/solutions/chat/plugins/workchat-app",
     "@kbn/workchat-framework-plugin": "link:x-pack/solutions/chat/plugins/workchat-framework",
+    "@kbn/workflows": "link:src/platform/packages/shared/kbn-workflows",
     "@kbn/workflows-plugin": "link:src/platform/plugins/shared/workflows",
     "@kbn/xstate-utils": "link:src/platform/packages/shared/kbn-xstate-utils",
     "@kbn/zod": "link:src/platform/packages/shared/kbn-zod",

@@ -7,34 +7,71 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiLink,
+  EuiBadge,
+  useEuiTheme,
+  toSentenceCase,
 } from '@elastic/eui';
 import { Link } from 'react-router-dom';
 import { Chart, BarSeries, ScaleType, Settings } from '@elastic/charts';
 import { useWorkflows } from '../../../entities/workflows/model/useWorkflows';
-import { WorkflowListItemDTO } from '../../../../common/workflows/models/types';
+import { WorkflowListItemDto } from '../../../../common/workflows/models/types';
+import { WorkflowExecutionStatus } from '@kbn/workflows';
 
 export function WorkflowList() {
   const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows();
-  const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDTO>>>(
+  const { euiTheme } = useEuiTheme();
+
+  const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
     () => [
       {
         field: 'name',
         name: 'Name',
         dataType: 'string',
-        render: (name: string, item: WorkflowListItemDTO) => (
-          <EuiLink>
-            <Link to={`/${item.id}`}>{name}</Link>
-          </EuiLink>
+        render: (name: string, item) => (
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiLink>
+                <Link to={`/${item.id}`}>{name}</Link>
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s" color="subdued">
+                {item.description}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
       {
-        field: 'description',
-        name: 'Description',
-        dataType: 'string',
+        name: 'Tags',
+        field: 'tags',
+        render: (value, item) => {
+          return (
+            <>
+              {item.tags.map((tag) => (
+                <EuiBadge key={tag} color="hollow">
+                  {tag}
+                </EuiBadge>
+              ))}
+            </>
+          );
+        },
       },
       {
-        name: 'Last executions',
-        render: (item: WorkflowListItemDTO) => {
+        name: 'Triggers',
+        field: 'triggers',
+        render: (value, item) => {
+          return (
+            <EuiText size="s" color="subdued">
+              {item.triggers.map((trigger) => toSentenceCase(trigger.type)).join(', ')}
+            </EuiText>
+          );
+        },
+      },
+      {
+        name: 'Run history',
+        field: 'runHistory',
+        render: (value, item) => {
           if (!item.runHistory.length) {
             return (
               <EuiText size="s" color="subdued">
@@ -42,20 +79,27 @@ export function WorkflowList() {
               </EuiText>
             );
           }
-          const data = item.runHistory.map((run) => [
-            new Date(run.startedAt).getTime(),
-            run.duration,
-          ]);
+          const data = item.runHistory.map((run) => ({
+            x: new Date(run.startedAt).getTime(),
+            y: run.duration,
+            color:
+              run.status === WorkflowExecutionStatus.SUCCESS
+                ? euiTheme.colors.vis.euiColorVis0
+                : run.status === WorkflowExecutionStatus.FAILED
+                ? euiTheme.colors.vis.euiColorVis6
+                : euiTheme.colors.vis.euiColorVis1,
+          }));
           return (
-            <Chart size={{ width: 100, height: 20 }}>
+            <Chart size={{ width: 160, height: 32 }}>
               <Settings />
               <BarSeries
                 id="data"
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
-                xAccessor={0}
-                yAccessors={[1]}
+                xAccessor={({ x }) => x}
+                yAccessors={[({ y }) => y ?? 0]}
                 data={data ?? []}
+                styleAccessor={({ datum }) => datum.color}
               />
             </Chart>
           );
@@ -70,7 +114,7 @@ export function WorkflowList() {
             name: 'View logs',
             description: 'View logs',
             color: 'text',
-            onClick: (item: WorkflowListItemDTO) => {
+            onClick: (item) => {
               // console.log(item);
             },
           },
@@ -81,7 +125,7 @@ export function WorkflowList() {
             name: 'Run',
             icon: 'play',
             description: 'Run',
-            onClick: (item: WorkflowListItemDTO) => {},
+            onClick: (item) => {},
           },
         ],
       },

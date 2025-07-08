@@ -1,65 +1,102 @@
-export interface Tag {
-  id: string;
-  name: string;
-}
-
-export enum RunStatus {
-  SUCCESS = 'success',
-  FAILED = 'failed',
-  RUNNING = 'running',
-  CANCELLED = 'cancelled',
-}
-
-export interface WorkflowTrigger {
-  id: string;
-  type: 'manual' | 'schedule';
-  enabled: boolean;
-  config: Record<string, any>;
-}
-
-export interface RunHistoryItem {
-  id: string;
-  status: RunStatus;
-  startedAt: string;
-  finishedAt: string | null;
-  duration: number | null;
-}
-
-export interface WorkflowListItemDTO {
-  id: string;
-  name: string;
-  description: string;
-  triggers: WorkflowTrigger[];
-  tags: Tag[];
-  enabled: boolean;
-  runHistory: RunHistoryItem[];
-}
-
-export interface WorkflowListDTO {
-  results: WorkflowListItemDTO[];
-  _pagination: {
-    limit: number;
-    offset: number;
-    total: number;
-  };
-}
-
-// ts-ignore
-// TODO: replace with a proper type
-export interface WorkflowDefinition {
-  steps: any[];
-}
+import {
+  Workflow,
+  WorkflowDefinition,
+  WorkflowExecution,
+  WorkflowExecutionStatus,
+} from '@kbn/workflows';
 
 // TODO: replace with a proper type
-export interface User {
+export interface UserDto {
   id: string;
   name: string;
   email: string;
 }
 
-export interface WorkflowDetailDTO extends WorkflowListItemDTO {
+export interface WorkflowTriggerDto {
+  id: string;
+  type: 'manual' | 'schedule';
+}
+
+export interface WorkflowExecutionChartItemDto {
+  id: string;
+  status: WorkflowExecutionStatus;
+  startedAt: string;
+  finishedAt: string | null;
+  duration: number | null;
+}
+
+export function toWorkflowExecutionChartItemDto(
+  execution: WorkflowExecution
+): WorkflowExecutionChartItemDto {
+  const { id, status, startedAt, finishedAt, duration } = execution;
+
+  return {
+    id,
+    status,
+    startedAt,
+    finishedAt,
+    duration,
+  };
+}
+
+export interface WorkflowDetailDto {
+  id: string;
+  name: string;
+  description: string;
+  triggers: WorkflowTriggerDto[];
+  tags: string[];
+  enabled: boolean;
+  runHistory: WorkflowExecutionChartItemDto[];
   definition: WorkflowDefinition;
-  createdBy: User;
+  createdBy: UserDto;
   createdAt: string;
   updatedAt: string;
+}
+
+export function toWorkflowDetailDto(
+  workflow: Workflow,
+  executions: WorkflowExecution[]
+): WorkflowDetailDto {
+  return {
+    id: workflow.id,
+    name: workflow.name,
+    description: workflow.description,
+    triggers: workflow.triggers,
+    tags: workflow.tags.map((tag) => tag.name),
+    enabled: workflow.enabled,
+    runHistory: executions.map(toWorkflowExecutionChartItemDto),
+    definition: workflow.definition,
+    createdBy: workflow.createdBy,
+    createdAt: workflow.createdAt,
+    updatedAt: workflow.updatedAt,
+  };
+}
+
+export type WorkflowListItemDto = Pick<
+  WorkflowDetailDto,
+  'id' | 'name' | 'description' | 'triggers' | 'tags' | 'enabled' | 'runHistory'
+>;
+
+export function toWorkflowListItemDto(
+  workflow: Workflow,
+  executions: WorkflowExecution[]
+): WorkflowListItemDto {
+  return {
+    id: workflow.id,
+    name: workflow.name,
+    description: workflow.description,
+    triggers: workflow.triggers,
+    tags: workflow.tags.map((tag) => tag.name),
+    enabled: workflow.enabled,
+    runHistory: executions.map(toWorkflowExecutionChartItemDto),
+  };
+}
+
+export interface WorkflowListDto {
+  results: WorkflowListItemDto[];
+  _pagination: {
+    limit: number;
+    offset: number;
+    total: number;
+  };
 }
