@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { ConversationRound } from '@kbn/onechat-common';
 import React from 'react';
 import { RoundAnswer } from './round_answer';
+import { conversationsCommonLabels } from '../i18n';
 
 interface RoundProps {
   round: ConversationRound;
@@ -24,18 +25,20 @@ export const Round: React.FC<RoundProps> = ({ round }) => {
     max-inline-size: calc(${euiTheme.size.xxxxl} * 10);
     background-color: ${euiTheme.colors.backgroundBasePrimary};
   `;
+  const labels = conversationsCommonLabels.content.messages.round;
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGroup direction="column" gutterSize="l" aria-label={labels.ariaLabel}>
       <EuiPanel
         css={userMessageContainerStyles}
         paddingSize="l"
         hasShadow={false}
         hasBorder={false}
+        aria-label={labels.userMessage}
       >
         <EuiText size="s">{input.message}</EuiText>
       </EuiPanel>
 
-      <EuiPanel hasShadow={false} hasBorder={false}>
+      <EuiPanel hasShadow={false} hasBorder={false} aria-label={labels.assistantResponse}>
         <RoundAnswer round={round} />
       </EuiPanel>
     </EuiFlexGroup>

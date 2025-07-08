@@ -16,6 +16,7 @@ import { ConversationGrid } from './conversation_grid';
 import { ConversationSidebar } from './conversation_sidebar';
 import { ConversationSidebarToggle } from './conversation_sidebar_toggle';
 import { ConversationTitle } from './conversation_title';
+import { conversationsCommonLabels } from './i18n';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -55,7 +56,11 @@ export const OnechatConversationsView: React.FC<{}> = () => {
         </KibanaPageTemplate.Sidebar>
       )}
 
-      <KibanaPageTemplate.Header css={headerStyles} bottomBorder={false}>
+      <KibanaPageTemplate.Header
+        css={headerStyles}
+        bottomBorder={false}
+        aria-label={conversationsCommonLabels.header.ariaLabel}
+      >
         <ConversationGrid>
           <ConversationSidebarToggle
             isSidebarOpen={isSidebarOpen}
@@ -73,6 +78,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
         contentProps={{
           css: mainContentStyles,
         }}
+        aria-label={conversationsCommonLabels.content.ariaLabel}
       >
         <Conversation agentId={oneChatDefaultAgentId} />
       </KibanaPageTemplate.Section>

@@ -10,6 +10,7 @@ import { EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { NewConversationButton } from './new_conversation_button';
 import { useConversation } from '../../hooks/use_conversation';
+import { conversationsCommonLabels } from './i18n';
 
 export const ConversationActions: React.FC<{}> = () => {
   const { conversation } = useConversation();
@@ -27,8 +28,10 @@ export const ConversationActions: React.FC<{}> = () => {
     justify-self: end;
   `;
 
+  const labels = conversationsCommonLabels.header.actions;
+
   return (
-    <EuiPageHeaderSection css={actionsContainerStyles}>
+    <EuiPageHeaderSection css={actionsContainerStyles} aria-label={labels.ariaLabel}>
       <NewConversationButton />
     </EuiPageHeaderSection>
   );

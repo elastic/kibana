@@ -65,10 +65,11 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
   const topContainerClass = css`
     padding-bottom: ${euiTheme.size.m};
   `;
-
   const inputFlexItemClass = css`
     max-width: 900px;
   `;
+
+  const labels = conversationsCommonLabels.content.input;
 
   return (
     <ConversationContent>
@@ -78,6 +79,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
         alignItems="center"
         justifyContent="center"
         className={topContainerClass}
+        aria-label={labels.ariaLabel}
       >
         <EuiFlexItem className={inputFlexItemClass}>
           <EuiTextArea
@@ -87,13 +89,13 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
             value={message}
             onChange={handleChange}
             onKeyDown={handleTextAreaKeyDown}
-            placeholder={conversationsCommonLabels.userInputBox.placeholder}
+            placeholder={labels.placeholder}
             inputRef={textAreaRef}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
-            aria-label="Submit"
+            aria-label={labels.submitAriaLabel}
             data-test-subj="onechatAppConversationInputFormSubmitButton"
             iconType="kqlFunction"
             display="fill"

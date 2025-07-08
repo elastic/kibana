@@ -29,9 +29,11 @@ export const NewConversationButton: React.FC<{}> = () => {
         },
       });
 
+  const labels = conversationsCommonLabels.header.actions.createNewConversationButton;
+
   return (
-    <EuiButton iconType="plus" iconSide="left" {...buttonProps}>
-      {conversationsCommonLabels.header.createNewConversationButtonLabel}
+    <EuiButton iconType="plus" iconSide="left" aria-label={labels.ariaLabel} {...buttonProps}>
+      {labels.display}
     </EuiButton>
   );
 };

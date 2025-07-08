@@ -28,8 +28,13 @@ export const ConversationTitle: React.FC<{}> = () => {
 
   return (
     <EuiPageHeaderSection css={sectionStyles}>
-      <EuiTitle aria-label="Conversation Title" size="xxs">
-        <h1>{title || conversationsCommonLabels.header.newConversationTitle}</h1>
+      <EuiTitle
+        aria-label={conversationsCommonLabels.header.conversationTitle.ariaLabel}
+        size="xxs"
+      >
+        <h1>
+          {title || conversationsCommonLabels.header.conversationTitle.newConversationDisplay}
+        </h1>
       </EuiTitle>
     </EuiPageHeaderSection>
   );

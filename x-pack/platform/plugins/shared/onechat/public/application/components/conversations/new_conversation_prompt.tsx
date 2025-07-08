@@ -22,6 +22,7 @@ export const NewConversationPrompt: React.FC<{}> = () => {
     padding: ${euiTheme.size.l};
     margin: 0 auto;
   `;
+  const labels = conversationsCommonLabels.content.newConversationPrompt;
   return (
     <ConversationContent css={fullHeightStyles}>
       <EuiFlexGroup
@@ -29,18 +30,19 @@ export const NewConversationPrompt: React.FC<{}> = () => {
         direction="column"
         alignItems="center"
         justifyContent="center"
+        aria-label={labels.ariaLabel}
       >
         <EuiFlexItem grow={false}>
           <EuiIcon color="primary" size="xxl" type="logoElastic" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle>
-            <h2>{conversationsCommonLabels.content.newConversationPrompt.title}</h2>
+            <h2>{labels.title}</h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText textAlign="center" color="subdued">
-            <p>{conversationsCommonLabels.content.newConversationPrompt.subtitle}</p>
+            <p>{labels.subtitle}</p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
