@@ -21,7 +21,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ToolSelection, ToolDescriptor } from '@kbn/onechat-common';
-import { allToolsSelectionWildcard } from '@kbn/onechat-common';
+import {
+  toggleProviderSelection,
+  toggleToolSelection,
+  isToolSelected,
+  isAllToolsSelectedForProvider,
+} from '../../../utils/tool_selection_utils';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 
 interface ToolsSelectionProps {
@@ -52,133 +57,16 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     return grouped;
   }, [tools]);
 
-  const isAllToolsSelectedForProvider = (providerId: string) => {
-    // Check if there's a wildcard selection for this provider
-    const hasWildcardSelection = selectedTools.some(
-      (selection) =>
-        selection.toolIds.includes(allToolsSelectionWildcard) &&
-        (!selection.provider || selection.provider === providerId)
-    );
-
-    if (hasWildcardSelection) {
-      return true;
-    }
-
-    // Otherwise, check if all individual tools are selected
+  const handleToggleProviderTools = (providerId: string) => {
     const providerTools = toolsByProvider[providerId] || [];
-    return providerTools.every((tool) =>
-      selectedTools.some(
-        (selection) =>
-          selection.toolIds.includes(tool.id) &&
-          (!selection.provider || selection.provider === providerId)
-      )
-    );
+    const newSelection = toggleProviderSelection(providerId, providerTools, selectedTools);
+    onToolsChange(newSelection);
   };
 
-  const isToolSelected = (toolId: string, providerId: string) => {
-    return selectedTools.some(
-      (selection) =>
-        (selection.toolIds.includes(toolId) ||
-          selection.toolIds.includes(allToolsSelectionWildcard)) &&
-        (!selection.provider || selection.provider === providerId)
-    );
-  };
-
-  const toggleProviderTools = (providerId: string) => {
+  const handleToggleTool = (toolId: string, providerId: string) => {
     const providerTools = toolsByProvider[providerId] || [];
-    const allSelected = isAllToolsSelectedForProvider(providerId);
-
-    if (allSelected) {
-      // Remove all tools from this provider (including wildcard selections)
-      const newSelection = selectedTools.filter(
-        (selection) =>
-          !(
-            selection.provider === providerId ||
-            selection.toolIds.includes(allToolsSelectionWildcard) ||
-            selection.toolIds.some((toolId) => providerTools.some((tool) => tool.id === toolId))
-          )
-      );
-      onToolsChange(newSelection);
-    } else {
-      // Add all tools from this provider using wildcard
-      const existingSelection = selectedTools.filter(
-        (selection) =>
-          !(
-            selection.provider === providerId ||
-            selection.toolIds.includes(allToolsSelectionWildcard) ||
-            selection.toolIds.some((toolId) => providerTools.some((tool) => tool.id === toolId))
-          )
-      );
-
-      const newProviderSelection: ToolSelection = {
-        provider: providerId,
-        toolIds: [allToolsSelectionWildcard],
-      };
-
-      onToolsChange([...existingSelection, newProviderSelection]);
-    }
-  };
-
-  const toggleTool = (toolId: string, providerId: string) => {
-    const isSelected = isToolSelected(toolId, providerId);
-    const providerTools = toolsByProvider[providerId] || [];
-
-    if (isSelected) {
-      // Check if this tool is selected via wildcard
-      const hasWildcardSelection = selectedTools.some(
-        (selection) =>
-          selection.toolIds.includes(allToolsSelectionWildcard) &&
-          (!selection.provider || selection.provider === providerId)
-      );
-
-      if (hasWildcardSelection) {
-        // Replace wildcard with individual tool selections (excluding the one being toggled off)
-        const newSelection = selectedTools.filter(
-          (selection) =>
-            !(
-              selection.toolIds.includes(allToolsSelectionWildcard) &&
-              (!selection.provider || selection.provider === providerId)
-            )
-        );
-
-        // Add individual selections for all other tools
-        const otherToolIds = providerTools
-          .filter((tool) => tool.id !== toolId)
-          .map((tool) => tool.id);
-
-        if (otherToolIds.length > 0) {
-          newSelection.push({
-            provider: providerId,
-            toolIds: otherToolIds,
-          });
-        }
-
-        onToolsChange(newSelection);
-      } else {
-        // Remove from individual selections
-        const newSelection = selectedTools
-          .map((selection) => {
-            if (selection.toolIds.includes(toolId)) {
-              const newToolIds = selection.toolIds.filter((id) => id !== toolId);
-              return newToolIds.length > 0 ? { ...selection, toolIds: newToolIds } : null;
-            }
-            return selection;
-          })
-          .filter(Boolean) as ToolSelection[];
-
-        onToolsChange(newSelection);
-      }
-    } else {
-      const existingSelection = selectedTools.filter(
-        (selection) => !selection.toolIds.includes(toolId)
-      );
-
-      const newToolSelection: ToolSelection = {
-        toolIds: [toolId],
-      };
-
-      onToolsChange([...existingSelection, newToolSelection]);
-    }
+    const newSelection = toggleToolSelection(toolId, providerId, providerTools, selectedTools);
+    onToolsChange(newSelection);
   };
 
   if (toolsLoading) {
@@ -198,8 +86,8 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiCheckbox
                     id={`tool-${tool.id}`}
-                    checked={isToolSelected(tool.id, providerId)}
-                    onChange={() => toggleTool(tool.id, providerId)}
+                    checked={isToolSelected(tool, selectedTools)}
+                    onChange={() => handleToggleTool(tool.id, providerId)}
                     disabled={disabled}
                   />
                 </EuiFlexItem>
@@ -248,8 +136,8 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
                       })}
                     </EuiText>
                   }
-                  checked={isAllToolsSelectedForProvider(providerId)}
-                  onChange={() => toggleProviderTools(providerId)}
+                  checked={isAllToolsSelectedForProvider(providerId, providerTools, selectedTools)}
+                  onChange={() => handleToggleProviderTools(providerId)}
                   disabled={disabled}
                 />
               </EuiFlexItem>
