@@ -21,10 +21,5 @@ export type StreamsConfig = TypeOf<typeof configSchema>;
  */
 export const exposeToBrowserConfig = {} as const;
 
-type ValidKeys = keyof {
-  [K in keyof typeof exposeToBrowserConfig as (typeof exposeToBrowserConfig)[K] extends true
-    ? K
-    : never]: true;
-};
-
-export type StreamsPublicConfig = Pick<StreamsConfig, ValidKeys>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StreamsPublicConfig {}

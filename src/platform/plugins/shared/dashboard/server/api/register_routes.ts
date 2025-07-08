@@ -13,19 +13,15 @@ import type { HttpServiceSetup } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
-import { CONTENT_ID } from '../../common/content_management';
-import {
-  INTERNAL_API_VERSION,
-  PUBLIC_API_PATH,
-  PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
-} from './constants';
+import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
+import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import {
   dashboardAttributesSchema,
   dashboardGetResultSchema,
   dashboardCreateResultSchema,
   dashboardSearchResultsSchema,
   referenceSchema,
-} from '../content_management/v3';
+} from '../content_management/v1';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
@@ -105,7 +101,7 @@ export function registerAPIRoutes({
       const { attributes, references, spaces: initialNamespaces } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for(CONTENT_ID, LATEST_VERSION);
       let result;
       try {
         ({ result } = await client.create(attributes, {
@@ -167,7 +163,7 @@ export function registerAPIRoutes({
       const { attributes, references } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for(CONTENT_ID, LATEST_VERSION);
       let result;
       try {
         ({ result } = await client.update(req.params.id, attributes, { references }));
@@ -232,7 +228,7 @@ export function registerAPIRoutes({
       const { page, perPage: limit } = req.query;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for(CONTENT_ID, LATEST_VERSION);
       let result;
       try {
         // TODO add filtering
@@ -291,7 +287,7 @@ export function registerAPIRoutes({
     async (ctx, req, res) => {
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for(CONTENT_ID, LATEST_VERSION);
       let result;
       try {
         ({ result } = await client.get(req.params.id));
@@ -340,7 +336,7 @@ export function registerAPIRoutes({
     async (ctx, req, res) => {
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for(CONTENT_ID, LATEST_VERSION);
       try {
         await client.delete(req.params.id);
       } catch (e) {
