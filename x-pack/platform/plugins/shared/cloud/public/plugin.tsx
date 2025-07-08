@@ -118,8 +118,11 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
-        productTier: this.config.serverless?.product_tier,
         orchestratorTarget: this.config.serverless?.orchestrator_target,
+        // Hi fellow developer! Please, refrain from using `productTier` from this contract.
+        // It is exposed for informational purposes (telemetry and feature flags). Do not use it for feature-gating.
+        // Use `core.pricing` when checking if a feature is available for the current product tier.
+        productTier: this.config.serverless?.product_tier,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
@@ -178,7 +181,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
-        productTier: this.config.serverless?.product_tier,
       },
       performanceUrl,
       usersAndRolesUrl,

@@ -151,7 +151,7 @@ export interface CloudSetup {
     /**
      * The serverless product tier.
      * Only present if the current project type has product tiers defined.
-     * @remarks This field is only exposed for informational purposes. Use the `core.pricing` when checking if a feature if available for the current product tier.
+     * @remarks This field is only exposed for informational purposes. Use the `core.pricing` when checking if a feature is available for the current product tier.
      * @internal
      */
     productTier?: KibanaProductTier;
@@ -368,8 +368,11 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         projectId,
         projectName: this.config.serverless?.project_name,
         projectType,
-        productTier,
         orchestratorTarget,
+        // Hi fellow developer! Please, refrain from using `productTier` from this contract.
+        // It is exposed for informational purposes (telemetry and feature flags). Do not use it for feature-gating.
+        // Use `core.pricing` when checking if a feature is available for the current product tier.
+        productTier,
       },
     };
   }
