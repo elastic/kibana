@@ -5,41 +5,26 @@
  * 2.0.
  */
 
-import { Anonymization, RegexAnonymizationRule } from '@kbn/inference-common';
+import { RegexAnonymizationRule } from '@kbn/inference-common';
 import { AnonymizationState } from './types';
-import { getEntityMask } from './get_entity_mask';
+import { RegexWorkerService } from './regex_worker_service';
 
 /**
  * Executes a regex anonymization rule, by iterating over the matches,
  * and replacing each occurrence with a masked value.
  */
-export function executeRegexRule({
+export async function executeRegexRule({
   state,
   rule,
+  regexWorker,
 }: {
   state: AnonymizationState;
   rule: RegexAnonymizationRule;
-}): AnonymizationState {
-  const regex = new RegExp(rule.pattern, 'g');
-
-  const anonymizations: Anonymization[] = state.anonymizations.concat();
-
-  const nextRecords = state.records.map((record) => {
-    const newRecord: Record<string, string> = {};
-    for (const [key, value] of Object.entries(record)) {
-      newRecord[key] = value.replace(regex, (match) => {
-        const mask = getEntityMask({ value: match, class_name: rule.entityClass });
-
-        anonymizations.push({
-          entity: { value: match, class_name: rule.entityClass, mask },
-          rule: { type: rule.type },
-        });
-
-        return mask;
-      });
-    }
-    return newRecord;
+  regexWorker: RegexWorkerService;
+}): Promise<AnonymizationState> {
+  const { records, anonymizations } = await regexWorker.run({
+    rule,
+    records: state.records,
   });
-
-  return { records: nextRecords, anonymizations };
+  return { records, anonymizations: state.anonymizations.concat(anonymizations) };
 }

@@ -34,12 +34,14 @@ import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { anonymizeMessages } from './anonymization/anonymize_messages';
 import { deanonymizeMessage } from './anonymization/deanonymize_message';
 import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
+import { RegexWorkerService } from './anonymization/regex_worker_service';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
   actions: ActionsPluginStart;
   logger: Logger;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
 }
 
@@ -73,6 +75,7 @@ export function createChatCompleteCallbackApi({
   actions,
   logger,
   anonymizationRulesPromise,
+  regexWorker,
   esClient,
 }: CreateChatCompleteApiOptions) {
   return (
@@ -121,6 +124,7 @@ export function createChatCompleteCallbackApi({
               system,
               messages,
               anonymizationRules,
+              regexWorker,
               esClient,
             })
           ).pipe(

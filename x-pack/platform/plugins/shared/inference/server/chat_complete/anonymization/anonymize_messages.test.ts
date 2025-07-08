@@ -6,6 +6,7 @@
  */
 
 import { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { anonymizeMessages } from './anonymize_messages';
 import {
   AnonymizationRule,
@@ -16,16 +17,26 @@ import {
 } from '@kbn/inference-common';
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
 import { getEntityMask } from './get_entity_mask';
-
+import { RegexWorkerService } from './regex_worker_service';
+import { InferenceConfig } from '../../config';
 const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),
   },
 } as any;
-
+const testConfig = {
+  enabled: true,
+  regexWorker: {
+    enabled: false,
+  },
+} as InferenceConfig;
 describe('anonymizeMessages', () => {
+  let logger: MockedLogger;
+  let regexWorker: RegexWorkerService;
   beforeEach(() => {
     jest.resetAllMocks();
+    logger = loggerMock.create();
+    regexWorker = new RegexWorkerService(testConfig, logger);
   });
 
   const setupMockResponse = (entities: MlInferenceResponseResult[]) => {
@@ -88,6 +99,7 @@ describe('anonymizeMessages', () => {
     const result = await anonymizeMessages({
       messages,
       anonymizationRules: [nerRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -126,6 +138,7 @@ describe('anonymizeMessages', () => {
       anonymizeMessages({
         messages,
         anonymizationRules: [nerRule],
+        regexWorker,
         esClient: mockEsClient,
       })
     ).resolves.toBeDefined();
@@ -137,6 +150,7 @@ describe('anonymizeMessages', () => {
     const result = await anonymizeMessages({
       messages,
       anonymizationRules: [disabledRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -154,6 +168,7 @@ describe('anonymizeMessages', () => {
     const result = await anonymizeMessages({
       messages,
       anonymizationRules: [disabledRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -181,6 +196,7 @@ describe('anonymizeMessages', () => {
     const result = await anonymizeMessages({
       messages,
       anonymizationRules: [regexRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -251,6 +267,7 @@ describe('anonymizeMessages', () => {
 
     const result = await anonymizeMessages({
       messages,
+      regexWorker,
       anonymizationRules: [nerRule],
       esClient: mockEsClient,
     });
@@ -295,6 +312,7 @@ describe('anonymizeMessages', () => {
       system: systemPrompt,
       messages: [],
       anonymizationRules: [nerRule],
+      regexWorker,
       esClient: mockEsClient,
     });
     expect(result.system).toBe(
@@ -349,6 +367,7 @@ describe('anonymizeMessages', () => {
         },
       ],
       anonymizationRules: [nerRule], // nerRule allows only PER
+      regexWorker,
       esClient: mockEsClient,
     });
 
