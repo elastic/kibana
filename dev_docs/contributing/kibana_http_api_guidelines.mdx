@@ -421,7 +421,7 @@ When you anticipate CPU or memory intensive operations consider that Node.js use
 Use [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) in UTC. This is the default representation in Node.js.
 
 **Durations**
-Can be specified in the [Elasticsearch date math](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/common-options#date-math) format, for ex. `1m` for 1 minute if you want your duration to be relative to `now` where the full expression would be `now-1m`.
+Can be specified in the [Elasticsearch date math](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/common-options#date-math) format, for ex. `1m` for 1 minute if you want your duration to be relative to `now` where the full expression would be `now-1m`. See the `@elastic/datemath` available in Kibana for more details about the capabilities available.
 
 Alternatively, use 2 numbers in milliseconds or [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) date strings.
 
@@ -441,7 +441,7 @@ curl -v -uelastic:changeme 'http://localhost:5601/api/synthetics/monitors' \
   -H 'elastic-api-version: 2023-10-31'
 ```
 
-Kibana's public HTTP APIs are versioned with the entire Elastic organization using data-based versioning. The date indicates the last breaking change. For example: version `2023-10-31` is saying "the last breaking change was at the end of October 2023".
+Kibana's public HTTP APIs in our Serverless offering are versioned with the entire Elastic organization using date-based versioning. The date indicates the last breaking change. For example: version `2023-10-31` is saying "the last breaking change was at the end of October 2023".
 
 <DocCallOut title="New public date versions will be very sparse" color="warning">
   Do not build your public HTTP APIs with the idea you will be able to change them quickly using versions! Due to the MASSIVE surface area, new date string versions are not introduced lightly and must go through rigorous review and justification.
