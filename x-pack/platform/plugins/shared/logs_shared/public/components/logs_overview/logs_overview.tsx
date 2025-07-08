@@ -35,7 +35,6 @@ const LazyLogsOverviewLoadingContent = dynamic(() =>
 export type LogsOverviewProps = Omit<FullLogsOverviewProps, 'dependencies' | 'featureFlags'>;
 
 export interface SelfContainedLogsOverviewHelpers {
-  useIsEnabled: () => boolean;
   ErrorContent: React.ComponentType<LogsOverviewErrorContentProps>;
   LoadingContent: React.ComponentType;
 }
@@ -51,7 +50,7 @@ export const createLogsOverview = (
   // Could be derived from multiple settings via `combineLatest`, but for now we
   // only have one feature flag.
   const featureFlags$ = dependencies.uiSettings.client
-    .get$(OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID, defaultIsEnabled)
+    .get$<boolean>(OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID)
     .pipe(
       map((value) => ({
         isPatternsEnabled: value,
@@ -64,15 +63,9 @@ export const createLogsOverview = (
     return <LazyLogsOverview dependencies={dependencies} featureFlags={featureFlags} {...props} />;
   };
 
-  SelfContainedLogsOverview.useIsEnabled = (): boolean => {
-    return useObservable(featureFlags$, undefined)?.isPatternsEnabled ?? defaultIsEnabled;
-  };
-
   SelfContainedLogsOverview.ErrorContent = LazyLogsOverviewErrorContent;
 
   SelfContainedLogsOverview.LoadingContent = LazyLogsOverviewLoadingContent;
 
   return SelfContainedLogsOverview;
 };
-
-const defaultIsEnabled = false;
