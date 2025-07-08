@@ -205,6 +205,8 @@ export class AutoInstallContentPackagesTask {
           await packageClient.installPackage({
             pkgName: name,
             pkgVersion: version,
+            useStreaming: true, // Use streaming for content packages
+            automaticInstall: true,
           });
         } catch (error) {
           this.logger.warn(

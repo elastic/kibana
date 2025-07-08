@@ -7,6 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 
+import type { DiscoveryField } from '../../common/types';
+
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import type { InstallType } from '../types';
 
@@ -20,6 +22,9 @@ export interface PackageUpdateEvent {
   error?: UpgradeError[];
   eventType: UpdateEventType;
   installType?: InstallType;
+  packageType?: string;
+  discoveryFields?: DiscoveryField[];
+  automaticInstall?: boolean;
 }
 
 export enum UpdateEventType {
