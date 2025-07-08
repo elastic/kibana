@@ -29,22 +29,30 @@ export const populateIndex = async ({
 }) => {
   log.debug(`Starting populating index ${indexName}`);
 
-  const contentEntries = archive.getEntryPaths().filter(isArtifactContentFilePath);
+  try {
+    const contentEntries = archive.getEntryPaths().filter(isArtifactContentFilePath);
 
-  for (let i = 0; i < contentEntries.length; i++) {
-    const entryPath = contentEntries[i];
-    log.debug(`Indexing content for entry ${entryPath}`);
-    const contentBuffer = await archive.getEntryContent(entryPath);
-    await indexContentFile({
-      indexName,
-      esClient,
-      contentBuffer,
-      legacySemanticText,
-      elserInferenceId,
-    });
+    await Promise.all(
+      contentEntries.map(async (entryPath) => {
+        log.debug(`Indexing content for entry ${entryPath}`);
+        const contentBuffer = await archive.getEntryContent(entryPath);
+        await indexContentFile({
+          indexName,
+          esClient,
+          contentBuffer,
+          legacySemanticText,
+          elserInferenceId,
+        });
+      })
+    );
+
+    await esClient.indices.refresh({ index: indexName });
+
+    log.debug(`Done populating index ${indexName}`);
+  } catch (e) {
+    log.error(`Error while trying to populate index ${indexName}: ${e}`);
+    throw e;
   }
-
-  log.debug(`Done populating index ${indexName}`);
 };
 
 const indexContentFile = async ({
@@ -77,12 +85,8 @@ const indexContentFile = async ({
       })
     );
 
-  const operations = documents.reduce<NonNullable<BulkRequest<{}, {}>['operations']>>(
-    (ops, document) => {
-      ops.push({ index: { _index: indexName } }, document);
-      return ops;
-    },
-    []
+  const operations = documents.flatMap<NonNullable<BulkRequest<{}, {}>['operations']>>(
+    (document) => [{ index: { _index: indexName } }, document]
   );
 
   const response = await esClient.bulk({

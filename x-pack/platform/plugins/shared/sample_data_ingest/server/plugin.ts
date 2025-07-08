@@ -8,7 +8,7 @@
 import * as Path from 'path';
 import type { Logger } from '@kbn/logging';
 import { getDataPath } from '@kbn/utils';
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SampleDataIngestConfig } from './config';
 import {
   InternalServices,
@@ -48,7 +48,7 @@ export class SampleDataIngestPlugin
     return {};
   }
 
-  start(core: CoreStart): SampleDataStartDependencies {
+  start(): SampleDataStartDependencies {
     const sampleDataManager = new SampleDataManager({
       kibanaVersion: this.context.env.packageInfo.version,
       artifactsFolder: Path.join(getDataPath(), 'sample-data-artifacts'),
