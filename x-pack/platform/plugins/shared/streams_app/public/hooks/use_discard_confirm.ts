@@ -19,10 +19,12 @@ const defaultMessage = i18n.translate('xpack.streams.cancelModal.message', {
 
 export const useDiscardConfirm = <THandler extends (..._args: any[]) => any>(
   handler: THandler,
-  options: OverlayModalConfirmOptions & { message?: string } = {}
+  options: OverlayModalConfirmOptions & { message?: string; enabled?: boolean } = {}
 ) => {
   const { core } = useKibana();
-  const { message = defaultMessage, ...optionsOverride } = options;
+  const { message = defaultMessage, enabled = true, ...optionsOverride } = options;
+
+  if (!enabled) return handler;
 
   return async (...args: Parameters<THandler>) => {
     const hasCancelled = await core.overlays.openConfirm(message, {

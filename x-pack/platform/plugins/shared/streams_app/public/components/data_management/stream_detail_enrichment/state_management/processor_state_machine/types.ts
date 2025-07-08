@@ -13,8 +13,7 @@ import { ProcessorDefinitionWithUIAttributes } from '../../types';
 export type ProcessorToParentEvent =
   | { type: 'processor.change'; id: string }
   | { type: 'processor.delete'; id: string }
-  | { type: 'processor.stage' }
-  | { type: 'processor.update' };
+  | { type: 'processor.save' };
 
 export interface ProcessorInput {
   parentRef: ProcessorParentActor;
@@ -49,8 +48,7 @@ export type ProcessorEvent =
     }
   | { type: 'processor.delete' }
   | { type: 'processor.edit' }
-  | { type: 'processor.stage' }
-  | { type: 'processor.update' };
+  | { type: 'processor.save' };
 
 export interface ProcessorEmittedEvent {
   type: 'processor.changesDiscarded';

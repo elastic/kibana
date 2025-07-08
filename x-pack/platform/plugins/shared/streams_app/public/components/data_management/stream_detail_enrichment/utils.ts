@@ -12,6 +12,7 @@ import {
   ProcessorDefinition,
   ProcessorDefinitionWithId,
   ProcessorType,
+  SampleDocument,
   getProcessorType,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
@@ -364,3 +365,14 @@ export const dataSourceConverter = {
   toUIDefinition: dataSourceToUIDefinition,
   toUrlSchema: dataSourceToUrlSchema,
 };
+
+export const getDefaultGrokProcessor = ({ sampleDocs }: { sampleDocs: FlattenRecord[] }) => ({
+  grok: {
+    field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+    patterns: [''],
+    pattern_definitions: {},
+    ignore_failure: true,
+    ignore_missing: true,
+    if: ALWAYS_CONDITION,
+  },
+});

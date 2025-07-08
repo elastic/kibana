@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
+import { ProcessorDefinition } from '@kbn/streams-schema';
 import { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
   streamEnrichmentMachine,
@@ -42,7 +43,7 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
-      addProcessor: (processor: ProcessorDefinitionWithUIAttributes) => {
+      addProcessor: (processor?: ProcessorDefinition) => {
         service.send({ type: 'processors.add', processor });
       },
       reorderProcessors: (processorsRefs: ProcessorActorRef[]) => {

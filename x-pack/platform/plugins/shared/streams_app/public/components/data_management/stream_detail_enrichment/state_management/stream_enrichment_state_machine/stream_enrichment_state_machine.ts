@@ -18,7 +18,7 @@ import {
   cancel,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { isRootStreamDefinition, Streams } from '@kbn/streams-schema';
+import { isRootStreamDefinition, ProcessorDefinition, Streams } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { GrokCollection } from '@kbn/grok-ui';
 import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
@@ -28,7 +28,7 @@ import {
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { isGrokProcessor, processorConverter } from '../../utils';
+import { getDefaultGrokProcessor, isGrokProcessor, processorConverter } from '../../utils';
 import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
@@ -56,8 +56,7 @@ import {
   dataSourceMachine,
 } from '../data_source_state_machine';
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
-
-const createId = htmlIdGenerator();
+import { selectPreviewDocuments } from '../simulation_state_machine/selectors';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 
@@ -103,13 +102,13 @@ export const streamEnrichmentMachine = setup({
       // Clean-up pre-existing processors
       context.processorsRefs.forEach(stopChild);
       // Setup processors from the stream definition
-      const processorsRefs = context.definition.stream.ingest.processing.map((proc) => {
-        const processor = processorConverter.toUIDefinition(proc);
+      const processorsRefs = context.definition.stream.ingest.processing.map((processor) => {
+        const processorWithUIAttributes = processorConverter.toUIDefinition(processor);
         return spawn('processorMachine', {
-          id: processor.id,
+          id: processorWithUIAttributes.id,
           input: {
             parentRef: self,
-            processor,
+            processor: processorWithUIAttributes,
           },
         });
       });
@@ -120,18 +119,21 @@ export const streamEnrichmentMachine = setup({
       };
     }),
     addProcessor: assign(
-      (
-        { context, spawn, self },
-        { processor }: { processor: ProcessorDefinitionWithUIAttributes }
-      ) => {
-        const id = createId();
+      ({ context, spawn, self }, { processor }: { processor?: ProcessorDefinition }) => {
+        if (!processor) {
+          processor = getDefaultGrokProcessor({
+            sampleDocs: selectPreviewDocuments(context.simulatorRef?.getSnapshot().context),
+          });
+        }
+
+        const processorWithUIAttributes = processorConverter.toUIDefinition(processor);
         return {
           processorsRefs: context.processorsRefs.concat(
             spawn('processorMachine', {
-              id,
+              id: processorWithUIAttributes.id,
               input: {
                 parentRef: self,
-                processor: { ...processor, id },
+                processor: processorWithUIAttributes,
                 isNew: true,
               },
             })
@@ -400,17 +402,8 @@ export const streamEnrichmentMachine = setup({
                     { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                   ],
                 },
-                'processor.stage': {
-                  actions: [
-                    { type: 'reassignProcessors' },
-                    { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                  ],
-                },
-                'processor.update': {
-                  actions: [
-                    { type: 'reassignProcessors' },
-                    { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                  ],
+                'processor.save': {
+                  actions: [{ type: 'reassignProcessors' }],
                 },
                 'simulation.refresh': {
                   actions: [{ type: 'refreshDataSources' }],

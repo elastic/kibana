@@ -68,7 +68,7 @@ export const processorMachine = setup({
     hasEditingChanges: ({ context }) => !isEqual(context.previousProcessor, context.processor),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QAcBOB7AxnW7UDoBXAO1TnQBsA3SAYgG0AGAXURXVgEsAXT9YtiAAeiAMz4AbACYJAFgDsATkWN5jCfNETRUgDQgAnogCM8gBz4ArMbOjjsxossalAX1f60WHHiKly1HT0xqxIIMgcPHwCYSIIUrKW+IxSlimpEtrOorL6RgimFta2jLLKMlJSivLunhjYsLgEEKgAhgBm3PiQUcRQtF4NTfiw3K0wTKHsXLz8gnGVsviilopmxpWMxnYSeYiJ4hLV8kpSovLGpme14fU+zW2d3RC9-YP3+JitxNgUk4IRGbReaIRT4RSVUTrMpmI7yByWPYICSlfC2RSiHSMSzyKo1Dy3byNXwtDpdHq8PoDO7EgiYAAW3wmLABkVmMVAcQAtNtGOC7NYqpYpIxHCckVolkdZMZnBoUvJLGZLDd3rTPvx2pwoIQyBB8JwIBQwNSicMKf8woConNYohpBJwZopOszGZZEdFMYJal8IqUplTMUpMZVTThphNdrdZBnjw45S3uHfIRkBBWtwwJbpjaOcJ7VDwcYvfI5KkVhIzEiDpJjqdzpdcWGzb5I8QtTq9QmE5wqWqI99ftnwmzgXaEG7HbI7FD7NKId7DIgqnydJZrKVKhJ7GZm0NW1HO7GKT2+8nmmBjZnh9b2SCEJjjH715iZVpMW6kfC+TJZZdjJWZSKHuHxth2Mb6ieFK9kmLZ0oyfRZiyVqjranKIGYLr4KkLpmBiphQkcSJmFsfpKE4UjmCKGLuASxDoBAcAAuerJAmh+YIFylQWIksJQgotjGIwUJfksEJbDkKzFriOQgeqJBkLggQQKxub3jyJH4Lx2juuYdjCVWS4FBcyQqCGIYnMoSoqgS-Yko83CqXe448uY-J-kKIpivISKUfI+DFjKsjTmUlarHJwykk80F9E5Y7ocifKyBUiruvpsi2NWKgBWkbprKIGLSFIEUHu20Z6nF7FxDiFjVDorrup6i75ABUhaSKc4aBklQ2XUcEamVR76oaxqVXmcQnEkthKMKUINuKRkJGC4n2KoZhqMlmIlXSh4QQmY33pkYJaC6Xp4phOhIhIwp+tulgrDIWyndtA3gV2UEvImB3jhc-knXhGzVBdehGd+2F3f+gHKC9jFXpA30JVyFi2GkKzVPd8JQiD+S4kkXp4dkQmlIktGuEAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QAcBOB7AxnW7UDoBXAO1TnQBsA3SAYgG0AGAXURXVgEsAXT9YtiAAeiAEwBmcfgBsATkkAOAIxKALEoDss2YwUAaEAE8xm-LInjVjaeIUalAVmmqAvi4NosOPEVLlqdPRKrEggyBw8fAKhIgiiEviqCjaqsgqymtq6BsYI4oxSCrpJ0oyO4g6y0m4eGNiwuAQQqACGAGbctJ71jfiwLTRMIexcvPyCsdJTZpKV4hoOOYgAtEoV+A41YXXeTa0dXTsNPpgtxNgUQ4Lho1ETiNIOqolVjPILSwhK5jJVGhrKWz2JyiLbdXb4ZrtTrg44ETAACzOMCuoRukXGMTElQ2og0lnmiyMiGSMniCjsAOcqjx1Xc2y8cPwmH4bU4UEIZAg+E4EAoYEOjN6kB4qJGGOioFiDlE0kSoiqdiJuXxCnw+NkDgUkh1szBR16LOIbI5XPwIt4xCggp6Pn6gxY1wiY0lwkQ81EZjU1lEysQmqUZg1Wt1evpsMNrPZnMg5ogkStNohp3OYEujrRzruWLyDgc+HSPr9CABsnwEk12tDFX1QpOUdNsYtnETEZ8EDTYG4YDFYSzmKliCcjAL9impVkGhpAM+IKDGlEjH+-1UTlc4YN9eN0bNzdbm-hSKtPYz4pd9wQk8+Chp5cr1bD9OI6A78DRB6dtwHbq+n2W8XEWtbQIEgyFwAIIE-CULwcDR8HEeRtEcaRFzeApi1ERwZHxSxrCBZD11qOs9mhKDzxzVR-gLUQaSUOxUm0bRVE+TD82kHCrBsOwCKA5MGxjSDMy-V1YlST5HkDCsQ2rTYN2I5l+LNXl+TI7NBxLAozHMOiPmJS9pnMDRdAfWSiOAhTt0bbk9ygVTv1iJQ5HLYtJxHIzFyrUNTIZcyO35btBLPNSfymKQ3nyJcATzGVpE+HVyzWKsF3EFC8TcNwgA */
   id: 'processor',
   context: ({ input }) => ({
     parentRef: input.parentRef,
@@ -82,25 +82,21 @@ export const processorMachine = setup({
       always: [{ target: 'draft', guard: 'isDraft' }, { target: 'configured' }],
     },
     draft: {
-      initial: 'editing',
-      states: {
-        editing: {
-          on: {
-            'processor.stage': {
-              target: '#configured',
-              actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
-            },
-            'processor.cancel': {
-              target: '#deleted',
-              actions: [{ type: 'resetToPrevious' }],
-            },
-            'processor.change': {
-              actions: [
-                { type: 'changeProcessor', params: ({ event }) => event },
-                { type: 'forwardChangeEventToParent' },
-              ],
-            },
-          },
+      on: {
+        'processor.save': {
+          guard: 'hasEditingChanges',
+          target: '#configured',
+          actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
+        },
+        'processor.cancel': {
+          target: '#deleted',
+          actions: [{ type: 'resetToPrevious' }],
+        },
+        'processor.change': {
+          actions: [
+            { type: 'changeProcessor', params: ({ event }) => event },
+            { type: 'forwardChangeEventToParent' },
+          ],
         },
       },
     },
@@ -109,34 +105,29 @@ export const processorMachine = setup({
       initial: 'idle',
       states: {
         idle: {
-          on: { 'processor.edit': 'edit' },
+          on: { 'processor.edit': 'editing' },
         },
-        edit: {
-          initial: 'editing',
-          states: {
-            editing: {
-              on: {
-                'processor.update': {
-                  guard: 'hasEditingChanges',
-                  target: '#configured.idle',
-                  actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
-                },
-                'processor.cancel': {
-                  target: '#configured.idle',
-                  actions: [
-                    { type: 'emitChangesDiscarded' },
-                    { type: 'resetToPrevious' },
-                    { type: 'forwardEventToParent' },
-                  ],
-                },
-                'processor.delete': '#deleted',
-                'processor.change': {
-                  actions: [
-                    { type: 'changeProcessor', params: ({ event }) => event },
-                    { type: 'forwardChangeEventToParent' },
-                  ],
-                },
-              },
+        editing: {
+          on: {
+            'processor.save': {
+              guard: 'hasEditingChanges',
+              target: '#configured.idle',
+              actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
+            },
+            'processor.cancel': {
+              target: '#configured.idle',
+              actions: [
+                { type: 'emitChangesDiscarded' },
+                { type: 'resetToPrevious' },
+                { type: 'forwardEventToParent' },
+              ],
+            },
+            'processor.delete': '#deleted',
+            'processor.change': {
+              actions: [
+                { type: 'changeProcessor', params: ({ event }) => event },
+                { type: 'forwardChangeEventToParent' },
+              ],
             },
           },
         },

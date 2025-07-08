@@ -27,6 +27,7 @@ import {
   EuiButtonIcon,
   EuiFlexItem,
   EuiButtonEmptyProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
@@ -34,6 +35,7 @@ import { Expression } from '@kbn/grok-ui';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { css } from '@emotion/react';
 import { useStreamEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 import { SortableList } from '../../sortable_list';
 import { GrokFormState } from '../../types';
@@ -49,6 +51,8 @@ export const GrokPatternsEditor = () => {
     register,
     setValue,
   } = useFormContext();
+
+  const { euiTheme } = useEuiTheme();
 
   const aiFeatures = useAIFeatures();
 
@@ -88,6 +92,9 @@ export const GrokPatternsEditor = () => {
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditorLabel',
           { defaultMessage: 'Grok patterns' }
         )}
+        css={css`
+          margin-bottom: ${euiTheme.size.s};
+        `}
       >
         <EuiPanel color="subdued" paddingSize="none">
           <SortableList onDragItem={handlerPatternDrag}>
@@ -169,7 +176,9 @@ const DraggablePatternInput = ({
 
   useDebounce(
     () => {
-      setValue(`patterns.${idx}.value`, field.draftGrokExpression);
+      setValue(`patterns.${idx}.value`, field.draftGrokExpression, {
+        shouldValidate: true,
+      });
     },
     300,
     [expression]
@@ -182,10 +191,6 @@ const DraggablePatternInput = ({
       draggableId={draftGrokExpression.id}
       hasInteractiveChildren
       customDragHandle
-      css={{
-        paddingLeft: 0,
-        paddingRight: 0,
-      }}
     >
       {(provided) => (
         <EuiFormRow isInvalid={isInvalid} error={error?.message}>

@@ -9,8 +9,10 @@ import React, { useMemo } from 'react';
 import {
   DragDropContextProps,
   EuiAccordion,
+  EuiButton,
   EuiCode,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
@@ -30,7 +32,6 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
-import { AddProcessorPanel } from './processors';
 import { SimulationPlayground } from './simulation_playground';
 import {
   StreamEnrichmentContextProvider,
@@ -147,14 +148,10 @@ export function StreamDetailEnrichmentContentImpl() {
 const ProcessorsEditor = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
-  const { reorderProcessors } = useStreamEnrichmentEvents();
+  const { addProcessor, reorderProcessors } = useStreamEnrichmentEvents();
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
 
-  const processorsRefs = useStreamEnrichmentSelector((state) =>
-    state.context.processorsRefs.filter((processorRef) =>
-      processorRef.getSnapshot().matches('configured')
-    )
-  );
+  const processorsRefs = useStreamEnrichmentSelector((state) => state.context.processorsRefs);
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
@@ -197,43 +194,48 @@ const ProcessorsEditor = React.memo(() => {
 
   return (
     <>
-      <EuiPanel
-        paddingSize="m"
-        hasShadow={false}
-        borderRadius="none"
-        grow={false}
-        css={css`
-          border-bottom: ${euiTheme.border.thin};
-        `}
-      >
-        <EuiTitle size="xxs">
-          <h2>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.headingTitle',
-              {
-                defaultMessage: 'Processors for field extraction',
-              }
-            )}
-          </h2>
-        </EuiTitle>
-        <EuiText component="p" size="xs">
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
-            {
-              defaultMessage: 'Drag and drop existing processors to update their execution order.',
-            }
+      <EuiPanel paddingSize="m" hasShadow={false} borderRadius="none" grow={false}>
+        <EuiFlexGroup alignItems="center" wrap>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h2>
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.headingTitle',
+                  {
+                    defaultMessage: 'Processors for field extraction',
+                  }
+                )}
+              </h2>
+            </EuiTitle>
+            <EuiText component="p" size="xs">
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
+                {
+                  defaultMessage:
+                    'Drag and drop existing processors to update their execution order.',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
+          {definition.privileges.simulate && (
+            <EuiButton size="s" iconType="plus" onClick={() => addProcessor()}>
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorButton',
+                { defaultMessage: 'Add processor' }
+              )}
+            </EuiButton>
           )}
-        </EuiText>
+        </EuiFlexGroup>
       </EuiPanel>
-      <EuiPanel
-        paddingSize="m"
-        hasShadow={false}
-        borderRadius="none"
-        css={css`
-          overflow: auto;
-        `}
-      >
-        {hasProcessors && (
+      {hasProcessors && (
+        <EuiPanel
+          hasShadow={false}
+          borderRadius="none"
+          css={css`
+            overflow: auto;
+            padding: ${euiTheme.size.m};
+          `}
+        >
           <SortableList onDragItem={handlerItemDrag}>
             {processorsRefs.map((processorRef, idx) => (
               <DraggableProcessorListItem
@@ -245,9 +247,8 @@ const ProcessorsEditor = React.memo(() => {
               />
             ))}
           </SortableList>
-        )}
-        {definition.privileges.simulate && <AddProcessorPanel />}
-      </EuiPanel>
+        </EuiPanel>
+      )}
       <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
         {!isEmpty(errors.ignoredFields) && (
           <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">

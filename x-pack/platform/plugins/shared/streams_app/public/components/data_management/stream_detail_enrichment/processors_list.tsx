@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { EuiDraggable } from '@elastic/eui';
-import { EditProcessorPanel, type EditProcessorPanelProps } from './processors';
+import { ProcessorPanel, ProcessorPanelProps } from './processors';
 
 export const DraggableProcessorListItem = ({
   idx,
   disableDrag,
   ...props
-}: Omit<EditProcessorPanelProps, 'dragHandleProps'> & { idx: number; disableDrag: boolean }) => (
+}: Omit<ProcessorPanelProps, 'dragHandleProps'> & { idx: number; disableDrag: boolean }) => (
   <EuiDraggable
     index={idx}
     spacing="m"
@@ -21,11 +21,7 @@ export const DraggableProcessorListItem = ({
     hasInteractiveChildren
     customDragHandle
     isDragDisabled={disableDrag}
-    css={{
-      paddingLeft: 0,
-      paddingRight: 0,
-    }}
   >
-    {(provided) => <EditProcessorPanel {...props} dragHandleProps={provided.dragHandleProps} />}
+    {(provided) => <ProcessorPanel {...props} dragHandleProps={provided.dragHandleProps} />}
   </EuiDraggable>
 );
