@@ -1024,10 +1024,10 @@ describe('MS Defender response actions client', () => {
                 type: 'RunScript',
                 params: [
                   { key: 'ScriptName', value: 'hello.sh' },
-                  { key: 'Args', value: '--noargs' }
-                ]
-              }
-            }
+                  { key: 'Args', value: '--noargs' },
+                ],
+              },
+            },
           ],
         };
 
@@ -1273,10 +1273,10 @@ describe('MS Defender response actions client', () => {
                   type: 'RunScript',
                   params: [
                     { key: 'ScriptName', value: 'hello.sh' },
-                    { key: 'Args', value: '--noargs' }
-                  ]
-                }
-              }
+                    { key: 'Args', value: '--noargs' },
+                  ],
+                },
+              },
             ],
           };
 
