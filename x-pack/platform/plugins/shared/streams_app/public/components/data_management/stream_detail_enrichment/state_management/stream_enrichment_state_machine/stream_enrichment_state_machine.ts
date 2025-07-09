@@ -55,7 +55,7 @@ import {
   dataSourceMachine,
 } from '../data_source_state_machine';
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
-import { selectPreviewDocuments } from '../simulation_state_machine/selectors';
+import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { moveArrayItem } from '../../../../../util/move_array_item';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
@@ -114,9 +114,7 @@ export const streamEnrichmentMachine = setup({
     addProcessor: assign((assignArgs, { processor }: { processor?: ProcessorDefinition }) => {
       if (!processor) {
         processor = getDefaultGrokProcessor({
-          sampleDocs: selectPreviewDocuments(
-            assignArgs.context.simulatorRef?.getSnapshot().context
-          ),
+          sampleDocs: selectPreviewRecords(assignArgs.context.simulatorRef?.getSnapshot().context),
         });
       }
 
