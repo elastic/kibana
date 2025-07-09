@@ -35,11 +35,22 @@ export const CascadeGridImplementation: StoryObj<
   { query: string } & Pick<ComponentProps<typeof DataCascade>, 'size'>
 > = {
   render: function DataCascadeWrapper(args) {
-    const initData = new Array(100).fill(null).map(() => {
+    const { groupByFields } = getESQLStatsQueryMeta(args.query);
+
+    interface MockGroupData {
+      [index: string]: string | number;
+      id: string;
+      count: number;
+    }
+
+    const initData: MockGroupData[] = new Array(100).fill(null).map(() => {
       return {
         id: faker.string.uuid(),
-        group: faker.person.fullName(),
         count: faker.number.int({ min: 1, max: 100 }),
+        ...groupByFields.reduce(
+          (acc, field) => ({ ...acc, [field]: faker.person.fullName() }),
+          {} as Record<string, string>
+        ),
       };
     });
 
@@ -58,7 +69,7 @@ export const CascadeGridImplementation: StoryObj<
             stickyGroupRoot
             size={args.size}
             data={initData}
-            cascadeGroups={getESQLStatsQueryMeta(args.query).groupByFields}
+            cascadeGroups={groupByFields}
             tableTitleSlot={({ rows }) => (
               <EuiText>
                 {i18n.translate('sharedUXPackages.data_cascade.toolbar.query_string', {
@@ -73,7 +84,7 @@ export const CascadeGridImplementation: StoryObj<
             )}
             rowHeaderTitleSlot={({ row }) => (
               <EuiText>
-                <h2>{row.original.group}</h2>
+                <h2>{row.original[groupByFields[row.depth]]}</h2>
               </EuiText>
             )}
             rowHeaderMetaSlots={({ row }) => [
@@ -82,7 +93,7 @@ export const CascadeGridImplementation: StoryObj<
                   id="sharedUXPackages.data_cascade.demo.row.count"
                   defaultMessage="Count <badge>{countValue}</badge>"
                   values={{
-                    countValue: row.original.count,
+                    countValue: String(row.original.count),
                     badge: (chunks) => <EuiBadge color="hollow">{chunks}</EuiBadge>,
                   }}
                 />
@@ -98,7 +109,7 @@ export const CascadeGridImplementation: StoryObj<
               return (
                 <EuiDescriptionList
                   listItems={(data ?? []).map((datum) => ({
-                    title: datum.group,
+                    title: datum.id,
                     description: JSON.stringify(datum, null, 2),
                   }))}
                 />
@@ -108,7 +119,7 @@ export const CascadeGridImplementation: StoryObj<
               // eslint-disable-next-line no-console -- Handle group by change if needed
               console.log('Group By Changed:', groupBy);
             }}
-            onCascadeGroupNodeExpanded={async ({ row }) => {
+            onCascadeGroupNodeExpanded={async ({ row, nodePath, nodePathMap }) => {
               // Simulate a data fetch on row expansion
               return new Promise((resolve) => {
                 setTimeout(() => {
@@ -116,15 +127,21 @@ export const CascadeGridImplementation: StoryObj<
                     new Array(row.original.count).fill(null).map(() => {
                       return {
                         id: faker.string.uuid(),
-                        group: faker.person.fullName(),
                         count: faker.number.int({ min: 1, max: row.original.count }),
+                        ...groupByFields.reduce((acc, field) => {
+                          return {
+                            ...acc,
+                            // @ts-expect-error - field is a string
+                            [field]: nodePath[field] ? nodePathMap[field] : faker.person.fullName(),
+                          };
+                        }, {} as Record<string, string>),
                       };
                     })
                   );
                 }, 3000);
               });
             }}
-            onCascadeLeafNodeExpanded={async ({ row, nodePathMap }) => {
+            onCascadeLeafNodeExpanded={async ({ row, nodePathMap, nodePath }) => {
               // Simulate a data fetch for the expanded leaf, ideally we'd want to use nodePath information to fetch this data
               return new Promise((resolve) => {
                 setTimeout(() => {
@@ -132,7 +149,13 @@ export const CascadeGridImplementation: StoryObj<
                     new Array(row.original.count).fill(null).map(() => {
                       return {
                         id: faker.string.uuid(),
-                        ...nodePathMap,
+                        ...groupByFields.reduce((acc, field) => {
+                          return {
+                            ...acc,
+                            // @ts-expect-error - field is a string
+                            [field]: nodePath[field] ? nodePathMap[field] : faker.person.fullName(),
+                          };
+                        }, {} as Record<string, string>),
                       };
                     })
                   );
