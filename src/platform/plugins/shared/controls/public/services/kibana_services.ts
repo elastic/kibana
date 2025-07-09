@@ -33,7 +33,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: ControlsPluginSta
 };
 
 export const untilPluginStartServicesReady = () => {
-  if (servicesReady$.value) return Promise.resolve();
+  if (servicesReady$.value) return Promise.resolve(servicesReady$.value);
   return new Promise<void>((resolve) => {
     const subscription = servicesReady$.subscribe((isInitialized) => {
       if (isInitialized) {

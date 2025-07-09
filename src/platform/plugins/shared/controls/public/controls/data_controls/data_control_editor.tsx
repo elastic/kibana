@@ -35,6 +35,9 @@ import {
   EuiText,
   EuiCheckableCard,
   useGeneratedHtmlId,
+  EuiCard,
+  EuiPopover,
+  EuiSelectOption,
 } from '@elastic/eui';
 import { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/common';
 import {
@@ -74,6 +77,8 @@ import {
   type DataControlFieldRegistry,
 } from './types';
 import { ControlFactory } from '../types';
+import { OptionsField } from './options_field';
+// import { ESQLLangEditor } from '@kbn/esql/public';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -209,12 +214,25 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
   const editorConfig = useMemo(() => controlGroupApi.getEditorConfig(), [controlGroupApi]);
 
+  const [staticOptions, setStaticOptions] = useState<EuiSelectOption[]>([]);
+
+  const [isFieldOutputPopoverOpen, setIsFieldOutputPopoverOpen] = useState<boolean>(false);
+
   const isEdit = useMemo(() => !!controlId, [controlId]); // if no ID, then we are creating a new control
 
   const isDSLInputMode = useMemo(
     () => (editorState.input ?? DEFAULT_CONTROL_INPUT) === ControlInputOption.DSL,
     [editorState.input]
   );
+  const isESQLInputMode = useMemo(
+    () => editorState.input === ControlInputOption.ESQL,
+    [editorState.input]
+  );
+  const isStaticInputMode = useMemo(
+    () => editorState.input === ControlInputOption.STATIC,
+    [editorState.input]
+  );
+
   const isESQLOutputMode = useMemo(
     () => editorState.output === ControlOutputOption.ESQL,
     [editorState.output]
@@ -415,6 +433,16 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
               fieldRegistry={fieldRegistry}
             />
           )}
+          {/* {isESQLInputMode && (
+            <ESQLLangEditor
+              query={{ esql: 'FROM logs-* | STATS BY category.keyword' }}
+              editorIsInline
+              errors={[]}
+            />
+          )} */}
+          {isStaticInputMode && (
+            <OptionsField label="List options" value={staticOptions} onChange={setStaticOptions} />
+          )}
         </>
       ),
     },
@@ -452,7 +480,46 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 }}
               />
             </EuiFormRow>
-          ) : !isDSLInputMode ? (
+          ) : isESQLInputMode ? (
+            <EuiCard hasBorder>
+              <EuiText size="s">
+                Filter will be created against the field <strong>category.keyword</strong>.{' '}
+                <EuiPopover
+                  isOpen={isFieldOutputPopoverOpen}
+                  closePopover={() => setIsFieldOutputPopoverOpen(false)}
+                  button={
+                    <EuiButtonEmpty onClick={() => setIsFieldOutputPopoverOpen(true)}>
+                      Change
+                    </EuiButtonEmpty>
+                  }
+                >
+                  <DataViewAndFieldPicker
+                    editorConfig={editorConfig}
+                    dataViewId={editorState.dataViewId}
+                    onChangeDataViewId={(newDataViewId) => {
+                      setEditorState({ ...editorState, dataViewId: newDataViewId });
+                    }}
+                    onSelectField={(field) => {
+                      setEditorState({ ...editorState, fieldName: field.name });
+                      /**
+                       * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
+                       */
+                      const newDefaultTitle = field.displayName ?? field.name;
+                      setDefaultPanelTitle(newDefaultTitle);
+                    }}
+                    dataViewListError={dataViewListError}
+                    dataViewListItems={dataViewListItems}
+                    dataViewListLoading={dataViewListLoading}
+                    dataViewLoading={dataViewLoading}
+                    selectedDataView={selectedDataView}
+                    fieldListError={fieldListError}
+                    fieldName={editorState.fieldName}
+                    fieldRegistry={fieldRegistry}
+                  />
+                </EuiPopover>
+              </EuiText>
+            </EuiCard>
+          ) : isStaticInputMode ? (
             <DataViewAndFieldPicker
               editorConfig={editorConfig}
               dataViewId={editorState.dataViewId}
