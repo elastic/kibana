@@ -9,7 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
+import { SEARCH_PRODUCT_NAME } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
 import { ProductCard } from '../product_card';
 
@@ -24,8 +24,8 @@ export const ElasticsearchProductCard = () => {
           'Ideal for bespoke applications, Elasticsearch helps you build highly customizable search and offers many different ingestion methods.',
       })}
       icon="logoElasticsearch"
-      name={ELASTICSEARCH_PLUGIN.NAME}
-      productId={ELASTICSEARCH_PLUGIN.ID}
+      name={SEARCH_PRODUCT_NAME}
+      productId="elasticsearch"
       emptyCta
       cta={i18n.translate('xpack.enterpriseSearch.elasticsearchCard.cta', {
         defaultMessage: 'Learn more',
