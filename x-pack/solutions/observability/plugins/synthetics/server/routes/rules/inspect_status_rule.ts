@@ -13,6 +13,7 @@ import { StatusRuleExecutorOptions } from '../../alert_rules/status_rule/types';
 import { StatusRuleExecutor } from '../../alert_rules/status_rule/status_rule_executor';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SYNTHETICS_ALERTS_WRITE_API } from '../../feature';
 
 export const syntheticsInspectStatusRuleRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -20,6 +21,7 @@ export const syntheticsInspectStatusRuleRoute: SyntheticsRestApiRouteFactory = (
   validate: {
     body: syntheticsMonitorStatusRuleParamsSchema,
   },
+  requiredPrivileges: [SYNTHETICS_ALERTS_WRITE_API],
   handler: async ({
     request,
     server,

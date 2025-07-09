@@ -19,7 +19,14 @@ import {
   SyntheticsRouteHandler,
 } from './types';
 
-function getDefaultWriteAccessFlag(method: SupportedMethod) {
+function getDefaultWriteAccessFlag(
+  writeAccess: boolean,
+  requiredPrivileges: any[],
+  method: SupportedMethod
+) {
+  if (writeAccess && !requiredPrivileges?.length) {
+    return true;
+  }
   // if the method is not GET, it defaults to requiring write access
   return method !== 'GET';
 }
@@ -30,7 +37,7 @@ export const createSyntheticsRouteWithAuth = <
   routeCreator: SyntheticsRestApiRouteFactory
 ): SyntheticsRoute<ClientContract> => {
   const restRoute = routeCreator();
-  const { handler, method, path, options, writeAccess, ...rest } = restRoute;
+  const { handler, method, path, options, writeAccess, requiredPrivileges, ...rest } = restRoute;
   const licenseCheckHandler: SyntheticsRouteHandler<ClientContract> = async ({
     context,
     response,
@@ -62,7 +69,7 @@ export const createSyntheticsRouteWithAuth = <
     options,
     handler: licenseCheckHandler,
     ...rest,
-    writeAccess: writeAccess ?? getDefaultWriteAccessFlag(method),
+    writeAccess: getDefaultWriteAccessFlag(writeAccess, requiredPrivileges, method),
   };
 };
 
