@@ -116,7 +116,9 @@ export function getUpsertWiredFields(
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
 
-export const spawnProcessor = <TAssignArgs extends AssignArgs<any, any, any, any>>(
+export const spawnProcessor = <
+  TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
+>(
   processor: ProcessorDefinition,
   assignArgs: TAssignArgs,
   options?: { isNew: boolean }
@@ -134,7 +136,9 @@ export const spawnProcessor = <TAssignArgs extends AssignArgs<any, any, any, any
   });
 };
 
-export const spawnDataSource = <TAssignArgs extends AssignArgs<any, any, any, any>>(
+export const spawnDataSource = <
+  TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
+>(
   dataSource: EnrichmentDataSource,
   assignArgs: TAssignArgs
 ) => {

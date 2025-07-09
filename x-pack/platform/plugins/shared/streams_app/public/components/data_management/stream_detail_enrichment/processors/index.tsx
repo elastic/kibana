@@ -54,7 +54,7 @@ import { ProcessorMetrics } from '../state_management/simulation_state_machine';
 import { DateProcessorForm } from './date';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import { ConfigDrivenProcessorType } from './config_driven/types';
-import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
+import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
 import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
 
 export interface ProcessorConfigurationProps {
@@ -178,7 +178,7 @@ const ProcessorConfigurationEditor = ({
   const defaultValues = useMemo(
     () =>
       getFormStateFrom(
-        selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+        selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
         { grokCollection },
         processor
       ),

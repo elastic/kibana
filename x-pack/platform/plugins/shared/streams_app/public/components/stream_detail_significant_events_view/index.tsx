@@ -32,7 +32,6 @@ export function StreamDetailSignificantEventsView({
   const {
     core: { notifications },
   } = useKibana();
-
   const {
     timeState: { start, end },
   } = useTimefilter();
