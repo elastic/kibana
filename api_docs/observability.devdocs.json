@@ -1111,7 +1111,7 @@
         "label": "ObservabilityAlertsTable",
         "description": [],
         "signature": [
-          "(props: Omit<{ id: string; columns?: ",
+          "(props: { id: string; columns?: ",
           "EuiDataGridColumn",
           "[] | undefined; query: Pick<",
           "QueryDslQueryContainer",
@@ -1135,25 +1135,9 @@
             "section": "def-public.ObservabilityAlertsTableContext",
             "text": "ObservabilityAlertsTableContext"
           },
-          ">) => void) | undefined; onLoaded?: ((alerts: ",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.Alert",
-            "text": "Alert"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.UnknownAlertFields",
-            "text": "UnknownAlertFields"
-          },
-          ">[], columns: ",
-          "EuiDataGridColumn",
-          "[]) => void) | undefined; runtimeMappings?: ",
+          ">) => void) | undefined; onLoaded?: ((props: ",
+          "AlertsTableOnLoadedProps",
+          ") => void) | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
           " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
           "EuiDataGridToolBarVisibilityOptions",
@@ -1173,7 +1157,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -3381,9 +3365,9 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
-          "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }, \"services\"> & { hideLazyLoader?: boolean | undefined; }) => React.JSX.Element"
+          "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; } & { hideLazyLoader?: boolean | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/public/components/alerts_table/alerts_table_lazy.tsx",
         "deprecated": false,
@@ -3397,7 +3381,7 @@
             "label": "props",
             "description": [],
             "signature": [
-              "Omit<{ id: string; columns?: ",
+              "{ id: string; columns?: ",
               "EuiDataGridColumn",
               "[] | undefined; query: Pick<",
               "QueryDslQueryContainer",
@@ -3421,25 +3405,9 @@
                 "section": "def-public.ObservabilityAlertsTableContext",
                 "text": "ObservabilityAlertsTableContext"
               },
-              ">) => void) | undefined; onLoaded?: ((alerts: ",
-              {
-                "pluginId": "@kbn/alerting-types",
-                "scope": "common",
-                "docId": "kibKbnAlertingTypesPluginApi",
-                "section": "def-common.Alert",
-                "text": "Alert"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/alerting-types",
-                "scope": "common",
-                "docId": "kibKbnAlertingTypesPluginApi",
-                "section": "def-common.UnknownAlertFields",
-                "text": "UnknownAlertFields"
-              },
-              ">[], columns: ",
-              "EuiDataGridColumn",
-              "[]) => void) | undefined; runtimeMappings?: ",
+              ">) => void) | undefined; onLoaded?: ((props: ",
+              "AlertsTableOnLoadedProps",
+              ") => void) | undefined; runtimeMappings?: ",
               "MappingRuntimeFields",
               " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
               "EuiDataGridToolBarVisibilityOptions",
@@ -3459,7 +3427,7 @@
                 "section": "def-common.UnknownAlertFields",
                 "text": "UnknownAlertFields"
               },
-              ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+              ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
               {
                 "pluginId": "observability",
                 "scope": "public",
@@ -5667,9 +5635,9 @@
               "GridOnScrollProps",
               " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
               "EuiDataGridRowHeightsOptions",
-              " | undefined; ref?: React.LegacyRef<",
+              " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
               "AlertsTableImperativeApi",
-              "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }, \"services\"> & { hideLazyLoader?: boolean | undefined; }"
+              "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; } & { hideLazyLoader?: boolean | undefined; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/components/alerts_table/alerts_table_lazy.tsx",
             "deprecated": false,
@@ -7927,7 +7895,8 @@
                 "docId": "kibCasesPluginApi",
                 "section": "def-public.CasesPublicStart",
                 "text": "CasesPublicStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -8132,7 +8101,7 @@
                 "section": "def-public.ExploratoryEmbeddableProps",
                 "text": "ExploratoryEmbeddableProps"
               },
-              ") => React.JSX.Element | null; }"
+              ") => React.JSX.Element | null; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -8252,6 +8221,24 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.logsDataAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "logsDataAccess",
+            "description": [],
+            "signature": [
+              "{ services: { logSourcesService: ",
+              "LogSourcesService",
+              "; logDataService: ",
+              "LogDataService",
+              "; }; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.navigation",
             "type": "Object",
             "tags": [],
@@ -8290,13 +8277,15 @@
                 "section": "def-public.NavigationSection",
                 "text": "NavigationSection"
               },
-              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
+              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, pricing, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
               "AppDeepLink",
               "<string>[]; updater$: ",
               "Subject",
               "<",
               "AppUpdater",
-              ">; }) => void; }"
+              ">; pricing: ",
+              "PricingServiceStart",
+              "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -8439,7 +8428,9 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -8905,7 +8896,7 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
@@ -8932,7 +8923,7 @@
                     "section": "def-common.MultiField",
                     "text": "MultiField"
                   },
-                  "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+                  "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
                   "Maybe",
                   "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
                   "Maybe",
@@ -9222,7 +9213,7 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & OutputOf<SetOptional<{ readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.context\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.evaluation.values\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; readonly array: true; }; readonly \"kibana.alert.grouping\": { readonly type: \"object\"; readonly dynamic: true; readonly array: false; readonly required: false; }; readonly \"kibana.alert.group\": { readonly type: \"object\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; }>> & TAdditionalMetaFields"
+              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & OutputOf<SetOptional<{ readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.context\": { readonly type: \"object\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.evaluation.values\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; readonly array: true; }; readonly \"kibana.alert.grouping\": { readonly type: \"object\"; readonly dynamic: true; readonly array: false; readonly required: false; }; readonly \"kibana.alert.group\": { readonly type: \"object\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.group.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; }>> & TAdditionalMetaFields"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/typings/alerts.ts",
             "deprecated": false,
@@ -9714,25 +9705,9 @@
             "section": "def-public.ObservabilityAlertsTableContext",
             "text": "ObservabilityAlertsTableContext"
           },
-          ">) => void) | undefined; onLoaded?: ((alerts: ",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.Alert",
-            "text": "Alert"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.UnknownAlertFields",
-            "text": "UnknownAlertFields"
-          },
-          ">[], columns: ",
-          "EuiDataGridColumn",
-          "[]) => void) | undefined; runtimeMappings?: ",
+          ">) => void) | undefined; onLoaded?: ((props: ",
+          "AlertsTableOnLoadedProps",
+          ") => void) | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
           " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
           "EuiDataGridToolBarVisibilityOptions",
@@ -9752,7 +9727,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -11960,7 +11935,7 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }[PropKey] extends null | undefined ? never : { id: string; columns?: ",
           "EuiDataGridColumn",
@@ -11986,25 +11961,9 @@
             "section": "def-public.ObservabilityAlertsTableContext",
             "text": "ObservabilityAlertsTableContext"
           },
-          ">) => void) | undefined; onLoaded?: ((alerts: ",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.Alert",
-            "text": "Alert"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.UnknownAlertFields",
-            "text": "UnknownAlertFields"
-          },
-          ">[], columns: ",
-          "EuiDataGridColumn",
-          "[]) => void) | undefined; runtimeMappings?: ",
+          ">) => void) | undefined; onLoaded?: ((props: ",
+          "AlertsTableOnLoadedProps",
+          ") => void) | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
           " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
           "EuiDataGridToolBarVisibilityOptions",
@@ -12024,7 +11983,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -14232,7 +14191,7 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }[PropKey]"
         ],
@@ -14343,25 +14302,9 @@
             "section": "def-public.ObservabilityAlertsTableContext",
             "text": "ObservabilityAlertsTableContext"
           },
-          ">) => void) | undefined; onLoaded?: ((alerts: ",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.Alert",
-            "text": "Alert"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerting-types",
-            "scope": "common",
-            "docId": "kibKbnAlertingTypesPluginApi",
-            "section": "def-common.UnknownAlertFields",
-            "text": "UnknownAlertFields"
-          },
-          ">[], columns: ",
-          "EuiDataGridColumn",
-          "[]) => void) | undefined; runtimeMappings?: ",
+          ">) => void) | undefined; onLoaded?: ((props: ",
+          "AlertsTableOnLoadedProps",
+          ") => void) | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
           " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
           "EuiDataGridToolBarVisibilityOptions",
@@ -14381,7 +14324,7 @@
             "section": "def-common.UnknownAlertFields",
             "text": "UnknownAlertFields"
           },
-          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyStateHeight?: \"short\" | \"tall\" | \"flex\" | undefined; emptyStateVariant?: \"subdued\" | \"transparent\" | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
+          ">) => boolean) | undefined; dynamicRowHeight?: boolean | undefined; emptyState?: { messageTitle?: string | undefined; messageBody?: string | undefined; height?: \"short\" | \"tall\" | \"flex\" | undefined; variant?: \"subdued\" | \"transparent\" | undefined; } | undefined; openLinksInNewTab?: boolean | undefined; additionalContext?: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -16589,7 +16532,7 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }"
         ],
@@ -16659,7 +16602,7 @@
             "section": "def-common.MultiField",
             "text": "MultiField"
           },
-          "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+          "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
           "Maybe",
           "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
           "Maybe",
@@ -16686,7 +16629,7 @@
                 "section": "def-common.MultiField",
                 "text": "MultiField"
               },
-              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
+              "[]; }; readonly \"kibana.alert.rule.execution.timestamp\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.severity_improving\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.updated_by.user.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.url\": { readonly type: \"keyword\"; readonly array: false; readonly index: false; readonly required: false; readonly ignore_above: 2048; }; readonly \"kibana.alert.workflow_assignee_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & Record<string, any>; formatters: { asDuration: (value: ",
               "Maybe",
               "<number>, { defaultValue, extended }?: FormatterOptions) => string; asPercent: (numerator: ",
               "Maybe",
@@ -20155,7 +20098,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -20280,7 +20223,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
+          "{ readonly enabled: boolean; readonly managedOtlpServiceUrl: string; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -20313,7 +20256,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -21154,20 +21097,6 @@
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmProgressiveLoading.showInLabs",
-                "type": "boolean",
-                "tags": [],
-                "label": "showInLabs",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmProgressiveLoading.solution",
                 "type": "string",
                 "tags": [],
@@ -21264,230 +21193,6 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.apmServiceGroupMaxNumberOfServices.solution",
-                "type": "string",
-                "tags": [],
-                "label": "solution",
-                "description": [],
-                "signature": [
-                  "\"oblt\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.apmLabsButton",
-            "type": "Object",
-            "tags": [],
-            "label": "[apmLabsButton]",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.type",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "\"boolean\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmLabsButton.solution",
-                "type": "string",
-                "tags": [],
-                "label": "solution",
-                "description": [],
-                "signature": [
-                  "\"oblt\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.enableInfrastructureProfilingIntegration",
-            "type": "Object",
-            "tags": [],
-            "label": "[enableInfrastructureProfilingIntegration]",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureProfilingIntegration.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureProfilingIntegration.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureProfilingIntegration.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureProfilingIntegration.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureProfilingIntegration.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureProfilingIntegration.solution",
                 "type": "string",
                 "tags": [],
                 "label": "solution",
@@ -21624,128 +21329,16 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.entityCentricExperience",
-            "type": "Object",
-            "tags": [],
-            "label": "[entityCentricExperience]",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.entityCentricExperience.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
               },
               {
                 "parentPluginId": "observability",
-                "id": "def-server.uiSettings.entityCentricExperience.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.entityCentricExperience.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.entityCentricExperience.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.entityCentricExperience.value",
+                "id": "def-server.uiSettings.apmEnableTableSearchBar.technicalPreview",
                 "type": "boolean",
                 "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.entityCentricExperience.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
+                "label": "technicalPreview",
                 "description": [],
                 "signature": [
                   "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.entityCentricExperience.type",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "signature": [
-                  "\"boolean\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.entityCentricExperience.solution",
-                "type": "string",
-                "tags": [],
-                "label": "solution",
-                "description": [],
-                "signature": [
-                  "\"oblt\""
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -21876,6 +21469,20 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceInventoryTableSearchBar.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -21998,6 +21605,20 @@
                 "description": [],
                 "signature": [
                   "\"oblt\""
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmEnableServiceMapApiV2.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -22323,6 +21944,20 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.syntheticsThrottlingEnabled.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -22425,107 +22060,6 @@
               {
                 "parentPluginId": "observability",
                 "id": "def-server.uiSettings.enableLegacyUptimeApp.solution",
-                "type": "string",
-                "tags": [],
-                "label": "solution",
-                "description": [],
-                "signature": [
-                  "\"oblt\""
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.apmEnableProfilingIntegration",
-            "type": "Object",
-            "tags": [],
-            "label": "[apmEnableProfilingIntegration]",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableProfilingIntegration.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableProfilingIntegration.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableProfilingIntegration.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableProfilingIntegration.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableProfilingIntegration.requiresPageReload",
-                "type": "boolean",
-                "tags": [],
-                "label": "requiresPageReload",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.apmEnableProfilingIntegration.solution",
                 "type": "string",
                 "tags": [],
                 "label": "solution",
@@ -23613,6 +23147,20 @@
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.searchExcludedDataTiers.technicalPreview",
+                "type": "boolean",
+                "tags": [],
+                "label": "technicalPreview",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -24051,6 +23599,39 @@
               "LegacyComparator"
             ],
             "path": "x-pack/solutions/observability/plugins/observability/common/utils/convert_legacy_outside_comparator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.ElapsedTimestampTooltip",
+        "type": "Function",
+        "tags": [],
+        "label": "ElapsedTimestampTooltip",
+        "description": [],
+        "signature": [
+          "({ time }: Props) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/components/elapsed_timestamp_tooltip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.ElapsedTimestampTooltip.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ time }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/common/components/elapsed_timestamp_tooltip.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -24762,21 +24343,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-common.apmEnableProfilingIntegration",
-        "type": "string",
-        "tags": [],
-        "label": "apmEnableProfilingIntegration",
-        "description": [],
-        "signature": [
-          "\"observability:apmEnableProfilingIntegration\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-common.apmEnableServiceInventoryTableSearchBar",
         "type": "string",
         "tags": [],
@@ -24829,21 +24395,6 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableTransactionProfiling\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.apmLabsButton",
-        "type": "string",
-        "tags": [],
-        "label": "apmLabsButton",
-        "description": [],
-        "signature": [
-          "\"observability:apmLabsButton\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -24989,6 +24540,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.casesDetailLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "casesDetailLocatorID",
+        "description": [],
+        "signature": [
+          "\"OBSERVABILITY_CASES_DETAIL_LOCATOR\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.casesFeatureId",
         "type": "string",
         "tags": [
@@ -25037,6 +24603,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.casesOverviewLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "casesOverviewLocatorID",
+        "description": [],
+        "signature": [
+          "\"OBSERVABILITY_CASES_OVERVIEW_LOCATOR\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.defaultApmServiceEnvironment",
         "type": "string",
         "tags": [],
@@ -25067,21 +24648,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-common.enableInfrastructureProfilingIntegration",
-        "type": "string",
-        "tags": [],
-        "label": "enableInfrastructureProfilingIntegration",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureProfilingIntegration\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-common.enableInspectEsQueries",
         "type": "string",
         "tags": [],
@@ -25089,21 +24655,6 @@
         "description": [],
         "signature": [
           "\"observability:enableInspectEsQueries\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.entityCentricExperience",
-        "type": "string",
-        "tags": [],
-        "label": "entityCentricExperience",
-        "description": [],
-        "signature": [
-          "\"observability:entityCentricExperience\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -25121,6 +24672,22 @@
           "\"observability:maxSuggestions\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.OBSERVABILITY_TIERED_FEATURES",
+        "type": "Array",
+        "tags": [],
+        "label": "OBSERVABILITY_TIERED_FEATURES",
+        "description": [],
+        "signature": [
+          "PricingProductFeature",
+          "[]"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -25559,13 +25126,65 @@
     "objects": [
       {
         "parentPluginId": "observability",
+        "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE",
+        "type": "Object",
+        "tags": [],
+        "label": "OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE",
+        "description": [
+          "\nTiered features"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE.products",
+            "type": "Array",
+            "tags": [],
+            "label": "products",
+            "description": [],
+            "signature": [
+              "{ name: \"observability\"; tier: \"complete\"; }[]"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/common/product_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.observabilityPaths",
         "type": "Object",
         "tags": [],
         "label": "observabilityPaths",
         "description": [],
         "signature": [
-          "{ alerts: string; annotations: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; createRule: (ruleTypeId: string) => string; }"
+          "{ alerts: string; annotations: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; createRule: (ruleTypeId: string) => string; editRule: (id: string) => string; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
         "deprecated": false,

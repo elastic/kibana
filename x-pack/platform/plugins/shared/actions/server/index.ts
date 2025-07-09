@@ -23,6 +23,7 @@ export type {
   ActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
+  SSLSettings,
 } from './types';
 
 export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';
@@ -49,7 +50,8 @@ export type { ServiceParams } from './sub_action_framework/types';
 export const config: PluginConfigDescriptor<ActionsConfig> = {
   schema: configSchema,
   exposeToBrowser: {
-    email: { domain_allowlist: true },
+    email: { domain_allowlist: true, services: { enabled: true } },
+    webhook: { ssl: { pfx: { enabled: true } } },
   },
 };
 

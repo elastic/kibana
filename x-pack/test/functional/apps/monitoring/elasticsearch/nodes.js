@@ -54,7 +54,8 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('skipCloud', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/217665
+      describe.skip('skipCloud', function () {
         // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 

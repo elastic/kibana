@@ -7,19 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Components using the @kbn/i18n module require access to the intl context.
- * This is not available when mounting single components in Enzyme.
- * These helper functions aim to address that and wrap a valid,
- * intl context around them.
- */
-
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@elastic/eui';
+
+export const renderWithKibanaRenderContext = (...args: Parameters<typeof render>) => {
+  const [ui, ...remainingRenderArgs] = args;
+  return render(
+    <EuiThemeProvider>
+      <I18nProvider>{ui}</I18nProvider>
+    </EuiThemeProvider>,
+    ...remainingRenderArgs
+  );
+};
 
 export const renderWithI18n = (...args: Parameters<typeof render>) => {
   const [ui, ...remainingRenderArgs] = args;
   // Avoid using { wrapper: I18nProvider } in case the caller adds a custom wrapper.
   return render(<I18nProvider>{ui}</I18nProvider>, ...remainingRenderArgs);
+};
+
+export const renderWithEuiTheme = (...args: Parameters<typeof render>) => {
+  const [ui, ...remainingRenderArgs] = args;
+  // Avoid using { wrapper: EuiThemeProvider } in case the caller adds a custom wrapper.
+  return render(<EuiThemeProvider>{ui}</EuiThemeProvider>, ...remainingRenderArgs);
 };

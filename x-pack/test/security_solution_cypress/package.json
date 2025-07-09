@@ -7,7 +7,7 @@
   "scripts": {
     "cypress": "../../../node_modules/.bin/cypress",
     "cypress:open:ess": "TZ=UTC node ../../solutions/security/plugins/security_solution/scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ../../test/security_solution_cypress/cypress/cypress.config.ts --ftr-config-file ../../test/security_solution_cypress/cli_config",
-    "cypress:asset_inventory:run:ess": "yarn cypress:ess --spec './cypress/e2e/asset_inventory/**/*.cy.ts'",
+    "cypress:asset_inventory:run:ess": "yarn cypress:ess --spec '.cypress/screens/asset_inventory/**/*.cy.ts'",
     "cypress:entity_analytics:run:ess": "yarn cypress:ess --spec './cypress/e2e/entity_analytics/**/*.cy.ts'",
     "cypress:run:cases:ess": "yarn cypress:ess --spec './cypress/e2e/explore/cases/*.cy.ts'",
     "cypress:ess": "TZ=UTC node ../../solutions/security/plugins/security_solution/scripts/start_cypress_parallel run --config-file ../../test/security_solution_cypress/cypress/cypress_ci.config.ts --ftr-config-file ../../test/security_solution_cypress/cli_config",
@@ -26,6 +26,7 @@
     "junit:transform": "node ../../solutions/security/plugins/security_solution/scripts/junit_transformer --pathPattern '../../../target/kibana-security-solution/cypress/results/*.xml' --rootDirectory ../../../ --reportName 'Security Solution Cypress' --writeInPlace",
     "cypress:serverless": "TZ=UTC node ../../solutions/security/plugins/security_solution/scripts/start_cypress_parallel --config-file ../../test/security_solution_cypress/cypress/cypress_ci_serverless.config.ts --ftr-config-file ../../test/security_solution_cypress/serverless_config",
     "cypress:ai4dsoc:serverless": "TZ=UTC node ../../solutions/security/plugins/security_solution/scripts/start_cypress_parallel --config-file ../../test/security_solution_cypress/cypress/cypress_ci_serverless.config.ts --ftr-config-file ../../test/security_solution_cypress/ai4dsoc_serverless_config",
+    "cypress:asset_inventory:run:serverless": "yarn cypress:serverless --spec './cypress/screens/asset_inventory/**/*.cy.ts'",
     "cypress:cloud:serverless": "TZ=UTC NODE_TLS_REJECT_UNAUTHORIZED=0 ../../../node_modules/.bin/cypress",
     "cypress:open:cloud:serverless": "yarn cypress:cloud:serverless open --config-file ./cypress/cypress_serverless.config.ts --env CLOUD_SERVERLESS=true",
     "cypress:open:serverless": "yarn cypress:serverless open --config-file ../../test/security_solution_cypress/cypress/cypress_serverless.config.ts --spec './cypress/e2e/**/*.cy.ts'",
@@ -53,6 +54,7 @@
     "cypress:run:qa:serverless:detection_engine": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/detection_engine/!(exceptions)/**/*.cy.ts'",
     "cypress:run:qa:serverless:detection_engine:exceptions": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/detection_engine/exceptions/**/*.cy.ts'",
     "cypress:run:qa:serverless:ai_assistant": "yarn cypress:qa:serverless --spec './cypress/e2e/ai_assistant/**/*.cy.ts'",
-    "cypress:run:qa:serverless:cloud_security_posture": "yarn cypress:qa:serverless --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts"
+    "cypress:run:qa:serverless:cloud_security_posture": "yarn cypress:qa:serverless --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts",
+    "cypress:run:qa:serverless:ai4dsoc": "yarn cypress:qa:serverless --spec './cypress/e2e/ai4dsoc/**/*.cy.ts'"
   }
 }

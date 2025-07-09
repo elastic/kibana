@@ -130,9 +130,7 @@
           "label": "initNavigation",
           "description": [],
           "signature": [
-            "(id: ",
-            "SolutionId",
-            ", navigationTree$: ",
+            "(id: \"security\" | \"oblt\" | \"es\" | \"chat\", navigationTree$: ",
             "Observable",
             "<",
             "NavigationTreeDefinition",
@@ -152,7 +150,7 @@
               "label": "id",
               "description": [],
               "signature": [
-                "SolutionId"
+                "\"security\" | \"oblt\" | \"es\" | \"chat\""
               ],
               "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
               "deprecated": false,

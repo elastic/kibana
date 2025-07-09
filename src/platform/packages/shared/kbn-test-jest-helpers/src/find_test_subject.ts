@@ -21,6 +21,8 @@ const MATCHERS: Matcher[] = [
 ];
 
 /**
+ * @deprecated - use '@testing-library/react' and byId query instead.
+ *
  * Find node which matches a specific test subject selector. Returns ReactWrappers around DOM element,
  * https://github.com/airbnb/enzyme/tree/master/docs/api/ReactWrapper.
  * Common use cases include calling simulate or getDOMNode on the returned ReactWrapper.

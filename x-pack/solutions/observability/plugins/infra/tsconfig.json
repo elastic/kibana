@@ -58,7 +58,6 @@
     "@kbn/core-analytics-server",
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
-    "@kbn/cases-plugin",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-link-redirect-app",
@@ -84,8 +83,6 @@
     "@kbn/apm-data-access-plugin",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
-    "@kbn/management-settings-components-field-row",
-    "@kbn/core-ui-settings-browser",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/serverless",
     "@kbn/elastic-agent-utils",
@@ -106,8 +103,6 @@
     "@kbn/alerting-rule-utils",
     "@kbn/core-application-browser",
     "@kbn/shared-ux-page-no-data-types",
-    "@kbn/entityManager-plugin",
-    "@kbn/zod",
     "@kbn/core-plugins-server",
     "@kbn/config",
     "@kbn/observability-utils-common",
@@ -116,12 +111,15 @@
     "@kbn/core-test-helpers-model-versions",
     "@kbn/deeplinks-management",
     "@kbn/response-ops-rule-form",
-    "@kbn/traced-es-client",
     "@kbn/fields-metadata-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/presentation-containers",
     "@kbn/object-utils",
-    "@kbn/coloring"
+    "@kbn/coloring",
+    "@kbn/saved-search-component",
+    "@kbn/core-saved-objects-server",
+    "@kbn/cases-plugin",
+    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": ["target/**/*"]
 }

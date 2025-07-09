@@ -35,6 +35,9 @@ export const REMOVED_TYPES: string[] = [
 export const SHARED_CONCURRENCY_TASKS: string[][] = [
   // for testing
   ['sampleTaskSharedConcurrencyType1', 'sampleTaskSharedConcurrencyType2'],
+
+  // reporting
+  ['report:execute', 'report:execute-scheduled'],
 ];
 
 /**

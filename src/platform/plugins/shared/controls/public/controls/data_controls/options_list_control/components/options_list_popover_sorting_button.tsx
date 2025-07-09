@@ -51,6 +51,10 @@ const sortOrderOptions: EuiButtonGroupOptionProps[] = [
   },
 ];
 
+const panelStyle = {
+  width: '224px',
+};
+
 export const OptionsListPopoverSortingButton = ({
   showOnlySelected,
 }: {
@@ -121,7 +125,7 @@ export const OptionsListPopoverSortingButton = ({
       isOpen={isSortingPopoverOpen}
       aria-labelledby="optionsList_sortingOptions"
       closePopover={() => setIsSortingPopoverOpen(false)}
-      panelClassName={'optionsList--sortPopover'}
+      panelStyle={panelStyle}
     >
       <span data-test-subj="optionsListControl__sortingOptionsPopover">
         <EuiPopoverTitle paddingSize="s">

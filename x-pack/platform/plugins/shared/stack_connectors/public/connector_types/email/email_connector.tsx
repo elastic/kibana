@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, useEffect, useMemo } from 'react';
+import React, { lazy, useEffect, useMemo, useRef } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -102,7 +102,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
     notifications: { toasts },
   } = useKibana().services;
   const {
-    services: { validateEmailAddresses },
+    services: { validateEmailAddresses, enabledEmailServices },
   } = useConnectorContext();
 
   const form = useFormContext();
@@ -119,6 +119,15 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
   const { service = null, hasAuth = false } = config ?? {};
   const disableServiceConfig = shouldDisableEmailConfiguration(service);
   const { isLoading, getEmailServiceConfig } = useEmailConfig({ http, toasts });
+  const initialService = useRef(service);
+  if (!initialService.current && service) {
+    initialService.current = service;
+  }
+  const availableEmailServices = getEmailServices(
+    isCloud,
+    enabledEmailServices,
+    initialService.current
+  );
 
   useEffect(() => {
     async function fetchConfig() {
@@ -173,7 +182,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
             componentProps={{
               euiFieldProps: {
                 'data-test-subj': 'emailServiceSelectInput',
-                options: getEmailServices(isCloud),
+                options: availableEmailServices,
                 fullWidth: true,
                 hasNoInitialSelection: true,
                 disabled: readOnly || isLoading,

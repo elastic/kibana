@@ -48,6 +48,7 @@ type BaseAlertsTableProps = AlertsTableProps;
 // Search alerts mock
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts');
 const mockSearchAlerts = jest.mocked(searchAlerts);
+
 const columns = [
   {
     id: AlertsField.name,
@@ -827,6 +828,29 @@ describe('AlertsTable', () => {
             .getAttribute('title')
         ).toBe(AlertsField.uuid);
       });
+    });
+
+    it('should remove sort if the sorting field is removed', async () => {
+      const props: BaseAlertsTableProps = {
+        ...tableProps,
+        initialSort: [
+          {
+            [AlertsField.name]: { order: 'asc' },
+          },
+        ],
+      };
+      render(<TestComponent {...props} />);
+
+      expect(
+        await screen.findByTestId(`dataGridHeaderCellSortingIcon-${AlertsField.name}`)
+      ).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('show-field-browser'));
+      const fieldCheckbox = screen.getByTestId(`field-${AlertsField.name}-checkbox`);
+      await userEvent.click(fieldCheckbox);
+      await userEvent.click(screen.getByTestId('close'));
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(expect.objectContaining({ sort: [] }));
     });
   });
 

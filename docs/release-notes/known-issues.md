@@ -4,6 +4,46 @@ navigation_title: "Known issues"
 
 # Kibana known issues
 
+::::{dropdown} Upgrading Kibana from 8.18.x to 9.0.2 fails due to a configuration conflict in the kibana.yml file
+
+Applies to: {{stack}} 9.0.2
+
+**Details**
+
+Upgrading {{kib}} from version 8.18.x to 9.0.2 fails due to a configuration conflict if `xpack.alerting.cancelAlertsOnRuleTimeout` is set to `false` in the `kibana.yml` file. {{kib}} fails to boot and shows a fatal error message in the {{kib}} logs that's similar to the following:
+
+````
+FATAL Error: Rule type "transform_health" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.
+````
+
+This failure occurs when the `xpack.alerting.cancelAlertsOnRuleTimeout` setting is set to `false`, which is incompatible with the default configuration of an internal setting (`autoRecoverAlerts`) in 9.0.2.
+
+
+**Action**
+
+To temporarily resolve the issue and allow the upgrade to proceed, follow these steps:
+
+1. Remove the `xpack.alerting.cancelAlertsOnRuleTimeout: false` setting from the `kibana.yml` file.
+2. Restart {{kib}} to apply the changes.
+
+**Resolved**
+
+This was resolved in {{stack}} 9.0.3.
+
+::::
+
+::::{dropdown} Errors in rule executions occur when maintenance windows have filters
+
+Applies to: {{stack}} 9.0.0, 9.0.1
+
+**Details** 
+Errors occur when rules run during an active maintenance window that has filters and a matching rule category. 
+
+**Workaround** 
+Remove any filters added to the active maintenance window.
+
+::::
+
 ::::{dropdown} Observability AI assistant gets stuck in a loop when attempting to call the `execute_connector` function
 :name:known-issue-1508
 

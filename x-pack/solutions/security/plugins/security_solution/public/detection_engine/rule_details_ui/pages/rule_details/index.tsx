@@ -39,6 +39,10 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import {
+  PrebuiltRuleBaseVersionFlyoutContextProvider,
+  usePrebuiltRuleBaseVersionContext,
+} from '../../../rule_management/components/rule_details/base_version_diff/base_version_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
 import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import {
@@ -78,7 +82,7 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
-import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
+import { RuleSwitch } from '../../../common/components/rule_switch';
 import { StepPanel } from '../../../rule_creation/components/step_panel';
 import {
   getMachineLearningJobId,
@@ -89,7 +93,7 @@ import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/ru
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { RuleActionsOverflow } from '../../../../detections/components/rules/rule_actions_overflow';
+import { RuleActionsOverflow } from './rule_actions_overflow';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -102,7 +106,6 @@ import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
-  showGlobalFilters,
 } from '../../../../timelines/components/timeline/helpers';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -117,7 +120,7 @@ import {
   RuleStatus,
   RuleStatusFailedCallOut,
   ruleStatusI18n,
-} from '../../../../detections/components/rules/rule_execution_status';
+} from '../../../common/components/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
@@ -148,7 +151,7 @@ import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
-import { CustomizedPrebuiltRuleBadge } from '../../../rule_management/components/rule_details/customized_prebuilt_rule_badge';
+import { ModifiedRuleBadge } from '../../../rule_management/components/rule_details/modified_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
@@ -228,9 +231,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).graphEventId
-  );
   const updatedAt = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).updated
   );
@@ -342,12 +342,17 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     });
   }, [navigateToApp, ruleId]);
 
+  const {
+    actions: { setBaseVersionRule },
+  } = usePrebuiltRuleBaseVersionContext();
+
   // persist rule until refresh is complete
   useEffect(() => {
     if (maybeRule != null) {
       setRule(maybeRule);
+      setBaseVersionRule(maybeRule);
     }
-  }, [maybeRule]);
+  }, [maybeRule, setBaseVersionRule]);
 
   useLegacyUrlRedirect({ rule, spacesApi });
 
@@ -638,7 +643,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
-        <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+        <FiltersGlobal>
           <SiemSearchBar
             id={InputsModelId.global}
             pollForSignalIndex={pollForSignalIndex}
@@ -653,7 +658,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 subtitle={subTitle}
                 subtitle2={
                   <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-                    <CustomizedPrebuiltRuleBadge rule={rule} />
+                    <ModifiedRuleBadge rule={rule} />
                     <EuiFlexGroup alignItems="center" gutterSize="xs">
                       <EuiFlexItem grow={false}>
                         {ruleStatusI18n.STATUS}
@@ -757,6 +762,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                               rule={rule}
                               isInteractive
                               dataTestSubj="definitionRule"
+                              showModifiedFields
                             />
                           )}
                         </StepPanel>
@@ -764,7 +770,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <EuiSpacer />
                       <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                         <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                          {rule != null && <RuleScheduleSection rule={rule} />}
+                          {rule != null && <RuleScheduleSection rule={rule} showModifiedFields />}
                         </StepPanel>
                       </EuiFlexItem>
                       {hasActions && (
@@ -895,6 +901,12 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 RuleDetailsPageComponent.displayName = 'RuleDetailsPageComponent';
 
-export const RuleDetailsPage = connector(React.memo(RuleDetailsPageComponent));
+const ConnectedRuleDetailsPage = connector(React.memo(RuleDetailsPageComponent));
+
+export const RuleDetailsPage = () => (
+  <PrebuiltRuleBaseVersionFlyoutContextProvider>
+    <ConnectedRuleDetailsPage />
+  </PrebuiltRuleBaseVersionFlyoutContextProvider>
+);
 
 RuleDetailsPage.displayName = 'RuleDetailsPage';

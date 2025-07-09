@@ -11,11 +11,13 @@ import {
   createToolProviderMock,
   createScopedPublicToolRegistryMock,
 } from './test_utils/tools';
+import { createMockedAgentClient } from './test_utils/agents';
 
 const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   return {
     tools: {
       register: jest.fn(),
+      registerProvider: jest.fn(),
     },
   };
 };
@@ -33,6 +35,10 @@ const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
       execute: jest.fn(),
       registry: createToolProviderMock(),
       asScoped: jest.fn().mockImplementation(() => createScopedToolStartMock()),
+    },
+    agents: {
+      execute: jest.fn(),
+      getScopedClient: jest.fn().mockImplementation(() => createMockedAgentClient()),
     },
   };
 };

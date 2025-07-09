@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
-import { PreviewLink, hasPreview } from './preview_link';
+import { PreviewLink } from './preview_link';
 import { TestProviders } from '../../../common/mock';
 import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -150,36 +151,10 @@ describe('<PreviewLink />', () => {
           field={'kibana.alert.rule.name'}
           value={'rule'}
           data-test-subj={'rule-link'}
-          scopeId={'scopeId'}
-          isPreview={true}
+          scopeId={TableId.rulePreview}
         />
       </TestProviders>
     );
     expect(queryByTestId('rule-link')).not.toBeInTheDocument();
-  });
-});
-
-describe('hasPreview', () => {
-  it('should return true if field is host.name', () => {
-    expect(hasPreview('host.name')).toBe(true);
-  });
-
-  it('should return true if field is user.name', () => {
-    expect(hasPreview('user.name')).toBe(true);
-  });
-
-  it('should return true if field is rule.id', () => {
-    expect(hasPreview('kibana.alert.rule.name')).toBe(true);
-  });
-
-  it('should return true if field type is source.ip', () => {
-    expect(hasPreview('source.ip')).toBe(true);
-    expect(hasPreview('destination.ip')).toBe(true);
-    expect(hasPreview('host.ip')).toBe(true);
-  });
-
-  it('should return false if field is not host.name, user.name, or ip type', () => {
-    expect(hasPreview('field')).toBe(false); // non-ecs field
-    expect(hasPreview('event.category')).toBe(false); // ecs field but not ip type
   });
 });

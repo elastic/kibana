@@ -13,20 +13,22 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { Condition, getAncestors, getParentId, Streams } from '@kbn/streams-schema';
+import { Condition, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
+import { LockManagerService } from '@kbn/lock-manager';
 import { AssetClient } from './assets/asset_client';
-import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import { StreamsStorageClient } from './service';
-import { checkAccess, checkAccessBulk } from './stream_crud';
+import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import { QueryClient } from './assets/query/query_client';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
 } from './errors/definition_not_found_error';
 import { SecurityError } from './errors/security_error';
-import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
-import { ASSET_ID, ASSET_TYPE } from './assets/fields';
-import { migrateOnRead } from './helpers/migrate_on_read';
+import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
+import { StreamsStorageClient } from './service';
+import { State } from './state_management/state';
+import { checkAccess, checkAccessBulk } from './stream_crud';
+import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -58,8 +60,10 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
 export class StreamsClient {
   constructor(
     private readonly dependencies: {
+      lockManager: LockManagerService;
       scopedClusterClient: IScopedClusterClient;
       assetClient: AssetClient;
+      queryClient: QueryClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
       request: KibanaRequest;
@@ -74,7 +78,32 @@ export class StreamsClient {
    * - it is a wired stream (as opposed to an ingest stream)
    */
   async isStreamsEnabled(): Promise<boolean> {
-    const rootLogsStreamExists = await this.getStream(LOGS_ROOT_STREAM_NAME)
+    const streamsStatus = await this.checkStreamStatus();
+
+    if (streamsStatus === 'conflict') {
+      throw new StreamsStatusConflictError(
+        'Streams status conflict: Elasticsearch and root stream status do not match, enable/disable streams again'
+      );
+    }
+
+    return streamsStatus;
+  }
+
+  public async checkStreamStatus(): Promise<boolean | 'conflict'> {
+    const rootLogsStreamExists = await this.checkRootLogsStreamExists();
+    if (this.dependencies.isServerless) {
+      // in serverless, Elasticsearch doesn't natively support streams yet
+      return rootLogsStreamExists;
+    }
+    const isEnabledOnElasticsearch = await this.checkElasticsearchStreamStatus();
+    if (isEnabledOnElasticsearch !== rootLogsStreamExists) {
+      return 'conflict';
+    }
+    return rootLogsStreamExists;
+  }
+
+  private async checkRootLogsStreamExists() {
+    return await this.getStream(LOGS_ROOT_STREAM_NAME)
       .then((definition) => Streams.WiredStream.Definition.is(definition))
       .catch((error) => {
         if (isDefinitionNotFoundError(error)) {
@@ -82,8 +111,6 @@ export class StreamsClient {
         }
         throw error;
       });
-
-    return rootLogsStreamExists;
   }
 
   /**
@@ -91,27 +118,45 @@ export class StreamsClient {
    * If it is already enabled, it is a noop.
    */
   async enableStreams(): Promise<EnableStreamsResponse> {
-    const isEnabled = await this.isStreamsEnabled();
+    try {
+      const isEnabled = await this.isStreamsEnabled();
 
-    if (isEnabled) {
-      return { acknowledged: true, result: 'noop' };
+      if (isEnabled) {
+        return { acknowledged: true, result: 'noop' };
+      }
+    } catch (error) {
+      if (error.name !== 'StreamsStatusConflictError') {
+        throw error;
+      }
     }
 
-    const result = await State.attemptChanges(
-      [
-        {
-          type: 'upsert',
-          definition: rootStreamDefinition,
-        },
-      ],
-      {
-        ...this.dependencies,
-        streamsClient: this,
-      }
-    );
+    const rootStreamExists = await this.checkRootLogsStreamExists();
 
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
+    if (!rootStreamExists) {
+      await State.attemptChanges(
+        [
+          {
+            type: 'upsert',
+            definition: rootStreamDefinition,
+          },
+        ],
+        {
+          ...this.dependencies,
+          streamsClient: this,
+        }
+      );
+    }
+
+    if (!this.dependencies.isServerless) {
+      // in serverless, Elasticsearch doesn't natively support streams yet
+      const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
+
+      if (!elasticsearchStreamsEnabled) {
+        await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+          method: 'POST',
+          path: '_streams/logs/_enable',
+        });
+      }
     }
 
     return { acknowledged: true, result: 'created' };
@@ -126,31 +171,45 @@ export class StreamsClient {
    * It does NOT delete unwired streams.
    */
   async disableStreams(): Promise<DisableStreamsResponse> {
-    const isEnabled = await this.isStreamsEnabled();
+    try {
+      const isEnabled = await this.isStreamsEnabled();
 
-    if (!isEnabled) {
-      return { acknowledged: true, result: 'noop' };
-    }
-
-    const result = await State.attemptChanges(
-      [
-        {
-          type: 'delete',
-          name: rootStreamDefinition.name,
-        },
-      ],
-      {
-        ...this.dependencies,
-        streamsClient: this,
+      if (!isEnabled) {
+        return { acknowledged: true, result: 'noop' };
       }
-    );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
+    } catch (error) {
+      if (error.name !== 'StreamsStatusConflictError') {
+        throw error;
+      }
     }
 
-    const { assetClient, storageClient } = this.dependencies;
-    await Promise.all([assetClient.clean(), storageClient.clean()]);
+    const rootStreamExists = await this.checkRootLogsStreamExists();
+    const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
+
+    if (rootStreamExists) {
+      await State.attemptChanges(
+        [
+          {
+            type: 'delete',
+            name: rootStreamDefinition.name,
+          },
+        ],
+        {
+          ...this.dependencies,
+          streamsClient: this,
+        }
+      );
+
+      const { assetClient, storageClient } = this.dependencies;
+      await Promise.all([assetClient.clean(), storageClient.clean()]);
+    }
+
+    if (elasticsearchStreamsEnabled) {
+      await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+        method: 'POST',
+        path: '_streams/logs/_disable',
+      });
+    }
 
     return { acknowledged: true, result: 'deleted' };
   }
@@ -201,25 +260,20 @@ export class StreamsClient {
       }
     );
 
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
-
     const { dashboards, queries } = request;
 
-    const queryLinks = queries.map((query) => ({
-      [ASSET_ID]: query.id,
-      [ASSET_TYPE]: 'query' as const,
-      query,
-    }));
-
-    await this.dependencies.assetClient.syncAssetList(stream.name, [
-      ...dashboards.map((dashboard) => ({
+    // sync dashboards as before
+    await this.dependencies.assetClient.syncAssetList(
+      stream.name,
+      dashboards.map((dashboard) => ({
         [ASSET_ID]: dashboard,
         [ASSET_TYPE]: 'dashboard' as const,
       })),
-      ...queryLinks,
-    ]);
+      'dashboard'
+    );
+
+    // sync rules with asset links
+    await this.dependencies.queryClient.syncQueries(stream.name, queries);
 
     return {
       acknowledged: true,
@@ -247,7 +301,7 @@ export class StreamsClient {
       throw new StatusError(`Child stream ${name} already exists`, 409);
     }
 
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'upsert',
@@ -283,10 +337,6 @@ export class StreamsClient {
       ],
       { ...this.dependencies, streamsClient: this }
     );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
 
     return { acknowledged: true, result: 'created' };
   }
@@ -329,9 +379,7 @@ export class StreamsClient {
     if (!source) {
       throw new DefinitionNotFoundError(`Cannot find stream definition`);
     }
-    const migratedSource = migrateOnRead(source);
-    Streams.all.Definition.asserts(migratedSource);
-    return migratedSource;
+    return source;
   }
 
   /**
@@ -588,6 +636,19 @@ export class StreamsClient {
     });
   }
 
+  private async checkElasticsearchStreamStatus(): Promise<boolean> {
+    if (this.dependencies.isServerless) {
+      // in serverless, Elasticsearch doesn't natively support streams yet
+      return false;
+    }
+    const response = (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+      method: 'GET',
+      path: '/_streams/status',
+    })) as { logs: { enabled: boolean } };
+
+    return response.logs.enabled;
+  }
+
   /**
    * Deletes a stream, and its Elasticsearch objects, and its data.
    * Also verifies whether the user has access to the stream.
@@ -612,7 +673,7 @@ export class StreamsClient {
       throw new SecurityError(`Cannot delete stream, insufficient privileges`);
     }
 
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'delete',
@@ -625,11 +686,7 @@ export class StreamsClient {
       }
     );
 
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
-
-    await this.dependencies.assetClient.syncAssetList(definition.name, []);
+    await this.dependencies.queryClient.syncQueries(name, []);
 
     return { acknowledged: true, result: 'deleted' };
   }

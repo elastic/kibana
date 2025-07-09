@@ -12,7 +12,6 @@ const REPORTS_FOLDER = __dirname;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { reporting, dashboard } = getPageObjects(['reporting', 'dashboard']);
-  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const config = getService('config');
   const log = getService('log');
@@ -60,8 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dashboard.navigateToApp();
       await dashboard.loadSavedDashboard('Ecommerce Map');
-      await reporting.openExportTab();
-      await testSubjects.click('pngV2-radioOption');
+      await reporting.selectExportItem('PNG');
       await reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('geo_map_report');
@@ -73,8 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('PNG file matches the baseline image, using embeddable example', async function () {
       await dashboard.navigateToApp();
       await dashboard.loadSavedDashboard('map embeddable example');
-      await reporting.openExportTab();
-      await testSubjects.click('pngV2-radioOption');
+      await reporting.selectExportItem('PNG');
       await reporting.clickGenerateReportButton();
 
       const percentDiff = await measurePngDifference('example_map_report');

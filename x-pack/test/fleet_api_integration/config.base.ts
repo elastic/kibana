@@ -14,6 +14,7 @@ import {
   getKibanaCliLoggers,
 } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
 const getFullPath = (relativePath: string) => path.join(path.dirname(__filename), relativePath);
 
@@ -48,7 +49,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           port: registryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       })
     : undefined;
@@ -87,14 +88,14 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
         `--xpack.fleet.enableExperimental=${JSON.stringify([
           'enableAutomaticAgentUpgrades',
-          'installedIntegrationsTabularUI',
+          'enableAgentMigrations',
         ])}`,
         `--xpack.cloud.id='123456789'`,
         `--xpack.fleet.agentless.enabled=true`,
-        `--xpack.fleet.agentless.api.url=https://api.agentless.url/api/v1/ess`,
-        `--xpack.fleet.agentless.api.tls.certificate=./config/node.crt`,
-        `--xpack.fleet.agentless.api.tls.key=./config/node.key`,
-        `--xpack.fleet.agentless.api.tls.ca=./config/ca.crt`,
+        `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,
+        `--xpack.fleet.agentless.api.tls.certificate=${KBN_CERT_PATH}`,
+        `--xpack.fleet.agentless.api.tls.key=${KBN_KEY_PATH}`,
+        `--xpack.fleet.agentless.api.tls.ca=${CA_CERT_PATH}`,
         `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
         `--xpack.fleet.internal.registry.spec.min=1.0`,
         `--logging.loggers=${JSON.stringify([

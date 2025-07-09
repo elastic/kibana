@@ -39,6 +39,7 @@ BUNDLER_DEPS = [
   "//src/platform/packages/private/kbn-repo-packages",
   "//src/platform/packages/shared/kbn-repo-info",
   "//src/platform/packages/private/kbn-babel-transform",
+  "//src/platform/packages/private/kbn-dot-text",
 ]
 
 js_library(

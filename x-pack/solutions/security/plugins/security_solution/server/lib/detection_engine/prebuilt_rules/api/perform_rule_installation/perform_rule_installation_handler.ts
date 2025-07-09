@@ -22,6 +22,7 @@ import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_ru
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
+import { excludeLicenseRestrictedRules } from '../../logic/utils';
 
 export const performRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -32,13 +33,13 @@ export const performRuleInstallationHandler = async (
 
   try {
     const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
-    const config = ctx.securitySolution.getConfig();
     const soClient = ctx.core.savedObjects.client;
     const rulesClient = await ctx.alerting.getRulesClient();
     const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const exceptionsListClient = ctx.securitySolution.getExceptionListClient();
+    const mlAuthz = ctx.securitySolution.getMlAuthz();
 
     const { mode } = request.body;
 
@@ -47,7 +48,7 @@ export const performRuleInstallationHandler = async (
 
     // If this API is used directly without hitting any detection engine
     // pages first, the rules package might be missing.
-    await ensureLatestRulesPackageInstalled(ruleAssetsClient, config, ctx.securitySolution);
+    await ensureLatestRulesPackageInstalled(ruleAssetsClient, ctx.securitySolution);
 
     const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
     const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
@@ -55,10 +56,9 @@ export const performRuleInstallationHandler = async (
       currentRuleVersions.map((version) => [version.rule_id, version])
     );
 
-    const allInstallableRules = allLatestVersions.filter((latestVersion) => {
-      const currentVersion = currentRuleVersionsMap.get(latestVersion.rule_id);
-      return !currentVersion;
-    });
+    const allInstallableRules = allLatestVersions.filter(
+      (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
+    );
 
     const ruleInstallQueue: Array<{
       rule_id: RuleSignatureId;
@@ -95,7 +95,7 @@ export const performRuleInstallationHandler = async (
         ruleInstallQueue.push(rule);
       });
     } else if (mode === 'ALL_RULES') {
-      ruleInstallQueue.push(...allInstallableRules);
+      ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
     const BATCH_SIZE = 100;

@@ -47,7 +47,6 @@
     "@kbn/home-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/inspector-plugin",
-    "@kbn/cases-plugin",
     "@kbn/cloud-plugin",
     "@kbn/spaces-plugin",
     "@kbn/core-doc-links-browser",

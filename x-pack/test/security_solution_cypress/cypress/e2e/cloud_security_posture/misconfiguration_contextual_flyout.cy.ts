@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { createRule } from '../../tasks/api_calls/rules';
 import { getNewRule } from '../../objects/rule';
 import { getDataTestSubjectSelector } from '../../helpers/common';
@@ -19,6 +18,9 @@ import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { login } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 import { visit } from '../../tasks/navigation';
+
+export const CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX =
+  'security_solution-test.misconfiguration_latest';
 
 const CSP_INSIGHT_MISCONFIGURATION_TITLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutInsightsMisconfigurationsTitleLink'
@@ -94,13 +96,86 @@ const mockFindingUserName = (matches: boolean) => {
     },
   };
 };
+const putIndexMapping = () => {
+  rootRequest({
+    method: 'PUT',
+    url: `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/${CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX}`,
+    body: {},
+  });
 
-const createMockFinding = (isNameMatches: boolean, findingType: 'host.name' | 'user.name') => {
+  rootRequest({
+    method: 'PUT',
+    url: `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/${CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX}/_mapping`,
+    body: {
+      properties: {
+        'result.evaluation': {
+          type: 'keyword',
+        },
+        'host.name': {
+          type: 'keyword',
+        },
+        'resource.id': {
+          type: 'keyword',
+        },
+        resource: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+            sub_type: {
+              type: 'keyword',
+            },
+          },
+        },
+        rule: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            section: {
+              type: 'keyword',
+            },
+            benchmark: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'keyword',
+                },
+                posture_type: {
+                  type: 'keyword',
+                },
+                name: {
+                  type: 'keyword',
+                },
+                version: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+};
+const createMockMisconfigurationFinding = (
+  isNameMatches: boolean,
+  findingType: 'host.name' | 'user.name'
+) => {
   return rootRequest({
     method: 'POST',
     url: `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN}/_doc`,
+    )}/${CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX}/_doc`,
     body:
       findingType === 'host.name'
         ? mockFindingHostName(isNameMatches)
@@ -108,112 +183,121 @@ const createMockFinding = (isNameMatches: boolean, findingType: 'host.name' | 'u
   });
 };
 
-const deleteDataStream = () => {
+const deleteLatestMisconfigurationIndex = () => {
   return rootRequest({
     method: 'DELETE',
     url: `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/_data_stream/${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN}`,
+    )}/${CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX}`,
   });
 };
 
-describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    deleteAlertsAndRules();
-    login();
-    createRule(getNewRule());
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
-  });
-
-  context('Host name - Has misconfiguration findings', () => {
+// Skip on serverless once this ticket is verified: https://github.com/elastic/security-team/issues/12819
+describe(
+  'Alert Host details expandable flyout',
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  () => {
     beforeEach(() => {
-      createMockFinding(true, 'host.name');
-      cy.reload();
-      expandFirstAlertHostFlyout();
+      deleteAlertsAndRules();
+      login();
+      createRule(getNewRule());
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
     });
 
-    afterEach(() => {
-      /* Deleting data stream even though we don't create it because data stream is automatically created when Cloud security API is used  */
-      deleteDataStream();
-    });
-
-    it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
-      cy.log('check if Misconfiguration preview title shown');
-      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
-    });
-
-    it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
-      clickMisconfigurationTitle();
-      cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
-      cy.get(CSP_INSIGHT_TABLE).should('be.visible');
-    });
-  });
-
-  context(
-    'Host name - Has misconfiguration findings but host name is not the same as alert host name',
-    () => {
+    context('Host name - Has misconfiguration findings', () => {
       beforeEach(() => {
-        createMockFinding(false, 'host.name');
+        putIndexMapping();
+        createMockMisconfigurationFinding(true, 'host.name');
         cy.reload();
         expandFirstAlertHostFlyout();
       });
 
       afterEach(() => {
-        deleteDataStream();
+        /* Deleting data stream even though we don't create it because data stream is automatically created when Cloud security API is used  */
+        deleteLatestMisconfigurationIndex();
       });
 
       it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
-        expandFirstAlertHostFlyout();
-
-        cy.log('check if Misconfiguration preview title is not shown');
-        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
+        cy.log('check if Misconfiguration preview title shown');
+        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
       });
-    }
-  );
 
-  context('User name - Has misconfiguration findings', () => {
-    beforeEach(() => {
-      createMockFinding(true, 'user.name');
-      cy.reload();
-      expandFirstAlertUserFlyout();
+      it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
+        clickMisconfigurationTitle();
+        cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
+        cy.get(CSP_INSIGHT_TABLE).should('be.visible');
+      });
     });
 
-    afterEach(() => {
-      deleteDataStream();
-    });
+    context(
+      'Host name - Has misconfiguration findings but host name is not the same as alert host name',
+      () => {
+        beforeEach(() => {
+          putIndexMapping();
+          createMockMisconfigurationFinding(false, 'host.name');
+          cy.reload();
+          expandFirstAlertHostFlyout();
+        });
 
-    it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
-      cy.log('check if Misconfiguration preview title shown');
-      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
-    });
+        afterEach(() => {
+          deleteLatestMisconfigurationIndex();
+        });
 
-    it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
-      clickMisconfigurationTitle();
-      cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
-      cy.get(CSP_INSIGHT_TABLE).should('be.visible');
-    });
-  });
+        it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
+          expandFirstAlertHostFlyout();
 
-  context(
-    'User name - Has misconfiguration findings but host name is not the same as alert host name',
-    () => {
+          cy.log('check if Misconfiguration preview title is not shown');
+          cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
+        });
+      }
+    );
+
+    context('User name - Has misconfiguration findings', () => {
       beforeEach(() => {
-        createMockFinding(false, 'user.name');
+        putIndexMapping();
+        createMockMisconfigurationFinding(true, 'user.name');
         cy.reload();
-        expandFirstAlertHostFlyout();
-      });
-
-      afterEach(() => {
-        deleteDataStream();
-      });
-
-      it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
         expandFirstAlertUserFlyout();
-
-        cy.log('check if Misconfiguration preview title is not shown');
-        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
       });
-    }
-  );
-});
+
+      afterEach(() => {
+        deleteLatestMisconfigurationIndex();
+      });
+
+      it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
+        cy.log('check if Misconfiguration preview title shown');
+        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
+      });
+
+      it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
+        clickMisconfigurationTitle();
+        cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
+        cy.get(CSP_INSIGHT_TABLE).should('be.visible');
+      });
+    });
+
+    context(
+      'User name - Has misconfiguration findings but host name is not the same as alert host name',
+      () => {
+        beforeEach(() => {
+          putIndexMapping();
+          createMockMisconfigurationFinding(false, 'user.name');
+          cy.reload();
+          expandFirstAlertHostFlyout();
+        });
+
+        afterEach(() => {
+          deleteLatestMisconfigurationIndex();
+        });
+
+        it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
+          expandFirstAlertUserFlyout();
+
+          cy.log('check if Misconfiguration preview title is not shown');
+          cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
+        });
+      }
+    );
+  }
+);

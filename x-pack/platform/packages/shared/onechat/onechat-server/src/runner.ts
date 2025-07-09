@@ -7,7 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolIdentifier, SerializedToolIdentifier } from '@kbn/onechat-common';
-import type { RunEventHandlerFn } from './events';
+import type { ToolEventHandlerFn } from './events';
+import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 
 /**
  * Return type for tool invocation APIs.
@@ -20,6 +21,10 @@ export interface RunToolReturn<TResult = unknown> {
    * The result value as returned by the tool.
    */
   result: TResult;
+  /**
+   * ID of this run
+   */
+  runId: string;
 }
 
 /**
@@ -34,6 +39,10 @@ export interface ScopedRunner {
    * Execute a tool.
    */
   runTool: ScopedRunToolFn;
+  /**
+   * Execute an agent
+   */
+  runAgent: ScopedRunAgentFn;
 }
 
 /**
@@ -84,7 +93,7 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
   /**
    * Optional event handler.
    */
-  onEvent?: RunEventHandlerFn;
+  onEvent?: ToolEventHandlerFn;
   /**
    * The request that initiated that run.
    */
@@ -120,4 +129,8 @@ export interface Runner {
    * Execute a tool.
    */
   runTool: RunToolFn;
+  /**
+   * Execute an agent;
+   */
+  runAgent: RunAgentFn;
 }

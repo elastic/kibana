@@ -11,6 +11,8 @@ export const SERVER_APP_ID = 'siem' as const;
 
 // New version created in 8.18. It was previously `SERVER_APP_ID`.
 export const SECURITY_FEATURE_ID_V2 = 'siemV2' as const;
+// New version for 9.1.
+export const SECURITY_FEATURE_ID_V3 = 'siemV3' as const;
 
 /**
  * @deprecated deprecated in 8.17. Use CASE_FEATURE_ID_V2 instead

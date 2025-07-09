@@ -24,7 +24,7 @@ exports[`SyncCalloutsPanel renders 1`] = `
   <EuiFlexItem>
     <EuiCallOut
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
       title="Sync started manually"
     >
       <MemoizedFormattedMessage
@@ -74,7 +74,7 @@ exports[`SyncCalloutsPanel renders canceled job 1`] = `
   <EuiFlexItem>
     <EuiCallOut
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
       title="Sync started manually"
     >
       <MemoizedFormattedMessage
@@ -126,7 +126,7 @@ exports[`SyncCalloutsPanel renders different trigger method 1`] = `
   <EuiFlexItem>
     <EuiCallOut
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
       title="Sync started by schedule"
     >
       <MemoizedFormattedMessage
@@ -178,7 +178,7 @@ exports[`SyncCalloutsPanel renders error job 1`] = `
   <EuiFlexItem>
     <EuiCallOut
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
       title="Sync started manually"
     >
       <MemoizedFormattedMessage
@@ -230,7 +230,7 @@ exports[`SyncCalloutsPanel renders in progress job 1`] = `
   <EuiFlexItem>
     <EuiCallOut
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
       title="Sync started manually"
     >
       <MemoizedFormattedMessage

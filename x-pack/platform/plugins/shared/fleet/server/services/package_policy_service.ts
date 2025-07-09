@@ -113,13 +113,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyUpdates: UpdatePackagePolicy[],
-    options?: {
-      user?: AuthenticatedUser;
-      force?: boolean;
-      asyncDeploy?: boolean;
-      fromBulkUpgrade?: boolean;
-      oldPackagePolicies?: PackagePolicy[];
-    },
+    options?: PackagePolicyClientBulkUpdateOptions,
     currentVersion?: string
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
@@ -137,17 +131,22 @@ export interface PackagePolicyClient {
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;
 
-  get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
+  get(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    options?: PackagePolicyClientGetOptions
+  ): Promise<PackagePolicy | null>;
 
   findAllForAgentPolicy(
     soClient: SavedObjectsClientContract,
-    agentPolicyId: string
+    agentPolicyId: string,
+    options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
 
   getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
-    options?: { ignoreMissing?: boolean }
+    options?: PackagePolicyClientGetByIdsOptions
   ): Promise<PackagePolicy[]>;
 
   list(
@@ -157,7 +156,7 @@ export interface PackagePolicyClient {
 
   listIds(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: PackagePolicyClientListIdsOptions
   ): Promise<ListResult<string>>;
 
   update(
@@ -268,9 +267,47 @@ export interface PackagePolicyClient {
   ): Promise<AsyncIterable<PackagePolicy[]>>;
 }
 
-export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'>;
+interface WithSpaceIdsOption {
+  /**
+   * The space IDs that should be targeted for data retrieval. The SO client provided to the services
+   * still needs to have access to those spaces.
+   * When using an un-scoped so client (has access to all spaces) and wanting to retrieve data across
+   * all space, use a value of `*` (ex. `spaceIds: ['*']`)
+   */
+  spaceIds?: string[];
+}
+
+export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> &
+  WithSpaceIdsOption;
 
 export type PackagePolicyClientFetchAllItemsOptions = Pick<
   ListWithKuery,
   'perPage' | 'kuery' | 'sortField' | 'sortOrder'
->;
+> &
+  WithSpaceIdsOption;
+
+export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
+  ignoreMissing?: boolean;
+}
+
+export interface PackagePolicyClientBulkUpdateOptions {
+  user?: AuthenticatedUser;
+  force?: boolean;
+  asyncDeploy?: boolean;
+  fromBulkUpgrade?: boolean;
+  oldPackagePolicies?: PackagePolicy[];
+}
+
+export type PackagePolicyClientFindAllForAgentPolicyOptions = WithSpaceIdsOption;
+
+export interface PackagePolicyClientGetOptions {
+  /**
+   * The space IDs that should be targeted for data retrieval. The SO client provided to the services
+   * still needs to have access to the space defined here.
+   * When using an un-scoped so client (has access to all spaces) and wanting to retrieve data across
+   * all space, use a value of `*` (ex. `spaceId: '*'`)
+   */
+  spaceId?: string;
+}
+
+export type PackagePolicyClientListIdsOptions = ListWithKuery & WithSpaceIdsOption;

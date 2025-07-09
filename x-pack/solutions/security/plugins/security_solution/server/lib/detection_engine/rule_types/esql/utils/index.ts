@@ -9,3 +9,5 @@ export * from './row_to_document';
 export * from './generate_alert_id';
 export * from './merge_esql_result_in_source';
 export * from './get_mv_expand_usage';
+export * from './update_excluded_documents';
+export * from './initiate_excluded_documents';

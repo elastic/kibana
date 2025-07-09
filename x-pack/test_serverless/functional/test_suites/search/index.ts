@@ -13,6 +13,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./elasticsearch_start.ts'));
+    loadTestFile(require.resolve('./search_homepage'));
     loadTestFile(require.resolve('./search_index_detail.ts'));
     loadTestFile(require.resolve('./getting_started'));
     loadTestFile(require.resolve('./index_management'));

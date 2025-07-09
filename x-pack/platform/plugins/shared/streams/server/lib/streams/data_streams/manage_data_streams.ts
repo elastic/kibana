@@ -6,7 +6,16 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import {
+  IngestStreamLifecycle,
+  IngestStreamLifecycleDSL,
+  IngestStreamLifecycleDisabled,
+  IngestStreamLifecycleILM,
+  isDslLifecycle,
+  isIlmLifecycle,
+  isInheritLifecycle,
+} from '@kbn/streams-schema';
+import { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { omit } from 'lodash';
 import { retryTransientEsErrors } from '../helpers/retry';
 
@@ -129,43 +138,147 @@ export async function updateDataStreamsLifecycle({
   isServerless: boolean;
 }) {
   try {
-    await retryTransientEsErrors(
-      () =>
-        esClient.indices.putDataLifecycle({
-          name: names,
-          data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
-        }),
-      { logger }
-    );
-
-    // if we transition from ilm to dlm or vice versa, the rolled over backing
-    // indices need to be updated or they'll retain the lifecycle configuration
-    // set at the time of creation.
-    // this is not needed for serverless since only dlm is allowed but in stateful
-    // we update every indices while not always necessary. this should be optimized
-    if (isServerless) {
-      return;
-    }
-
-    const dataStreams = await esClient.indices.getDataStream({ name: names });
-    const isIlm = isIlmLifecycle(lifecycle);
-
-    for (const dataStream of dataStreams.data_streams) {
-      logger.debug(`updating settings for data stream ${dataStream.name} backing indices`);
+    if (isIlmLifecycle(lifecycle)) {
+      await putDataStreamsSettings({
+        esClient,
+        names,
+        logger,
+        settings: {
+          'index.lifecycle.name': lifecycle.ilm.policy,
+          'index.lifecycle.prefer_ilm': true,
+        },
+      });
+    } else if (isDslLifecycle(lifecycle)) {
       await retryTransientEsErrors(
         () =>
-          esClient.indices.putSettings({
-            index: dataStream.indices.map((index) => index.index_name),
-            settings: {
-              'lifecycle.prefer_ilm': isIlm,
-              'lifecycle.name': isIlm ? lifecycle.ilm.policy : null,
-            },
+          esClient.indices.putDataLifecycle({
+            name: names,
+            data_retention: lifecycle.dsl.data_retention,
           }),
         { logger }
+      );
+
+      if (!isServerless) {
+        // we don't need overrides for serverless since data streams can
+        // only be managed by dsl
+        await putDataStreamsSettings({
+          esClient,
+          names,
+          logger,
+          settings: {
+            'index.lifecycle.name': null,
+            'index.lifecycle.prefer_ilm': false,
+          },
+        });
+      }
+    } else if (isInheritLifecycle(lifecycle)) {
+      // classic streams only - inheriting a lifecycle means falling back to
+      // the template configuration. if we find a DSL we need to set it
+      // explicitly since there is no way to fall back to the template value,
+      // for ILM or disabled we only have to unset any overrides
+      await Promise.all(
+        names.map(async (name) => {
+          const { template } = (await retryTransientEsErrors(
+            () => esClient.indices.simulateIndexTemplate({ name }),
+            {
+              logger,
+            }
+          )) as {
+            template: IndicesSimulateTemplateTemplate & {
+              lifecycle?: { enabled: boolean; data_retention?: string };
+            };
+          };
+
+          const templateLifecycle = getTemplateLifecycle(template);
+          if (isDslLifecycle(templateLifecycle)) {
+            await retryTransientEsErrors(
+              () =>
+                esClient.indices.putDataLifecycle({
+                  name,
+                  data_retention: templateLifecycle.dsl.data_retention,
+                }),
+              { logger }
+            );
+          } else {
+            await retryTransientEsErrors(() => esClient.indices.deleteDataLifecycle({ name }), {
+              logger,
+            });
+          }
+
+          if (!isServerless) {
+            // unset any overriden settings
+            await putDataStreamsSettings({
+              esClient,
+              names: [name],
+              logger,
+              settings: {
+                'index.lifecycle.name': null,
+                'index.lifecycle.prefer_ilm': null,
+              },
+            });
+          }
+        })
       );
     }
   } catch (err: any) {
     logger.error(`Error updating data stream lifecycle: ${err.message}`);
     throw err;
   }
+}
+
+async function putDataStreamsSettings({
+  esClient,
+  names,
+  logger,
+  settings,
+}: {
+  esClient: ElasticsearchClient;
+  names: string[];
+  logger: Logger;
+  settings: {
+    'index.lifecycle.name'?: string | null;
+    'index.lifecycle.prefer_ilm'?: boolean | null;
+  };
+}) {
+  await retryTransientEsErrors(
+    () =>
+      // TODO: use client method once available
+      esClient.transport.request({
+        method: 'PUT',
+        path: `/_data_stream/${names.join(',')}/_settings`,
+        body: settings,
+      }),
+    { logger }
+  );
+}
+
+export function getTemplateLifecycle(
+  template: IndicesSimulateTemplateTemplate & {
+    lifecycle?: { enabled: boolean; data_retention?: string };
+  }
+): IngestStreamLifecycleILM | IngestStreamLifecycleDSL | IngestStreamLifecycleDisabled {
+  const toBoolean = (value: boolean | string | undefined): boolean => {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+    return value === 'true';
+  };
+
+  const hasEffectiveDsl =
+    toBoolean(template.lifecycle?.enabled) &&
+    !(
+      toBoolean(template.settings.index?.lifecycle?.prefer_ilm) &&
+      template.settings.index?.lifecycle?.name
+    );
+  if (hasEffectiveDsl) {
+    return { dsl: { data_retention: template.lifecycle!.data_retention } };
+  }
+
+  if (template.settings.index?.lifecycle?.name) {
+    // if dsl is not enabled and a policy is set, the ilm will be effective
+    // regardless of the prefer_ilm setting
+    return { ilm: { policy: template.settings.index.lifecycle.name } };
+  }
+
+  return { disabled: {} };
 }

@@ -8,9 +8,6 @@ xpack.osquery.enabled: false
 
 # Enable fleet on search projects for agentless features
 xpack.fleet.enabled: true
-xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
-xpack.fleet.internal.registry.spec.min: '3.0'
-xpack.fleet.internal.registry.spec.max: '3.3'
 xpack.fleet.packages:
   # fleet_server package installed to publish agent metrics
   - name: fleet_server
@@ -88,18 +85,18 @@ xpack.ml.dfa.enabled: false
 xpack.ml.nlp:
   enabled: true
   modelDeployment:
-    allowStaticAllocations: true
+    allowStaticAllocations: false
     vCPURange:
       low:
         min: 0
         max: 2
         static: 2
       medium:
-        min: 1
+        min: 0
         max: 32
         static: 32
       high:
-        min: 1
+        min: 0
         max: 512
         static: 512
 xpack.ml.compatibleModuleType: 'search'
@@ -111,6 +108,9 @@ xpack.searchNotebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-
 
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: true
+
+# Search Homepage
+xpack.searchHomepage.enabled: true
 
 # AI Assistant config
 xpack.observabilityAIAssistant.enabled: true

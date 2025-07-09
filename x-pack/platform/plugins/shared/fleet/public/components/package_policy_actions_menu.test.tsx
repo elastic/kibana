@@ -35,6 +35,7 @@ jest.mock('../hooks', () => {
     }),
   };
 });
+jest.mock('../applications/integrations/sections/epm/screens/detail/policies/package_policies');
 
 const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
   typeof useMultipleAgentPolicies

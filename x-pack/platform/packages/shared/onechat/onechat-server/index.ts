@@ -6,8 +6,13 @@
  */
 
 export type {
+  RegisteredToolMeta,
   RegisteredTool,
+  RegisteredToolProvider,
+  EsqlToolDefinition,
+  EsqlTool,
   ToolHandlerFn,
+  ToolHandlerReturn,
   ToolHandlerContext,
   ToolProvider,
   ToolProviderHasOptions,
@@ -30,17 +35,22 @@ export type {
   RunToolReturn,
 } from './src/runner';
 export {
-  OnechatRunEventType,
-  isToolResponseEvent,
-  isToolCallEvent,
-  type OnechatRunEvent,
-  type RunEventHandlerFn,
-  type ToolResponseEventData,
-  type RunEventEmitter,
-  type RunEventEmitterFn,
-  type InternalRunEvent,
-  type OnechatRunEventMeta,
-  type ToolCallEventData,
-  type ToolResponseEvent,
-  type ToolCallEvent,
+  type OnechatToolEvent,
+  type ToolEventHandlerFn,
+  type ToolEventEmitter,
+  type ToolEventEmitterFn,
+  type InternalToolEvent,
 } from './src/events';
+export type {
+  AgentHandlerParams,
+  AgentHandlerContext,
+  AgentHandlerReturn,
+  AgentHandlerFn,
+  RunAgentFn,
+  RunAgentParams,
+  RunAgentReturn,
+  ScopedRunAgentFn,
+  ScopedRunnerRunAgentParams,
+  AgentEventEmitter,
+  RunAgentOnEventFn,
+} from './agents';

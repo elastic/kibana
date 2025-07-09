@@ -6,6 +6,7 @@
  */
 
 import type { SecurityService } from '@kbn/ftr-common-functional-services';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 
 export const testUsers: {
   [rollName: string]: { username: string; password: string; permissions?: any };
@@ -179,7 +180,7 @@ export const testUsers: {
     permissions: {
       feature: {
         fleet: ['read'],
-        siemV2: [
+        [SECURITY_FEATURE_ID]: [
           'minimal_all',
           'trusted_applications_read',
           'host_isolation_exceptions_read',
@@ -200,7 +201,7 @@ export const testUsers: {
     permissions: {
       feature: {
         fleet: ['all'],
-        siemV2: ['minimal_all', 'policy_management_all'],
+        [SECURITY_FEATURE_ID]: ['minimal_all', 'policy_management_all'],
         securitySolutionNotes: ['all'],
         securitySolutionTimeline: ['all'],
       },
@@ -214,7 +215,7 @@ export const testUsers: {
     permissions: {
       feature: {
         fleet: ['all'],
-        siemV2: ['minimal_all', 'policy_management_read'],
+        [SECURITY_FEATURE_ID]: ['minimal_all', 'policy_management_read'],
         securitySolutionNotes: ['all'],
         securitySolutionTimeline: ['all'],
       },
@@ -228,7 +229,7 @@ export const testUsers: {
     permissions: {
       feature: {
         fleet: ['read'],
-        siemV2: ['minimal_all'],
+        [SECURITY_FEATURE_ID]: ['minimal_all'],
         securitySolutionNotes: ['all'],
         securitySolutionTimeline: ['all'],
       },
@@ -241,7 +242,7 @@ export const testUsers: {
   endpoint_integr_read_only_fleet_none: {
     permissions: {
       feature: {
-        siemV2: ['minimal_all'],
+        [SECURITY_FEATURE_ID]: ['minimal_all'],
         securitySolutionNotes: ['all'],
         securitySolutionTimeline: ['all'],
       },

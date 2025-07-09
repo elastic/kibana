@@ -36,8 +36,13 @@ describe('use cases add to new case flyout hook', () => {
             permissions: allCasesPermissions(),
             basePath: '/jest',
             dispatch,
-            features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
+            features: {
+              alerts: { sync: true, enabled: true, isExperimental: false },
+              metrics: [],
+              observables: { enabled: true },
+            },
             releasePhase: 'ga',
+            settings: { displayIncrementalCaseId: false },
           }}
         >
           {children}

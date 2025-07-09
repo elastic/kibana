@@ -11,7 +11,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { MlLocatorDefinition, MlManagementLocatorInternal } from '@kbn/ml-plugin/public';
-import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import {
   createObservabilityRuleTypeRegistryMock,
   enableComparisonByDefault,
@@ -71,6 +70,51 @@ const mockCore = merge({}, coreStart, {
             to: 'now/w',
             display: 'This week',
           },
+          {
+            from: 'now-1m',
+            to: 'now',
+            display: 'Last 1 minute',
+          },
+          {
+            from: 'now-15m',
+            to: 'now',
+            display: 'Last 15 minutes',
+          },
+          {
+            from: 'now-30m',
+            to: 'now',
+            display: 'Last 30 minutes',
+          },
+          {
+            from: 'now-1h',
+            to: 'now',
+            display: 'Last 1 hour',
+          },
+          {
+            from: 'now-24h',
+            to: 'now',
+            display: 'Last 24 hours',
+          },
+          {
+            from: 'now-7d',
+            to: 'now',
+            display: 'Last 7 days',
+          },
+          {
+            from: 'now-30d',
+            to: 'now',
+            display: 'Last 30 days',
+          },
+          {
+            from: 'now-90d',
+            to: 'now',
+            display: 'Last 90 days',
+          },
+          {
+            from: 'now-1y',
+            to: 'now',
+            display: 'Last 1 year',
+          },
         ],
         [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
           from: 'now-15m',
@@ -81,7 +125,6 @@ const mockCore = merge({}, coreStart, {
           value: 100000,
         },
         [enableComparisonByDefault]: true,
-        [apmEnableProfilingIntegration]: true,
       };
       return uiSettings[key];
     },
@@ -121,6 +164,7 @@ const mockConfig: ConfigSchema = {
     migrationToFleetAvailable: true,
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
+    // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingIntegrationAvailable: false,
     ruleFormV2Enabled: false,
   },

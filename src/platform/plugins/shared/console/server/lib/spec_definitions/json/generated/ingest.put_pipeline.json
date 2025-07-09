@@ -23,7 +23,7 @@
     "patterns": [
       "_ingest/pipeline/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ingest.html",
+    "documentation": "https://www.elastic.co/docs/manage-data/ingest/transform-enrich/ingest-pipelines",
     "availability": {
       "stack": true,
       "serverless": true

@@ -12,7 +12,7 @@
     "patterns": [
       "_ingest/processor/grok"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/grok-processor.html",
+    "documentation": "https://www.elastic.co/docs/reference/enrich-processor/grok-processor",
     "availability": {
       "stack": true,
       "serverless": true

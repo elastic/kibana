@@ -118,7 +118,7 @@ export class ImportResolver {
     }
 
     // these are special webpack-aliases only used in storybooks, ignore them
-    if (req === 'core_styles' || req === 'core_app_image_assets') {
+    if (req === 'core_styles') {
       return true;
     }
 

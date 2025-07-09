@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import { agentPolicyService } from '../../services';
+import { agentPolicyService, appContextService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import type {
   GetUninstallTokensMetadataRequestSchema,
@@ -20,10 +20,13 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
   unknown,
   TypeOf<typeof GetUninstallTokensMetadataRequestSchema.query>
 > = async (context, request, response) => {
+  const logger = appContextService.getLogger().get('httpGetUninstallTokensMetadataHandler');
   const [fleetContext, coreContext] = await Promise.all([context.fleet, context.core]);
   const uninstallTokenService = fleetContext.uninstallTokenService.asCurrentUser;
 
   const { page = 1, perPage = 20, policyId, search } = request.query;
+
+  logger.debug(`Retrieving uninstall tokens with policy id [${policyId}] and search [${search}]`);
 
   if (policyId && search) {
     return response.badRequest({
@@ -42,6 +45,8 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
   });
 
   const managedPolicyIds = managedPolicies.map((policy) => policy.id);
+
+  logger.debug(`Found [${managedPolicyIds.length}] managed policies`);
 
   let policyIdSearchTerm: string | undefined;
   let policyNameSearchTerm: string | undefined;

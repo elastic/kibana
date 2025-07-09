@@ -1033,6 +1033,7 @@ export interface PolicyConfig {
   mac: {
     advanced?: {};
     events: {
+      dns: boolean;
       file: boolean;
       process: boolean;
       network: boolean;

@@ -219,7 +219,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           {i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
             defaultMessage: 'Data retention',
           })}{' '}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" />
+          <EuiIcon size="s" color="subdued" type="question" />
         </span>
       </EuiToolTip>
     ),
@@ -247,12 +247,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
                   }
                 )}
               >
-                <EuiIcon
-                  size="s"
-                  color="subdued"
-                  type="iInCircle"
-                  data-test-subj="usingMaxRetention"
-                />
+                <EuiIcon size="s" color="subdued" type="info" data-test-subj="usingMaxRetention" />
               </EuiToolTip>
             </>
           )}

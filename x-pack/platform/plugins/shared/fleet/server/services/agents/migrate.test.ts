@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import type { AgentPolicy, Agent } from '../../types';
 
-import { migrateSingleAgent } from './migrate';
+import { migrateSingleAgent, bulkMigrateAgents } from './migrate';
 import { createAgentAction } from './actions';
 
 // Mock the imported functions
@@ -61,6 +61,7 @@ describe('Agent migration', () => {
       agents: ['agent-123'],
       created_at: new Date().toISOString(),
     });
+    mockedPolicy.is_protected = false;
   });
 
   describe('migrateSingleAgent', () => {
@@ -88,9 +89,11 @@ describe('Agent migration', () => {
         created_at: expect.any(String),
         type: 'MIGRATE',
         policyId: options.policyId,
-        enrollment_token: options.enrollment_token,
-        target_uri: options.uri,
-        additionalSettings: options.settings,
+        data: {
+          enrollment_token: options.enrollment_token,
+          target_uri: options.uri,
+          settings: options.settings,
+        },
       });
 
       // Verify result contains the action ID from createAgentAction
@@ -111,7 +114,11 @@ describe('Agent migration', () => {
       expect(mockedCreateAgentAction).toHaveBeenCalledWith(
         esClientMock,
         expect.objectContaining({
-          additionalSettings: undefined,
+          data: {
+            enrollment_token: options.enrollment_token,
+            target_uri: options.uri,
+            settings: undefined,
+          },
         })
       );
     });
@@ -127,6 +134,83 @@ describe('Agent migration', () => {
       await expect(
         migrateSingleAgent(esClientMock, agentId, mockedPolicy, mockedAgent, options)
       ).rejects.toThrowError('Agent is protected and cannot be migrated');
+    });
+  });
+
+  // Bulk migrate
+
+  describe('migrateBulkAgents', () => {
+    it('should create a MIGRATE action for the specified agents', async () => {
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+        settings: { timeout: 300 },
+      };
+
+      const result = await bulkMigrateAgents(
+        esClientMock,
+        [mockedAgent, mockedAgent],
+        [mockedPolicy, mockedPolicy],
+        options
+      );
+
+      // Verify createAgentAction was called with correct params
+      expect(mockedCreateAgentAction).toHaveBeenCalledTimes(1);
+      expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, {
+        agents: [mockedAgent.id, mockedAgent.id],
+        created_at: expect.any(String),
+        type: 'MIGRATE',
+        data: {
+          enrollment_token: options.enrollment_token,
+          target_uri: options.uri,
+          settings: options.settings,
+        },
+      });
+
+      // Verify result contains the action ID from createAgentAction
+      expect(result).toEqual({ actionId: 'test-action-id' });
+    });
+
+    it('should handle empty additional settings', async () => {
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+
+      await bulkMigrateAgents(
+        esClientMock,
+        [mockedAgent, mockedAgent],
+        [mockedPolicy, mockedPolicy],
+        options
+      );
+
+      // Verify createAgentAction was called with correct params and undefined additionalSettings
+      expect(mockedCreateAgentAction).toHaveBeenCalledWith(
+        esClientMock,
+        expect.objectContaining({
+          data: {
+            enrollment_token: options.enrollment_token,
+            target_uri: options.uri,
+            settings: undefined,
+          },
+        })
+      );
+    });
+
+    it('should throw an error if the agent is protected', async () => {
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      mockedPolicy.is_protected = true;
+      await expect(
+        bulkMigrateAgents(
+          esClientMock,
+          [mockedAgent, mockedAgent],
+          [mockedPolicy, mockedPolicy],
+          options
+        )
+      ).rejects.toThrowError('One or more agents are protected agents and cannot be migrated');
     });
   });
 });

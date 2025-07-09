@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiCodeBlock,
   EuiCopy,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { UrlService } from '@kbn/share-plugin/common/url_service';
 import { ApplicationStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -64,11 +65,20 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
   // Check if both the Dev Tools UI and the Console UI are enabled.
   const shouldShowDevToolsLink = canShowDevtools && consolePreviewLink !== undefined;
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={closeFlyout} data-test-subj="apiRequestFlyout" {...flyoutProps}>
+    <EuiFlyout
+      onClose={closeFlyout}
+      data-test-subj="apiRequestFlyout"
+      aria-labelledby={flyoutTitleId}
+      {...flyoutProps}
+    >
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2 data-test-subj="apiRequestFlyoutTitle">{title}</h2>
+          <h2 id={flyoutTitleId} data-test-subj="apiRequestFlyoutTitle">
+            {title}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 

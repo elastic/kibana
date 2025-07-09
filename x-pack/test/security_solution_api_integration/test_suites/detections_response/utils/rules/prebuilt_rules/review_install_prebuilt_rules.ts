@@ -10,7 +10,7 @@ import { ReviewRuleInstallationResponseBody } from '@kbn/security-solution-plugi
 import type SuperTest from 'supertest';
 
 /**
- * Returns prebuilt rules that are avaialble to install
+ * Returns prebuilt rules that are available to install
  *
  * @param supertest SuperTest instance
  * @returns Review Install prebuilt rules response

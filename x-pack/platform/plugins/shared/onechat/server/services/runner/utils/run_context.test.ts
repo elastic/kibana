@@ -7,7 +7,11 @@
 
 import { createBuiltinToolId, toSerializedToolIdentifier } from '@kbn/onechat-common';
 import type { RunContext } from '@kbn/onechat-server';
-import { createEmptyRunContext, forkContextForToolRun } from './run_context';
+import {
+  createEmptyRunContext,
+  forkContextForToolRun,
+  forkContextForAgentRun,
+} from './run_context';
 
 describe('RunContext utilities', () => {
   describe('creatEmptyRunContext', () => {
@@ -77,6 +81,59 @@ describe('RunContext utilities', () => {
           {
             type: 'tool',
             toolId: toSerializedToolIdentifier(newToolId),
+          },
+        ],
+      });
+    });
+  });
+
+  describe('forkContextForAgentRun', () => {
+    it('should fork context and add agent to stack', () => {
+      const parentContext: RunContext = {
+        runId: 'parent-run-id',
+        stack: [],
+      };
+
+      const agentId = 'test-agent';
+      const forkedContext = forkContextForAgentRun({ agentId, parentContext });
+
+      expect(forkedContext).toEqual({
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'agent',
+            agentId,
+          },
+        ],
+      });
+    });
+
+    it('should preserve existing stack entries when forking', () => {
+      const existingAgentId = 'existing-agent';
+      const newAgentId = 'new-agent';
+
+      const parentContext: RunContext = {
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'agent',
+            agentId: existingAgentId,
+          },
+        ],
+      };
+
+      const forkedContext = forkContextForAgentRun({ agentId: newAgentId, parentContext });
+
+      expect(forkedContext).toEqual({
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'agent',
+            agentId: existingAgentId,
+          },
+          {
+            type: 'agent',
+            agentId: newAgentId,
           },
         ],
       });

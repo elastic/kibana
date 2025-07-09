@@ -152,79 +152,85 @@
   "testCases": [
     {
       "query": "",
-      "error": [],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
+      ],
       "warning": []
     },
     {
       "query": " ",
-      "error": [],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
+      ],
       "warning": []
     },
     {
       "query": "     ",
-      "error": [],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}"
+      ],
       "warning": []
     },
     {
       "query": "eval",
       "error": [
-        "SyntaxError: mismatched input 'eval' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'eval' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "stats",
       "error": [
-        "SyntaxError: mismatched input 'stats' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'stats' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "rename",
       "error": [
-        "SyntaxError: mismatched input 'rename' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'rename' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "limit",
       "error": [
-        "SyntaxError: mismatched input 'limit' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'limit' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "keep",
       "error": [
-        "SyntaxError: mismatched input 'keep' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'keep' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "drop",
       "error": [
-        "SyntaxError: mismatched input 'drop' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'drop' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "mv_expand",
       "error": [
-        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'mv_expand' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "dissect",
       "error": [
-        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'dissect' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "grok",
       "error": [
-        "SyntaxError: mismatched input 'grok' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'grok' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },
@@ -327,91 +333,6 @@
     {
       "query": "row NOT false",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in ",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting '('"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        "Error: [in] function expects at least 2 arguments, got 1."
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 not in ",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting '('"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (1, 2, 3)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 in (1, 2, 3)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 not in (1, 2, 3)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (1, 2, 3, round(5))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = \"a\" in (\"a\", \"b\", \"c\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = \"a\" in (\"a\", \"b\", \"c\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = \"a\" not in (\"a\", \"b\", \"c\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (\"a\", \"b\", \"c\")",
-      "error": [
-        "Argument of [in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 in (\"a\", \"b\", \"c\")",
-      "error": [
-        "Argument of [in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 not in (\"a\", \"b\", \"c\")",
-      "error": [
-        "Argument of [not_in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 not in (1, 2, 3, \"a\")",
-      "error": [
-        "Argument of [not_in] must be [integer[]], found value [(1, 2, 3, \"a\")] type [(integer, integer, integer, keyword)]"
-      ],
       "warning": []
     },
     {
@@ -866,7 +787,7 @@
     {
       "query": "row var = 5 NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [5] type [integer]"
+        "Argument of [not like] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -880,7 +801,7 @@
     {
       "query": "row var = NOT 5 NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [5] type [integer]"
+        "Argument of [not like] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -914,7 +835,7 @@
     {
       "query": "row var = 5 NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [5] type [integer]"
+        "Argument of [not rlike] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -928,7 +849,7 @@
     {
       "query": "row var = NOT 5 NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [5] type [integer]"
+        "Argument of [not rlike] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -1006,9 +927,7 @@
     },
     {
       "query": "row 1 year + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1071,9 +990,7 @@
     },
     {
       "query": "row 1 years + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1136,9 +1053,7 @@
     },
     {
       "query": "row 1 quarter + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1201,9 +1116,7 @@
     },
     {
       "query": "row 1 quarters + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1266,9 +1179,7 @@
     },
     {
       "query": "row 1 month + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1331,9 +1242,7 @@
     },
     {
       "query": "row 1 months + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1396,9 +1305,7 @@
     },
     {
       "query": "row 1 week + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1461,9 +1368,7 @@
     },
     {
       "query": "row 1 weeks + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1526,9 +1431,7 @@
     },
     {
       "query": "row 1 day + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1591,9 +1494,7 @@
     },
     {
       "query": "row 1 days + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1656,9 +1557,7 @@
     },
     {
       "query": "row 1 hour + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1721,9 +1620,7 @@
     },
     {
       "query": "row 1 hours + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1786,9 +1683,7 @@
     },
     {
       "query": "row 1 minute + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1851,9 +1746,7 @@
     },
     {
       "query": "row 1 minutes + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1916,9 +1809,7 @@
     },
     {
       "query": "row 1 second + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1981,9 +1872,7 @@
     },
     {
       "query": "row 1 seconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2046,9 +1935,7 @@
     },
     {
       "query": "row 1 millisecond + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2111,9 +1998,7 @@
     },
     {
       "query": "row 1 milliseconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2141,38 +2026,9 @@
       "warning": []
     },
     {
-      "query": "show",
-      "error": [
-        "SyntaxError: missing 'info' at '<EOF>'"
-      ],
-      "warning": []
-    },
-    {
-      "query": "show info",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "show doubleField",
-      "error": [
-        "SyntaxError: token recognition error at: 'd'",
-        "SyntaxError: token recognition error at: 'o'",
-        "SyntaxError: token recognition error at: 'u'",
-        "SyntaxError: token recognition error at: 'b'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'e'",
-        "SyntaxError: token recognition error at: 'F'",
-        "SyntaxError: token recognition error at: 'ie'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'd'",
-        "SyntaxError: missing 'info' at '<EOF>'"
-      ],
-      "warning": []
-    },
-    {
       "query": "from index | limit ",
       "error": [
-        "SyntaxError: missing INTEGER_LITERAL at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
@@ -2182,30 +2038,23 @@
       "warning": []
     },
     {
-      "query": "from index | limit 4.5",
-      "error": [
-        "SyntaxError: mismatched input '4.5' expecting INTEGER_LITERAL"
-      ],
-      "warning": []
-    },
-    {
       "query": "from index | limit a",
       "error": [
-        "SyntaxError: mismatched input 'a' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'a' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
     {
       "query": "from index | limit doubleField",
       "error": [
-        "SyntaxError: mismatched input 'doubleField' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'doubleField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
     {
       "query": "from index | limit textField",
       "error": [
-        "SyntaxError: mismatched input 'textField' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'textField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
@@ -2271,28 +2120,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
@@ -2558,22 +2407,22 @@
     {
       "query": "from a_index | rename textField",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'"
+        "SyntaxError: no viable alternative at input 'textField'"
       ],
       "warning": []
     },
     {
       "query": "from a_index | rename a",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'",
-        "Unknown column [a]"
+        "SyntaxError: no viable alternative at input 'a'"
       ],
       "warning": []
     },
     {
       "query": "from a_index | rename textField as",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -2581,7 +2430,7 @@
       "query": "from a_index | rename missingField as",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [missingField]"
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -2606,12 +2455,28 @@
       "warning": []
     },
     {
+      "query": "from a_index | rename b = textField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | rename b = textField, b AS c",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | rename textField = a",
+      "error": [
+        "Unknown column [a]"
+      ],
+      "warning": [
+        "Column [textField] of type text has been overwritten as new type: unknown"
+      ]
+    },
+    {
       "query": "from a_index | rename fn() as a",
       "error": [
-        "SyntaxError: token recognition error at: '('",
-        "SyntaxError: token recognition error at: ')'",
-        "Unknown column [fn]",
-        "Unknown column [a]"
+        "Invalid query [from a_index | rename fn() as a]"
       ],
       "warning": []
     },
@@ -2628,7 +2493,8 @@
     {
       "query": "from a_index |eval doubleField + 1 | rename `doubleField + 1` as ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -3660,7 +3526,7 @@
     {
       "query": "from a_index | where doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3674,7 +3540,7 @@
     {
       "query": "from a_index | where NOT doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3708,7 +3574,7 @@
     {
       "query": "from a_index | where doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3722,7 +3588,7 @@
     {
       "query": "from a_index | where NOT doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6609,7 +6475,7 @@
     {
       "query": "from a_index | eval doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6623,7 +6489,7 @@
     {
       "query": "from a_index | eval NOT doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6657,7 +6523,7 @@
     {
       "query": "from a_index | eval doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6671,7 +6537,7 @@
     {
       "query": "from a_index | eval NOT doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6891,9 +6757,7 @@
     },
     {
       "query": "from a_index | eval 1 year + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -6961,9 +6825,7 @@
     },
     {
       "query": "from a_index | eval 1 years + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7031,9 +6893,7 @@
     },
     {
       "query": "from a_index | eval 1 quarter + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7101,9 +6961,7 @@
     },
     {
       "query": "from a_index | eval 1 quarters + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7171,9 +7029,7 @@
     },
     {
       "query": "from a_index | eval 1 month + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7241,9 +7097,7 @@
     },
     {
       "query": "from a_index | eval 1 months + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7311,9 +7165,7 @@
     },
     {
       "query": "from a_index | eval 1 week + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7381,9 +7233,7 @@
     },
     {
       "query": "from a_index | eval 1 weeks + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7451,9 +7301,7 @@
     },
     {
       "query": "from a_index | eval 1 day + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7521,9 +7369,7 @@
     },
     {
       "query": "from a_index | eval 1 days + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7591,9 +7437,7 @@
     },
     {
       "query": "from a_index | eval 1 hour + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7661,9 +7505,7 @@
     },
     {
       "query": "from a_index | eval 1 hours + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7731,9 +7573,7 @@
     },
     {
       "query": "from a_index | eval 1 minute + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7801,9 +7641,7 @@
     },
     {
       "query": "from a_index | eval 1 minutes + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7871,9 +7709,7 @@
     },
     {
       "query": "from a_index | eval 1 second + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7941,9 +7777,7 @@
     },
     {
       "query": "from a_index | eval 1 seconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8011,9 +7845,7 @@
     },
     {
       "query": "from a_index | eval 1 millisecond + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8081,9 +7913,7 @@
     },
     {
       "query": "from a_index | eval 1 milliseconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8151,9 +7981,7 @@
     },
     {
       "query": "from a_index | eval 1 ms + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8221,9 +8049,7 @@
     },
     {
       "query": "from a_index | eval 1 s + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8291,9 +8117,7 @@
     },
     {
       "query": "from a_index | eval 1 m + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8361,9 +8185,7 @@
     },
     {
       "query": "from a_index | eval 1 h + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8431,9 +8253,7 @@
     },
     {
       "query": "from a_index | eval 1 d + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8501,9 +8321,7 @@
     },
     {
       "query": "from a_index | eval 1 w + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8571,9 +8389,7 @@
     },
     {
       "query": "from a_index | eval 1 mo + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8641,9 +8457,7 @@
     },
     {
       "query": "from a_index | eval 1 q + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8711,9 +8525,7 @@
     },
     {
       "query": "from a_index | eval 1 y + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8781,9 +8593,7 @@
     },
     {
       "query": "from a_index | eval 1 yr + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -9501,7 +9311,7 @@
     {
       "query": "f",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'row', 'from', 'show'}"
+        "SyntaxError: mismatched input 'f' expecting {'row', 'from', 'show'}"
       ],
       "warning": []
     },

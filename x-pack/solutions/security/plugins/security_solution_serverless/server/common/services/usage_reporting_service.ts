@@ -75,7 +75,6 @@ export class UsageReportingService {
       cert: tlsConfig.certificate,
       key: tlsConfig.key,
       ca: tlsConfig.certificateAuthorities,
-      // @ts-expect-error option added to node 20.18.0 but @types/node has not been updated to reflect this
       allowPartialTrustChain: true,
     });
 

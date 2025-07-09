@@ -20,7 +20,6 @@ import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { checkIfSeriesHaveSameFormatters } from '../../lib/check_if_series_have_same_formatters';
 import { TimeSeries } from '../../../visualizations/views/timeseries';
 import { Markdown } from '@kbn/shared-ux-markdown';
-import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import { replaceVars } from '../../lib/replace_vars';
 import { getInterval } from '../../lib/get_interval';
 import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
@@ -282,7 +281,6 @@ class TimeseriesVisualization extends Component {
             palettesService={palettesService}
             interval={interval}
             initialRender={initialRender}
-            useLegacyTimeAxis={getConfig(LEGACY_TIME_AXIS, false)}
             isLastBucketDropped={Boolean(
               model.drop_last_bucket ||
                 model.series.some((series) => series.series_drop_last_bucket)

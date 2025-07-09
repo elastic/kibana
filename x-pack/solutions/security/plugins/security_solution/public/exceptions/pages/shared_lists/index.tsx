@@ -42,7 +42,7 @@ import {
   ListsSearchBar,
 } from '../../components';
 import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
-import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
+import { ReferenceErrorModal } from '../../../common/components/reference_error_modal';
 import { patchRule } from '../../../detection_engine/rule_management/api/api';
 
 import { getSearchFilters } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
@@ -623,7 +623,7 @@ export const SharedLists = React.memo(() => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem style={{ alignItems: 'flex-end' }}>
+          <EuiFlexItem css={{ alignItems: 'flex-end' }}>
             <EuiFlexGroup alignItems="flexEnd">
               <EuiFlexItem>
                 <EuiPagination

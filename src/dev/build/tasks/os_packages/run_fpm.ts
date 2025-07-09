@@ -150,5 +150,6 @@ export async function runFpm(
   await exec(log, 'fpm', args, {
     cwd: config.resolveFromRepo('.'),
     level: 'info',
+    build,
   });
 }

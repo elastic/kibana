@@ -24,17 +24,23 @@ jest.mock('./tasks/privilege_monitoring_task', () => {
   };
 });
 
-jest.mock('./saved_object/privilege_monitoring', () => {
+jest.mock('./saved_objects', () => {
   return {
+    MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
+      findByIndex: jest.fn().mockResolvedValue([]),
+      create: jest.fn(),
+    })),
     PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
       init: jest.fn().mockResolvedValue({ status: 'success' }),
       update: jest.fn(),
     })),
   };
 });
+
 describe('Privilege Monitoring Data Client', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const esClientMock = clusterClientMock.asCurrentUser;
   const loggerMock = loggingSystemMock.createLogger();
   const auditMock = { log: jest.fn().mockReturnValue(undefined) };
   loggerMock.debug = jest.fn();
@@ -66,7 +72,6 @@ describe('Privilege Monitoring Data Client', () => {
 
       expect(mockCreateOrUpdateIndex).toHaveBeenCalled();
       expect(mockStartPrivilegeMonitoringTask).toHaveBeenCalled();
-      expect(loggerMock.debug).toHaveBeenCalledTimes(1);
       expect(auditMock.log).toHaveBeenCalled();
       expect(result).toEqual(mockDescriptor);
     });
@@ -135,6 +140,126 @@ describe('Privilege Monitoring Data Client', () => {
 
     it('should handle errors during audit logging', async () => {
       // TODO: implement once we have more auditing
+    });
+  });
+
+  describe('syncAllIndexUsers', () => {
+    const mockLog = jest.fn();
+
+    it('should sync all index users successfully', async () => {
+      const mockMonitoringSOSources = [
+        { name: 'source1', indexPattern: 'index1' },
+        { name: 'source2', indexPattern: 'index2' },
+      ];
+      const findByIndexMock = jest.fn().mockResolvedValue(mockMonitoringSOSources);
+      Object.defineProperty(dataClient, 'monitoringIndexSourceClient', {
+        value: {
+          init: jest.fn().mockResolvedValue({ status: 'success' }),
+          update: jest.fn(),
+          findByIndex: findByIndexMock,
+        },
+      });
+      dataClient.syncUsernamesFromIndex = jest.fn().mockResolvedValue(['user1', 'user2']);
+      await dataClient.plainIndexSync();
+      expect(findByIndexMock).toHaveBeenCalled();
+      expect(dataClient.syncUsernamesFromIndex).toHaveBeenCalledTimes(2);
+      expect(dataClient.syncUsernamesFromIndex).toHaveBeenCalledWith({
+        indexName: 'index1',
+        kuery: undefined,
+      });
+    });
+
+    it('logs and returns if no index sources', async () => {
+      Object.defineProperty(dataClient, 'log', { value: mockLog });
+      const findByIndexMock = jest.fn().mockResolvedValue([]);
+      Object.defineProperty(dataClient, 'monitoringIndexSourceClient', {
+        value: {
+          init: jest.fn().mockResolvedValue({ status: 'success' }),
+          update: jest.fn(),
+          findByIndex: findByIndexMock,
+        },
+      });
+
+      await dataClient.plainIndexSync();
+
+      expect(mockLog).toHaveBeenCalledWith(
+        'debug',
+        expect.stringContaining('No monitoring index sources found. Skipping sync.')
+      );
+    });
+
+    it('skips sources without indexPattern', async () => {
+      Object.defineProperty(dataClient, 'monitoringIndexSourceClient', {
+        value: {
+          findByIndex: jest.fn().mockResolvedValue([
+            { name: 'no-index', indexPattern: undefined },
+            { name: 'with-index', indexPattern: 'foo' },
+          ]),
+          init: jest.fn().mockResolvedValue({ status: 'success' }),
+          update: jest.fn(),
+        },
+      });
+
+      dataClient.syncUsernamesFromIndex = jest.fn().mockResolvedValue(['user1']);
+      Object.defineProperty(dataClient, 'findStaleUsersForIndex', {
+        value: jest.fn().mockResolvedValue([]),
+      });
+      await dataClient.plainIndexSync();
+      // Should only be called for the source with indexPattern
+      expect(dataClient.syncUsernamesFromIndex).toHaveBeenCalledTimes(1);
+      expect(dataClient.syncUsernamesFromIndex).toHaveBeenCalledWith({
+        indexName: 'foo',
+        kuery: undefined,
+      });
+    });
+
+    it('should retrieve all usernames from index and perform bulk ops', async () => {
+      const mockHits = [
+        {
+          _source: { user: { name: 'frodo' } },
+          _id: '1',
+          sort: [1],
+        },
+        {
+          _source: { user: { name: 'samwise' } },
+          _id: '2',
+          sort: [2],
+        },
+      ];
+
+      const mockMonitoredUserHits = {
+        hits: {
+          hits: [
+            {
+              _source: { user: { name: 'frodo' } },
+              _id: '1',
+            },
+            {
+              _source: { user: { name: 'samwise' } },
+              _id: '2',
+            },
+          ],
+        },
+      };
+
+      dataClient.searchUsernamesInIndex = jest
+        .fn()
+        .mockResolvedValueOnce({ hits: { hits: mockHits } }) // first batch
+        .mockResolvedValueOnce({ hits: { hits: [] } }); // second batch = end
+
+      dataClient.getMonitoredUsers = jest.fn().mockResolvedValue(mockMonitoredUserHits);
+      dataClient.buildBulkOperationsForUsers = jest.fn().mockReturnValue([{ index: { _id: '1' } }]);
+      dataClient.getIndex = jest.fn().mockReturnValue('test-index');
+
+      const usernames = await dataClient.syncUsernamesFromIndex({
+        indexName: 'test-index',
+      });
+
+      expect(usernames).toEqual(['frodo', 'samwise']);
+      expect(dataClient.searchUsernamesInIndex).toHaveBeenCalledTimes(2);
+      expect(esClientMock.bulk).toHaveBeenCalled();
+      expect(dataClient.getMonitoredUsers).toHaveBeenCalledWith(['frodo', 'samwise']);
+      expect(dataClient.buildBulkOperationsForUsers).toHaveBeenCalled();
     });
   });
 });

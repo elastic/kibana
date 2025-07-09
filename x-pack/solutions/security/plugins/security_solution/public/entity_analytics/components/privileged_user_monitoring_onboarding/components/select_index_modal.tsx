@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -23,38 +23,52 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useDebounceFn } from '@kbn/react-hooks';
+import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useFetchPrivilegedUserIndices } from '../hooks/use_fetch_privileged_user_indices';
+import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { CreateIndexModal } from './create_index_modal';
 
-const SELECT_INDEX_LABEL = i18n.translate(
+export const SELECT_INDEX_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.comboboxPlaceholder',
   {
     defaultMessage: 'Select index',
   }
 );
 
-const LOADING_ERROR_MESSAGE = i18n.translate(
+export const LOADING_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.error',
   {
     defaultMessage: 'Error loading indices. Please try again later.',
   }
 );
 
-const DEBOUNCE_OPTIONS = { wait: 300 };
+export const DEBOUNCE_OPTIONS = { wait: 300 };
 
 export const IndexSelectorModal = ({
-  isOpen,
   onClose,
+  onImport,
+  editDataSource,
 }: {
-  isOpen: boolean;
   onClose: () => void;
+  onImport: (userCount: number) => void;
+  editDataSource?: {
+    id: string;
+    indexPattern?: string;
+  };
 }) => {
+  const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    editDataSource?.indexPattern?.split(',').map((index) => ({ label: index })) ?? []
+  );
+
+  const [isCreateIndexModalOpen, { on: showCreateIndexModal, off: hideCreateIndexModal }] =
+    useBoolean(false);
   const { addError } = useAppToasts();
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
-  const { data: indices, isFetching, error } = useFetchPrivilegedUserIndices(searchQuery);
-  const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const { data: indices, isFetching, error, refetch } = useFetchPrivilegedUserIndices(searchQuery);
   const debouncedSetSearchQuery = useDebounceFn(setSearchQuery, DEBOUNCE_OPTIONS);
+  const { registerPrivMonMonitoredIndices, updatePrivMonMonitoredIndices } =
+    useEntityAnalyticsRoutes();
   const options = useMemo(
     () =>
       indices?.map((index) => ({
@@ -69,12 +83,40 @@ export const IndexSelectorModal = ({
     }
   }, [addError, error]);
 
-  if (!isOpen) {
-    return null;
-  }
+  const addPrivilegedUsers = useCallback(async () => {
+    if (selectedOptions.length > 0) {
+      if (editDataSource?.id) {
+        await updatePrivMonMonitoredIndices(
+          editDataSource.id,
+          selectedOptions.map(({ label }) => label).join(',')
+        );
+      } else {
+        await registerPrivMonMonitoredIndices(selectedOptions.map(({ label }) => label).join(','));
+      }
 
-  return (
-    <EuiModal onClose={onClose} maxWidth="624px">
+      onImport(0); // The API does not return the user count because it is not available at this point.
+    }
+  }, [
+    editDataSource?.id,
+    onImport,
+    registerPrivMonMonitoredIndices,
+    selectedOptions,
+    updatePrivMonMonitoredIndices,
+  ]);
+
+  const onCreateIndex = useCallback(
+    (indexName: string) => {
+      hideCreateIndexModal();
+      setSelected(selectedOptions.concat({ label: indexName }));
+      refetch();
+    },
+    [hideCreateIndexModal, refetch, selectedOptions, setSelected]
+  );
+
+  return isCreateIndexModalOpen ? (
+    <CreateIndexModal onClose={hideCreateIndexModal} onCreate={onCreateIndex} />
+  ) : (
+    <EuiModal onClose={onClose} maxWidth="624px" data-test-subj="index-selector-modal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
@@ -124,7 +166,7 @@ export const IndexSelectorModal = ({
       <EuiModalFooter>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="plusInCircle" onClick={() => {}}>
+            <EuiButtonEmpty iconType="plusInCircle" onClick={showCreateIndexModal}>
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.createIndexButtonLabel"
                 defaultMessage="Create index"
@@ -139,7 +181,7 @@ export const IndexSelectorModal = ({
                   defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
-              <EuiButton onClick={() => {}} fill>
+              <EuiButton onClick={addPrivilegedUsers} fill disabled={selectedOptions.length === 0}>
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.addUserButtonLabel"
                   defaultMessage="Add privileged users"

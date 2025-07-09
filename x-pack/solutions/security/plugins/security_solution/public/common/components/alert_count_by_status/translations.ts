@@ -20,7 +20,7 @@ export const ALERTS_BY_RULE = i18n.translate(
 export const COLUMN_HEADER_RULE_NAME = i18n.translate(
   'xpack.securitySolution.alertCountByRuleByStatus.ruleName',
   {
-    defaultMessage: 'kibana.alert.rule.name',
+    defaultMessage: 'Rule name',
   }
 );
 
