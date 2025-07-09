@@ -105,7 +105,7 @@ describe('EntityAnalyticsManagementPage', () => {
 
   it('has the major sections of the page visible', () => {
     render(pageComponent());
-    expect(screen.getByText('Entity risk score')).toBeInTheDocument();
+    expect(screen.getByText('Entity Risk Score')).toBeInTheDocument();
     expect(screen.getByText('Risk score enable section')).toBeInTheDocument();
     expect(screen.getByText('Risk score preview')).toBeInTheDocument();
   });
