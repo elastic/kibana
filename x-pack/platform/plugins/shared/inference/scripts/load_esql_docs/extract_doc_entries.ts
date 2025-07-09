@@ -145,7 +145,10 @@ async function processFile({
     const $element = load(fileContent)('*');
     output.pages.push({
       sourceFile: basename,
-      name: basename === 'esql.html' ? 'overview' : basename.replace('esql-', ''),
+      name:
+        basename === 'esql.html'
+          ? 'overview'
+          : basename.replace(/^esql-/, '').replace(/\.html$/, ''),
       content: getSimpleText($element),
     });
   } else {
