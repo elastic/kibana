@@ -8,9 +8,9 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
-const TEST_TIMEOUT = 2 * 60 * 1000; // 2 minutes timeout, needed to wait for the SLOs to be created
+const TEST_TIMEOUT = 3 * 60 * 1000; // 3 minutes timeout, needed to wait for the SLOs to be created
 
-test.describe('SLOs Overview', { tag: ['@ess'] }, () => {
+test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
   test.describe.configure({ timeout: TEST_TIMEOUT });
 
   test.beforeAll(async ({ sloData }) => {
