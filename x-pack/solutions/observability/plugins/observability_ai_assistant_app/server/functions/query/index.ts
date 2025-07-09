@@ -127,10 +127,10 @@ export function registerQueryFunction({
           },
         },
         system: `
-        - **RULE OF THE CURRENT TASK**: After generating a query with "${QUERY_FUNCTION_NAME}" you MUST IMMEDIATELY execute it using "execute_query".
+        - **RULE OF THE CURRENT TASK**: After generating a query you MUST IMMEDIATELY execute it using "${EXECUTE_QUERY_FUNCTION_NAME}".
           * The ONLY exceptions:
             * User explicitly requests "example query"
-            * User specifically asks for visualization (graphs/charts) instead of raw data
+            * User specifically asks for **visualization** (graphs/charts) instead of raw data
           *  DETECT DATA REQUESTS:
             * If the user says to **show, display, list, count, average, sum, stats/statistics, top, how many**, or asks for any specific number/value → you MUST execute the query.`,
       });
