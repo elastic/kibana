@@ -15,8 +15,10 @@ import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { SCORE_SUGGESTIONS_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/score_suggestions';
-import { SELECT_RELEVANT_FIELDS_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  MessageRole,
+  SELECT_RELEVANT_FIELDS_NAME,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
