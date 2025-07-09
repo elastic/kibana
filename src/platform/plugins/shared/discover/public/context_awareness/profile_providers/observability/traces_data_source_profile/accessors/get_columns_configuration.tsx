@@ -44,7 +44,7 @@ export const DataTableSummaryColumnHeaderTracesContext = ({
   const tooltipContent = (
     <FormattedMessage
       id="discover.unifiedDataTable.tableHeader.tracesContext.sourceFieldIconTooltip"
-      defaultMessage="Displays the most relevant resource identifiers like:{br}{br}service.name{br}event.outcome{br}transaction.name{br}etc."
+      defaultMessage="Displays the most relevant resource identifiers like:{br}{br}- service.name{br}- event.outcome{br}- transaction.name{br}- etc."
       values={{ br: <br /> }}
     />
   );
