@@ -17,7 +17,6 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { BuildFlavor } from '@kbn/config';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -41,11 +40,9 @@ export class AIAssistantManagementSelectionPlugin
     >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
-  private readonly buildFlavor: BuildFlavor;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
-    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
   }
 
   public setup(
@@ -123,42 +120,33 @@ export class AIAssistantManagementSelectionPlugin
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
     const { cloud } = plugins;
-    const isServerless = this.buildFlavor === 'serverless';
+    const serverlessProjectType = cloud?.serverless.projectType;
 
-    if (!isServerless) {
-      core.uiSettings.register({
-        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-          ...classicSetting,
-          value: this.config.preferredAIAssistantType,
-        },
-      });
-    } else {
-      const serverlessProjectType = cloud?.serverless.projectType;
-      switch (serverlessProjectType) {
-        case 'observability':
-          core.uiSettings.register({
-            [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-              ...observabilitySolutionSetting,
-              value: this.config.preferredAIAssistantType,
-            },
-          });
-          return;
-        case 'security':
-          core.uiSettings.register({
-            [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-              ...securitySolutionSetting,
-              value: this.config.preferredAIAssistantType,
-            },
-          });
-          return;
-        default:
-          return core.uiSettings.register({
-            [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-              ...classicSetting,
-              value: this.config.preferredAIAssistantType ?? AIAssistantType.Default,
-            },
-          });
-      }
+    switch (serverlessProjectType) {
+      case 'observability':
+        core.uiSettings.register({
+          [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+            ...observabilitySolutionSetting,
+            value: this.config.preferredAIAssistantType,
+          },
+        });
+        return;
+      case 'security':
+        core.uiSettings.register({
+          [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+            ...securitySolutionSetting,
+            value: this.config.preferredAIAssistantType,
+          },
+        });
+        return;
+      default:
+        // This case is hit when in stateful Kibana
+        return core.uiSettings.register({
+          [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+            ...classicSetting,
+            value: this.config.preferredAIAssistantType ?? AIAssistantType.Default,
+          },
+        });
     }
   }
 
