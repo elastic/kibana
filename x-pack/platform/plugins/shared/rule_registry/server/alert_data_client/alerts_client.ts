@@ -48,7 +48,7 @@ import { isEmpty } from 'lodash';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { TypeOf } from 'io-ts';
 import { alertAuditEvent, operationAlertAuditActionMap } from '@kbn/alerting-plugin/server/lib';
-import type { GetBrowserFieldsResponse } from '../types';
+import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,

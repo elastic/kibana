@@ -17,8 +17,6 @@ import type {
   RuleExecutorServices,
   RuleType,
 } from '@kbn/alerting-plugin/server';
-import type { BrowserFields } from '@kbn/alerting-types';
-import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
 import type { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<
@@ -77,8 +75,3 @@ export interface RacApiRequestHandlerContext {
 export type RacRequestHandlerContext = CustomRequestHandlerContext<{
   rac: RacApiRequestHandlerContext;
 }>;
-
-export interface GetBrowserFieldsResponse {
-  browserFields: BrowserFields;
-  fields: FieldDescriptor[];
-}

@@ -10,7 +10,7 @@
 import { isEmpty } from 'lodash';
 import type { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { GetBrowserFieldsResponse } from '@kbn/rule-registry-plugin/server';
+import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
 import { BASE_RAC_ALERTS_API_PATH, EMPTY_AAD_FIELDS } from '../../constants';
 
 export const getDescription = (fieldName: string, ecsFlat: Record<string, EcsMetadata>) => {

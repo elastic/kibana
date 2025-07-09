@@ -9,8 +9,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { ActionVariable } from '@kbn/alerting-plugin/common';
 import { useEffect, useMemo, useState } from 'react';
 import { EcsFlat } from '@elastic/ecs';
-import type { GetBrowserFieldsResponse } from '@kbn/rule-registry-plugin/server';
-
+import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
 import {
   fetchRuleTypeAlertFields,
   getDescription,
