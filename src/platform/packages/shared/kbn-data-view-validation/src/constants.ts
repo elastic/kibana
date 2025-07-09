@@ -10,11 +10,11 @@
 /**
  * Error code for when an index pattern contains illegal characters
  */
-export const ILLEGAL_CHARACTERS_KEY = 'ILLEGAL_CHARACTERS';
+export const ILLEGAL_CHARACTERS_KEY = 'ILLEGAL_CHARACTERS' as const;
 /**
  * Error code for when an index pattern contains spaces
  */
-export const CONTAINS_SPACES_KEY = 'CONTAINS_SPACES';
+export const CONTAINS_SPACES_KEY = 'CONTAINS_SPACES' as const;
 /**
  * Characters disallowed in index patterns that are visible.
  */

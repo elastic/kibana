@@ -12,6 +12,7 @@ import {
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_KEY,
 } from './constants';
+import type { ValidationErrors } from './types';
 
 function dataViewContainsSpaces(indexPattern: string): boolean {
   return indexPattern.includes(' ');
@@ -35,8 +36,8 @@ function findIllegalCharacters(indexPattern: string): string[] {
  * @returns errors object
  */
 
-export function validateDataView(indexPattern: string) {
-  const errors: { [ILLEGAL_CHARACTERS_KEY]?: string[]; [CONTAINS_SPACES_KEY]?: boolean } = {};
+export function validateDataView(indexPattern: string): ValidationErrors {
+  const errors: ValidationErrors = {};
 
   const illegalCharacters = findIllegalCharacters(indexPattern);
 

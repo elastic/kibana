@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/constants';
-export * from './src/validation';
-export * from './src/types';
+import { ILLEGAL_CHARACTERS_KEY, CONTAINS_SPACES_KEY } from './constants';
+
+export type ValidationErrors = {
+  [ILLEGAL_CHARACTERS_KEY]?: string[];
+  [CONTAINS_SPACES_KEY]?: boolean;
+};

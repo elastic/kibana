@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ILLEGAL_CHARACTERS_VISIBLE, CONTAINS_SPACES_KEY, ILLEGAL_CHARACTERS_KEY } from './types';
+import { ILLEGAL_CHARACTERS_VISIBLE, CONTAINS_SPACES_KEY, ILLEGAL_CHARACTERS_KEY, type ValidationErrors } from '@kbn/data-view-validation';
 
 function indexPatternContainsSpaces(indexPattern: string): boolean {
   return indexPattern.includes(' ');
@@ -30,8 +30,8 @@ function findIllegalCharacters(indexPattern: string): string[] {
  * @returns Object with validation errors
  */
 
-export function validateIndexPattern(indexPattern: string) {
-  const errors: { [ILLEGAL_CHARACTERS_KEY]?: string[]; [CONTAINS_SPACES_KEY]?: boolean } = {};
+export function validateIndexPattern(indexPattern: string): ValidationErrors {
+  const errors: ValidationErrors = {};
 
   const illegalCharacters = findIllegalCharacters(indexPattern);
 
