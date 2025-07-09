@@ -21,8 +21,8 @@ export function AddToCaseContextItem() {
   const {
     services: { cases },
   } = useKibana<ClientPluginsStart>();
-  const getCasesContext = cases.ui?.getCasesContext;
-  const canUseCases = cases.helpers?.canUseCases;
+  const getCasesContext = cases?.ui?.getCasesContext;
+  const canUseCases = cases?.helpers?.canUseCases;
 
   const casesPermissions: CasesPermissions = useMemo(() => {
     if (!canUseCases) {
@@ -64,14 +64,10 @@ export function AddToCaseContextItem() {
 function AddToCaseButtonContent() {
   const { monitor } = useSelectedMonitor();
   const { dateRangeEnd, dateRangeStart, locationId } = useGetUrlParams();
-  const {
-    services: {
-      cases: {
-        hooks: { useCasesAddToExistingCaseModal },
-      },
-      notifications,
-    },
-  } = useKibana<ClientPluginsStart>();
+  const services = useKibana<ClientPluginsStart>().services;
+  const notifications = services.notifications;
+  // type checked in wrapper component
+  const useCasesAddToExistingCaseModal = services.cases?.hooks?.useCasesAddToExistingCaseModal!;
   const casesModal = useCasesAddToExistingCaseModal();
   const timeRange: TimeRange = {
     from: dateRangeStart,
@@ -98,11 +94,10 @@ function AddToCaseButtonContent() {
 
     casesModal.open({
       getAttachments: () => {
-        const url = redirectUrl;
         const persistableStateAttachmentState: PageAttachmentPersistedState = {
           type: 'synthetics_monitor',
           url: {
-            pathAndQuery: url,
+            pathAndQuery: redirectUrl,
             label: monitor.name,
             actionLabel: i18n.translate(
               'xpack.synthetics.cases.addToCaseModal.goToMonitorHistoryActionLabel',
