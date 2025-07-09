@@ -6,16 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  useFormContext,
-  useFieldArray,
-  UseFormRegisterReturn,
-  FieldError,
-  FieldErrorsImpl,
-  UseFormSetValue,
-  FieldArrayWithId,
-  FieldValues,
-} from 'react-hook-form';
+import { useFormContext, useFieldArray, FieldArrayWithId } from 'react-hook-form';
 import {
   DragDropContextProps,
   EuiFormRow,
@@ -63,8 +54,6 @@ export const GrokPatternsEditor = () => {
     rules: {
       minLength: 1,
       validate: (expressions) => {
-        console.log('expressions', expressions);
-
         if (expressions.some((expression) => isEmpty(expression.getExpression()))) {
           return i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditorRequiredError',

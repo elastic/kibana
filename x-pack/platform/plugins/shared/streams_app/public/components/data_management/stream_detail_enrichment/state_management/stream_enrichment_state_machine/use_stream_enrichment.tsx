@@ -15,8 +15,6 @@ import {
   createStreamEnrichmentMachineImplementations,
 } from './stream_enrichment_state_machine';
 import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { ProcessorActorRef } from '../processor_state_machine';
 import {
   PreviewDocsFilterOption,
   SimulationActorSnapshot,

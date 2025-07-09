@@ -352,23 +352,25 @@ const ActiveSimulationStatus = ({ children }: PropsWithChildren<{}>) => {
   );
 
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="xs"
-      css={css`
-        flex-grow: 0;
-      `}
-    >
-      <EuiBeacon
-        color="success"
-        aria-label={tooltipContent}
-        size={8}
+    <EuiToolTip content={tooltipContent}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
         css={css`
-          margin: ${euiTheme.size.xs};
+          flex-grow: 0;
         `}
-      />
-      {children}
-    </EuiFlexGroup>
+      >
+        <EuiBeacon
+          color="success"
+          aria-label={tooltipContent}
+          size={8}
+          css={css`
+            margin: ${euiTheme.size.xs};
+          `}
+        />
+        {children}
+      </EuiFlexGroup>
+    </EuiToolTip>
   );
 };
 
@@ -379,9 +381,11 @@ const InactiveSimulationStatus = ({ children }: PropsWithChildren<{}>) => {
   );
 
   return (
-    <EuiHealth color="subdued" aria-label={tooltipContent}>
-      {children}
-    </EuiHealth>
+    <EuiToolTip content={tooltipContent}>
+      <EuiHealth color="subdued" aria-label={tooltipContent}>
+        {children}
+      </EuiHealth>
+    </EuiToolTip>
   );
 };
 
