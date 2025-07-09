@@ -10,7 +10,9 @@ import type { ToolSelection } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InternalToolRegistry } from '../../tools/types';
 
-const idRegexp = /^[a-zA-Z][a-zA-Z0-9_-]*$/;
+// - Must start and end with letter or digit
+// - Can contain letters, digits, hyphens, underscores
+const idRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
 
 export const ensureValidId = (id: string) => {
   if (!idRegexp.test(id)) {
