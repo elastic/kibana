@@ -118,7 +118,8 @@
     "@kbn/object-utils",
     "@kbn/coloring",
     "@kbn/saved-search-component",
-    "@kbn/core-saved-objects-server"
+    "@kbn/core-saved-objects-server",
+    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": ["target/**/*"]
 }
