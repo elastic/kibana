@@ -15,9 +15,7 @@
       "observability"
     ],
     "requiredPlugins": [
-      "aiops",
       "alerting",
-      "cases",
       "charts",
       "contentManagement",
       "controls",
@@ -50,6 +48,8 @@
       "inference"
     ],
     "optionalPlugins": [
+      "aiops",
+      "cases",
       "discover",
       "exploratoryView",
       "home",
@@ -63,6 +63,8 @@
       "streams"
     ],
     "requiredBundles": [
+      "aiops",
+      "cases",
       "data",
       "discover",
       "logsShared",

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { ToolProviderId, PlainIdToolIdentifier, ToolDescriptor } from './tools';
+import type { PlainIdToolIdentifier, ToolDescriptor } from './tools';
 
 /**
  * "all tools" wildcard which can be used for {@link ByIdsToolSelection}
  */
 export const allToolsSelectionWildcard = '*';
+/**
+ * Constant tool selection to select all tools
+ */
+export const allToolsSelection: ToolSelection[] = [{ tool_ids: [allToolsSelectionWildcard] }];
 
 /**
  * Represents a tool selection based on individual tool IDs, and optionally a provider ID.
@@ -20,27 +24,27 @@ export const allToolsSelectionWildcard = '*';
  * @example
  * ```ts
  * // select all available tools
- * const allTools: ByIdsToolSelection = { toolIds: ['*'] }
+ * const allTools: ByIdsToolSelection = { tool_ids: ['*'] }
  *
  * // select all tools from provider "dolly"
- * const allTools: ByIdsToolSelection = { provider: 'dolly', toolIds: ['*'] }
+ * const allTools: ByIdsToolSelection = { provider: 'dolly', tool_ids: ['*'] }
  *
  * // select toolA and toolB, regardless of the provider
- * const toolAB: ByIdsToolSelection = { toolIds: ['toolA', 'toolB'] }
+ * const toolAB: ByIdsToolSelection = { tool_ids: ['toolA', 'toolB'] }
  *
  * // select foo from provider 'custom'
- * const toolAB: ByIdsToolSelection = { provider: 'custom', toolIds: ['foo'] }
+ * const toolAB: ByIdsToolSelection = { provider: 'custom', tool_ids: ['foo'] }
  * ```
  */
 export interface ByIdsToolSelection {
   /**
    * The id of the provider to select tools from
    */
-  provider?: ToolProviderId;
+  type?: string;
   /**
    * List of individual tool ids to select.
    */
-  toolIds: PlainIdToolIdentifier[];
+  tool_ids: PlainIdToolIdentifier[];
 }
 
 /**
@@ -54,7 +58,7 @@ export type ToolSelection = ByIdsToolSelection;
 export const isByIdsToolSelection = (
   toolSelection: ToolSelection
 ): toolSelection is ByIdsToolSelection => {
-  return 'toolIds' in toolSelection && Array.isArray(toolSelection.toolIds);
+  return 'tool_ids' in toolSelection && Array.isArray(toolSelection.tool_ids);
 };
 
 /**
@@ -74,13 +78,13 @@ export const filterToolsBySelection = <TType extends ToolDescriptor>(
  */
 export const toolMatchSelection = (tool: ToolDescriptor, toolSelection: ToolSelection): boolean => {
   if (isByIdsToolSelection(toolSelection)) {
-    if (toolSelection.provider && toolSelection.provider !== tool.meta.providerId) {
+    if (toolSelection.type && toolSelection.type !== tool.meta.providerId) {
       return false;
     }
-    if (toolSelection.toolIds.includes(allToolsSelectionWildcard)) {
+    if (toolSelection.tool_ids.includes(allToolsSelectionWildcard)) {
       return true;
     }
-    return toolSelection.toolIds.includes(tool.id);
+    return toolSelection.tool_ids.includes(tool.id);
   }
   throw new Error(`Invalid tool selection : ${JSON.stringify(toolSelection)}`);
 };

@@ -8,8 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay } from 'rxjs';
 import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
+import { allToolsSelection } from '@kbn/onechat-common';
 import { AgentHandlerContext } from '@kbn/onechat-server';
-import { addRoundCompleteEvent, extractRound, conversationToLangchainMessages } from '../utils';
+import {
+  addRoundCompleteEvent,
+  extractRound,
+  conversationToLangchainMessages,
+  selectProviderTools,
+} from '../utils';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import { RunAgentParams, RunAgentResponse } from '../run_agent';
@@ -27,13 +33,26 @@ export type RunChatAgentFn = (
  * Create the handler function for the default onechat agent.
  */
 export const runReasoningAgent: RunChatAgentFn = async (
-  { nextInput, conversation = [], tools = [], runId = uuidv4(), systemPrompt },
-  { logger, request, modelProvider, events }
+  {
+    nextInput,
+    conversation = [],
+    toolSelection = allToolsSelection,
+    runId = uuidv4(),
+    agentId,
+    customInstructions,
+  },
+  { logger, request, modelProvider, toolProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
 
+  const selectedTools = await selectProviderTools({
+    provider: toolProvider,
+    selection: toolSelection,
+    request,
+  });
+
   const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
-    tools,
+    tools: selectedTools,
     logger,
     request,
   });
@@ -46,7 +65,7 @@ export const runReasoningAgent: RunChatAgentFn = async (
     logger,
     chatModel: model.chatModel,
     tools: langchainTools,
-    systemPrompt,
+    customInstructions,
   });
 
   const eventStream = agentGraph.streamEvents(
@@ -56,9 +75,10 @@ export const runReasoningAgent: RunChatAgentFn = async (
       runName: chatAgentGraphName,
       metadata: {
         graphName: chatAgentGraphName,
+        agentId,
         runId,
       },
-      recursionLimit: 25,
+      recursionLimit: 40,
       callbacks: [],
     }
   );
@@ -74,8 +94,11 @@ export const runReasoningAgent: RunChatAgentFn = async (
     shareReplay()
   );
 
-  events$.subscribe((event) => {
-    events.emit(event);
+  events$.subscribe({
+    next: (event) => events.emit(event),
+    error: () => {
+      // error will be handled by function return, we just need to trap here
+    },
   });
 
   const round = await extractRound(events$);

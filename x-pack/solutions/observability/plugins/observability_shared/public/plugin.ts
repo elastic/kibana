@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
@@ -57,7 +56,6 @@ export interface ObservabilitySharedSetup {
 
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
-  cases: CasesPublicStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;

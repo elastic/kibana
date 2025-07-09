@@ -97,6 +97,7 @@ import {
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
 import { getPageAttachmentType } from './attachments/page/attachment';
+import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
   unsafe: {
@@ -139,7 +140,7 @@ export interface ObservabilityPublicPluginsSetup {
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
@@ -193,6 +194,7 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
+  private telemetry: TelemetryService;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -233,7 +235,9 @@ export class Plugin
     }),
   ];
 
-  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
+    this.telemetry = new TelemetryService();
+  }
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
@@ -243,6 +247,7 @@ export class Plugin
     const euiIconType = 'logoObservability';
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
+    this.telemetry.setup(coreSetup.analytics);
 
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
@@ -276,7 +281,12 @@ export class Plugin
         kibanaVersion,
         observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        telemetryClient: this.telemetry.start(coreStart.analytics),
+        plugins: {
+          ...pluginsStart,
+          ruleTypeRegistry,
+          actionTypeRegistry,
+        },
         usageCollection: pluginsSetup.usageCollection,
         isServerless: !!pluginsStart.serverless,
       });
@@ -416,7 +426,7 @@ export class Plugin
                 }));
 
               const casesLink: NavigationEntry[] = otherLinks
-                .filter((link) => link.id === 'cases')
+                .filter((link) => link.id === 'cases' && pluginsStart.cases)
                 .map((link) => ({
                   app: observabilityAppId,
                   label: link.title,
@@ -460,6 +470,7 @@ export class Plugin
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
+      pricing: coreStart.pricing,
     });
 
     import('./navigation_tree').then(({ createDefinition }) => {

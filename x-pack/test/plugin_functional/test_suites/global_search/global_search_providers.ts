@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import '@kbn/core-provider-plugin/types';
 import { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
 import { GlobalSearchTestApi } from '@kbn/global-search-test-plugin/public/types';
 import { FtrProviderContext } from '../../ftr_provider_context';

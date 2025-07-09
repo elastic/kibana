@@ -5,14 +5,17 @@
  * 2.0.
  */
 import React, { ComponentType, useMemo } from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { StreamsAppContextProvider } from '../public/components/streams_app_context_provider';
 import { getMockStreamsAppContext } from './get_mock_streams_app_context';
 
-export function KibanaReactStorybookDecorator(Story: ComponentType) {
+export function StreamsAppStorybookDecorator(Story: ComponentType) {
   const context = useMemo(() => getMockStreamsAppContext(), []);
   return (
     <StreamsAppContextProvider context={context}>
-      <Story />
+      <EuiThemeProvider>
+        <Story />
+      </EuiThemeProvider>
     </StreamsAppContextProvider>
   );
 }
