@@ -58,7 +58,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MonitoringEntitySource"
+              $ref: "#/components/schemas/MonitoringEntitySourceNoId"
       responses:
         "200":
           description: Entity source updated successfully
@@ -194,16 +194,15 @@ components:
                 - type: string
                 - type: object
 
-    MonitoringEntitySource:
+    MonitoringEntitySourceProperties:
       type: object
-      required: [type, name, id, managed]
       properties:
-        id:
-          type: string
         name:
           type: string
         type:
           type: string
+        managed:
+          type: boolean
         indexPattern:
           type: string
         integrationName:
@@ -231,5 +230,20 @@ components:
           properties:
             kuery:
               oneOf:
-                - type: string
-                - type: object
+              - type: string
+              - type: object
+
+    MonitoringEntitySourceNoId:
+      allOf:
+      - $ref: '#/components/schemas/MonitoringEntitySourceProperties'
+      - type: object
+        required: [type, name, managed]
+
+    MonitoringEntitySource:
+      allOf:
+      - $ref: '#/components/schemas/MonitoringEntitySourceProperties'
+      - type: object
+        required: [type, name, id, managed]
+        properties:
+          id:
+            type: string

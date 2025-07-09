@@ -69,7 +69,7 @@ describe('MonitoringEntitySourceDataClient', () => {
       } as unknown as SavedObjectsClientContract);
 
       defaultOpts.soClient.create.mockResolvedValue({
-        id: 'temp-id', // TODO: update to use dynamic ID
+        id: 'abcdefg',
         type: monitoringEntitySourceTypeName,
         attributes: testDescriptor,
         references: [],
@@ -165,10 +165,10 @@ describe('MonitoringEntitySourceDataClient', () => {
         references: [],
       };
       defaultOpts.soClient.get.mockResolvedValue(getResponse as unknown as SavedObject<unknown>);
-      const result = await dataClient.get();
+      const result = await dataClient.get('abcdefg');
       expect(defaultOpts.soClient.get).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        `temp-id` // TODO: https://github.com/elastic/security-team/issues/12851
+        `abcdefg`
       );
       expect(result).toEqual(getResponse.attributes);
     });
@@ -176,7 +176,7 @@ describe('MonitoringEntitySourceDataClient', () => {
 
   describe('update', () => {
     it('should update Monitoring Entity Source Sync Config Successfully', async () => {
-      const id = 'temp-id'; // TODO: https://github.com/elastic/security-team/issues/12851
+      const id = 'abcdefg';
       const updateDescriptor = {
         ...testDescriptor,
         managed: false,
@@ -212,10 +212,10 @@ describe('MonitoringEntitySourceDataClient', () => {
 
   describe('delete', () => {
     it('should delete Monitoring Entity Source Sync Config Successfully', async () => {
-      await dataClient.delete();
+      await dataClient.delete('abcdefg');
       expect(mockSavedObjectClient.delete).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        `temp-id` // TODO: https://github.com/elastic/security-team/issues/12851
+        'abcdefg'
       );
     });
   });

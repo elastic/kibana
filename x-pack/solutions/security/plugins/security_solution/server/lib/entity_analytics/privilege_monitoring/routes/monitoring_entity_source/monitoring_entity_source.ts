@@ -20,6 +20,8 @@ import {
   CreateEntitySourceRequestBody,
   UpdateEntitySourceRequestBody,
   type CreateEntitySourceResponse,
+  GetEntitySourceRequestParams,
+  UpdateEntitySourceRequestParams,
 } from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 
 export const monitoringEntitySourceRoute = (
@@ -69,7 +71,7 @@ export const monitoringEntitySourceRoute = (
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/entity_source',
+      path: '/api/entity_analytics/monitoring/entity_source/{id}',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -79,7 +81,11 @@ export const monitoringEntitySourceRoute = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {},
+        validate: {
+          request: {
+            params: GetEntitySourceRequestParams,
+          },
+        },
       },
       async (context, request, response): Promise<IKibanaResponse<GetEntitySourceResponse>> => {
         const siemResponse = buildSiemResponse(response);
@@ -87,7 +93,7 @@ export const monitoringEntitySourceRoute = (
         try {
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.get();
+          const body = await client.get(request.params.id);
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
@@ -103,7 +109,7 @@ export const monitoringEntitySourceRoute = (
   router.versioned
     .put({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/entity_source',
+      path: '/api/entity_analytics/monitoring/entity_source/{id}',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -116,6 +122,7 @@ export const monitoringEntitySourceRoute = (
         validate: {
           request: {
             body: UpdateEntitySourceRequestBody,
+            params: UpdateEntitySourceRequestParams,
           },
         },
       },
@@ -125,7 +132,7 @@ export const monitoringEntitySourceRoute = (
         try {
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.update(request.body);
+          const body = await client.update({ ...request.body, id: request.params.id });
 
           return response.ok({ body });
         } catch (e) {
