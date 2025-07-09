@@ -250,7 +250,7 @@ export class AutoInstallContentPackagesTask {
   ) {
     const discoveryMatches = await esClient.search(
       {
-        index: 'logs-*;metrics-*;traces-*',
+        index: 'logs-*,metrics-*,traces-*',
         query: {
           bool: {
             filter: [
