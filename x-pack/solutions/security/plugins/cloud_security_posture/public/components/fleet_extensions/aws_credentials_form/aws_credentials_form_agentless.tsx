@@ -324,10 +324,12 @@ export const AwsCredentialsFormAgentless = ({
 
   const showCloudFormationAccordion = isCloudFormationSupported && showCloudCredentialsButton;
 
-  const accordianTitleLink =
-    showCloudFormationAccordion && cloudFormationSettings[awsCredentialsType].accordianTitleLink;
-  const templateUrl =
-    showCloudFormationAccordion && cloudFormationSettings[awsCredentialsType].templateUrl;
+  const accordianTitleLink = showCloudFormationAccordion
+    ? cloudFormationSettings[awsCredentialsType].accordianTitleLink
+    : '';
+  const templateUrl = showCloudFormationAccordion
+    ? cloudFormationSettings[awsCredentialsType].templateUrl
+    : '';
 
   return (
     <>
