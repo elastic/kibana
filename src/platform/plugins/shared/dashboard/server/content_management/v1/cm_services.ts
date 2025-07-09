@@ -10,8 +10,8 @@
 import { schema } from '@kbn/config-schema';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
+import { filterSchema, querySchema } from '@kbn/es-query-server';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
-import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
@@ -30,65 +30,8 @@ const apiError = schema.object({
 const searchSourceSchema = schema.object(
   {
     type: schema.maybe(schema.string()),
-    query: schema.maybe(
-      schema.object({
-        query: schema.oneOf([
-          schema.string({
-            meta: {
-              description:
-                'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
-            },
-          }),
-          schema.recordOf(schema.string(), schema.any()),
-        ]),
-        language: schema.string({
-          meta: { description: 'The query language such as KQL or Lucene.' },
-        }),
-      })
-    ),
-    filter: schema.maybe(
-      schema.arrayOf(
-        schema.object(
-          {
-            meta: schema.object(
-              {
-                alias: schema.maybe(schema.nullable(schema.string())),
-                disabled: schema.maybe(schema.boolean()),
-                negate: schema.maybe(schema.boolean()),
-                controlledBy: schema.maybe(schema.string()),
-                group: schema.maybe(schema.string()),
-                index: schema.maybe(schema.string()),
-                isMultiIndex: schema.maybe(schema.boolean()),
-                type: schema.maybe(schema.string()),
-                key: schema.maybe(schema.string()),
-                params: schema.maybe(schema.any()),
-                value: schema.maybe(schema.string()),
-                field: schema.maybe(schema.string()),
-              },
-              { unknowns: 'allow' }
-            ),
-            query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-            $state: schema.maybe(
-              schema.object({
-                store: schema.oneOf(
-                  [
-                    schema.literal(FilterStateStore.APP_STATE),
-                    schema.literal(FilterStateStore.GLOBAL_STATE),
-                  ],
-                  {
-                    meta: {
-                      description:
-                        "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-                    },
-                  }
-                ),
-              })
-            ),
-          },
-          { meta: { description: 'A filter for the search source.' } }
-        )
-      )
-    ),
+    query: schema.maybe(querySchema),
+    filter: schema.maybe(schema.arrayOf(filterSchema)),
     sort: schema.maybe(
       schema.arrayOf(
         schema.recordOf(
