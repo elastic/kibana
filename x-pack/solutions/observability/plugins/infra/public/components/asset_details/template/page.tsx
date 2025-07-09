@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { SYSTEM_INTEGRATION } from '../../../../common/constants';
+import type { SupportedDataSources } from '../../../../common/metrics_sources/get_has_data';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -24,8 +24,8 @@ import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { PageTitleWithPopover } from '../header/page_title_with_popover';
 
-const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
-  host: [SYSTEM_INTEGRATION],
+const DATA_SOURCE_PER_TYPE: Partial<Record<InventoryItemType, SupportedDataSources>> = {
+  host: 'host',
 };
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
@@ -78,7 +78,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   return (
     <InfraPageTemplate
       onboardingFlow={asset.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
-      dataAvailabilityModules={DATA_AVAILABILITY_PER_TYPE[asset.type] || undefined}
+      dataSourceAvailability={DATA_SOURCE_PER_TYPE[asset.type] || undefined}
       pageHeader={{
         pageTitle: loading ? (
           <EuiLoadingSpinner size="m" />
