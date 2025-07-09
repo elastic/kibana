@@ -29,5 +29,6 @@
     "@kbn/presentation-publishing",
     "@kbn/reporting-common",
     "@kbn/es-query",
+    "@kbn/deeplinks-analytics",
   ]
 }
