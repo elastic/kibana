@@ -232,8 +232,6 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
             end: gapEnd,
           });
 
-        logger.info('finalGapResponse');
-        logger.info(JSON.stringify(finalGapResponse.body, null, 2));
         expect(finalGapResponse.statusCode).to.eql(200);
         expect(finalGapResponse.body.total).to.eql(1);
         const finalGap = finalGapResponse.body.data[0];
