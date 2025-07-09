@@ -20,4 +20,17 @@ const relatedAlertsLoaded: TelemetryEvent = {
   },
 };
 
-export const events: TelemetryEvent[] = [relatedAlertsLoaded];
+const alertDetailsPageView: TelemetryEvent = {
+  eventType: TelemetryEventTypes.ALERT_DETAILS_PAGE_VIEW,
+  schema: {
+    rule_type: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'Rule type ID of the alert whose details page was viewed',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const events: TelemetryEvent[] = [relatedAlertsLoaded, alertDetailsPageView];
