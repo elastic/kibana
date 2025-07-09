@@ -20,7 +20,7 @@ import { cmServicesDefinition } from './schema/cm_services';
 import { BOOK_SAVED_OBJECT_TYPE } from '../saved_object/register_book_saved_object';
 import { savedObjectToBook } from '../../../common/book/transforms/transform_out';
 import { BookSearchOptions, BookState } from './schema/latest';
-import { bookToSavedObject } from '../saved_object/book_to_saved_object';
+import { bookToAttributes } from '../saved_object/book_to_attributes';
 
 const getFindOptions = (
   query: SearchQuery,
@@ -146,7 +146,7 @@ export class BookStorage implements ContentStorage {
 
     let attributes: BookAttributes;
     try {
-      ({ attributes } = bookToSavedObject(dataToLatest));
+      attributes = bookToAttributes(dataToLatest);
     } catch (error) {
       throw Boom.badRequest(`Invalid data. ${error.message}`);
     }
@@ -193,7 +193,7 @@ export class BookStorage implements ContentStorage {
 
     let attributes: BookAttributes;
     try {
-      ({ attributes } = bookToSavedObject(dataToLatest));
+      attributes = bookToAttributes(dataToLatest);
     } catch (error) {
       throw Boom.badRequest(`Invalid data. ${error.message}`);
     }

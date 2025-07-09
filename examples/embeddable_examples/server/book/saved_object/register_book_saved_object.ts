@@ -40,6 +40,7 @@ export function registerBookSavedObject(core: CoreSetup) {
     mappings: {
       properties: {
         title: { type: 'text', index: true },
+        bookJSON: { type: 'text', index: false },
       },
     },
   });

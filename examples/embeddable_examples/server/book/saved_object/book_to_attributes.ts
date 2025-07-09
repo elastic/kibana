@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObject } from '@kbn/core/server';
 import { BookState } from '../content_management';
 import { BookAttributes } from './types';
 
-export function bookToSavedObject(
-  book: BookState
-): Pick<SavedObject<BookAttributes>, 'attributes'> {
+export function bookToAttributes(book: BookState): BookAttributes {
   const { bookTitle, ...rest } = book;
   return {
-    attributes: {
-      title: bookTitle,
-      bookJSON: JSON.stringify(rest),
-    },
+    title: bookTitle,
+    bookJSON: JSON.stringify(rest),
   };
 }

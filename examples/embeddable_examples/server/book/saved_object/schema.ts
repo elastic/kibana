@@ -9,12 +9,15 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const bookAttributesSchema = schema.object({
-  title: schema.string(),
-  // DO NOT COPY STRINGIFIED JSON EXAMPLE
-  // Storing data as stringified JSON is not best practice.
-  //
-  // This example stores state as stringified JSON to show
-  // how CRUD APIs should not leak storage implemenation details.
-  bookJSON: schema.string(),
-});
+export const bookAttributesSchema = schema.object(
+  {
+    title: schema.string(),
+    // DO NOT COPY STRINGIFIED JSON EXAMPLE
+    // Storing data as stringified JSON is not best practice.
+    //
+    // This example stores state as stringified JSON to show
+    // how CRUD APIs should not leak storage implemenation details.
+    bookJSON: schema.string(),
+  },
+  { unknowns: 'forbid' }
+);

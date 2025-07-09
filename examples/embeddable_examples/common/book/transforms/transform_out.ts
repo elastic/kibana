@@ -11,6 +11,14 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObject } from '@kbn/core/server';
 import type { BookAttributes, BookState } from '../../../server';
 
+/* export interface BookByValueSerializedState {
+  attributes: BookAttributes;
+}
+
+export interface BookByReferenceSerializedState {
+  savedBookId: string;
+}*/
+
 export function transformOut(storedState: unknown, references: Reference[]) {}
 
 export function savedObjectToBook(savedObject: SavedObject<BookAttributes>): BookState {
