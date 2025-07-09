@@ -22,7 +22,7 @@ export const Round: React.FC<RoundProps> = ({ round }) => {
   const userMessageContainerStyles = css`
     width: 100%;
     align-self: end;
-    max-inline-size: calc(${euiTheme.size.xxxxl} * 10);
+    max-inline-size: 80%;
     background-color: ${euiTheme.colors.backgroundBasePrimary};
   `;
   const labels = conversationsCommonLabels.content.messages.round;
