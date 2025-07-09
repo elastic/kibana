@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   builtinToolProviderId,
-  type AgentProfile,
+  type AgentDefinition,
   type ToolSelection,
   allToolsSelectionWildcard,
 } from '@kbn/onechat-common';
@@ -18,18 +18,12 @@ import { useOnechatAgentById } from './use_agent_by_id';
 import { useOnechatTools } from '../use_tools';
 import { queryKeys } from '../../query_keys';
 
-export interface AgentEditState {
-  id: string;
-  name: string;
-  description: string;
-  customInstructions: string;
-  toolSelection: ToolSelection[];
-}
+export type AgentEditState = Omit<AgentDefinition, 'type'>;
 
 const defaultToolSelection: ToolSelection[] = [
   {
-    provider: builtinToolProviderId,
-    toolIds: [allToolsSelectionWildcard],
+    type: builtinToolProviderId,
+    tool_ids: [allToolsSelectionWildcard],
   },
 ];
 
@@ -37,8 +31,10 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
-  customInstructions: '',
-  toolSelection: defaultToolSelection,
+  configuration: {
+    instructions: '',
+    tools: defaultToolSelection,
+  },
 });
 
 export function useAgentEdit({
@@ -47,10 +43,10 @@ export function useAgentEdit({
   onSaveError,
 }: {
   agentId?: string;
-  onSaveSuccess: (agent: AgentProfile) => void;
+  onSaveSuccess: (agent: AgentDefinition) => void;
   onSaveError: (err: Error) => void;
 }) {
-  const { agentProfilesService } = useOnechatServices();
+  const { agentService } = useOnechatServices();
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
@@ -59,7 +55,7 @@ export function useAgentEdit({
   const { agent, isLoading: agentLoading, error: agentError } = useOnechatAgentById(agentId || '');
 
   const createMutation = useMutation({
-    mutationFn: (data: AgentEditState) => agentProfilesService.create(data),
+    mutationFn: (data: AgentEditState) => agentService.create(data),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
       onSaveSuccess(result);
@@ -74,7 +70,7 @@ export function useAgentEdit({
       if (!agentId) {
         throw new Error('Agent ID is required for update');
       }
-      return agentProfilesService.update(agentId, data);
+      return agentService.update(agentId, data);
     },
     onSuccess: (result) => {
       // Invalidate specific agent and agent profiles list
@@ -94,13 +90,8 @@ export function useAgentEdit({
     }
 
     if (agent) {
-      setState({
-        id: agent.id,
-        name: agent.name,
-        description: agent.description,
-        customInstructions: agent.customInstructions,
-        toolSelection: agent.toolSelection || defaultToolSelection,
-      });
+      const { type, ...agentState } = agent;
+      setState(agentState);
     }
   }, [agentId, agent]);
 
