@@ -105,7 +105,7 @@ describe('Rule Definition', () => {
       hasManageApiKeysCapability: jest.fn(() => true),
     }));
     ruleTypeRegistry.has.mockImplementation((id) => {
-      if (id === 'siem_rule') {
+      if (id === 'siem_rule' || id === 'attack-discovery') {
         return false;
       }
       return true;
@@ -122,7 +122,7 @@ describe('Rule Definition', () => {
       requiresAppContext: false,
     };
     ruleTypeRegistry.get.mockImplementation((id) => {
-      if (id === 'siem_rule') {
+      if (id === 'siem_rule' || id === 'attack-discovery') {
         throw new Error('error');
       }
       return ruleTypeR;
@@ -186,6 +186,18 @@ describe('Rule Definition', () => {
     const ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
     expect(ruleDescription).toBeTruthy();
     expect(ruleDescription.find('div.euiText').text()).toEqual('Security detection rule');
+  });
+
+  it('show Attack Discovery rule type description "', async () => {
+    await setup({
+      ruleOverwrite: {
+        consumer: 'siem',
+        ruleTypeId: 'attack-discovery',
+      },
+    });
+    const ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
+    expect(ruleDescription).toBeTruthy();
+    expect(ruleDescription.find('div.euiText').text()).toEqual('Attack Discovery rule');
   });
 
   it('show rule conditions only if the rule allows multiple conditions', async () => {
