@@ -25,7 +25,6 @@ import {
 import { css } from '@emotion/react';
 
 import { apiIsPresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
@@ -53,6 +52,7 @@ import {
 } from '../lib/deserialize_from_library';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
 import { isParentApiCompatible } from '../actions/add_links_panel_action';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { coreServices } from '../services/kibana_services';
 
 export const LinksContext = createContext<LinksApi | null>(null);
@@ -227,18 +227,21 @@ export const getLinksEmbeddableFactory = () => {
             onTitleDuplicate,
           });
         },
-        onEdit: async () => {
-          openLazyFlyout({
+        onEdit: async () => { 
+          await openLazyFlyout({
             core: coreServices,
             parentApi,
             loadContent: async ({ closeFlyout }) => {
               const { getEditorFlyout } = await import('../editor/get_editor_flyout');
-              return await getEditorFlyout({
-                initialState: stateManager.getLatestState(),
+              return getEditorFlyout({
+                initialState: {
+                  ...stateManager.getLatestState(),
+                  savedObjectId,
+                },
                 parentDashboard: parentApi,
-                onCompleteEdit: (newState) => {
+                onCompleteEdit: async (newState) => {
                   if (!newState) return;
-
+    
                   // if the by reference state has changed during this edit, reinitialize the panel.
                   const nextSavedObjectId = newState?.savedObjectId;
                   const nextIsByReference = nextSavedObjectId !== undefined;
@@ -250,7 +253,7 @@ export const getLinksEmbeddableFactory = () => {
                       ? serializeByReference(nextSavedObjectId)
                       : serializeByValue();
                     (serializedState.rawState as SerializedTitles).title = newState.title;
-
+    
                     api.parentApi.replacePanel<LinksSerializedState>(api.uuid, {
                       serializedState,
                       panelType: api.type,
