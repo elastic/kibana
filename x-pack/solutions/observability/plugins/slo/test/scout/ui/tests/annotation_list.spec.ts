@@ -42,11 +42,12 @@ test.describe('Annotations List', { tag: ['@ess'] }, () => {
   });
 
   test('validate annotation list', async ({ page }) => {
+    // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Test annotation"');
     await expect(page.locator('.euiTableRow')).toHaveCount(1);
-
+    // eslint-disable-next-line playwright/no-nth-methods
     await page.locator('.echAnnotation__marker').first().hover();
-
+    // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Test annotation description"');
   });
 
@@ -60,7 +61,7 @@ test.describe('Annotations List', { tag: ['@ess'] }, () => {
 
   test('check that annotation is displayed', async ({ page }) => {
     await page.getByRole('button', { name: 'Test annotation description' }).hover();
-
+    // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Test annotation description"');
   });
 
@@ -72,10 +73,10 @@ test.describe('Annotations List', { tag: ['@ess'] }, () => {
     await page.getByTestId('annotationMessage').blur();
     await page.getByTestId('annotationSaveButton').click();
     await page.getByTestId('toastCloseButton').click();
-
+    // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Updated annotation"');
     await page.getByRole('button', { name: 'Updated annotation description' }).hover();
-
+    // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Updated annotation description"');
   });
 
