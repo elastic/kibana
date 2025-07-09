@@ -9,15 +9,15 @@
 
 import { flow } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
-import { ControlGroupAttributes } from '../../types';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 /**
  * Transform functions for serialized controls state.
  */
 export const transformControlsState: (
   serializedControlState: string
-) => ControlGroupAttributes['controls'] = flow(
+) => ControlsGroupState['controls'] = flow(
   JSON.parse,
   transformControlObjectToArray,
   transformControlsWidthAuto,

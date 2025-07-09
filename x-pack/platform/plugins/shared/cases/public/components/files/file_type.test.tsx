@@ -152,6 +152,15 @@ describe('getFileType', () => {
       );
     });
 
+    it('children is defined when file is an image', () => {
+      const attachmentViewObject = fileType.getAttachmentViewObject(attachmentViewProps);
+      expect(attachmentViewObject).toEqual(
+        expect.objectContaining({
+          children: expect.any(Object),
+        })
+      );
+    });
+
     it('timelineAvatar is document if file is not an image', () => {
       expect(
         fileType.getAttachmentViewObject({
