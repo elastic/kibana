@@ -17,7 +17,10 @@ import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import { setupApp } from './app/setup_app';
 import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
@@ -29,9 +32,11 @@ import { registerFieldListPanelPlacementSetting } from './react_embeddables/fiel
 import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
-import { BOOK_EMBEDDABLE_TYPE } from '../common';
+import { BOOK_CONTENT_ID, BOOK_EMBEDDABLE_TYPE, BOOK_LATEST_VERSION } from '../common';
+import { setKibanaServices } from './kibana_services';
 
 export interface SetupDeps {
+  contentManagement: ContentManagementPublicSetup;
   developerExamples: DeveloperExamplesSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsStart;
@@ -50,7 +55,10 @@ export interface StartDeps {
 }
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, { embeddable, developerExamples }: SetupDeps) {
+  public setup(
+    core: CoreSetup<StartDeps>,
+    { contentManagement, embeddable, developerExamples }: SetupDeps
+  ) {
     setupApp(core, developerExamples);
 
     const startServicesPromise = core.getStartServices();
@@ -90,9 +98,18 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       embeddable,
       new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
     );
+
+    contentManagement.registry.register({
+      id: BOOK_CONTENT_ID,
+      version: {
+        latest: BOOK_LATEST_VERSION,
+      },
+    });
   }
 
   public start(core: CoreStart, deps: StartDeps) {
+    setKibanaServices(core, deps);
+
     registerCreateFieldListAction(deps.uiActions);
     registerFieldListPanelPlacementSetting(deps.dashboard);
 
