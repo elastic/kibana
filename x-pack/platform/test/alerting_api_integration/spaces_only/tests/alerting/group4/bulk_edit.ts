@@ -31,7 +31,6 @@ const getSnoozeSchedule = () => {
   };
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
