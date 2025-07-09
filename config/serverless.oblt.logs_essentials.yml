@@ -1,5 +1,8 @@
 # Observability Logs Essentials tier config
 
+## Cloud settings
+xpack.cloud.serverless.product_tier: logs_essentials
+
 ## Disable xpack plugins
 xpack.infra.enabled: false
 xpack.slo.enabled: false
@@ -45,5 +48,20 @@ xpack.fleet.internal.registry.excludePackages: [
   'synthetics_dashboards',
 ]
 
+xpack.actions.enabledActionTypes: [
+  '.email',
+  '.webhook',
+  '.jira',
+  '.teams',
+  '.opsgenie',
+  '.pagerduty',
+  '.slack',
+  '.slack_api',
+  '.resilient',
+  '.servicenow',
+  '.tines',
+  '.torq'
+]
 
+xpack.alerting.enabledRuleTypes: ['observability.rules.custom_threshold','.es-query','datasetQuality.degradedDocs']
 xpack.cases.enabled: false
