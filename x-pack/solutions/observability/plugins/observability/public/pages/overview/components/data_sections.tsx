@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { BoolQuery } from '@kbn/es-query';
 import { APMSection } from './sections/apm/apm_section';
 import { LogsSection } from './sections/logs/logs_section';
 import { AlertsSection } from './sections/alerts/alerts_section';
@@ -17,14 +16,13 @@ import type { BucketSize } from '../helpers/calculate_bucket_size';
 
 interface Props {
   bucketSize: BucketSize;
-  esQuery: { bool: BoolQuery };
 }
 
-export function DataSections({ bucketSize, esQuery }: Props) {
+export function DataSections({ bucketSize }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <AlertsSection bucketSize={bucketSize} esQuery={esQuery} />
+        <AlertsSection bucketSize={bucketSize} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <LogsSection bucketSize={bucketSize} />

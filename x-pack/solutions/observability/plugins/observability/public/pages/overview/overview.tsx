@@ -13,20 +13,18 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   ExternalResourceLinks,
   useBreadcrumbs,
   useFetcher,
 } from '@kbn/observability-shared-plugin/public';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { LoadingObservability } from '../../components/loading_observability';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
-import { buildEsQuery } from '../../utils/build_es_query';
 import { DataSections } from './components/data_sections';
 import { HeaderActions } from './components/header_actions/header_actions';
 import { HeaderMenu } from './components/header_menu/header_menu';
@@ -116,16 +114,7 @@ export function OverviewPage() {
     });
   }, [appsWithoutData, hasDataMap, setScreenContext]);
 
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
-
-  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>(
-    buildEsQuery({
-      timeRange: {
-        from: relativeStart,
-        to: relativeEnd,
-      },
-    })
-  );
+  const { absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
@@ -138,17 +127,6 @@ export function OverviewPage() {
     [absoluteStart, absoluteEnd, timeBuckets]
   );
 
-  const handleTimeRangeRefresh = useCallback(() => {
-    setEsQuery(
-      buildEsQuery({
-        timeRange: {
-          from: relativeStart,
-          to: relativeEnd,
-        },
-      })
-    );
-  }, [relativeEnd, relativeStart]);
-
   if (!isAllRequestsComplete) {
     return <LoadingObservability />;
   }
@@ -160,9 +138,7 @@ export function OverviewPage() {
         pageTitle: i18n.translate('xpack.observability.overview.pageTitle', {
           defaultMessage: 'Overview',
         }),
-        rightSideItems: hasAnyData
-          ? [<HeaderActions onTimeRangeRefresh={handleTimeRangeRefresh} />]
-          : [],
+        rightSideItems: hasAnyData ? [<HeaderActions />] : [],
         rightSideGroupProps: {
           responsive: true,
         },
@@ -177,7 +153,7 @@ export function OverviewPage() {
 
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <DataSections bucketSize={bucketSize} esQuery={esQuery} />
+              <DataSections bucketSize={bucketSize} />
             </EuiFlexItem>
             <EuiSpacer size="s" />
           </EuiFlexGroup>

@@ -23,17 +23,13 @@ import { getColumns } from '../../../../../components/alerts_table/common/get_co
 import { useKibana } from '../../../../../utils/kibana_react';
 import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../../../../constants';
 import { BucketSize } from '../../../helpers/calculate_bucket_size';
+import { buildEsQuery } from '../../../../../utils/build_es_query';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
 const tableColumns = getColumns({ showRuleName: true });
-export function AlertsSection({
-  esQuery,
-  bucketSize,
-}: {
-  esQuery: { bool: BoolQuery };
-  bucketSize: BucketSize;
-}) {
+
+export function AlertsSection({ bucketSize }: { bucketSize: BucketSize }) {
   const {
     http,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
@@ -47,6 +43,11 @@ export function AlertsSection({
   } = useKibana().services;
   const { relativeStart, relativeEnd } = useDatePickerContext();
   const { hasDataMap } = useHasData();
+
+  const esQuery = useMemo<{ bool: BoolQuery }>(
+    () => buildEsQuery({ timeRange: { from: relativeStart, to: relativeEnd } }),
+    [relativeStart, relativeEnd]
+  );
   const alertSummaryTimeRange = useMemo(
     () =>
       getAlertSummaryTimeRange(
