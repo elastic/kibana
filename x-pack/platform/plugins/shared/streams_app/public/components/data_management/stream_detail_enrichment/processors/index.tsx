@@ -339,39 +339,43 @@ const ProcessorPanel = ({ isNew, ...props }: PropsWithChildren<{ isNew: boolean 
   );
 };
 
-const SimulationStatus = ({ isNew, children }: PropsWithChildren<{ isNew: boolean }>) => {
-  const tooltipContent = isNew
-    ? i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.newProcessorTooltip',
-        { defaultMessage: 'This processor configuration is used to run the parsing simulation.' }
-      )
-    : i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.configuredProcessorTooltip',
-        {
-          defaultMessage: 'This processor configuration is not used to run the parsing simulation.',
-        }
-      );
+const SimulationStatus = ({ isNew, ...props }: PropsWithChildren<{ isNew: boolean }>) => {
+  return isNew ? <ActiveSimulationStatus {...props} /> : <InactiveSimulationStatus {...props} />;
+};
+
+const ActiveSimulationStatus = ({ children }: PropsWithChildren<{}>) => {
+  const { euiTheme } = useEuiTheme();
+
+  const tooltipContent = i18n.translate(
+    'xpack.streams.streamDetailView.managementTab.enrichment.newProcessorTooltip',
+    { defaultMessage: 'This processor configuration is used to run the parsing simulation.' }
+  );
 
   return (
-    <EuiToolTip content={tooltipContent}>
-      {isNew ? (
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiBeacon
-            color="success"
-            aria-label={tooltipContent}
-            size={8}
-            css={css`
-              margin: 4px;
-            `}
-          />
-          {children}
-        </EuiFlexGroup>
-      ) : (
-        <EuiHealth color="subdued" aria-label={tooltipContent}>
-          {children}
-        </EuiHealth>
-      )}
-    </EuiToolTip>
+    <EuiFlexGroup alignItems="center" gutterSize="xs">
+      <EuiBeacon
+        color="success"
+        aria-label={tooltipContent}
+        size={8}
+        css={css`
+          margin: ${euiTheme.size.xs};
+        `}
+      />
+      {children}
+    </EuiFlexGroup>
+  );
+};
+
+const InactiveSimulationStatus = ({ children }: PropsWithChildren<{}>) => {
+  const tooltipContent = i18n.translate(
+    'xpack.streams.streamDetailView.managementTab.enrichment.configuredProcessorTooltip',
+    { defaultMessage: 'This processor configuration is not used to run the parsing simulation.' }
+  );
+
+  return (
+    <EuiHealth color="subdued" aria-label={tooltipContent}>
+      {children}
+    </EuiHealth>
   );
 };
 
