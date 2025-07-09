@@ -146,7 +146,7 @@ export const createEventSignal = async ({
     ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
 
     const enrichment = threatEnrichmentFactory({
-      signalsQueryMap,
+      signalsQueryMap: matchedEvents,
       threatIndicatorPath,
       threatFilters,
       threatSearchParams,

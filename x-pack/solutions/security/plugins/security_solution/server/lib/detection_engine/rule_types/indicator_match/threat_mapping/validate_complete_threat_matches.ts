@@ -7,6 +7,7 @@
 
 import type { SignalsQueryMap } from './get_signals_map_from_threat_index';
 import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { ThreatMatchNamedQuery } from './types';
 
 /**
  * Validates that events have complete threat matches based on the threat mapping configuration.
@@ -64,16 +65,31 @@ export const validateCompleteThreatMatches = (
   const skippedIds: string[] = [];
 
   signalsQueryMap.forEach((threatQueries, signalId) => {
-    const hasCompleteMatch = threatMapping.some((andGroup) => {
-      return andGroup.entries.every((entry) =>
-        threatQueries.some(
+    const allMatchedThreatQueries: ThreatMatchNamedQuery[] = [];
+    const hasMatch = threatMapping.some((andGroup) => {
+      const matchedThreatQueriesForAndGroup: ThreatMatchNamedQuery[] = [];
+      const hasMatchForAndGroup = andGroup.entries.every((entry) => {
+        const filteredThreatQueries = threatQueries.filter(
           (threatQuery) => threatQuery.field === entry.field && threatQuery.value === entry.value
-        )
-      );
+        );
+
+        if (filteredThreatQueries.length > 0) {
+          matchedThreatQueriesForAndGroup.push(...filteredThreatQueries);
+          return true;
+        }
+
+        return false;
+      });
+
+      if (hasMatchForAndGroup) {
+        allMatchedThreatQueries.push(...matchedThreatQueriesForAndGroup);
+      }
+
+      return hasMatchForAndGroup;
     });
 
-    if (hasCompleteMatch) {
-      matchedEvents.set(signalId, threatQueries);
+    if (hasMatch) {
+      matchedEvents.set(signalId, allMatchedThreatQueries);
     } else {
       skippedIds.push(signalId);
     }

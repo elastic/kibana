@@ -237,6 +237,44 @@ describe('validateCompleteThreatMatches', () => {
       expect(result.skippedIds).toEqual(['event-3', 'event-4']);
     });
 
+    it('should store only matched threat queries in matchedEvents', () => {
+      const threatMapping = createThreatMapping([
+        [
+          { field: 'user.name', value: 'threat.indicator.user.name' },
+          { field: 'host.name', value: 'threat.indicator.host.name' },
+        ],
+      ]);
+
+      const allThreatQueries = [
+        createThreatQuery('user.name', 'threat.indicator.user.name', 'threat-1', 'index-1'),
+        createThreatQuery('host.name', 'threat.indicator.host.name', 'threat-2', 'index-2'),
+        createThreatQuery('source.ip', 'threat.indicator.source.ip', 'threat-3', 'index-3'), // Unmatched query
+        createThreatQuery(
+          'destination.port',
+          'threat.indicator.destination.port',
+          'threat-4',
+          'index-4'
+        ), // Unmatched query
+      ];
+
+      const signalsQueryMap = new Map([['event-1', allThreatQueries]]);
+
+      const result = validateCompleteThreatMatches(signalsQueryMap, threatMapping);
+
+      expect(result.matchedEvents.has('event-1')).toBe(true);
+
+      // Should only contain the matched queries, not all queries
+      const matchedQueries = result.matchedEvents.get('event-1')!;
+      expect(matchedQueries).toHaveLength(2);
+
+      // Verify only the matched queries are included
+      const matchedFields = matchedQueries.map((q) => q.field);
+      expect(matchedFields).toContain('user.name');
+      expect(matchedFields).toContain('host.name');
+      expect(matchedFields).not.toContain('source.ip');
+      expect(matchedFields).not.toContain('destination.port');
+    });
+
     it('should handle single field AND group', () => {
       const threatMapping = createThreatMapping([
         [{ field: 'source.ip', value: 'threat.indicator.source.ip' }],
