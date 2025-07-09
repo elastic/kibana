@@ -2,7 +2,7 @@
 title: "Exploring AWS STS AssumeRoot"
 subtitle: "AssumeRoot Abuse and Detection Strategies in AWS Organizations"
 slug: "exploring-aws-sts-assumeroot"
-date: "2024-12-09"
+date: "2024-12-10"
 description: "Explore AWS STS AssumeRoot, its risks, detection strategies, and practical scenarios to secure against privilege escalation and account compromise using Elastic's SIEM and CloudTrail data."
 author:
   - slug: terrance-dejesus
@@ -13,7 +13,7 @@ category:
 
 ## Preamble
 
-Welcome to another installment of AWS detection engineering with Elastic. This article will dive into the new AWS [Security Token Service](https://docs.aws.amazon.com/STS/latest/APIReference/welcome.html) (STS) API operation, [AssumeRoot](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRoot.html), simulate some practical behavior in a sandbox AWS environment, and explore detection capabilities within Elastic’s SIEM.
+Welcome to another installment of AWS detection engineering with Elastic. This article will dive into the new AWS Security Token Service(STS) API operation, AssumeRoot, simulate some practical behavior in a sandbox AWS environment, and explore detection capabilities within Elastic’s SIEM.
 
 What to expect from this article:
 
