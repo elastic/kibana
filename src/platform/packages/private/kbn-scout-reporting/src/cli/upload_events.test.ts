@@ -51,20 +51,14 @@ describe('uploadAllEventsFromPath', () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(false);
 
     await expect(
-      uploadAllEventsFromPath('esURL', 'esAPIKey', true, log, 'non_existent_path')
+      uploadAllEventsFromPath('non_existent_path', {
+        esURL: 'esURL',
+        esAPIKey: 'esAPIKey',
+        verifyTLSCerts: true,
+        log,
+      })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"The provided event log path 'non_existent_path' does not exist."`
-    );
-  });
-
-  it('should log if eventLogPath is not provided and the SCOUT_REPORT_OUTPUT_ROOT directory does not exist', async () => {
-    jest.spyOn(fs, 'existsSync').mockReturnValue(false);
-
-    // eventLogPath not provided
-    await uploadAllEventsFromPath('esURL', 'esAPIKey', true, log);
-
-    expect(log.info).toHaveBeenCalledWith(
-      'No Scout report output directory found at scout/reports/directory. No events to upload.'
     );
   });
 
@@ -77,7 +71,12 @@ describe('uploadAllEventsFromPath', () => {
       isDirectory: () => false,
     } as unknown as fs.Stats);
 
-    await uploadAllEventsFromPath('esURL', 'esAPIKey', true, log, 'existing_event_log.ndjson');
+    await uploadAllEventsFromPath('existing_event_log.ndjson', {
+      esURL: 'esURL',
+      esAPIKey: 'esAPIKey',
+      verifyTLSCerts: true,
+      log,
+    });
 
     expect(mockAddEventsFromFile).toHaveBeenCalledWith('existing_event_log.ndjson');
   });

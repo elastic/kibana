@@ -37,43 +37,35 @@ const readFilesRecursively = (directory: string, callback: Function) => {
 };
 
 export const uploadAllEventsFromPath = async (
-  esURL: string,
-  esAPIKey: string,
-  verifyTLSCerts: boolean,
-  log: ToolingLog,
-  eventLogPath?: string
+  eventLogPath: string,
+  options: {
+    esURL: string;
+    esAPIKey: string;
+    verifyTLSCerts: boolean;
+    log: ToolingLog;
+  }
 ) => {
   // Validate CLI options
   if (eventLogPath && !fs.existsSync(eventLogPath)) {
     throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
   }
 
-  if (!eventLogPath) {
-    // Default to the SCOUT_REPORT_OUTPUT_ROOT directory if no path is provided
-    eventLogPath = SCOUT_REPORT_OUTPUT_ROOT;
-
-    if (!fs.existsSync(eventLogPath)) {
-      log.info(`No Scout report output directory found at ${eventLogPath}. No events to upload.`);
-      return;
-    }
-  }
-
   // ES connection
 
-  log.info(`Connecting to Elasticsearch at ${esURL}`);
+  options.log.info(`Connecting to Elasticsearch at ${options.esURL}`);
   const es = await getValidatedESClient(
     {
-      node: esURL,
-      auth: { apiKey: esAPIKey },
+      node: options.esURL,
+      auth: { apiKey: options.esAPIKey },
       tls: {
-        rejectUnauthorized: verifyTLSCerts,
+        rejectUnauthorized: options.verifyTLSCerts,
       },
     },
-    { log, cli: true }
+    { log: options.log, cli: true }
   );
 
   // Event log upload
-  const reportDataStream = new ScoutReportDataStream(es, log);
+  const reportDataStream = new ScoutReportDataStream(es, options.log);
 
   if (fs.statSync(eventLogPath).isDirectory()) {
     readFilesRecursively(eventLogPath, (filePath: string) => {
@@ -107,14 +99,21 @@ export const uploadEvents: Command<void> = {
     `,
   },
   run: async ({ flagsReader, log }) => {
+    // default to Scout report output directory if no eventLogPath is provided
+    const eventLogPath = flagsReader.string('eventLogPath') || SCOUT_REPORT_OUTPUT_ROOT;
+
     const esURL = flagsReader.requiredString('esURL');
     const esAPIKey = flagsReader.requiredString('esAPIKey');
     const verifyTLSCerts = flagsReader.boolean('verifyTLSCerts');
-    const eventLogPath = flagsReader.string('eventLogPath');
     const dontFailOnError = flagsReader.boolean('dontFailOnError');
 
     try {
-      await uploadAllEventsFromPath(esURL, esAPIKey, verifyTLSCerts, log, eventLogPath);
+      await uploadAllEventsFromPath(eventLogPath, {
+        esURL,
+        esAPIKey,
+        verifyTLSCerts,
+        log,
+      });
     } catch (error) {
       log.error(error);
 
