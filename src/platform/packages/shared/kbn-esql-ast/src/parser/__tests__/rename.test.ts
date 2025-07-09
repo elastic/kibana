@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '..';
+import { EsqlQuery } from '../../query';
+import { Walker } from '../../walker';
 
 describe('RENAME', () => {
-  /**
-   * Enable this test once RENAME commands are fixed:
-   * https://github.com/elastic/kibana/discussions/182393#discussioncomment-10313313
-   */
-  it.skip('example from documentation', () => {
-    const text = `
-FROM kibana_sample_data_logs
-| RENAME total_visits as \`Unique Visits (Total)\`,
-`;
-    const { ast } = parse(text);
+  describe('correctly formatted', () => {
+    it('parses basic example from documentation', () => {
+      const src = `
+        FROM employees
+        | KEEP first_name, last_name, still_hired
+        | RENAME still_hired AS employed`;
+      const { ast, errors } = EsqlQuery.fromSrc(src);
+      const rename = Walker.match(ast, { type: 'command', name: 'rename' });
 
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(ast, null, 2));
+      expect(errors.length).toBe(0);
+      expect(rename).toMatchObject({
+        type: 'command',
+        name: 'rename',
+        args: [{}],
+      });
+    });
   });
 });

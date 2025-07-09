@@ -237,6 +237,6 @@ export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
 
 function getElasticsearchRequestLoggingOptions(): ElasticsearchRequestLoggingOptions {
   return {
-    loggerName: 'synthetics',
+    loggerName: 'uptime',
   };
 }
