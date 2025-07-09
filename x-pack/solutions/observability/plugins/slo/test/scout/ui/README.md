@@ -22,4 +22,14 @@ npx playwright test --config x-pack/solutions/observability/plugins/slo/test/sco
 npx playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --project=local --grep @svlOblt
 ```
 
+Add `--headed` to turn off headless
+
+```bash
+// ESS
+npx playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --headed --project=local --grep @ess
+
+// Serverless
+npx playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --headed --project=local --grep @svlOblt
+```
+
 Test results are available in `x-pack/solutions/observability/plugins/slo/test/scout/ui/output`
