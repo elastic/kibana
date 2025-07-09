@@ -130,7 +130,10 @@ export const SavedPlaygroundHeader: React.FC<SavedPlaygroundHeaderProps> = ({
           <ViewCodeAction selectedPageMode={pageMode} />
           <EuiSpacer />
           <SavedPlaygroundSaveButton hasChanges={hasChanges} />
-          <PlaygroundMoreOptionsMenu onDeletePlayground={onDeletePlayground} />
+          <PlaygroundMoreOptionsMenu
+            onDeletePlayground={onDeletePlayground}
+            onSavePlaygroundAs={onCopyPlayground}
+          />
         </EuiFlexGroup>
       </EuiPageHeaderSection>
     </EuiPageTemplate.Header>
