@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult, DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory, type KibanaResponseFactory } from '@kbn/core/server';
 import { errorHandler } from './error_handler';
@@ -17,14 +17,14 @@ const createApiResponseError = ({
 }: {
   statusCode?: number;
   headers?: Record<string, string>;
-  body?: Record<string, any>;
+  body?: DiagnosticResult['body'];
 } = {}): TransportResult => {
   return {
     body,
     statusCode,
     headers,
     warnings: [],
-    meta: {} as any,
+    meta: {} as DiagnosticResult['meta'],
   };
 };
 
