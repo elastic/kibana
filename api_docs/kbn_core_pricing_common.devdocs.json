@@ -91,6 +91,42 @@
           },
           {
             "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingTiersClient.setTiers",
+            "type": "Function",
+            "tags": [],
+            "label": "setTiers",
+            "description": [
+              "\nSets the pricing tiers configuration.\n"
+            ],
+            "signature": [
+              "(tiers: Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[] | undefined; } & { enabled: boolean; }>) => void"
+            ],
+            "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-common",
+                "id": "def-common.PricingTiersClient.setTiers.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "tiers",
+                "description": [
+                  "- The new pricing tiers configuration"
+                ],
+                "signature": [
+                  "Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[] | undefined; } & { enabled: boolean; }>"
+                ],
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
             "id": "def-common.PricingTiersClient.isFeatureAvailable",
             "type": "Function",
             "tags": [],

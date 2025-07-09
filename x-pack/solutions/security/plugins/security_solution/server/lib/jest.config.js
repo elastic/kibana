@@ -16,4 +16,7 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/server/lib/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../__mocks__/module_name_map'),
+  globals: {
+    Uint8Array: Uint8Array,
+  },
 };

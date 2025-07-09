@@ -164,7 +164,21 @@ export function columnToOperation(
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
-  const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
+  const { dataType, label, isBucketed, operationType, timeShift, reducedTimeRange } = column;
+
+  const operationDefinition = operationDefinitionMap[operationType];
+  if (!operationDefinition) {
+    throw new Error(
+      i18n.translate('xpack.lens.indexPattern.operationNotFoundErrorMessage', {
+        defaultMessage: 'Operation {operationType} not found',
+        values: { operationType },
+      })
+    );
+  }
+
+  const scale = operationDefinition.scale
+    ? operationDefinition.scale(column, dataView as IndexPattern)
+    : 'ratio';
 
   return {
     dataType: normalizeOperationDataType(dataType),
