@@ -47,7 +47,7 @@ class EsqlToolClientImpl {
       return tool;
     } catch (isToolNotFoundError) {
       throw createToolNotFoundError({
-        toolId: `tool::${id}`,
+        toolId: `${esqlToolProviderId}::${id}`,
         customMessage: `Tool with id ${id} not found`,
       });
     }
@@ -116,11 +116,12 @@ class EsqlToolClientImpl {
 
     return updatedTool;
   }
+
   async delete(id: string): Promise<boolean> {
     const result = await this.storage.getClient().delete({ id });
     if (result.result === 'not_found') {
       throw createToolNotFoundError({
-        toolId: `tool::${id}`,
+        toolId: `${esqlToolProviderId}::${id}`,
         customMessage: `Tool with id ${id} not found`,
       });
     }

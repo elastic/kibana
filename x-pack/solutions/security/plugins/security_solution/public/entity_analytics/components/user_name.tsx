@@ -14,9 +14,11 @@ import { UserPanelKey } from '../../flyout/entity_details/shared/constants';
 
 interface Props {
   userName: string | undefined | null;
+  contextId?: string;
+  scopeId: string;
 }
 
-const UserNameComponent: React.FC<Props> = ({ userName }) => {
+const UserNameComponent: React.FC<Props> = ({ userName, scopeId, contextId }) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
   const openUserDetailsSidePanel = useCallback(
@@ -28,11 +30,13 @@ const UserNameComponent: React.FC<Props> = ({ userName }) => {
           id: UserPanelKey,
           params: {
             userName,
+            contextID: contextId,
+            scopeId,
           },
         },
       });
     },
-    [openFlyout, userName]
+    [contextId, openFlyout, scopeId, userName]
   );
 
   if (!userName) {
