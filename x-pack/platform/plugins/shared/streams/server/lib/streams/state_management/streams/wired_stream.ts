@@ -42,35 +42,34 @@ import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type { StateDependencies, StreamChange } from '../types';
 import type {
-  PrintableStream,
   StreamChangeStatus,
+  StreamChanges,
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
 
+interface WiredStreamChanges extends StreamChanges {
+  ownFields: boolean;
+  routing: boolean;
+  processing: boolean;
+  lifecycle: boolean;
+}
+
 export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definition> {
-  private _ownFieldsChanged: boolean = false;
-  private _routingChanged: boolean = false;
-  private _processingChanged: boolean = false;
-  private _lifecycleChanged: boolean = false;
+  protected _changes: WiredStreamChanges = {
+    ownFields: false,
+    routing: false,
+    processing: false,
+    lifecycle: false,
+  };
 
   constructor(definition: Streams.WiredStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
   }
 
-  clone(): StreamActiveRecord<Streams.WiredStream.Definition> {
+  protected doClone(): StreamActiveRecord<Streams.WiredStream.Definition> {
     return new WiredStream(cloneDeep(this._definition), this.dependencies);
-  }
-
-  toPrintable(): PrintableStream {
-    return {
-      ...super.toPrintable(),
-      processingChanged: this._processingChanged,
-      lifecycleChanged: this._lifecycleChanged,
-      routingChanged: this._routingChanged,
-      ownFieldsChanged: this._ownFieldsChanged,
-    };
   }
 
   protected async doHandleUpsertChange(
@@ -106,28 +105,28 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       throw new StatusError('Unexpected starting state stream type', 400);
     }
 
-    this._ownFieldsChanged =
+    this._changes.ownFields =
       !startingStateStreamDefinition ||
       !_.isEqual(
         this._definition.ingest.wired.fields,
         startingStateStreamDefinition.ingest.wired.fields
       );
 
-    this._routingChanged =
+    this._changes.routing =
       !startingStateStreamDefinition ||
       !_.isEqual(
         this._definition.ingest.wired.routing,
         startingStateStreamDefinition.ingest.wired.routing
       );
 
-    this._processingChanged =
+    this._changes.processing =
       !startingStateStreamDefinition ||
       !_.isEqual(
         this._definition.ingest.processing,
         startingStateStreamDefinition.ingest.processing
       );
 
-    this._lifecycleChanged =
+    this._changes.lifecycle =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
 
@@ -156,7 +155,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       });
     }
 
-    if (this._routingChanged) {
+    if (this._changes.routing) {
       const routeTargets = this._definition.ingest.wired.routing.map(
         (routing) => routing.destination
       );
@@ -493,11 +492,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   public hasChangedFields(): boolean {
-    return this._ownFieldsChanged;
+    return this._changes.ownFields;
   }
 
   public hasChangedLifecycle(): boolean {
-    return this._lifecycleChanged;
+    return this._changes.lifecycle;
   }
 
   public getLifecycle(): IngestStreamLifecycle {
@@ -532,7 +531,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       });
     }
-    if (this._routingChanged) {
+
+    if (this._changes.routing) {
       actions.push({
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
@@ -541,7 +541,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         }),
       });
     }
-    if (this._processingChanged) {
+    if (this._changes.processing) {
       actions.push({
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
@@ -575,7 +575,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     const definitionChanged = !_.isEqual(startingStateStream.definition, this._definition);
-
     if (definitionChanged) {
       actions.push({
         type: 'upsert_dot_streams_document',

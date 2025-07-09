@@ -91,18 +91,6 @@ describe('Search search provider', () => {
     },
   };
 
-  const searchAIResult = {
-    icon: 'logoElasticsearch',
-    id: 'ai_search',
-    score: 80,
-    title: 'Search AI',
-    type: 'Elasticsearch',
-    url: {
-      path: '/app/elasticsearch/ai_search',
-      prependBasePath: true,
-    },
-  };
-
   const searchResultProvider = getSearchResultProvider(
     {
       hasConnectors: true,
@@ -126,10 +114,7 @@ describe('Search search provider', () => {
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: expect.arrayContaining([
-            { ...customizedConnectorResult, score: 80 },
-            { ...searchAIResult, score: 80 },
-          ]),
+          a: expect.arrayContaining([{ ...customizedConnectorResult, score: 80 }]),
         });
       });
     });
@@ -163,7 +148,7 @@ describe('Search search provider', () => {
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: expect.arrayContaining([{ ...searchAIResult, score: 80 }]),
+          a: [],
         });
       });
     });
@@ -262,10 +247,7 @@ describe('Search search provider', () => {
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: expect.arrayContaining([
-            { ...customizedConnectorResult, score: 80 },
-            { ...searchAIResult, score: 80 },
-          ]),
+          a: expect.arrayContaining([{ ...customizedConnectorResult, score: 80 }]),
         });
       });
     });
