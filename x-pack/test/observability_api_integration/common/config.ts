@@ -8,9 +8,7 @@
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { Config, FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import { format, UrlObject } from 'url';
-import { LogsSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import supertest from 'supertest';
-import { bootstrapApmSynthtraceEsClient, getSynthtraceKibanaClient } from './bootstrap_synthtrace';
 import { FtrProviderContext } from './ftr_provider_context';
 import { createObsApiClient } from './obs_api_supertest';
 
@@ -24,20 +22,21 @@ export type CustomApiTestServices = ReturnType<typeof getCustomApiTestServices>;
 function getCustomApiTestServices(xPackAPITestsConfig: Config) {
   const servers = xPackAPITestsConfig.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
-  const kibanaServerUrl = format(kibanaServer);
-  const synthtraceKibanaClient = getSynthtraceKibanaClient(kibanaServerUrl);
 
   return {
-    apmSynthtraceEsClient: (context: FtrProviderContext) => {
-      return bootstrapApmSynthtraceEsClient(context, synthtraceKibanaClient);
+    apmSynthtraceEsClient: async (context: FtrProviderContext) => {
+      const synthtrace = context.getService('synthtrace');
+      const { apmEsClient } = synthtrace.getClients(['apmEsClient']);
+      await apmEsClient.initializePackage();
+
+      return apmEsClient;
     },
-    logSynthtraceEsClient: (context: FtrProviderContext) =>
-      new LogsSynthtraceEsClient({
-        client: context.getService('es'),
-        logger: createLogger(LogLevel.info),
-        refreshAfterIndex: true,
-      }),
-    synthtraceKibanaClient: () => synthtraceKibanaClient,
+    logSynthtraceEsClient: (context: FtrProviderContext) => {
+      const synthtrace = context.getService('synthtrace');
+      const { logsEsClient } = synthtrace.getClients(['logsEsClient']);
+
+      return logsEsClient;
+    },
     obsApiClient: async (context: FtrProviderContext) => {
       const getApiClientForUsername = (username: string) => {
         const url = format({

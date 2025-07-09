@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient,
-  InfraSynthtraceEsClient,
-  InfraSynthtraceKibanaClient,
-} from '@kbn/apm-synthtrace';
+import { SynthtraceClientTypes, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
 import { ToolingLog } from '@kbn/tooling-log';
-import Url from 'url';
 import { type Logger, extendToolingLog } from '@kbn/apm-synthtrace';
 import { Auth, Es } from '.';
 import { KibanaUrl } from './kibana_url';
@@ -25,69 +19,44 @@ export interface SynthtraceClientOptions {
   es: Es;
   log: ToolingLog;
 }
-export type SynthtraceClient = InfraSynthtraceEsClient | ApmSynthtraceEsClient;
-export type SynthtraceClientType = 'infra' | 'apm';
+
+export type SynthtraceDataType = 'infra' | 'apm';
+
+const synthtraceClientMapping: Record<SynthtraceDataType, SynthtraceClientTypes> = {
+  infra: 'infraEsClient',
+  apm: 'apmEsClient',
+};
 
 export async function getSynthtraceClient(
-  type: SynthtraceClientType,
+  synthClient: SynthtraceDataType,
   options: SynthtraceClientOptions
-): Promise<SynthtraceClient> {
-  if (type === 'infra') {
-    return initInfraSynthtraceClient(options);
-  } else {
-    return initApmSynthtraceClient(options);
+) {
+  const { log, es, auth, kbnUrl } = options;
+  const logger: Logger = extendToolingLog(log);
+
+  const clientType = synthtraceClientMapping[synthClient];
+  if (!clientType) {
+    throw new Error(`Unsupported synthtrace client type: ${synthClient}`);
   }
-}
 
-async function initInfraSynthtraceClient(options: SynthtraceClientOptions) {
-  const { log, es, auth, kbnUrl } = options;
-  const logger: Logger = extendToolingLog(log);
-
-  const synthKbnClient = new InfraSynthtraceKibanaClient({
-    logger,
-    target: kbnUrl.get(),
-    username: auth.getUsername(),
-    password: auth.getPassword(),
-  });
-  const pkgVersion = await synthKbnClient.fetchLatestSystemPackageVersion();
-  await synthKbnClient.installSystemPackage(pkgVersion);
-
-  const synthEsClient = new InfraSynthtraceEsClient({
-    logger,
-    client: es,
-    refreshAfterIndex: true,
-  });
-
-  return synthEsClient;
-}
-
-async function initApmSynthtraceClient(options: SynthtraceClientOptions) {
-  const { log, es, auth, kbnUrl } = options;
-  const logger: Logger = extendToolingLog(log);
-  const kibanaUrl = new URL(kbnUrl.get());
-  const kibanaUrlWithAuth = Url.format({
-    protocol: kibanaUrl.protocol,
-    hostname: kibanaUrl.hostname,
-    port: kibanaUrl.port,
-    auth: `${auth.getUsername()}:${auth.getPassword()}`,
-  });
-
-  const synthKbnClient = new ApmSynthtraceKibanaClient({
-    logger,
-    target: kibanaUrlWithAuth,
-  });
-  const packageVersion = await synthKbnClient.fetchLatestApmPackageVersion();
-  await synthKbnClient.installApmPackage(packageVersion);
-
-  const synthEsClient = new ApmSynthtraceEsClient({
+  const clientManager = new SynthtraceClientsManager({
     client: es,
     logger,
     refreshAfterIndex: true,
-    version: packageVersion,
-    pipeline: {
-      includeSerialization: false,
+    includePipelineSerialization: synthClient !== 'apm', // Only include pipeline serialization for APM client
+  });
+
+  const clients = clientManager.getClients({
+    clients: [clientType],
+    kibana: {
+      target: kbnUrl.get(),
+      username: auth.getUsername(),
+      password: auth.getPassword(),
+      logger,
     },
   });
 
-  return synthEsClient;
+  await clientManager.initFleetPackageForClient({ clients, skipInstallation: false });
+
+  return clients[clientType];
 }

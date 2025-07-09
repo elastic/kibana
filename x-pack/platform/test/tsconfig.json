@@ -24,14 +24,9 @@
     "./api_integration/apis/logstash/pipeline/fixtures/*.json",
     "./api_integration/apis/logstash/pipelines/fixtures/*.json",
     "./api_integration/apis/telemetry/fixtures/*.json",
-    "./monitoring_api_integration/fixtures/**/*.json",
+    "./monitoring_api_integration/fixtures/**/*.json"
   ],
-  "exclude": [
-    "target/**/*",
-    "*/plugins/**/*",
-    "*/packages/**/*",
-    "*/*/packages/**/*"
-  ],
+  "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
   "kbn_references": [
     "@kbn/test-suites-src",
     "@kbn/telemetry-collection-manager-plugin",
@@ -127,5 +122,6 @@
     "@kbn/core-provider-plugin",
     "@kbn/reporting-plugin",
     "@kbn/kibana-usage-collection-plugin",
+    "@kbn/apm-synthtrace"
   ]
 }

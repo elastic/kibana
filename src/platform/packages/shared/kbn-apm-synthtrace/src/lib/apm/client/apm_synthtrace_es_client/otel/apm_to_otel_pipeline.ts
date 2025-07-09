@@ -18,8 +18,8 @@ import { getOtelTransforms } from './otel_to_apm_pipeline';
 
 export function apmToOtelPipeline(
   logger: Logger,
-  version: string,
-  includeSerialization: boolean = true
+  includeSerialization: boolean = true,
+  version: string = 'latest'
 ) {
   return (base: Readable) => {
     const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
