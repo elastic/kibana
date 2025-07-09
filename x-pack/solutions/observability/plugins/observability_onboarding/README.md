@@ -28,26 +28,26 @@ yarn jest --config x-pack/solutions/observability/plugins/observability_onboardi
 
 ### Deployment-agnostic API tests
 
-The deployment-agnostic API tests are located in [`x-pack/test/api_integration/deployment_agnostic/apis/observability/onboarding`](/x-pack/test/api_integration/deployment_agnostic/apis/observability/onboarding/).
+The deployment-agnostic API tests are located in [`x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/onboarding`](/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/onboarding/).
 
 #### Start server and run test (stateful)
 
 ```sh
 # start server
-node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
 
 # run tests
-node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts --include ./x-pack/test/api_integration/deployment_agnostic/apis/observability/onboarding/index.ts
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts --include ./x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/onboarding/index.ts
 ```
 
 #### Start server and run test (serverless)
 
 ```sh
 # start server
-node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
 
 # run tests
-node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts --include ./x-pack/test/api_integration/deployment_agnostic/apis/observability/onboarding/index.ts
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts --include ./x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/onboarding/index.ts
 ```
 
 ### API integration tests
