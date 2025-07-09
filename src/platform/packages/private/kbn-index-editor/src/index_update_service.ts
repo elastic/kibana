@@ -87,7 +87,7 @@ export class IndexUpdateService {
     return this._indexCrated$.getValue();
   }
 
-  private readonly actions$ = new Subject<Action>();
+  private readonly _actions$ = new Subject<Action>();
 
   private readonly _isSaving$ = new BehaviorSubject<boolean>(false);
   public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
@@ -111,7 +111,7 @@ export class IndexUpdateService {
   private readonly _subscription = new Subscription();
 
   // Accumulate updates in buffer with undo
-  private bufferState$: Observable<DocUpdate[]> = this.actions$.pipe(
+  private bufferState$: Observable<DocUpdate[]> = this._actions$.pipe(
     scan((acc: DocUpdate[], action: Action) => {
       if (action.type === 'add') {
         return [...acc, action.payload];
@@ -144,7 +144,7 @@ export class IndexUpdateService {
   );
 
   // Observable to track the number of milliseconds left to allow undo of the last change
-  public readonly undoTimer$: Observable<number> = this.actions$.pipe(
+  public readonly undoTimer$: Observable<number> = this._actions$.pipe(
     filter((action) => action.type === 'add' || action.type === 'undo'),
     switchMap((action) =>
       action.type === 'add'
@@ -152,7 +152,7 @@ export class IndexUpdateService {
             map((elapsed) => {
               return Math.max(BUFFER_TIMEOUT_MS - elapsed * UNDO_EMIT_MS, 0);
             }),
-            takeUntil(this.actions$.pipe(filter((a) => a.type === 'undo'))),
+            takeUntil(this._actions$.pipe(filter((a) => a.type === 'undo'))),
             takeWhile((remaining) => remaining > 0, true)
           )
         : of(0)
@@ -264,7 +264,7 @@ export class IndexUpdateService {
         .subscribe({
           next: ({ updates, response, rows, dataView }) => {
             // Clear the buffer after successful update
-            this.actions$.next({ type: 'saved', payload: { response, updates } });
+            this._actions$.next({ type: 'saved', payload: { response, updates } });
 
             // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
 
@@ -411,7 +411,7 @@ export class IndexUpdateService {
 
   // Add a new index
   public addDoc(doc: Record<string, any>) {
-    this.actions$.next({ type: 'add', payload: { value: doc } });
+    this._actions$.next({ type: 'add', payload: { value: doc } });
   }
 
   public async addNewRow(newRow: Record<string, any>) {
@@ -432,7 +432,7 @@ export class IndexUpdateService {
       },
       {}
     );
-    this.actions$.next({ type: 'add', payload: { id, value: parsedUpdate } });
+    this._actions$.next({ type: 'add', payload: { id, value: parsedUpdate } });
   }
 
   /**
@@ -475,7 +475,7 @@ export class IndexUpdateService {
    * Cancel the latest update operation.
    */
   public undo() {
-    this.actions$.next({ type: 'undo' });
+    this._actions$.next({ type: 'undo' });
   }
 
   public addNewColumn(filedName: string) {
@@ -496,5 +496,11 @@ export class IndexUpdateService {
 
   public destroy() {
     this._subscription.unsubscribe();
+    // complete all subjects
+    this._isSaving$.complete();
+    this._isFetching$.complete();
+    this._rows$.complete();
+    this._totalHits$.complete();
+    this._actions$.complete();
   }
 }
