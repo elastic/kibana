@@ -50,7 +50,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:fdfd7f357a09f933ab22143273849f8b247360f2f94f4dc2ea473001c59f9f0b';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:a02075b9fd57b4c0ad04232054569eccbcab254159deba01cc4c9fcbeb800411';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
@@ -60,7 +60,7 @@ export async function runDockerGenerator(
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:d55453afc55faeae722b28dab2885ccb71de83ef8be746f1b6d260dd4dabaf7a';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:7f2cebdfa7fd6dff440bfe56e9806bb75c474bf5b7de0906f1ccde4839fac1d3';
   }
 
   // General docker var config
@@ -74,7 +74,6 @@ export async function runDockerGenerator(
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
-  build.setBuildArch(artifactArchitecture);
   let artifactVariant = '';
   if (flags.serverless) artifactVariant = '-serverless';
   const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
@@ -152,7 +151,14 @@ export async function runDockerGenerator(
   // Write all the needed docker config files
   // into kibana-docker folder
   for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
-    await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
+    let filename: string;
+    if (!dockerTemplate.name.includes('kibana.yml')) {
+      filename = `${dockerTemplate.name}.${artifactArchitecture}`;
+    } else {
+      filename = dockerTemplate.name;
+    }
+
+    await write(resolve(dockerBuildDir, filename), dockerTemplate.generator(scope));
   }
 
   // Copy serverless-only configuration files
@@ -183,7 +189,8 @@ export async function runDockerGenerator(
   // In order to do this we just call the file we
   // created from the templates/build_docker_sh.template.js
   // and we just run that bash script
-  await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
+  const dockerBuildScript = `build_docker.sh.${artifactArchitecture}`;
+  await chmodAsync(`${resolve(dockerBuildDir, dockerBuildScript)}`, '755');
 
   // Only build images on native targets
   if (flags.image) {
@@ -202,7 +209,7 @@ export async function runDockerGenerator(
       await linkAsync(src, dest);
     }
 
-    await exec(log, `./build_docker.sh`, [], {
+    await exec(log, `./${dockerBuildScript}`, [], {
       cwd: dockerBuildDir,
       level: 'info',
       build,

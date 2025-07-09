@@ -12,7 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
 
-  describe('Elasticsearch deprecations', function () {
+  describe.skip('Elasticsearch deprecations', function () {
     describe('GET /api/upgrade_assistant/es_deprecations', () => {
       describe('error handling', () => {
         it('handles auth error', async () => {

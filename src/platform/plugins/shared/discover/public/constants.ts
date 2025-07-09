@@ -12,4 +12,5 @@ export const ADHOC_DATA_VIEW_RENDER_EVENT = 'ad_hoc_data_view';
 export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
 
 // TEMPORARY: This is a temporary flag to enable/disable tabs in Discover until the feature is fully implemented.
-export const TABS_ENABLED = false;
+export const TABS_ENABLED =
+  window?.localStorage?.getItem('discoverExperimental:tabs') === 'true' || false;

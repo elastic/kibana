@@ -102,6 +102,7 @@ export interface ComplianceDashboardDataV2 {
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   trend: PostureTrend[];
   benchmarks: BenchmarkData[];
+  namespaces: string[];
 }
 
 export type RuleSection = CspBenchmarkRuleMetadata['section'];

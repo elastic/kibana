@@ -396,14 +396,13 @@ class AgentPolicyService {
         }
         newAgentPolicy = updatedNewAgentPolicy;
       }
+      logger.debug(`Running of external callbacks for [${externalCallbackType}] done`);
       return newAgentPolicy;
     } catch (error) {
       logger.error(`Error running external callbacks for [${externalCallbackType}]`);
       logger.error(error);
       throw error;
     }
-
-    logger.debug(`Running of external callbacks for [${externalCallbackType}] done`);
   }
 
   public async create(
@@ -448,6 +447,11 @@ class AgentPolicyService {
     }
 
     this.checkAgentless(agentPolicy);
+
+    if (agentPolicy.supports_agentless && !agentPolicy.fleet_server_host_id) {
+      const { fleetServerId } = agentlessAgentService.getDefaultSettings();
+      agentPolicy.fleet_server_host_id = fleetServerId;
+    }
 
     await this.requireUniqueName(soClient, agentPolicy);
     await validatePolicyNamespaceForSpace({
@@ -900,7 +904,6 @@ class AgentPolicyService {
         force: options?.force,
       });
     }
-
     return this._update(soClient, esClient, id, agentPolicy, options?.user, {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,

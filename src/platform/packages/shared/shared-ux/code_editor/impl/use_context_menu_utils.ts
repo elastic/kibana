@@ -33,8 +33,6 @@ const DEFAULT_ACTIONS: ContextMenuAction[] = [
       label: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.cutActionLabel', {
         defaultMessage: 'Cut',
       }),
-      // eslint-disable-next-line no-bitwise
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyX],
       contextMenuGroupId: '9_cutcopypaste',
       contextMenuOrder: 1,
       run: async (ed) => {
@@ -43,7 +41,7 @@ const DEFAULT_ACTIONS: ContextMenuAction[] = [
         if (selection && model) {
           const selectedText = model.getValueInRange(selection);
           copyToClipboard(selectedText);
-          // ed.executeEdits('Cut selection', [{ range: selection, text: '' }]);
+          ed.executeEdits('Cut selection', [{ range: selection, text: '' }]);
         }
       },
     },
@@ -55,22 +53,14 @@ const DEFAULT_ACTIONS: ContextMenuAction[] = [
       label: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.copyActionLabel', {
         defaultMessage: 'Copy',
       }),
-      // eslint-disable-next-line no-bitwise
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC],
       contextMenuGroupId: '9_cutcopypaste',
       contextMenuOrder: 2,
       run: async (ed) => {
         const selection = ed.getSelection();
         const model = ed.getModel();
-        const position = ed.getPosition();
         if (selection && model) {
           const selectedText = model.getValueInRange(selection);
           copyToClipboard(selectedText);
-          if (position) {
-            // For some reason (possibly rerendering), calling copyToClipboard
-            // changes the position of the cursor so we set it to the initial position
-            ed.setPosition(position);
-          }
         }
       },
     },
@@ -82,8 +72,6 @@ const DEFAULT_ACTIONS: ContextMenuAction[] = [
       label: i18n.translate('sharedUXPackages.codeEditor.contextMenuAction.pasteActionLabel', {
         defaultMessage: 'Paste',
       }),
-      // eslint-disable-next-line no-bitwise
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV],
       contextMenuGroupId: '9_cutcopypaste',
       contextMenuOrder: 3,
       run: async (ed) => {

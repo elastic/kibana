@@ -8,9 +8,10 @@
 import { Client, errors } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import pRetry from 'p-retry';
+import pRetry, { AbortError } from 'p-retry';
+import pTimeout, { TimeoutError } from 'p-timeout';
+import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base';
 
 // tiny models
@@ -37,6 +38,7 @@ export async function importModel(
 
   try {
     await ml.api.importTrainedModel(modelId, modelId, config);
+    log.info(`Model "${modelId}" imported successfully.`);
   } catch (error) {
     if (
       error.message.includes('resource_already_exists_exception') ||
@@ -83,8 +85,10 @@ export async function startModelDeployment(
 export async function setupTinyElserModelAndInferenceEndpoint(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
-  await importModel(getService, { modelId: TINY_ELSER_MODEL_ID });
-  await createTinyElserInferenceEndpoint(getService, { inferenceId: TINY_ELSER_INFERENCE_ID });
+  await retryOnTimeout(() => importModel(getService, { modelId: TINY_ELSER_MODEL_ID }));
+  await retryOnTimeout(() =>
+    createTinyElserInferenceEndpoint(getService, { inferenceId: TINY_ELSER_INFERENCE_ID })
+  );
 }
 
 export async function teardownTinyElserModelAndInferenceEndpoint(
@@ -249,4 +253,21 @@ export async function stopTinyElserModel(
   } catch (e) {
     log.error(`Could not stop knowledge base model (${TINY_ELSER_MODEL_ID}): ${e}`);
   }
+}
+
+async function retryOnTimeout<T>(fn: () => Promise<T>, timeout = 60_000): Promise<T> {
+  return pRetry(
+    async () => {
+      try {
+        return await pTimeout(fn(), { milliseconds: timeout });
+      } catch (err: any) {
+        if (!(err instanceof TimeoutError)) {
+          throw new AbortError(err); // don't retry on non-timeout errors
+        }
+
+        throw err; // retry on timeout errors
+      }
+    },
+    { retries: 2, minTimeout: 5_000, maxTimeout: 5_000 }
+  );
 }

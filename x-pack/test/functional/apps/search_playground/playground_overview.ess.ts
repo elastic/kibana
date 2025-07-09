@@ -5,14 +5,33 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createOpenAIConnector } from './utils/create_openai_connector';
-import { MachineLearningCommonAPIProvider } from '../../services/ml/common_api';
 
 import {
   createLlmProxy,
   LlmProxy,
-} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
+
+const COMMON_REQUEST_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'Kibana',
+};
+
+export function MachineLearningCommonAPIProvider({}: FtrProviderContext) {
+  return {
+    getCommonRequestHeader,
+  };
+}
+
+export function getCommonRequestHeader(apiVersion?: string) {
+  if (apiVersion === undefined) {
+    return COMMON_REQUEST_HEADERS;
+  }
+
+  return Object.assign(COMMON_REQUEST_HEADERS, { [ELASTIC_HTTP_VERSION_HEADER]: apiVersion });
+}
 
 const esArchiveIndex =
   'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';

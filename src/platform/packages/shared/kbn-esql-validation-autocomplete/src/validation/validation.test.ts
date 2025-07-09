@@ -6,7 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import {
+  timeUnitsToSuggest,
+  timeUnits,
+  fieldTypes as _fieldTypes,
+  FieldType,
+  dataTypes,
+  SupportedDataType,
+  FunctionDefinition,
+} from '@kbn/esql-ast';
+import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { readFile, writeFile } from 'fs/promises';
 import { camelCase } from 'lodash';
 import capitalize from 'lodash/capitalize';
@@ -19,17 +30,6 @@ import {
   policies,
   unsupported_field,
 } from '../__tests__/helpers';
-import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
-import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { getFunctionSignatures } from '../definitions/helpers';
-import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
-import {
-  FieldType,
-  FunctionDefinition,
-  SupportedDataType,
-  fieldTypes as _fieldTypes,
-  dataTypes,
-} from '../definitions/types';
 import { nonNullable } from '../shared/helpers';
 import { Setup, setup } from './__tests__/helpers';
 import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
@@ -263,19 +263,23 @@ describe('validation logic', () => {
       },
     });
 
-    // The following block tests a case that is allowed in Kibana
-    // by suppressing the parser error in src/platform/packages/shared/kbn-esql-ast/src/ast_parser.ts
-    describe('ESQL query can be empty', () => {
-      testErrorsAndWarnings('', []);
-      testErrorsAndWarnings(' ', []);
-      testErrorsAndWarnings('     ', []);
+    describe('ESQL query cannot be empty', () => {
+      testErrorsAndWarnings('', [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
+      ]);
+      testErrorsAndWarnings(' ', [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
+      ]);
+      testErrorsAndWarnings('     ', [
+        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
+      ]);
     });
 
     describe('ESQL query should start with a source command', () => {
       ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
         (command) =>
           testErrorsAndWarnings(command, [
-            `SyntaxError: mismatched input '${command}' expecting {'explain', 'row', 'from', 'show'}`,
+            `SyntaxError: mismatched input '${command}' expecting {'row', 'from', 'show'}`,
           ])
       );
     });
@@ -434,24 +438,6 @@ describe('validation logic', () => {
           }
         }
       });
-    });
-
-    describe('show', () => {
-      testErrorsAndWarnings('show', ["SyntaxError: missing 'info' at '<EOF>'"]);
-      testErrorsAndWarnings('show info', []);
-      testErrorsAndWarnings('show doubleField', [
-        "SyntaxError: token recognition error at: 'd'",
-        "SyntaxError: token recognition error at: 'o'",
-        "SyntaxError: token recognition error at: 'u'",
-        "SyntaxError: token recognition error at: 'b'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'e'",
-        "SyntaxError: token recognition error at: 'F'",
-        "SyntaxError: token recognition error at: 'ie'",
-        "SyntaxError: token recognition error at: 'l'",
-        "SyntaxError: token recognition error at: 'd'",
-        "SyntaxError: missing 'info' at '<EOF>'",
-      ]);
     });
 
     describe('limit', () => {

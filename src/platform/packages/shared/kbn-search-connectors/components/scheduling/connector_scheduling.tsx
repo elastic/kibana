@@ -202,7 +202,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                       { defaultMessage: 'Access control syncs not allowed' }
                     )}
                     color="warning"
-                    iconType="iInCircle"
+                    iconType="info"
                   >
                     <p>
                       <FormattedMessage

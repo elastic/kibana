@@ -42,6 +42,7 @@
     "@kbn/ml-is-defined",
     "@kbn/sse-utils-client",
     "@kbn/zod",
-    "@kbn/inference-tracing"
+    "@kbn/inference-tracing",
+    "@kbn/core-ui-settings-common"
   ]
 }
