@@ -10,7 +10,7 @@
 require('@kbn/babel-register').install();
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
-// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 // const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const ConsoleDefinitionsPlugin = require('./console-definitions-plugin');
@@ -52,10 +52,18 @@ module.exports = [
         'moment-duration-format': 'commonjs moment-duration-format',
         'moment-timezone': 'commonjs moment-timezone',
         '@elastic/datemath': 'commonjs @elastic/datemath',
+        'monaco-editor': 'commonjs monaco-editor',
+        '@kbn/monaco': 'commonjs @kbn/monaco',
       },
       // Handle react-dom internal imports only
       function (context, request, callback) {
         if (/^react-dom\//.test(request)) {
+          return callback(null, 'commonjs ' + request);
+        }
+        callback();
+      },
+      function (context, request, callback) {
+        if (/^monaco-editor\/(esm\/vs|esm|lib|min)/.test(request)) {
           return callback(null, 'commonjs ' + request);
         }
         callback();
@@ -215,7 +223,7 @@ module.exports = [
         cleanOnceBeforeBuildPatterns: [path.resolve(__dirname, '../target/react/**/*')],
       }),
       // new MonacoWebpackPlugin({}),
-      /* new BundleAnalyzerPlugin() */
+      new BundleAnalyzerPlugin()
     ],
   },
 
