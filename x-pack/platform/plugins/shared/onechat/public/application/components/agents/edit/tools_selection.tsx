@@ -69,9 +69,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   const handleToggleTool = useCallback(
     (toolId: string, providerId: string) => {
       const providerTools = toolsByProvider[providerId] || [];
-      console.log('**** handle change tool, before', selectedTools);
       const newSelection = toggleToolSelection(toolId, providerId, providerTools, selectedTools);
-      console.log('**** handle change tool, after', newSelection);
       onToolsChange(newSelection);
     },
     [selectedTools, onToolsChange, toolsByProvider]
