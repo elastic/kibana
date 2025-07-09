@@ -20,7 +20,6 @@ import { HostContainer } from './components/hosts_container';
 const HOSTS_FEEDBACK_LINK =
   'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
 
-
 export const HostsPage = () => {
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
 
@@ -36,7 +35,7 @@ export const HostsPage = () => {
   return (
     <div className={APP_WRAPPER_CLASS}>
       <InfraPageTemplate
-        dataSourceAvailability='host'
+        dataSourceAvailability="host"
         onboardingFlow={OnboardingFlow.Hosts}
         pageHeader={{
           alignItems: 'center',
