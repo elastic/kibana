@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import type { Node } from '@elastic/eui/src/components/tree_view/tree_view';
+import { i18n } from '@kbn/i18n';
 import type { PipelineTreeNode } from './types';
 import { MAX_TREE_LEVEL } from './constants';
 import { cssTreeNode } from './styles';
@@ -18,7 +19,14 @@ const traverseTree = (treeNode: PipelineTreeNode, level: number): Node => {
     label: treeNode.pipelineName,
     'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}`,
     css: cssTreeNode,
-    icon: treeNode.isManaged ? <EuiIcon type="lock" /> : undefined,
+    icon: treeNode.isManaged ? (
+      <EuiIconTip
+        content={i18n.translate('ingestPipelines.pipelineStructureTree.treeNodeManagedTooltip', {
+          defaultMessage: 'Managed',
+        })}
+        type="lock"
+      />
+    ) : undefined,
     hasArrow: true,
     children: [] as Node[],
   };
