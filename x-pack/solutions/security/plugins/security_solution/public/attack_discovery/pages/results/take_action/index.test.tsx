@@ -5,36 +5,56 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../../../common/mock/test_providers';
+import { SECURITY_FEATURE_ID } from '../../../../../common';
+import { useKibana } from '../../../../common/lib/kibana';
+import { TestProviders } from '../../../../common/mock';
 import { mockAttackDiscovery } from '../../mock/mock_attack_discovery';
+import { getMockAttackDiscoveryAlerts } from '../../mock/mock_attack_discovery_alerts';
 import { TakeAction } from '.';
 
-// Mocks for hooks and dependencies
-jest.mock('../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => ({ attackDiscoveryAlertsEnabled: true }),
+const mockMutateAsyncBulk = jest.fn().mockResolvedValue({});
+const mockMutateAsyncStatus = jest.fn().mockResolvedValue({});
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn(),
 }));
+
 jest.mock('../../use_attack_discovery_bulk', () => ({
-  useAttackDiscoveryBulk: () => ({ mutateAsync: jest.fn().mockResolvedValue({}) }),
+  useAttackDiscoveryBulk: jest.fn(() => ({ mutateAsync: mockMutateAsyncBulk })),
 }));
-jest.mock('./use_update_alerts_status', () => ({
-  useUpdateAlertsStatus: () => ({ mutateAsync: jest.fn().mockResolvedValue({}) }),
+
+jest.mock('../../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: jest.fn(() => ({ attackDiscoveryAlertsEnabled: true })),
 }));
+
 jest.mock('./use_add_to_case', () => ({
-  useAddToNewCase: () => ({ disabled: false, onAddToNewCase: jest.fn() }),
+  useAddToNewCase: jest.fn(() => ({ disabled: false, onAddToNewCase: jest.fn() })),
 }));
+
 jest.mock('./use_add_to_existing_case', () => ({
-  useAddToExistingCase: () => ({ onAddToExistingCase: jest.fn() }),
+  useAddToExistingCase: jest.fn(() => ({ onAddToExistingCase: jest.fn() })),
 }));
+
 jest.mock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant', () => ({
-  useViewInAiAssistant: () => ({ showAssistantOverlay: jest.fn(), disabled: false }),
+  useViewInAiAssistant: jest.fn(() => ({ showAssistantOverlay: jest.fn(), disabled: false })),
 }));
+
+jest.mock('./use_update_alerts_status', () => ({
+  useUpdateAlertsStatus: jest.fn(() => ({ mutateAsync: mockMutateAsyncStatus })),
+}));
+
 jest.mock('../../utils/is_attack_discovery_alert', () => ({
   isAttackDiscoveryAlert: (ad: { alertWorkflowStatus?: string }) =>
-    ad && ad.alertWorkflowStatus !== undefined,
+    ad?.alertWorkflowStatus !== undefined,
 }));
+
+/** helper function to open the popover */
+const openPopover = () => fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
+
+const MOCK_SECURITY_FEATURE_ID = SECURITY_FEATURE_ID;
 
 const defaultProps = {
   attackDiscoveries: [mockAttackDiscovery],
@@ -44,6 +64,46 @@ const defaultProps = {
 describe('TakeAction', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            assistant: {
+              show: true,
+              save: true,
+            },
+            [MOCK_SECURITY_FEATURE_ID]: {
+              configurations: undefined, // AI for SOC is not configured
+            },
+          },
+        },
+        cases: {
+          helpers: {
+            canUseCases: jest.fn().mockReturnValue({
+              all: true,
+              connectors: true,
+              create: true,
+              delete: true,
+              push: true,
+              read: true,
+              settings: true,
+              update: true,
+              createComment: true,
+            }),
+          },
+          hooks: {
+            useCasesAddToExistingCase: jest.fn(),
+            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+            useCasesAddToNewCaseFlyout: jest.fn(),
+          },
+          ui: {},
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
+      },
+    });
   });
 
   it('renders the Add to new case action', () => {
@@ -52,7 +112,9 @@ describe('TakeAction', () => {
         <TakeAction {...defaultProps} />
       </TestProviders>
     );
-    fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
+
+    openPopover();
+
     expect(screen.getByTestId('addToCase')).toBeInTheDocument();
   });
 
@@ -62,7 +124,9 @@ describe('TakeAction', () => {
         <TakeAction {...defaultProps} />
       </TestProviders>
     );
-    fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
+
+    openPopover();
+
     expect(screen.getByTestId('addToExistingCase')).toBeInTheDocument();
   });
 
@@ -72,11 +136,13 @@ describe('TakeAction', () => {
         <TakeAction {...defaultProps} />
       </TestProviders>
     );
-    fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
+
+    openPopover();
+
     expect(screen.getByTestId('viewInAiAssistant')).toBeInTheDocument();
   });
 
-  it('does not render View in AI Assistant when multiple discoveries', () => {
+  it('does NOT render View in AI Assistant when multiple discoveries are selected', () => {
     render(
       <TestProviders>
         <TakeAction
@@ -85,35 +151,28 @@ describe('TakeAction', () => {
         />
       </TestProviders>
     );
-    fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
+
+    openPopover();
+
     expect(screen.queryByTestId('viewInAiAssistant')).toBeNull();
   });
 
-  it('renders mark as open/acknowledged/closed actions when alertWorkflowStatus is set', () => {
-    const alert = { ...mockAttackDiscovery, alertWorkflowStatus: 'acknowledged' };
-    render(
-      <TestProviders>
-        <TakeAction {...defaultProps} attackDiscoveries={[alert]} />
-      </TestProviders>
-    );
-    fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
-    expect(screen.getByTestId('markAsOpen')).toBeInTheDocument();
-    expect(screen.getByTestId('markAsClosed')).toBeInTheDocument();
-  });
-
-  it('shows UpdateAlertsModal when mark as closed is clicked', async () => {
+  it('shows the UpdateAlertsModal when mark as closed is clicked', async () => {
     const alert = { ...mockAttackDiscovery, alertWorkflowStatus: 'open', id: 'id1' };
+
     render(
       <TestProviders>
         <TakeAction {...defaultProps} attackDiscoveries={[alert]} />
       </TestProviders>
     );
-    fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
+
+    openPopover();
     fireEvent.click(screen.getByTestId('markAsClosed'));
+
     expect(await screen.findByTestId('confirmModal')).toBeInTheDocument();
   });
 
-  it('calls setSelectedAttackDiscoveries and closes modal on confirm', async () => {
+  it('calls setSelectedAttackDiscoveries and closes the modal on confirm', async () => {
     const alert = { ...mockAttackDiscovery, alertWorkflowStatus: 'open', id: 'id1' };
     const setSelectedAttackDiscoveries = jest.fn();
     render(
@@ -125,28 +184,439 @@ describe('TakeAction', () => {
         />
       </TestProviders>
     );
-    fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
+
+    openPopover();
     fireEvent.click(screen.getByTestId('markAsClosed'));
     expect(await screen.findByTestId('confirmModal')).toBeInTheDocument();
+
     fireEvent.click(screen.getByTestId('markDiscoveriesOnly'));
     // Wait for setSelectedAttackDiscoveries to be called
     await screen.findByTestId('takeActionPopoverButton');
     expect(setSelectedAttackDiscoveries).toHaveBeenCalledWith({});
   });
 
-  it('closes modal on cancel', async () => {
+  it('closes the modal on cancel', async () => {
     const alert = { ...mockAttackDiscovery, alertWorkflowStatus: 'open', id: 'id1' };
     render(
       <TestProviders>
         <TakeAction {...defaultProps} attackDiscoveries={[alert]} />
       </TestProviders>
     );
-    fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
+
+    openPopover();
     fireEvent.click(screen.getByTestId('markAsClosed'));
     expect(await screen.findByTestId('confirmModal')).toBeInTheDocument();
+
     fireEvent.click(screen.getByTestId('cancel'));
     // Wait for modal to close
     await screen.findByTestId('takeActionPopoverButton');
+
     expect(screen.queryByTestId('confirmModal')).toBeNull();
+  });
+
+  describe('actions when a single alert is selected', () => {
+    const workflowStatuses = [
+      {
+        status: 'open',
+        expected: {
+          markAsOpen: false,
+          markAsAcknowledged: true,
+          markAsClosed: true,
+        },
+      },
+      {
+        status: 'acknowledged',
+        expected: {
+          markAsOpen: true,
+          markAsAcknowledged: false,
+          markAsClosed: true,
+        },
+      },
+      {
+        status: 'closed',
+        expected: {
+          markAsOpen: true,
+          markAsAcknowledged: true,
+          markAsClosed: false,
+        },
+      },
+    ];
+
+    it.each(workflowStatuses)(
+      'renders correct actions for status $status (single alert selection)',
+      ({ status, expected }) => {
+        const alert = { ...mockAttackDiscovery, alertWorkflowStatus: status };
+
+        render(
+          <TestProviders>
+            <TakeAction {...defaultProps} attackDiscoveries={[alert]} />
+          </TestProviders>
+        );
+        openPopover();
+
+        if (expected.markAsOpen) {
+          expect(screen.getByTestId('markAsOpen')).toBeInTheDocument();
+        } else {
+          expect(screen.queryByTestId('markAsOpen')).toBeNull();
+        }
+
+        if (expected.markAsAcknowledged) {
+          expect(screen.getByTestId('markAsAcknowledged')).toBeInTheDocument();
+        } else {
+          expect(screen.queryByTestId('markAsAcknowledged')).toBeNull();
+        }
+
+        if (expected.markAsClosed) {
+          expect(screen.getByTestId('markAsClosed')).toBeInTheDocument();
+        } else {
+          expect(screen.queryByTestId('markAsClosed')).toBeNull();
+        }
+      }
+    );
+  });
+
+  describe('actions when multiple alerts are selected', () => {
+    const alerts = getMockAttackDiscoveryAlerts(); // <-- multiple alerts
+    const testCases = [
+      {
+        testId: 'markAsAcknowledged',
+        description: 'renders mark as acknowledged',
+      },
+      {
+        testId: 'markAsClosed',
+        description: 'renders mark as closed',
+      },
+      {
+        testId: 'markAsOpen',
+        description: 'renders mark as open',
+      },
+    ];
+
+    beforeEach(() => {
+      render(
+        <TestProviders>
+          <TakeAction attackDiscoveries={alerts} setSelectedAttackDiscoveries={jest.fn()} />
+        </TestProviders>
+      );
+
+      openPopover();
+    });
+
+    it.each(testCases)('$description', ({ testId }) => {
+      expect(screen.getByTestId(testId)).toBeInTheDocument();
+    });
+  });
+
+  describe('when AI for SOC is the configured project', () => {
+    let alert: ReturnType<typeof getMockAttackDiscoveryAlerts>[0];
+    let setSelectedAttackDiscoveries: jest.Mock;
+
+    beforeEach(() => {
+      alert = getMockAttackDiscoveryAlerts()[0];
+      setSelectedAttackDiscoveries = jest.fn();
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              assistant: { show: true, save: true },
+              [MOCK_SECURITY_FEATURE_ID]: { configurations: {} },
+            },
+          },
+          cases: { helpers: { canUseCases: () => ({ createComment: true, read: true }) } },
+        },
+      });
+    });
+
+    it('renders mark as closed action and takes action immediately (no modal)', async () => {
+      render(
+        <TestProviders>
+          <TakeAction
+            attackDiscoveries={[alert]}
+            setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
+          />
+        </TestProviders>
+      );
+
+      openPopover();
+      expect(screen.getByTestId('markAsClosed')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('markAsClosed'));
+
+      // Modal should NOT appear
+      expect(screen.queryByTestId('confirmModal')).toBeNull();
+
+      // Wait for async action
+      await waitFor(() => {
+        expect(mockMutateAsyncBulk).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: [alert.id],
+            kibanaAlertWorkflowStatus: 'closed',
+          })
+        );
+      });
+
+      expect(mockMutateAsyncStatus).not.toHaveBeenCalled();
+      expect(setSelectedAttackDiscoveries).toHaveBeenCalledWith({});
+    });
+
+    it('renders mark as acknowledged action and takes action immediately (no modal)', async () => {
+      alert = { ...alert, alertWorkflowStatus: 'open' };
+      render(
+        <TestProviders>
+          <TakeAction
+            attackDiscoveries={[alert]}
+            setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
+          />
+        </TestProviders>
+      );
+
+      openPopover();
+      expect(screen.getByTestId('markAsAcknowledged')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('markAsAcknowledged'));
+
+      expect(screen.queryByTestId('confirmModal')).toBeNull();
+
+      await waitFor(() => {
+        expect(mockMutateAsyncBulk).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: [alert.id],
+            kibanaAlertWorkflowStatus: 'acknowledged',
+          })
+        );
+      });
+
+      expect(mockMutateAsyncStatus).not.toHaveBeenCalled();
+      expect(setSelectedAttackDiscoveries).toHaveBeenCalledWith({});
+    });
+
+    it('renders mark as open action and takes action immediately (no modal)', async () => {
+      alert = { ...alert, alertWorkflowStatus: 'closed' };
+      render(
+        <TestProviders>
+          <TakeAction
+            attackDiscoveries={[alert]}
+            setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
+          />
+        </TestProviders>
+      );
+
+      openPopover();
+      expect(screen.getByTestId('markAsOpen')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('markAsOpen'));
+
+      expect(screen.queryByTestId('confirmModal')).toBeNull();
+
+      await waitFor(() => {
+        expect(mockMutateAsyncBulk).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: [alert.id],
+            kibanaAlertWorkflowStatus: 'open',
+          })
+        );
+      });
+
+      expect(mockMutateAsyncStatus).not.toHaveBeenCalled();
+      expect(setSelectedAttackDiscoveries).toHaveBeenCalledWith({});
+    });
+  });
+
+  describe('when attackDiscoveryAlertsEnabled is disabled', () => {
+    beforeEach(() => {
+      // Mock useKibanaFeatureFlags to return false
+      const { useKibanaFeatureFlags } = jest.requireMock('../../use_kibana_feature_flags');
+      useKibanaFeatureFlags.mockReturnValue({ attackDiscoveryAlertsEnabled: false });
+    });
+
+    it('does not render workflow status actions', () => {
+      const alert = { ...getMockAttackDiscoveryAlerts()[0], alertWorkflowStatus: 'open' };
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} attackDiscoveries={[alert]} />
+        </TestProviders>
+      );
+
+      openPopover();
+
+      expect(screen.queryByTestId('markAsOpen')).toBeNull();
+      expect(screen.queryByTestId('markAsAcknowledged')).toBeNull();
+      expect(screen.queryByTestId('markAsClosed')).toBeNull();
+    });
+
+    it('renders case actions and view in AI assistant', () => {
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} />
+        </TestProviders>
+      );
+
+      openPopover();
+
+      expect(screen.getByTestId('addToCase')).toBeInTheDocument();
+      expect(screen.getByTestId('addToExistingCase')).toBeInTheDocument();
+      expect(screen.getByTestId('viewInAiAssistant')).toBeInTheDocument();
+    });
+  });
+
+  describe('case interactions', () => {
+    const mockOnAddToNewCase = jest.fn();
+    const mockOnAddToExistingCase = jest.fn();
+
+    beforeEach(() => {
+      const { useAddToNewCase } = jest.requireMock('./use_add_to_case');
+      const { useAddToExistingCase } = jest.requireMock('./use_add_to_existing_case');
+
+      useAddToNewCase.mockReturnValue({
+        disabled: false,
+        onAddToNewCase: mockOnAddToNewCase,
+      });
+
+      useAddToExistingCase.mockReturnValue({
+        onAddToExistingCase: mockOnAddToExistingCase,
+      });
+    });
+
+    it('calls onAddToNewCase when clicking add to new case', async () => {
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} />
+        </TestProviders>
+      );
+
+      openPopover();
+      fireEvent.click(screen.getByTestId('addToCase'));
+
+      await waitFor(() => {
+        expect(mockOnAddToNewCase).toHaveBeenCalledWith({
+          alertIds: expect.any(Array),
+          markdownComments: expect.any(Array),
+          replacements: undefined,
+        });
+      });
+    });
+
+    it('calls onAddToExistingCase when clicking add to existing case', () => {
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} />
+        </TestProviders>
+      );
+
+      openPopover();
+      fireEvent.click(screen.getByTestId('addToExistingCase'));
+
+      expect(mockOnAddToExistingCase).toHaveBeenCalledWith({
+        alertIds: expect.any(Array),
+        markdownComments: expect.any(Array),
+        replacements: undefined,
+      });
+    });
+  });
+
+  describe('when case permissions are disabled', () => {
+    beforeEach(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          cases: {
+            helpers: {
+              canUseCases: jest.fn().mockReturnValue({
+                all: false,
+                connectors: false,
+                create: false,
+                delete: false,
+                push: false,
+                read: false,
+                settings: false,
+                update: false,
+                createComment: false,
+              }),
+            },
+            hooks: {
+              useCasesAddToExistingCase: jest.fn(),
+              useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+              useCasesAddToNewCaseFlyout: jest.fn(),
+            },
+            ui: {},
+          },
+          featureFlags: {
+            getBooleanValue: jest.fn().mockReturnValue(true),
+          },
+          application: {
+            capabilities: {
+              assistant: {
+                show: true,
+                save: true,
+              },
+              [MOCK_SECURITY_FEATURE_ID]: {
+                configurations: undefined,
+              },
+            },
+          },
+        },
+      });
+
+      const { useAddToNewCase } = jest.requireMock('./use_add_to_case');
+      useAddToNewCase.mockReturnValue({
+        disabled: true,
+        onAddToNewCase: jest.fn(),
+      });
+
+      const { useAddToExistingCase } = jest.requireMock('./use_add_to_existing_case');
+      useAddToExistingCase.mockReturnValue({
+        onAddToExistingCase: jest.fn(),
+      });
+    });
+
+    it('disables case actions when the user lacks permissions', () => {
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} />
+        </TestProviders>
+      );
+
+      openPopover();
+
+      const addToCaseButton = screen.getByTestId('addToCase');
+      const addToExistingCaseButton = screen.getByTestId('addToExistingCase');
+
+      expect(addToCaseButton).toBeDisabled();
+      expect(addToExistingCaseButton).toBeDisabled();
+    });
+  });
+
+  describe('AI Assistant interactions', () => {
+    const mockShowAssistantOverlay = jest.fn();
+
+    beforeEach(() => {
+      const { useViewInAiAssistant } = jest.requireMock(
+        '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
+      );
+      useViewInAiAssistant.mockReturnValue({
+        showAssistantOverlay: mockShowAssistantOverlay,
+        disabled: false,
+      });
+    });
+
+    it('disables view in AI assistant when disabled', () => {
+      const { useViewInAiAssistant } = jest.requireMock(
+        '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
+      );
+      useViewInAiAssistant.mockReturnValue({
+        showAssistantOverlay: mockShowAssistantOverlay,
+        disabled: true,
+      });
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} />
+        </TestProviders>
+      );
+
+      openPopover();
+      const viewInAiAssistantButton = screen.getByTestId('viewInAiAssistant');
+
+      expect(viewInAiAssistantButton).toBeDisabled();
+    });
   });
 });
