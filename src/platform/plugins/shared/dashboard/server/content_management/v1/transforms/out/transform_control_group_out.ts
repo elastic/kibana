@@ -9,32 +9,31 @@
 
 import { flow } from 'lodash';
 import {
-  ControlGroupChainingSystem,
-  ControlLabelPosition,
   DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROL_CHAINING,
-  DEFAULT_CONTROL_LABEL_POSITION,
+  DEFAULT_CONTROLS_CHAINING,
+  DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
-  type ParentIgnoreSettings,
-} from '@kbn/controls-plugin/common';
+} from '@kbn/controls-constants';
+import type {
+  ControlsChainingSystem,
+  ControlsGroupState,
+  ControlsLabelPosition,
+  ControlsIgnoreParentSettings,
+} from '@kbn/controls-schemas';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import type { ControlGroupAttributes } from '../../types';
 import { transformControlsState } from './transform_controls_state';
 
 export const transformControlGroupOut: (
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
-) => ControlGroupAttributes = flow(
-  transformControlGroupSetDefaults,
-  transformControlGroupProperties
-);
+) => ControlsGroupState = flow(transformControlGroupSetDefaults, transformControlGroupProperties);
 
 // TODO We may want to remove setting defaults in the future
 function transformControlGroupSetDefaults(
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
 ) {
   return {
-    controlStyle: DEFAULT_CONTROL_LABEL_POSITION,
-    chainingSystem: DEFAULT_CONTROL_CHAINING,
+    controlStyle: DEFAULT_CONTROLS_LABEL_POSITION,
+    chainingSystem: DEFAULT_CONTROLS_CHAINING,
     showApplySelections: !DEFAULT_AUTO_APPLY_SELECTIONS,
     ...controlGroupInput,
   };
@@ -46,12 +45,10 @@ function transformControlGroupProperties({
   showApplySelections,
   ignoreParentSettingsJSON,
   panelsJSON,
-}: Required<
-  NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
->): ControlGroupAttributes {
+}: Required<NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>>): ControlsGroupState {
   return {
-    labelPosition: controlStyle as ControlLabelPosition,
-    chainingSystem: chainingSystem as ControlGroupChainingSystem,
+    labelPosition: controlStyle as ControlsLabelPosition,
+    chainingSystem: chainingSystem as ControlsChainingSystem,
     autoApplySelections: !showApplySelections,
     ignoreParentSettings: ignoreParentSettingsJSON
       ? flow(
@@ -66,8 +63,8 @@ function transformControlGroupProperties({
 
 // TODO We may want to remove setting defaults in the future
 function transformIgnoreParentSettingsSetDefaults(
-  ignoreParentSettings: ParentIgnoreSettings
-): ParentIgnoreSettings {
+  ignoreParentSettings: ControlsIgnoreParentSettings
+): ControlsIgnoreParentSettings {
   return {
     ...DEFAULT_IGNORE_PARENT_SETTINGS,
     ...ignoreParentSettings,
@@ -83,7 +80,7 @@ function transformIgnoreParentSettingsProperties({
   ignoreQuery,
   ignoreTimerange,
   ignoreValidations,
-}: ParentIgnoreSettings): ParentIgnoreSettings {
+}: ControlsIgnoreParentSettings): ControlsIgnoreParentSettings {
   return {
     ignoreFilters,
     ignoreQuery,

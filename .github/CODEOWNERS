@@ -400,6 +400,8 @@ src/platform/packages/shared/content-management/table_list_view @elastic/appex-s
 src/platform/packages/shared/content-management/table_list_view_common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/table_list_view_table @elastic/appex-sharedux
 src/platform/packages/shared/content-management/user_profiles @elastic/appex-sharedux
+src/platform/packages/shared/controls/controls-constants @elastic/kibana-presentation
+src/platform/packages/shared/controls/controls-schemas @elastic/kibana-presentation
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/chat @elastic/search-kibana
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
@@ -1584,7 +1586,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/test/functional/apps/discover/observability/embeddable @elastic/obs-ux-logs-team
 /src/platform/test/functional/apps/discover/observability/logs @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/observability/public/pages/landing @elastic/obs-ux-logs-team
-/x-pack/solutions/observability/plugins/observability/ui_tests/tests/landing.spec.ts @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts @elastic/obs-ux-logs-team
 
 # Observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
@@ -1744,10 +1746,10 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
 /x-pack/platform/test/common/ftr_provider_context.ts @elastic/appex-qa
 /x-pack/platform/test/common/lib/test_data_loader.ts @elastic/appex-qa # temporarily
-/x-pack/platform/plugins/shared/maps/ui_tests @elastic/appex-qa # temporarily
-/x-pack/platform/plugins/private/discover_enhanced/ui_tests/ @elastic/appex-qa # temporarily
-/x-pack/platform/plugins/private/discover_enhanced/ui_tests/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
-/x-pack/platform/plugins/private/painless_lab/ui_tests @elastic/appex-qa # temporarily
+/x-pack/platform/plugins/shared/maps/test/scout @elastic/appex-qa # temporarily
+/x-pack/platform/plugins/private/discover_enhanced/test/scout/ @elastic/appex-qa # temporarily
+/x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
+/x-pack/platform/plugins/private/painless_lab/test/scout @elastic/appex-qa # temporarily
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
 /x-pack/test/functional/es_archives/filebeat @elastic/appex-qa
