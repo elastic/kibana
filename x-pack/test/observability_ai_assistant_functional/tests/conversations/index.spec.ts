@@ -15,10 +15,10 @@ import { systemMessageSorted } from '../../../api_integration/deployment_agnosti
 import {
   createLlmProxy,
   LlmProxy,
-} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { editor } from '../../../observability_ai_assistant_api_integration/common/users/users';
+import { editor } from '../../common/users/users';
 import { deleteConnectors } from '../../common/connectors';
 import { deleteConversations } from '../../common/conversations';
 
