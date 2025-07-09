@@ -119,8 +119,6 @@
     "@kbn/reporting-server",
     "@kbn/es-archiver",
     "@kbn/lens-plugin",
-    "@kbn/mock-idp-utils",
-    "@kbn/es",
     "@kbn/licensing-plugin",
     "@kbn/core-provider-plugin",
     "@kbn/reporting-plugin",
