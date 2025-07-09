@@ -33,7 +33,7 @@ import {
 import { isSavedPlaygroundFormDirty } from '../../utils/saved_playgrounds';
 
 import { Chat } from '../chat';
-import { SavedPlaygroundHeader } from './header';
+import { SavedPlaygroundHeader } from './saved_playground_header';
 import { ChatSetupPage } from '../setup_page/chat_setup_page';
 import { SearchMode } from '../search_mode/search_mode';
 import { SearchQueryMode } from '../query_mode/search_query_mode';
