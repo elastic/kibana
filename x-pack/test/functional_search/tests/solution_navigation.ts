@@ -172,6 +172,7 @@ export default function searchSolutionNavigation({
         'enterpriseSearchApplications:searchApplications',
         'relevance',
         'searchSynonyms:synonyms',
+        'searchQueryRules',
         'searchInferenceEndpoints:inferenceEndpoints',
         'search_project_nav_footer',
         'dev_tools',
