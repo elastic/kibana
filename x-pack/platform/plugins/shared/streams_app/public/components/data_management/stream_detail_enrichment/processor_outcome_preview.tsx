@@ -19,12 +19,8 @@ import { Sample } from '@kbn/grok-ui';
 import { i18n } from '@kbn/i18n';
 import { GrokProcessorDefinition } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-<<<<<<< HEAD
-import React, { useMemo } from 'react';
-=======
 import { getPercentageFormatter } from '../../../util/formatters';
 import { useKibana } from '../../../hooks/use_kibana';
->>>>>>> 00333f2c8ad ([Streams 🌊] Prevent routing simulation timeout and improve cancellations (#226374))
 import { PreviewTable } from '../preview_table';
 import {
   PreviewDocsFilterOption,
