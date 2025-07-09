@@ -33,6 +33,7 @@ import type {
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { getColumnForASTNode, getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
@@ -109,6 +110,7 @@ function buildFunctionLookup() {
       .concat(
         scalarFunctionDefinitions,
         aggFunctionDefinitions,
+        timeSeriesAggFunctionDefinitions,
         groupingFunctionDefinitions,
         getTestFunctions()
       )

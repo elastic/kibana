@@ -42,7 +42,7 @@ export const addRoundCompleteEvent = ({
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
-          const round = createRoundFromEvents({ events, userInput });
+          const round = createRoundFromEvents({ events, input: userInput });
 
           const event: RoundCompleteEvent = {
             type: ChatAgentEventType.roundComplete,
@@ -60,10 +60,10 @@ export const addRoundCompleteEvent = ({
 
 const createRoundFromEvents = ({
   events,
-  userInput,
+  input,
 }: {
   events: SourceEvents[];
-  userInput: RoundInput;
+  input: RoundInput;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent).map((event) => event.data);
   const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
@@ -72,12 +72,15 @@ const createRoundFromEvents = ({
   const eventToStep = (event: StepEvents): ConversationRoundStep => {
     if (isToolCallEvent(event)) {
       const toolCall = event.data;
-      const toolResult = toolResults.find((result) => result.toolCallId === toolCall.toolCallId);
+      const toolResult = toolResults.find(
+        (result) => result.tool_call_id === toolCall.tool_call_id
+      );
       return {
         type: ConversationRoundStepType.toolCall,
-        toolCallId: toolCall.toolCallId,
-        toolId: toolCall.toolId,
-        args: toolCall.args,
+        tool_call_id: toolCall.tool_call_id,
+        tool_id: toolCall.tool_id,
+        tool_type: toolCall.tool_type,
+        params: toolCall.params,
         result: toolResult?.result ?? 'unknown',
       };
     }
@@ -91,9 +94,9 @@ const createRoundFromEvents = ({
   };
 
   const round: ConversationRound = {
-    userInput,
+    input,
     steps: stepEvents.map(eventToStep),
-    assistantResponse: { message: messages[messages.length - 1].messageContent },
+    response: { message: messages[messages.length - 1].message_content },
   };
 
   return round;
