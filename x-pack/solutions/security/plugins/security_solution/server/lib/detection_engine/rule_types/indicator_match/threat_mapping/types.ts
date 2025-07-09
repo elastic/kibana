@@ -85,7 +85,6 @@ export interface CreateEventSignalOptions {
 type EntryKey = 'field' | 'value';
 
 export interface BuildThreatMappingFilterOptions {
-  chunkSize?: number;
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
@@ -111,16 +110,10 @@ export interface CreateAndOrClausesOptions {
 }
 
 export interface BuildEntriesMappingFilterOptions {
-  chunkSize: number;
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
   allowedFieldsForTermsQuery?: AllowedFieldsForTermsQuery;
-}
-
-export interface SplitShouldClausesOptions {
-  chunkSize: number;
-  should: BooleanFilter[];
 }
 
 export interface BooleanFilter {
