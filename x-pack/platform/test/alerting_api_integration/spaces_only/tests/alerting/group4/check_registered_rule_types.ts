@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createRegisteredRuleTypeTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
@@ -46,6 +45,7 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         'siem.newTermsRule',
         'siem.notifications',
         'slo.rules.burnRate',
+        'streams.rules.esql',
         'logs.alert.document.count',
         'metrics.alert.inventory.threshold',
         'metrics.alert.threshold',

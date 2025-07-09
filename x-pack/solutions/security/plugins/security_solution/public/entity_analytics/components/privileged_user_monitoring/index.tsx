@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
+import { KeyInsightsPanel } from './components/key_insights_panel';
 import { UserActivityPrivilegedUsersPanel } from './components/privileged_user_activity';
 import { PrivilegedAccessDetectionsPanel } from './components/privileged_access_detection';
+import { PrivilegedUsersTable } from './components/privileged_users_table';
 
 export interface OnboardingCallout {
   userCount: number;
@@ -19,12 +22,17 @@ export interface OnboardingCallout {
 
 export const PrivilegedUserMonitoring = ({
   callout,
+  error,
   onManageUserClicked,
+  sourcererDataView,
 }: {
   callout?: OnboardingCallout;
+  error?: string;
   onManageUserClicked: () => void;
+  sourcererDataView: DataViewSpec;
 }) => {
   const spaceId = useSpaceId();
+
   const [dismissCallout, setDismissCallout] = useState(false);
   const handleDismiss = useCallback(() => {
     setDismissCallout(true);
@@ -33,6 +41,20 @@ export const PrivilegedUserMonitoring = ({
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
+        {error && (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.errorTitle"
+                defaultMessage="Error loading privileged user monitoring data"
+              />
+            }
+            color="danger"
+            iconType="cross"
+          >
+            <p>{error}</p>
+          </EuiCallOut>
+        )}
         {callout && !dismissCallout && (
           <EuiCallOut
             title={
@@ -77,20 +99,14 @@ export const PrivilegedUserMonitoring = ({
             {spaceId && <RiskLevelsPrivilegedUsersPanel spaceId={spaceId} />}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel hasShadow={false} hasBorder={true}>
-              <span>{'TODO: Top risky privileged users'}</span>
-            </EuiPanel>
+            {spaceId && <KeyInsightsPanel spaceId={spaceId} sourcerDataView={sourcererDataView} />}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {spaceId && <PrivilegedUsersTable spaceId={spaceId} />}
       {spaceId && <PrivilegedAccessDetectionsPanel spaceId={spaceId} />}
       <EuiFlexItem>
-        <UserActivityPrivilegedUsersPanel />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel hasShadow={false} hasBorder={true}>
-          {'TODO: Privileged users'}
-        </EuiPanel>
+        <UserActivityPrivilegedUsersPanel sourcererDataView={sourcererDataView} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -67,6 +67,11 @@ export interface FlatMetadata {
    */
   project_type?: string;
   /**
+   * The Serverless product tier (only available on serverless for selected project types)
+   * @group Kibana Static Values
+   */
+  product_tier?: string;
+  /**
    * Whether this is a canary or non-canary project/deployment
    * @group Kibana Static Values
    */
@@ -142,6 +147,7 @@ export class MetadataService {
               build_sha: metadata.build_sha,
               build_sha_short: metadata.build_sha_short,
               project_type: metadata.project_type,
+              product_tier: metadata.product_tier,
               orchestrator_target: metadata.orchestrator_target,
               has_data: metadata.has_data,
             }),

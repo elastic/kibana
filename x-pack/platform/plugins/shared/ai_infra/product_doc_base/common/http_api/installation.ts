@@ -13,14 +13,20 @@ export const INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 export const UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 
 export interface InstallationStatusResponse {
+  inferenceId: string;
   overall: InstallationStatus;
   perProducts: Record<ProductName, ProductInstallState>;
 }
 
 export interface PerformInstallResponse {
   installed: boolean;
+  failureReason?: string;
 }
 
 export interface UninstallResponse {
   success: boolean;
+}
+
+export interface ProductDocInstallParams {
+  inferenceId: string | undefined;
 }

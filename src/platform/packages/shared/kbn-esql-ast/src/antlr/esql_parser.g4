@@ -35,12 +35,12 @@ query
     ;
 
 sourceCommand
-    : explainCommand
-    | fromCommand
+    : fromCommand
     | rowCommand
     | showCommand
     // in development
     | {this.isDevVersion()}? timeSeriesCommand
+    | {this.isDevVersion()}? explainCommand
     ;
 
 processingCommand
@@ -67,6 +67,7 @@ processingCommand
     | {this.isDevVersion()}? insistCommand
     | {this.isDevVersion()}? rerankCommand
     | {this.isDevVersion()}? rrfCommand
+    | {this.isDevVersion()}? fuseCommand
     ;
 
 whereCommand
@@ -241,11 +242,11 @@ commandOption
     ;
 
 explainCommand
-    : EXPLAIN subqueryExpression
+    : DEV_EXPLAIN subqueryExpression
     ;
 
 subqueryExpression
-    : OPENING_BRACKET query CLOSING_BRACKET
+    : LP query RP
     ;
 
 showCommand
@@ -307,6 +308,10 @@ forkSubQueryProcessingCommand
 rrfCommand
    : DEV_RRF
    ;
+
+fuseCommand
+    : DEV_FUSE
+    ;
 
 inferenceCommandOptions
     : inferenceCommandOption (COMMA inferenceCommandOption)*

@@ -49,7 +49,7 @@ import type {
   VisitorOutput,
 } from './types';
 import { Builder } from '../builder';
-import { isProperNode } from '../ast/helpers';
+import { isProperNode } from '../ast/is';
 
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -513,8 +513,8 @@ export class SampleCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
-// RRF
-export class RrfCommandVisitorContext<
+// FUSE
+export class FuseCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}

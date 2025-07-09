@@ -167,11 +167,11 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       const maintenanceWindow = {
         title: formData.title,
         duration: endDate.diff(startDate),
-        rRule: convertToRRule(
+        rRule: convertToRRule({
           startDate,
-          formData.timezone ? formData.timezone[0] : defaultTimezone,
-          formData.recurringSchedule
-        ),
+          timezone: formData.timezone ? formData.timezone[0] : defaultTimezone,
+          recurringSchedule: formData.recurringSchedule,
+        }),
         categoryIds: formData.solutionId ? [formData.solutionId] : null,
         scopedQuery: availableSolutions.length !== 0 ? scopedQueryPayload : null,
       };

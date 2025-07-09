@@ -43,6 +43,7 @@ export class EndpointExceptionsValidator extends BaseValidator {
 
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
     await this.validateHasWritePrivilege();
+    await this.validateCanCreateGlobalArtifacts(item);
     await this.validateCreateOwnerSpaceIds(item);
 
     return item;
@@ -54,6 +55,7 @@ export class EndpointExceptionsValidator extends BaseValidator {
   ) {
     await this.validateHasWritePrivilege();
     await this.validateUpdateOwnerSpaceIds(item, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(item, currentItem);
 
     return item;
   }

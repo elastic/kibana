@@ -73,7 +73,13 @@ export function initializeIntegrations(
             references: [...cleanedState.references, ...(dynamicActionsReferences ?? [])],
           };
         }
-        return cleanedState;
+        return {
+          rawState: {
+            ...cleanedState.rawState,
+            ...dynamicActionsState,
+          },
+          references: [...cleanedState.references, ...(dynamicActionsReferences ?? [])],
+        };
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

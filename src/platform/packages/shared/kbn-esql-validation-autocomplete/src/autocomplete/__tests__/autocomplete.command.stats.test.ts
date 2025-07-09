@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import { FieldType, FunctionReturnType, Location } from '../../definitions/types';
-import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
-import { getDateHistogramCompletionItem } from '../commands/stats/util';
-import { allStarConstant } from '../complete_items';
+import {
+  getDateHistogramCompletionItem,
+  allStarConstant,
+  ESQL_NUMBER_TYPES,
+  ESQL_COMMON_NUMERIC_TYPES,
+  FieldType,
+  FunctionReturnType,
+} from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { roundParameterTypes } from './constants';
 import {
   setup,

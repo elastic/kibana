@@ -35,6 +35,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
       setToggleStatus: jest.fn(),
     });
     mockUseRiskLevelsPrivilegedUserQuery.mockReturnValue({
+      hasEngineBeenInstalled: true,
       records: [],
       isLoading: false,
       refetch: jest.fn(),
@@ -51,6 +52,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
 
   it('renders the error callout when there is an error', () => {
     mockUseRiskLevelsPrivilegedUserQuery.mockReturnValue({
+      hasEngineBeenInstalled: true,
       records: [],
       isLoading: false,
       refetch: jest.fn(),
@@ -65,6 +67,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
 
   it('renders the donut chart when data is available', () => {
     mockUseRiskLevelsPrivilegedUserQuery.mockReturnValue({
+      hasEngineBeenInstalled: true,
       records: [
         { level: 'Critical', count: 5 },
         { level: 'High', count: 10 },
@@ -82,6 +85,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
 
   it('renders the table with correct rows when data is available', () => {
     mockUseRiskLevelsPrivilegedUserQuery.mockReturnValue({
+      hasEngineBeenInstalled: true,
       records: [
         { level: 'Critical', count: 5 },
         { level: 'High', count: 10 },
@@ -113,5 +117,20 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
 
     expect(screen.queryByTestId('severity-level-table')).not.toBeInTheDocument();
     expect(screen.queryByTestId('donut-chart')).not.toBeInTheDocument();
+  });
+
+  it('renders the risk score enablement when hasEngineBeenInstalled is false', () => {
+    mockUseRiskLevelsPrivilegedUserQuery.mockReturnValue({
+      hasEngineBeenInstalled: false,
+      records: [],
+      isLoading: false,
+      refetch: jest.fn(),
+      inspect: null,
+      isError: false,
+    });
+
+    render(<RiskLevelsPrivilegedUsersPanel spaceId={'default'} />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('enable_risk_score')).toBeInTheDocument();
   });
 });

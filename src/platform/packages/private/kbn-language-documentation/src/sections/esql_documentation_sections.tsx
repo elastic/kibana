@@ -462,7 +462,7 @@ FROM employees
       label: i18n.translate('languageDocumentation.documentationESQL.lookupJoin', {
         defaultMessage: 'LOOKUP JOIN',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab={true}

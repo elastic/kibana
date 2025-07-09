@@ -38,6 +38,9 @@ import { getStatusLabel } from './utils';
 import { GapStatusFilter } from './status_filter';
 import { useFindGapsForRule } from '../../api/hooks/use_find_gaps_for_rule';
 import { FillGap } from './fill_gap';
+import { FillRuleGapsButton } from './fill_rule_gaps_button';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
 const DatePickerEuiFlexItem = styled(EuiFlexItem)`
   max-width: 582px;
 `;
@@ -179,6 +182,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<GapStatus[]>([]);
+  const isBulkFillRuleGapsEnables = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
   const [sort, setSort] = useState<{ field: keyof Gap; direction: 'desc' | 'asc' }>({
     field: '@timestamp',
     direction: 'desc',
@@ -267,7 +271,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
         </EuiFlexItem>
 
         <EuiFlexItem grow={true}>
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <GapStatusFilter selectedItems={selectedStatuses} onChange={handleStatusChange} />
             </EuiFlexItem>
@@ -287,6 +291,11 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
                 />
               </DatePickerEuiFlexItem>
             </EuiFlexItem>
+            {isBulkFillRuleGapsEnables && (
+              <EuiFlexItem grow={false}>
+                <FillRuleGapsButton ruleId={ruleId} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

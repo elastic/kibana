@@ -21,12 +21,12 @@ import {
   getCase,
   createConfiguration,
   getConfigurationRequest,
-} from '../../../cases_api_integration/common/lib/api';
+} from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
   loginUsers,
   suggestUserProfiles,
-} from '../../../cases_api_integration/common/lib/api/user_profiles';
-import { User } from '../../../cases_api_integration/common/lib/authentication/types';
+} from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api/user_profiles';
+import { User } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/types';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';

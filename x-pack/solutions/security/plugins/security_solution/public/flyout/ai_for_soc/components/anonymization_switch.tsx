@@ -94,7 +94,7 @@ export const AnonymizationSwitch = memo(({ hasAlertSummary }: AnonymizationSwitc
                 />
               }
             >
-              <EuiIcon tabIndex={0} type="iInCircle" />
+              <EuiIcon tabIndex={0} type="info" />
             </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>

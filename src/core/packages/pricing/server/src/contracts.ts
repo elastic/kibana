@@ -19,6 +19,19 @@ import type { IPricingTiersClient, PricingProductFeature } from '@kbn/core-prici
  */
 export interface PricingServiceSetup {
   /**
+   * Check if a specific feature is available in the current pricing tier configuration.
+   * Resolves asynchronously after the pricing service has been set up and all the plugins have registered their features.
+   *
+   * @example
+   * ```ts
+   * // my-plugin/server/plugin.ts
+   * public setup(core: CoreSetup) {
+   *   const isPremiumFeatureAvailable = core.pricing.isFeatureAvailable('my_premium_feature');
+   * }
+   * ```
+   */
+  isFeatureAvailable(featureId: string): Promise<boolean>;
+  /**
    * Register product features that are available in specific pricing tiers.
    *
    * @example

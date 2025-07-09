@@ -21,6 +21,7 @@
       "logsDataAccess",
       "esUiShared",
       "navigation",
+      "searchHomepage",
       "searchNavigation",
       "uiActions"
     ],

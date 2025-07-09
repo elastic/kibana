@@ -17,7 +17,7 @@ import {
 import * as i18n from '../../../common/translations';
 import type { BulkActionResponse, BulkActionSummary } from '../../api/api';
 
-export function summarizeBulkSuccess(action: BulkActionType): string {
+export function summarizeBulkSuccess(action: BulkActionType, summary: BulkActionSummary): string {
   switch (action) {
     case BulkActionTypeEnum.export:
       return i18n.RULES_BULK_EXPORT_SUCCESS;
@@ -38,6 +38,9 @@ export function summarizeBulkSuccess(action: BulkActionType): string {
       return i18n.RULES_BULK_MANUAL_RULE_RUN_SUCCESS;
 
     case BulkActionTypeEnum.fill_gaps:
+      if (summary.succeeded === 0 && summary.skipped > 0) {
+        return i18n.RULES_BULK_FILL_GAPS_SUCCESS_ALL_SKIPPED;
+      }
       return i18n.RULES_BULK_FILL_GAPS_SUCCESS;
 
     case BulkActionTypeEnum.edit:
@@ -69,7 +72,10 @@ export function explainBulkSuccess(
       return i18n.RULES_BULK_MANUAL_RULE_RUN_SUCCESS_DESCRIPTION(summary.succeeded);
 
     case BulkActionTypeEnum.fill_gaps:
-      return i18n.RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION(summary.succeeded);
+      if (summary.succeeded === 0 && summary.skipped > 0) {
+        return i18n.RULES_BULK_FILL_GAPS_SUCCESS_ALL_RULES_SKIPPED_DESCRIPTION;
+      }
+      return i18n.RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION(summary.succeeded, summary.skipped);
   }
 }
 

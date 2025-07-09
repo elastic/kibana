@@ -11,24 +11,18 @@ import {
   ESQLCommandOption,
   Walker,
   isIdentifier,
+  isList,
   type ESQLAst,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLFunction,
   type ESQLSingleAstItem,
+  FunctionDefinitionTypes,
 } from '@kbn/esql-ast';
-import { isList } from '@kbn/esql-ast/src/ast/helpers';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
+import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
 import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
-import { FunctionDefinitionTypes } from '../definitions/types';
-import { EDITOR_MARKER } from './constants';
-import {
-  isColumnItem,
-  isSourceItem,
-  pipePrecedesCurrentWord,
-  getFunctionDefinition,
-  isOptionItem,
-  within,
-} from './helpers';
+import { isColumnItem, isSourceItem, getFunctionDefinition, isOptionItem, within } from './helpers';
 
 function findCommand(ast: ESQLAst, offset: number) {
   const commandIndex = ast.findIndex(
@@ -122,6 +116,12 @@ function findAstPosition(ast: ESQLAst, offset: number) {
   let node: ESQLSingleAstItem | undefined;
 
   Walker.walk(command, {
+    visitSource: (_node, parent, walker) => {
+      if (_node.location.max >= offset && _node.text !== EDITOR_MARKER) {
+        node = _node as ESQLSingleAstItem;
+        walker.abort();
+      }
+    },
     visitAny: (_node) => {
       if (
         _node.type === 'function' &&

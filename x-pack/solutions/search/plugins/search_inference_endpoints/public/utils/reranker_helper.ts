@@ -23,12 +23,12 @@ export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) 
 
   /*
     For rerank task type, model ID starting with '.' indicates tech preview
-    Special case for 'rainbow-sprinkles' model
+    Special case for 'rainbow-sprinkles' model and ELSER on EIS
   */
   if (
     (taskType === 'rerank' && modelId.startsWith('.')) ||
     modelId === 'rainbow-sprinkles' ||
-    (modelId === 'elser-v2' &&
+    (modelId === 'elser_model_2' &&
       inferenceId.startsWith('.') &&
       service === ServiceProviderKeys.elastic)
   ) {

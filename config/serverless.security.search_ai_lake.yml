@@ -1,5 +1,8 @@
 # Security Search AI Lake tier config
 
+## Cloud settings
+xpack.cloud.serverless.product_tier: search_ai_lake
+
 ## Disable plugins
 xpack.osquery.enabled: false
 xpack.ml.ad.enabled: false
@@ -77,6 +80,7 @@ xpack.fleet.agentless.isDefault: true
 xpack.fleet.hideDashboards: true
 xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations'
 xpack.fleet.prereleaseEnabledByDefault: true
+xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
 
 # Pin the prebuilt rules package version to the version that contains promotion rules
 xpack.securitySolution.prebuiltRulesPackageVersion: '9.0.5-beta.1'

@@ -9,8 +9,15 @@ import { PluginInitializerContext } from '@kbn/core-plugins-server';
 import { StreamsConfig } from '../common/config';
 import { StreamsPluginSetup, StreamsPluginStart, config } from './plugin';
 import { StreamsRouteRepository } from './routes';
+import { SimulationDocReport } from './routes/internal/streams/processing/simulation_handler';
 
-export type { StreamsConfig, StreamsPluginSetup, StreamsPluginStart, StreamsRouteRepository };
+export type {
+  StreamsConfig,
+  StreamsPluginSetup,
+  StreamsPluginStart,
+  StreamsRouteRepository,
+  SimulationDocReport,
+};
 export { config };
 
 export const plugin = async (context: PluginInitializerContext<StreamsConfig>) => {

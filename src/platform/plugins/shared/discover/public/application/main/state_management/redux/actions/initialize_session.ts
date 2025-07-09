@@ -76,11 +76,13 @@ export const initializeSession: InternalStateThunkActionCreator<
       dispatch(clearAllTabs());
     }
 
-    const discoverSessionLoadTracker =
-      services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
-
-    const { currentDataView$, stateContainer$, customizationService$, scopedProfilesManager$ } =
-      selectTabRuntimeState(runtimeStateManager, tabId);
+    const {
+      currentDataView$,
+      stateContainer$,
+      customizationService$,
+      scopedProfilesManager$,
+      scopedEbtManager$,
+    } = selectTabRuntimeState(runtimeStateManager, tabId);
     const tabState = selectTab(getState(), tabId);
 
     let urlState = cleanupUrlState(
@@ -100,7 +102,12 @@ export const initializeSession: InternalStateThunkActionCreator<
       currentDataView$.next(undefined);
       stateContainer$.next(undefined);
       customizationService$.next(undefined);
-      scopedProfilesManager$.next(services.profilesManager.createScopedProfilesManager());
+      scopedEbtManager$.next(services.ebtManager.createScopedEBTManager());
+      scopedProfilesManager$.next(
+        services.profilesManager.createScopedProfilesManager({
+          scopedEbtManager: scopedEbtManager$.getValue(),
+        })
+      );
     }
 
     if (TABS_ENABLED && !wasTabInitialized) {
@@ -123,6 +130,10 @@ export const initializeSession: InternalStateThunkActionCreator<
         urlState = cloneDeep(tabInitialAppState);
       }
     }
+
+    const discoverSessionLoadTracker = scopedEbtManager$
+      .getValue()
+      .trackPerformanceEvent('discoverLoadSavedSearch');
 
     const persistedDiscoverSession = discoverSessionId
       ? await services.savedSearch.get(discoverSessionId)

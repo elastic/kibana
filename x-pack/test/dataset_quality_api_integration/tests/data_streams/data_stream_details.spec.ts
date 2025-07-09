@@ -39,9 +39,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('DataStream Details', { config: 'basic' }, () => {
     describe('gets the data stream details', function () {
-      // this mutes the forward-compatibility test with Elasticsearch, 8.19 kibana and 9.0 ES.
-      // There are not expected to work together.
+      // This disables the forward-compatibility test for Kibana 8.19 with ES upgraded to 9.0.
+      // These versions are not expected to work together.
+      // The tests raise "unknown index privilege [read_failure_store]" error in ES 9.0.
       this.onlyEsVersion('8.19 || >=9.1');
+
       before(async () => {
         await synthtrace.index([
           timerange(start, end)

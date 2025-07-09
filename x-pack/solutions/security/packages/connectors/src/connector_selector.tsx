@@ -88,7 +88,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
 
     const mappedConnectorOptions = connectors.map((connector) => ({
       value: connector.id,
-      'data-test-subj': connector.id,
+      'data-test-subj': `connector-option-${connector.name}`,
       inputDisplay: (
         <EuiText
           css={styles?.optionDisplay}
@@ -101,7 +101,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
       dropdownDisplay: (
         <React.Fragment key={connector.id}>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
-            <EuiFlexItem grow={false} data-test-subj={`connector-option-${connector.name}`}>
+            <EuiFlexItem grow={false}>
               <strong>{connector.name}</strong>
               <EuiText size="xs" color="subdued">
                 <p>{connector.description}</p>

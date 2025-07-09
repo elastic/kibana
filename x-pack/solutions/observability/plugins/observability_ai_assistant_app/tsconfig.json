@@ -71,7 +71,6 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/ai-assistant-common",
     "@kbn/observability-utils-common",
-    "@kbn/slo-plugin",
     "@kbn/spaces-plugin",
     "@kbn/data-service",
     "@kbn/inference-common",
@@ -86,7 +85,7 @@
     "@kbn/i18n-react",
     "@kbn/utility-types",
     "@kbn/alerts-ui-shared",
-    "@kbn/traced-es-client"
+    "@kbn/traced-es-client",
   ],
   "exclude": ["target/**/*"]
 }

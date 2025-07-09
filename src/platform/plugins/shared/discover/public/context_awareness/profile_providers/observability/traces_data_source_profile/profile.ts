@@ -23,7 +23,6 @@ export const createTracesDataSourceProfileProvider = ({
   tracesContextService,
 }: ProfileProviderServices): DataSourceProfileProvider => ({
   profileId: OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID,
-  isExperimental: true,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
     getDefaultAppState: (prev) => (params) => ({

@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
+import React, { useMemo } from 'react';
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import { AiForSOCAlertsTab } from './ai_for_soc/wrapper';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { SECURITY_FEATURE_ID } from '../../../../../../../common';
 import { DetectionEngineAlertsTable } from '../../../../../../detections/components/alerts_table';
+import { getColumns } from '../../../../../../detections/configurations/security_solution_detections/columns';
 
 interface Props {
   attackDiscovery: AttackDiscovery;
@@ -49,6 +50,20 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
 
   const id = useMemo(() => `attack-discovery-alerts-${attackDiscovery.id}`, [attackDiscovery.id]);
 
+  // add workflow_status as the 2nd column in the table:
+  const columns = useMemo(() => {
+    const defaultColumns = getColumns();
+
+    return [
+      ...defaultColumns.slice(0, 1),
+      {
+        columnHeaderType: 'not-filtered',
+        id: 'kibana.alert.workflow_status',
+      },
+      ...defaultColumns.slice(1),
+    ];
+  }, []);
+
   return (
     <div data-test-subj="alertsTab">
       {AIForSOC ? (
@@ -58,6 +73,7 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
       ) : (
         <div data-test-subj="detection-engine-alerts-table">
           <DetectionEngineAlertsTable
+            columns={columns}
             id={id}
             tableType={TableId.alertsOnCasePage}
             ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}

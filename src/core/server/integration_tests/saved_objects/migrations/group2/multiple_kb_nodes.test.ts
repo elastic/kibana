@@ -163,7 +163,8 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
     // '.kibana_migrator_split' is a new index, all nodes' migrators must attempt to create it
     expect(logs).toContainLogEntries(
       [
-        `[${kibanaSplitIndex}] INIT -> CREATE_REINDEX_TEMP.`,
+        `[${kibanaSplitIndex}] INIT -> RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION.`,
+        `[${kibanaSplitIndex}] RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> CREATE_REINDEX_TEMP.`,
         `[${kibanaSplitIndex}] CREATE_REINDEX_TEMP -> READY_TO_REINDEX_SYNC.`,
         // no docs to reindex, as source index did NOT exist
         `[${kibanaSplitIndex}] READY_TO_REINDEX_SYNC -> DONE_REINDEXING_SYNC.`,
@@ -176,8 +177,8 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
       expect(logs).toContainLogEntries(
         [
           `[${index}] INIT -> WAIT_FOR_YELLOW_SOURCE.`,
-          `[${index}] WAIT_FOR_YELLOW_SOURCE -> CHECK_CLUSTER_ROUTING_ALLOCATION.`,
-          `[${index}] CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.`,
+          `[${index}] WAIT_FOR_YELLOW_SOURCE -> REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION.`,
+          `[${index}] REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.`,
           `[${index}] CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.`,
           `[${index}] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.`,
           `[${index}] CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP.`,

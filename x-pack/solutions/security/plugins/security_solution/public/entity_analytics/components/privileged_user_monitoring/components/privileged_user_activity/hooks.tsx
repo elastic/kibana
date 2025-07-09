@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import {
   generateListESQLQuery,
@@ -21,15 +22,13 @@ import {
 } from './columns';
 import { getLensAttributes } from './get_lens_attributes';
 import {
-  getAccountSwitchesEsqlSource,
-  getAuthenticationsEsqlSource,
-  getGrantedRightsEsqlSource,
-} from './esql_source_query';
-import {
   ACCOUNT_SWITCH_STACK_BY,
   AUTHENTICATIONS_STACK_BY,
   GRANTED_RIGHTS_STACK_BY,
 } from './constants';
+import { getAuthenticationsEsqlSource } from '../../queries/authentications_esql_query';
+import { getAccountSwitchesEsqlSource } from '../../queries/account_switches_esql_query';
+import { getGrantedRightsEsqlSource } from '../../queries/granted_rights_esql_query';
 
 const toggleOptionsConfig = {
   [VisualizationToggleOptions.GRANTED_RIGHTS]: {
@@ -50,13 +49,24 @@ const toggleOptionsConfig = {
 };
 
 export const usePrivilegedUserActivityParams = (
-  selectedToggleOption: VisualizationToggleOptions
+  selectedToggleOption: VisualizationToggleOptions,
+  sourcererDataView: DataViewSpec
 ) => {
   const spaceId = useSpaceId();
+
+  const indexPattern = sourcererDataView?.title ?? '';
+  const fields = sourcererDataView?.fields;
+
   const esqlSource = useMemo(
     () =>
-      spaceId ? toggleOptionsConfig[selectedToggleOption].generateEsqlSource(spaceId) : undefined,
-    [selectedToggleOption, spaceId]
+      spaceId && indexPattern && fields
+        ? toggleOptionsConfig[selectedToggleOption].generateEsqlSource(
+            spaceId,
+            indexPattern,
+            fields
+          )
+        : undefined,
+    [selectedToggleOption, spaceId, indexPattern, fields]
   );
 
   const generateTableQuery = useMemo(
@@ -75,11 +85,17 @@ export const usePrivilegedUserActivityParams = (
     [selectedToggleOption, openRightPanel]
   );
 
+  const hasLoadedDependencies = useMemo(
+    () => Boolean(spaceId && indexPattern && fields),
+    [spaceId, indexPattern, fields]
+  );
+
   return {
     getLensAttributes,
     generateVisualizationQuery,
     generateTableQuery,
     columns,
+    hasLoadedDependencies,
   };
 };
 

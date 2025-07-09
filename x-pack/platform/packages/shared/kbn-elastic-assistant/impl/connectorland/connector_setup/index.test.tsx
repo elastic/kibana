@@ -82,4 +82,13 @@ describe('ConnectorSetup', () => {
 
     expect(setApiConfig).not.toHaveBeenCalled();
   });
+
+  it('should NOT set api config for conversation with empty id when new connector is saved', async () => {
+    const { getByTestId } = render(<ConnectorSetup onConversationUpdate={onConversationUpdate} />, {
+      wrapper: TestProviders,
+    });
+
+    fireEvent.click(getByTestId('modal-mock'));
+    expect(setApiConfig).not.toHaveBeenCalled();
+  });
 });

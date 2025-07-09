@@ -187,13 +187,14 @@ export const functions = {
   ### BIT LENGTH
   Returns the bit length of a string.
 
+  Note: All strings are in UTF-8, so a single character can use multiple bytes.
+
   \`\`\`esql
   FROM airports
   | WHERE country == "India"
   | KEEP city
   | EVAL fn_length = LENGTH(city), fn_bit_length = BIT_LENGTH(city)
   \`\`\`
-  Note: All strings are in UTF-8, so a single character can use multiple bytes.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -221,13 +222,14 @@ export const functions = {
   ### BYTE LENGTH
   Returns the byte length of a string.
 
+  Note: All strings are in UTF-8, so a single character can use multiple bytes.
+
   \`\`\`esql
   FROM airports
   | WHERE country == "India"
   | KEEP city
   | EVAL fn_length = LENGTH(city), fn_byte_length = BYTE_LENGTH(city)
   \`\`\`
-  Note: All strings are in UTF-8, so a single character can use multiple bytes.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -319,11 +321,12 @@ export const functions = {
   ### CEIL
   Round a number up to the nearest integer.
 
+  Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to [Math.ceil](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Math.html#ceil(double)).
+
   \`\`\`esql
   ROW a=1.8
   | EVAL a=CEIL(a)
   \`\`\`
-  Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to [Math.ceil](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Math.html#ceil(double)).
   `,
             description:
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -747,13 +750,14 @@ export const functions = {
   ### FLOOR
   Round a number down to the nearest integer.
 
+  Note: This is a noop for \`long\` (including unsigned) and \`integer\`.
+  For \`double\` this picks the closest \`double\` value to the integer
+  similar to [Math.floor](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Math.html#floor(double)).
+
   \`\`\`esql
   ROW a=1.8
   | EVAL a=FLOOR(a)
   \`\`\`
-  Note: This is a noop for \`long\` (including unsigned) and \`integer\`.
-  For \`double\` this picks the closest \`double\` value to the integer
-  similar to [Math.floor](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Math.html#floor(double)).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -813,11 +817,12 @@ export const functions = {
   Returns the maximum value from multiple columns. This is similar to [\`MV_MAX\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/mv-functions#esql-mv_max)
   except it is intended to run on multiple columns at once.
 
+  Note: When run on \`keyword\` or \`text\` fields, this returns the last string in alphabetical order. When run on \`boolean\` columns this will return \`true\` if any values are \`true\`.
+
   \`\`\`esql
   ROW a = 10, b = 20
   | EVAL g = GREATEST(a, b)
   \`\`\`
-  Note: When run on \`keyword\` or \`text\` fields, this returns the last string in alphabetical order. When run on \`boolean\` columns this will return \`true\` if any values are \`true\`.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -925,7 +930,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.kql', {
         defaultMessage: 'KQL',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1026,13 +1031,14 @@ export const functions = {
   ### LENGTH
   Returns the character length of a string.
 
+  Note: All strings are in UTF-8, so a single character can use multiple bytes.
+
   \`\`\`esql
   FROM airports
   | WHERE country == "India"
   | KEEP city
   | EVAL fn_length = LENGTH(city)
   \`\`\`
-  Note: All strings are in UTF-8, so a single character can use multiple bytes.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1177,7 +1183,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.match', {
         defaultMessage: 'MATCH',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1190,17 +1196,6 @@ export const functions = {
   ### MATCH
   Use \`MATCH\` to perform a [match query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query) on the specified field.
   Using \`MATCH\` is equivalent to using the \`match\` query in the Elasticsearch Query DSL.
-
-  Match can be used on fields from the text family like [text](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/text) and [semantic_text](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/semantic-text),
-  as well as other field types like keyword, boolean, dates, and numeric types.
-  When Match is used on a [semantic_text](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/semantic-text) field, it will perform a semantic query on the field.
-
-  Match can use [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params) to specify additional options for the match query.
-  All [match query parameters](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query#match-field-params) are supported.
-
-  For a simplified syntax, you can use the [match operator](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/operators#esql-match-operator) \`:\` operator instead of \`MATCH\`.
-
-  \`MATCH\` returns true if the provided query matches the row.
 
   \`\`\`esql
   FROM books
@@ -1220,7 +1215,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.match_phrase', {
         defaultMessage: 'MATCH_PHRASE',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1234,15 +1229,6 @@ export const functions = {
   Use \`MATCH_PHRASE\` to perform a [\`match_phrase\`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query-phrase) on the
   specified field.
   Using \`MATCH_PHRASE\` is equivalent to using the \`match_phrase\` query in the Elasticsearch Query DSL.
-
-  MatchPhrase can be used on [text](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/text) fields, as well as other field types like keyword, boolean, or date types.
-  MatchPhrase is not supported for [semantic_text](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/semantic-text) or numeric types.
-
-  MatchPhrase can use [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params) to specify additional options for the
-  match_phrase query.
-  All [\`match_phrase\`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query-phrase) query parameters are supported.
-
-  \`MATCH_PHRASE\` returns true if the provided query matches the row.
 
   \`\`\`esql
   FROM books
@@ -1467,11 +1453,12 @@ export const functions = {
   ### MV DEDUPE
   Remove duplicate values from a multivalued field.
 
+  Note: \`MV_DEDUPE\` may, but won’t always, sort the values in the column.
+
   \`\`\`esql
   ROW a=["foo", "foo", "bar", "foo"]
   | EVAL dedupe_a = MV_DEDUPE(a)
   \`\`\`
-  Note: \`MV_DEDUPE\` may, but won’t always, sort the values in the column.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1632,11 +1619,12 @@ export const functions = {
 
   It is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable \`X\`, the median absolute deviation is \`median(|median(X) - X|)\`.
 
+  Note: If the field has an even number of values, the medians will be calculated as the average of the middle two values. If the value is not a floating point number, the averages are rounded towards 0.
+
   \`\`\`esql
   ROW values = [0, 2, 5, 6]
   | EVAL median_absolute_deviation = MV_MEDIAN_ABSOLUTE_DEVIATION(values), median = MV_MEDIAN(values)
   \`\`\`
-  Note: If the field has an even number of values, the medians will be calculated as the average of the middle two values. If the value is not a floating point number, the averages are rounded towards 0.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1937,11 +1925,12 @@ export const functions = {
   ### POW
   Returns the value of \`base\` raised to the power of \`exponent\`.
 
+  Note: It is still possible to overflow a double result here; in that case, null will be returned.
+
   \`\`\`esql
   ROW base = 2.0, exponent = 2
   | EVAL result = POW(base, exponent)
   \`\`\`
-  Note: It is still possible to overflow a double result here; in that case, null will be returned.
   `,
             description:
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1955,7 +1944,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.qstr', {
         defaultMessage: 'QSTR',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2595,7 +2584,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_envelope', {
         defaultMessage: 'ST_ENVELOPE',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2613,320 +2602,6 @@ export const functions = {
   | WHERE abbrev == "CPH"
   | EVAL envelope = ST_ENVELOPE(city_boundary)
   | KEEP abbrev, airport, envelope
-  \`\`\`
-  `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.st_geohash', {
-        defaultMessage: 'ST_GEOHASH',
-      }),
-      preview: false,
-      description: (
-        <Markdown
-          openLinksInNewTab
-          readOnly
-          enableSoftLineBreaks
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.st_geohash.markdown',
-            {
-              defaultMessage: `
-  ### ST GEOHASH
-  Calculates the \`geohash\` of the supplied geo_point at the specified precision.
-  The result is long encoded. Use [ST_GEOHASH_TO_STRING](#esql-st_geohash_to_string) to convert the result to a string.
-
-  These functions are related to the [\`geo_grid\` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-geo-grid-query)
-  and the [\`geohash_grid\` aggregation](https://www.elastic.co/docs/reference/aggregations/search-aggregations-bucket-geohashgrid-aggregation).
-
-  \`\`\`esql
-  FROM airports
-  | EVAL geohash = ST_GEOHASH(location, 1)
-  | STATS
-      count = COUNT(*),
-      centroid = ST_CENTROID_AGG(location)
-        BY geohash
-  | WHERE count >= 10
-  | EVAL geohashString = ST_GEOHASH_TO_STRING(geohash)
-  | KEEP count, centroid, geohashString
-  | SORT count DESC, geohashString ASC
-  \`\`\`
-  `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.st_geohash_to_long', {
-        defaultMessage: 'ST_GEOHASH_TO_LONG',
-      }),
-      preview: false,
-      description: (
-        <Markdown
-          openLinksInNewTab
-          readOnly
-          enableSoftLineBreaks
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.st_geohash_to_long.markdown',
-            {
-              defaultMessage: `
-  ### ST GEOHASH TO LONG
-  Converts an input value representing a geohash grid-ID in string format into a long.
-
-  \`\`\`esql
-  ROW geohash = "u3bu"
-  | EVAL geohashLong = ST_GEOHASH_TO_LONG(geohash)
-  \`\`\`
-  `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.st_geohash_to_string', {
-        defaultMessage: 'ST_GEOHASH_TO_STRING',
-      }),
-      preview: false,
-      description: (
-        <Markdown
-          openLinksInNewTab
-          readOnly
-          enableSoftLineBreaks
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.st_geohash_to_string.markdown',
-            {
-              defaultMessage: `
-  ### ST GEOHASH TO STRING
-  Converts an input value representing a geohash grid-ID in long format into a string.
-
-  \`\`\`esql
-  ROW geohash = TO_LONG(13686180)
-  | EVAL geohashString = ST_GEOHASH_TO_STRING(geohash)
-  \`\`\`
-  `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.st_geohex', {
-        defaultMessage: 'ST_GEOHEX',
-      }),
-      preview: false,
-      description: (
-        <Markdown
-          openLinksInNewTab
-          readOnly
-          enableSoftLineBreaks
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.st_geohex.markdown',
-            {
-              defaultMessage: `
-  ### ST GEOHEX
-  Calculates the \`geohex\`, the H3 cell-id, of the supplied geo_point at the specified precision.
-  The result is long encoded. Use [ST_GEOHEX_TO_STRING](#esql-st_geohex_to_string) to convert the result to a string.
-
-  These functions are related to the [\`geo_grid\` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-geo-grid-query)
-  and the [\`geohex_grid\` aggregation](https://www.elastic.co/docs/reference/aggregations/search-aggregations-bucket-geohexgrid-aggregation).
-
-  \`\`\`esql
-  FROM airports
-  | EVAL geohex = ST_GEOHEX(location, 1)
-  | STATS
-      count = COUNT(*),
-      centroid = ST_CENTROID_AGG(location)
-        BY geohex
-  | WHERE count >= 10
-  | EVAL geohexString = ST_GEOHEX_TO_STRING(geohex)
-  | KEEP count, centroid, geohexString
-  | SORT count DESC, geohexString ASC
-  \`\`\`
-  `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.st_geohex_to_long', {
-        defaultMessage: 'ST_GEOHEX_TO_LONG',
-      }),
-      preview: false,
-      description: (
-        <Markdown
-          openLinksInNewTab
-          readOnly
-          enableSoftLineBreaks
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.st_geohex_to_long.markdown',
-            {
-              defaultMessage: `
-  ### ST GEOHEX TO LONG
-  Converts an input value representing a geohex grid-ID in string format into a long.
-
-  \`\`\`esql
-  ROW geohex = "841f059ffffffff"
-  | EVAL geohexLong = ST_GEOHEX_TO_LONG(geohex)
-  \`\`\`
-  `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.st_geohex_to_string', {
-        defaultMessage: 'ST_GEOHEX_TO_STRING',
-      }),
-      preview: false,
-      description: (
-        <Markdown
-          openLinksInNewTab
-          readOnly
-          enableSoftLineBreaks
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.st_geohex_to_string.markdown',
-            {
-              defaultMessage: `
-  ### ST GEOHEX TO STRING
-  Converts an input value representing a Geohex grid-ID in long format into a string.
-
-  \`\`\`esql
-  ROW geohex = 595020895127339007
-  | EVAL geohexString = ST_GEOHEX_TO_STRING(geohex)
-  \`\`\`
-  `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.st_geotile', {
-        defaultMessage: 'ST_GEOTILE',
-      }),
-      preview: false,
-      description: (
-        <Markdown
-          openLinksInNewTab
-          readOnly
-          enableSoftLineBreaks
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.st_geotile.markdown',
-            {
-              defaultMessage: `
-  ### ST GEOTILE
-  Calculates the \`geotile\` of the supplied geo_point at the specified precision.
-  The result is long encoded. Use [ST_GEOTILE_TO_STRING](#esql-st_geotile_to_string) to convert the result to a string.
-
-  These functions are related to the [\`geo_grid\` query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-geo-grid-query)
-  and the [\`geotile_grid\` aggregation](https://www.elastic.co/docs/reference/aggregations/search-aggregations-bucket-geotilegrid-aggregation).
-
-  \`\`\`esql
-  FROM airports
-  | EVAL geotile = ST_GEOTILE(location, 2)
-  | STATS
-      count = COUNT(*),
-      centroid = ST_CENTROID_AGG(location)
-        BY geotile
-  | EVAL geotileString = ST_GEOTILE_TO_STRING(geotile)
-  | SORT count DESC, geotileString ASC
-  | KEEP count, centroid, geotileString
-  \`\`\`
-  `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.st_geotile_to_long', {
-        defaultMessage: 'ST_GEOTILE_TO_LONG',
-      }),
-      preview: false,
-      description: (
-        <Markdown
-          openLinksInNewTab
-          readOnly
-          enableSoftLineBreaks
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.st_geotile_to_long.markdown',
-            {
-              defaultMessage: `
-  ### ST GEOTILE TO LONG
-  Converts an input value representing a geotile grid-ID in string format into a long.
-
-  \`\`\`esql
-  ROW geotile = "4/8/5"
-  | EVAL geotileLong = ST_GEOTILE_TO_LONG(geotile)
-  \`\`\`
-  `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.st_geotile_to_string', {
-        defaultMessage: 'ST_GEOTILE_TO_STRING',
-      }),
-      preview: false,
-      description: (
-        <Markdown
-          openLinksInNewTab
-          readOnly
-          enableSoftLineBreaks
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.st_geotile_to_string.markdown',
-            {
-              defaultMessage: `
-  ### ST GEOTILE TO STRING
-  Converts an input value representing a geotile grid-ID in long format into a string.
-
-  \`\`\`esql
-  ROW geotile = 1152921508901814277
-  | EVAL geotileString = ST_GEOTILE_TO_STRING(geotile)
   \`\`\`
   `,
               description:
@@ -3039,7 +2714,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_xmax', {
         defaultMessage: 'ST_XMAX',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3074,7 +2749,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_xmin', {
         defaultMessage: 'ST_XMIN',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3138,7 +2813,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_ymax', {
         defaultMessage: 'ST_YMAX',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3173,7 +2848,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_ymin', {
         defaultMessage: 'ST_YMIN',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3532,13 +3207,14 @@ export const functions = {
   ### TO DATE NANOS
   Converts an input to a nanosecond-resolution date value (aka date_nanos).
 
+  Note: The range for date nanos is 1970-01-01T00:00:00.000000000Z to 2262-04-11T23:47:16.854775807Z, attempting to convert values outside of that range will result in null with a warning.  Additionally, integers cannot be converted into date nanos, as the range of integer nanoseconds only covers about 2 seconds after epoch.
+
   \`\`\`esql
   FROM date_nanos
   | WHERE MV_MIN(nanos) < TO_DATE_NANOS("2023-10-23T12:27:28.948Z")
       AND millis > "2000-01-01"
   | SORT nanos DESC
   \`\`\`
-  Note: The range for date nanos is 1970-01-01T00:00:00.000000000Z to 2262-04-11T23:47:16.854775807Z, attempting to convert values outside of that range will result in null with a warning.  Additionally, integers cannot be converted into date nanos, as the range of integer nanoseconds only covers about 2 seconds after epoch.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -3599,11 +3275,12 @@ export const functions = {
   A string will only be successfully converted if it’s respecting the format \`yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\`.
   To convert dates in other formats, use [\`DATE_PARSE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/date-time-functions#esql-date_parse).
 
+  Note: Note that when converting from nanosecond resolution to millisecond resolution with this function, the nanosecond date is truncated, not rounded.
+
   \`\`\`esql
   ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]
   | EVAL datetime = TO_DATETIME(string)
   \`\`\`
-  Note: Note that when converting from nanosecond resolution to millisecond resolution with this function, the nanosecond date is truncated, not rounded.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -3971,7 +3648,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.to_unsigned_long', {
         defaultMessage: 'TO_UNSIGNED_LONG',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab

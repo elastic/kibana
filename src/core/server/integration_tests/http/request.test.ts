@@ -15,9 +15,9 @@ import supertest from 'supertest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import type { HttpService } from '@kbn/core-http-server-internal';
-import { createHttpService } from '@kbn/core-http-server-mocks';
 import { schema } from '@kbn/config-schema';
+import { HttpService } from '@kbn/core-http-server-internal';
+import { createInternalHttpService } from '../utilities';
 
 let server: HttpService;
 
@@ -32,7 +32,7 @@ const setupDeps = {
 beforeEach(async () => {
   logger = loggingSystemMock.create();
 
-  server = createHttpService({ logger });
+  server = createInternalHttpService({ logger });
   await server.preboot({ context: contextServiceMock.createPrebootContract() });
 });
 

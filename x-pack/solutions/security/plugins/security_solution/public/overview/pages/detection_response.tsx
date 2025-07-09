@@ -34,6 +34,7 @@ import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query
 import { useKibana } from '../../common/lib/kibana';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
+import { PageLoader } from '../../common/components/page_loader';
 
 const DetectionResponseComponent = () => {
   const { cases } = useKibana().services;
@@ -65,6 +66,10 @@ const DetectionResponseComponent = () => {
 
   if (!canReadAlerts && !canReadCases) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
+  }
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
   }
 
   return (

@@ -41,6 +41,9 @@ export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExce
 export const CONFIRM_MANUAL_RULE_RUN_WARNING_BTN =
   '[data-test-subj="bulkActionConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
 
+export const CONFIRM_FILL_RULE_GAPS_WARNING_BTN =
+  '[data-test-subj="bulkActionConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
+
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
@@ -134,6 +137,11 @@ export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-ru
 
 export const RULE_DETAILS_MANUAL_RULE_RUN_BTN = '[data-test-subj="rules-details-manual-rule-run"]';
 
+export const RULE_DETAILS_REVERT_RULE_BTN = '[data-test-subj="rules-details-revert-rule"]';
+
+export const RULE_DETAILS_REVERT_RULE_TOOLTIP =
+  '[data-test-subj="rules-details-revert-rule-tooltip"]';
+
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const SELECT_ALL_RULES_ON_PAGE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';
@@ -145,6 +153,8 @@ export const RULE_IMPORT_MODAL_BUTTON = '[data-test-subj="import-data-modal-butt
 export const INPUT_FILE = 'input[type=file]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
+
+export const TOASTER_MESSAGE = '[data-test-subj="errorToastMessage"]';
 
 export const SUCCESS_TOASTER = '[class*="euiToast-success"] [data-test-subj="euiToastHeader"]';
 

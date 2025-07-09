@@ -81,6 +81,7 @@ export interface StoreOpts {
   security: SecurityServiceStart;
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
+  getIsSecurityEnabled: () => boolean;
 }
 
 export interface SearchOpts {
@@ -150,6 +151,7 @@ export class TaskStore {
   private requestTimeouts: RequestTimeoutsConfig;
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
+  private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
 
   /**
@@ -184,6 +186,7 @@ export class TaskStore {
     this.requestTimeouts = opts.requestTimeouts;
     this.security = opts.security;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
+    this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
   }
 
@@ -207,7 +210,7 @@ export class TaskStore {
   }
 
   private getSoClientForCreate(options: ApiKeyOptions) {
-    if (options.request) {
+    if (options.request && this.getIsSecurityEnabled()) {
       return this.savedObjectsService.getScopedClient(options.request, {
         includedHiddenTypes: [TASK_SO_NAME],
         excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
@@ -217,6 +220,10 @@ export class TaskStore {
   }
 
   private async getApiKeyFromRequest(taskInstances: TaskInstance[], request?: KibanaRequest) {
+    if (!this.getIsSecurityEnabled()) {
+      return null;
+    }
+
     if (!request) {
       return null;
     }
@@ -349,6 +356,13 @@ export class TaskStore {
     }
 
     const result = savedObjectToConcreteTaskInstance(savedObject);
+
+    if (options?.request && !this.getIsSecurityEnabled()) {
+      this.logger.info(
+        `Trying to schedule task ${result.id} with user scope but security is disabled. Task will run without user scope.`
+      );
+    }
+
     return this.taskValidator.getValidatedTaskInstanceFromReading(result);
   }
 
@@ -418,6 +432,14 @@ export class TaskStore {
     } catch (e) {
       this.errors$.next(e);
       throw e;
+    }
+
+    if (options?.request && !this.getIsSecurityEnabled()) {
+      this.logger.info(
+        `Trying to bulk schedule tasks ${JSON.stringify(
+          savedObjects.saved_objects.map((so) => so.id)
+        )} with user scope but security is disabled. Tasks will run without user scope.`
+      );
     }
 
     return savedObjects.saved_objects.map((so) => {
@@ -612,7 +634,7 @@ export class TaskStore {
 
       if (item.update?.error) {
         const err = new BulkUpdateError({
-          message: item.update.error.reason,
+          message: item.update.error.reason ?? undefined, // reason can be null, and we want to keep `message` as string | undefined
           type: item.update.error.type,
           statusCode: item.update.status,
         });

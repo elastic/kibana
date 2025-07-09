@@ -12,11 +12,11 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import request from 'superagent';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
+import { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
 import {
   SupertestReturnType,
   ApmApiError,
-} from '@kbn/test-suites-xpack-observability/apm_api_integration/common/apm_api_supertest';
-import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
+} from '../../../../../../apm_api_integration/common/apm_api_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const synthtraceService = getService('synthtrace');
   const logger = getService('log');
   const dataViewPattern =
-    'traces-apm*,apm-*,traces-*.otel-*,logs-apm*,apm-*,logs-*.otel-*,metrics-apm*,apm-*,metrics-*.otel-*';
+    'apm-*,logs-*.otel-*,logs-apm*,metrics-*.otel-*,metrics-apm*,traces-*.otel-*,traces-apm*';
 
   function createDataViewWithWriteUser({ spaceId }: { spaceId: string }) {
     return apmApiClient.writeUser({
@@ -141,7 +141,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(dataView.id).to.be('apm_static_data_view_id_default');
           expect(dataView.name).to.be('APM');
           expect(dataView.title).to.be(
-            'traces-apm*,apm-*,traces-*.otel-*,logs-apm*,apm-*,logs-*.otel-*,metrics-apm*,apm-*,metrics-*.otel-*'
+            'apm-*,logs-*.otel-*,logs-apm*,metrics-*.otel-*,metrics-apm*,traces-*.otel-*,traces-apm*'
           );
         });
       });

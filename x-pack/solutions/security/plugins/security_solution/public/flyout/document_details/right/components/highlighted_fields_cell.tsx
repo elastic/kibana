@@ -19,7 +19,8 @@ import {
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
-import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
+import { isFlyoutLink } from '../../../shared/utils/link_utils';
+import { PreviewLink } from '../../../shared/components/preview_link';
 
 export interface HighlightedFieldsCellProps {
   /**
@@ -44,6 +45,11 @@ export interface HighlightedFieldsCellProps {
    * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
    */
   showPreview?: boolean;
+  /**
+   * The indexName to be passed to the flyout preview panel
+   * when clicking on "Source event" id
+   */
+  ancestorsIndexName?: string;
 }
 
 /**
@@ -55,6 +61,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   originalField = '',
   scopeId = '',
   showPreview = false,
+  ancestorsIndexName,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
@@ -80,12 +87,13 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
               key={`${i}-${value}`}
               data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
             >
-              {showPreview && hasPreview(field) ? (
+              {showPreview && isFlyoutLink({ field, scopeId }) ? (
                 <PreviewLink
                   field={field}
                   value={value}
                   scopeId={scopeId}
                   data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
+                  ancestorsIndexName={ancestorsIndexName}
                 />
               ) : field === AGENT_STATUS_FIELD_NAME ? (
                 <AgentStatus

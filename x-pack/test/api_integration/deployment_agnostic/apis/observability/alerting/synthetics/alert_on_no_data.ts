@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { waitForDocumentInIndex } from '@kbn/test-suites-xpack-observability/alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
+import { waitForDocumentInIndex } from '../../../../../../common/utils/observability/alerting_wait_for_helpers';
 import { RoleCredentials, SupertestWithRoleScopeType } from '../../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {

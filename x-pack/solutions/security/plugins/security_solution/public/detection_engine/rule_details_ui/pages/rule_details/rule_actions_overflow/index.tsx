@@ -14,6 +14,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { usePrebuiltRuleBaseVersionContext } from '../../../../rule_management/components/rule_details/base_version_diff/base_version_context';
+import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine';
 import { useScheduleRuleRun } from '../../../../rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../../common';
@@ -85,6 +87,11 @@ const RuleActionsOverflowComponent = ({
       path: getRulesUrl(),
     });
   }, [navigateToApp]);
+
+  const {
+    actions: { openCustomizationsRevertFlyout },
+    state: { doesBaseVersionExist },
+  } = usePrebuiltRuleBaseVersionContext();
 
   const actions = useMemo(
     () =>
@@ -177,6 +184,31 @@ const RuleActionsOverflowComponent = ({
             >
               {i18nActions.MANUAL_RULE_RUN}
             </EuiContextMenuItem>,
+            ...(isCustomizedPrebuiltRule(rule) // Don't display action if rule isn't a customized prebuilt rule
+              ? [
+                  <EuiContextMenuItem
+                    key={i18nActions.REVERT_RULE}
+                    toolTipContent={
+                      !doesBaseVersionExist ? i18nActions.REVERT_RULE_TOOLTIP_CONTENT : undefined
+                    }
+                    toolTipProps={{
+                      title: !doesBaseVersionExist
+                        ? i18nActions.REVERT_RULE_TOOLTIP_TITLE
+                        : undefined,
+                      'data-test-subj': 'rules-details-revert-rule-tooltip',
+                    }}
+                    icon="timeRefresh"
+                    disabled={!userHasPermissions || !doesBaseVersionExist}
+                    data-test-subj="rules-details-revert-rule"
+                    onClick={() => {
+                      closePopover();
+                      openCustomizationsRevertFlyout();
+                    }}
+                  >
+                    {i18nActions.REVERT_RULE}
+                  </EuiContextMenuItem>,
+                ]
+              : []),
             <EuiContextMenuItem
               key={i18nActions.DELETE_RULE}
               icon="trash"
@@ -207,6 +239,7 @@ const RuleActionsOverflowComponent = ({
       rule,
       canDuplicateRuleWithActions,
       userHasPermissions,
+      doesBaseVersionExist,
       startTransaction,
       closePopover,
       showBulkDuplicateExceptionsConfirmation,
@@ -217,6 +250,7 @@ const RuleActionsOverflowComponent = ({
       showManualRuleRunConfirmation,
       telemetry,
       scheduleRuleRun,
+      openCustomizationsRevertFlyout,
       confirmDeletion,
       onRuleDeletedCallback,
     ]

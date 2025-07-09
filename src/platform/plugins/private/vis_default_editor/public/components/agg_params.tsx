@@ -18,6 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
 import {

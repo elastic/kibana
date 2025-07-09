@@ -10,9 +10,10 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getMonitorFilters, OverviewStatusQuery } from '../common';
-import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 import { RouteContext } from '../types';
 import {
@@ -115,7 +116,7 @@ export class OverviewStatusService {
       ];
     };
     const filters: QueryDslQueryContainer[] = [
-      ...(showFromAllSpaces ? [] : [{ term: { 'meta.space_id': spaceId } }]),
+      ...(showFromAllSpaces ? [] : [{ terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } }]),
       ...getTermFilter('monitor.type', monitorTypes),
       ...getTermFilter('tags', tags),
       ...getTermFilter('monitor.project.id', projects),
@@ -370,7 +371,7 @@ export class OverviewStatusService {
       projectId: monitor.attributes[ConfigKey.PROJECT_ID],
       isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
       updated_at: monitor.updated_at,
-      spaceId: monitor.namespaces?.[0],
+      spaces: monitor.namespaces,
       urls: monitor.attributes[ConfigKey.URLS],
       maintenanceWindows: monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS]?.map((mw) => mw),
     };

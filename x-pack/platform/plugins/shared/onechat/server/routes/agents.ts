@@ -6,96 +6,45 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Subject, Observable } from 'rxjs';
-import { ServerSentEvent } from '@kbn/sse-utils';
-import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import type { ChatAgentEvent } from '@kbn/onechat-common';
-import type { CallAgentResponse } from '../../common/http_api/agents';
+import { AgentType } from '@kbn/onechat-common';
+import type { ListAgentsResponse } from '../../common/http_api/agents';
 import { apiPrivileges } from '../../common/features';
+import { agentToDescriptor } from '../services/agents/utils';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 
 export function registerAgentRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  router.post(
+  router.get(
     {
-      path: '/internal/onechat/agents/invoke',
+      path: '/internal/chat/agents',
+      validate: {
+        query: schema.object({
+          type: schema.string({ defaultValue: AgentType.conversational }),
+        }),
+      },
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
-      validate: {
-        body: schema.object({
-          agentId: schema.string({}),
-          agentParams: schema.recordOf(schema.string(), schema.any()),
-        }),
+      options: {
+        availability: {
+          stability: 'experimental',
+        },
       },
     },
     wrapHandler(async (ctx, request, response) => {
-      const { agents } = getInternalServices();
-      const { agentId, agentParams } = request.body;
-      const agentRegistry = agents.registry.asPublicRegistry();
+      // const { type } = request.query;
+      const { agents: agentService } = getInternalServices();
+      const agentRegistry = agentService.registry.asPublicRegistry();
 
-      const agent = await agentRegistry.get({ agentId, request });
-      const agentResult = await agent.execute({
-        agentParams: agentParams as any,
-      });
+      // TODO: use type as filter?
+      const agents = await agentRegistry.list({ request });
 
-      return response.ok<CallAgentResponse>({
-        body: agentResult,
-      });
-    })
-  );
-
-  // stream agent events endpoint
-  router.post(
-    {
-      path: '/internal/onechat/agents/stream',
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
-      },
-      validate: {
-        body: schema.object({
-          agentId: schema.string({}),
-          agentParams: schema.recordOf(schema.string(), schema.any()),
-        }),
-      },
-    },
-    wrapHandler(async (ctx, request, response) => {
-      const { agents } = getInternalServices();
-      const { agentId, agentParams } = request.body;
-      const agentRegistry = agents.registry.asPublicRegistry();
-
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
-
-      const subject$ = new Subject<ChatAgentEvent>();
-
-      const agent = await agentRegistry.get({ agentId, request });
-      agent
-        .execute({
-          agentParams: agentParams as any,
-          onEvent: (event) => {
-            subject$.next(event);
-          },
-        })
-        .then(
-          (result) => {
-            // TODO: should we emit an event with the final result?
-            subject$.complete();
-          },
-          (error) => {
-            subject$.error(error);
-          }
-        );
-
-      return response.ok({
-        body: observableIntoEventSourceStream(subject$ as unknown as Observable<ServerSentEvent>, {
-          signal: abortController.signal,
-          logger,
-        }),
+      return response.ok<ListAgentsResponse>({
+        body: {
+          agents: agents.map(agentToDescriptor),
+        },
       });
     })
   );

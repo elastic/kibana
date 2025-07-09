@@ -28,7 +28,13 @@ export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 
 /**
- * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
+ * UI settings
+ */
+
+export const CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID = 'cases:incrementalIdDisplay:enabled';
+
+/**
+ * If more values are added here please also add them here: x-pack/platform/test/cases_api_integration/common/plugins
  */
 export const SAVED_OBJECT_TYPES = [
   CASE_SAVED_OBJECT,
@@ -337,3 +343,8 @@ export const OBSERVABLE_TYPES_BUILTIN = [
 ];
 
 export const OBSERVABLE_TYPES_BUILTIN_KEYS = OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key);
+
+/**
+ * EBT events
+ */
+export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view';

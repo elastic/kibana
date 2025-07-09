@@ -7,8 +7,9 @@
 
 export {
   AgentType,
-  OneChatDefaultAgentId,
-  OneChatDefaultAgentProviderId,
+  AgentMode,
+  oneChatDefaultAgentId,
+  oneChatAgentProviderIds,
   type AgentDescriptor,
 } from './descriptor';
 export {
@@ -45,3 +46,4 @@ export {
   toSerializedAgentIdentifier,
   toStructuredAgentIdentifier,
 } from './identifiers';
+export type { AgentProfile } from './profiles';

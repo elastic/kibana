@@ -51,5 +51,6 @@ export * from './rule_to_update_schema';
 export * from './update_rule';
 export * from './get_simple_rule_as_ndjson';
 export * from './rule_gaps';
+export * from './import_rules';
 
 export * from './prebuilt_rules';

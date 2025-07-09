@@ -16,6 +16,7 @@ const createInstallClientMock = (): InstallClientMock => {
     setInstallationSuccessful: jest.fn(),
     setInstallationFailed: jest.fn(),
     setUninstalled: jest.fn(),
+    getPreviouslyInstalledInferenceIds: jest.fn().mockResolvedValue([]),
   } as unknown as InstallClientMock;
 };
 

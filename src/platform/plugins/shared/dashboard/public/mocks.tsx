@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { DashboardStart } from './plugin';
 import { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
-import { DashboardPanelMap, DashboardSectionMap } from '../common';
+import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -125,69 +125,70 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
       from: 'now-15m',
     },
     timeRestore: false,
-    viewMode: 'view',
-    panels: {},
-    sections: {},
+    panels: [],
     ...overrides,
   };
 }
 
-export function getMockDashboardPanels(
-  withSections: boolean = false,
-  overrides?: {
-    panels?: DashboardPanelMap;
-    sections?: DashboardSectionMap;
-  }
-): { panels: DashboardPanelMap; sections: DashboardSectionMap } {
-  const panels = {
-    '1': {
+export function getMockPanels() {
+  return [
+    {
       gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-      type: 'lens',
-      explicitInput: { id: '1' },
+      panelConfig: { title: 'panel One' },
+      panelIndex: '1',
+      type: 'testPanelType',
     },
-    '2': {
+    {
       gridData: { x: 6, y: 0, w: 6, h: 6, i: '2' },
-      type: 'lens',
-      explicitInput: { id: '2' },
+      panelConfig: { title: 'panel Two' },
+      panelIndex: '2',
+      type: 'testPanelType',
     },
-    ...overrides?.panels,
-  };
-  if (!withSections) return { panels, sections: {} };
+  ];
+}
 
-  return {
-    panels: {
-      ...panels,
-      '3': {
-        gridData: { x: 0, y: 0, w: 6, h: 6, i: '3', sectionId: 'section1' },
-        type: 'lens',
-        explicitInput: { id: '3' },
+export function getMockPanelsWithSections() {
+  return [
+    ...getMockPanels(),
+    {
+      title: 'Section One',
+      collapsed: true,
+      gridData: {
+        y: 6,
+        i: 'section1',
       },
-      '4': {
-        gridData: { x: 0, y: 0, w: 6, h: 6, i: '4', sectionId: 'section2' },
-        type: 'lens',
-        explicitInput: { id: '4' },
-      },
-    },
-    sections: {
-      section1: {
-        id: 'section1',
-        title: 'Section One',
-        collapsed: true,
-        gridData: {
-          y: 6,
-          i: 'section1',
+      panels: [
+        {
+          gridData: { x: 0, y: 0, w: 6, h: 6, i: '3' },
+          panelConfig: { title: 'panel Three' },
+          panelIndex: '3',
+          type: 'testPanelType',
         },
-      },
-      section2: {
-        id: 'section2',
-        title: 'Section Two',
-        collapsed: false,
-        gridData: {
-          y: 7,
-          i: 'section2',
-        },
-      },
-      ...overrides?.sections,
+      ],
     },
-  } as any;
+    {
+      title: 'Section Two',
+      collapsed: false,
+      gridData: {
+        y: 7,
+        i: 'section2',
+      },
+      panels: [
+        {
+          gridData: { x: 0, y: 0, w: 6, h: 6, i: '4' },
+          panelConfig: { title: 'panel Four' },
+          panelIndex: '4',
+          type: 'testPanelType',
+        },
+      ],
+    },
+  ];
+}
+
+export function getMockLayout() {
+  return deserializeLayout(getMockPanels(), () => []).layout;
+}
+
+export function getMockLayoutWithSections() {
+  return deserializeLayout(getMockPanelsWithSections(), () => []).layout;
 }

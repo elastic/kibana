@@ -6,8 +6,8 @@
  */
 
 import { useIntervalForHeatmap } from './pad_heatmap_interval_hooks';
-import { getPrivilegedMonitorUsersJoin } from '../../../../helpers';
 import type { AnomalyBand } from '../pad_anomaly_bands';
+import { getPrivilegedMonitorUsersJoin } from '../../../../queries/helpers';
 
 const getHiddenBandsFilters = (anomalyBands: AnomalyBand[]) => {
   const hiddenBands = anomalyBands.filter((each) => each.hidden);
@@ -15,13 +15,6 @@ const getHiddenBandsFilters = (anomalyBands: AnomalyBand[]) => {
     `| WHERE record_score < ${eachHiddenBand.start} OR record_score >= ${eachHiddenBand.end} `;
   return hiddenBands.map(recordScoreFilterClause).join('');
 };
-
-/**
- * Currently, this query utilizes the `TOP` ES|QL command to filter for privileged users, and this effectively puts a cap on the number of data
- * sources, per `user.name`, this query supports. Right now, we have a total of 3 possible values ('integration', 'api', and 'csv'), so 100
- * is more than enough, and should likely suffice with the current architecture. If the `VALUES` ES|QL command is ever officially supported, this limitation would go away.
- */
-const numberOfSupportedDataSources = 100;
 
 export const usePadTopAnomalousUsersEsqlSource = ({
   jobIds,
@@ -41,7 +34,7 @@ export const usePadTopAnomalousUsersEsqlSource = ({
     | WHERE record_score IS NOT NULL AND user.name IS NOT NULL
     ${getHiddenBandsFilters(anomalyBands)}
     ${getPrivilegedMonitorUsersJoin(spaceId)}
-    | STATS max_record_score = MAX(record_score), user.is_privileged = TOP(user.is_privileged, ${numberOfSupportedDataSources}, "desc") by user.name
+    | STATS max_record_score = MAX(record_score), user.is_privileged = TOP(user.is_privileged, 1, "desc") by user.name
     | WHERE user.is_privileged == true
     | SORT max_record_score DESC
     | KEEP user.name

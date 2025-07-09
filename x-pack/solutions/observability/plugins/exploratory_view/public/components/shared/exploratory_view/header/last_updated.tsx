@@ -49,7 +49,7 @@ export function LastUpdated() {
     <EuiFlexGroup alignItems="center" gutterSize="m">
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={<ChartCreationInfo {...chartTimeRangeContext} />}>
-          <EuiIcon type="iInCircle" />
+          <EuiIcon type="info" />
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

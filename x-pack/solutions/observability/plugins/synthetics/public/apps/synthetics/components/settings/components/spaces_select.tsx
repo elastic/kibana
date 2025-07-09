@@ -38,7 +38,7 @@ export const SpaceSelector = <T extends FieldValues>({
   const showFieldInvalid = (isSubmitted || isTouched) && !!error;
 
   useEffect(() => {
-    if (data) {
+    if (data?.spacesDataPromise) {
       data.spacesDataPromise.then((spacesData) => {
         setSpacesList([
           allSpacesOption,

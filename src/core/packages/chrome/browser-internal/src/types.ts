@@ -27,8 +27,70 @@ export interface InternalChromeStart extends ChromeStart {
   /**
    * Used only by the rendering service to render the header UI
    * @internal
+   *
+   * @remarks
+   * LegacyHeader is a fixed layout header component that is used in the legacy fixed layout.
+   * Apart from the header, it also includes the navigations, banner and the chromeless header state.
+   * It decides which header - classic or project based on the chromeStyle$ observable.
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getHeaderComponent(): JSX.Element;
+  getLegacyHeaderComponentForFixedLayout(): JSX.Element;
+
+  /**
+   * Used only by the rendering service to render the header UI
+   * @internal
+   *
+   * @remarks
+   * Header that is used in the grid layout with the "classic" navigation.
+   * It includes the header and the overlay classic navigation.
+   * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getClassicHeaderComponentForGridLayout(): JSX.Element;
+
+  /**
+   * Used only by the rendering service to render the header UI
+   * @internal
+   *
+   * @remarks
+   * Header that is used in the grid layout with the "project" navigation (solution and serverless)
+   * It includes the header.
+   * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getProjectHeaderComponentForGridLayout(): JSX.Element;
+
+  /**
+   * Used only by the rendering service to render the header banner UI
+   * @internal
+   *
+   * @remarks
+   * Can be used by layout service to render a banner separate from the header.
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getHeaderBanner(): JSX.Element;
+
+  /**
+   * Used only by the rendering service to render the chromeless header UI
+   * @internal
+   *
+   * @remarks
+   * Includes global loading indicator for chromeless state.
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getChromelessHeader(): JSX.Element;
+
+  /**
+   * Used only by the rendering service to render the project app menu UI
+   * @internal
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getProjectAppMenuComponent(): JSX.Element;
 
   /**
    * Used only by the rendering service to retrieve the set of classNames

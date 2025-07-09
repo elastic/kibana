@@ -153,6 +153,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         });
 
       /** Fetch the suggestions and perform validation */
+      const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
       const loadMoreSubject = new Subject<void>();
       const fetchSubscription = fetchAndValidate$({
         api: {
@@ -169,13 +170,13 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         sort$,
         controlFetch$: (onReload: () => void) => controlGroupApi.controlFetch$(uuid, onReload),
       }).subscribe((result) => {
-        // if there was an error during fetch, set blocking error and return early
+        // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
-          dataControlManager.api.setBlockingError((result as { error: Error }).error);
+          suggestionLoadError$.next((result as { error: Error }).error);
           return;
-        } else if (dataControlManager.api.blockingError$.getValue()) {
+        } else if (suggestionLoadError$.getValue()) {
           // otherwise,  if there was a previous error, clear it
-          dataControlManager.api.setBlockingError(undefined);
+          suggestionLoadError$.next(undefined);
         }
 
         // fetch was successful so set all attributes from result
@@ -305,9 +306,22 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         },
       });
 
+      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+      const errorsSubscription = combineLatest([
+        dataControlManager.api.blockingError$,
+        suggestionLoadError$,
+      ])
+        .pipe(
+          map(([controlError, suggestionError]) => {
+            return controlError ?? suggestionError;
+          })
+        )
+        .subscribe((error) => blockingError$.next(error));
+
       const api = finalizeApi({
         ...unsavedChangesApi,
         ...dataControlManager.api,
+        blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
         serializeState,
@@ -398,6 +412,34 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         setSort: (sort: OptionsListSortingType | undefined) => {
           sort$.next(sort);
         },
+        selectAll: (keys: string[]) => {
+          const field = api.field$.getValue();
+          if (keys.length < 1 || !field) {
+            api.setBlockingError(
+              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            );
+            return;
+          }
+
+          const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
+          const newSelections = keys.filter((key) => !selectedOptions.includes(key as string));
+          selectionsManager.api.setSelectedOptions([...selectedOptions, ...newSelections]);
+        },
+        deselectAll: (keys: string[]) => {
+          const field = api.field$.getValue();
+          if (keys.length < 1 || !field) {
+            api.setBlockingError(
+              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            );
+            return;
+          }
+
+          const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
+          const remainingSelections = selectedOptions.filter(
+            (option) => !keys.includes(option as string)
+          );
+          selectionsManager.api.setSelectedOptions(remainingSelections);
+        },
       };
 
       if (selectionsManager.api.hasInitialSelections) {
@@ -418,6 +460,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               validSearchStringSubscription.unsubscribe();
               hasSelectionsSubscription.unsubscribe();
               selectionsSubscription.unsubscribe();
+              errorsSubscription.unsubscribe();
             };
           }, []);
 

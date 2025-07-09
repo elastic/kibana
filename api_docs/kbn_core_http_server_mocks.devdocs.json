@@ -116,13 +116,29 @@
         "tags": [],
         "label": "createHttpService",
         "description": [
-          "\nCreates a concrete HttpService with a mocked context."
+          "\nCreates an HTTP service instance for external services to test against."
         ],
         "signature": [
-          "({ buildNum, ...overrides }?: Partial<",
-          "CoreContext",
-          " & { buildNum: number; }>) => ",
-          "HttpService"
+          "() => ",
+          "HttpIntegrationTestService"
+        ],
+        "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.HttpIntegrationTestService",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpIntegrationTestService",
+        "description": [
+          "\nA mock of the HttpService that can be used in tests.\n"
         ],
         "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
         "deprecated": false,
@@ -130,29 +146,138 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-server.createHttpService.$1",
-            "type": "Object",
+            "id": "def-server.HttpIntegrationTestService.preboot",
+            "type": "Function",
             "tags": [],
-            "label": "{\n  buildNum,\n  ...overrides\n}",
+            "label": "preboot",
             "description": [],
             "signature": [
-              "Partial<",
-              "CoreContext",
-              " & { buildNum: number; }>"
+              "() => Promise<void>"
             ],
             "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.HttpIntegrationTestService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => Promise<{ createRouter: (path: string) => ",
+              "IRouter",
+              "<any>; server: { listener: any; }; }>"
+            ],
+            "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.HttpIntegrationTestService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.HttpIntegrationTestService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.HttpIntegrationServicePrebootContractMock",
+        "type": "Type",
+        "tags": [],
+        "label": "HttpIntegrationServicePrebootContractMock",
+        "description": [],
+        "signature": [
+          "void"
+        ],
+        "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.HttpIntegrationServiceSetupContractMock",
+        "type": "Type",
+        "tags": [],
+        "label": "HttpIntegrationServiceSetupContractMock",
+        "description": [],
+        "signature": [
+          "{ createRouter: (path: string) => ",
+          "IRouter",
+          "<any>; server: { listener: any; }; }"
+        ],
+        "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.HttpIntegrationServiceStartContractMock",
+        "type": "Type",
+        "tags": [],
+        "label": "HttpIntegrationServiceStartContractMock",
+        "description": [],
+        "signature": [
+          "void"
+        ],
+        "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server-mocks",
+        "id": "def-server.HttpIntegrationServiceStopContractMock",
+        "type": "Type",
+        "tags": [],
+        "label": "HttpIntegrationServiceStopContractMock",
+        "description": [],
+        "signature": [
+          "void"
+        ],
+        "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
         "id": "def-server.HttpServicePrebootMock",
@@ -560,7 +685,7 @@
                   },
                   "<",
                   "RequestLog",
-                  "> | undefined; readonly method?: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"subscribe\" | \"lock\" | \"unsubscribe\" | \"report\" | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\" | undefined; readonly mime?: string | undefined; readonly orig?: ",
+                  "> | undefined; readonly method?: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"lock\" | \"unsubscribe\" | \"subscribe\" | \"report\" | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\" | undefined; readonly mime?: string | undefined; readonly orig?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -760,7 +885,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<(method: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"subscribe\" | \"lock\" | \"unsubscribe\" | \"report\" | ",
+                  "<(method: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"lock\" | \"unsubscribe\" | \"subscribe\" | \"report\" | ",
                   "HTTP_METHODS",
                   " | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\") => void> | undefined; setUrl?: ",
                   {

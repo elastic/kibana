@@ -36,7 +36,7 @@ describe('ConnectorSelector', () => {
     );
 
     fireEvent.click(getByTestId(testSubj));
-    fireEvent.click(getByTestId('1'));
+    fireEvent.click(getByTestId('connector-option-Connector One'));
 
     expect(mockOnChange).toHaveBeenCalledWith('1');
   });

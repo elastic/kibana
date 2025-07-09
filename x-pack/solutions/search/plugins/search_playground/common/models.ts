@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticModelIds } from '@kbn/inference-common';
 import { ModelProvider, LLMs } from './types';
 
 export const MODELS: ModelProvider[] = [
@@ -39,6 +40,12 @@ export const MODELS: ModelProvider[] = [
     provider: LLMs.bedrock,
   },
   {
+    name: 'Anthropic Claude 3.7 Sonnet',
+    model: 'anthropic.claude-3-7-sonnet-20250219-v1:0',
+    promptTokenLimit: 200000,
+    provider: LLMs.bedrock,
+  },
+  {
     name: 'Google Gemini 1.5 Pro',
     model: 'gemini-1.5-pro-002',
     promptTokenLimit: 2097152,
@@ -49,5 +56,11 @@ export const MODELS: ModelProvider[] = [
     model: 'gemini-1.5-flash-002',
     promptTokenLimit: 2097152,
     provider: LLMs.gemini,
+  },
+  {
+    name: 'Elastic Managed LLM',
+    model: elasticModelIds.RainbowSprinkles,
+    promptTokenLimit: 200000,
+    provider: LLMs.inference,
   },
 ];

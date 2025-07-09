@@ -165,7 +165,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     );
   });
 
-  it('should throw error if it cannot establish a connection with remote kibana', async () => {
+  it('should return an error if it cannot establish a connection with remote kibana', async () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
@@ -182,11 +182,11 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
       );
     });
 
-    await expect(
-      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
-    ).rejects.toThrowError(
-      'request to http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed, reason: getaddrinfo ENOTFOUND remote-kibana-host'
-    );
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+      error:
+        'GET http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed with error: request to http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed, reason: getaddrinfo ENOTFOUND remote-kibana-host',
+    });
   });
 
   it('should return the response from the remote status api', async () => {
@@ -240,7 +240,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     });
   });
 
-  it('should throw if the remote api returns error', async () => {
+  it('should return an error if the remote api returns error', async () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
@@ -254,9 +254,11 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     mockedFetch.mockImplementation(() => {
       throw new Error(`some error`);
     });
-    await expect(
-      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
-    ).rejects.toThrowError('some error');
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+      error:
+        'GET http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed with error: some error',
+    });
   });
 
   it('should return error if the fetch returns invalid-json error', async () => {

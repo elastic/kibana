@@ -65,7 +65,7 @@ const styles = css({
       content: '" [" attr(href) "]"',
     },
     figure: {
-      'page-break-inside': 'avoid',
+      pageBreakInside: 'avoid',
     },
     '*': {
       printColorAdjust: 'exact !important',

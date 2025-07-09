@@ -22,12 +22,13 @@
       "indexManagement",
       "ingestPipelines",
       "navigation",
-      "observabilityAIAssistant",
       "savedObjectsTagging",
       "share",
       "streams",
-      "unifiedSearch"
+      "unifiedSearch",
+      "unifiedDocViewer"
     ],
-    "requiredBundles": ["kibanaReact", "kibanaUtils"]
+    "optionalPlugins": ["observabilityAIAssistant"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"]
   }
 }

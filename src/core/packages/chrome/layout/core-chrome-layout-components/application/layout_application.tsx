@@ -10,6 +10,7 @@
 import React, { ReactNode } from 'react';
 
 import { useEuiOverflowScroll } from '@elastic/eui';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 import { styles } from './layout_application.styles';
 
@@ -19,8 +20,22 @@ import { styles } from './layout_application.styles';
  * @param props - Props for the LayoutApplication component.
  * @returns The rendered LayoutApplication component.
  */
-export const LayoutApplication = ({ children }: { children: ReactNode }) => {
+export const LayoutApplication = ({
+  children,
+  topBar,
+  bottomBar,
+}: {
+  children: ReactNode;
+  topBar?: ReactNode;
+  bottomBar?: ReactNode;
+}) => {
   const overflow = useEuiOverflowScroll('y');
 
-  return <main css={[styles.root, overflow]}>{children}</main>;
+  return (
+    <main css={[styles.root, overflow]} id={APP_MAIN_SCROLL_CONTAINER_ID}>
+      {topBar && <div css={styles.topBar}>{topBar}</div>}
+      <div css={[styles.content]}>{children}</div>
+      {bottomBar && <div css={styles.bottomBar}>{bottomBar}</div>}
+    </main>
+  );
 };

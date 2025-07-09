@@ -7,7 +7,7 @@
 import { SavedObjectsType } from '@kbn/core/server';
 import { syntheticsParamType } from '../../common/types/saved_objects';
 
-export const SYNTHETICS_SECRET_ENCRYPTED_TYPE = {
+export const SYNTHETICS_PARAMS_SECRET_ENCRYPTED_TYPE = {
   type: syntheticsParamType,
   attributesToEncrypt: new Set(['value']),
   attributesToIncludeInAAD: new Set(['key', 'description', 'tags']),

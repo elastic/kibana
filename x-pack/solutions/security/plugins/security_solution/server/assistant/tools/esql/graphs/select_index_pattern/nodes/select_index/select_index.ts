@@ -5,23 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatVertexAI,
-  ActionsClientChatOpenAI,
-} from '@kbn/langchain/server';
 import { Command } from '@langchain/langgraph';
 
 import type { SelectIndexPatternAnnotation } from '../../state';
 
-export const getSelectIndexPattern = ({
-  createLlmInstance,
-}: {
-  createLlmInstance: () =>
-    | ActionsClientChatBedrockConverse
-    | ActionsClientChatVertexAI
-    | ActionsClientChatOpenAI;
-}) => {
+export const getSelectIndexPattern = () => {
   return async (state: typeof SelectIndexPatternAnnotation.State) => {
     const indexPatternAnalysis = Object.values(state.indexPatternAnalysis);
     const candidateIndexPatterns = indexPatternAnalysis.filter(

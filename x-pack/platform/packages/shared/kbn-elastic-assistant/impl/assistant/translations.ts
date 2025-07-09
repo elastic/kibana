@@ -37,10 +37,10 @@ export const EMPTY_SCREEN_TITLE = i18n.translate(
 );
 
 export const EMPTY_SCREEN_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.assistant.emptyScreen.description',
+  'xpack.elasticAssistant.assistant.emptyScreen.descriptionV2',
   {
     defaultMessage:
-      'Ask me anything from "Summarize this alert" to "Help me build a query" using the following system prompt:',
+      'Ask me anything in the chat box, or choose one of the prompts below to jump right in.',
   }
 );
 

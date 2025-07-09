@@ -48,6 +48,11 @@ describe('SettingsTab', () => {
           basePath: { prepend: prependMock },
         },
         productDocBase: undefined,
+        notifications: {
+          toasts: {
+            add: jest.fn(),
+          },
+        },
       },
     });
     useKnowledgeBaseMock.mockReturnValue({

@@ -9,23 +9,15 @@ import { tool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { z } from '@kbn/zod';
 import { HumanMessage } from '@langchain/core/messages';
-import type { ElasticAssistantApiRequestHandlerContext } from '@kbn/elastic-assistant-plugin/server/types';
-import type {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatVertexAI,
-  ActionsClientChatOpenAI,
-} from '@kbn/langchain/server';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './utils/common';
 import { getGenerateEsqlGraph } from './graphs/generate_esql/generate_esql';
 
-export type GenerateEsqlParams = AssistantToolParams & {
-  assistantContext: ElasticAssistantApiRequestHandlerContext;
-  createLlmInstance: () =>
-    | ActionsClientChatBedrockConverse
-    | ActionsClientChatVertexAI
-    | ActionsClientChatOpenAI;
-};
+export type GenerateEsqlParams = Require<
+  AssistantToolParams,
+  'assistantContext' | 'createLlmInstance'
+>;
 
 const TOOL_NAME = 'GenerateESQLTool';
 
@@ -55,7 +47,7 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
       createLlmInstance != null
     );
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, inference, logger, request, isOssModel, esClient, createLlmInstance } =
@@ -63,7 +55,7 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
 
     if (inference == null || connectorId == null) return null;
 
-    const selfHealingGraph = getGenerateEsqlGraph({
+    const selfHealingGraph = await getGenerateEsqlGraph({
       esClient,
       connectorId,
       inference,

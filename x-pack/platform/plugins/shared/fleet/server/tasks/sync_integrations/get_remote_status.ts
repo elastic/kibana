@@ -64,11 +64,17 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
 
     let body;
     let errorMessage;
-    const res = await fetch(url, options);
+    let res;
+
     try {
+      res = await fetch(url, options);
       body = await res.json();
     } catch (error) {
-      errorMessage = `GET ${url} failed with status ${res.status}. ${error.message}`;
+      if (res) {
+        errorMessage = `GET ${url} failed with status ${res.status}. ${error.message}`;
+      } else {
+        errorMessage = `GET ${url} failed with error: ${error.message}`;
+      }
     }
 
     if (body?.statusCode && body?.message) {

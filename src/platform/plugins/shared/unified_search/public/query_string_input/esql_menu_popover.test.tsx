@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { createStubDataView, stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/stubs';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -95,6 +96,7 @@ describe('ESQLMenuPopover', () => {
     await waitFor(() => {
       expect(screen.getByText('Count of logs')).toBeInTheDocument();
       expect(screen.getByText('Average bytes')).toBeInTheDocument();
+      expect(screen.getByText('Identify patterns')).toBeInTheDocument();
     });
   });
 
@@ -112,5 +114,41 @@ describe('ESQLMenuPopover', () => {
     // and that the static recommended queries are still shown.
     await userEvent.click(screen.getByRole('button'));
     expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
+  });
+
+  it('should show identify patterns recommended query', async () => {
+    const stubLogstashDataView = createStubDataView({
+      spec: {
+        id: 'logstash-*',
+        title: 'logstash-*',
+        timeFieldName: 'time',
+        fields: {
+          ...stubLogstashFieldSpecMap,
+          message: {
+            name: 'message',
+            type: 'string',
+            esTypes: ['text'],
+            aggregatable: true,
+            searchable: true,
+            count: 0,
+            readFromDocValues: true,
+            scripted: false,
+            isMapped: true,
+          },
+        },
+      },
+    });
+
+    renderESQLPopover(stubLogstashDataView);
+
+    // open the popover and check for recommended queries
+    await userEvent.click(screen.getByRole('button'));
+    expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
+    // Open the nested section to see the recommended queries
+    await waitFor(() => userEvent.click(screen.getByTestId('esql-recommended-queries')));
+
+    await waitFor(() => {
+      expect(screen.getByText('Identify patterns')).toBeInTheDocument();
+    });
   });
 });

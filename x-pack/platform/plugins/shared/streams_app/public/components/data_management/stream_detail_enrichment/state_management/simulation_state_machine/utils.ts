@@ -41,22 +41,21 @@ export function getTableColumns(
   return uniq([...uniqueProcessorsFields, ...uniqueDetectedFields]);
 }
 
-export function filterSimulationDocuments(
-  documents: Simulation['documents'],
-  filter: PreviewDocsFilterOption
-) {
+type SimulationDocReport = Simulation['documents'][number];
+
+export function getFilterSimulationDocumentsFn(filter: PreviewDocsFilterOption) {
   switch (filter) {
     case 'outcome_filter_parsed':
-      return documents.filter((doc) => doc.status === 'parsed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'parsed';
     case 'outcome_filter_partially_parsed':
-      return documents.filter((doc) => doc.status === 'partially_parsed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'partially_parsed';
     case 'outcome_filter_skipped':
-      return documents.filter((doc) => doc.status === 'skipped').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'skipped';
     case 'outcome_filter_failed':
-      return documents.filter((doc) => doc.status === 'failed').map((doc) => doc.value);
+      return (doc: SimulationDocReport) => doc.status === 'failed';
     case 'outcome_filter_all':
     default:
-      return documents.map((doc) => doc.value);
+      return (doc: SimulationDocReport) => true;
   }
 }
 

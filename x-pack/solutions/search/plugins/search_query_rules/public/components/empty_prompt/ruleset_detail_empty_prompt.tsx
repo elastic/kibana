@@ -19,9 +19,10 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
+import queryRulesDarkImg from '../../assets/query-rules-context-alt-dark.svg';
 
 export const RulesetDetailEmptyPrompt = () => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const positionRelative = css({
     position: 'relative',
   });
@@ -54,7 +55,11 @@ export const RulesetDetailEmptyPrompt = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow css={positionRelative}>
-          <img src={queryRulesImg} alt="Query Rules" css={imgProps} />
+          <img
+            src={colorMode === 'DARK' ? queryRulesDarkImg : queryRulesImg}
+            alt="Query Rules"
+            css={imgProps}
+          />
           <div css={gradientOverlay}>&nbsp;</div>
         </EuiFlexItem>
       </EuiFlexGroup>

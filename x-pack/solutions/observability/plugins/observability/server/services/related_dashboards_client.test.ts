@@ -10,6 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
 import { InvestigateAlertsClient } from './investigate_alerts_client';
 import { AlertData } from './alert_data';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 describe('RelatedDashboardsClient', () => {
   let logger: jest.Mocked<Logger>;
@@ -21,6 +22,7 @@ describe('RelatedDashboardsClient', () => {
     getAllRelevantFields: jest.fn().mockReturnValue(['field1', 'field2']),
     getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
     getRuleId: jest.fn().mockReturnValue('rule-id'),
+    getRuleTypeId: jest.fn().mockReturnValue(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID),
   } as unknown as AlertData;
 
   beforeEach(() => {
@@ -59,6 +61,8 @@ describe('RelatedDashboardsClient', () => {
     alertId = 'test-alert-id';
 
     client = new RelatedDashboardsClient(logger, dashboardClient, alertsClient, alertId);
+
+    jest.clearAllMocks();
   });
 
   describe('fetchSuggestedDashboards', () => {
@@ -377,6 +381,20 @@ describe('RelatedDashboardsClient', () => {
           title: 'Dashboard 1',
         },
       ]);
+    });
+
+    it('should not fetch suggested dashboards when the rule type id is not supported', async () => {
+      const mockAlert = {
+        ...baseMockAlert,
+        getRuleTypeId: jest.fn().mockReturnValue('unsupported-type-id'),
+      } as unknown as AlertData;
+      alertsClient.getAlertById.mockResolvedValue(mockAlert);
+
+      const result = await client.fetchRelatedDashboards();
+
+      expect(result.suggestedDashboards).toEqual([]);
+      expect(mockAlert.getRuleTypeId).toHaveBeenCalled();
+      expect(mockAlert.getAllRelevantFields).not.toHaveBeenCalled();
     });
   });
 

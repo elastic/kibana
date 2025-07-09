@@ -23,5 +23,5 @@ interface Props {
 }
 
 export const LevelInfoTip: FunctionComponent<Props> = ({ level }) => {
-  return <EuiIconTip content={i18nTexts[level]} position="top" type="iInCircle" />;
+  return <EuiIconTip content={i18nTexts[level]} position="top" type="info" />;
 };

@@ -30,8 +30,7 @@
       "expressions",
       "unifiedDocViewer",
       "unifiedSearch",
-      "contentManagement",
-      "discoverShared"
+      "contentManagement"
     ],
     "optionalPlugins": [
       "dataVisualizer",

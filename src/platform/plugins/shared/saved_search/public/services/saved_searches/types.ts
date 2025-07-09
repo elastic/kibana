@@ -8,16 +8,16 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 import type { DiscoverSessionAttributes } from '../../../server/saved_objects/schema';
 import type { SavedSearch as SavedSearchCommon, SavedSearchAttributes } from '../../../common';
 
 /** @public **/
 export interface SavedSearch extends SavedSearchCommon {
   sharingSavedObjectProps?: {
-    outcome?: ResolvedSimpleSavedObject['outcome'];
-    aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
-    aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+    outcome?: SavedObjectsResolveResponse['outcome'];
+    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
     errorJSON?: string;
   };
 }

@@ -20,3 +20,7 @@ export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
 export interface ConversationListOptions {
   agentId?: AgentIdentifier;
 }
+
+export interface ConversationGetOptions {
+  conversationId: string;
+}

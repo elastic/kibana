@@ -1,0 +1,1212 @@
+{
+  "id": "@kbn/cypress-test-helper",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.EndpointError",
+        "type": "Class",
+        "tags": [],
+        "label": "EndpointError",
+        "description": [
+          "\nEndpoint base error class that supports an optional second argument for providing additional data\nfor the error."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/cypress-test-helper",
+            "scope": "common",
+            "docId": "kibKbnCypressTestHelperPluginApi",
+            "section": "def-common.EndpointError",
+            "text": "EndpointError"
+          },
+          "<MetaType> extends Error"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.EndpointError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cypress-test-helper",
+                "id": "def-common.EndpointError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/cypress-test-helper",
+                "id": "def-common.EndpointError.Unnamed.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "meta",
+                "description": [],
+                "signature": [
+                  "MetaType | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.FormattedAxiosError",
+        "type": "Class",
+        "tags": [],
+        "label": "FormattedAxiosError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/cypress-test-helper",
+            "scope": "common",
+            "docId": "kibKbnCypressTestHelperPluginApi",
+            "section": "def-common.FormattedAxiosError",
+            "text": "FormattedAxiosError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/cypress-test-helper",
+            "scope": "common",
+            "docId": "kibKbnCypressTestHelperPluginApi",
+            "section": "def-common.EndpointError",
+            "text": "EndpointError"
+          },
+          "<unknown>"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.FormattedAxiosError.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "{ method: string; url: string; data: unknown; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.FormattedAxiosError.response",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "{ status: number; statusText: string; data: any; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.FormattedAxiosError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cypress-test-helper",
+                "id": "def-common.FormattedAxiosError.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "axiosError",
+                "description": [],
+                "signature": [
+                  "AxiosError",
+                  "<unknown, any>"
+                ],
+                "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.FormattedAxiosError.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [],
+            "signature": [
+              "() => { message: string; request: { method: string; url: string; data: unknown; }; response: { status: number; statusText: string; data: any; }; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.FormattedAxiosError.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.catchAxiosErrorFormatAndThrow",
+        "type": "Function",
+        "tags": [],
+        "label": "catchAxiosErrorFormatAndThrow",
+        "description": [
+          "\nUsed with `promise.catch()`, it will format the Axios error to a new error and will re-throw"
+        ],
+        "signature": [
+          "(error: Error) => never"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.catchAxiosErrorFormatAndThrow.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.createRuntimeServices",
+        "type": "Function",
+        "tags": [],
+        "label": "createRuntimeServices",
+        "description": [],
+        "signature": [
+          "({ kibanaUrl: _kibanaUrl, elasticsearchUrl, fleetServerUrl, username: _username, password: _password, spaceId, apiKey, esUsername: _esUsername, esPassword: _esPassword, log, asSuperuser, useCertForSsl, }: CreateRuntimeServicesOptions) => Promise<",
+          "RuntimeServices",
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/stack_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.createRuntimeServices.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  kibanaUrl: _kibanaUrl,\n  elasticsearchUrl,\n  fleetServerUrl = 'https://localhost:8220',\n  username: _username,\n  password: _password,\n  spaceId,\n  apiKey,\n  esUsername: _esUsername,\n  esPassword: _esPassword,\n  log = createToolingLogger(),\n  asSuperuser = false,\n  useCertForSsl = false,\n}",
+            "description": [],
+            "signature": [
+              "CreateRuntimeServicesOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/stack_services.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.createSecuritySuperuser",
+        "type": "Function",
+        "tags": [],
+        "label": "createSecuritySuperuser",
+        "description": [],
+        "signature": [
+          "(esClient: ",
+          "default",
+          ", username?: string | undefined, password?: string) => Promise<",
+          {
+            "pluginId": "@kbn/cypress-test-helper",
+            "scope": "common",
+            "docId": "kibKbnCypressTestHelperPluginApi",
+            "section": "def-common.CreatedSecuritySuperuser",
+            "text": "CreatedSecuritySuperuser"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.createSecuritySuperuser.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.createSecuritySuperuser.$2",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.createSecuritySuperuser.$3",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.createToolingLogger",
+        "type": "Function",
+        "tags": [],
+        "label": "createToolingLogger",
+        "description": [
+          "\nCreates an instance of `ToolingLog` that outputs to `stdout`.\nThe default log `level` for all instances can be set by setting the function's `defaultLogLevel`\nproperty. Default logging level can also be set from CLI scripts that use the `@kbn/dev-cli-runner`\nby calling the `setDefaultLogLevelFromCliFlags(flags)` and passing in the `flags` property.\n"
+        ],
+        "signature": [
+          "{ (level: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined): ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; defaultLogLevel: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\"; setDefaultLogLevelFromCliFlags(flags: ",
+          {
+            "pluginId": "@kbn/dev-cli-runner",
+            "scope": "common",
+            "docId": "kibKbnDevCliRunnerPluginApi",
+            "section": "def-common.Flags",
+            "text": "Flags"
+          },
+          "): void; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/logger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.createToolingLogger.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "signature": [
+              "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/logger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.enableFleetSpaceAwareness",
+        "type": "Function",
+        "tags": [],
+        "label": "enableFleetSpaceAwareness",
+        "description": [
+          "\nCalls the Fleet internal API to enable space awareness"
+        ],
+        "signature": [
+          "((kbnClient: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          },
+          ") => Promise<void>) & _.MemoizedFunction"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/fleet_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.enableFleetSpaceAwareness.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "kbnClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.KbnClient",
+                "text": "KbnClient"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/fleet_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.fetchKibanaStatus",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchKibanaStatus",
+        "description": [],
+        "signature": [
+          "(kbnClient: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          },
+          ") => Promise<",
+          "StatusResponse",
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/kibana_status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.fetchKibanaStatus.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "kbnClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.KbnClient",
+                "text": "KbnClient"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/kibana_status.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.getApiAuth",
+        "type": "Function",
+        "tags": [],
+        "label": "getApiAuth",
+        "description": [],
+        "signature": [
+          "() => { user: any; pass: any; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.getLocalhostRealIp",
+        "type": "Function",
+        "tags": [],
+        "label": "getLocalhostRealIp",
+        "description": [],
+        "signature": [
+          "() => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/network_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.isEndpointError",
+        "type": "Function",
+        "tags": [],
+        "label": "isEndpointError",
+        "description": [
+          "\nType guard to check if a given Error is an instance of EndpointError"
+        ],
+        "signature": [
+          "(err: Error) => err is ",
+          {
+            "pluginId": "@kbn/cypress-test-helper",
+            "scope": "common",
+            "docId": "kibKbnCypressTestHelperPluginApi",
+            "section": "def-common.EndpointError",
+            "text": "EndpointError"
+          },
+          "<unknown>"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.isEndpointError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "Error"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.isLocalhost",
+        "type": "Function",
+        "tags": [],
+        "label": "isLocalhost",
+        "description": [],
+        "signature": [
+          "(hostname: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/is_localhost.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.isLocalhost.$1",
+            "type": "string",
+            "tags": [],
+            "label": "hostname",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/is_localhost.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.isServerlessKibanaFlavor",
+        "type": "Function",
+        "tags": [],
+        "label": "isServerlessKibanaFlavor",
+        "description": [
+          "\nChecks to see if Kibana/ES is running in serverless mode"
+        ],
+        "signature": [
+          "(client: ",
+          "default",
+          " | ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          },
+          ") => Promise<boolean>"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/kibana_status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.isServerlessKibanaFlavor.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              "default",
+              " | ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.KbnClient",
+                "text": "KbnClient"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/kibana_status.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.login",
+        "type": "Function",
+        "tags": [],
+        "label": "login",
+        "description": [
+          "\nLogin to Kibana using API (not login page).\nBy default, user will be logged in using `KIBANA_USERNAME` and `KIBANA_PASSWORD` retrieved from\nthe cypress `env`\n"
+        ],
+        "signature": [
+          "{ (user?: ",
+          {
+            "pluginId": "@kbn/cypress-test-helper",
+            "scope": "common",
+            "docId": "kibKbnCypressTestHelperPluginApi",
+            "section": "def-common.SecurityTestUser",
+            "text": "SecurityTestUser"
+          },
+          "): Cypress.Chainable<{ username: string; password: string; }>; with(username: string, password: string): Cypress.Chainable<{ username: string; password: string; }>; withCustomRole(role: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "): Cypress.Chainable<{ username: string; password: string; }>; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/login.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.login.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cypress-test-helper",
+                "scope": "common",
+                "docId": "kibKbnCypressTestHelperPluginApi",
+                "section": "def-common.SecurityTestUser",
+                "text": "SecurityTestUser"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/login.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.request",
+        "type": "Function",
+        "tags": [],
+        "label": "request",
+        "description": [],
+        "signature": [
+          "<T = unknown>({ headers, ...options }: Partial<Cypress.RequestOptions>) => Cypress.Chainable<Cypress.Response<T>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.request.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  headers,\n  ...options\n}",
+            "description": [],
+            "signature": [
+              "Partial<Cypress.RequestOptions>"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.resolveCloudUsersFilePath",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveCloudUsersFilePath",
+        "description": [],
+        "signature": [
+          "(filename: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.resolveCloudUsersFilePath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "filename",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.samlAuthentication",
+        "type": "Function",
+        "tags": [],
+        "label": "samlAuthentication",
+        "description": [],
+        "signature": [
+          "(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.samlAuthentication.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "on",
+            "description": [],
+            "signature": [
+              "Cypress.PluginEvents"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.samlAuthentication.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "Cypress.PluginConfigOptions"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.waitForAlertsToPopulate",
+        "type": "Function",
+        "tags": [],
+        "label": "waitForAlertsToPopulate",
+        "description": [],
+        "signature": [
+          "(alertCountThreshold?: number) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/alerting_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.waitForAlertsToPopulate.$1",
+            "type": "number",
+            "tags": [],
+            "label": "alertCountThreshold",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/alerting_services.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.CreatedSecuritySuperuser",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreatedSecuritySuperuser",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.CreatedSecuritySuperuser.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.CreatedSecuritySuperuser.password",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cypress-test-helper",
+            "id": "def-common.CreatedSecuritySuperuser.created",
+            "type": "boolean",
+            "tags": [],
+            "label": "created",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.EndpointSecurityRoleDefinitions",
+        "type": "Type",
+        "tags": [],
+        "label": "EndpointSecurityRoleDefinitions",
+        "description": [],
+        "signature": [
+          "{ hunter: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; t1_analyst: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; t2_analyst: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; t3_analyst: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; threat_intelligence_analyst: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; rule_author: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; soc_manager: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; detections_admin: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; platform_engineer: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; endpoint_operations_analyst: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; endpoint_policy_manager: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; endpoint_response_actions_access: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; endpoint_response_actions_no_access: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; endpoint_security_policy_management_read: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; artifact_read_privileges: ",
+          {
+            "pluginId": "@kbn/security-plugin-types-common",
+            "scope": "common",
+            "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+            "section": "def-common.Role",
+            "text": "Role"
+          },
+          "; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.EndpointSecurityRoleNames",
+        "type": "Type",
+        "tags": [],
+        "label": "EndpointSecurityRoleNames",
+        "description": [],
+        "signature": [
+          "\"hunter\" | \"t1_analyst\" | \"t2_analyst\" | \"t3_analyst\" | \"threat_intelligence_analyst\" | \"rule_author\" | \"soc_manager\" | \"detections_admin\" | \"platform_engineer\" | \"endpoint_operations_analyst\" | \"endpoint_policy_manager\" | \"endpoint_response_actions_access\" | \"endpoint_response_actions_no_access\" | \"endpoint_security_policy_management_read\" | \"artifact_read_privileges\""
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.ES_LOADED_USERS",
+        "type": "Array",
+        "tags": [],
+        "label": "ES_LOADED_USERS",
+        "description": [],
+        "signature": [
+          "(string | undefined)[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.KibanaKnownUserAccounts",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaKnownUserAccounts",
+        "description": [],
+        "signature": [
+          "\"elastic\" | \"admin\" | \"system_indices_superuser\" | \"elastic_serverless\""
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.SecuritySolutionDescribeBlockFtrConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "SecuritySolutionDescribeBlockFtrConfig",
+        "description": [],
+        "signature": [
+          "{ readonly license?: string | undefined; readonly kbnServerArgs?: string[] | undefined; readonly productTypes?: Readonly<{} & { product_line: \"security\" | \"cloud\" | \"endpoint\"; product_tier: \"complete\" | \"essentials\"; }>[] | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.SecurityTestUser",
+        "type": "Type",
+        "tags": [],
+        "label": "SecurityTestUser",
+        "description": [],
+        "signature": [
+          "\"elastic\" | \"admin\" | \"hunter\" | \"system_indices_superuser\" | \"t1_analyst\" | \"t2_analyst\" | \"t3_analyst\" | \"threat_intelligence_analyst\" | \"rule_author\" | \"soc_manager\" | \"detections_admin\" | \"platform_engineer\" | \"endpoint_operations_analyst\" | \"endpoint_policy_manager\" | \"endpoint_response_actions_access\" | \"endpoint_response_actions_no_access\" | \"endpoint_security_policy_management_read\" | \"artifact_read_privileges\" | \"elastic_serverless\""
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.COMMON_API_HEADERS",
+        "type": "Object",
+        "tags": [],
+        "label": "COMMON_API_HEADERS",
+        "description": [],
+        "signature": [
+          "{ readonly 'kbn-xsrf': \"cypress\"; readonly 'x-elastic-internal-origin': \"security-solution\"; readonly 'elastic-api-version': \"2023-10-31\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.ENDPOINT_SECURITY_ROLE_NAMES",
+        "type": "Object",
+        "tags": [],
+        "label": "ENDPOINT_SECURITY_ROLE_NAMES",
+        "description": [],
+        "signature": [
+          "{ readonly hunter: \"hunter\"; readonly endpoint_response_actions_access: \"endpoint_response_actions_access\"; readonly endpoint_response_actions_no_access: \"endpoint_response_actions_no_access\"; readonly endpoint_security_policy_management_read: \"endpoint_security_policy_management_read\"; readonly artifact_read_privileges: \"artifact_read_privileges\"; readonly t1_analyst: \"t1_analyst\"; readonly t2_analyst: \"t2_analyst\"; readonly t3_analyst: \"t3_analyst\"; readonly threat_intelligence_analyst: \"threat_intelligence_analyst\"; readonly rule_author: \"rule_author\"; readonly soc_manager: \"soc_manager\"; readonly detections_admin: \"detections_admin\"; readonly platform_engineer: \"platform_engineer\"; readonly endpoint_operations_analyst: \"endpoint_operations_analyst\"; readonly endpoint_policy_manager: \"endpoint_policy_manager\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.KIBANA_KNOWN_DEFAULT_ACCOUNTS",
+        "type": "Object",
+        "tags": [],
+        "label": "KIBANA_KNOWN_DEFAULT_ACCOUNTS",
+        "description": [
+          "\nList of kibana system accounts"
+        ],
+        "signature": [
+          "{ readonly elastic: \"elastic\"; readonly elastic_serverless: \"elastic_serverless\"; readonly system_indices_superuser: \"system_indices_superuser\"; readonly admin: \"admin\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cypress-test-helper",
+        "id": "def-common.SECURITY_SERVERLESS_ROLE_NAMES",
+        "type": "Object",
+        "tags": [
+          "see",
+          "see"
+        ],
+        "label": "SECURITY_SERVERLESS_ROLE_NAMES",
+        "description": [
+          "\nSecurity Solution set of roles that are loaded and used in serverless deployments.\nThe source of these role definitions is under `project-controller` at:\n"
+        ],
+        "signature": [
+          "{ readonly t1_analyst: \"t1_analyst\"; readonly t2_analyst: \"t2_analyst\"; readonly t3_analyst: \"t3_analyst\"; readonly threat_intelligence_analyst: \"threat_intelligence_analyst\"; readonly rule_author: \"rule_author\"; readonly soc_manager: \"soc_manager\"; readonly detections_admin: \"detections_admin\"; readonly platform_engineer: \"platform_engineer\"; readonly endpoint_operations_analyst: \"endpoint_operations_analyst\"; readonly endpoint_policy_manager: \"endpoint_policy_manager\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

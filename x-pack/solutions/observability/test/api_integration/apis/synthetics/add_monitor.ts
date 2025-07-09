@@ -14,7 +14,7 @@ import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
+import { legacySyntheticsMonitorTypeSingle } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import {
   removeMonitorEmptyValues,
   transformPublicKeys,
@@ -224,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .auth(username, password)
           .query({
-            filter: `${syntheticsMonitorType}.attributes.name: "${name}"`,
+            filter: `${legacySyntheticsMonitorTypeSingle}.attributes.name: "${name}"`,
           })
           .set('kbn-xsrf', 'true')
           .expect(200);

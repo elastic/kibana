@@ -70,10 +70,15 @@ const tableColumns = getColumns({ showRuleName: true });
 function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
   const {
-    charts,
     data,
     http,
     notifications,
+    fieldFormats,
+    application,
+    licensing,
+    cases,
+    settings,
+    charts,
     dataViews,
     observabilityAIAssistant,
     share: {
@@ -136,6 +141,7 @@ function InternalAlertsPage() {
     meta: {
       rangeFrom: alertSearchBarStateProps.rangeFrom,
       rangeTo: alertSearchBarStateProps.rangeTo,
+      description: '[ttfmp_alerts] The Observability Alerts page has loaded a table of alerts.',
     },
   });
 
@@ -377,6 +383,16 @@ function InternalAlertsPage() {
                         />
                       )}
                       showInspectButton
+                      services={{
+                        data,
+                        http,
+                        notifications,
+                        fieldFormats,
+                        application,
+                        licensing,
+                        cases,
+                        settings,
+                      }}
                     />
                   );
                 }}

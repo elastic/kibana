@@ -13,11 +13,7 @@ import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-function
 import { last } from 'lodash';
 import { GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import {
-  LlmProxy,
-  RelevantField,
-  createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { LlmProxy, RelevantField, createLlmProxy } from '../../utils/create_llm_proxy';
 import { createSyntheticApmData } from '../../synthtrace_scenarios/create_synthetic_apm_data';
 import { chatComplete, getSystemMessage, systemMessageSorted } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
@@ -32,7 +28,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const alertingApi = getService('alertingApi');
   const samlAuth = getService('samlAuth');
 
-  describe('get_alerts_dataset_info', function () {
+  describe('tool: get_alerts_dataset_info', function () {
     this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;

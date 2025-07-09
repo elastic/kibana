@@ -123,7 +123,7 @@ export function FlameGraphTooltip({
                 </EuiText>
               }
               size="s"
-              iconType="iInCircle"
+              iconType="info"
             />
           )}
           {isRoot === false && (
@@ -219,7 +219,7 @@ export function FlameGraphTooltip({
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="iInCircle" />
+                    <EuiIcon type="info" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText color="subdued" size="xs">

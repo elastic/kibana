@@ -20,13 +20,15 @@ import {
   type DiscoverCustomizationService,
 } from '../customizations';
 import { DiscoverMainProvider } from '../application/main/state_management/discover_state_provider';
-import { type ScopedProfilesManager, ScopedProfilesManagerProvider } from '../context_awareness';
+import { type ScopedProfilesManager } from '../context_awareness';
 import type { DiscoverServices } from '../build_services';
 import { createDiscoverServicesMock } from './services';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ChartPortalsRenderer } from '../application/main/components/chart';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ScopedDiscoverEBTManager } from '../ebt_manager';
+import { ScopedServicesProvider } from '../components/scoped_services_provider';
 
 export const DiscoverTestProvider = ({
   services: originalServices,
@@ -34,6 +36,7 @@ export const DiscoverTestProvider = ({
   customizationService,
   runtimeState,
   scopedProfilesManager: originalScopedProfilesManager,
+  scopedEbtManager: originalScopedEbtManager,
   currentTabId: originalCurrentTabId,
   usePortalsRenderer,
   children,
@@ -42,6 +45,7 @@ export const DiscoverTestProvider = ({
   stateContainer?: DiscoverStateContainer;
   customizationService?: DiscoverCustomizationService;
   scopedProfilesManager?: ScopedProfilesManager;
+  scopedEbtManager?: ScopedDiscoverEBTManager;
   runtimeState?: CombinedRuntimeState;
   currentTabId?: string;
   usePortalsRenderer?: boolean;
@@ -51,16 +55,25 @@ export const DiscoverTestProvider = ({
     () => originalServices ?? createDiscoverServicesMock(),
     [originalServices]
   );
+  const scopedEbtManager = useMemo(
+    () => originalScopedEbtManager ?? services.ebtManager.createScopedEBTManager(),
+    [originalScopedEbtManager, services.ebtManager]
+  );
   const scopedProfilesManager = useMemo(
-    () => originalScopedProfilesManager ?? services.profilesManager.createScopedProfilesManager(),
-    [originalScopedProfilesManager, services.profilesManager]
+    () =>
+      originalScopedProfilesManager ??
+      services.profilesManager.createScopedProfilesManager({ scopedEbtManager }),
+    [originalScopedProfilesManager, scopedEbtManager, services.profilesManager]
   );
   const currentTabId = originalCurrentTabId ?? stateContainer?.getCurrentTab().id;
 
   children = (
-    <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
+    <ScopedServicesProvider
+      scopedProfilesManager={scopedProfilesManager}
+      scopedEBTManager={scopedEbtManager}
+    >
       {children}
-    </ScopedProfilesManagerProvider>
+    </ScopedServicesProvider>
   );
 
   if (runtimeState) {

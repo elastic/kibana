@@ -30,9 +30,6 @@ export const useSignalHelpers = (): {
   const { indicesExist, dataViewId: oldDataViewId } = useSourcererDataView(
     SourcererScopeName.detections
   );
-  const { dataView: detectionsDataView } = useDataView(SourcererScopeName.detections);
-
-  const dataViewId = newDataViewPickerEnabled ? oldDataViewId : detectionsDataView?.id ?? null;
 
   const { indexFieldsSearch } = useOldDataView();
   const dispatch = useDispatch();
@@ -52,16 +49,24 @@ export const useSignalHelpers = (): {
     ? experimentalSignalIndexName
     : signalIndexNameSourcerer;
 
-  const { dataView: experimentalDefaultDataView } = useDataView(SourcererScopeName.default);
+  const { dataView: experimentalDefaultDataView, status } = useDataView(
+    SourcererScopeName.detections
+  );
+  const dataViewId = newDataViewPickerEnabled
+    ? experimentalDefaultDataView?.id ?? null
+    : oldDataViewId;
 
   const defaultDataViewPattern = newDataViewPickerEnabled
-    ? experimentalDefaultDataView?.getIndexPattern() ?? ''
+    ? experimentalDefaultDataView.getIndexPattern() ?? ''
     : oldDefaultDataView.title;
 
-  const signalIndexNeedsInit = useMemo(
-    () => !defaultDataViewPattern.includes(`${signalIndexName}`),
-    [defaultDataViewPattern, signalIndexName]
-  );
+  const signalIndexNeedsInit = useMemo(() => {
+    if (newDataViewPickerEnabled && status === 'pristine') {
+      return false;
+    }
+
+    return !defaultDataViewPattern.includes(`${signalIndexName}`);
+  }, [defaultDataViewPattern, newDataViewPickerEnabled, signalIndexName, status]);
   const shouldWePollForIndex = useMemo(
     () => !indicesExist && !signalIndexNeedsInit,
     [indicesExist, signalIndexNeedsInit]

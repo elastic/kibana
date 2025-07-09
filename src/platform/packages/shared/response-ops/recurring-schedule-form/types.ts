@@ -23,6 +23,10 @@ export interface RecurringSchedule {
   customFrequency?: RecurrenceFrequency;
   byweekday?: Record<string, boolean>;
   bymonth?: string;
+  bymonthweekday?: string;
+  bymonthday?: number;
+  byhour?: number;
+  byminute?: number;
 }
 
 export type RRuleParams = Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;

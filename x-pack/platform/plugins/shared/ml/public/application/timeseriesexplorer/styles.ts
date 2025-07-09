@@ -9,24 +9,23 @@ import { useMemo } from 'react';
 import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme, transparentize } from '@elastic/eui';
-
-import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils';
+import {
+  ML_ANOMALY_THRESHOLD,
+  getThemeResolvedSeverityColor,
+  getThemeResolvedSeverityStrokeColor,
+} from '@kbn/ml-anomaly-utils';
 
 // Annotations constants
 const mlAnnotationBorderWidth = '2px';
 const mlAnnotationRectDefaultStrokeOpacity = 0.2;
-const mlAnnotationRectDefaultFillOpacity = 0.05;
+const mlAnnotationRectDefaultFillOpacity = 0.1;
 
 export const useTimeseriesExplorerStyles = () => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const { fontSize: euiFontSizeXS } = useEuiFontSize('xs', { unit: 'px' });
   const { fontSize: euiFontSizeS } = useEuiFontSize('s', { unit: 'px' });
 
-  // Amsterdam: euiTheme.colors.vis.euiColorVis5
-  // Borealis:  euiTheme.colors.vis.euiColorVis9
-  const forecastColor = euiTheme.flags.hasVisColorAdjustment
-    ? euiTheme.colors.vis.euiColorVis5
-    : euiTheme.colors.vis.euiColorVis9;
+  const isDarkMode = colorMode === 'DARK';
 
   return useMemo(
     () =>
@@ -42,7 +41,7 @@ export const useTimeseriesExplorerStyles = () => {
           '.axis': {
             'path, line': {
               fill: 'none',
-              stroke: euiTheme.colors.borderBasePlain,
+              stroke: euiTheme.colors.lightestShade,
               shapeRendering: 'crispEdges',
               pointerEvents: 'none',
             },
@@ -52,20 +51,20 @@ export const useTimeseriesExplorerStyles = () => {
             },
 
             '.tick line': {
-              stroke: euiTheme.colors.lightShade,
+              stroke: euiTheme.colors.lightestShade,
             },
           },
 
           '.chart-border': {
-            stroke: euiTheme.colors.borderBasePlain,
+            stroke: euiTheme.colors.lightestShade,
             fill: 'none',
             strokeWidth: 1,
             shapeRendering: 'crispEdges',
           },
 
           '.chart-border-highlight': {
-            stroke: euiTheme.colors.darkShade,
-            strokeWidth: 2,
+            stroke: euiTheme.colors.lightShade,
+            strokeWidth: 1,
 
             '&:hover': {
               opacity: 1,
@@ -76,24 +75,26 @@ export const useTimeseriesExplorerStyles = () => {
             strokeWidth: 1,
 
             '&.bounds': {
-              fill: transparentize(euiTheme.colors.primary, 0.2),
+              fill: transparentize(euiTheme.colors.lightShade, 0.6),
               pointerEvents: 'none',
             },
 
             '&.forecast': {
-              fill: transparentize(forecastColor, 0.3),
+              fill: transparentize(euiTheme.colors.vis.euiColorVis1, 0.4),
               pointerEvents: 'none',
             },
           },
 
           '.values-line': {
             fill: 'none',
-            stroke: euiTheme.colors.primary,
-            strokeWidth: 2,
+            stroke: isDarkMode
+              ? euiTheme.colors.vis.euiColorVisGrey0
+              : euiTheme.colors.darkestShade,
+            strokeWidth: 1,
             pointerEvents: 'none',
 
             '&.forecast': {
-              stroke: forecastColor,
+              stroke: euiTheme.colors.vis.euiColorVis0,
               pointerEvents: 'none',
             },
           },
@@ -103,7 +104,7 @@ export const useTimeseriesExplorerStyles = () => {
           },
 
           '.values-dots circle': {
-            fill: euiTheme.colors.primary,
+            fill: 'none',
             strokeWidth: 0,
           },
 
@@ -116,33 +117,40 @@ export const useTimeseriesExplorerStyles = () => {
 
           '.anomaly-marker': {
             strokeWidth: 1,
-            stroke: euiTheme.colors.mediumShade,
 
             '&.critical': {
-              fill: ML_SEVERITY_COLORS.CRITICAL,
+              fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme),
+              stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme),
             },
 
             '&.major': {
-              fill: ML_SEVERITY_COLORS.MAJOR,
+              fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme),
+              stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme),
             },
 
             '&.minor': {
-              fill: ML_SEVERITY_COLORS.MINOR,
+              fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme),
+              stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme),
             },
 
             '&.warning': {
-              fill: ML_SEVERITY_COLORS.WARNING,
+              fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme),
+              stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme),
             },
 
             '&.low': {
-              fill: ML_SEVERITY_COLORS.LOW,
+              fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
+              stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
             },
           },
 
           '.metric-value:hover, .anomaly-marker:hover, .anomaly-marker.highlighted': {
             strokeWidth: 6,
             strokeOpacity: 0.65,
-            stroke: euiTheme.colors.primary,
+            stroke: transparentize(
+              isDarkMode ? euiTheme.colors.vis.euiColorVisGrey0 : euiTheme.colors.darkestShade,
+              0.5
+            ),
           },
 
           'rect.scheduled-event-marker': {
@@ -153,7 +161,7 @@ export const useTimeseriesExplorerStyles = () => {
 
           '.forecast': {
             '.metric-value, .metric-value:hover': {
-              stroke: forecastColor,
+              stroke: euiTheme.colors.vis.euiColorVis1,
             },
           },
 
@@ -219,7 +227,7 @@ export const useTimeseriesExplorerStyles = () => {
           '.brush .extent': {
             fillOpacity: 0,
             shapeRendering: 'crispEdges',
-            stroke: euiTheme.colors.darkShade,
+            stroke: euiTheme.colors.lightShade,
             strokeWidth: 2,
             cursor: 'move',
             '&:hover': {
@@ -238,7 +246,7 @@ export const useTimeseriesExplorerStyles = () => {
 
           'div.brush-handle-inner': {
             border: `1px solid ${euiTheme.colors.darkShade}`,
-            backgroundColor: euiTheme.colors.lightShade,
+            backgroundColor: euiTheme.colors.lightestShade,
             height: '70px',
             width: '10px',
             textAlign: 'center',
@@ -267,7 +275,7 @@ export const useTimeseriesExplorerStyles = () => {
           },
         },
       }),
-    [euiTheme, euiFontSizeS, euiFontSizeXS, forecastColor]
+    [euiTheme, euiFontSizeXS, isDarkMode, euiFontSizeS]
   );
 };
 
@@ -281,19 +289,20 @@ export const useAnnotationStyles = () => {
         '.ml-annotation': {
           '&__brush': {
             '.extent': {
-              stroke: euiTheme.colors.lightShade,
+              stroke: euiTheme.colors.accent,
               strokeWidth: mlAnnotationBorderWidth,
               strokeDasharray: '2 2',
-              fill: euiTheme.colors.lightestShade,
+              fill: euiTheme.colors.accent,
+              fillOpacity: 0.1,
               shapeRendering: 'geometricPrecision',
             },
           },
 
           '&__rect': {
-            stroke: euiTheme.colors.fullShade,
+            stroke: euiTheme.colors.accent,
             strokeWidth: mlAnnotationBorderWidth,
             strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
-            fill: euiTheme.colors.fullShade,
+            fill: euiTheme.colors.accent,
             fillOpacity: mlAnnotationRectDefaultFillOpacity,
             shapeRendering: 'geometricPrecision',
             transition: `stroke-opacity ${euiTheme.animation.fast}, fill-opacity ${euiTheme.animation.fast}`,
@@ -314,21 +323,17 @@ export const useAnnotationStyles = () => {
             fontSize: euiFontSizeXS,
             fontFamily: euiTheme.font.family,
             fontWeight: euiTheme.font.weight.medium,
-            fill: euiTheme.colors.fullShade,
+            fill: euiTheme.colors.textInverse,
             transition: `fill ${euiTheme.animation.fast}`,
             userSelect: 'none',
-
-            '&--blur': {
-              fill: euiTheme.colors.mediumShade,
-            },
           },
 
           '&__text-rect': {
-            fill: euiTheme.colors.lightShade,
+            fill: euiTheme.colors.accent,
             transition: `fill ${euiTheme.animation.fast}`,
 
             '&--blur': {
-              fill: euiTheme.colors.lightestShade,
+              fill: euiTheme.colors.backgroundBaseAccent,
             },
           },
 
@@ -337,10 +342,10 @@ export const useAnnotationStyles = () => {
           },
 
           '&__context-rect': {
-            stroke: euiTheme.colors.fullShade,
+            stroke: euiTheme.colors.accent,
             strokeWidth: mlAnnotationBorderWidth,
             strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
-            fill: euiTheme.colors.fullShade,
+            fill: euiTheme.colors.accent,
             fillOpacity: mlAnnotationRectDefaultFillOpacity,
             transition: `stroke-opacity ${euiTheme.animation.fast}, fill-opacity ${euiTheme.animation.fast}`,
             shapeRendering: 'geometricPrecision',

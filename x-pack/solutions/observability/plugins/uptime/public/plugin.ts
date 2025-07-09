@@ -40,7 +40,6 @@ import {
 } from '@kbn/observability-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -96,7 +95,6 @@ export interface ClientPluginsStart {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  cases: CasesPublicStart;
   dataViews: DataViewsPublicPluginStart;
   spaces?: SpacesPluginStart;
   cloud?: CloudStart;

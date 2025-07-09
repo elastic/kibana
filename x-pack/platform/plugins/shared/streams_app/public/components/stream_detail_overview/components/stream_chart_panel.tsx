@@ -15,12 +15,11 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { computeInterval } from '@kbn/visualization-utils';
 import moment, { DurationInputArg1, DurationInputArg2 } from 'moment';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ControlledEsqlChart } from '../../esql_chart/controlled_esql_chart';
-import { getIndexPatterns } from '../../../util/hierarchy_helpers';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../hooks/use_timefilter';
@@ -44,7 +43,7 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   const { timeState } = useTimefilter();
 
   const indexPatterns = useMemo(() => {
-    return getIndexPatterns(definition?.stream);
+    return getIndexPatternsForStream(definition.stream);
   }, [definition]);
 
   const discoverLocator = useMemo(

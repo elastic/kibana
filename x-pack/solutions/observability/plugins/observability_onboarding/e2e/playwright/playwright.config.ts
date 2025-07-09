@@ -72,7 +72,7 @@ export default defineConfig({
       testMatch: '*stateful/*.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
-        viewport: { width: 1920, height: 1200 },
+        viewport: { width: 1920, height: 2400 },
         storageState: STORAGE_STATE,
         launchOptions: {
           logger: {

@@ -15,6 +15,7 @@ import type {
   ToolDescriptorMeta,
   ToolIdentifier,
   PlainIdToolIdentifier,
+  FieldTypes,
 } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
@@ -44,6 +45,82 @@ export interface RegisteredTool<
    * Optional set of metadata for this tool.
    */
   meta?: RegisteredToolMeta;
+}
+
+/**
+ * Onechat tool, as registered by built-in tool providers.
+ */
+export interface EsqlToolDefinition extends ToolDescriptor {
+  /**
+   * The ESQL Tool name.
+   */
+  name: string;
+
+  /**
+   * The ESQL query to be executed.
+   */
+  query: string;
+
+  /**
+   * Parameters that can be used in the query.
+   * Each parameter has a key identifier and metadata about its type and usage.
+   */
+  params: Record<
+    string,
+    {
+      /**
+       * The data types of the parameter. Must be one of these
+       */
+      type: FieldTypes;
+
+      /**
+       * Description of the parameter's purpose or expected values.
+       */
+      description: string;
+    }
+  >;
+}
+
+export interface EsqlTool<RunInput extends ZodObject<any> = ZodObject<any>, RunOutput = unknown>
+  extends RegisteredTool<RunInput, RunOutput> {
+  /**
+   * The ESQL id to be executed.
+   */
+  id: string;
+
+  /**
+   * The ESQL Tool name.
+   */
+  name: string;
+
+  /**
+   * The ESQL tool description to be executed.
+   */
+  description: string;
+
+  /**
+   * The ESQL query to be executed.
+   */
+  query: string;
+
+  /**
+   * Parameters that can be used in the query.
+   * Each parameter has a key identifier and metadata about its type and usage.
+   */
+  params: Record<
+    string,
+    {
+      /**
+       * The data types of the parameter.
+       */
+      type: FieldTypes;
+
+      /**
+       * Description of the parameter's purpose or expected values.
+       */
+      description: string;
+    }
+  >;
 }
 
 /**
@@ -98,12 +175,19 @@ export type ExecutableToolHandlerFn<TParams = Record<string, unknown>, TResult =
 ) => Promise<RunToolReturn<TResult>>;
 
 /**
+ * Return value for {@link ToolHandlerFn} / {@link RegisteredTool}
+ */
+export interface ToolHandlerReturn<T = unknown> {
+  result: T;
+}
+
+/**
  * Tool handler function for {@link RegisteredTool} handlers.
  */
 export type ToolHandlerFn<
   TParams extends Record<string, unknown> = Record<string, unknown>,
   RunOutput = unknown
-> = (args: TParams, context: ToolHandlerContext) => MaybePromise<RunOutput>;
+> = (args: TParams, context: ToolHandlerContext) => MaybePromise<ToolHandlerReturn<RunOutput>>;
 
 /**
  * Scoped context which can be used during tool execution to access

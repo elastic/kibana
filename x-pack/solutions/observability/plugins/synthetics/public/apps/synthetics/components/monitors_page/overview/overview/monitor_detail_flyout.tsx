@@ -60,7 +60,7 @@ interface Props {
   id: string;
   location: string;
   locationId: string;
-  spaceId?: string;
+  spaces?: string[];
   onClose: () => void;
   onEnabledChange: () => void;
   onLocationChange: (params: FlyoutParamProps) => void;
@@ -220,7 +220,7 @@ export function LoadingState() {
 }
 
 export function MonitorDetailFlyout(props: Props) {
-  const { id, configId, onLocationChange, locationId, spaceId } = props;
+  const { id, configId, onLocationChange, locationId, spaces } = props;
 
   const { status: overviewStatus } = useOverviewStatus({ scopeStatusByLocation: true });
 
@@ -235,13 +235,14 @@ export function MonitorDetailFlyout(props: Props) {
 
   const setLocation = useCallback(
     (location: string, locationIdT: string) =>
-      onLocationChange({ id, configId, location, locationId: locationIdT, spaceId }),
-    [onLocationChange, id, configId, spaceId]
+      onLocationChange({ id, configId, location, locationId: locationIdT, spaces }),
+    [onLocationChange, id, configId, spaces]
   );
 
   const detailLink = useMonitorDetailLocator({
     configId,
     locationId,
+    spaces,
   });
 
   const dispatch = useDispatch();
@@ -265,10 +266,10 @@ export function MonitorDetailFlyout(props: Props) {
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
-        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+        ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
       })
     );
-  }, [configId, dispatch, space?.id, spaceId, upsertSuccess]);
+  }, [configId, dispatch, space, space?.id, spaces, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
@@ -392,7 +393,7 @@ export const MaybeMonitorDetailsFlyout = ({
       id={flyoutConfig.id}
       location={flyoutConfig.location}
       locationId={flyoutConfig.locationId}
-      spaceId={flyoutConfig.spaceId}
+      spaces={flyoutConfig.spaces}
       onClose={hideFlyout}
       onEnabledChange={forceRefreshCallback}
       onLocationChange={setFlyoutConfigCallback}
