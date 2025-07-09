@@ -8,7 +8,6 @@
  */
 
 export type {
-  ControlGroupAttributes,
   GridData,
   DashboardPanel,
   DashboardSection,

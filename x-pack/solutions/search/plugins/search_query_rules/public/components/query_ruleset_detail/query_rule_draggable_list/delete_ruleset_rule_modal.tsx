@@ -54,10 +54,6 @@ export const DeleteRulesetRuleModal = ({
       buttonColor="danger"
       isLoading={isLoading}
     >
-      {i18n.translate('xpack.queryRules.deleteRulesetRuleModal.body', {
-        defaultMessage:
-          'Deleting a rule referenced in a query will result in a broken query.  Make sure you have fixed any references to this rule prior to deletion.',
-      })}
       <EuiSpacer size="m" />
       <EuiCheckbox
         id={confirmCheckboxId}

@@ -10,11 +10,11 @@
 import { flow } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import { ControlGroupAttributes } from '../../types';
 
 export function transformControlGroupIn(
-  controlGroupInput?: ControlGroupAttributes
+  controlGroupInput?: ControlsGroupState
 ): DashboardSavedObjectAttributes['controlGroupInput'] | undefined {
   if (!controlGroupInput) {
     return;
@@ -27,7 +27,7 @@ export function transformControlGroupIn(
   )(controlGroupInput);
 }
 
-function transformControlStyle(controlGroupInput: ControlGroupAttributes) {
+function transformControlStyle(controlGroupInput: ControlsGroupState) {
   const { labelPosition, ...restControlGroupInput } = controlGroupInput;
   return {
     ...restControlGroupInput,
@@ -35,7 +35,7 @@ function transformControlStyle(controlGroupInput: ControlGroupAttributes) {
   };
 }
 
-function transformShowApplySelections(controlGroupInput: ControlGroupAttributes) {
+function transformShowApplySelections(controlGroupInput: ControlsGroupState) {
   const { autoApplySelections, ...restControlGroupInput } = controlGroupInput;
   return {
     ...restControlGroupInput,
@@ -43,7 +43,7 @@ function transformShowApplySelections(controlGroupInput: ControlGroupAttributes)
   };
 }
 
-function transformIgnoreParentSettings(controlGroupInput: ControlGroupAttributes) {
+function transformIgnoreParentSettings(controlGroupInput: ControlsGroupState) {
   const { ignoreParentSettings, ...restControlGroupInput } = controlGroupInput;
   return {
     ...restControlGroupInput,
@@ -51,7 +51,7 @@ function transformIgnoreParentSettings(controlGroupInput: ControlGroupAttributes
   };
 }
 
-function transformPanelsJSON(controlGroupInput: ControlGroupAttributes) {
+function transformPanelsJSON(controlGroupInput: ControlsGroupState) {
   const { controls, ...restControlGroupInput } = controlGroupInput;
   const updatedControls = Object.fromEntries(
     controls.map(({ controlConfig, id = uuidv4(), ...restOfControl }) => {

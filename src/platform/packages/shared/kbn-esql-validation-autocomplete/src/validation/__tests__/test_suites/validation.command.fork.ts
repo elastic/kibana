@@ -111,9 +111,9 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
 
             await expectErrors(
               `FROM index
-| FORK
-    (EVAL TO_UPPER(keywordField) | LIMIT 100)
-    (FORK (WHERE 1))`,
+              | FORK
+                  (EVAL TO_UPPER(keywordField) | LIMIT 100)
+                  (FORK (WHERE 1))`,
               [
                 '[FORK] Must include at least two branches.',
                 '[FORK] a query cannot have more than one FORK command.',

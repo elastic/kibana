@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SearchRequest as ESSearchRequest,
+  MsearchMultisearchHeader,
+  SearchSearchRequestBody,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import type { InfraBackendLibs } from '../infra_types';
 
@@ -18,6 +21,11 @@ type RequiredParams = Omit<ESSearchRequest, 'index'> & {
   size: number;
   track_total_hits: boolean | number;
 };
+
+export type MSearchParams = Omit<RequiredParams, 'allow_no_indices'>;
+interface TypedMSearchResponse<TDocument, TParams extends RequiredParams> {
+  responses: Array<InferSearchResponseOf<TDocument, TParams>>;
+}
 
 export type InfraMetricsClient = Awaited<ReturnType<typeof getInfraMetricsClient>>;
 
@@ -37,20 +45,12 @@ export async function getInfraMetricsClient({
   const excludedDataTiers = await uiSettings.client.get<DataTier[]>(searchExcludedDataTiers);
   const metricsIndices = await infraContext.getMetricsIndices();
 
-  const excludedQuery = excludedDataTiers.length
-    ? excludeTiersQuery(excludedDataTiers)[0].bool!.must_not!
-    : [];
+  const excludedQuery = excludedDataTiers.length ? excludeTiersQuery(excludedDataTiers) : undefined;
 
   return {
     search<TDocument, TParams extends RequiredParams>(
       searchParams: TParams
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
-      const searchFilter = searchParams.query?.bool?.must_not ?? [];
-
-      // This flattens arrays by one level, and non-array values can be added as well, so it all
-      // results in a nice [QueryDsl, QueryDsl, ...] array.
-      const mustNot = ([] as QueryDslQueryContainer[]).concat(searchFilter, excludedQuery);
-
       return framework.callWithRequest(
         context,
         'search',
@@ -59,15 +59,40 @@ export async function getInfraMetricsClient({
           ignore_unavailable: true,
           index: metricsIndices,
           query: {
-            ...searchParams.query,
             bool: {
-              ...searchParams.query?.bool,
-              must_not: mustNot,
+              filter: excludedQuery,
+              must: [searchParams.query],
             },
           },
         },
         request
       ) as Promise<any>;
+    },
+    msearch<TDocument, TParams extends MSearchParams>(
+      searchParams: TParams[]
+    ): Promise<TypedMSearchResponse<TDocument, TParams>> {
+      const searches = searchParams
+        .map((params) => {
+          const search: [MsearchMultisearchHeader, SearchSearchRequestBody] = [
+            {
+              index: metricsIndices,
+              preference: 'any',
+              ignore_unavailable: true,
+              expand_wildcards: ['open', 'hidden'],
+            },
+            {
+              ...params,
+              query: {
+                bool: {
+                  filter: [params.query, ...(excludedQuery ? excludedQuery : [])].filter(Boolean),
+                },
+              },
+            },
+          ];
+          return search;
+        })
+        .flat();
+      return framework.callWithRequest(context, 'msearch', { searches }, request) as Promise<any>;
     },
   };
 }

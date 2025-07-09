@@ -19,7 +19,6 @@ import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { WithRequiredProperty } from '@kbn/utility-types';
 import {
   dashboardItemSchema,
-  controlGroupInputSchema,
   panelGridDataSchema,
   panelSchema,
   sectionSchema,
@@ -55,7 +54,6 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
   references: SavedObjectReference[] | undefined;
 };
 
-export type ControlGroupAttributes = TypeOf<typeof controlGroupInputSchema>;
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;

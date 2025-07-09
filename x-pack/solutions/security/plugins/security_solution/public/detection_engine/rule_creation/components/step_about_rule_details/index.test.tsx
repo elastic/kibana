@@ -19,8 +19,14 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { StepAboutRule } from '../../../rule_creation_ui/components/step_about_rule';
 import type { AboutStepRule } from '../../../common/types';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { usePrebuiltRuleBaseVersionContext } from '../../../rule_management/components/rule_details/base_version_diff/base_version_context';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock(
+  '../../../rule_management/components/rule_details/base_version_diff/base_version_context'
+);
+
+const usePrebuiltRuleBaseVersionContextMock = usePrebuiltRuleBaseVersionContext as jest.Mock;
 
 const mockTheme = getMockTheme({
   eui: { euiSizeL: '10px', euiBreakpoints: { s: '450px' }, euiSizeM: '10px' },
@@ -31,6 +37,10 @@ describe('StepAboutRuleToggleDetails', () => {
 
   beforeEach(() => {
     stepDataMock = mockAboutStepRule();
+    usePrebuiltRuleBaseVersionContextMock.mockReturnValue({
+      actions: { openCustomizationsPreviewFlyout: jest.fn() },
+      state: { doesBaseVersionExist: true, modifiedFields: new Set() },
+    });
   });
 
   test('it renders loading component when "loading" is true', () => {

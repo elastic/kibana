@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlsGroupState } from '@kbn/controls-schemas';
 import { transformControlGroupIn } from './transform_control_group_in';
-import { ControlGroupAttributes } from '../../types';
-import { CONTROL_WIDTH_OPTIONS } from '@kbn/controls-plugin/common';
+import { CONTROL_WIDTH_SMALL } from '@kbn/controls-constants';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
 }));
 
 describe('transformControlGroupIn', () => {
-  const mockControlGroupInput: ControlGroupAttributes = {
+  const mockControlsGroupState: ControlsGroupState = {
     chainingSystem: 'NONE',
     labelPosition: 'oneLine',
     autoApplySelections: true,
@@ -30,7 +30,7 @@ describe('transformControlGroupIn', () => {
       {
         id: 'control1',
         type: 'type1',
-        width: CONTROL_WIDTH_OPTIONS.SMALL,
+        width: CONTROL_WIDTH_SMALL,
         controlConfig: { bizz: 'buzz' },
         order: 0,
         grow: false,
@@ -38,20 +38,20 @@ describe('transformControlGroupIn', () => {
       {
         type: 'type2',
         grow: true,
-        width: CONTROL_WIDTH_OPTIONS.SMALL,
+        width: CONTROL_WIDTH_SMALL,
         controlConfig: { boo: 'bear' },
         order: 1,
       },
     ],
   };
 
-  it('should return undefined if controlGroupInput is undefined', () => {
+  it('should return undefined if controlsGroupState is undefined', () => {
     const result = transformControlGroupIn(undefined);
     expect(result).toBeUndefined();
   });
 
-  it('should transform controlGroupInput correctly', () => {
-    const result = transformControlGroupIn(mockControlGroupInput);
+  it('should transform controlsGroupState correctly', () => {
+    const result = transformControlGroupIn(mockControlsGroupState);
 
     expect(result).toEqual({
       chainingSystem: 'NONE',
@@ -83,12 +83,12 @@ describe('transformControlGroupIn', () => {
   });
 
   it('should handle empty controls array', () => {
-    const controlGroupInput: ControlGroupAttributes = {
-      ...mockControlGroupInput,
+    const controlsGroupState: ControlsGroupState = {
+      ...mockControlsGroupState,
       controls: [],
     };
 
-    const result = transformControlGroupIn(controlGroupInput);
+    const result = transformControlGroupIn(controlsGroupState);
 
     expect(result).toEqual({
       chainingSystem: 'NONE',

@@ -10,7 +10,7 @@
     "server/**/*",
     "typings/**/*",
     "../../../../../typings/**/*",
-    "ui_tests/**/*"
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/rule-data-utils",
