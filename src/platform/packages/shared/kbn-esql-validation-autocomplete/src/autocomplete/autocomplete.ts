@@ -16,90 +16,78 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
   Walker,
+  esqlCommandRegistry,
+  getCommandAutocompleteDefinitions,
+  commaCompleteItem,
+  listCompleteItem,
+  allStarConstant,
+  FULL_TEXT_SEARCH_FUNCTIONS,
+  ESQL_VARIABLES_PREFIX,
+  isNumericType,
+  FunctionParameterType,
+  FunctionDefinitionTypes,
+  FunctionParameter,
   isList,
+  isColumn,
+  isOptionNode,
+  isLiteral,
+  isFunctionExpression,
 } from '@kbn/esql-ast';
-import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
-import { isNumericType } from '../shared/esql_types';
-import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { comparisonFunctions } from '@kbn/esql-ast/src/definitions/all_operators';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import {
-  getCommandDefinition,
-  getFunctionDefinition,
-  isColumnItem,
-  isFunctionItem,
-  isLiteralItem,
-  isOptionItem,
-  isSourceCommand,
-  getAllFunctions,
-  isSingleItem,
-  getColumnExists,
-  getColumnByName,
-  getAllCommands,
+  getDateLiterals,
+  getCompatibleLiterals,
+  getFieldsOrFunctionsSuggestions,
+  getControlSuggestionIfSupported,
+  pushItUpInTheList,
+  getSuggestionsToRightOfOperatorExpression,
+  buildFieldsDefinitionsWithMetadata,
+  getFunctionSuggestions,
   getExpressionType,
-} from '../shared/helpers';
-import { ESQL_VARIABLES_PREFIX } from '../shared/constants';
+  getFunctionDefinition,
+} from '@kbn/esql-ast/src/definitions/utils';
+import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
+import {
+  ESQLUserDefinedColumn,
+  ESQLFieldWithMetadata,
+  GetColumnsByTypeFn,
+  ISuggestionItem,
+  ItemKind,
+} from '@kbn/esql-ast/src/commands_registry/types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import type { EditorContext } from './types';
+import { isSourceCommand, getAllFunctions, getColumnExists } from '../shared/helpers';
 import {
   collectUserDefinedColumns,
   excludeUserDefinedColumnsFromCurrentCommand,
 } from '../shared/user_defined_columns';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../validation/types';
-import {
-  allStarConstant,
-  commaCompleteItem,
-  getCommandAutocompleteDefinitions,
-  listCompleteItem,
-} from './complete_items';
-import {
-  buildPoliciesDefinitions,
-  getFunctionSuggestions,
-  getCompatibleLiterals,
-  buildValueDefinitions,
-  getDateLiterals,
-  buildFieldsDefinitionsWithMetadata,
-  getControlSuggestionIfSupported,
-} from './factories';
-import { EDITOR_MARKER, FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
+import { buildValueDefinitions } from './factories';
 import { getAstContext } from '../shared/context';
-import {
-  getFieldsByTypeHelper,
-  getPolicyHelper,
-  getSourcesHelper,
-} from '../shared/resources_helpers';
-import type { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
+import { getFieldsByTypeHelper, getSourcesHelper } from '../shared/resources_helpers';
+import type { ESQLCallbacks } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getQueryForFields,
-  getSourcesFromCommands,
   isAggFunctionUsedAlready,
   getValidSignaturesAndTypesToSuggestNext,
-  getFieldsOrFunctionsSuggestions,
-  pushItUpInTheList,
   extractTypeFromASTArg,
-  getSuggestionsToRightOfOperatorExpression,
   correctQuerySyntax,
+  isTimeseriesAggUsedAlready,
 } from './helper';
-import {
-  FunctionParameter,
-  FunctionDefinitionTypes,
-  GetPolicyMetadataFn,
-  getLocationFromCommandOrOptionName,
-  FunctionParameterType,
-} from '../definitions/types';
-import { comparisonFunctions } from '../definitions/all_operators';
-import {
-  getRecommendedQueriesSuggestionsFromStaticTemplates,
-  mapRecommendedQueriesFromExtensions,
-  getRecommendedQueriesTemplatesFromExtensions,
-} from './recommended_queries/suggestions';
+import { getLocationFromCommandOrOptionName } from '../shared/types';
+import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
+import { getCommandContext } from './get_command_context';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLFieldWithMetadata>>;
-type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
 
 export async function suggest(
   fullText: string,
   offset: number,
   context: EditorContext,
   resourceRetriever?: ESQLCallbacks
-): Promise<SuggestionRawDefinition[]> {
+): Promise<ISuggestionItem[]> {
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText);
@@ -121,16 +109,16 @@ export async function suggest(
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariables = resourceRetriever?.getVariables;
   const getSources = getSourcesHelper(resourceRetriever);
-  const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
     // resolve particular commands suggestions after
     // filter source commands if already defined
-    let suggestions = getCommandAutocompleteDefinitions(getAllCommands());
+    const commands = esqlCommandRegistry.getAllCommandNames();
+    const suggestions = getCommandAutocompleteDefinitions(commands);
     if (!ast.length) {
       // Display the recommended queries if there are no commands (empty state)
-      const recommendedQueriesSuggestions: SuggestionRawDefinition[] = [];
+      const recommendedQueriesSuggestions: ISuggestionItem[] = [];
       if (getSources) {
         let fromCommand = '';
         const sources = await getSources();
@@ -167,23 +155,17 @@ export async function suggest(
       return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
     }
 
-    // If the last command is not a FORK, RRF should not be suggested.
-    const lastCommand = root.commands[root.commands.length - 1];
-    if (lastCommand.name !== 'fork') {
-      suggestions = suggestions.filter((def) => def.label !== 'RRF');
-    }
-
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
   // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492
   const lastCharacterTyped = innerText[innerText.length - 1];
-  let controlSuggestions: SuggestionRawDefinition[] = [];
+  let controlSuggestions: ISuggestionItem[] = [];
   if (lastCharacterTyped === ESQL_VARIABLES_PREFIX) {
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
       ESQLVariableType.VALUES,
-      getVariables,
+      await getVariables?.(),
       false
     );
 
@@ -195,15 +177,9 @@ export async function suggest(
       innerText,
       ast,
       astContext,
-      getSources,
       getFieldsByType,
       getFieldsMap,
-      getPolicies,
-      getPolicyMetadata,
-      getVariables,
-      resourceRetriever?.getPreferences,
-      resourceRetriever,
-      supportsControls
+      resourceRetriever
     );
     return commandsSpecificSuggestions;
   }
@@ -250,14 +226,7 @@ export async function suggest(
     return functionsSpecificSuggestions;
   }
   if (astContext.type === 'list') {
-    return getListArgsSuggestions(
-      innerText,
-      ast,
-      astContext,
-      getFieldsByType,
-      getFieldsMap,
-      getPolicyMetadata
-    );
+    return getListArgsSuggestions(innerText, ast, astContext, getFieldsByType, getFieldsMap);
   }
   return [];
 }
@@ -294,21 +263,10 @@ export function getFieldsByTypeRetriever(
         fields,
         recommendedFieldsFromExtensions,
         updatedOptions,
-        getVariables
+        await getVariables?.()
       );
     },
     getFieldsMap: helpers.getFieldsMap,
-  };
-}
-
-function getPolicyRetriever(resourceRetriever?: ESQLCallbacks) {
-  const helpers = getPolicyHelper(resourceRetriever);
-  return {
-    getPolicies: async () => {
-      const policies = await helpers.getPolicies();
-      return buildPoliciesDefinitions(policies);
-    },
-    getPolicyMetadata: helpers.getPolicyMetadata,
   };
 }
 
@@ -330,17 +288,15 @@ async function getSuggestionsWithinCommandExpression(
     option?: ESQLCommandOption;
     containingFunction?: ESQLFunction;
   },
-  getSources: () => Promise<ESQLSourceResult[]>,
   getColumnsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
-  getPolicies: GetPoliciesFn,
-  getPolicyMetadata: GetPolicyMetadataFn,
-  getVariables?: () => ESQLControlVariable[] | undefined,
-  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  callbacks?: ESQLCallbacks,
-  supportsControls?: boolean
+  callbacks?: ESQLCallbacks
 ) {
-  const commandDef = getCommandDefinition(astContext.command.name);
+  const commandDefinition = esqlCommandRegistry.getCommandByName(astContext.command.name);
+
+  if (!commandDefinition) {
+    return [];
+  }
 
   // collect all fields + userDefinedColumns to suggest
   const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
@@ -368,56 +324,45 @@ async function getSuggestionsWithinCommandExpression(
     });
   }
 
-  // Function returning suggestions from static templates and editor extensions
-  const getRecommendedQueries = async (queryString: string, prefix: string = '') => {
-    const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? {
-      recommendedQueries: [],
-    };
-    const recommendedQueriesFromExtensions = getRecommendedQueriesTemplatesFromExtensions(
-      editorExtensions.recommendedQueries
+  const getSuggestedUserDefinedColumnName = (extraFieldNames?: string[]) => {
+    if (!extraFieldNames?.length) {
+      return findNewUserDefinedColumn(anyUserDefinedColumns);
+    }
+
+    const augmentedFieldsMap = new Map(fieldsMap);
+    extraFieldNames.forEach((name) => {
+      augmentedFieldsMap.set(name, { name, type: 'double' });
+    });
+    return findNewUserDefinedColumn(
+      collectUserDefinedColumns(commands, augmentedFieldsMap, innerText)
     );
-
-    const recommendedQueriesFromTemplates =
-      await getRecommendedQueriesSuggestionsFromStaticTemplates(getColumnsByType, prefix);
-
-    return [...recommendedQueriesFromExtensions, ...recommendedQueriesFromTemplates];
   };
 
-  return commandDef.suggest({
+  const additionalCommandContext = await getCommandContext(
+    astContext.command.name,
     innerText,
-    command: astContext.command,
-    getColumnsByType,
-    getAllColumnNames: () => Array.from(fieldsMap.keys()),
-    columnExists: (col: string) => Boolean(getColumnByName(col, references)),
-    getSuggestedUserDefinedColumnName: (extraFieldNames?: string[]) => {
-      if (!extraFieldNames?.length) {
-        return findNewUserDefinedColumn(anyUserDefinedColumns);
-      }
+    callbacks
+  );
+  const context = {
+    ...references,
+    ...additionalCommandContext,
+  };
 
-      const augmentedFieldsMap = new Map(fieldsMap);
-      extraFieldNames.forEach((name) => {
-        augmentedFieldsMap.set(name, { name, type: 'double' });
-      });
-      return findNewUserDefinedColumn(
-        collectUserDefinedColumns(commands, augmentedFieldsMap, innerText)
-      );
+  // does it make sense to have a different context per command?
+  return commandDefinition.methods.autocomplete(
+    innerText,
+    astContext.command,
+    {
+      getByType: getColumnsByType,
+      getSuggestedUserDefinedColumnName,
+      getColumnsForQuery: callbacks?.getColumnsFor
+        ? async (query: string) => {
+            return await callbacks.getColumnsFor!({ query });
+          }
+        : undefined,
     },
-    getExpressionType: (expression: ESQLAstItem | undefined) =>
-      getExpressionType(expression, references.fields, references.userDefinedColumns),
-    getPreferences,
-    definition: commandDef,
-    getSources,
-    getRecommendedQueriesSuggestions: (queryString, prefix) =>
-      getRecommendedQueries(queryString, prefix),
-    getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
-    previousCommands: commands,
-    callbacks,
-    getVariables,
-    supportsControls,
-    getPolicies,
-    getPolicyMetadata,
-    references,
-  });
+    context
+  );
 }
 
 const addCommaIf = (condition: boolean, text: string) => (condition ? `${text},` : text);
@@ -440,7 +385,7 @@ async function getFunctionArgsSuggestions(
   offset: number,
   getVariables?: () => ESQLControlVariable[] | undefined,
   supportsControls?: boolean
-): Promise<SuggestionRawDefinition[]> {
+): Promise<ISuggestionItem[]> {
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
   if (!fnDefinition) {
@@ -499,11 +444,11 @@ async function getFunctionArgsSuggestions(
     });
   }
 
-  const suggestions: SuggestionRawDefinition[] = [];
+  const suggestions: ISuggestionItem[] = [];
   const noArgDefined = !arg;
   const isUnknownColumn =
     arg &&
-    isColumnItem(arg) &&
+    isColumn(arg) &&
     !getColumnExists(arg, {
       fields: fieldsMap,
       userDefinedColumns: userDefinedColumnsExcludingCurrentCommandOnes,
@@ -513,7 +458,7 @@ async function getFunctionArgsSuggestions(
     // ... | EVAL fn( field, <suggest>)
 
     const commandArgIndex = command.args.findIndex(
-      (cmdArg) => isSingleItem(cmdArg) && cmdArg.location.max >= node.location.max
+      (cmdArg) => !Array.isArray(cmdArg) && cmdArg.location.max >= node.location.max
     );
     const finalCommandArgIndex =
       command.name !== 'stats'
@@ -537,7 +482,7 @@ async function getFunctionArgsSuggestions(
 
     if (
       command.name !== 'stats' ||
-      (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
+      (isOptionNode(finalCommandArg) && finalCommandArg.name === 'by')
     ) {
       // ignore the current function
       fnToIgnore.push(node.name);
@@ -546,6 +491,11 @@ async function getFunctionArgsSuggestions(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
+          : []),
+        ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
+          ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(
+              ({ name }) => name
+            )
           : [])
       );
     }
@@ -618,9 +568,16 @@ async function getFunctionArgsSuggestions(
 
     // Functions
     if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
+      let location = getLocationFromCommandOrOptionName(option?.name ?? command.name);
+      // If the user is working with timeseries data, we want to suggest
+      // functions that are relevant to the timeseries context.
+      const isTSSourceCommand = commands[0].name === 'ts';
+      if (isTSSourceCommand && isAggFunctionUsedAlready(command, finalCommandArgIndex)) {
+        location = Location.STATS_TIMESERIES;
+      }
       suggestions.push(
         ...getFunctionSuggestions({
-          location: getLocationFromCommandOrOptionName(option?.name ?? command.name),
+          location,
           returnTypes: canBeBooleanCondition
             ? ['any']
             : (ensureKeywordAndText(
@@ -653,7 +610,7 @@ async function getFunctionArgsSuggestions(
   // for eval and row commands try also to complete numeric literals with time intervals where possible
   if (arg) {
     if (command.name !== 'stats') {
-      if (isLiteralItem(arg) && isNumericType(arg.literalType)) {
+      if (isLiteral(arg) && isNumericType(arg.literalType)) {
         // ... | EVAL fn(2 <suggest>)
         suggestions.push(
           ...getCompatibleLiterals(['time_literal_unit'], {
@@ -666,7 +623,7 @@ async function getFunctionArgsSuggestions(
     // Suggest comparison functions for boolean conditions
     if (canBeBooleanCondition) {
       suggestions.push(
-        ...comparisonFunctions.map<SuggestionRawDefinition>(({ name, description }) => ({
+        ...comparisonFunctions.map<ISuggestionItem>(({ name, description }) => ({
           label: name,
           text: name,
           kind: 'Function' as ItemKind,
@@ -699,14 +656,13 @@ async function getListArgsSuggestions(
     node: ESQLSingleAstItem | undefined;
   },
   getFieldsByType: GetColumnsByTypeFn,
-  getFieldsMaps: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn
+  getFieldsMaps: GetFieldsMapFn
 ) {
   const suggestions = [];
 
   // node is supposed to be the function who support a list argument (like the "in" operator)
   // so extract the type of the first argument and suggest fields of that type
-  if (node && isFunctionItem(node)) {
+  if (node && isFunctionExpression(node)) {
     const list = node?.args[1];
 
     if (isList(list)) {
@@ -728,7 +684,7 @@ async function getListArgsSuggestions(
       }
     });
     const [firstArg] = node.args;
-    if (isColumnItem(firstArg)) {
+    if (isColumn(firstArg)) {
       const argType = extractTypeFromASTArg(firstArg, {
         fields: fieldsMap,
         userDefinedColumns: anyUserDefinedColumns,
@@ -737,7 +693,7 @@ async function getListArgsSuggestions(
         // do not propose existing columns again
         const otherArgs = isList(list)
           ? list.values
-          : node.args.filter(Array.isArray).flat().filter(isColumnItem);
+          : node.args.filter(Array.isArray).flat().filter(isColumn);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             [argType as string],

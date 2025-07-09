@@ -6,12 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { setTestFunctions } from '../../shared/test_functions';
-import { FunctionDefinitionTypes, Location } from '../../definitions/types';
+import { FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { Location, ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { getFunctionSignaturesByReturnType, setup } from './helpers';
 import { uniq } from 'lodash';
-import { SuggestionRawDefinition } from '../types';
 
 describe('functions arg suggestions', () => {
   afterEach(() => {
@@ -195,7 +194,7 @@ describe('functions arg suggestions', () => {
 
     const { suggest } = await setup();
 
-    const isColumn = (s: SuggestionRawDefinition) => s.kind === 'Variable';
+    const isColumn = (s: ISuggestionItem) => s.kind === 'Variable';
 
     const constantOnlySuggestions = await suggest(
       'FROM index | EVAL FUNC_WITH_CONSTANT_ONLY_PARAM(/)'
