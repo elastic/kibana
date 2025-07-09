@@ -84,7 +84,10 @@ import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
-import { EffectedPolicySelect, StyledButtonGroup } from '../../../../components/effected_policy_select';
+import {
+  EffectedPolicySelect,
+  StyledButtonGroup,
+} from '../../../../components/effected_policy_select';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
@@ -94,10 +97,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { TrustedAppsApiClient } from '../../service';
 import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
 import { Loader } from '../../../../../common/components/loader';
-import {
-  computeHasDuplicateFields,
-  getAddedFieldsCounts,
-} from '../../../../common/utils';
+import { computeHasDuplicateFields, getAddedFieldsCounts } from '../../../../common/utils';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -364,10 +364,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           isValid: updatedValidationResult.isValid && conditionsState.areValid,
           confirmModalLabels: updatedValidationResult.extraWarning
             ? CONFIRM_WARNING_MODAL_LABELS(
-              i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
-                defaultMessage: 'trusted application',
-              })
-            )
+                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                  defaultMessage: 'trusted application',
+                })
+              )
             : undefined,
         });
       },
@@ -615,18 +615,18 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         const updatedItem: ArtifactFormComponentProps['item'] =
           arg.exceptionItems[0] !== undefined
             ? ({
-              ...arg.exceptionItems[0],
-              name: currentItem?.name ?? '',
-              description: currentItem?.description ?? '',
-              comments: currentItem?.comments ?? [],
-              os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
-              tags: currentItem?.tags ?? [],
-              meta: currentItem.meta,
-            } as ArtifactFormComponentProps['item'])
+                ...arg.exceptionItems[0],
+                name: currentItem?.name ?? '',
+                description: currentItem?.description ?? '',
+                comments: currentItem?.comments ?? [],
+                os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
+                tags: currentItem?.tags ?? [],
+                meta: currentItem.meta,
+              } as ArtifactFormComponentProps['item'])
             : {
-              ...currentItem,
-              entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
-            };
+                ...currentItem,
+                entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
+              };
 
         processChanged(updatedItem);
         if (!hasFormChanged) {

@@ -93,7 +93,7 @@ export const getAddedFieldsCounts = (formFields: string[]): { [k: string]: numbe
 
 /**
  * Checks if conditions in Event filters or Trusted Apps forms have duplicate fields
- * @param formFields 
+ * @param formFields
  * @returns boolean
  */
 export const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
