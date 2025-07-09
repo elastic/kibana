@@ -87,6 +87,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       const defaultHeaders = { ...this.headers };
       let defaultQuery: Record<string, string> | undefined;
 
+      const isHttps = this.url.toLowerCase().startsWith('https');
+
       if (
         this.provider === OpenAiProviderType.Other &&
         (('certificateData' in this.secrets && this.secrets.certificateData) ||
@@ -109,11 +111,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           this.url,
           this.sslOverrides
         );
-        httpAgent = agents.httpsAgent;
+        httpAgent = isHttps ? agents.httpsAgent : agents.httpAgent;
         baseURL = removeEndpointFromUrl(this.url);
       } else {
         const agents = getCustomAgents(this.configurationUtilities, this.logger, this.url);
-        httpAgent = agents.httpsAgent ?? agents.httpAgent;
+        httpAgent = isHttps ? agents.httpsAgent : agents.httpAgent;
         if (this.config.apiProvider === OpenAiProviderType.AzureAi) {
           baseURL = this.config.apiUrl;
           defaultHeaders['api-key'] = this.key;

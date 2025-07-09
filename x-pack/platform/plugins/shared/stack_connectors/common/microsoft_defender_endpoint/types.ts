@@ -64,7 +64,7 @@ export interface MicrosoftDefenderEndpointGetActionsResponse {
 
 export interface MicrosoftDefenderEndpointGetActionResultsResponse {
   '@odata.context': string;
-  value: string[]; // Downloadable link
+  value: string; // Downloadable link
 }
 
 /**

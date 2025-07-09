@@ -23,6 +23,7 @@ import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
@@ -54,11 +55,32 @@ export interface PaginationConfigExtension {
  * Parameters passed to the app menu extension
  */
 export interface AppMenuExtensionParams {
+  /**
+   * Available actions for the app menu
+   */
+  actions: {
+    /**
+     * Updates the ad hoc data views list
+     * @param adHocDataViews The new ad hoc data views to set
+     */
+    updateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
+  };
+  /**
+   * True if Discover is in ESQL mode
+   */
   isEsqlMode: boolean;
+  /**
+   * The current data view
+   */
   dataView: DataView | undefined;
+  /**
+   * The available ad hoc data views
+   */
   adHocDataViews: DataView[];
+  /**
+   * The authorized alerting rule type IDs for the current user
+   */
   authorizedRuleTypeIds: string[];
-  onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
 }
 
 /**
@@ -140,6 +162,20 @@ export interface DefaultAppStateExtension {
    * The field to apply for the histogram breakdown
    */
   breakdownField?: string;
+  /**
+   * The state for chart visibility toggle
+   */
+  hideChart?: boolean;
+}
+
+/**
+ * Parameters passed to the modified vis attributes extension
+ */
+export interface ModifiedVisAttributesExtensionParams {
+  /**
+   * The vis attributes to modify
+   */
+  attributes: TypedLensByValueInput['attributes'];
 }
 
 /**
@@ -150,6 +186,9 @@ export interface CellRenderersExtensionParams {
    * Available actions for cell renderers
    */
   actions: {
+    /**
+     * Adds a filter to the current search in data view mode, or a where clause in ESQL mode
+     */
     addFilter?: DocViewFilterFn;
   };
   /**
@@ -171,23 +210,28 @@ export interface CellRenderersExtensionParams {
  */
 export interface RowControlsExtensionParams {
   /**
+   * Available actions for row controls
+   */
+  actions: {
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+    /**
+     * Sets the expanded document, which is displayed in a flyout
+     * @param record - The record to display in the flyout
+     * @param options.initialTabId - The tabId to display in the flyout
+     */
+    setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  };
+  /**
    * The current data view
    */
   dataView: DataView;
   /**
    * The current query
    */
-  updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
-  /**
-   * The current query
-   */
   query?: DiscoverAppState['query'];
-  /**
-   * Function to set the expanded document, which is displayed in a flyout
-   * @param record - The record to display in the flyout
-   * @param options.initialTabId - The tabId to display in the flyout
-   */
-  setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
 }
 
 /**
@@ -304,6 +348,18 @@ export interface Profile {
   getDefaultAdHocDataViews: () => Array<
     Omit<DataViewSpec, 'id'> & { id: NonNullable<DataViewSpec['id']> }
   >;
+
+  /**
+   * Chart
+   */
+
+  /**
+   * Allows modifying the default vis attributes used in the Discover chart
+   * @returns The modified vis attributes to use in the chart
+   */
+  getModifiedVisAttributes: (
+    params: ModifiedVisAttributesExtensionParams
+  ) => TypedLensByValueInput['attributes'];
 
   /**
    * Data grid

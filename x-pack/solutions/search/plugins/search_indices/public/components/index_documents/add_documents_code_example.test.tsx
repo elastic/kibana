@@ -69,8 +69,6 @@ describe('AddDocumentsCodeExample', () => {
         <AddDocumentsCodeExample indexName={indexName} mappingProperties={mappingProperties} />
       );
 
-      expect(generateSampleDocument).toHaveBeenCalledTimes(3);
-
       exampleTexts.forEach((text, index) => {
         expect(generateSampleDocument).toHaveBeenNthCalledWith(index + 1, mappingProperties, text);
       });
@@ -81,10 +79,8 @@ describe('AddDocumentsCodeExample', () => {
 
       render(<AddDocumentsCodeExample indexName={indexName} mappingProperties={{}} />);
 
-      expect(generateSampleDocument).toHaveBeenCalledTimes(3);
-
       const mappingProperties: Record<string, MappingProperty> = {
-        text: { type: 'text' },
+        text: { type: 'semantic_text' },
       };
 
       exampleTexts.forEach((text, index) => {

@@ -17,7 +17,7 @@ import { URL_PARAM_KEY } from '../use_url_state';
 export const useSyncTimelineUrlParam = () => {
   const updateUrlParam = useUpdateUrlParam<TimelineUrl>(URL_PARAM_KEY.timeline);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { activeTab, show, savedObjectId, savedSearchId } = useShallowEqualSelector(
+  const { activeTab, show, savedObjectId, savedSearchId, kqlQuery } = useShallowEqualSelector(
     (state) => getTimeline(state, TimelineId.active) ?? {}
   );
 
@@ -27,7 +27,11 @@ export const useSyncTimelineUrlParam = () => {
       isOpen: show,
       activeTab,
       savedSearchId: savedSearchId ? savedSearchId : undefined,
+      query: {
+        kind: kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
+        expression: kqlQuery?.filterQuery?.kuery?.expression ?? '',
+      },
     };
     updateUrlParam(params);
-  }, [activeTab, savedObjectId, show, updateUrlParam, savedSearchId]);
+  }, [activeTab, savedObjectId, show, updateUrlParam, savedSearchId, kqlQuery]);
 };

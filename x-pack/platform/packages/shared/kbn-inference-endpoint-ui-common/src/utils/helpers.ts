@@ -8,6 +8,7 @@
 import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
 import { Config, ConfigEntryView, FieldType, InferenceProvider } from '../types/types';
+import type { FieldsConfiguration } from '../types/types';
 import * as LABELS from '../translations';
 
 export interface TaskTypeOption {
@@ -79,11 +80,25 @@ export const getNonEmptyValidator = (
 
 export const mapProviderFields = (
   taskType: string,
-  newProvider: InferenceProvider
+  newProvider: InferenceProvider,
+  fieldOverrides?: { hidden: string[]; additional: FieldsConfiguration[] }
 ): ConfigEntryView[] => {
+  // fieldOverrides.additional
+  // e.g. [ { field: { default_value: 'value', ...}, other_field: { default_value: 'value', ...} } ]
+  if (fieldOverrides?.additional) {
+    fieldOverrides?.additional.forEach((additionalField) => {
+      const fieldKey = Object.keys(additionalField)[0];
+      if (!newProvider.configurations[fieldKey]) {
+        newProvider.configurations[fieldKey] = additionalField[fieldKey];
+      }
+    });
+  }
+
   return Object.keys(newProvider.configurations ?? {})
-    .filter((pk) =>
-      (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType)
+    .filter(
+      (pk) =>
+        (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType) &&
+        (fieldOverrides?.hidden ?? []).indexOf(pk) === -1
     )
     .map(
       (k): ConfigEntryView => ({

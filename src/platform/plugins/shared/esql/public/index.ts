@@ -10,7 +10,7 @@
 import { EsqlPlugin, type EsqlPluginStart } from './plugin';
 
 export { ESQLLangEditor } from './create_editor';
-export type { ESQLEditorProps } from '@kbn/esql-editor';
+export type { ESQLEditorProps, DataErrorsControl } from '@kbn/esql-editor';
 export type { EsqlPluginStart };
 
 export function plugin() {

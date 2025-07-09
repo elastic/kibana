@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Plugin, AppMountParameters, CoreStart } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_TITLE } from '../common';
 import {
   AppPluginSetupDependencies,
@@ -32,6 +33,7 @@ export class QueryRulesPlugin
     core.application.register({
       id: PLUGIN_ID,
       appRoute: PLUGIN_ROUTE_ROOT,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: PLUGIN_TITLE,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
@@ -48,7 +50,8 @@ export class QueryRulesPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      visibleIn: ['globalSearch'],
+      order: 4,
+      visibleIn: ['globalSearch', 'sideNav'],
     });
 
     return {};

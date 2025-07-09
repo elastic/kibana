@@ -19253,7 +19253,7 @@
             }
           }
         },
-        "summary": "Update an agent",
+        "summary": "Update an agent by ID",
         "tags": [
           "Elastic Agents"
         ]
@@ -19465,163 +19465,6 @@
         "summary": "Create an agent action",
         "tags": [
           "Elastic Agent actions"
-        ]
-      }
-    },
-    "/api/fleet/agents/{agentId}/migrate": {
-      "post": {
-        "description": "Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.",
-        "operationId": "post-fleet-agents-agentid-migrate",
-        "parameters": [
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "agentId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "enrollment_token": {
-                    "type": "string"
-                  },
-                  "settings": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "ca_sha256": {
-                        "type": "string"
-                      },
-                      "certificate_authorities": {
-                        "type": "string"
-                      },
-                      "elastic_agent_cert": {
-                        "type": "string"
-                      },
-                      "elastic_agent_cert_key": {
-                        "type": "string"
-                      },
-                      "elastic_agent_cert_key_passphrase": {
-                        "type": "string"
-                      },
-                      "headers": {
-                        "additionalProperties": {
-                          "type": "string"
-                        },
-                        "type": "object"
-                      },
-                      "insecure": {
-                        "type": "boolean"
-                      },
-                      "proxy_disabled": {
-                        "type": "boolean"
-                      },
-                      "proxy_headers": {
-                        "additionalProperties": {
-                          "type": "string"
-                        },
-                        "type": "object"
-                      },
-                      "proxy_url": {
-                        "type": "string"
-                      },
-                      "replace_token": {
-                        "type": "boolean"
-                      },
-                      "staging": {
-                        "type": "boolean"
-                      },
-                      "tags": {
-                        "items": {
-                          "type": "string"
-                        },
-                        "type": "array"
-                      }
-                    },
-                    "type": "object"
-                  },
-                  "uri": {
-                    "format": "uri",
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "uri",
-                  "enrollment_token"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": false,
-                  "description": "Generic Error",
-                  "properties": {
-                    "attributes": {},
-                    "error": {
-                      "type": "string"
-                    },
-                    "errorType": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "attributes"
-                  ],
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Migrate a single agent",
-        "tags": [
-          "Elastic Agents"
         ]
       }
     },
@@ -46037,7 +45880,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -48149,7 +47991,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -49976,7 +49817,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -51835,7 +51675,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -53664,7 +53503,6 @@
                                       "additionalProperties": false,
                                       "properties": {
                                         "query": {
-                                          "minLength": 1,
                                           "type": "string"
                                         }
                                       },
@@ -58326,7 +58164,6 @@
                                       "additionalProperties": false,
                                       "properties": {
                                         "query": {
-                                          "minLength": 1,
                                           "type": "string"
                                         }
                                       },
@@ -58495,7 +58332,6 @@
                     "additionalProperties": false,
                     "properties": {
                       "query": {
-                        "minLength": 1,
                         "type": "string"
                       }
                     },
@@ -58544,7 +58380,6 @@
             "name": "from",
             "required": true,
             "schema": {
-              "format": "date-time",
               "type": "string"
             }
           },
@@ -58553,7 +58388,6 @@
             "name": "to",
             "required": true,
             "schema": {
-              "format": "date-time",
               "type": "string"
             }
           },
@@ -58592,6 +58426,98 @@
         },
         "responses": {},
         "summary": "Read the significant events",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
+    "/api/streams/{name}/significant_events/_preview": {
+      "post": {
+        "description": "Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.",
+        "operationId": "post-streams-name-significant-events-preview",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "bucketSize",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "query": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "kql": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "query": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "query"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "kql"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "query"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Preview significant events",
         "tags": [
           "streams"
         ],

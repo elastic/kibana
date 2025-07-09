@@ -89,26 +89,20 @@ export class RuleMigrationsTaskClient {
     migrationTaskRunner
       .run(invocationConfig)
       .then(() => {
-        /**
-         * Handles
-         *  - successful completion of this execution
-         *  - Manual Abort of the execution
-         */
-        migrationLogger.info('Migration Execution task completed successfully');
-        // Save the migration execution details on completion
-        this.data.migrations.saveAsEnded({ id: migrationId }).catch((error) => {
-          migrationLogger.error(`Error saving migration as ended: ${error}`);
+        // The task runner has finished normally. Abort errors are also handled here, it's an expected finish scenario, nothing special should be done.
+        migrationLogger.debug('Migration execution task finished');
+        this.data.migrations.saveAsFinished({ id: migrationId }).catch((error) => {
+          migrationLogger.error(`Error saving migration as finished: ${error}`);
         });
       })
       .catch((error) => {
-        // no use in throwing the error, the `start` promise is long gone. Just store and log the error
+        // Unexpected errors, no use in throwing them since the `start` promise is long gone. Just log and store the error message
+        migrationLogger.error(`Error executing migration task: ${error}`);
         this.data.migrations
           .saveAsFailed({ id: migrationId, error: error.message })
           .catch((saveError) => {
             migrationLogger.error(`Error saving migration as failed: ${saveError}`);
           });
-
-        void migrationLogger.error(`Error executing migration task: ${error}`);
       })
       .finally(() => {
         this.migrationsRunning.delete(migrationId);
@@ -141,7 +135,7 @@ export class RuleMigrationsTaskClient {
     }
     const dataStats = await this.data.rules.getStats(migrationId);
     const taskStats = this.getTaskStats(migration, dataStats.rules);
-    return { ...taskStats, ...dataStats };
+    return { ...taskStats, ...dataStats, name: migration.name };
   }
 
   /** Returns the stats of all migrations */
@@ -157,8 +151,8 @@ export class RuleMigrationsTaskClient {
     for (const dataStats of allDataStats) {
       const migration = allMigrationsMap.get(dataStats.id);
       if (migration) {
-        const taksStats = this.getTaskStats(migration, dataStats.rules);
-        allStats.push({ ...taksStats, ...dataStats });
+        const tasksStats = this.getTaskStats(migration, dataStats.rules);
+        allStats.push({ ...tasksStats, ...dataStats, name: migration.name });
       }
     }
     return allStats;
@@ -185,13 +179,13 @@ export class RuleMigrationsTaskClient {
     if (dataStats.completed + dataStats.failed === dataStats.total) {
       return SiemMigrationTaskStatus.FINISHED;
     }
-    if (lastExecution?.is_aborted) {
-      return SiemMigrationTaskStatus.ABORTED;
+    if (lastExecution?.is_stopped) {
+      return SiemMigrationTaskStatus.STOPPED;
     }
     if (dataStats.pending === dataStats.total) {
       return SiemMigrationTaskStatus.READY;
     }
-    return SiemMigrationTaskStatus.STOPPED;
+    return SiemMigrationTaskStatus.INTERRUPTED;
   }
 
   /** Stops one running migration */
@@ -199,8 +193,8 @@ export class RuleMigrationsTaskClient {
     try {
       const migrationRunning = this.migrationsRunning.get(migrationId);
       if (migrationRunning) {
-        migrationRunning.abortController.abort();
-        await this.data.migrations.setIsAborted({ id: migrationId });
+        migrationRunning.abortController.abort('Stopped by user');
+        await this.data.migrations.setIsStopped({ id: migrationId });
         return { exists: true, stopped: true };
       }
 

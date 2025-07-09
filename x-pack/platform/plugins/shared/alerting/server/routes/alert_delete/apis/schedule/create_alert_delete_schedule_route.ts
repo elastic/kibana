@@ -69,7 +69,7 @@ export const alertDeleteScheduleRoute = (
         }
 
         try {
-          await alertingContext
+          const message = await alertingContext
             .getAlertDeletionClient()
             .scheduleTask(
               req,
@@ -78,7 +78,7 @@ export const alertDeleteScheduleRoute = (
                 ? spaceIds
                 : [(await alertingContext.getRulesClient()).getSpaceId() || DEFAULT_SPACE_ID]
             );
-          return res.noContent();
+          return message ? res.ok({ body: message }) : res.noContent();
         } catch (error) {
           return res.customError({
             statusCode: 500,

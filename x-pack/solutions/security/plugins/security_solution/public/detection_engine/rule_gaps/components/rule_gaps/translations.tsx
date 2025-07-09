@@ -179,3 +179,61 @@ export const GAPS_TABLE_TOTAL_GAPS_LABEL = (totalItems: number, maxItems: number
     values: { totalItems, maxItems },
     defaultMessage: `More than {totalItems} gaps match filters provided. Showing first {maxItems}. Constrain filters further to view additional gaps.`,
   });
+
+export const GAPS_FILL_ALL_GAPS_ERROR_DISABLED_RULE_MESSAGE = i18n.translate(
+  'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalDisabledRuleErrorLabel',
+  {
+    defaultMessage: 'Enable the rule to schedule gap fills.',
+  }
+);
+
+export const GAPS_FILL_ALL_GAPS_UNKNOWN_ERROR_MESSAGE = (message: string) =>
+  i18n.translate(
+    'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalUnknownErrorLabel',
+    {
+      values: { message },
+      defaultMessage: 'Cannot fill gaps for 1 rule ({message})',
+    }
+  );
+
+export const GAPS_FILL_ALL_GAPS_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.gaps.fillAllGapsButtonLabel',
+  {
+    defaultMessage: 'Fill gaps',
+  }
+);
+
+export const GAPS_FILL_ALL_GAPS_DRY_RUN_FAILED_MODAL_CLOSE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalCloseButtonLabel',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const GAPS_FILL_ALL_GAPS_DRY_RUN_MODAL_HEADING = i18n.translate(
+  'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalHeading',
+  {
+    defaultMessage: 'Unable to schedule gap fills for a disabled rule',
+  }
+);
+
+export const GAPS_FILL_ALL_GAPS_WARNING_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.gaps.fillRuleGapsLongRunWarningToastTitle',
+  {
+    defaultMessage: 'Scheduling gap fills',
+  }
+);
+
+export const GAPS_FILL_ALL_GAPS_WARNING_TOAST_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.gaps.fillRuleGapsLongRunWarningToastMessage',
+  {
+    defaultMessage: 'Scheduling gap fills for 1 rule.',
+  }
+);
+
+export const GAPS_FILL_ALL_GAPS_WARNING_TOAST_NOTIFY = i18n.translate(
+  'xpack.securitySolution.gaps.fillRuleGapsLongRunWarningToastNotifyLabel',
+  {
+    defaultMessage: `Notify me when done`,
+  }
+);

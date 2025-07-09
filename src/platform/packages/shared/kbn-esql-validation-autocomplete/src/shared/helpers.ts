@@ -8,7 +8,6 @@
  */
 import {
   Walker,
-  lastItem,
   type ESQLAstCommand,
   type ESQLAstItem,
   type ESQLColumn,
@@ -18,7 +17,27 @@ import {
   type ESQLSingleAstItem,
   type ESQLSource,
   type ESQLTimeInterval,
+  esqlCommandRegistry,
+  timeUnits,
+  type FieldType,
+  type FunctionParameterType,
+  type ArrayType,
+  type FunctionDefinition,
+  FunctionDefinitionTypes,
+  type FunctionParameter,
+  type FunctionReturnType,
 } from '@kbn/esql-ast';
+import type {
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+} from '@kbn/esql-ast/src/commands_registry/types';
+import { getColumnForASTNode, getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
+import { getExpressionType } from '@kbn/esql-ast/src/definitions/utils';
+import { getTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import {
   ESQLIdentifier,
   ESQLInlineCast,
@@ -29,33 +48,8 @@ import {
 import { uniqBy } from 'lodash';
 
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
-import { operatorsDefinitions } from '../definitions/all_operators';
-import { commandDefinitions } from '../definitions/commands';
-import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
-import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
-import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { getFunctionSignatures } from '../definitions/helpers';
-import { timeUnits } from '../definitions/literals';
-import type { FieldType } from '../definitions/types';
-import {
-  ArrayType,
-  CommandDefinition,
-  FunctionDefinition,
-  FunctionDefinitionTypes,
-  FunctionParameter,
-  FunctionParameterType,
-  FunctionReturnType,
-  SupportedDataType,
-  getLocationFromCommandOrOptionName,
-} from '../definitions/types';
-import type {
-  ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
-  ReferenceMaps,
-} from '../validation/types';
-import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from './constants';
-import { removeMarkerArgFromArgsList } from './context';
-import { getTestFunctions } from './test_functions';
+import { getLocationFromCommandOrOptionName } from './types';
+import type { ReferenceMaps } from '../validation/types';
 import type { ESQLCallbacks, ReasonTypes } from './types';
 import { collectUserDefinedColumns } from './user_defined_columns';
 
@@ -99,15 +93,6 @@ export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
   return isFunctionItem(arg) && arg.name === '=';
 }
 
-export function isAssignmentComplete(node: ESQLFunction | undefined) {
-  const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];
-  return Boolean(assignExpression && Array.isArray(assignExpression) && assignExpression.length);
-}
-
-export function isIncompleteItem(arg: ESQLAstItem): boolean {
-  return !arg || (!Array.isArray(arg) && arg.incomplete);
-}
-
 export const within = (position: number, location: ESQLLocation | undefined) =>
   Boolean(location && location.min <= position && location.max >= position);
 
@@ -116,7 +101,6 @@ export function isSourceCommand({ label }: { label: string }) {
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
-let commandLookups: Map<string, CommandDefinition<string>> | undefined;
 
 function buildFunctionLookup() {
   // we always refresh if we have test functions
@@ -179,33 +163,6 @@ export function getFunctionDefinition(name: string) {
 
 const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
 
-function buildCommandLookup(): Map<string, CommandDefinition<string>> {
-  if (!commandLookups) {
-    commandLookups = commandDefinitions.reduce((memo, def) => {
-      memo.set(def.name, def);
-      return memo;
-    }, new Map<string, CommandDefinition<string>>());
-  }
-  return commandLookups!;
-}
-
-export function getCommandDefinition<CommandName extends string>(
-  name: CommandName
-): CommandDefinition<CommandName> {
-  return buildCommandLookup().get(name.toLowerCase()) as unknown as CommandDefinition<CommandName>;
-}
-
-export function getAllCommands() {
-  return Array.from(buildCommandLookup().values());
-}
-
-export function getCommandsByName(names: string[]): Array<CommandDefinition<string>> {
-  const commands = buildCommandLookup();
-  return names.map((name) => commands.get(name)).filter((command) => command) as Array<
-    CommandDefinition<string>
-  >;
-}
-
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
   if (item.literalType === argType) {
     return true;
@@ -237,67 +194,15 @@ function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQ
   return false;
 }
 
-/**
- * This function returns the userDefinedColumn or field matching a column
- */
-export function getColumnForASTNode(
-  node: ESQLColumn | ESQLIdentifier,
-  { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
-): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
-  const formatted = node.type === 'identifier' ? node.name : node.parts.join('.');
-  return getColumnByName(formatted, { fields, userDefinedColumns });
-}
-
-/**
- * Take a column name like "`my``column`"" and return "my`column"
- */
-export function unescapeColumnName(columnName: string) {
-  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
-  // to use the AST column node parts array, but in some cases the AST node isn't available.
-  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
-    return columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
-  }
-  return columnName;
-}
-
-/**
- * This function returns the userDefinedColumn or field matching a column
- */
-export function getColumnByName(
-  columnName: string,
-  { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
-): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
-  const unescaped = unescapeColumnName(columnName);
-  return fields.get(unescaped) || userDefinedColumns.get(unescaped)?.[0];
-}
-
-const ARRAY_REGEXP = /\[\]$/;
-
 export function isArrayType(type: string): type is ArrayType {
-  return ARRAY_REGEXP.test(type);
+  return type.endsWith('[]');
 }
-
-const arrayToSingularMap: Map<ArrayType, FunctionParameterType> = new Map([
-  ['double[]', 'double'],
-  ['unsigned_long[]', 'unsigned_long'],
-  ['long[]', 'long'],
-  ['integer[]', 'integer'],
-  ['counter_integer[]', 'counter_integer'],
-  ['counter_long[]', 'counter_long'],
-  ['counter_double[]', 'counter_double'],
-  ['keyword[]', 'keyword'],
-  ['text[]', 'text'],
-  ['date[]', 'date'],
-  ['date_period[]', 'date_period'],
-  ['boolean[]', 'boolean'],
-  ['any[]', 'any'],
-]);
 
 /**
  * Given an array type for example `string[]` it will return `string`
  */
-export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
-  return isArrayType(type) ? arrayToSingularMap.get(type)! : type;
+export function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType {
+  return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -386,7 +291,10 @@ export function getAllArrayTypes(
         types.push(subArg.literalType);
       }
       if (subArg.type === 'column') {
-        const hit = getColumnForASTNode(subArg, references);
+        const hit = getColumnForASTNode(subArg, {
+          fields: references.fields,
+          userDefinedColumns: references.userDefinedColumns,
+        });
         types.push(hit?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
@@ -444,16 +352,16 @@ export function checkFunctionArgMatchesDefinition(
   parameterDefinition: FunctionParameter,
   references: ReferenceMaps,
   parentCommand?: string
-) {
-  const argType = parameterDefinition.type;
-  if (argType === 'any') {
+): boolean {
+  const parameterType = parameterDefinition.type;
+  if (parameterType === 'any') {
     return true;
   }
   if (isParam(arg)) {
     return true;
   }
   if (arg.type === 'literal') {
-    const matched = doesLiteralMatchParameterType(argType, arg);
+    const matched = doesLiteralMatchParameterType(parameterType, arg);
     return matched;
   }
   if (arg.type === 'function') {
@@ -462,16 +370,19 @@ export function checkFunctionArgMatchesDefinition(
       return fnDef.signatures.some(
         (signature) =>
           signature.returnType === 'unknown' ||
-          argType === signature.returnType ||
-          bothStringTypes(argType, signature.returnType)
+          parameterType === signature.returnType ||
+          bothStringTypes(parameterType, signature.returnType)
       );
     }
   }
   if (arg.type === 'timeInterval') {
-    return argType === 'time_duration' && inKnownTimeInterval(arg.unit);
+    return parameterType === 'time_duration' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
-    const hit = getColumnForASTNode(arg, references);
+    const hit = getColumnForASTNode(arg, {
+      fields: references.fields,
+      userDefinedColumns: references.userDefinedColumns,
+    });
     const validHit = hit;
     if (!validHit) {
       return false;
@@ -481,14 +392,19 @@ export function checkFunctionArgMatchesDefinition(
       : [validHit.type];
 
     return wrappedTypes.some(
-      (ct) => ct === argType || bothStringTypes(ct, argType) || ct === 'null' || ct === 'unknown'
+      (ct) =>
+        ct === parameterType ||
+        bothStringTypes(ct, parameterType) ||
+        ct === 'null' ||
+        ct === 'unknown'
     );
   }
   if (arg.type === 'inlineCast') {
-    const lowerArgType = argType?.toLowerCase();
+    const lowerArgType = parameterType?.toLowerCase();
     const castedType = getExpressionType(arg);
     return castedType === lowerArgType;
   }
+  return false;
 }
 
 function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
@@ -549,11 +465,6 @@ function getWildcardPosition(name: string) {
 export function hasWildcard(name: string) {
   return /\*/.test(name);
 }
-export function isUserDefinedColumn(
-  column: ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined
-): column is ESQLUserDefinedColumn {
-  return Boolean(column && 'location' in column);
-}
 
 /**
  * This returns the name with any quotes that were present.
@@ -588,83 +499,6 @@ export function getColumnExists(
   }
 
   return false;
-}
-
-const removeSourceNameQuotes = (sourceName: string) =>
-  sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
-
-export function sourceExists(index: string, sources: Set<string>) {
-  if (sources.has(removeSourceNameQuotes(index)) || index.startsWith('-')) {
-    return true;
-  }
-  return Boolean(fuzzySearch(index, sources.keys()));
-}
-
-/**
- * Works backward from the cursor position to determine if
- * the final character of the previous word matches the given character.
- */
-function characterPrecedesCurrentWord(text: string, char: string) {
-  let inCurrentWord = true;
-  for (let i = text.length - 1; i >= 0; i--) {
-    if (inCurrentWord && /\s/.test(text[i])) {
-      inCurrentWord = false;
-    }
-
-    if (!inCurrentWord && !/\s/.test(text[i])) {
-      return text[i] === char;
-    }
-  }
-}
-
-export function pipePrecedesCurrentWord(text: string) {
-  return characterPrecedesCurrentWord(text, '|');
-}
-
-export function getLastNonWhitespaceChar(text: string) {
-  return text[text.trimEnd().length - 1];
-}
-
-/**
- * Are we after a comma? i.e. STATS fieldA, <here>
- */
-export function isRestartingExpression(text: string) {
-  return getLastNonWhitespaceChar(text) === ',' || characterPrecedesCurrentWord(text, ',');
-}
-
-export function findPreviousWord(text: string) {
-  const words = text.split(/\s+/);
-  return words[words.length - 2];
-}
-
-export function withinQuotes(text: string) {
-  const quoteCount = (text.match(/"/g) || []).length;
-  return quoteCount % 2 === 1;
-}
-
-export function endsInWhitespace(text: string) {
-  return /\s$/.test(text);
-}
-
-/**
- * Returns the word at the end of the text if there is one.
- * @param text
- * @returns
- */
-export function findFinalWord(text: string) {
-  const words = text.split(/\s+/);
-  return words[words.length - 1];
-}
-
-export function shouldBeQuotedSource(text: string) {
-  // Based on lexer `fragment UNQUOTED_SOURCE_PART`
-  return /[:"=|,[\]\/ \t\r\n]/.test(text);
-}
-export function shouldBeQuotedText(
-  text: string,
-  { dashSupported }: { dashSupported?: boolean } = {}
-) {
-  return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
 }
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>
@@ -729,144 +563,6 @@ export function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
-// --- Expression types helpers ---
-
-/**
- * Type guard to check if the type is 'param'
- */
-export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
-
-/**
- * Determines the type of the expression
- */
-export function getExpressionType(
-  root: ESQLAstItem | undefined,
-  fields?: Map<string, ESQLFieldWithMetadata>,
-  userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>
-): SupportedDataType | 'unknown' {
-  if (!root) {
-    return 'unknown';
-  }
-
-  if (!isSingleItem(root)) {
-    if (root.length === 0) {
-      return 'unknown';
-    }
-    return getExpressionType(root[0], fields, userDefinedColumns);
-  }
-
-  if (isLiteralItem(root)) {
-    return root.literalType;
-  }
-
-  if (isTimeIntervalItem(root)) {
-    return 'time_duration';
-  }
-
-  // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
-  if (isInlineCastItem(root)) {
-    switch (root.castType) {
-      case 'int':
-        return 'integer';
-      case 'bool':
-        return 'boolean';
-      case 'string':
-        return 'keyword';
-      case 'text':
-        return 'keyword';
-      case 'datetime':
-        return 'date';
-      default:
-        return root.castType;
-    }
-  }
-
-  if (isColumnItem(root) && fields && userDefinedColumns) {
-    const column = getColumnForASTNode(root, { fields, userDefinedColumns });
-    const lastArg = lastItem(root.args);
-    // If the last argument is a param, we return its type (param literal type)
-    // This is useful for cases like `where ??field`
-    if (isParam(lastArg)) {
-      return lastArg.literalType;
-    }
-    if (!column) {
-      return 'unknown';
-    }
-    return column.type;
-  }
-
-  if (root.type === 'list') {
-    return getExpressionType(root.values[0], fields, userDefinedColumns);
-  }
-
-  if (isFunctionItem(root)) {
-    const fnDefinition = getFunctionDefinition(root.name);
-    if (!fnDefinition) {
-      return 'unknown';
-    }
-
-    /**
-     * Special case for COUNT(*) because
-     * the "*" column doesn't match any
-     * of COUNT's function definitions
-     */
-    if (
-      fnDefinition.name === 'count' &&
-      root.args[0] &&
-      isColumnItem(root.args[0]) &&
-      root.args[0].name === '*'
-    ) {
-      return 'long';
-    }
-
-    if (fnDefinition.name === 'case' && root.args.length) {
-      /**
-       * The CASE function doesn't fit our system of function definitions
-       * and needs special handling. This is imperfect, but it's a start because
-       * at least we know that the final argument to case will never be a conditional
-       * expression, always a result expression.
-       *
-       * One problem with this is that if a false case is not provided, the return type
-       * will be null, which we aren't detecting. But this is ok because we consider
-       * userDefinedColumns and fields to be nullable anyways and account for that during validation.
-       */
-      return getExpressionType(root.args[root.args.length - 1], fields, userDefinedColumns);
-    }
-
-    const signaturesWithCorrectArity = getSignaturesWithMatchingArity(fnDefinition, root);
-
-    if (!signaturesWithCorrectArity.length) {
-      return 'unknown';
-    }
-    const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
-
-    // When functions are passed null for any argument, they generally return null
-    // This is a special case that is not reflected in our function definitions
-    if (argTypes.some((argType) => argType === 'null')) return 'null';
-
-    const matchingSignature = signaturesWithCorrectArity.find((signature) => {
-      return argTypes.every((argType, i) => {
-        const param = getParamAtPosition(signature, i);
-        return (
-          param &&
-          (param.type === 'any' ||
-            param.type === argType ||
-            (argType === 'keyword' && ['date', 'date_period'].includes(param.type)) ||
-            isParamExpressionType(argType))
-        );
-      });
-    });
-
-    if (!matchingSignature) {
-      return 'unknown';
-    }
-
-    return matchingSignature.returnType === 'any' ? 'unknown' : matchingSignature.returnType;
-  }
-
-  return 'unknown';
-}
-
 // --- Fields helpers ---
 
 export function transformMapToESQLFields(
@@ -923,22 +619,17 @@ export async function getCurrentQueryAvailableFields(
   const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
   previousPipeFields.forEach((field) => cacheCopy.set(field.name, field));
   const lastCommand = commands[commands.length - 1];
-  const commandDef = getCommandDefinition(lastCommand.name);
+  const commandDefinition = esqlCommandRegistry.getCommandByName(lastCommand.name);
 
-  // If the command has a fieldsSuggestionsAfter function, use it to get the fields
-  if (commandDef.fieldsSuggestionsAfter) {
+  // If the command has a columnsAfter function, use it to get the fields
+  if (commandDefinition?.methods.columnsAfter) {
     const userDefinedColumns = collectUserDefinedColumns([lastCommand], cacheCopy, query);
-    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
-      userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
-    );
 
-    return commandDef.fieldsSuggestionsAfter(
-      lastCommand,
-      previousPipeFields,
-      arrayOfUserDefinedColumns
-    );
+    return commandDefinition.methods.columnsAfter(lastCommand, previousPipeFields, {
+      userDefinedColumns,
+    });
   } else {
-    // If the command doesn't have a fieldsSuggestionsAfter function, use the default behavior
+    // If the command doesn't have a columnsAfter function, use the default behavior
     const userDefinedColumns = collectUserDefinedColumns(commands, cacheCopy, query);
     const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
       userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()

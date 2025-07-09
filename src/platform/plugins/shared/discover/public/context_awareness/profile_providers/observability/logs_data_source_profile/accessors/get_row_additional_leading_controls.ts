@@ -15,13 +15,17 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { BasicPrettyPrinter, mutate, parse } from '@kbn/esql-ast';
 import { IGNORED_FIELD } from '@kbn/discover-utils/src/field_constants';
 import type { LogsDataSourceProfileProvider } from '../profile';
+import type { RowControlsExtensionParams } from '../../../../types';
 
 export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['profile']['getRowAdditionalLeadingControls'] =
 
     (prev, { context }) =>
     (params) => {
       const additionalControls = prev(params) || [];
-      const { updateESQLQuery, query, setExpandedDoc } = params;
+      const {
+        actions: { updateESQLQuery, setExpandedDoc },
+        query,
+      } = params;
 
       const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
         ? queryContainsMetadataIgnored(query)
@@ -40,27 +44,29 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
         : undefined;
 
       const leadingControlClick =
-        (actionName: 'stacktrace' | 'quality_issues') => (props: RowControlRowProps) => {
-          if (!setExpandedDoc) {
-            return;
-          }
-
+        (
+          openDocViewer: NonNullable<RowControlsExtensionParams['actions']['setExpandedDoc']>,
+          actionName: 'stacktrace' | 'quality_issues'
+        ) =>
+        (props: RowControlRowProps) => {
           context.logOverviewContext$.next({
             recordId: props.record.id,
             initialAccordionSection: actionName,
           });
-          setExpandedDoc(props.record, { initialTabId: 'doc_view_logs_overview' });
+          openDocViewer(props.record, { initialTabId: 'doc_view_logs_overview' });
         };
 
-      return [
-        ...additionalControls,
-        createDegradedDocsControl({
-          enabled: isDegradedDocsControlEnabled,
-          addIgnoredMetadataToQuery,
-          onClick: leadingControlClick('quality_issues'),
-        }),
-        createStacktraceControl({ onClick: leadingControlClick('stacktrace') }),
-      ];
+      return setExpandedDoc
+        ? [
+            ...additionalControls,
+            createDegradedDocsControl({
+              enabled: isDegradedDocsControlEnabled,
+              addIgnoredMetadataToQuery,
+              onClick: leadingControlClick(setExpandedDoc, 'quality_issues'),
+            }),
+            createStacktraceControl({ onClick: leadingControlClick(setExpandedDoc, 'stacktrace') }),
+          ]
+        : additionalControls;
     };
 
 const queryContainsMetadataIgnored = (query: AggregateQuery) =>

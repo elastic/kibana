@@ -13,7 +13,6 @@ import { ResilientSimulator } from '@kbn/actions-simulators-plugin/server/resili
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function resilientTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');

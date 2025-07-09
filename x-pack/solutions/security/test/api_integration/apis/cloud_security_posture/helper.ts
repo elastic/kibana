@@ -10,6 +10,7 @@ import type { Agent as SuperTestAgent } from 'supertest';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { RoleCredentials, SecurityService } from '@kbn/ftr-common-functional-services';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 
 export async function createPackagePolicy(
   supertest: SuperTestAgent,
@@ -123,7 +124,7 @@ export const createCSPRole = async (
   await security.role.create(roleName, {
     kibana: [
       {
-        feature: { siemV2: ['read'], fleetv2: ['all'], fleet: ['read'] },
+        feature: { [SECURITY_FEATURE_ID]: ['read'], fleetv2: ['all'], fleet: ['read'] },
         spaces: ['*'],
       },
     ],

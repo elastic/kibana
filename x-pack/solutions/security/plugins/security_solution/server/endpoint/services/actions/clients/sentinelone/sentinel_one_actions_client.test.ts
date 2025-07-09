@@ -51,7 +51,10 @@ import type {
   SentinelOneGetRemoteScriptStatusApiResponse,
   SentinelOneRemoteScriptExecutionStatus,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import { ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT } from '../../../../../lib/telemetry/event_based/events';
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+  ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+} from '../../../../../lib/telemetry/event_based/events';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
@@ -238,6 +241,23 @@ describe('SentinelOneActionsClient class', () => {
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
+
+    describe('telemetry events', () => {
+      it('should send `isolate` action creation telemetry event', async () => {
+        await s1ActionsClient.isolate(createS1IsolationOptions());
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'sentinel_one',
+            command: 'isolate',
+            isAutomated: false,
+          },
+        });
+      });
+    });
   });
 
   describe('#release()', () => {
@@ -370,6 +390,23 @@ describe('SentinelOneActionsClient class', () => {
       );
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
+    });
+
+    describe('telemetry events', () => {
+      it('should send `release` action creation telemetry event', async () => {
+        await s1ActionsClient.release(createS1IsolationOptions());
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'sentinel_one',
+            command: 'unisolate',
+            isAutomated: false,
+          },
+        });
+      });
     });
   });
 
@@ -915,12 +952,7 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
-    describe('Telemetry', () => {
-      beforeEach(() => {
-        // @ts-expect-error
-        classConstructorOptions.endpointService.experimentalFeatures.responseActionsTelemetryEnabled =
-          true;
-      });
+    describe('telemetry events', () => {
       describe('for Isolate and Release', () => {
         let s1ActivityHits: Array<SearchHit<SentinelOneActivityEsDoc>>;
 
@@ -1407,6 +1439,23 @@ describe('SentinelOneActionsClient class', () => {
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
+
+    describe('telemetry events', () => {
+      it('should send `get-file` action creation telemetry event', async () => {
+        await s1ActionsClient.getFile(getFileReqOptions);
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'sentinel_one',
+            command: 'get-file',
+            isAutomated: false,
+          },
+        });
+      });
+    });
   });
 
   describe('#getFileInfo()', () => {
@@ -1585,7 +1634,7 @@ describe('SentinelOneActionsClient class', () => {
         response: s1DataGenerator.toEsSearchResponse([]),
       });
       await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
-        'Action ID [abc] for agent ID [abc] is still pending'
+        'Action ID [abc] for agent ID [123] is still pending'
       );
     });
 
@@ -1801,6 +1850,23 @@ describe('SentinelOneActionsClient class', () => {
 
       expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
+
+    describe('telemetry events', () => {
+      it('should send `kill-process` action creation telemetry event', async () => {
+        await s1ActionsClient.killProcess(killProcessActionRequest);
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'sentinel_one',
+            command: 'kill-process',
+            isAutomated: false,
+          },
+        });
+      });
+    });
   });
 
   describe('#runningProcesses()', () => {
@@ -1959,6 +2025,23 @@ describe('SentinelOneActionsClient class', () => {
         }),
         { meta: true }
       );
+    });
+
+    describe('telemetry events', () => {
+      it('should send `kill-process` action creation telemetry event', async () => {
+        await s1ActionsClient.runningProcesses(processesActionRequest);
+
+        expect(
+          classConstructorOptions.endpointService.getTelemetryService().reportEvent
+        ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+          responseActions: {
+            actionId: expect.any(String),
+            agentType: 'sentinel_one',
+            command: 'running-processes',
+            isAutomated: false,
+          },
+        });
+      });
     });
   });
 

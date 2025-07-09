@@ -1,5 +1,67 @@
 # Observability Logs Essentials tier config
 
+## Cloud settings
+xpack.cloud.serverless.product_tier: logs_essentials
+
 ## Disable xpack plugins
 xpack.infra.enabled: false
 xpack.slo.enabled: false
+xpack.observabilityAIAssistant.enabled: false
+xpack.aiops.ui.enabled: false
+xpack.apm.enabled: false
+
+xpack.legacy_uptime.enabled: false
+xpack.ux.enabled: false
+xpack.uptime.enabled: false
+xpack.exploratoryView.enabled: false
+
+xpack.fleet.internal.registry.excludePackages: [
+  # Oblt integrations
+  'synthetics',
+  # Security integrations
+  'endpoint',
+  'beaconing',
+  'cloud_security_posture',
+  'cloud_defend',
+  'security_detection_engine',
+
+  # Deprecated security integrations
+  'bluecoat',
+  'cisco',
+  'cyberark',
+  'cylance',
+  'f5',
+  'fortinet_forticlient',
+  'juniper_junos',
+  'juniper_netscreen',
+  'microsoft',
+  'netscout',
+  'radware',
+  'symantec',
+  'tomcat',
+
+  # ML integrations
+  'dga',
+
+  # Profiling integrations
+  'profiler_agent',
+  'synthetics_dashboards',
+]
+
+xpack.actions.enabledActionTypes: [
+  '.email',
+  '.webhook',
+  '.jira',
+  '.teams',
+  '.opsgenie',
+  '.pagerduty',
+  '.slack',
+  '.slack_api',
+  '.resilient',
+  '.servicenow',
+  '.tines',
+  '.torq'
+]
+
+xpack.alerting.enabledRuleTypes: ['observability.rules.custom_threshold','.es-query','datasetQuality.degradedDocs']
+xpack.cases.enabled: false

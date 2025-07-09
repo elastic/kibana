@@ -17,7 +17,6 @@ import {
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
   apmEnableTableSearchBar,
-  entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   syntheticsThrottlingEnabled,
@@ -35,15 +34,6 @@ import {
   searchExcludedDataTiers,
   apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';
-
-const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
-  defaultMessage: 'beta',
-});
-
-const technicalPreviewLabel = i18n.translate(
-  'xpack.observability.uiSettings.technicalPreviewLabel',
-  { defaultMessage: 'technical preview' }
-);
 
 /**
  * uiSettings definitions for Observability.
@@ -172,33 +162,14 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     description: i18n.translate('xpack.observability.apmEnableTableSearchBarDescription', {
       defaultMessage:
-        '{betaLabel} Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Transactions and Errors',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-      },
+        'Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Transactions and Errors',
     }),
     schema: schema.boolean(),
     value: true,
     requiresPageReload: true,
     type: 'boolean',
     solution: 'oblt',
-  },
-  [entityCentricExperience]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.entityCentricExperience', {
-      defaultMessage: 'Entity-centric experience',
-    }),
-    description: i18n.translate('xpack.observability.entityCentricExperienceDescription', {
-      defaultMessage: '{technicalPreviewLabel} Promote entity-centric experience to users.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: true,
-    type: 'boolean',
-    solution: 'oblt',
+    technicalPreview: true,
   },
   [apmEnableServiceInventoryTableSearchBar]: {
     category: [observabilityFeatureId],
@@ -209,10 +180,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       'xpack.observability.apmEnableServiceInventoryTableSearchBarDescription',
       {
         defaultMessage:
-          '{technicalPreviewLabel} Enables faster searching in the APM Service inventory table by adding a handy search bar with live filtering.',
-        values: {
-          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        },
+          'Enables faster searching in the APM Service inventory table by adding a handy search bar with live filtering.',
       }
     ),
     schema: schema.boolean(),
@@ -220,6 +188,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     requiresPageReload: true,
     type: 'boolean',
     solution: 'oblt',
+    technicalPreview: true,
   },
   [apmEnableServiceMapApiV2]: {
     category: [observabilityFeatureId],
@@ -227,16 +196,14 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
       defaultMessage: 'Service Map API v2',
     }),
     description: i18n.translate('xpack.observability.apmEnableServiceMapApiV2Description', {
-      defaultMessage: '{technicalPreviewLabel} Enables the usage of the new Service Map API v2.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
+      defaultMessage: 'Enables the usage of the new Service Map API v2.',
     }),
     schema: schema.boolean(),
     value: false,
     requiresPageReload: false,
     type: 'boolean',
     solution: 'oblt',
+    technicalPreview: true,
   },
   [apmAWSLambdaPriceFactor]: {
     category: [observabilityFeatureId],
@@ -266,7 +233,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   [syntheticsThrottlingEnabled]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.syntheticsThrottlingEnabledExperimentName', {
-      defaultMessage: 'Enable Synthetics throttling (Experimental)',
+      defaultMessage: 'Enable Synthetics throttling',
     }),
     value: false,
     description: i18n.translate(
@@ -284,6 +251,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     schema: schema.boolean(),
     requiresPageReload: true,
     solution: 'oblt',
+    technicalPreview: true,
   },
   [enableLegacyUptimeApp]: {
     category: [observabilityFeatureId],
@@ -455,9 +423,8 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     description: i18n.translate(
       'xpack.observability.advancedSettings.searchExcludedDataTiersDesc',
       {
-        defaultMessage: `{technicalPreviewLabel} Specify the data tiers to exclude from search, such as data_cold and/or data_frozen.
+        defaultMessage: `Specify the data tiers to exclude from search, such as data_cold and/or data_frozen.
         When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM, Infrastructure`,
-        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
       }
     ),
     value: [],
@@ -466,6 +433,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     ),
     requiresPageReload: false,
     solution: 'oblt',
+    technicalPreview: true,
   },
 };
 

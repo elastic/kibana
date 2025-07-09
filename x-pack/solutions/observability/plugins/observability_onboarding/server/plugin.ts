@@ -27,6 +27,7 @@ import { observabilityOnboardingFlow } from './saved_objects/observability_onboa
 import { EsLegacyConfigService } from './services/es_legacy_config_service';
 import { ObservabilityOnboardingConfig } from './config';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
+import { ObservabilityOnboardingPricingFeature } from '../common/pricing_features';
 
 export class ObservabilityOnboardingPlugin
   implements
@@ -119,6 +120,15 @@ export class ObservabilityOnboardingPlugin
     });
 
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
+
+    core.pricing.registerProductFeatures([
+      {
+        id: ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING,
+        description:
+          'Enables flows that onboard metrics. This feature is available only in the "complete" tier.',
+        products: [{ name: 'observability', tier: 'complete' }],
+      },
+    ]);
 
     return {};
   }

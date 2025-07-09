@@ -8,7 +8,10 @@
 import { performance } from 'perf_hooks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  EsqlEsqlShardFailure,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logEsqlRequest } from '../utils/logged_requests';
@@ -39,6 +42,13 @@ export type EsqlResultRow = Array<string | null>;
 export interface EsqlTable {
   columns: EsqlResultColumn[];
   values: EsqlResultRow[];
+  _clusters?: {
+    details?: {
+      [key: string]: {
+        failures?: EsqlEsqlShardFailure[];
+      };
+    };
+  };
 }
 
 export const performEsqlRequest = async ({
@@ -69,6 +79,7 @@ export const performEsqlRequest = async ({
     loggedRequests?.push({
       request: logEsqlRequest(requestBody, requestQueryParams),
       description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
+      request_type: 'findMatches',
     });
     const asyncSearchStarted = performance.now();
     const asyncEsqlResponse = await esClient.transport.request<AsyncEsqlResponse>({

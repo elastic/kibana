@@ -14,6 +14,22 @@ import { selectDataViewAsync } from '../actions';
 import { sharedDataViewManagerSlice } from '../slices';
 import type { DataViewManagerScopeName } from '../../constants';
 
+/**
+ * Creates a Redux listener for handling data view selection logic in the data view manager.
+ *
+ * This listener responds to the `selectDataViewAsync` action for a specific scope. It attempts to resolve
+ * the selected data view by:
+ *   1. Checking for a cached data view (either ad-hoc or persisted) in the Redux state.
+ *   2. If not found, attempting to fetch a lazy data view by ID from the DataViews service.
+ *   3. If still not found, creating a new ad-hoc data view using fallback patterns.
+ *
+ * The listener ensures that only one effect runs per scope at a time to prevent race conditions.
+ * If a data view is successfully resolved, it dispatches an action to set it as selected for the current scope.
+ * If an error occurs during fetching or creation, it dispatches an error action for the current scope.
+ *
+ * @param dependencies - The dependencies required for the listener, including the scope and DataViews service.
+ * @returns An object with the action creator and effect for Redux middleware.
+ */
 export const createDataViewSelectedListener = (dependencies: {
   scope: DataViewManagerScopeName;
   dataViews: DataViewsServicePublic;

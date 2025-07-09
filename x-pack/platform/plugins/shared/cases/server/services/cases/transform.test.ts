@@ -243,6 +243,28 @@ describe('case transforms', () => {
         expect(transformedAttributes.attributes.status).toBe(expectedStatusValue);
       }
     );
+
+    it('does not return the total alerts', () => {
+      expect(
+        transformUpdateResponseToExternalModel({
+          type: 'a',
+          id: '1',
+          attributes: { total_alerts: 2 },
+          references: undefined,
+        }).attributes
+      ).not.toHaveProperty('total_alerts');
+    });
+
+    it('does not return the total comments', () => {
+      expect(
+        transformUpdateResponseToExternalModel({
+          type: 'a',
+          id: '1',
+          attributes: { total_comments: 2 },
+          references: undefined,
+        }).attributes
+      ).not.toHaveProperty('total_comments');
+    });
   });
 
   describe('transformAttributesToESModel', () => {
@@ -437,6 +459,22 @@ describe('case transforms', () => {
       expect(transformAttributesToESModel({ incremental_id: 100 }).attributes).not.toHaveProperty(
         'incremental_id'
       );
+    });
+
+    it('does not remove the total alerts', () => {
+      expect(transformAttributesToESModel({ total_alerts: 10 }).attributes).toMatchInlineSnapshot(`
+        Object {
+          "total_alerts": 10,
+        }
+      `);
+    });
+
+    it('does not remove the total comments', () => {
+      expect(transformAttributesToESModel({ total_comments: 5 }).attributes).toMatchInlineSnapshot(`
+        Object {
+          "total_comments": 5,
+        }
+      `);
     });
   });
 
@@ -654,6 +692,32 @@ describe('case transforms', () => {
 
       expect(
         transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.incremental_id
+      ).not.toBeDefined();
+    });
+
+    it('does not return the total comments', () => {
+      const resWithTotalComments = createCaseSavedObjectResponse({
+        overrides: {
+          total_comments: 3,
+        },
+      });
+
+      expect(
+        // @ts-expect-error: total_comments is not defined in the attributes
+        transformSavedObjectToExternalModel(resWithTotalComments).attributes.total_comments
+      ).not.toBeDefined();
+    });
+
+    it('does not return the total alerts', () => {
+      const resWithTotalAlerts = createCaseSavedObjectResponse({
+        overrides: {
+          total_alerts: 2,
+        },
+      });
+
+      expect(
+        // @ts-expect-error: total_alerts is not defined in the attributes
+        transformSavedObjectToExternalModel(resWithTotalAlerts).attributes.total_alerts
       ).not.toBeDefined();
     });
   });

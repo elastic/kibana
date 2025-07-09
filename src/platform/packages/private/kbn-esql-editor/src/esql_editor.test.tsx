@@ -17,6 +17,24 @@ import { ESQLEditor } from './esql_editor';
 import type { ESQLEditorProps } from './types';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { waitFor } from '@testing-library/dom';
+import { act } from '@testing-library/react';
+
+const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
+jest.mock('@kbn/monaco', () => ({
+  ...jest.requireActual('@kbn/monaco'),
+  ESQLLang: {
+    ...jest.requireActual('@kbn/monaco').ESQLLang,
+    getEsqlLanguage: jest.fn(() => ({
+      id: 'esql',
+      name: 'ESQL',
+      extensions: ['.esql'],
+      aliases: ['ESQL', 'esql'],
+      mimetypes: ['application/esql'],
+    })),
+    validate: async () => mockValidate(),
+  },
+}));
 
 describe('ESQLEditor', () => {
   const uiConfig: Record<string, any> = {};
@@ -50,7 +68,19 @@ describe('ESQLEditor', () => {
       onTextLangQueryChange: jest.fn(),
       onTextLangQuerySubmit: jest.fn(),
     };
+    mockValidate.mockResolvedValue({ errors: [], warnings: [] });
+    jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
+      (contextId, options) =>
+        ({
+          webkitBackingStorePixelRatio: 1,
+        } as unknown as RenderingContext)
+    );
   });
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
   it('should  render the editor component', async () => {
     const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
     expect(getByTestId('ESQLEditor')).toBeInTheDocument();
@@ -169,5 +199,39 @@ describe('ESQLEditor', () => {
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
     expect(queryByTestId('ESQLEditor-run-query-button')).not.toBeInTheDocument();
+  });
+
+  it('should render the data errors switch if the dataErrorsControl prop is set', async () => {
+    const newProps = {
+      ...props,
+      dataErrorsControl: { enabled: true, onChange: jest.fn() },
+    };
+    mockValidate.mockResolvedValue({
+      errors: [{ message: 'Data error example', severity: 'error' }],
+      warnings: [],
+    });
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent(newProps));
+    await waitFor(() => {
+      expect(queryByTestId('ESQLEditor-footerPopoverButton-error')).toBeInTheDocument();
+    });
+    act(() => {
+      queryByTestId('ESQLEditor-footerPopoverButton-error')?.click();
+    });
+    expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).toBeInTheDocument();
+  });
+
+  it('should not render the data errors switch if the dataErrorsControl prop is not set', async () => {
+    mockValidate.mockResolvedValue({
+      errors: [{ message: 'Data error example', severity: 'error' }],
+      warnings: [],
+    });
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent(props));
+    await waitFor(() => {
+      expect(queryByTestId('ESQLEditor-footerPopoverButton-error')).toBeInTheDocument();
+    });
+    act(() => {
+      queryByTestId('ESQLEditor-footerPopoverButton-error')?.click();
+    });
+    expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).not.toBeInTheDocument();
   });
 });
