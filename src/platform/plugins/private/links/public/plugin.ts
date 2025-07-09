@@ -26,7 +26,6 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import { LinksSerializedState } from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
@@ -112,6 +111,7 @@ export class LinksPlugin
                 title,
                 editor: {
                   onEdit: async (savedObjectId: string) => {
+                    const { openLazyFlyout } = await import('@kbn/presentation-util');
                     openLazyFlyout({
                       core: coreServices,
                       loadContent: async ({ closeFlyout }) => {

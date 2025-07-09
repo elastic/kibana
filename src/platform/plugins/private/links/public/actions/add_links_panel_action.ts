@@ -18,10 +18,9 @@ import {
   apiPublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import type { LinksParentApi, LinksSerializedState } from '../types';
-import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
+import type { LinksParentApi } from '../types';
+import { APP_ICON, APP_NAME } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
-import { serializeLinksAttributes } from '../lib/serialize_attributes';
 import { coreServices } from '../services/kibana_services';
 
 export const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
@@ -44,38 +43,10 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       core: coreServices,
       parentApi: embeddable,
       loadContent: async ({ closeFlyout }) => {
-        const { getEditorFlyout } = await import('../editor/get_editor_flyout');
-        return await getEditorFlyout({
-          parentDashboard: embeddable,
+        const { loadLinksPanel } = await import('./load_links_panel');
+        return loadLinksPanel({
           closeFlyout,
-          onCompleteEdit: async (runtimeState) => {
-            if (!runtimeState) return;
-
-            function serializeState() {
-              if (!runtimeState) return;
-
-              if (runtimeState.savedObjectId !== undefined) {
-                return {
-                  rawState: {
-                    savedObjectId: runtimeState.savedObjectId,
-                  },
-                };
-              }
-
-              const { attributes, references } = serializeLinksAttributes(runtimeState);
-              return {
-                rawState: {
-                  attributes,
-                },
-                references,
-              };
-            }
-
-            await embeddable.addNewPanel<LinksSerializedState>({
-              panelType: CONTENT_ID,
-              serializedState: serializeState(),
-            });
-          },
+          embeddable,
         });
       },
       flyoutProps: {
