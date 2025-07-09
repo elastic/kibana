@@ -39,7 +39,6 @@ export class InferencePlugin
 {
   private logger: Logger;
   private config: InferenceConfig;
-  private shutdownProcessor?: () => Promise<void>;
   private regexWorker?: RegexWorkerService;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
@@ -107,7 +106,6 @@ export class InferencePlugin
   }
 
   async stop() {
-    await this.shutdownProcessor?.();
     await this.regexWorker?.stop();
   }
 }
