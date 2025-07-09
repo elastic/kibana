@@ -208,7 +208,7 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
               values: {
                 objectType: item.payload?.objectType
                   ? getDisplayNameFromObjectType(item.payload?.objectType)
-                  : 'in Kibana',
+                  : 'Kibana',
               },
             }),
           description: (item) =>

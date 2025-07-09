@@ -412,7 +412,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
                 values: {
                   objectType: job.objectType
                     ? getDisplayNameFromObjectType(job.objectType)
-                    : 'in Kibana',
+                    : 'Kibana',
                 },
               }),
             'data-test-subj': 'reportOpenInKibanaApp',
