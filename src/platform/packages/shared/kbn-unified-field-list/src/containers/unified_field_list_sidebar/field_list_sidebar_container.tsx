@@ -17,6 +17,7 @@ import React, {
   useEffect,
   type ComponentProps,
 } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
@@ -32,7 +33,10 @@ import {
   EuiPortal,
   EuiShowFor,
   EuiTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+
 import {
   useExistingFieldsFetcher,
   type ExistingFieldsFetcher,
@@ -375,10 +379,11 @@ function ButtonVariant({
   workspaceSelectedFieldNames,
 }: InternalUnifiedFieldListSidebarContainerProps) {
   const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;
+  const styles = useMemoCss(componentStyles);
 
   return (
     <>
-      <div className="unifiedFieldListSidebar__mobile">
+      <div className="unifiedFieldListSidebar__mobile" css={styles.sidebarMobile}>
         <EuiButton
           {...buttonPropsToTriggerFlyout}
           contentProps={{
@@ -394,6 +399,7 @@ function ButtonVariant({
           />
           <EuiBadge
             className="unifiedFieldListSidebar__mobileBadge"
+            css={styles.sidebarMobileBadge}
             color={workspaceSelectedFieldNames?.[0] === '_source' ? 'default' : 'accent'}
           >
             {!workspaceSelectedFieldNames?.length || workspaceSelectedFieldNames[0] === '_source'
@@ -446,6 +452,19 @@ function ButtonVariant({
     </>
   );
 }
+
+const componentStyles = {
+  sidebarMobile: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      padding: `${euiTheme.size.s} ${euiTheme.size.s} 0`,
+    }),
+  sidebarMobileBadge: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginLeft: euiTheme.size.s,
+      verticalAlign: 'text-bottom',
+    }),
+};
 
 // Necessary for React.lazy
 // eslint-disable-next-line import/no-default-export
