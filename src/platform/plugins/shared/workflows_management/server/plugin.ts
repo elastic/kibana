@@ -5,12 +5,15 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 import type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
 import { defineRoutes } from './routes';
 import { WorkflowsManagementApi } from './api';
-
+import { workflowsGrouppedByTriggerType } from './mock';
+import { v4 as generateUuid } from 'uuid';
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
 
@@ -30,21 +33,65 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     };
   }
 
-  public start(core: CoreStart, plugins: { taskManager: TaskManagerStartContract }) {
+  public start(
+    core: CoreStart,
+    plugins: { taskManager: TaskManagerStartContract; actions: ActionsPluginStartContract }
+  ) {
     this.logger.debug('workflows: Start');
 
     this.logger.debug('workflows: Started');
 
-    const pushEvent = (eventType: string, eventData: Record<string, any>) => {
+    const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
+      return workflowsGrouppedByTriggerType[triggerType] || [];
+    };
+
+    const extractConnectorIds = async (
+      workflow: WorkflowExecutionEngineModel
+    ): Promise<Record<string, Record<string, any>>> => {
+      const connectorNames = workflow.steps
+        .filter((step) => step.connectorType.endsWith('-connector'))
+        .map((step) => step.connectorName);
+      const distinctConnectorNames = Array.from(new Set(connectorNames));
+      const allConnectors = await plugins.actions.getUnsecuredActionsClient().getAll('default');
+      const connectorNameIdMap = new Map<string, string>(
+        allConnectors.map((connector) => [connector.name, connector.id])
+      );
+
+      return distinctConnectorNames.reduce((acc, name) => {
+        const connectorId = connectorNameIdMap.get(name);
+        if (connectorId) {
+          acc['connector.' + name] = {
+            id: connectorId,
+          };
+        }
+        return acc;
+      }, {} as Record<string, Record<string, any>>);
+    };
+
+    const pushEvent = async (eventType: string, eventData: Record<string, any>) => {
       try {
-        plugins.taskManager.schedule({
-          taskType: 'workflow-event',
-          params: {
-            eventType,
-            rawEvent: eventData,
-          },
-          state: {},
-        });
+        const worklfowsToRun = findWorkflowsByTrigger(eventType);
+
+        for (const workflow of worklfowsToRun) {
+          const connectorCredentials = await extractConnectorIds(workflow);
+
+          const workflowRunId = generateUuid();
+
+          plugins.taskManager.schedule({
+            taskType: 'workflow-event',
+            params: {
+              workflowRunId,
+              workflow,
+              eventType,
+              context: {
+                workflowRunId,
+                connectorCredentials,
+                event: eventData,
+              },
+            },
+            state: {},
+          });
+        }
       } catch (error) {
         this.logger.error(`Failed to push event: ${error.message}`);
       }

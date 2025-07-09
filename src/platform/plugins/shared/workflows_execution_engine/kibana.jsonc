@@ -9,6 +9,6 @@
     "id": "workflowsExecutionEngine",
     "browser": false,
     "server": true,
-    "requiredPlugins": ["taskManager"]
+    "requiredPlugins": ["taskManager", "actions"]
   }
 }

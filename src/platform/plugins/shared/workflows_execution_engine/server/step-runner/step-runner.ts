@@ -1,5 +1,6 @@
-import { Provider, WorkflowStep } from '@kbn/workflows';
+import { WorkflowStep } from '@kbn/workflows';
 import { TemplatingEngine } from '../templating-engine';
+import { ConnectorExecutor } from '../connector-executor';
 
 export interface RunStepResult {
   output: Record<string, any> | undefined;
@@ -8,17 +9,11 @@ export interface RunStepResult {
 
 export class StepRunner {
   constructor(
-    private providers: Record<string, Provider>,
+    private connectorExecutor: ConnectorExecutor,
     private templatingEngine: TemplatingEngine
   ) {}
 
   public async runStep(step: WorkflowStep, context: Record<string, any>): Promise<RunStepResult> {
-    const stepProvider = this.providers[step.providerName]; // integrate with connector
-
-    if (!stepProvider) {
-      throw new Error(`Provider "${step.providerName}" not found`);
-    }
-
     const providerInputs = step.inputs || {};
 
     const renderedInputs = Object.entries(providerInputs).reduce((accumulator, [key, value]) => {
@@ -31,7 +26,11 @@ export class StepRunner {
     }, {} as Record<string, any>);
 
     try {
-      const stepOutput = await stepProvider.action(renderedInputs);
+      const stepOutput = await this.connectorExecutor.execute(
+        step.connectorType,
+        step.connectorName,
+        renderedInputs
+      );
       return {
         output: stepOutput || undefined,
         error: undefined,
