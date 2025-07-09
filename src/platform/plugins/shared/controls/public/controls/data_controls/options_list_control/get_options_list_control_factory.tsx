@@ -47,7 +47,7 @@ import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
 import { initializeSelectionsManager, selectionComparators } from './selections_manager';
 import { OptionsListStrings } from './options_list_strings';
-import type { OptionsListComponentApi, OptionsListControlApi } from './types';
+import type { OptionsListControlApi, OptionsListComponentApi } from './types';
 import { initializeTemporayStateManager } from './temporay_state_manager';
 import {
   editorComparators,
@@ -468,7 +468,13 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             <OptionsListControlContext.Provider
               value={{
                 componentApi,
-                displaySettings: { placeholder, hideActionBar, hideExclude, hideExists, hideSort },
+                displaySettings: {
+                  placeholder,
+                  hideActionBar,
+                  hideExclude,
+                  hideExists,
+                  hideSort,
+                },
               }}
             >
               <OptionsListControl controlPanelClassName={controlPanelClassName} />

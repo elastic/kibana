@@ -41,17 +41,22 @@ interface PublishesOptions {
   totalCardinality$: PublishingSubject<number>;
 }
 
-export type OptionsListComponentApi = OptionsListControlApi &
-  PublishesOptions &
+export type OptionsListStateApis = StateManager<SelectionsState>['api'] &
   StateManager<DefaultDataControlState>['api'] &
   StateManager<EditorState>['api'] &
-  StateManager<SelectionsState>['api'] &
   StateManager<TemporaryState>['api'] & {
+    sort$: PublishingSubject<OptionsListSortingType | undefined>;
+    setSort: (sort: OptionsListSortingType | undefined) => void;
+  };
+
+export type OptionsListComponentApi = Omit<OptionsListControlApi, 'fieldFormatter'> &
+  PublishesOptions &
+  OptionsListStateApis & {
+    // Make fieldFormatter explicitly optional
+    fieldFormatter?: OptionsListControlApi['fieldFormatter'];
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
     loadMoreSubject: Subject<void>;
-    sort$: PublishingSubject<OptionsListSortingType | undefined>;
-    setSort: (sort: OptionsListSortingType | undefined) => void;
     selectAll: (keys: string[]) => void;
     deselectAll: (keys: string[]) => void;
   };

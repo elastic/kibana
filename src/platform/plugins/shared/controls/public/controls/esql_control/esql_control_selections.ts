@@ -8,18 +8,15 @@
  */
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, filter, map, merge, switchMap } from 'rxjs';
-import {
-  ESQLControlVariable,
-  ESQLControlState,
-  EsqlControlType,
-  ESQLVariableType,
-} from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { OptionsListSelection } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
+import { ESQLControlVariable, ESQLControlState, EsqlControlType } from './types';
 
-function selectedOptionsComparatorFunction(a?: string[], b?: string[]) {
+function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
 }
 
@@ -48,7 +45,9 @@ export function initializeESQLControlSelections(
   initialState: ESQLControlState,
   controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>
 ) {
-  const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
+  const availableOptions$ = new BehaviorSubject<string[] | undefined>(
+    initialState.availableOptions ?? []
+  );
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
   const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
@@ -58,10 +57,13 @@ export function initializeESQLControlSelections(
   const controlType$ = new BehaviorSubject<EsqlControlType>(initialState.controlType ?? '');
   const esqlQuery$ = new BehaviorSubject<string>(initialState.esqlQuery ?? '');
   const title$ = new BehaviorSubject<string | undefined>(initialState.title);
+  const totalCardinality$ = new BehaviorSubject<number>(initialState.availableOptions?.length ?? 0);
 
-  function setSelectedOptions(next: string[]) {
-    if (!selectedOptionsComparatorFunction(selectedOptions$.value, next)) {
-      selectedOptions$.next(next);
+  function setSelectedOptions(next: OptionsListSelection[] | undefined) {
+    if (!next) return;
+    const selected = next as string[];
+    if (!selectedOptionsComparatorFunction(selectedOptions$.value, selected)) {
+      selectedOptions$.next(selected);
     }
   }
 
@@ -80,7 +82,8 @@ export function initializeESQLControlSelections(
     )
     .subscribe((result) => {
       if (getESQLSingleColumnValues.isSuccess(result)) {
-        availableOptions$.next(result.values);
+        availableOptions$.next(result.values.map((value) => value));
+        totalCardinality$.next(result.values.length);
       }
     });
 
@@ -139,8 +142,10 @@ export function initializeESQLControlSelections(
       };
     },
     internalApi: {
-      selectedOptions$: selectedOptions$ as PublishingSubject<string[]>,
-      availableOptions$: availableOptions$ as PublishingSubject<string[]>,
+      selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
+      availableOptions$,
+      totalCardinality$,
+      title$,
       setSelectedOptions,
     },
   };

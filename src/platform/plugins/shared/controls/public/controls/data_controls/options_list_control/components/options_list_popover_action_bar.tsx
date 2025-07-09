@@ -25,7 +25,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { lastValueFrom, take } from 'rxjs';
+import { BehaviorSubject, lastValueFrom, take } from 'rxjs';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { OptionsListSuggestions } from '../../../../../common/options_list';
@@ -76,7 +76,9 @@ export const OptionsListPopoverActionBar = ({
 
   // Using useStateFromPublishingSubject instead of useBatchedPublishingSubjects
   // to avoid debouncing input value
-  const searchString = useStateFromPublishingSubject(componentApi.searchString$);
+  const searchString = useStateFromPublishingSubject(
+    componentApi.searchString$ ?? new BehaviorSubject('')
+  );
 
   const [
     searchTechnique,
