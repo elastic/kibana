@@ -4,28 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as http from 'http';
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupMockServer } from '../agents/helpers/mock_agentless_api';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const fleetAndAgents = getService('fleetAndAgents');
+  const mockAgentlessApiService = setupMockServer();
 
   describe('package policy deployment modes', () => {
+    let mockApiServer: http.Server;
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await fleetAndAgents.setup();
+
+      // Set up default Fleet Server host, needed during agentless agent creation
+      await supertest
+        .post(`/api/fleet/fleet_server_hosts`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          id: 'fleet-default-fleet-server-host',
+          name: 'Default',
+          is_default: true,
+          host_urls: ['https://test.com:8080', 'https://test.com:8081'],
+        });
     });
 
     after(async () => {
+      await supertest
+        .delete(`/api/fleet/fleet_server_hosts/fleet-default-fleet-server-host`)
+        .set('kbn-xsrf', 'xxxx');
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      mockApiServer.close();
     });
 
     describe('deployment_modes support', () => {
@@ -35,13 +54,8 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         // Install test package with deployment_modes
         await supertest
-          .post(`/api/fleet/epm/packages/_upload`)
+          .post(`/api/fleet/epm/packages/deployment_modes_test/1.0.0`)
           .set('kbn-xsrf', 'xxxx')
-          .attach(
-            'file',
-            '/Users/jen/Projects/kibana/x-pack/test/fleet_api_integration/apis/fixtures/test_packages/deployment_modes_test/1.0.0',
-            'deployment_modes_test-1.0.0.tar.gz'
-          )
           .expect(200);
 
         // Create regular agent policy
@@ -281,7 +295,35 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should fall back to blocklist for inputs without deployment_modes', async () => {
-          // Test winlog input (not in AGENTLESS_DISABLED_INPUTS) for agentless mode
+          // Test winlog input for default mode (should succeed - no blocklist for default)
+          const { body: defaultResponse } = await supertest
+            .post(`/api/fleet/package_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `deployment-test-winlog-default-${uuidv4()}`,
+              description: 'Test winlog input in default mode (fallback allows all)',
+              namespace: 'default',
+              policy_id: agentPolicyId,
+              package: {
+                name: 'deployment_modes_test',
+                version: '1.0.0',
+              },
+              inputs: [
+                {
+                  type: 'winlog',
+                  policy_template: 'mixed_modes',
+                  enabled: true,
+                  streams: [],
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(defaultResponse.item.inputs).to.have.length(1);
+          expect(defaultResponse.item.inputs[0].type).to.be('winlog');
+          expect(defaultResponse.item.inputs[0].enabled).to.be(true);
+
+          // Test winlog input (blocked by AGENTLESS_DISABLED_INPUTS) for agentless mode
           const { body: agentlessResponse } = await supertest
             .post(`/api/fleet/package_policies`)
             .set('kbn-xsrf', 'xxxx')
@@ -303,11 +345,11 @@ export default function (providerContext: FtrProviderContext) {
                 },
               ],
             })
-            .expect(200);
+            .expect(400);
 
-          expect(agentlessResponse.item.inputs).to.have.length(1);
-          expect(agentlessResponse.item.inputs[0].type).to.be('winlog');
-          expect(agentlessResponse.item.inputs[0].enabled).to.be(true);
+          expect(agentlessResponse.message).to.contain(
+            "Input winlog in deployment_modes_test is not allowed for deployment mode 'agentless'"
+          );
         });
       });
 
