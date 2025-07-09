@@ -10,11 +10,11 @@ import { useOnechatServices } from '../use_onechat_service';
 import { queryKeys } from '../../query_keys';
 
 export const useOnechatAgentById = (agentId: string) => {
-  const { agentProfilesService } = useOnechatServices();
+  const { agentService } = useOnechatServices();
 
   const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.agentProfiles.byId(agentId),
-    queryFn: () => agentProfilesService.get(agentId),
+    queryFn: () => agentService.get(agentId),
     enabled: !!agentId,
   });
 
