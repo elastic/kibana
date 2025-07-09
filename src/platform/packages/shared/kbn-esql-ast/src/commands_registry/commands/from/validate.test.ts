@@ -107,4 +107,26 @@ describe('FROM Validation', () => {
       });
     });
   });
+
+  describe('CCS indices', () => {
+    describe('... <sources> ...', () => {
+      test('display errors on unknown indices', () => {
+        fromExpectErrors('fRoM remote-*:indexes*', ['Unknown index [remote-*:indexes*]']);
+        fromExpectErrors('fRoM remote-*:indexes', ['Unknown index [remote-*:indexes]']);
+        fromExpectErrors('fRoM remote-ccs:indexes', ['Unknown index [remote-ccs:indexes]']);
+        fromExpectErrors('fRoM a_index, remote-ccs:indexes', [
+          'Unknown index [remote-ccs:indexes]',
+        ]);
+      });
+    });
+
+    describe('... METADATA <indices>', () => {
+      test('no errors on correct usage', () => {
+        fromExpectErrors(`from remote-ccs:indexes METADATA _id`, [
+          'Unknown index [remote-ccs:indexes]',
+        ]);
+        fromExpectErrors(`from *:indexes METADATA _id`, ['Unknown index [*:indexes]']);
+      });
+    });
+  });
 });

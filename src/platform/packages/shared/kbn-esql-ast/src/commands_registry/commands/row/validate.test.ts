@@ -142,4 +142,19 @@ describe('ROW Validation', () => {
       }
     }
   });
+
+  test('date_diff', () => {
+    rowExpectErrors(
+      'row col0 = date_diff("month", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")',
+      []
+    );
+    rowExpectErrors(
+      'row col0 = date_diff("mm", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")',
+      []
+    );
+    rowExpectErrors(
+      'row col0 = date_diff("bogus", "2023-12-02T11:00:00.000Z", "2023-12-02T11:00:00.000Z")',
+      []
+    );
+  });
 });
