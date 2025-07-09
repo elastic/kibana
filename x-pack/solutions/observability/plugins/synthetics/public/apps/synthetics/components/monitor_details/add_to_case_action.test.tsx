@@ -152,7 +152,7 @@ describe('AddToCaseContextItem', () => {
     expect(attachments).toHaveLength(1);
     expect(attachments[0]).toEqual({
       persistableStateAttachmentState: {
-        type: 'dashboard',
+        type: 'synthetics_monitor',
         url: {
           pathAndQuery:
             '/history?locationId=test-location-id&dateRangeStart=2025-06-26T12:42:38.568Z&dateRangeEnd=2025-06-26T12:57:38.568Z&configId=test-config-id',

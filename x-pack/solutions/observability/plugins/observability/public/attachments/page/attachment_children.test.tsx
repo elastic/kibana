@@ -25,6 +25,6 @@ describe('PageAttachmentChildren', () => {
     render(<PageAttachmentChildren persistableStateAttachmentState={mockPersistableState} />);
 
     const link = screen.getByRole('link', { name: 'Sample Dashboard' });
-    expect(link).toHaveAttribute('href', '/test/path?query=1');
+    expect(link).toHaveAttribute('href', 'http://localhost/test/path?query=1');
   });
 });
