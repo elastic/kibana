@@ -4352,18 +4352,20 @@
         "@opentelemetry/exporter-metrics-otlp-grpc",
         "@opentelemetry/exporter-prometheus",
         "@opentelemetry/exporter-trace-otlp-http",
-        "@opentelemetry/exporter-trace-otlp-proto"
+        "@opentelemetry/exporter-trace-otlp-proto",
+        "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [
-        "team:stack-monitoring",
-        "team:kibana-core"
+        "team:kibana-core",
+        "team:kibana-security"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Monitoring",
-        "backport:all-open",
+        "Team:Core",
+        "Team:Security",
+        "backport:prev-minor",
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
