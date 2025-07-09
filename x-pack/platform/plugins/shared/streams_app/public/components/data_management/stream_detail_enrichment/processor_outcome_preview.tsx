@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { GrokProcessorDefinition } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { getPercentageFormatter } from '../../../util/formatters';
-import { useKibana } from '../../../hooks/use_kibana';
 import { PreviewTable } from '../preview_table';
 import {
   PreviewDocsFilterOption,
