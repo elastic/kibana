@@ -10,12 +10,4 @@ import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 
 export const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-*';
 export const APM_ACTION_VARIABLE_INDEX = 'apm-index-connector-test';
-
-function getTimerange() {
-  return {
-    start: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    end: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-  };
-}
-
 export type ApmAlertFields = ParsedTechnicalFields & ObservabilityApmAlert;
