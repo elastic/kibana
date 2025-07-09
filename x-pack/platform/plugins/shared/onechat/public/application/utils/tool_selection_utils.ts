@@ -165,7 +165,7 @@ export const toggleToolSelection = (
         .map((selection) => {
           if (selection.tool_ids.includes(toolId)) {
             const newToolIds = selection.tool_ids.filter((id) => id !== toolId);
-            return newToolIds.length > 0 ? { ...selection, toolIds: newToolIds } : null;
+            return newToolIds.length > 0 ? { ...selection, tool_ids: newToolIds } : null;
           }
           return selection;
         })

@@ -90,7 +90,8 @@ export function useAgentEdit({
     }
 
     if (agent) {
-      setState(agent);
+      const { type, ...agentState } = agent;
+      setState(agentState);
     }
   }, [agentId, agent]);
 

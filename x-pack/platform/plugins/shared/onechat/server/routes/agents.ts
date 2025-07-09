@@ -22,7 +22,7 @@ const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Agent API'
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object({
-    provider: schema.maybe(schema.string()),
+    type: schema.maybe(schema.string()),
     tool_ids: schema.arrayOf(schema.string()),
   })
 );

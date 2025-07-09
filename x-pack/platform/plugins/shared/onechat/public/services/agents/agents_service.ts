@@ -64,6 +64,6 @@ export class AgentService {
    * Delete an agent by id
    */
   async delete(id: string): Promise<DeleteAgentResponse> {
-    return await this.http.delete<DeleteAgentResponse>(`/api/chat/agents/profiles/${id}`);
+    return await this.http.delete<DeleteAgentResponse>(`/api/chat/agents/${id}`);
   }
 }
