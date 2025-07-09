@@ -68,13 +68,15 @@ export function generateLatestBackfillTransformId(definition: EntityDefinition, 
 }
 
 export function generateLatestBackfillIndexName(definition: EntityDefinition, unique?: string) {
-  const suffix = unique ? `.${unique}` : '';
-  const pattern = entitiesIndexPattern({
+  const segments = entitiesIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V1,
     dataset: ENTITY_LATEST,
     definitionId: definition.id,
-  });
-  return `${pattern}.backfill${suffix}` as const;
+  }).split('_');
+  // insert 'backfill' (and unique, if present) as penultimate segments, before the namespace
+  // e.g. foo_bar_baz -> foo_bar_backfill_baz OR foo_bar_backfill_${unique}_baz
+  const backfill_pattern = unique ? segments.splice(-1, 0, 'backfill', unique) : segments.splice(-1, 0, 'backfill');
+  return backfill_pattern.join('_') as const;
 }
 
 export const generateLatestBackfillIngestPipelineId = generateLatestBackfillId;
