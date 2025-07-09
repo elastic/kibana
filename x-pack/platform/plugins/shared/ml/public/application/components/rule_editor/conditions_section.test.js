@@ -8,8 +8,8 @@
 // Mock the mlJobService that is imported for saving rules.
 jest.mock('../../services/job_service', () => 'mlJobService');
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ML_DETECTOR_RULE_APPLIES_TO, ML_DETECTOR_RULE_OPERATOR } from '@kbn/ml-anomaly-utils';
 
@@ -17,9 +17,9 @@ import { ConditionsSection } from './conditions_section';
 import { getNewConditionDefaults } from './utils';
 
 describe('ConditionsSectionExpression', () => {
-  const addCondition = jest.fn(() => {});
-  const updateCondition = jest.fn(() => {});
-  const deleteCondition = jest.fn(() => {});
+  const addCondition = jest.fn();
+  const updateCondition = jest.fn();
+  const deleteCondition = jest.fn();
 
   const testCondition = {
     applies_to: ML_DETECTOR_RULE_APPLIES_TO.TYPICAL,
@@ -39,9 +39,9 @@ describe('ConditionsSectionExpression', () => {
       isEnabled: false,
     };
 
-    const component = shallowWithIntl(<ConditionsSection {...props} />);
+    const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with no conditions supplied', () => {
@@ -50,9 +50,9 @@ describe('ConditionsSectionExpression', () => {
       isEnabled: true,
     };
 
-    const component = shallowWithIntl(<ConditionsSection {...props} />);
+    const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with empty conditions supplied', () => {
@@ -62,9 +62,9 @@ describe('ConditionsSectionExpression', () => {
       conditions: [],
     };
 
-    const component = shallowWithIntl(<ConditionsSection {...props} />);
+    const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with one condition', () => {
@@ -74,9 +74,9 @@ describe('ConditionsSectionExpression', () => {
       conditions: [getNewConditionDefaults()],
     };
 
-    const component = shallowWithIntl(<ConditionsSection {...props} />);
+    const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with two conditions', () => {
@@ -86,9 +86,9 @@ describe('ConditionsSectionExpression', () => {
       conditions: [getNewConditionDefaults(), testCondition],
     };
 
-    const component = shallowWithIntl(<ConditionsSection {...props} />);
+    const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test(`don't render when not enabled with conditions`, () => {
@@ -98,8 +98,8 @@ describe('ConditionsSectionExpression', () => {
       conditions: [getNewConditionDefaults(), testCondition],
     };
 
-    const component = shallowWithIntl(<ConditionsSection {...props} />);
+    const { container } = renderWithI18n(<ConditionsSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });
