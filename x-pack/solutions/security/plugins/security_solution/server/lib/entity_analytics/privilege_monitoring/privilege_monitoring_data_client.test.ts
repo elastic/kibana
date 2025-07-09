@@ -17,7 +17,10 @@ import { EngineComponentResourceEnum } from '../../../../common/api/entity_analy
 
 import { startPrivilegeMonitoringTask as mockStartPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
 import type { AuditLogger } from '@kbn/core/server';
-import { PRIVMON_EVENT_INGEST_PIPELINE_ID } from './elasticsearch/pipelines/event_ingested';
+import {
+  eventIngestPipeline,
+  PRIVMON_EVENT_INGEST_PIPELINE_ID,
+} from './elasticsearch/pipelines/event_ingested';
 
 jest.mock('./tasks/privilege_monitoring_task', () => {
   return {
@@ -165,16 +168,20 @@ describe('Privilege Monitoring Data Client', () => {
       Object.defineProperty(dataClient, 'log', { value: mockLog });
 
       const mockGetPipeline = jest.fn().mockResolvedValue({});
+      const mockPutPipeline = jest.fn();
 
       Object.defineProperty(dataClient, 'internalUserClient', {
         value: {
           ingest: {
             getPipeline: mockGetPipeline,
+            putPipeline: mockPutPipeline,
           },
         },
       });
 
       await dataClient.createIngestPipelineIfDoesNotExist();
+
+      expect(mockPutPipeline).toHaveBeenCalledWith(expect.objectContaining(eventIngestPipeline));
 
       expect(mockLog).toHaveBeenCalledWith(
         'info',

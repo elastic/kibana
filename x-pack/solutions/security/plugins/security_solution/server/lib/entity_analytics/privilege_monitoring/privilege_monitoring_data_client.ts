@@ -226,13 +226,13 @@ export class PrivilegeMonitoringDataClient {
   }
 
   public async createIngestPipelineIfDoesNotExist() {
-    const getPipelinesResponse = await this.internalUserClient.ingest.getPipeline(
+    const pipelinesResponse = await this.internalUserClient.ingest.getPipeline(
       { id: PRIVMON_EVENT_INGEST_PIPELINE_ID },
       { ignore: [404] }
     );
-    if (!getPipelinesResponse[PRIVMON_EVENT_INGEST_PIPELINE_ID]) {
+    if (!pipelinesResponse[PRIVMON_EVENT_INGEST_PIPELINE_ID]) {
       this.log('info', 'Privileged user monitoring ingest pipeline does not exist, creating.');
-      await this.esClient.ingest.putPipeline(eventIngestPipeline);
+      await this.internalUserClient.ingest.putPipeline(eventIngestPipeline);
     } else {
       this.log('info', 'Privileged user monitoring ingest pipeline already exists.');
     }
