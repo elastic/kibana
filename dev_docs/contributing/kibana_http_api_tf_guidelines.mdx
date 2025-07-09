@@ -301,58 +301,6 @@ Volatile fields create a challenging choice: include them (causing constant conf
 
 Including and separating them makes it easier for the TF provider to specifically ignore sets of fields (marking them as [readonly](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_alerting_rule#read-only)) but needs to be built into the client generator.
 
-**Supporting multiple types**
-
-If your API needs to support multiple data types for the same logical concept, consider these approaches:
-
-1. **Use separate, clearly named fields**
-   ```json
-   {
-     "group_by_field": "field_name",      // Single field
-     "group_by_fields": ["field1", "field2"]  // Multiple fields
-   }
-   ```
-
-2. **Use the most flexible type from the start**
-   ```json
-   {
-     "group_by": ["field_name"]  // Always an array, even for single values
-   }
-   ```
-
-**When you have to support flexible types**
-
-If poorly defined structure or types are unavoidable, JSON strings provide a workaround—but use them sparingly:
-
-```terraform
-resource "elasticstack_elasticsearch_index" "example" {
-  # Structured fields for simple, predictable values
-  number_of_shards   = 1
-  number_of_replicas = 2
-  # JSON strings only for truly complex, variable structures
-  mappings = jsonencode({
-    properties = {
-      user = { type = "keyword" }
-      timestamp = { type = "date" }
-    }
-  })
-}
-```
-
-[Index resource schema](https://github.com/elastic/terraform-provider-elasticstack/blob/main/internal/elasticsearch/index/schema.go)
-
-**What's the issue with JSON strings?**
-
-`jsonencode()` and `jsondecode()` come with significant downsides:
-
-- **Limited validation**: Terraform can only validate JSON syntax during plan, not the actual content structure
-- **Poor user experience**: Users lose autocompletion, type checking, and clear error messages
-- **Complex validation logic**: Content validation is left to the API layer, leading to runtime errors that could have been plan-time validation
-
-**Bottom line**
-
-Consistent field types make everyone's life easier—API consumers, Terraform provider developers, and your future self. When designing your API, choose field types that can accommodate future needs rather than changing them later.
-
 ### Make requests transactional
 
 Terraform expects changes to take effect immediately. Design your API so that changes take effect immediately upon successful response.

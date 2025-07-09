@@ -203,7 +203,7 @@ Carefully consider cases where this pattern may make sense as it is more user-fr
 
 This is sometimes referred to as _idempotency_. It is related to side-effects, but not quite the same thing.
 
-Imagine we were to run requests the following methods 1000x over:
+Imagine we were to run the following methods 1000x over:
 
 * `GET` always results in the same _server state_
 * `PUT` always results in the same _server state_
@@ -216,7 +216,9 @@ However...
 
 **POST is (mostly) for creating a resource**
 
-Sometimes `POST` can be used for an action against a resource or for actions like a `GET` but with a body. If you expect you need to support a lot of input for searching or listing resources it might be good to reserve `POST` for this purposes. For example:
+Sometimes `POST` can be used for an action against a resource or for actions like a `GET` but with a body. In this case, `POST` may be both side-effect free and idempotent! In most cases it will not be because your request will open a PIT: see [pagination and sorting](#pagination-and-sorting).
+
+If you expect you need to support a lot of input for searching or listing resources it might be good to reserve `POST` for this purposes.
 
 **GET does not accept a body**
 
@@ -307,6 +309,8 @@ Both requests and responses should be `application/json`, unless there is a good
 `GET /api/my_domain/my_resources` <br />
 => <br />
 `{ items: [{ "id": "1", "name": "My resource" }], page: 1, size: 10, total: 100 }`
+
+See the section on [data modelling](#data-modeling) for more guidance.
 
 ### Defaults
 
@@ -551,3 +555,36 @@ Kibana's public HTTP APIs in our Serverless offering are versioned with the enti
 Kibana's internal HTTP APIs can be versioned too, but for a very different purpose! With serverless, we continually roll out code changes _without_ asking browsers to refresh. That means, for a time, browser clients might expect old internal API behavior. It is up to route authors and UI developers to consider how to handle breaking changes of internal routes. Note: you are free to version internal APIs at will to mitigate any unfortunate browser client breakages!
 
 Please see the tutorial on <DocLink id="kibDevTutorialVersioningHTTPAPIs" text="versioning HTTP APIs" /> for more details.
+
+
+### Data modelling
+
+If your API needs to support multiple data types for the same logical concept, consider these approaches:
+
+1. **Use separate, clearly named fields**
+   ```json
+   {
+     "group_by_field": "field_name",      // Single field
+     "group_by_fields": ["field1", "field2"]  // Multiple fields
+   }
+   ```
+
+2. **Use the most flexible type from the start**
+   ```json
+   {
+     "group_by": ["field_name"]  // Always an array, even for single values
+   }
+   ```
+
+**When you MUST support poorly defined types**
+
+Poorly defined data structures in your requests result in a terrible user experience. But if poorly defined structure or types are unavoidable due to legacy design, you can use "JSON blobs" to hold such data structures:
+
+```json
+{
+  "id": "abc",
+  "data": {...} // Kludge of data
+}
+```
+
+And validation should be super lax `schema.object({}, { unknowns: 'allow' })`.
