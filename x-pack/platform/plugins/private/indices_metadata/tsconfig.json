@@ -8,7 +8,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/task-manager-plugin"
+    "@kbn/task-manager-plugin",
+    "@kbn/config-schema"
   ],
   "exclude": [
     "target/**/*"
