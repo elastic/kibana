@@ -97,6 +97,8 @@ export function initializeESQLControlSelections(
     });
 
   // Filter the displayed available options by the current search string
+  // TODO: Run this filtering server-side instead of client side; this just replicates the basic behavior
+  // of a combo box dropdown for keyboard accessibility
   const availableOptionsSearchSubscription = combineLatest([searchString$, availableOptions$])
     .pipe(debounceTime(50))
     .subscribe(([searchString, availableOptions]) => {
