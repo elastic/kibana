@@ -76,6 +76,13 @@ First release new HTTP APIs internally or as `Technical Preview` behind a <DocLi
  - Set an existing property as required
  - Add or delete a security requirement
  - In some cases, changing a default
+ - In some cases, _behavioural_ changes might form part of your contract
+
+#### Non-breaking changes to HTTP APIs include
+ - Adding a new **optional** request parameter
+ - Expanding the types of input parameters, going from `string` -> `string | string[]` in requests
+ - Adding a new **optional** response property
+ - Relaxing request validation requirements: e.g. going from `schema.string({ minLength: 10 })` -> `schema.string()`
 
 <DocCallOut title="Do not break clients!">
   A public HTTP API should never cause a client to break. Not without a long deprecation period and a ready alternative.
