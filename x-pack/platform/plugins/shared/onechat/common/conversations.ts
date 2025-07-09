@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Conversation, AgentIdentifier } from '@kbn/onechat-common';
+import type { Conversation } from '@kbn/onechat-common';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
@@ -18,7 +18,7 @@ export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
   Partial<Pick<Conversation, 'title' | 'rounds'>>;
 
 export interface ConversationListOptions {
-  agentId?: AgentIdentifier;
+  agentId?: string;
 }
 
 export interface ConversationGetOptions {

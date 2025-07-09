@@ -35,7 +35,7 @@ describe('tool_selection_utils', () => {
 
   describe('isToolSelected', () => {
     it('should return true when tool is individually selected', () => {
-      const selectedTools: ToolSelection[] = [{ toolIds: ['tool1'] }];
+      const selectedTools: ToolSelection[] = [{ tool_ids: ['tool1'] }];
 
       expect(isToolSelected(mockTools[0], selectedTools)).toBe(true);
       expect(isToolSelected(mockTools[1], selectedTools)).toBe(false);
@@ -43,7 +43,7 @@ describe('tool_selection_utils', () => {
 
     it('should return true when tool is selected via wildcard', () => {
       const selectedTools: ToolSelection[] = [
-        { provider: 'provider1', toolIds: [allToolsSelectionWildcard] },
+        { type: 'provider1', tool_ids: [allToolsSelectionWildcard] },
       ];
 
       expect(isToolSelected(mockTools[0], selectedTools)).toBe(true);
@@ -54,7 +54,7 @@ describe('tool_selection_utils', () => {
 
   describe('isAllToolsSelectedForProvider', () => {
     it('should return true when all tools are individually selected', () => {
-      const selectedTools: ToolSelection[] = [{ toolIds: ['tool1', 'tool2'] }];
+      const selectedTools: ToolSelection[] = [{ tool_ids: ['tool1', 'tool2'] }];
       const provider1Tools = mockTools.filter((t) => t.meta.providerId === 'provider1');
 
       expect(isAllToolsSelectedForProvider('provider1', provider1Tools, selectedTools)).toBe(true);
@@ -62,7 +62,7 @@ describe('tool_selection_utils', () => {
 
     it('should return true when all tools are selected via wildcard', () => {
       const selectedTools: ToolSelection[] = [
-        { provider: 'provider1', toolIds: [allToolsSelectionWildcard] },
+        { type: 'provider1', tool_ids: [allToolsSelectionWildcard] },
       ];
       const provider1Tools = mockTools.filter((t) => t.meta.providerId === 'provider1');
 
@@ -70,7 +70,7 @@ describe('tool_selection_utils', () => {
     });
 
     it('should return false when only some tools are selected', () => {
-      const selectedTools: ToolSelection[] = [{ toolIds: ['tool1'] }];
+      const selectedTools: ToolSelection[] = [{ tool_ids: ['tool1'] }];
       const provider1Tools = mockTools.filter((t) => t.meta.providerId === 'provider1');
 
       expect(isAllToolsSelectedForProvider('provider1', provider1Tools, selectedTools)).toBe(false);
@@ -84,12 +84,12 @@ describe('tool_selection_utils', () => {
 
       const result = toggleProviderSelection('provider1', provider1Tools, selectedTools);
 
-      expect(result).toEqual([{ provider: 'provider1', toolIds: [allToolsSelectionWildcard] }]);
+      expect(result).toEqual([{ type: 'provider1', tool_ids: [allToolsSelectionWildcard] }]);
     });
 
     it('should deselect all tools when all are selected', () => {
       const selectedTools: ToolSelection[] = [
-        { provider: 'provider1', toolIds: [allToolsSelectionWildcard] },
+        { type: 'provider1', tool_ids: [allToolsSelectionWildcard] },
       ];
       const provider1Tools = mockTools.filter((t) => t.meta.providerId === 'provider1');
 
@@ -106,27 +106,27 @@ describe('tool_selection_utils', () => {
 
       const result = toggleToolSelection('tool1', 'provider1', provider1Tools, selectedTools);
 
-      expect(result).toEqual([{ toolIds: ['tool1'] }]);
+      expect(result).toEqual([{ tool_ids: ['tool1'] }]);
     });
 
     it('should deselect tool when selected', () => {
-      const selectedTools: ToolSelection[] = [{ toolIds: ['tool1', 'tool2'] }];
+      const selectedTools: ToolSelection[] = [{ tool_ids: ['tool1', 'tool2'] }];
       const provider1Tools = mockTools.filter((t) => t.meta.providerId === 'provider1');
 
       const result = toggleToolSelection('tool1', 'provider1', provider1Tools, selectedTools);
 
-      expect(result).toEqual([{ toolIds: ['tool2'] }]);
+      expect(result).toEqual([{ tool_ids: ['tool2'] }]);
     });
 
     it('should handle wildcard to individual selection correctly', () => {
       const selectedTools: ToolSelection[] = [
-        { provider: 'provider1', toolIds: [allToolsSelectionWildcard] },
+        { type: 'provider1', tool_ids: [allToolsSelectionWildcard] },
       ];
       const provider1Tools = mockTools.filter((t) => t.meta.providerId === 'provider1');
 
       const result = toggleToolSelection('tool1', 'provider1', provider1Tools, selectedTools);
 
-      expect(result).toEqual([{ provider: 'provider1', toolIds: ['tool2'] }]);
+      expect(result).toEqual([{ type: 'provider1', tool_ids: ['tool2'] }]);
     });
   });
 });

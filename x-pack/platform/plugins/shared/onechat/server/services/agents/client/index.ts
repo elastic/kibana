@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { AgentProfilesService } from './agents_profiles_service';
+export type { AgentClient } from './client';
+export { createClient } from './client';

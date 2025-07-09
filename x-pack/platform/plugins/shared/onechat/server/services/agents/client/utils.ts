@@ -36,8 +36,8 @@ export async function validateToolSelection({
   const allProviders = new Set(allTools.map((t: any) => t.meta.providerId));
 
   for (const selection of toolSelection) {
-    const { provider, toolIds } = selection;
-    if (!provider) {
+    const { type, tool_ids: toolIds } = selection;
+    if (!type) {
       // If provider is not specified, check for ambiguity
       for (const toolId of toolIds) {
         if (toolId === '*') continue;
@@ -58,19 +58,19 @@ export async function validateToolSelection({
       }
     } else {
       // Provider specified
-      if (!allProviders.has(provider)) {
-        errors.push(`Provider '${provider}' does not exist.`);
+      if (!allProviders.has(type)) {
+        errors.push(`Provider '${type}' does not exist.`);
         continue;
       }
       // Check each tool exists for the provider
       for (const toolId of toolIds) {
         if (toolId === '*') continue;
         const exists = await toolRegistry.has({
-          toolId: { toolId, providerId: provider },
+          toolId: { toolId, providerId: type },
           request,
         });
         if (!exists) {
-          errors.push(`Tool id '${toolId}' does not exist for provider '${provider}'.`);
+          errors.push(`Tool id '${toolId}' does not exist for provider '${type}'.`);
         }
       }
     }

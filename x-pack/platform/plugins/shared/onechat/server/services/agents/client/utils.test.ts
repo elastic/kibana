@@ -33,7 +33,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ toolIds: ['toolA'] }],
+      toolSelection: [{ tool_ids: ['toolA'] }],
     });
     expect(errors.join(' ')).toMatch(/ambiguous/);
   });
@@ -43,7 +43,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ toolIds: ['nonexistent'] }],
+      toolSelection: [{ tool_ids: ['nonexistent'] }],
     });
     expect(errors.join(' ')).toMatch(/does not exist in any provider/);
   });
@@ -53,7 +53,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'provX', toolIds: ['toolA'] }],
+      toolSelection: [{ type: 'provX', tool_ids: ['toolA'] }],
     });
     expect(errors.join(' ')).toMatch(/Provider 'provX' does not exist/);
   });
@@ -63,7 +63,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'prov2', toolIds: ['*'] }],
+      toolSelection: [{ type: 'prov2', tool_ids: ['*'] }],
     });
     expect(errors.join(' ')).toMatch(/Provider 'prov2' does not exist/);
   });
@@ -73,7 +73,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'prov1', toolIds: ['toolC'] }],
+      toolSelection: [{ type: 'prov1', tool_ids: ['toolC'] }],
     });
     expect(errors.join(' ')).toMatch(/does not exist for provider/);
   });
@@ -83,7 +83,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'prov1', toolIds: ['toolA'] }],
+      toolSelection: [{ type: 'prov1', tool_ids: ['toolA'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -93,7 +93,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ toolIds: ['toolB'] }],
+      toolSelection: [{ tool_ids: ['toolB'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -103,7 +103,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ toolIds: ['*'] }],
+      toolSelection: [{ tool_ids: ['*'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -113,7 +113,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'prov1', toolIds: ['*'] }],
+      toolSelection: [{ type: 'prov1', tool_ids: ['*'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -124,7 +124,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'builtIn', toolIds: ['*'] }],
+      toolSelection: [{ type: 'builtIn', tool_ids: ['*'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -135,8 +135,8 @@ describe('validateToolSelection (unit)', () => {
       toolRegistry: registry as any,
       request: mockRequest,
       toolSelection: [
-        { toolIds: ['toolA', 'nonexistent'] },
-        { provider: 'provX', toolIds: ['toolA'] },
+        { tool_ids: ['toolA', 'nonexistent'] },
+        { type: 'provX', tool_ids: ['toolA'] },
       ],
     });
     expect(errors).toEqual(
