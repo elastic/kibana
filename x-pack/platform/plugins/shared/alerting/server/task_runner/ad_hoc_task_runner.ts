@@ -427,7 +427,7 @@ export class AdHocTaskRunner implements CancellableTask {
         (s: AdHocRunSchedule) => s.status === adHocRunStatus.PENDING
       );
       if (this.scheduleToRunIndex > -1) {
-        this.logger.warn(
+        this.logger.debug(
           `Executing ad hoc run for rule ${ruleType.id}:${rule.id} for runAt ${
             this.adHocRunSchedule[this.scheduleToRunIndex].runAt
           }`
@@ -597,10 +597,10 @@ export class AdHocTaskRunner implements CancellableTask {
       timeoutOverride,
     } = this.taskInstance;
 
-    this.logger.warn(
+    this.logger.debug(
       `Cancelling execution for ad hoc run with id ${adHocRunParamsId} for rule type ${this.ruleTypeId} with id ${this.ruleId} - execution exceeded rule type timeout of ${timeoutOverride}`
     );
-    this.logger.warn(
+    this.logger.debug(
       `Aborting any in-progress ES searches for rule type ${this.ruleTypeId} with id ${this.ruleId}`
     );
     this.alertingEventLogger.logTimeout({
@@ -623,11 +623,9 @@ export class AdHocTaskRunner implements CancellableTask {
   }
 
   async cleanup() {
-    this.logger.warn('cleanup');
     if (!this.shouldDeleteTask) return;
 
     try {
-      this.logger.warn('deleting saved object');
       await this.internalSavedObjectsRepository.delete(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         this.taskInstance.params.adHocRunParamsId,
@@ -636,8 +634,6 @@ export class AdHocTaskRunner implements CancellableTask {
           namespace: this.context.spaceIdToNamespace(this.taskInstance.params.spaceId),
         }
       );
-
-      this.logger.warn('updateGapsAfterBackfillComplete');
 
       await this.updateGapsAfterBackfillComplete();
     } catch (e) {
@@ -649,19 +645,13 @@ export class AdHocTaskRunner implements CancellableTask {
   }
 
   private async updateGapsAfterBackfillComplete() {
-    this.logger.warn('this.updateGapsAfterBackfillComplete');
-    // if (!this.shouldDeleteTask) return;
-    this.logger.warn('this.updateGapsAfterBackfillComplete 1');
     if (this.scheduleToRunIndex < 0 || !this.adHocRange) return null;
-    this.logger.warn('this.updateGapsAfterBackfillComplete 2');
+
     const fakeRequest = getFakeKibanaRequest(
       this.context,
       this.taskInstance.params.spaceId,
       this.apiKeyToUse
     );
-
-    this.logger.warn('this.adHocRunSchedule');
-    this.logger.warn(JSON.stringify(this.adHocRunSchedule));
 
     const eventLogClient = await this.context.getEventLogClient(fakeRequest);
     const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
