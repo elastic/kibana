@@ -23,7 +23,6 @@ export function plugin() {
 
 // Containers & Hook
 export { LogViewProvider, useLogViewContext, useLogView } from './hooks/use_log_view';
-export { LogStreamProvider, useLogStreamContext } from './containers/logs/log_stream';
 export {
   LogPositionStateProvider,
   useLogPositionStateContext,
@@ -40,7 +39,6 @@ export {
   useColumnWidths,
 } from './components/logging/log_text_stream/log_entry_column';
 export type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
-export type { LogStreamProps } from './components/log_stream/log_stream';
 export type {
   UpdatedDateRange,
   VisibleInterval,
@@ -53,7 +51,6 @@ export const LogEntryFlyout = dynamic(
 export const LogAIAssistant = dynamic(
   () => import('./components/log_ai_assistant/log_ai_assistant')
 );
-export const LogStream = dynamic(() => import('./components/log_stream/log_stream'));
 export const LogColumnHeader = dynamic(
   () => import('./components/logging/log_text_stream/column_headers')
 );

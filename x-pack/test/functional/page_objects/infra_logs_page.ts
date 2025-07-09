@@ -24,10 +24,6 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
         { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
       );
     },
-
-    async getLogStream() {
-      return await testSubjects.find('logStream');
-    },
   };
 }
 
