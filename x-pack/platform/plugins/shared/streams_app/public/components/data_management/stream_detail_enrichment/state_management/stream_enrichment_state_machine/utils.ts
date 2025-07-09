@@ -118,7 +118,7 @@ export function getUpsertWiredFields(
 
 export const spawnProcessor = <TAssignArgs extends AssignArgs<any, any, any, any>>(
   processor: ProcessorDefinition,
-  assignArgs: Pick<TAssignArgs, 'spawn' | 'self'>,
+  assignArgs: TAssignArgs,
   options?: { isNew: boolean }
 ) => {
   const { spawn, self } = assignArgs;

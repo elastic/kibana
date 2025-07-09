@@ -90,7 +90,9 @@ const ProcessorConfigurationListItem = ({
   processorMetrics,
   processorRef,
 }: ProcessorConfigurationProps) => {
-  const canEdit = useStreamEnrichmentSelector((s) => s.context.definition.privileges.simulate);
+  const canEdit = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.can({ type: 'processor.edit' })
+  );
   const processor = useSelector(processorRef, (snapshot) => snapshot.context.processor);
 
   const isConfigured = useSelector(processorRef, (snapshot) => snapshot.matches('configured'));
@@ -196,20 +198,6 @@ const ProcessorConfigurationEditor = ({
     });
     return () => unsubscribe();
   }, [methods, processorRef]);
-
-  useEffect(() => {
-    const subscription = processorRef.on('processor.changesDiscarded', () => {
-      methods.reset(
-        getFormStateFrom(
-          selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
-          { grokCollection },
-          previousProcessor
-        )
-      );
-    });
-
-    return () => subscription.unsubscribe();
-  }, [getEnrichmentState, grokCollection, methods, previousProcessor, processorRef]);
 
   const isConfigured = useSelector(processorRef, (snapshot) => snapshot.matches('configured'));
   const isNew = useSelector(processorRef, (snapshot) => snapshot.context.isNew);

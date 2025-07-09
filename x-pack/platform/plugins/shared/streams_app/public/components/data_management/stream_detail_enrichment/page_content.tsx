@@ -150,10 +150,12 @@ const ProcessorsEditor = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
   const { addProcessor, reorderProcessors } = useStreamEnrichmentEvents();
-  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
 
+  const canAddProcessor = useStreamEnrichmentSelector((state) =>
+    state.can({ type: 'processors.add' })
+  );
   const canReorderProcessors = useStreamEnrichmentSelector((state) =>
-    state.can({ type: 'processors.reorder', processorsRefs: state.context.processorsRefs })
+    state.can({ type: 'processors.reorder', from: Number(), to: Number() })
   );
 
   const processorsRefs = useStreamEnrichmentSelector((state) => state.context.processorsRefs);
@@ -190,11 +192,9 @@ const ProcessorsEditor = React.memo(() => {
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
-      const items = euiDragDropReorder(processorsRefs, source.index, destination.index);
-      reorderProcessors(items);
+      reorderProcessors(source.index, destination.index);
     }
   };
-
   const hasProcessors = !isEmpty(processorsRefs);
 
   return (
@@ -222,14 +222,17 @@ const ProcessorsEditor = React.memo(() => {
               )}
             </EuiText>
           </EuiFlexItem>
-          {definition.privileges.simulate && (
-            <EuiButton size="s" iconType="plus" onClick={() => addProcessor()}>
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorButton',
-                { defaultMessage: 'Add processor' }
-              )}
-            </EuiButton>
-          )}
+          <EuiButton
+            size="s"
+            iconType="plus"
+            onClick={() => addProcessor()}
+            disabled={!canAddProcessor}
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorButton',
+              { defaultMessage: 'Add processor' }
+            )}
+          </EuiButton>
         </EuiFlexGroup>
       </EuiPanel>
       {hasProcessors ? (

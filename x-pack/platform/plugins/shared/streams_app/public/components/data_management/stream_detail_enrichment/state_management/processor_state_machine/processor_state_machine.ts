@@ -4,16 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ActorRefFrom, assign, emit, forwardTo, sendTo, setup } from 'xstate5';
-import { isEqual } from 'lodash';
+import { ActorRefFrom, assign, forwardTo, sendTo, setup } from 'xstate5';
 import { ProcessorDefinition, getProcessorType } from '@kbn/streams-schema';
-import {
-  ProcessorInput,
-  ProcessorContext,
-  ProcessorEvent,
-  ProcessorEmittedEvent,
-  ProcessorResources,
-} from './types';
+import { ProcessorInput, ProcessorContext, ProcessorEvent, ProcessorResources } from './types';
 
 export type ProcessorActorRef = ActorRefFrom<typeof processorMachine>;
 
@@ -22,7 +15,6 @@ export const processorMachine = setup({
     input: {} as ProcessorInput,
     context: {} as ProcessorContext,
     events: {} as ProcessorEvent,
-    emitted: {} as ProcessorEmittedEvent,
   },
   actions: {
     changeProcessor: assign(
@@ -61,7 +53,6 @@ export const processorMachine = setup({
         id: context.processor.id,
       })
     ),
-    emitChangesDiscarded: emit({ type: 'processor.changesDiscarded' }),
   },
   guards: {
     isDraft: ({ context }) => context.isNew,
@@ -100,21 +91,22 @@ export const processorMachine = setup({
       initial: 'idle',
       states: {
         idle: {
-          on: { 'processor.edit': 'editing' },
+          on: {
+            'processor.edit': {
+              target: 'editing',
+              actions: [{ type: 'forwardEventToParent' }],
+            },
+          },
         },
         editing: {
           on: {
             'processor.save': {
-              target: '#configured.idle',
+              target: 'idle',
               actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
             },
             'processor.cancel': {
-              target: '#configured.idle',
-              actions: [
-                { type: 'emitChangesDiscarded' },
-                { type: 'resetToPrevious' },
-                { type: 'forwardEventToParent' },
-              ],
+              target: 'idle',
+              actions: [{ type: 'resetToPrevious' }, { type: 'forwardEventToParent' }],
             },
             'processor.change': {
               actions: [

@@ -64,6 +64,6 @@ export type StreamEnrichmentEvent =
   | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
   | { type: 'processors.add'; processor?: ProcessorDefinition }
-  | { type: 'processors.reorder'; processorsRefs: ProcessorActorRef[] }
+  | { type: 'processors.reorder'; from: number; to: number }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
   | { type: 'url.sync' };

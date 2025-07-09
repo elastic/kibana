@@ -11,8 +11,10 @@ import { DraftGrokExpression } from '@kbn/grok-ui';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export type ProcessorToParentEvent =
+  | { type: 'processor.cancel'; id: string }
   | { type: 'processor.change'; id: string }
   | { type: 'processor.delete'; id: string }
+  | { type: 'processor.edit' }
   | { type: 'processor.save' };
 
 export interface ProcessorInput {
@@ -49,7 +51,3 @@ export type ProcessorEvent =
   | { type: 'processor.delete' }
   | { type: 'processor.edit' }
   | { type: 'processor.save' };
-
-export interface ProcessorEmittedEvent {
-  type: 'processor.changesDiscarded';
-}
