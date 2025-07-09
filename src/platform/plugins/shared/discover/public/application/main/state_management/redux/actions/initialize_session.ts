@@ -138,6 +138,9 @@ export const initializeSession: InternalStateThunkActionCreator<
     const persistedDiscoverSession = discoverSessionId
       ? await services.savedSearch.get(discoverSessionId)
       : undefined;
+    // const test = discoverSessionId
+    //   ? await services.savedSearch.getDiscoverSession(discoverSessionId)
+    //   : undefined;
     const initialQuery =
       urlState?.query ?? persistedDiscoverSession?.searchSource.getField('query');
     const isEsqlMode = isOfAggregateQueryType(initialQuery);

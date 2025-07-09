@@ -98,3 +98,51 @@ export type SavedSearch = Partial<SavedSearchAttributes> & {
 export type SerializableSavedSearch = Omit<SavedSearch, 'searchSource'> & {
   serializedSearchSource?: SerializedSearchSourceFields;
 };
+
+export interface DiscoverSessionTab {
+  id: string;
+  label: string;
+  sort: SortOrder[];
+  columns: string[];
+  grid: DiscoverGridSettings;
+  hideChart: boolean;
+  isTextBasedQuery: boolean;
+  usesAdHocDataView?: boolean;
+  searchSource: ISearchSource;
+  viewMode?: VIEW_MODE;
+  hideAggregatedPreview?: boolean;
+  rowHeight?: number;
+  headerRowHeight?: number;
+  timeRestore?: boolean;
+  timeRange?: Pick<TimeRange, 'from' | 'to'>;
+  refreshInterval?: RefreshInterval;
+  rowsPerPage?: number;
+  sampleSize?: number;
+  breakdownField?: string;
+  density?: DataGridDensity;
+  visContext?: VisContextUnmapped;
+}
+
+export interface DiscoverSession {
+  id?: string;
+  title: string;
+  description: string;
+  tabs: DiscoverSessionTab[];
+  managed: boolean;
+  tags?: string[] | undefined;
+  references?: SavedObjectReference[];
+  sharingSavedObjectProps?: {
+    outcome?: SavedObjectsResolveResponse['outcome'];
+    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+    errorJSON?: string;
+  };
+}
+
+export type SerializableDiscoverSessionTab = Omit<DiscoverSessionTab, 'searchSource'> & {
+  serializedSearchSource?: SerializedSearchSourceFields;
+};
+
+export type SerializableDiscoverSession = Omit<DiscoverSession, 'tabs'> & {
+  tabs: SerializableDiscoverSessionTab[];
+};
