@@ -204,11 +204,11 @@ export const ReportSchedulesTable = (props: { apiClient: ReportingAPIClient }) =
         {
           name: (item) =>
             i18n.translate('xpack.reporting.schedules.table.openDashboard.title', {
-              defaultMessage: 'Open {objectType}',
+              defaultMessage: 'Open in {objectType}',
               values: {
                 objectType: item.payload?.objectType
                   ? getDisplayNameFromObjectType(item.payload?.objectType)
-                  : 'Kibana',
+                  : 'in Kibana',
               },
             }),
           description: (item) =>

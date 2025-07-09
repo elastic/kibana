@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { capitalize } from 'lodash';
 import type { IconType } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { Job } from '@kbn/reporting-public';
@@ -49,7 +50,7 @@ export const getDisplayNameFromObjectType = (type: string): string => {
     case 'search':
       return 'Discover';
     default:
-      return type;
+      return capitalize(type);
   }
 };
 

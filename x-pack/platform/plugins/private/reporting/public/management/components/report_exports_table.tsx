@@ -408,11 +408,11 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
           {
             name: (job) =>
               i18n.translate('xpack.reporting.schedules.table.openDashboard.title', {
-                defaultMessage: 'Open {objectType}',
+                defaultMessage: 'Open in {objectType}',
                 values: {
                   objectType: job.objectType
                     ? getDisplayNameFromObjectType(job.objectType)
-                    : 'Kibana',
+                    : 'in Kibana',
                 },
               }),
             'data-test-subj': 'reportOpenInKibanaApp',
