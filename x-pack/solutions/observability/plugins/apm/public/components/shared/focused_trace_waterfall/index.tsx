@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TraceWaterfall } from '../trace_waterfall';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
@@ -68,7 +69,16 @@ function getTraceItems(items: NonNullable<FocusedTrace['traceItems']>) {
 export function FocusedTraceWaterfall({ items, onErrorClick }: Props) {
   const reparentedItems = reparentDocumentToRoot(items.traceItems);
   if (!reparentedItems) {
-    return null;
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.apm.focusedTraceWaterfall.euiCallOut.incompleteTraceLabel', {
+          defaultMessage:
+            'The waterfall may appear incomplete or not at all until processing finishes.',
+        })}
+        size="s"
+        color="warning"
+      />
+    );
   }
   const traceItems = getTraceItems(reparentedItems);
 
