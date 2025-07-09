@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiText, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactElement } from 'react';
 import { createKeyInsightsPanelLensAttributes } from './lens_attributes';
@@ -84,38 +84,33 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
     !visualizationResponse.tables
   ) {
     return (
-      <EuiFlexItem grow={false} style={{ minWidth: LENS_VISUALIZATION_MIN_WIDTH }}>
-        <EuiPanel
-          color="subdued"
-          hasBorder={true}
-          paddingSize="m"
-          style={{ height: LENS_VISUALIZATION_HEIGHT }}
-          data-test-subj="visualization-embeddable-error"
-        >
-          <EuiFlexGroup direction="column" justifyContent="flexStart" style={{ height: '100%' }}>
+      <EuiFlexGroup
+        direction="column"
+        justifyContent="spaceBetween"
+        style={{ height: '100%' }} // ensures it uses the full height so 'space-between' works
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h4>{titleString}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="flexStart">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="m">
-                    <strong>{titleString}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiIcon type="alert" color="warning" />
             </EuiFlexItem>
-            <EuiFlexItem grow={true} />
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <FormattedMessage
-                    id="xpack.securitySolution.keyInsightsTile.dataNotAvailable"
-                    defaultMessage="Data not available"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.securitySolution.keyInsightsTile.dataNotAvailable"
+                  defaultMessage="Data not available"
+                />
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
