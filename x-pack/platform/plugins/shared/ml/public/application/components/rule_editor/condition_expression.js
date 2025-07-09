@@ -228,7 +228,6 @@ export class ConditionExpression extends Component {
             closePopover={this.closeOperatorValue}
             panelPaddingSize="s"
             ownFocus
-            withTitle
             anchorPosition="downLeft"
           >
             {this.renderOperatorValuePopover()}
