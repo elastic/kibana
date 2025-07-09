@@ -37,8 +37,7 @@ test.describe('Annotations List', { tag: ['@ess'] }, () => {
     // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Test annotation"');
     await expect(page.locator('.euiTableRow')).toHaveCount(1);
-    // eslint-disable-next-line playwright/no-nth-methods
-    await page.locator('.echAnnotation__marker').first().hover();
+    await page.locator('.echAnnotation__marker').hover();
     // eslint-disable-next-line playwright/no-wait-for-selector
     await page.waitForSelector('text="Test annotation description"');
   });
