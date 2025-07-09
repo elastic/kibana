@@ -104,18 +104,6 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
     }
 
-    if (
-      startingState.get(this._definition.name)?.definition &&
-      this._changes.lifecycle &&
-      isInheritLifecycle(this.getLifecycle())
-    ) {
-      // temporary until https://github.com/elastic/kibana/issues/222440 is resolved
-      return {
-        isValid: false,
-        errors: [new Error('Cannot revert to default lifecycle once updated')],
-      };
-    }
-
     // Check for conflicts
     if (this._changes.lifecycle || this._changes.processing) {
       try {
@@ -226,7 +214,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       });
     }
 
-    if (this._changes.lifecycle && !isInheritLifecycle(this.getLifecycle())) {
+    if (this._changes.lifecycle) {
       actions.push({
         type: 'update_lifecycle',
         request: {
