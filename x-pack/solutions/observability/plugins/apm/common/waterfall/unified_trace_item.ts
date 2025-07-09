@@ -14,4 +14,5 @@ export interface TraceItem {
   hasError?: boolean;
   parentId?: string;
   serviceName: string;
+  spanType?: string;
 }
