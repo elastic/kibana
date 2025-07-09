@@ -43,7 +43,7 @@ import {
   DataTableTimeColumnHeader,
 } from './data_table_column_header';
 import { UnifiedDataTableProps } from './data_table';
-import UnifiedDataTableSummaryColumnHeader from './data_table_summary_column_header';
+import { UnifiedDataTableSummaryColumnHeader } from './data_table_summary_column_header';
 
 export const getColumnDisplayName = (
   columnName: string,
