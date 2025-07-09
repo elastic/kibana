@@ -8,6 +8,14 @@
 import { newConversationId } from '@kbn/onechat-common';
 
 export const appPaths = {
+  root: '/',
+  agents: {
+    list: '/agents',
+    new: '/agents/new',
+    edit: ({ agentId }: { agentId: string }) => {
+      return `/agents/${agentId}`;
+    },
+  },
   chat: {
     new: `/conversations/${newConversationId}`,
     conversation: ({ conversationId }: { conversationId: string }) => {
