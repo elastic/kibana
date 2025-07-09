@@ -5,8 +5,20 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+jest.mock('../../../anomalies_table/anomaly_value_display', () => ({
+  AnomalyValueDisplay: jest.fn().mockImplementation(({ value }) => {
+    const React = jest.requireActual('react');
+    const displayValue = Array.isArray(value) ? value[0] : value;
+    return React.createElement(
+      'span',
+      { 'data-test-subj': 'mockAnomalyValueDisplay' },
+      `${displayValue}`
+    );
+  }),
+}));
+
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { DetectorDescriptionList } from './detector_description_list';
 
@@ -26,9 +38,9 @@ describe('DetectorDescriptionList', () => {
       },
     };
 
-    const component = shallowWithIntl(<DetectorDescriptionList {...props} />);
+    const { container } = renderWithI18n(<DetectorDescriptionList {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('render for population detector with no anomaly values', () => {
@@ -54,8 +66,8 @@ describe('DetectorDescriptionList', () => {
       },
     };
 
-    const component = shallowWithIntl(<DetectorDescriptionList {...props} />);
+    const { container } = renderWithI18n(<DetectorDescriptionList {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

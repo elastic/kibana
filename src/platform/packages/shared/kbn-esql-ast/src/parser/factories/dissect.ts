@@ -45,7 +45,7 @@ const createDissectOptions = (ctx: CommandOptionsContext | undefined): ESQLComma
   return options;
 };
 
-export const createDissectCommand = (ctx: DissectCommandContext): ESQLCommand => {
+export const createDissectCommand = (ctx: DissectCommandContext): ESQLCommand<'dissect'> => {
   const command = createCommand('dissect', ctx);
   const primaryExpression = visitPrimaryExpression(ctx.primaryExpression());
   const stringContext = ctx.string_();
