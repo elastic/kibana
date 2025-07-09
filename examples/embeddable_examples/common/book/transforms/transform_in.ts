@@ -7,4 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function transformIn() {}
+import { BOOK_SAVED_OBJECT_TYPE } from '../constants';
+import { BookByReferenceState, BookEmbeddableState } from '../types';
+
+export function transformIn(state: BookEmbeddableState) {
+  if ((state as BookByReferenceState).savedObjectId) {
+    const { savedObjectId, ...rest } = state as BookByReferenceState;
+    return {
+      state: rest,
+      references: {
+        name: 'savedObjectRef',
+        type: BOOK_SAVED_OBJECT_TYPE,
+        id: savedObjectId,
+      },
+    };
+  }
+
+  return state;
+}
