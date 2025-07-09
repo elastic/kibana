@@ -6,12 +6,13 @@
  */
 const { workerData } = require('worker_threads');
 
-// When we run from source the worker file is still .ts → transpile on-the-fly
-if (workerData.fullpath.endsWith('.ts')) {
-  // eslint-disable-next-line import/no-extraneous-dependencies
-  require('ts-node').register({ transpileOnly: true });
+if (process.env.NODE_ENV !== 'production') {
+  /* eslint-disable @kbn/imports/no_boundary_crossing */
+  require('../../../../../../../../src/setup_node_env');
+} else {
+  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+  require('../../../../../../src/setup_node_env/dist');
 }
 
-// Compiled worker implementation (the .js file in production)
 // eslint-disable-next-line import/no-dynamic-require
 module.exports = require(workerData.fullpath);
