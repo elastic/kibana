@@ -78,7 +78,12 @@ export function getDataSourcesSamples(
 
   return dataSourcesSnapshots.flatMap((snapshot, dataSourceIndex) =>
     snapshot.context.data.map((doc) => ({
-      dataSourceName: snapshot.context.dataSource.name || `Data Source ${dataSourceIndex + 1}`,
+      dataSourceName:
+        snapshot.context.dataSource.name ||
+        i18n.translate('xpack.streams.enrichment.dataSources.defaultName', {
+          defaultMessage: 'Data source {index}',
+          values: { index: dataSourceIndex + 1 },
+        }),
       sample: doc,
     }))
   );
