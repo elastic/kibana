@@ -194,9 +194,7 @@ const generateSignificantEventsRoute = createServerRoute({
     server,
     logger,
   }): Promise<
-    Observable<
-      ServerSentEventBase<'generated_queries', { queries: GeneratedSignificantEventQuery[] }>
-    >
+    Observable<ServerSentEventBase<'generated_queries', { query: GeneratedSignificantEventQuery }>>
   > => {
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(
       STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
@@ -228,7 +226,7 @@ const generateSignificantEventsRoute = createServerRoute({
 
     return fromRxjs(generatedSignificantEventDefinitions).pipe(
       map((query) => ({
-        queries: [query],
+        query,
         type: 'generated_queries',
       }))
     );
