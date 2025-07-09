@@ -10,6 +10,7 @@ import type { AADAlert } from '@kbn/alerts-as-data-utils';
 import { get, isEmpty } from 'lodash';
 import type { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { millisToNanos } from '@kbn/event-log-plugin/server';
 import type { AlertHit, CombinedSummarizedAlerts } from '../types';
 import type {
   AlertInstanceMeta,
@@ -202,6 +203,42 @@ export class Alert<
 
   setContext(context: Context) {
     this.context = context;
+    return this;
+  }
+
+  setStart(currentTime: string) {
+    this.state = {
+      ...this.state,
+      start: currentTime,
+      duration: '0',
+    };
+    return this;
+  }
+
+  setEnd(currentTime: string) {
+    if (this.state.start) {
+      const durationInMs = new Date(currentTime).valueOf() - new Date(this.state.start).valueOf();
+      const duration = millisToNanos(durationInMs);
+      this.state = {
+        ...this.state,
+        end: currentTime,
+        duration,
+      };
+    }
+    return this;
+  }
+
+  updateDuration(currentTime: string, fallbackStart?: string | null) {
+    const start: string = this.state.start || fallbackStart;
+    if (start) {
+      const durationInMs = new Date(currentTime).valueOf() - new Date(start).valueOf();
+      const duration = millisToNanos(durationInMs);
+      this.state = {
+        ...this.state,
+        start,
+        duration,
+      };
+    }
     return this;
   }
 

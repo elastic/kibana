@@ -10,7 +10,8 @@ import { cloneDeep } from 'lodash';
 import type { AlertInstanceContext, AlertInstanceState } from '../types';
 import type { PublicAlert } from './alert';
 import { Alert } from './alert';
-import { processAlerts } from '../lib';
+import { categorizeAlerts } from '../lib';
+import { AlertCategory } from '../alerts_client/types';
 
 export interface AlertFactory<
   State extends AlertInstanceState,
@@ -51,7 +52,7 @@ export interface CreateAlertFactoryOpts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext
 > {
-  alerts: Record<string, Alert<State, Context>>;
+  alerts: Map<string, Alert<State, Context>>;
   logger: Logger;
   maxAlerts: number;
   autoRecoverAlerts: boolean;
@@ -96,14 +97,14 @@ export function createAlertFactory<
         throw new Error(`Rule reported more than ${maxAlerts} alerts.`);
       }
 
-      if (!alerts[id]) {
-        alerts[id] = new Alert<State, Context>(id);
+      if (!alerts.has(id)) {
+        alerts.set(id, new Alert<State, Context>(id));
       }
 
-      return alerts[id];
+      return alerts.get(id)!;
     },
     get: (id: string): PublicAlert<State, Context, ActionGroupIds> | null => {
-      return alerts[id] ? alerts[id] : null;
+      return alerts.get(id) ?? null;
     },
     // namespace alert limit services for rule type executors to use
     alertLimit: {
@@ -142,18 +143,21 @@ export function createAlertFactory<
             return [];
           }
 
-          const { recoveredAlerts } = processAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
-            {
-              alerts,
-              existingAlerts: originalAlerts,
-              hasReachedAlertLimit,
-              alertLimit: maxAlerts,
-              autoRecoverAlerts,
-            }
-          );
-          return Object.keys(recoveredAlerts ?? {}).map(
-            (alertId: string) => recoveredAlerts[alertId]
-          );
+          const categorizedAlerts = categorizeAlerts<
+            State,
+            Context,
+            ActionGroupIds,
+            ActionGroupIds
+          >({
+            alerts,
+            existingAlerts: originalAlerts,
+            autoRecoverAlerts,
+            startedAt: new Date().toISOString(),
+          });
+
+          return categorizedAlerts
+            .filter(({ category }) => category === AlertCategory.Recovered)
+            .map(({ alert }) => alert);
         },
       };
     },

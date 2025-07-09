@@ -21,9 +21,9 @@ export interface LogAlertsParams<
 > {
   logger: Logger;
   alertingEventLogger: AlertingEventLogger;
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  newAlerts: Map<string, Alert<State, Context, ActionGroupIds>>;
+  activeAlerts: Map<string, Alert<State, Context, ActionGroupIds>>;
+  recoveredAlerts: Map<string, Alert<State, Context, RecoveryActionGroupId>>;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
@@ -63,7 +63,7 @@ export function logAlerts<
       `rule ${ruleLogPrefix} has ${activeAlertIds.length} active alerts: ${JSON.stringify(
         activeAlertIds.map((alertId) => ({
           instanceId: alertId,
-          actionGroup: activeAlerts[alertId].getScheduledActionOptions()?.actionGroup,
+          actionGroup: activeAlerts.get(alertId)!.getScheduledActionOptions()?.actionGroup,
         }))
       )}`
     );
@@ -77,7 +77,7 @@ export function logAlerts<
 
     if (canSetRecoveryContext) {
       for (const id of recoveredAlertIds) {
-        if (!recoveredAlerts[id].hasContext()) {
+        if (!recoveredAlerts.get(id)!.hasContext()) {
           logger.debug(
             `rule ${ruleLogPrefix} has no recovery context specified for recovered alert ${id}`
           );
@@ -91,10 +91,10 @@ export function logAlerts<
     ruleRunMetricsStore.setNumberOfActiveAlerts(activeAlertIds.length);
     ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
     for (const id of recoveredAlertIds) {
-      const alert = recoveredAlerts[id];
+      const alert = recoveredAlerts.get(id)!;
       const { group: actionGroup } = alert.getLastScheduledActions() ?? {};
       const uuid = alert.getUuid();
-      const state = recoveredAlerts[id].getState();
+      const state = alert.getState();
       const maintenanceWindowIds = alert.getMaintenanceWindowIds();
       const message = `${ruleLogPrefix} alert '${id}' has recovered`;
       alertingEventLogger.logAlert({
@@ -104,13 +104,13 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: recoveredAlerts[id].getFlapping(),
+        flapping: alert.getFlapping(),
         ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
       });
     }
 
     for (const id of newAlertIds) {
-      const alert = activeAlerts[id];
+      const alert = activeAlerts.get(id)!;
       const { actionGroup } = alert.getScheduledActionOptions() ?? {};
       const state = alert.getState();
       const uuid = alert.getUuid();
@@ -123,13 +123,13 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: activeAlerts[id].getFlapping(),
+        flapping: alert.getFlapping(),
         ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
       });
     }
 
     for (const id of activeAlertIds) {
-      const alert = activeAlerts[id];
+      const alert = activeAlerts.get(id)!;
       const { actionGroup } = alert.getScheduledActionOptions() ?? {};
       const state = alert.getState();
       const uuid = alert.getUuid();
@@ -142,7 +142,7 @@ export function logAlerts<
         group: actionGroup,
         message,
         state,
-        flapping: activeAlerts[id].getFlapping(),
+        flapping: alert.getFlapping(),
         ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
       });
     }

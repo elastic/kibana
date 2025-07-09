@@ -37,6 +37,8 @@ import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
+import type { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
+import type { LegacyAlertsClientParams } from './legacy_alerts_client';
 
 export interface AlertRuleData {
   consumer: string;
@@ -138,8 +140,8 @@ export interface TrackedAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext
 > {
-  active: Record<string, LegacyAlert<State, Context>>;
-  recovered: Record<string, LegacyAlert<State, Context>>;
+  active: Map<string, LegacyAlert<State, Context>>;
+  recovered: Map<string, LegacyAlert<State, Context>>;
 }
 
 export interface PublicAlertsClient<
@@ -284,3 +286,49 @@ export type ScopedQueryAggregationResult = Record<
     };
   }
 >;
+
+export type AlertMapper<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> = (
+  opts: MapperOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
+) => Promise<AlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId>>;
+
+export enum AlertCategory {
+  Existing, // alerts that were active in the previous run
+  New, // alerts that are newly created in the current run
+  Ongoing, // alerts that were active in the previous run and are still active in the current run
+  Recovered, // alerts that were active in the previous run and are now recovered in the current run
+  PreviouslyRecovered, // alerts that were recovered in the previous run
+}
+
+export type AlertsResult<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> = Array<{
+  alert: LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
+  category: AlertCategory;
+}>;
+
+export interface MapperContext {
+  alertDelay: number;
+  alertsClientContext: LegacyAlertsClientParams;
+  flappingSettings: RulesSettingsFlappingProperties;
+  hasReachedAlertLimit: boolean;
+  maxAlerts: number;
+  startedAt: string;
+}
+
+export interface MapperOpts<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  alerts: AlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId>;
+  context: MapperContext;
+}

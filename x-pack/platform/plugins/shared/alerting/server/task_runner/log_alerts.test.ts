@@ -32,15 +32,15 @@ describe('logAlerts', () => {
   });
 
   test('should debug log active alerts if they exist', () => {
+    const activeAlerts = new Map();
+    activeAlerts.set('1', new Alert<{}, {}, DefaultActionGroupId>('1'));
+    activeAlerts.set('2', new Alert<{}, {}, DefaultActionGroupId>('2'));
     logAlerts({
       logger,
       alertingEventLogger,
-      newAlerts: {},
-      activeAlerts: {
-        '1': new Alert<{}, {}, DefaultActionGroupId>('1'),
-        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
-      },
-      recoveredAlerts: {},
+      newAlerts: new Map(),
+      activeAlerts,
+      recoveredAlerts: new Map(),
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
@@ -55,17 +55,19 @@ describe('logAlerts', () => {
   });
 
   test('should debug log recovered alerts if they exist', () => {
+    const activeAlerts = new Map();
+    activeAlerts.set('1', new Alert<{}, {}, DefaultActionGroupId>('1'));
+    activeAlerts.set('2', new Alert<{}, {}, DefaultActionGroupId>('2'));
+
+    const recoveredAlerts = new Map();
+    recoveredAlerts.set('8', new Alert<{}, {}, DefaultActionGroupId>('8'));
+
     logAlerts({
       logger,
       alertingEventLogger,
-      newAlerts: {},
-      activeAlerts: {
-        '1': new Alert<{}, {}, DefaultActionGroupId>('1'),
-        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
-      },
-      recoveredAlerts: {
-        '8': new Alert<{}, {}, DefaultActionGroupId>('8'),
-      },
+      newAlerts: new Map(),
+      activeAlerts,
+      recoveredAlerts,
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
@@ -84,19 +86,17 @@ describe('logAlerts', () => {
   });
 
   test('should correctly debug log recovered alerts if canSetRecoveryContext is true', () => {
-    const recoveredAlert1 = new Alert<{ value: string }, {}, DefaultActionGroupId>('8');
-    const recoveredAlert2 = new Alert<{ value: string }, {}, DefaultActionGroupId>('9');
-    const recoveredAlerts = {
-      '8': recoveredAlert1,
-      '9': recoveredAlert2,
-    };
+    const recoveredAlerts = new Map();
+    const recoveredAlert8 = new Alert<{}, {}, DefaultActionGroupId>('8');
+    recoveredAlert8.setContext({ value: 'hey' });
+    recoveredAlerts.set('8', recoveredAlert8);
+    recoveredAlerts.set('9', new Alert<{}, {}, DefaultActionGroupId>('9'));
 
-    recoveredAlerts['8'].setContext({ value: 'hey' });
     logAlerts({
       logger,
       alertingEventLogger,
-      newAlerts: {},
-      activeAlerts: {},
+      newAlerts: new Map(),
+      activeAlerts: new Map(),
       recoveredAlerts,
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
@@ -119,9 +119,9 @@ describe('logAlerts', () => {
     logAlerts({
       logger,
       alertingEventLogger,
-      newAlerts: {},
-      activeAlerts: {},
-      recoveredAlerts: {},
+      newAlerts: new Map(),
+      activeAlerts: new Map(),
+      recoveredAlerts: new Map(),
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: true,
@@ -134,23 +134,42 @@ describe('logAlerts', () => {
   test('should correctly set values in ruleRunMetricsStore and call alertingEventLogger.logAlert if shouldPersistAlerts is true', () => {
     jest.clearAllMocks();
 
+    const newAlerts = new Map();
+    newAlerts.set('4', new Alert<{}, {}, DefaultActionGroupId>('4'));
+    const activeAlerts = new Map();
+    activeAlerts.set(
+      '1',
+      new Alert<{}, {}, DefaultActionGroupId>('1', { meta: { uuid: 'uuid-1' } })
+    );
+    activeAlerts.set(
+      '2',
+      new Alert<{}, {}, DefaultActionGroupId>('2', { meta: { uuid: 'uuid-2' } })
+    );
+    activeAlerts.set('4', new Alert<{}, {}, DefaultActionGroupId>('4'));
+    const recoveredAlerts = new Map();
+    recoveredAlerts.set(
+      '7',
+      new Alert<{}, {}, DefaultActionGroupId>('7', { meta: { uuid: 'uuid-7' } })
+    );
+    recoveredAlerts.set(
+      '8',
+      new Alert<{}, {}, DefaultActionGroupId>('8', { meta: { uuid: 'uuid-8' } })
+    );
+    recoveredAlerts.set(
+      '9',
+      new Alert<{}, {}, DefaultActionGroupId>('9', { meta: { uuid: 'uuid-9' } })
+    );
+    recoveredAlerts.set(
+      '10',
+      new Alert<{}, {}, DefaultActionGroupId>('10', { meta: { uuid: 'uuid-10' } })
+    );
+
     logAlerts({
       logger,
       alertingEventLogger,
-      newAlerts: {
-        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
-      },
-      activeAlerts: {
-        '1': new Alert<{}, {}, DefaultActionGroupId>('1', { meta: { uuid: 'uuid-1' } }),
-        '2': new Alert<{}, {}, DefaultActionGroupId>('2', { meta: { uuid: 'uuid-2' } }),
-        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
-      },
-      recoveredAlerts: {
-        '7': new Alert<{}, {}, DefaultActionGroupId>('7', { meta: { uuid: 'uuid-7' } }),
-        '8': new Alert<{}, {}, DefaultActionGroupId>('8', { meta: { uuid: 'uuid-8' } }),
-        '9': new Alert<{}, {}, DefaultActionGroupId>('9', { meta: { uuid: 'uuid-9' } }),
-        '10': new Alert<{}, {}, DefaultActionGroupId>('10', { meta: { uuid: 'uuid-10' } }),
-      },
+      newAlerts,
+      activeAlerts,
+      recoveredAlerts,
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
@@ -236,23 +255,26 @@ describe('logAlerts', () => {
   });
 
   test('should not call alertingEventLogger.logAlert or update ruleRunMetricsStore if shouldPersistAlerts is false', () => {
+    const newAlerts = new Map();
+    newAlerts.set('4', new Alert<{}, {}, DefaultActionGroupId>('4'));
+
+    const activeAlerts = new Map();
+    activeAlerts.set('1', new Alert<{}, {}, DefaultActionGroupId>('1'));
+    activeAlerts.set('2', new Alert<{}, {}, DefaultActionGroupId>('2'));
+    activeAlerts.set('4', new Alert<{}, {}, DefaultActionGroupId>('4'));
+
+    const recoveredAlerts = new Map();
+    recoveredAlerts.set('7', new Alert<{}, {}, DefaultActionGroupId>('7'));
+    recoveredAlerts.set('8', new Alert<{}, {}, DefaultActionGroupId>('8'));
+    recoveredAlerts.set('9', new Alert<{}, {}, DefaultActionGroupId>('9'));
+    recoveredAlerts.set('10', new Alert<{}, {}, DefaultActionGroupId>('10'));
+
     logAlerts({
       logger,
       alertingEventLogger,
-      newAlerts: {
-        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
-      },
-      activeAlerts: {
-        '1': new Alert<{}, {}, DefaultActionGroupId>('1'),
-        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
-        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
-      },
-      recoveredAlerts: {
-        '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
-        '8': new Alert<{}, {}, DefaultActionGroupId>('8'),
-        '9': new Alert<{}, {}, DefaultActionGroupId>('9'),
-        '10': new Alert<{}, {}, DefaultActionGroupId>('10'),
-      },
+      newAlerts,
+      activeAlerts,
+      recoveredAlerts,
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
@@ -267,23 +289,32 @@ describe('logAlerts', () => {
   });
 
   test('should correctly set flapping values', () => {
+    const newAlerts = new Map();
+    newAlerts.set('4', new Alert<{}, {}, DefaultActionGroupId>('4'));
+
+    const activeAlerts = new Map();
+    activeAlerts.set(
+      '1',
+      new Alert<{}, {}, DefaultActionGroupId>('1', { meta: { flapping: true } })
+    );
+    activeAlerts.set('2', new Alert<{}, {}, DefaultActionGroupId>('2'));
+    activeAlerts.set('4', new Alert<{}, {}, DefaultActionGroupId>('4'));
+
+    const recoveredAlerts = new Map();
+    recoveredAlerts.set('7', new Alert<{}, {}, DefaultActionGroupId>('7'));
+    recoveredAlerts.set(
+      '8',
+      new Alert<{}, {}, DefaultActionGroupId>('8', { meta: { flapping: true } })
+    );
+    recoveredAlerts.set('9', new Alert<{}, {}, DefaultActionGroupId>('9'));
+    recoveredAlerts.set('10', new Alert<{}, {}, DefaultActionGroupId>('10'));
+
     logAlerts({
       logger,
       alertingEventLogger,
-      newAlerts: {
-        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
-      },
-      activeAlerts: {
-        '1': new Alert<{}, {}, DefaultActionGroupId>('1', { meta: { flapping: true } }),
-        '2': new Alert<{}, {}, DefaultActionGroupId>('2'),
-        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
-      },
-      recoveredAlerts: {
-        '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
-        '8': new Alert<{}, {}, DefaultActionGroupId>('8', { meta: { flapping: true } }),
-        '9': new Alert<{}, {}, DefaultActionGroupId>('9'),
-        '10': new Alert<{}, {}, DefaultActionGroupId>('10'),
-      },
+      newAlerts,
+      activeAlerts,
+      recoveredAlerts,
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
@@ -365,25 +396,34 @@ describe('logAlerts', () => {
   });
 
   test('should correctly set maintenance window in ruleRunMetricsStore and call alertingEventLogger.logAlert', () => {
+    const newAlerts = new Map();
+    newAlerts.set('4', new Alert<{}, {}, DefaultActionGroupId>('4'));
+
+    const activeAlerts = new Map();
+    activeAlerts.set(
+      '1',
+      new Alert<{}, {}, DefaultActionGroupId>('1', {
+        meta: { maintenanceWindowIds: ['window-id-1'] },
+      })
+    );
+    activeAlerts.set('4', new Alert<{}, {}, DefaultActionGroupId>('4'));
+
+    const recoveredAlerts = new Map();
+    recoveredAlerts.set('7', new Alert<{}, {}, DefaultActionGroupId>('7'));
+    recoveredAlerts.set(
+      '8',
+      new Alert<{}, {}, DefaultActionGroupId>('8', {
+        meta: { maintenanceWindowIds: ['window-id-8'] },
+      })
+    );
+
     jest.clearAllMocks();
     logAlerts({
       logger,
       alertingEventLogger,
-      newAlerts: {
-        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
-      },
-      activeAlerts: {
-        '1': new Alert<{}, {}, DefaultActionGroupId>('1', {
-          meta: { maintenanceWindowIds: ['window-id-1'] },
-        }),
-        '4': new Alert<{}, {}, DefaultActionGroupId>('4'),
-      },
-      recoveredAlerts: {
-        '7': new Alert<{}, {}, DefaultActionGroupId>('7'),
-        '8': new Alert<{}, {}, DefaultActionGroupId>('8', {
-          meta: { maintenanceWindowIds: ['window-id-8'] },
-        }),
-      },
+      newAlerts,
+      activeAlerts,
+      recoveredAlerts,
       ruleLogPrefix: `test-rule-type-id:123: 'test rule'`,
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
