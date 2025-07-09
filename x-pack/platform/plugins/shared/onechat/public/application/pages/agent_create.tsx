@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { OnechatAgents } from '../components/agents/list/agents';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
+import { CreateAgent } from '../components/agents/edit/create_agent';
 
-export const OnechatAgentsPage = () => {
+export const OnechatAgentsCreate = () => {
   useBreadcrumb([
     {
       text: labels.chat.title,
@@ -21,6 +21,9 @@ export const OnechatAgentsPage = () => {
       text: labels.agents.title,
       path: appPaths.agents.list,
     },
+    {
+      text: labels.agents.newAgent,
+    },
   ]);
-  return <OnechatAgents />;
+  return <CreateAgent />;
 };
