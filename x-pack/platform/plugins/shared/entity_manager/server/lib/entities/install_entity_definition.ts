@@ -12,7 +12,7 @@ import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
 import { generateLatestIndexTemplateId } from './helpers/generate_component_id';
 import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
-import { createAndInstallTransforms } from './create_and_install_transform';
+import { createAndInstallTransforms, createAndInstallBackfillTransforms } from './create_and_install_transform';
 import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteIngestPipelines } from './delete_ingest_pipeline';
@@ -65,8 +65,7 @@ export async function installEntityDefinition({
   } catch (e) {
     logger.error(`Failed to install entity definition [${definition.id}]: ${e}`);
 
-    await stopTransforms(esClient, definition, logger);
-    await deleteTransforms(esClient, definition, logger);
+    await stopAndDeleteTransforms(esClient, definition, logger);
 
     await deleteIngestPipelines(esClient, definition, logger);
 
@@ -164,10 +163,11 @@ async function install({
 
   logger.debug(`Installing transforms for definition [${definition.id}]`);
   const transforms = await createAndInstallTransforms(esClient, definition, logger);
+  const backfillTransforms = await createAndInstallBackfillTransforms(esClient, definition, logger);
 
   const updatedProps = await updateEntityDefinition(soClient, definition.id, {
     installStatus: 'installed',
-    installedComponents: [...templates, ...pipelines, ...transforms],
+    installedComponents: [...templates, ...pipelines, ...transforms, ...backfillTransforms],
   });
   return { ...definition, ...updatedProps.attributes };
 }

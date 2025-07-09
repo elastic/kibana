@@ -23,11 +23,6 @@ function generateHistoryId(definition: EntityDefinition) {
   return `${ENTITY_HISTORY_PREFIX_V1}-${definition.id}` as const;
 }
 
-// History Backfill
-export function generateHistoryBackfillTransformId(definition: EntityDefinition) {
-  return `${ENTITY_HISTORY_PREFIX_V1}-backfill-${definition.id}` as const;
-}
-
 export const generateHistoryTransformId = generateHistoryId;
 export const generateHistoryIngestPipelineId = generateHistoryId;
 
@@ -64,12 +59,12 @@ export const generateLatestIndexTemplateId = (definition: EntityDefinition) =>
 
 // Latest Backfill
 function generateLatestBackfillId(definition: EntityDefinition) {
-  return `${ENTITY_LATEST_PREFIX_V1}-backfill-${definition.id}` as const;
+  return `${ENTITY_LATEST_PREFIX_V1}-${definition.id}-backfill` as const;
 }
 
 export function generateLatestBackfillTransformId(definition: EntityDefinition, unique?: string) {
   const suffix = unique ? `-${unique}` : '';
-  return `${ENTITY_LATEST_PREFIX_V1}-backfill-${definition.id}${suffix}` as const;
+  return `${ENTITY_LATEST_PREFIX_V1}${definition.id}-backfill${suffix}` as const;
 }
 
 export function generateLatestBackfillIndexName(definition: EntityDefinition, unique?: string) {
@@ -79,7 +74,7 @@ export function generateLatestBackfillIndexName(definition: EntityDefinition, un
     dataset: ENTITY_LATEST,
     definitionId: definition.id,
   });
-  return `${pattern}${suffix}` as const;
+  return `${pattern}.backfill${suffix}` as const;
 }
 
 export const generateLatestBackfillIngestPipelineId = generateLatestBackfillId;
