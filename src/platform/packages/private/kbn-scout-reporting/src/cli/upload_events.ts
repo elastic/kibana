@@ -36,60 +36,53 @@ const readFilesRecursively = (directory: string, callback: Function) => {
   });
 };
 
-export const runUploadEvents = async (flagsReader: FlagsReader, log: ToolingLog) => {
-  try {
-    let eventLogPath = flagsReader.string('eventLogPath');
+export const uploadAllEventsFromPath = async (
+  esURL: string,
+  esAPIKey: string,
+  verifyTLSCerts: boolean,
+  log: ToolingLog,
+  eventLogPath?: string
+) => {
+  // Validate CLI options
+  if (eventLogPath && !fs.existsSync(eventLogPath)) {
+    throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
+  }
 
-    // Validate CLI options
-    if (eventLogPath && !fs.existsSync(eventLogPath)) {
-      throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
+  if (!eventLogPath) {
+    // Default to the SCOUT_REPORT_OUTPUT_ROOT directory if no path is provided
+    eventLogPath = SCOUT_REPORT_OUTPUT_ROOT;
+
+    if (!fs.existsSync(eventLogPath)) {
+      log.info(`No Scout report output directory found at ${eventLogPath}. No events to upload.`);
+      return;
     }
+  }
 
-    if (!eventLogPath) {
-      // Default to the SCOUT_REPORT_OUTPUT_ROOT directory if no path is provided
-      eventLogPath = SCOUT_REPORT_OUTPUT_ROOT;
+  // ES connection
 
-      if (!fs.existsSync(eventLogPath)) {
-        log.info(`No Scout report output directory found at ${eventLogPath}. No events to upload.`);
-        return;
-      }
-    }
-
-    // ES connection
-    const esURL = flagsReader.requiredString('esURL');
-    const esAPIKey = flagsReader.requiredString('esAPIKey');
-    const verifyTLSCerts = flagsReader.boolean('verifyTLSCerts');
-
-    log.info(`Connecting to Elasticsearch at ${esURL}`);
-    const es = await getValidatedESClient(
-      {
-        node: esURL,
-        auth: { apiKey: esAPIKey },
-        tls: {
-          rejectUnauthorized: verifyTLSCerts,
-        },
+  log.info(`Connecting to Elasticsearch at ${esURL}`);
+  const es = await getValidatedESClient(
+    {
+      node: esURL,
+      auth: { apiKey: esAPIKey },
+      tls: {
+        rejectUnauthorized: verifyTLSCerts,
       },
-      { log, cli: true }
-    );
+    },
+    { log, cli: true }
+  );
 
-    // Event log upload
-    const reportDataStream = new ScoutReportDataStream(es, log);
+  // Event log upload
+  const reportDataStream = new ScoutReportDataStream(es, log);
 
-    if (fs.statSync(eventLogPath).isDirectory()) {
-      readFilesRecursively(eventLogPath, (filePath: string) => {
-        if (filePath.endsWith('.ndjson')) {
-          reportDataStream.addEventsFromFile(filePath);
-        }
-      });
-    } else if (eventLogPath.endsWith('.ndjson')) {
-      reportDataStream.addEventsFromFile(eventLogPath);
-    }
-  } catch (error) {
-    log.error(error);
-
-    if (!flagsReader.boolean('dontFailOnError')) {
-      throw error;
-    }
+  if (fs.statSync(eventLogPath).isDirectory()) {
+    readFilesRecursively(eventLogPath, (filePath: string) => {
+      if (filePath.endsWith('.ndjson')) {
+        reportDataStream.addEventsFromFile(filePath);
+      }
+    });
+  } else if (eventLogPath.endsWith('.ndjson')) {
+    reportDataStream.addEventsFromFile(eventLogPath);
   }
 };
 
@@ -114,6 +107,20 @@ export const uploadEvents: Command<void> = {
     `,
   },
   run: async ({ flagsReader, log }) => {
-    await runUploadEvents(flagsReader, log);
+    const esURL = flagsReader.requiredString('esURL');
+    const esAPIKey = flagsReader.requiredString('esAPIKey');
+    const verifyTLSCerts = flagsReader.boolean('verifyTLSCerts');
+    const eventLogPath = flagsReader.string('eventLogPath');
+    const dontFailOnError = flagsReader.boolean('dontFailOnError');
+
+    try {
+      await uploadAllEventsFromPath(esURL, esAPIKey, verifyTLSCerts, log, eventLogPath);
+    } catch (error) {
+      log.error(error);
+
+      if (!dontFailOnError) {
+        throw error;
+      }
+    }
   },
 };
