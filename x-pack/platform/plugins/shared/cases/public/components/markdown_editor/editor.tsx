@@ -22,7 +22,7 @@ interface MarkdownEditorProps {
   onChange: (content: string) => void;
   disabledUiPlugins?: string[] | undefined;
   value: string;
-  errors: Array<string | Error>;
+  errors?: Array<string | Error>;
 }
 
 export type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
@@ -90,7 +90,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         parsingPluginList={parsingPlugins}
         processingPluginList={processingPlugins}
         onParse={onParse}
-        errors={[...markdownErrorMessages, ...errors]}
+        errors={[...markdownErrorMessages, ...(errors ?? [])]}
         data-test-subj={dataTestSubj}
         height={height}
       />
