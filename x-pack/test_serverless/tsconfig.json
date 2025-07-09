@@ -91,5 +91,6 @@
     "@kbn/streams-schema",
     "@kbn/test-suites-xpack-platform",
     "@kbn/test-suites-xpack-security",
+    "@kbn/test-suites-xpack-observability",
   ]
 }
