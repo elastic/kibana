@@ -9,7 +9,6 @@
   },
   "kbn_references": [
     "@kbn/test",
-    "@kbn/data-forge",
     "@kbn/observability-synthetics-test-data",
     "@kbn/scout-oblt",
   ]
