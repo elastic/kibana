@@ -8,7 +8,6 @@ import {
   MachineImplementationsFrom,
   assign,
   forwardTo,
-  not,
   setup,
   sendTo,
   stopChild,
@@ -414,7 +413,10 @@ export const streamEnrichmentMachine = setup({
                     'processors.add': {
                       guard: 'hasSimulatePrivileges',
                       target: 'creating',
-                      actions: [{ type: 'addProcessor', params: ({ event }) => event }],
+                      actions: [
+                        { type: 'addProcessor', params: ({ event }) => event },
+                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                      ],
                     },
                     'processor.edit': {
                       guard: 'hasSimulatePrivileges',
@@ -431,7 +433,6 @@ export const streamEnrichmentMachine = setup({
                 },
                 creating: {
                   id: 'creatingProcessor',
-                  entry: [{ type: 'sendProcessorsEventToSimulator', params: ({ event }) => event }],
                   on: {
                     'processor.change': {
                       actions: [

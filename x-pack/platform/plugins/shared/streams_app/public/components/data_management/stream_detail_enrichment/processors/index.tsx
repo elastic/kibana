@@ -352,7 +352,13 @@ const ActiveSimulationStatus = ({ children }: PropsWithChildren<{}>) => {
   );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      css={css`
+        flex-grow: 0;
+      `}
+    >
       <EuiBeacon
         color="success"
         aria-label={tooltipContent}

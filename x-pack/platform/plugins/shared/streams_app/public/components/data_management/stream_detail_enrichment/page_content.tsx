@@ -18,7 +18,6 @@ import {
   EuiSplitPanel,
   EuiText,
   EuiTitle,
-  euiDragDropReorder,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
