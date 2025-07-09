@@ -322,7 +322,8 @@ export class AIAssistantService {
       this.options.logger.debug(`Initializing resources for AIAssistantService`);
       const esClient = await this.options.elasticsearchClientPromise;
       const productDocManager = await this.options.productDocManager;
-      if (productDocManager) {
+      // do not install in CI, leads to flaky tests
+      if (productDocManager && !process.env.CI) {
         // install product documentation without blocking other resources
         void ensureProductDocumentationInstalled({
           productDocManager,
