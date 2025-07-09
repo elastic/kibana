@@ -12,7 +12,6 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
-import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { hostsTitle } from '../../../translations';
@@ -22,7 +21,6 @@ import { HostContainer } from './components/hosts_container';
 const HOSTS_FEEDBACK_LINK =
   'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
 
-const DATA_AVAILABILITY_MODULES = [SYSTEM_INTEGRATION];
 
 export const HostsPage = () => {
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
@@ -40,7 +38,7 @@ export const HostsPage = () => {
     <EuiErrorBoundary>
       <div className={APP_WRAPPER_CLASS}>
         <InfraPageTemplate
-          dataAvailabilityModules={DATA_AVAILABILITY_MODULES}
+          dataSourceAvailability='host'
           onboardingFlow={OnboardingFlow.Hosts}
           pageHeader={{
             alignItems: 'center',
