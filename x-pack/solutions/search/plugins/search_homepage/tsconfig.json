@@ -30,6 +30,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/core-http-server",
     "@kbn/search-navigation",
+    "@kbn/search-api-keys-components",
     "@kbn/logging",
     "@kbn/core-elasticsearch-server",
     "@kbn/search-shared-ui"

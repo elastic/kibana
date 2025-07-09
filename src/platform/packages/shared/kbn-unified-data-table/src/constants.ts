@@ -25,6 +25,7 @@ export const DEFAULT_PAGINATION_MODE = 'multiPage';
  */
 export const ROWS_HEIGHT_OPTIONS = {
   auto: -1,
+  single: 1,
   default: 3,
 } as const;
 export const defaultRowLineHeight = '1.6em';
