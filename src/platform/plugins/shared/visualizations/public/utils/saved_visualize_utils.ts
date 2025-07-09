@@ -183,6 +183,9 @@ export async function findListItems(
 
       if (config) {
         return {
+          // TODO: understand why this SO can take any shape based on type?
+          // This conflicts with the type of `savedObject` value as `VisualizationSavedObject`.
+          // See test case titled 'uses type-specific toListItem function, if available'
           ...config.toListItem(savedObject),
           references: savedObject.references,
         };

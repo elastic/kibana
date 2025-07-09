@@ -462,7 +462,7 @@ describe('saved_visualize_utils', () => {
               toListItem(savedObject) {
                 return {
                   id: savedObject.id,
-                  title: `${(savedObject.attributes as { label: string }).label} THE GRAY`,
+                  title: `${(savedObject.attributes as any).label} THE GRAY`,
                 };
               },
             },

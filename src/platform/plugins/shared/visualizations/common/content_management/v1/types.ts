@@ -34,7 +34,7 @@ export type VisualizationSavedObjectAttributes = {
   visState?: string;
   uiStateJSON?: string;
   savedSearchRefName?: string;
-  typeName?: unknown;
+  typeName?: string;
 };
 
 export interface VisualizationSavedObject {
