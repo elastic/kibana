@@ -7,7 +7,6 @@
 
 import { ServerSentEventError } from '@kbn/sse-utils';
 import type { SerializedToolIdentifier } from '../tools';
-import type { SerializedAgentIdentifier, PlainIdAgentIdentifier } from '../agents';
 
 /**
  * Code to identify onechat errors
@@ -125,7 +124,7 @@ export const createAgentNotFoundError = ({
   customMessage,
   meta = {},
 }: {
-  agentId: SerializedAgentIdentifier | PlainIdAgentIdentifier;
+  agentId: string;
   customMessage?: string;
   meta?: Record<string, any>;
 }): OnechatAgentNotFoundError => {

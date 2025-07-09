@@ -11,14 +11,12 @@ import {
   type ESQLAstCommand,
   type ESQLAstItem,
   type ESQLColumn,
-  type ESQLCommandOption,
   type ESQLFunction,
   type ESQLLiteral,
   type ESQLSingleAstItem,
-  type ESQLSource,
-  type ESQLTimeInterval,
   esqlCommandRegistry,
   timeUnits,
+  isColumn,
   type FieldType,
   type FunctionParameterType,
   type ArrayType,
@@ -26,12 +24,17 @@ import {
   FunctionDefinitionTypes,
   type FunctionParameter,
   type FunctionReturnType,
+  isTimeInterval,
 } from '@kbn/esql-ast';
 import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { getColumnForASTNode, getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
+import {
+  getColumnForASTNode,
+  getFunctionSignatures,
+  getFunctionDefinition,
+} from '@kbn/esql-ast/src/definitions/utils';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
@@ -41,7 +44,6 @@ import { getExpressionType } from '@kbn/esql-ast/src/definitions/utils';
 import { getTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import {
   ESQLIdentifier,
-  ESQLInlineCast,
   ESQLLocation,
   ESQLParamLiteral,
   ESQLProperNode,
@@ -56,42 +58,6 @@ import { collectUserDefinedColumns } from './user_defined_columns';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
-}
-
-export function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
-  return arg && !Array.isArray(arg);
-}
-
-export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
-  return isSingleItem(arg) && arg.type === 'function';
-}
-
-export function isOptionItem(arg: ESQLAstItem): arg is ESQLCommandOption {
-  return isSingleItem(arg) && arg.type === 'option';
-}
-
-export function isSourceItem(arg: ESQLAstItem): arg is ESQLSource {
-  return isSingleItem(arg) && arg.type === 'source';
-}
-
-export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
-  return isSingleItem(arg) && arg.type === 'column';
-}
-
-export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
-  return isSingleItem(arg) && arg.type === 'literal';
-}
-
-export function isInlineCastItem(arg: ESQLAstItem): arg is ESQLInlineCast {
-  return isSingleItem(arg) && arg.type === 'inlineCast';
-}
-
-export function isTimeIntervalItem(arg: ESQLAstItem): arg is ESQLTimeInterval {
-  return isSingleItem(arg) && arg.type === 'timeInterval';
-}
-
-export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
-  return isFunctionItem(arg) && arg.name === '=';
 }
 
 export const within = (position: number, location: ESQLLocation | undefined) =>
@@ -157,10 +123,6 @@ export function getAllFunctions(options?: {
   }
   const types = new Set(Array.isArray(options.type) ? options.type : [options.type]);
   return Array.from(fns.values()).filter((fn) => types.has(fn.type));
-}
-
-export function getFunctionDefinition(name: string) {
-  return buildFunctionLookup().get(name.toLowerCase());
 }
 
 const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
@@ -264,7 +226,7 @@ export function getAllArrayValues(arg: ESQLAstItem) {
       if (subArg.type === 'literal') {
         values.push(String(subArg.value));
       }
-      if (isColumnItem(subArg) || isTimeIntervalItem(subArg)) {
+      if (isColumn(subArg) || isTimeInterval(subArg)) {
         values.push(subArg.name);
       }
       if (subArg.type === 'function') {
