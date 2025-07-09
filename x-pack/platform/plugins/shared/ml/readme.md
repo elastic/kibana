@@ -141,7 +141,7 @@ With PATH_TO_CONFIG and other options as follows.
 
 1. API integration tests with `Trial` license:
 
-   - PATH_TO_CONFIG: `src/platform/test/api_integration/apis/ml/config.ts`
+   - PATH_TO_CONFIG: `x-pack/platform/test/api_integration/apis/ml/config.ts`
 
 1. Accessibility tests:
 
