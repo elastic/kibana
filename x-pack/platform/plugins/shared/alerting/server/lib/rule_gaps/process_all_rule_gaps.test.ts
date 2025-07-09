@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { findGapsSearchAfter } from './find_gaps';
-import { processAllGapsInTimeRange } from './process_all_gaps_in_time_range';
+import { processAllRuleGaps } from './process_all_rule_gaps';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import type { Gap } from './gap';
 import { gapStatus } from '../../../common/constants';
@@ -59,7 +59,7 @@ const generateTestCaseData = (iterations: number) => {
   };
 };
 
-describe('processAllGapsInTimeRange', () => {
+describe('processAllRuleGaps', () => {
   const ruleId = 'some-rule-id';
   const mockLogger = loggerMock.create();
   const mockEventLogClient = eventLogClientMock.create();
@@ -78,12 +78,12 @@ describe('processAllGapsInTimeRange', () => {
   describe('happy path', () => {
     const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(3);
     const { start, end } = searchRange;
-    let results: Awaited<ReturnType<typeof processAllGapsInTimeRange>>;
+    let results: Awaited<ReturnType<typeof processAllRuleGaps>>;
     beforeEach(async () => {
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
-      results = await processAllGapsInTimeRange({
+      results = await processAllRuleGaps({
         ruleId,
         start,
         end,
@@ -146,14 +146,14 @@ describe('processAllGapsInTimeRange', () => {
   });
 
   describe('when there are no gaps to process', () => {
-    let results: Awaited<ReturnType<typeof processAllGapsInTimeRange>>;
+    let results: Awaited<ReturnType<typeof processAllRuleGaps>>;
     beforeEach(async () => {
       findGapsSearchAfterMock.mockResolvedValue({
         data: [],
         searchAfer: null,
         pitId: null,
       });
-      results = await processAllGapsInTimeRange({
+      results = await processAllRuleGaps({
         ruleId,
         start: new Date().toISOString(),
         end: new Date().toISOString(),
@@ -175,7 +175,7 @@ describe('processAllGapsInTimeRange', () => {
   describe('when the max iterations are reached', () => {
     const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(10001);
     const { start, end } = searchRange;
-    let results: Awaited<ReturnType<typeof processAllGapsInTimeRange>>;
+    let results: Awaited<ReturnType<typeof processAllRuleGaps>>;
     beforeEach(async () => {
       findGapsSearchAfterMock.mockImplementation(() => {
         return {
@@ -187,7 +187,7 @@ describe('processAllGapsInTimeRange', () => {
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
-      results = await processAllGapsInTimeRange({
+      results = await processAllRuleGaps({
         ruleId,
         start,
         end,
@@ -222,7 +222,7 @@ describe('processAllGapsInTimeRange', () => {
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
-      await processAllGapsInTimeRange({
+      await processAllRuleGaps({
         ruleId,
         start,
         end,
@@ -272,7 +272,7 @@ describe('processAllGapsInTimeRange', () => {
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
-      await processAllGapsInTimeRange({
+      await processAllRuleGaps({
         ruleId,
         start,
         end,
@@ -300,7 +300,7 @@ describe('processAllGapsInTimeRange', () => {
       findGapsSearchAfterMock.mockResolvedValueOnce(findGapsSearchReturnValues[0]);
       findGapsSearchAfterMock.mockRejectedValue(thrownError);
       try {
-        await processAllGapsInTimeRange({
+        await processAllRuleGaps({
           ruleId,
           start,
           end,

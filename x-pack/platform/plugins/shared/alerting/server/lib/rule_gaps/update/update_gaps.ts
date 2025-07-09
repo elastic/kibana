@@ -15,8 +15,8 @@ import type { Gap } from '../gap';
 import type { BackfillSchedule } from '../../../application/backfill/result/types';
 import {
   PROCESS_GAPS_DEFAULT_PAGE_SIZE,
-  processAllGapsInTimeRange,
-} from '../process_all_gaps_in_time_range';
+  processAllRuleGaps,
+} from '../process_all_rule_gaps';
 import { updateGapsBatch } from './update_gaps_batch';
 
 interface UpdateGapsParams {
@@ -93,7 +93,7 @@ export const updateGaps = async (params: UpdateGapsParams) => {
       }
     } else {
       // Otherwise fetch and update them
-      await processAllGapsInTimeRange({
+      await processAllRuleGaps({
         ruleId,
         start: start.toISOString(),
         end: end.toISOString(),

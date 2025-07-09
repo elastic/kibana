@@ -15,11 +15,11 @@ import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { Gap } from '../gap';
 import { adHocRunStatus } from '../../../../common/constants';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { processAllGapsInTimeRange } from '../process_all_gaps_in_time_range';
+import { processAllRuleGaps } from '../process_all_rule_gaps';
 import { updateGapsBatch } from './update_gaps_batch';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 
-jest.mock('../process_all_gaps_in_time_range');
+jest.mock('../process_all_rule_gaps');
 jest.mock('./update_gaps_batch');
 
 describe('updateGaps', () => {
@@ -30,7 +30,7 @@ describe('updateGaps', () => {
   const mockBackfillClient = backfillClientMock.create();
   const mockActionsClient = actionsClientMock.create();
 
-  const processAllGapsInTimeRangeMock = processAllGapsInTimeRange as jest.Mock;
+  const processAllRuleGapsMock = processAllRuleGaps as jest.Mock;
   const updateGapsBatchMock = updateGapsBatch as jest.Mock;
 
   const gaps = [
@@ -51,7 +51,7 @@ describe('updateGaps', () => {
   const ruleId = 'test-rule-id';
   beforeEach(() => {
     jest.resetAllMocks();
-    processAllGapsInTimeRangeMock.mockImplementation(({ processGapsBatch }) =>
+    processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) =>
       processGapsBatch(gaps)
     );
   });
@@ -72,7 +72,7 @@ describe('updateGaps', () => {
         shouldRefetchAllBackfills: true,
       });
 
-      expect(processAllGapsInTimeRangeMock).toHaveBeenCalledWith({
+      expect(processAllRuleGapsMock).toHaveBeenCalledWith({
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
         ruleId: 'test-rule-id',
@@ -110,7 +110,7 @@ describe('updateGaps', () => {
         backfillSchedule,
         shouldRefetchAllBackfills: true,
       });
-      expect(processAllGapsInTimeRangeMock).not.toHaveBeenCalled();
+      expect(processAllRuleGapsMock).not.toHaveBeenCalled();
       expect(updateGapsBatchMock).toHaveBeenCalledWith({
         gaps,
         backfillSchedule,
