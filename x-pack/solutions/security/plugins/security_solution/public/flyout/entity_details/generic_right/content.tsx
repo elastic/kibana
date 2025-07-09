@@ -81,6 +81,13 @@ export const GenericEntityFlyoutContent = ({
 
   return (
     <FlyoutBody>
+      <EntityInsight
+        field={insightsField}
+        value={insightsValue}
+        isPreviewMode={false}
+        isLinkEnabled={true}
+        openDetailsPanel={openGenericEntityDetailsPanelByPath}
+      />
       <ExpandableSection
         title={
           <FormattedMessage
@@ -128,14 +135,6 @@ export const GenericEntityFlyoutContent = ({
           />
         </ExpandablePanel>
       </ExpandableSection>
-
-      <EntityInsight
-        field={insightsField}
-        value={insightsValue}
-        isPreviewMode={false}
-        isLinkEnabled={true}
-        openDetailsPanel={openGenericEntityDetailsPanelByPath}
-      />
     </FlyoutBody>
   );
 };

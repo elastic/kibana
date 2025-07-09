@@ -109,7 +109,6 @@ export const EntityInsight = <T,>({
     <>
       {insightContent.length > 0 && (
         <>
-          <EuiHorizontalRule />
           <EuiAccordion
             initialIsOpen={true}
             id="entityInsight-accordion"
