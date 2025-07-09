@@ -20,7 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { DarkModeValue as ColorMode } from '@kbn/user-profile-components';
+import type {
+  DarkModeValue as ColorMode,
+  ContrastModeValue as ContrastMode,
+} from '@kbn/user-profile-components';
 import { type Value, ValuesGroup } from './values_group';
 import { useAppearance } from './use_appearance_hook';
 
@@ -74,7 +77,6 @@ interface Props {
 }
 
 const ColorModeGroup: FC<{
-  //
   isServerless: boolean;
   colorMode: ColorMode;
   onChange: ({ colorMode }: { colorMode: ColorMode }, updateUserProfile: boolean) => void;
@@ -132,12 +134,67 @@ const ColorModeGroup: FC<{
   );
 };
 
+const ContrastModeGroup: FC<{
+  contrastMode: ContrastMode;
+  onChange: ({ contrastMode }: { contrastMode: ContrastMode }, updateUserProfile: boolean) => void;
+}> = ({ contrastMode, onChange }) => {
+  return (
+    <ValuesGroup<ContrastMode>
+      title={i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalContrastModeTitle', {
+        defaultMessage: 'Interface contrast',
+      })}
+      values={[
+        {
+          id: 'system',
+          label: systemLabel,
+          icon: 'desktop',
+        },
+        {
+          id: 'standard',
+          label: i18n.translate(
+            'xpack.cloudLinks.userMenuLinks.appearanceModalContrastModeStandard',
+            {
+              defaultMessage: 'Normal',
+            }
+          ),
+          icon: 'contrast',
+        },
+        {
+          id: 'high',
+          label: i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalContrastModeHigh', {
+            defaultMessage: 'High',
+          }),
+          icon: 'contrastHigh',
+        },
+      ]}
+      selectedValue={contrastMode}
+      onChange={(id) => {
+        onChange({ contrastMode: id }, false);
+      }}
+      ariaLabel={i18n.translate(
+        'xpack.cloudLinks.userMenuLinks.appearanceModalContrastModeAriaLabel',
+        {
+          defaultMessage: 'Appearance contrast mode',
+        }
+      )}
+    />
+  );
+};
+
 export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isServerless }) => {
   const modalTitleId = useGeneratedHtmlId();
 
-  const { onChange, colorMode, isLoading, initialColorModeValue } = useAppearance({
+  const {
+    colorMode,
+    initialColorModeValue,
+    contrastMode,
+    initialContrastModeValue,
+    isLoading,
+    onChange,
+  } = useAppearance({
     uiSettingsClient,
     defaultColorMode: isServerless ? 'system' : 'space_default',
+    defaultContrastMode: 'standard',
   });
 
   return (
@@ -163,6 +220,10 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isSer
 
       <EuiModalBody>
         <ColorModeGroup isServerless={isServerless} colorMode={colorMode} onChange={onChange} />
+
+        <EuiSpacer />
+
+        <ContrastModeGroup contrastMode={contrastMode} onChange={onChange} />
       </EuiModalBody>
 
       <EuiModalFooter>
@@ -175,8 +236,8 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isSer
         <EuiButton
           data-test-subj="appearanceModalSaveButton"
           onClick={async () => {
-            if (colorMode !== initialColorModeValue) {
-              await onChange({ colorMode }, true);
+            if (colorMode !== initialColorModeValue || contrastMode !== initialContrastModeValue) {
+              onChange({ colorMode, contrastMode }, true);
             }
             closeModal();
           }}
