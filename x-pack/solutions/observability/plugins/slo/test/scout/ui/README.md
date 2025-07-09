@@ -16,10 +16,10 @@ Some tests are designed to run sequentially:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/observability/plugins/slo/ui_tests/playwright.config.ts --project=local --grep @ess
+npx playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --project=local --grep @ess
 
 // Serverless
-npx playwright test --config x-pack/solutions/observability/plugins/slo/ui_tests/playwright.config.ts --project=local --grep @svlOblt
+npx playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --project=local --grep @svlOblt
 ```
 
-Test results are available in `x-pack/solutions/observability/plugins/slo/ui_tests/output`
+Test results are available in `x-pack/solutions/observability/plugins/slo/test/scout/ui/output`
