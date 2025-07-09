@@ -4,10 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-const path = require('path');
-const { REPO_ROOT } = require('@kbn/repo-info');
-// eslint-disable-next-line import/no-dynamic-require
-require(path.resolve(REPO_ROOT, 'src/setup_node_env'));
 const { workerData } = require('worker_threads');
+
+// When we run from source the worker file is still .ts → transpile on-the-fly
+if (workerData.fullpath.endsWith('.ts')) {
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  require('ts-node').register({ transpileOnly: true });
+}
+
+// Now load the real worker implementation
 // eslint-disable-next-line import/no-dynamic-require
 module.exports = require(workerData.fullpath);
