@@ -256,16 +256,44 @@ export function SecondaryMetric({
   const value = metricColumn ? row[metricColumn.id] : undefined;
 
   return (
-    <span data-test-subj="metric-secondary-element">
-      {prefix}
-      {prefix ? ' ' : ''}
-      <SecondaryMetricValue
-        rawValue={value}
-        formattedValue={metricFormatter?.(value)}
-        trendConfig={color ? undefined : trendConfig}
-        color={color}
-        formatter={metricFormatter}
-      />
+    <span css={styles.wrapper} data-test-subj="metric-secondary-element">
+      {prefix && <span css={styles.prefix}>{prefix}</span>}
+      <span css={styles.value}>
+        <SecondaryMetricValue
+          rawValue={value}
+          formattedValue={metricFormatter?.(value)}
+          trendConfig={color ? undefined : trendConfig}
+          color={color}
+          formatter={metricFormatter}
+        />
+      </span>
     </span>
   );
 }
+
+const styles = {
+  wrapper: css({
+    display: 'flex',
+    alignItems: 'center',
+    minWidth: 0,
+    width: '100%',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+  }),
+  prefix: css({
+    flex: '0 1 auto',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  }),
+  value: css({
+    display: 'inline-flex',
+    flex: '1 0 auto',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
+    marginLeft: 4,
+    maxWidth: 'calc(100% - 4px)', // Subtract the marginLeft value
+  }),
+};
