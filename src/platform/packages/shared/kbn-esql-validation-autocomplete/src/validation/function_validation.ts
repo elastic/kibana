@@ -13,28 +13,29 @@ import {
   ESQLFunction,
   ESQLMessage,
   isIdentifier,
+  isAssignment,
   UNSUPPORTED_COMMANDS_BEFORE_MATCH,
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
   isList,
+  isColumn,
+  isLiteral,
+  isInlineCast,
+  isTimeInterval,
+  isFunctionExpression,
 } from '@kbn/esql-ast';
-import { getMessageFromId, errors } from '@kbn/esql-ast/src/definitions/utils';
+import {
+  getMessageFromId,
+  errors,
+  getFunctionDefinition,
+} from '@kbn/esql-ast/src/definitions/utils';
 import { FunctionParameter, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/utils';
-import {
-  isLiteralItem,
-  isTimeIntervalItem,
-  isFunctionItem,
-  isSupportedFunction,
-  getFunctionDefinition,
-  isColumnItem,
-  isAssignment,
-} from '../..';
+import { isSupportedFunction } from '../..';
 import {
   isValidLiteralOption,
   checkFunctionArgMatchesDefinition,
   inKnownTimeInterval,
-  isInlineCastItem,
   getQuotedColumnName,
   getColumnExists,
   isFunctionOperatorParam,
@@ -186,7 +187,7 @@ export function validateFunction({
        */
       const subArg = removeInlineCasts(_subArg);
 
-      if (isFunctionItem(subArg)) {
+      if (isFunctionExpression(subArg)) {
         const messagesFromArg = validateFunction({
           fn: subArg,
           parentCommand,
@@ -256,7 +257,7 @@ export function validateFunction({
           s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
             const arg = enrichedArgs[idx];
 
-            if (isLiteralItem(arg)) {
+            if (isLiteral(arg)) {
               return (
                 dataType === arg.literalType || compareTypesWithLiterals(dataType, arg.literalType)
               );
@@ -351,7 +352,7 @@ function validateFunctionLiteralArg(
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
-  if (isLiteralItem(argument)) {
+  if (isLiteral(argument)) {
     if (
       argument.literalType === 'keyword' &&
       parameter.acceptedValues &&
@@ -385,7 +386,7 @@ function validateFunctionLiteralArg(
       );
     }
   }
-  if (isTimeIntervalItem(argument)) {
+  if (isTimeInterval(argument)) {
     // check first if it's a valid interval string
     if (!inKnownTimeInterval(argument.unit)) {
       messages.push(
@@ -424,7 +425,7 @@ function validateInlineCastArg(
   references: ReferenceMaps,
   parentCommand: string
 ) {
-  if (!isInlineCastItem(arg)) {
+  if (!isInlineCast(arg)) {
     return [];
   }
 
@@ -455,7 +456,7 @@ function validateNestedFunctionArg(
 ) {
   const messages: ESQLMessage[] = [];
   if (
-    isFunctionItem(argument) &&
+    isFunctionExpression(argument) &&
     // no need to check the reason here, it is checked already above
     isSupportedFunction(argument.name, parentCommand).supported
   ) {
@@ -498,7 +499,7 @@ function validateFunctionColumnArg(
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
-  if (!(isColumnItem(actualArg) || isIdentifier(actualArg)) || isParametrized(actualArg)) {
+  if (!(isColumn(actualArg) || isIdentifier(actualArg)) || isParametrized(actualArg)) {
     return messages;
   }
 
@@ -579,7 +580,7 @@ function validateFunctionColumnArg(
 }
 
 function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
-  if (isInlineCastItem(arg)) {
+  if (isInlineCast(arg)) {
     return removeInlineCasts(arg.value);
   }
   return arg;
