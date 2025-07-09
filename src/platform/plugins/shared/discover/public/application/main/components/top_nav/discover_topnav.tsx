@@ -234,7 +234,7 @@ export const DiscoverTopNav = ({
   const setSearchUiState = useCurrentTabAction(internalStateActions.setSearchUiState);
   const onInitialStateChange = useCallback(
     (newSearchUiState: Partial<UnifiedSearchRestorableState>) => {
-      console.log('onInitialStateChange', newSearchUiState);
+      // console.log('onInitialStateChange', newSearchUiState);
       dispatch(
         setSearchUiState({
           searchUiState: newSearchUiState,
@@ -244,7 +244,7 @@ export const DiscoverTopNav = ({
     [dispatch, setSearchUiState]
   );
 
-  console.log('searchUiState', searchUiState);
+  // console.log('searchUiState', searchUiState);
 
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
