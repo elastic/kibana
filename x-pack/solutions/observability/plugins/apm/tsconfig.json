@@ -138,6 +138,8 @@
     "@kbn/apm-sources-access-plugin",
     "@kbn/presentation-containers",
     "@kbn/object-utils",
+    "@kbn/cases-plugin",
+    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": ["target/**/*"]
 }

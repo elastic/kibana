@@ -28,9 +28,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
 
-  describe('Search Homepage', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/225446
+  describe.skip('Search Homepage', function () {
     describe('as admin', function () {
       before(async () => {
+        await es.indices.create({ index: 'test-my-index-001' });
         await pageObjects.svlCommonPage.loginAsAdmin();
       });
 
@@ -45,14 +47,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('goes to the home page if there exists at least one index', async () => {
-        await es.indices.create({ index: 'test-my-index-001' });
         await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
+      });
+
+      describe('Elasticsearch endpoint and API Keys', function () {
+        it('renders Elasticsearch endpoint with copy functionality', async () => {
+          await testSubjects.existOrFail('copyEndpointButton');
+          await testSubjects.existOrFail('endpointValueField');
+        });
+
+        it('renders API keys buttons and active badge correctly', async () => {
+          await testSubjects.existOrFail('createApiKeyButton');
+          await testSubjects.existOrFail('manageApiKeysButton');
+          await testSubjects.existOrFail('activeApiKeysBadge');
+        });
+        it('opens API keys management page on clicking Manage API Keys', async () => {
+          await pageObjects.svlSearchHomePage.clickManageApiKeysLink();
+          await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
+        });
       });
     });
 
     describe('as developer', function () {
       before(async () => {
+        await es.indices.create({ index: 'test-my-index-001' });
         await pageObjects.svlCommonPage.loginAsDeveloper();
       });
 
@@ -67,9 +86,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('goes to the home page if there exists at least one index', async () => {
-        await es.indices.create({ index: 'test-my-index-001' });
         await pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
+      });
+
+      describe('Elasticsearch endpoint and API Keys', function () {
+        it('renders Elasticsearch endpoint with copy functionality', async () => {
+          await testSubjects.existOrFail('copyEndpointButton');
+          await testSubjects.existOrFail('endpointValueField');
+        });
+
+        it('renders API keys buttons and active badge correctly', async () => {
+          await testSubjects.existOrFail('createApiKeyButton');
+          await testSubjects.existOrFail('manageApiKeysButton');
+          await testSubjects.existOrFail('activeApiKeysBadge');
+        });
+        it('opens API keys management page on clicking Manage API Keys', async () => {
+          await pageObjects.svlSearchHomePage.clickManageApiKeysLink();
+          await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
+        });
       });
     });
 
@@ -112,16 +147,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('renders Elasticsearch endpoint with copy functionality', async () => {
           await testSubjects.existOrFail('copyEndpointButton');
           await testSubjects.existOrFail('endpointValueField');
-        });
-
-        it('renders API keys buttons and active badge correctly', async () => {
-          await testSubjects.existOrFail('createApiKeyButton');
-          await testSubjects.existOrFail('manageApiKeysButton');
-          await testSubjects.existOrFail('activeApiKeysBadge');
-        });
-        it('opens API keys management page on clicking Manage API Keys', async () => {
-          await pageObjects.svlSearchHomePage.clickManageApiKeysLink();
-          await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
+          await testSubjects.existOrFail('apiKeyFormNoUserPrivileges');
         });
       });
 

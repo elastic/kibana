@@ -6,9 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { ESQL_NUMBER_TYPES } from '@kbn/esql-ast';
 import { attachTriggerCommand, getFieldNamesByType, setup } from './helpers';
-import { ESQL_NUMBER_TYPES } from '../../shared/esql_types';
 
 describe('autocomplete.suggest', () => {
   describe('CHANGE_POINT', () => {
