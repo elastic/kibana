@@ -268,7 +268,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   narrowDateRange={narrowDateRange}
                   indexPatterns={selectedPatterns}
                   jobNameById={jobNameById}
-                  scopeId={SourcererScopeName.explore}
+                  scopeId={
+                    newDataViewPickerEnabled
+                      ? SourcererScopeName.explore
+                      : SourcererScopeName.default
+                  }
                 />
               )}
             </AnomalyTableProvider>
