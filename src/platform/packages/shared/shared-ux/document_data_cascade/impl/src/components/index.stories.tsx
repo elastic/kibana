@@ -16,8 +16,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiDescriptionList,
   EuiButtonEmpty,
+  EuiBasicTable,
+  HorizontalAlignment,
 } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import { DataCascade } from '.';
@@ -43,14 +44,30 @@ export const CascadeGridImplementation: StoryObj<
       count: number;
     }
 
+    const generateGroupFieldRecord = (
+      nodePath?: string[],
+      nodePathMap?: Record<string, string>
+    ) => {
+      return groupByFields.reduce<Record<string, string>>((acc, field) => {
+        return {
+          ...acc,
+          [field]:
+            nodePathMap && nodePath?.indexOf(field) !== -1
+              ? nodePathMap[field]
+              : /purchase_date/.test(field)
+              ? faker.date.past({ years: 2 }).toLocaleDateString()
+              : /order_value/.test(field)
+              ? faker.commerce.price({ min: 100, max: 10000, symbol: '$' })
+              : faker.person.fullName(),
+        };
+      }, {} as Record<string, string>);
+    };
+
     const initData: MockGroupData[] = new Array(100).fill(null).map(() => {
       return {
         id: faker.string.uuid(),
         count: faker.number.int({ min: 1, max: 100 }),
-        ...groupByFields.reduce(
-          (acc, field) => ({ ...acc, [field]: faker.person.fullName() }),
-          {} as Record<string, string>
-        ),
+        ...generateGroupFieldRecord(),
       };
     });
 
@@ -107,10 +124,29 @@ export const CascadeGridImplementation: StoryObj<
             ]}
             leafContentSlot={({ data }) => {
               return (
-                <EuiDescriptionList
-                  listItems={(data ?? []).map((datum) => ({
-                    title: datum.id,
-                    description: JSON.stringify(datum, null, 2),
+                <EuiBasicTable
+                  columns={[
+                    {
+                      field: 'id',
+                      name: 'ID',
+                    },
+                    ...groupByFields.map((field, index, groupArray) => ({
+                      field,
+                      name: field.replace(/_/g, ' '),
+                      ...(index === groupArray.length - 1
+                        ? { align: 'right' as HorizontalAlignment }
+                        : {}),
+                    })),
+                  ]}
+                  items={(data ?? []).map((datum) => ({
+                    id: datum.id,
+                    ...groupByFields.reduce(
+                      (acc, field) => ({
+                        ...acc,
+                        [field]: datum[field],
+                      }),
+                      {} as Record<string, string>
+                    ),
                   }))}
                 />
               );
@@ -128,13 +164,7 @@ export const CascadeGridImplementation: StoryObj<
                       return {
                         id: faker.string.uuid(),
                         count: faker.number.int({ min: 1, max: row.original.count }),
-                        ...groupByFields.reduce((acc, field) => {
-                          return {
-                            ...acc,
-                            // @ts-expect-error - field is a string
-                            [field]: nodePath[field] ? nodePathMap[field] : faker.person.fullName(),
-                          };
-                        }, {} as Record<string, string>),
+                        ...generateGroupFieldRecord(nodePath, nodePathMap),
                       };
                     })
                   );
@@ -149,13 +179,7 @@ export const CascadeGridImplementation: StoryObj<
                     new Array(row.original.count).fill(null).map(() => {
                       return {
                         id: faker.string.uuid(),
-                        ...groupByFields.reduce((acc, field) => {
-                          return {
-                            ...acc,
-                            // @ts-expect-error - field is a string
-                            [field]: nodePath[field] ? nodePathMap[field] : faker.person.fullName(),
-                          };
-                        }, {} as Record<string, string>),
+                        ...generateGroupFieldRecord(nodePath, nodePathMap),
                       };
                     })
                   );
@@ -182,7 +206,7 @@ export const CascadeGridImplementation: StoryObj<
   },
   args: {
     query:
-      'FROM kibana_sample_data_ecommerce | STATS count = COUNT(*) by customer_full_name, customer_birth_date , customer_first_name ',
+      'FROM kibana_sample_data_ecommerce | STATS count = COUNT(*) by customer_full_name, purchase_date , order_value ',
     size: 'm',
   },
 };
