@@ -12,6 +12,6 @@ if (workerData.fullpath.endsWith('.ts')) {
   require('ts-node').register({ transpileOnly: true });
 }
 
-// Now load the real worker implementation
+// Compiled worker implementation (the .js file in production)
 // eslint-disable-next-line import/no-dynamic-require
 module.exports = require(workerData.fullpath);
