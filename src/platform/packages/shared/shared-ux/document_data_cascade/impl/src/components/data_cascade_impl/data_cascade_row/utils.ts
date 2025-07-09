@@ -21,7 +21,7 @@ export function getCascadeRowNodePath<G extends GroupNode>(
 }
 
 /**
- * @description This function returns a record of the path values for the row node.
+ * @description This function returns a record of the path values for the provided row node.
  */
 export function getCascadeRowNodePathValueRecord<G extends GroupNode>(
   currentGroupByColumns: string[],
@@ -29,12 +29,14 @@ export function getCascadeRowNodePathValueRecord<G extends GroupNode>(
 ) {
   const nodePath = getCascadeRowNodePath(currentGroupByColumns, row);
 
-  return row.getParentRows().reduce((acc, parentRow) => {
-    // TODO: This assumes that the parentRow.original.group is the value you want to use for the path.
-    // provide means to adjust this logic if user's data structure is different.
-    acc[nodePath[parentRow.depth]] = parentRow.original.group;
-    return acc;
-  }, {} as Record<string, string>);
+  if (row.depth === 0) {
+    return { [nodePath[0]]: row.original[nodePath[0]] };
+  } else {
+    return [row, ...row.getParentRows()].reduce((acc, parentRow) => {
+      acc[nodePath[parentRow.depth]] = parentRow.original[nodePath[parentRow.depth]];
+      return acc;
+    }, {} as Record<string, string>);
+  }
 }
 
 /**
