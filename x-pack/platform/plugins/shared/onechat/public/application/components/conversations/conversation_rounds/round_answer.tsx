@@ -49,18 +49,19 @@ export const RoundAnswer: React.FC<RoundAnswerProps> = ({ round }) => {
     <>
       {steps?.map((step) => {
         if (step.type === ConversationRoundStepType.toolCall) {
+          const { result, tool_call_id: callId, tool_id: toolId, params } = step;
           return (
-            <div key={step.tool_call_id}>
+            <div key={callId}>
               <EuiPanel className={toolCallPanelClass} hasShadow={false} hasBorder={true}>
                 <div className={stepHeaderClass}>
                   <EuiIcon type="wrench" color="primary" />
                   <EuiText size="s" color="subdued">
-                    Tool: {step.tool_id}
+                    Tool: {toolId}
                   </EuiText>
                 </div>
                 <EuiSpacer size="xs" />
                 <EuiAccordion
-                  id={`args-${step.tool_call_id}`}
+                  id={`args-${callId}`}
                   buttonContent={
                     <EuiText size="xs" color="subdued">
                       Tool call args
@@ -76,23 +77,32 @@ export const RoundAnswer: React.FC<RoundAnswerProps> = ({ round }) => {
                       isCopyable={false}
                       transparentBackground
                     >
-                      {JSON.stringify(step.params, null, 2)}
+                      {JSON.stringify(params, null, 2)}
                     </EuiCodeBlock>
                   </div>
                 </EuiAccordion>
                 <EuiSpacer size="s" />
-                {step.result ? (
-                  <div className={codeBlockClass}>
-                    <EuiCodeBlock
-                      language="json"
-                      fontSize="s"
-                      paddingSize="s"
-                      isCopyable={false}
-                      transparentBackground
-                    >
-                      {step.result}
-                    </EuiCodeBlock>
-                  </div>
+                {result ? (
+                  <EuiAccordion
+                    id={`result-${callId}`}
+                    buttonContent={
+                      <EuiText size="xs" color="subdued">
+                        Tool call result
+                      </EuiText>
+                    }
+                  >
+                    <div className={codeBlockClass}>
+                      <EuiCodeBlock
+                        language="json"
+                        fontSize="s"
+                        paddingSize="s"
+                        isCopyable={false}
+                        transparentBackground
+                      >
+                        {result}
+                      </EuiCodeBlock>
+                    </div>
+                  </EuiAccordion>
                 ) : (
                   <EuiText size="s" color="subdued">
                     No result available
