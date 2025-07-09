@@ -7,10 +7,6 @@ date: 2025-07-02
 tags: ['kibana', 'contributor', 'dev', 'http', 'api', 'rest', 'design']
 ---
 
-<DocCallOut title="Some APIs need to be Terraform-friendly">
-  For additional guidance, refer to the <DocLink id="kibHttpApiTfGuidelines" text="Guidelines for Terraform friendly HTTP APIs" /> if you would like to support an Infrastructure-as-Code (IaC) use case.
-</DocCallOut>
-
 [Click here](#structure-and-conventions) to skip to the structure and conventions guides.
 
 ## Design principles
@@ -105,6 +101,12 @@ router.get({ path: '/api/foos', options: { access: 'public' } }, async () => {..
 ```
 
 See the principle regarding [commitment](#commitment) before making APIs public!
+
+## Infrastructure-as-Code
+
+All public APIs should endeavour to be compatible with Infrastructure-as-Code (IaC) tools like Terraform. There may be merit in further optimizations for IaC use cases depending on your API.
+
+For additional guidance, refer to the <DocLink id="kibHttpApiTfGuidelines" text="Guidelines for Terraform friendly HTTP APIs" /> if you would like to support an Infrastructure-as-Code (IaC) use case.
 
 ## Structure and conventions
 
