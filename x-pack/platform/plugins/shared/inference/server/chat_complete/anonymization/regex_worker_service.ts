@@ -23,22 +23,22 @@ export class RegexWorkerService {
   private readonly config: InferenceConfig;
 
   constructor(config: InferenceConfig, private readonly logger: Logger) {
-    this.enabled = config.regexWorker.enabled;
+    this.enabled = config.anonymizationRegexWorker.enabled;
     this.config = config;
 
     if (this.enabled) {
       this.logger.debug(
-        `Initializing regex worker pool (min=${config.regexWorker.minThreads} | max=${
-          config.regexWorker.maxThreads
-        } | idle=${config.regexWorker.idleTimeout.asMilliseconds()}ms)`
+        `Initializing regex worker pool (min=${config.anonymizationRegexWorker.minThreads} | max=${
+          config.anonymizationRegexWorker.maxThreads
+        } | idle=${config.anonymizationRegexWorker.idleTimeout.asMilliseconds()}ms)`
       );
 
       this.worker = new Piscina({
         filename: require.resolve('./regex_worker_wrapper.js'),
         workerData: { fullpath: regexWorkerFilename },
-        minThreads: config.regexWorker.minThreads,
-        maxThreads: config.regexWorker.maxThreads,
-        idleTimeout: config.regexWorker.idleTimeout.asMilliseconds(),
+        minThreads: config.anonymizationRegexWorker.minThreads,
+        maxThreads: config.anonymizationRegexWorker.maxThreads,
+        idleTimeout: config.anonymizationRegexWorker.idleTimeout.asMilliseconds(),
       });
     }
   }
@@ -58,7 +58,7 @@ export class RegexWorkerService {
     const controller = new AbortController();
     const timer = setTimeout(
       () => controller.abort(),
-      this.config.regexWorker.taskTimeout.asMilliseconds()
+      this.config.anonymizationRegexWorker.taskTimeout.asMilliseconds()
     );
 
     try {

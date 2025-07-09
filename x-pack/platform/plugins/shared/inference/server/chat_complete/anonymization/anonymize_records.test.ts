@@ -41,7 +41,7 @@ const regexRule: AnonymizationRule = {
 
 const testConfig = {
   enabled: true,
-  regexWorker: {
+  anonymizationRegexWorker: {
     enabled: false,
   },
 } as InferenceConfig;

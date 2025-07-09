@@ -26,7 +26,7 @@ const mockEsClient = {
 } as any;
 const testConfig = {
   enabled: true,
-  regexWorker: {
+  anonymizationRegexWorker: {
     enabled: false,
   },
 } as InferenceConfig;

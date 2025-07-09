@@ -27,11 +27,11 @@ const taskPayload = {
   rule: regexEmailRule,
 };
 function createTestConfig(
-  overrides: Partial<InferenceConfig['regexWorker']> = {}
+  overrides: Partial<InferenceConfig['anonymizationRegexWorker']> = {}
 ): InferenceConfig {
   return {
     enabled: true,
-    regexWorker: {
+    anonymizationRegexWorker: {
       enabled: true,
       minThreads: 1,
       maxThreads: 3,

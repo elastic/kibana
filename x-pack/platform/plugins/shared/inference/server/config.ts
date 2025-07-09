@@ -9,7 +9,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  regexWorker: schema.object({
+  anonymizationRegexWorker: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     minThreads: schema.number({ defaultValue: 0, min: 0 }),
     maxThreads: schema.number({ defaultValue: 3, min: 1 }),
