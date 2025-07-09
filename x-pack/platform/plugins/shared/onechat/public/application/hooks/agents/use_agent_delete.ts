@@ -15,7 +15,7 @@ export interface UseAgentDeleteOptions {
 }
 
 export function useAgentDelete({ onSuccess, onError }: UseAgentDeleteOptions = {}) {
-  const { agentProfilesService } = useOnechatServices();
+  const { agentService } = useOnechatServices();
   const queryClient = useQueryClient();
 
   const deleteAgentMutation = useMutation({
@@ -23,7 +23,7 @@ export function useAgentDelete({ onSuccess, onError }: UseAgentDeleteOptions = {
       if (!agentId) {
         throw new Error('Agent ID is required for delete');
       }
-      return agentProfilesService.delete(agentId);
+      return agentService.delete(agentId);
     },
     onSuccess: (result, agentId) => {
       // Invalidate specific agent and agent profiles list

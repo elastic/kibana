@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -57,17 +57,23 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     return grouped;
   }, [tools]);
 
-  const handleToggleProviderTools = (providerId: string) => {
-    const providerTools = toolsByProvider[providerId] || [];
-    const newSelection = toggleProviderSelection(providerId, providerTools, selectedTools);
-    onToolsChange(newSelection);
-  };
+  const handleToggleProviderTools = useCallback(
+    (providerId: string) => {
+      const providerTools = toolsByProvider[providerId] || [];
+      const newSelection = toggleProviderSelection(providerId, providerTools, selectedTools);
+      onToolsChange(newSelection);
+    },
+    [selectedTools, onToolsChange, toolsByProvider]
+  );
 
-  const handleToggleTool = (toolId: string, providerId: string) => {
-    const providerTools = toolsByProvider[providerId] || [];
-    const newSelection = toggleToolSelection(toolId, providerId, providerTools, selectedTools);
-    onToolsChange(newSelection);
-  };
+  const handleToggleTool = useCallback(
+    (toolId: string, providerId: string) => {
+      const providerTools = toolsByProvider[providerId] || [];
+      const newSelection = toggleToolSelection(toolId, providerId, providerTools, selectedTools);
+      onToolsChange(newSelection);
+    },
+    [selectedTools, onToolsChange, toolsByProvider]
+  );
 
   if (toolsLoading) {
     return <EuiLoadingSpinner size="l" />;
