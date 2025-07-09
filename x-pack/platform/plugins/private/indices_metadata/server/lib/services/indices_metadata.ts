@@ -72,7 +72,9 @@ export class IndicesMetadataService {
       .getIndicesMetadataConfiguration$()
       .subscribe((configuration) => {
         this.logger.debug('Indices metadata configuration updated', { configuration } as LogMeta);
-        this.configuration = configuration;
+        if (configuration) {
+          this.configuration = configuration;
+        }
       });
 
     this.scheduleIndicesMetadataTask(taskManager).catch((error) => {

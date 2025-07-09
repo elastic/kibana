@@ -26,7 +26,9 @@ const CONFIGURATION_ARTIFACT_NAME = 'indices-metadata-configuration';
 export class ConfigurationService {
   private readonly logger: Logger;
   private readonly artifactService: ArtifactService;
-  private readonly indicesMetadataConfiguration$: Observable<IndicesMetadataConfiguration>;
+  private readonly indicesMetadataConfiguration$: Observable<
+    IndicesMetadataConfiguration | undefined
+  >;
 
   private readonly stop$ = new ReplaySubject<void>(1);
 
@@ -48,7 +50,7 @@ export class ConfigurationService {
     this.stop$.complete();
   }
 
-  public getIndicesMetadataConfiguration$(): Observable<IndicesMetadataConfiguration> {
+  public getIndicesMetadataConfiguration$(): Observable<IndicesMetadataConfiguration | undefined> {
     return this.indicesMetadataConfiguration$;
   }
 
