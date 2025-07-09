@@ -10,8 +10,7 @@
 import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
 import { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 
-// Priority: numeric > date > keyword > text > others
-const TYPE_PRIORITY = [
+const NUMERIC_TYPES = [
   'long',
   'integer',
   'short',
@@ -20,9 +19,11 @@ const TYPE_PRIORITY = [
   'float',
   'half_float',
   'scaled_float',
-  'date',
-  'keyword',
 ] as const;
+const NUMERIC_TYPES_SET = new Set(NUMERIC_TYPES);
+
+// Priority: numeric > date > keyword > text > others
+const TYPE_PRIORITY = [...NUMERIC_TYPES, 'date', 'keyword'] as const;
 
 // List of sortable types in Elasticsearch (TYPE_PRIORITY plus 'boolean')
 const SORTABLE_TYPES = new Set([...TYPE_PRIORITY, 'boolean']);
@@ -57,7 +58,7 @@ export const getKeywordField = (fieldMapping?: SavedObjectsFieldMapping): string
 
 /**
  * Validates that all field mappings have the same type.
- * Throws an error if types are not the same.
+ * Throws an error if types are not the same, except all numeric types are considered equivalent.
  */
 export function validateSameFieldTypeForAllTypes(
   sortField: string,
@@ -65,11 +66,15 @@ export function validateSameFieldTypeForAllTypes(
 ): void {
   const fieldTypes = fieldMappings.map((fm) => fm.type);
   const uniqueTypes = Array.from(new Set(fieldTypes));
+  // If all types are numeric, allow
+  if (uniqueTypes.every((t) => NUMERIC_TYPES.includes(t as (typeof NUMERIC_TYPES)[number]))) {
+    return;
+  }
   if (uniqueTypes.length > 1) {
     throw new Error(
       `Sort field "${sortField}" has different mapping types across types: [${uniqueTypes.join(
         ', '
-      )}]. Sorting requires the field to have the same type in all types.`
+      )}]. Sorting requires the field to have the same type in all types (numeric types are considered equivalent).`
     );
   }
 }
@@ -91,14 +96,16 @@ export const getMergedFieldType = (
       }
       return f.type;
     })
-    .filter(Boolean);
+    .filter(Boolean) as string[];
+
+  // Always return 'double' for any numeric type
+  if (types.some((t) => NUMERIC_TYPES_SET.has(t as (typeof NUMERIC_TYPES)[number]))) {
+    return 'double';
+  }
 
   for (const t of TYPE_PRIORITY) {
     if (types.includes(t)) {
-      // Map unsupported runtime types to supported equivalents
-      if (t === 'integer' || t === 'short' || t === 'byte') return 'long';
-      if (t === 'float' || t === 'half_float' || t === 'scaled_float') return 'double';
-      return t;
+      return t as MappingRuntimeFieldType;
     }
   }
   // fallback to keyword if unknown

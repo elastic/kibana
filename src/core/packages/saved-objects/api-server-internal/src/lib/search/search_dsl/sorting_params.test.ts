@@ -333,7 +333,7 @@ describe('searchDsl/getSortParams', () => {
               source:
                 "if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } else if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); }",
             },
-            type: 'long',
+            type: 'double',
           },
         },
         sort: [{ merged_count: { order: undefined } }],
@@ -394,7 +394,7 @@ describe('searchDsl/getSortParams', () => {
           mismatch: {
             properties: {
               count: {
-                type: 'float',
+                type: 'keyword',
               },
             },
           },
@@ -404,7 +404,7 @@ describe('searchDsl/getSortParams', () => {
       expect(() =>
         getSortingParams(MAPPINGS_WITH_MISMATCH, ['numeric', 'mismatch'], 'count')
       ).toThrow(
-        'Sort field "count" has different mapping types across types: [long, float]. Sorting requires the field to have the same type in all types.'
+        'Sort field "count" has different mapping types across types: [long, keyword]. Sorting requires the field to have the same type in all types (numeric types are considered equivalent).'
       );
     });
   });
