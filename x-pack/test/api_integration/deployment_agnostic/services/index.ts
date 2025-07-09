@@ -9,6 +9,7 @@ import { services as platformDeploymentAgnosticServices } from '@kbn/test-suites
 import { SupertestWithRoleScope } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
 import { SynthtraceProvider } from './synthtrace';
 import { ObservabilityAIAssistantApiProvider } from './observability_ai_assistant_api';
+import { AlertingApiProvider } from './alerting_api';
 
 export type {
   InternalRequestHeader,
