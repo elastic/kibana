@@ -280,45 +280,40 @@ export const CloudAssetInventoryPolicyTemplateForm =
             onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
           />
 
-          {/* Namespace selector */}
-          {
-            <>
-              <EuiSpacer size="m" />
-              <EuiAccordion
-                id="advancedOptions"
-                data-test-subj="advancedOptionsAccordion"
-                buttonContent={
-                  <EuiText
-                    size="xs"
-                    color={euiTheme.colors.textPrimary}
-                    css={{
-                      fontWeight: euiTheme.font.weight.medium,
-                    }}
-                  >
-                    <FormattedMessage
-                      id="xpack.csp.fleetIntegration.advancedOptionsLabel"
-                      defaultMessage="Advanced options"
-                    />
-                  </EuiText>
-                }
-                paddingSize="m"
+          <EuiSpacer size="m" />
+          <EuiAccordion
+            id="advancedOptions"
+            data-test-subj="advancedOptionsAccordion"
+            buttonContent={
+              <EuiText
+                size="xs"
+                color={euiTheme.colors.textPrimary}
+                css={{
+                  fontWeight: euiTheme.font.weight.medium,
+                }}
               >
-                <NamespaceComboBox
-                  fullWidth
-                  namespace={newPolicy.namespace}
-                  placeholder="default"
-                  isEditPage={isEditPage}
-                  validationError={validationResults?.namespace}
-                  onNamespaceChange={(namespace: string) => {
-                    updatePolicy({ ...newPolicy, namespace });
-                  }}
-                  data-test-subj="namespaceInput"
-                  labelId="xpack.csp.fleetIntegration.namespaceLabel"
-                  helpTextId="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+                <FormattedMessage
+                  id="xpack.csp.fleetIntegration.advancedOptionsLabel"
+                  defaultMessage="Advanced options"
                 />
-              </EuiAccordion>
-            </>
-          }
+              </EuiText>
+            }
+            paddingSize="m"
+          >
+            <NamespaceComboBox
+              fullWidth
+              namespace={newPolicy.namespace}
+              placeholder="default"
+              isEditPage={isEditPage}
+              validationError={validationResults?.namespace}
+              onNamespaceChange={(namespace: string) => {
+                updatePolicy({ ...newPolicy, namespace });
+              }}
+              data-test-subj="namespaceInput"
+              labelId="xpack.csp.fleetIntegration.namespaceLabel"
+              helpTextId="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+            />
+          </EuiAccordion>
           {shouldRenderAgentlessSelector && (
             <SetupTechnologySelector
               disabled={isEditPage}
