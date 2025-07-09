@@ -108,9 +108,7 @@ export const useBatchedOptionalPublishingSubjects = <
  *
  * @param subjects Publishing subjects array.
  */
-export const useBatchedPublishingSubjects = <
-  SubjectsType extends [...Array<PublishingSubject<any> | undefined>]
->(
+export const useBatchedPublishingSubjects = <SubjectsType extends [...AnyPublishingSubject[]]>(
   ...subjects: [...SubjectsType]
 ): UnwrapPublishingSubjectTuple<SubjectsType> => {
   /**
