@@ -38,7 +38,10 @@ export type {
   RangeFilterParams,
   ScriptedPhraseFilter,
   ScriptedRangeFilter,
+  TimeRange,
   TimeState,
+  RelativeTimeRange,
+  AbsoluteTimeRange,
   CombinedFilter,
 } from './src/filters';
 
@@ -133,5 +136,3 @@ export {
 } from './src/utils';
 
 export type { ExecutionContextSearch } from './src/expressions/types';
-
-export type { TimeRange, AbsoluteTimeRange, RelativeTimeRange } from '@kbn/es-query-server';

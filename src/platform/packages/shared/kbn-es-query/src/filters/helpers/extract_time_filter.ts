@@ -8,8 +8,8 @@
  */
 
 import { keys, partition } from 'lodash';
-import type { TimeRange } from '@kbn/es-query-server';
 import { Filter, isRangeFilter, RangeFilter } from '../build_filters';
+import { TimeRange } from './types';
 import { convertRangeFilterToTimeRangeString } from './convert_range_filter';
 
 export function extractTimeFilter(
