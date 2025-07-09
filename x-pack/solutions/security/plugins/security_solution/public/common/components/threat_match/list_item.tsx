@@ -96,7 +96,7 @@ export const ListItemComponent = React.memo<ListItemProps>(
                         indexPattern={indexPattern}
                         showLabel={listItemIndex === 0 && index === 0}
                         onChange={handleEntryChange}
-                        isNotMatchDisabled={listItem.entries.length === 1}
+                        doesNotMatchDisabled={listItem.entries.length === 1}
                       />
                     </MyOverflowContainer>
                     <EntryDeleteButtonComponent

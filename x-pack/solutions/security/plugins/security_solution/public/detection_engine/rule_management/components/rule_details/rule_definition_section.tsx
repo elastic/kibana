@@ -388,7 +388,9 @@ export const ThreatMapping = ({ threatMapping }: ThreatMappingProps) => {
     (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
       const matches = threatMap.entries.reduce<string>(
         (accumItems, item, itemsIndex, { length: threatMapLength }) => {
-          const matchOperator = item.negate ? threatMatchI18n.NOT_MATCHES : threatMatchI18n.MATCHES;
+          const matchOperator = item.negate
+            ? threatMatchI18n.DOES_NOT_MATCH
+            : threatMatchI18n.MATCHES;
 
           if (threatMapLength === 1) {
             return `${item.field} ${matchOperator} ${item.value}`;

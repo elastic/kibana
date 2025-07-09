@@ -25,7 +25,7 @@ interface EntryItemProps {
   threatIndexPatterns: DataViewBase;
   showLabel: boolean;
   onChange: (arg: Entry, i: number) => void;
-  isNotMatchDisabled?: boolean;
+  doesNotMatchDisabled?: boolean;
 }
 
 const LABEL_PADDING = 20;
@@ -36,7 +36,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   threatIndexPatterns,
   showLabel,
   onChange,
-  isNotMatchDisabled,
+  doesNotMatchDisabled,
 }): JSX.Element => {
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
@@ -88,19 +88,23 @@ export const EntryItem: React.FC<EntryItemProps> = ({
 
   const renderMatchInput = useMemo(() => {
     const options = [
-      { value: 'matches', inputDisplay: i18n.MATCHES },
-      { value: 'not_matches', inputDisplay: i18n.NOT_MATCHES, disabled: isNotMatchDisabled },
+      { value: 'MATCHES', inputDisplay: i18n.MATCHES },
+      {
+        value: 'DOES_NOT_MATCH',
+        inputDisplay: i18n.DOES_NOT_MATCH,
+        disabled: doesNotMatchDisabled,
+      },
     ];
     return (
       <EuiFormRow data-test-subj="entryItemMatchInputFormRow">
         <EuiSuperSelect
           options={options}
-          valueOfSelected={entry.negate ? 'not_matches' : 'matches'}
-          onChange={(value) => handleMatchChange(value === 'not_matches')}
+          valueOfSelected={entry.negate ? 'DOES_NOT_MATCH' : 'MATCHES'}
+          onChange={(value) => handleMatchChange(value === 'DOES_NOT_MATCH')}
         />
       </EuiFormRow>
     );
-  }, [handleMatchChange, entry, isNotMatchDisabled]);
+  }, [handleMatchChange, entry, doesNotMatchDisabled]);
 
   const renderThreatFieldInput = useMemo(() => {
     const comboBox = (
@@ -143,15 +147,6 @@ export const EntryItem: React.FC<EntryItemProps> = ({
       >
         {renderMatchInput}
       </EuiFlexItem>
-      {/* <EuiFlexItem grow={1}>
-        <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
-          {showLabel ? (
-            <FlexItemWithLabel grow={false}>{i18n.MATCHES}</FlexItemWithLabel>
-          ) : (
-            <FlexItemWithoutLabel grow={false}>{i18n.MATCHES}</FlexItemWithoutLabel>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem> */}
       <EuiFlexItem grow={3}>{renderThreatFieldInput}</EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -34,7 +34,7 @@ import {
   AND,
   MATCHES,
   OR,
-  NOT_MATCHES,
+  DOES_NOT_MATCH,
 } from '../../../../common/components/threat_match/translations';
 import type { EqlOptions } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -525,7 +525,7 @@ export const buildThreatMappingDescription = (
     (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
       const matches = threatMap.entries.reduce<string>(
         (accumItems, item, itemsIndex, { length: threatMapLength }) => {
-          const matchOperator = item.negate ? NOT_MATCHES : MATCHES;
+          const matchOperator = item.negate ? DOES_NOT_MATCH : MATCHES;
 
           if (threatMapLength === 1) {
             return `${item.field} ${matchOperator} ${item.value}`;

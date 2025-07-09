@@ -36,9 +36,12 @@ export const MATCHES = i18n.translate('xpack.securitySolution.threatMatch.matche
   defaultMessage: 'MATCHES',
 });
 
-export const NOT_MATCHES = i18n.translate('xpack.securitySolution.threatMatch.notMatchesLabel', {
-  defaultMessage: 'NOT MATCHES',
-});
+export const DOES_NOT_MATCH = i18n.translate(
+  'xpack.securitySolution.threatMatch.doesNotMatchLabel',
+  {
+    defaultMessage: 'DOES NOT MATCH',
+  }
+);
 
 export const AND = i18n.translate('xpack.securitySolution.threatMatch.andDescription', {
   defaultMessage: 'AND',
