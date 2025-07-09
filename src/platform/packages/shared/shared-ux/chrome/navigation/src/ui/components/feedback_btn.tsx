@@ -26,13 +26,15 @@ interface Props {
 
 export const FeedbackBtn: FC<Props> = ({ solutionId }) => {
   const { euiTheme } = useEuiTheme();
-  const [showCallOut, setShowCallOut] = useState(
-    sessionStorage.getItem(FEEDBACK_BTN_KEY) !== 'hidden'
-  );
+  const [showCallOut, setShowCallOut] = useState(() => {
+    const storedValue =
+      localStorage.getItem(FEEDBACK_BTN_KEY) || sessionStorage.getItem(FEEDBACK_BTN_KEY);
+    return storedValue !== 'hidden';
+  });
 
   const onDismiss = () => {
     setShowCallOut(false);
-    sessionStorage.setItem(FEEDBACK_BTN_KEY, 'hidden');
+    localStorage.setItem(FEEDBACK_BTN_KEY, 'hidden');
   };
 
   const onClick = () => {
