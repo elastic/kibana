@@ -18,6 +18,7 @@ import {
 import { Sample } from '@kbn/grok-ui';
 import { i18n } from '@kbn/i18n';
 import { GrokProcessorDefinition } from '@kbn/streams-schema';
+import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { getPercentageFormatter } from '../../../util/formatters';
 import { PreviewTable } from '../preview_table';
