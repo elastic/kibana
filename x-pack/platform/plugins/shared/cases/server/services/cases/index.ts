@@ -326,6 +326,28 @@ export class CasesService {
     }
   }
 
+  /**
+   * Like the regular case resolver but tries to resolve by the case's `incremental_id` first.
+   */
+  public async getResolveCaseByIncrementalId({
+    incremental_id: caseId,
+  }: {
+    incremental_id: string;
+  }): Promise<SavedObjectsResolveResponse<CaseTransformedAttributes>> {
+    try {
+      this.log.debug(`Attempting to find case by incremental_id ${caseId}`);
+      const found = await this.unsecuredSavedObjectsClient.find<CasePersistedAttributes>({
+        type: CASE_SAVED_OBJECT,
+        search: `attributes.incremental_id: ${caseId}`,
+      });
+      const resolveId = found.saved_objects.length > 0 ? found.saved_objects[0].id : caseId;
+      return this.getResolveCase({ id: resolveId });
+    } catch (error) {
+      this.log.error(`Error on resolve case by incremental_id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
   public async getCases({
     caseIds,
   }: GetCasesArgs): Promise<SavedObjectsBulkResponseWithErrors<CaseTransformedAttributes>> {
