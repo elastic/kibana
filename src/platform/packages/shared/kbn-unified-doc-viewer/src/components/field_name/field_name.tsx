@@ -56,7 +56,7 @@ export function FieldName({
   const isMultiField = !!subTypeMulti?.multi;
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
+    <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
           gutterSize="s"
@@ -123,18 +123,12 @@ export function FieldName({
 const componentStyles = {
   fieldIconContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
-      paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
       lineHeight: euiTheme.font.lineHeightMultiplier,
     }),
   fieldName: (themeContext: UseEuiTheme) => {
-    const { euiTheme } = themeContext;
     const { fontSize } = euiFontSize(themeContext, 's');
 
     return css({
-      padding: euiTheme.size.xs,
-      paddingLeft: 0,
-      lineHeight: euiTheme.font.lineHeightMultiplier,
-
       '.euiDataGridRowCell__popover &': {
         fontSize,
       },
