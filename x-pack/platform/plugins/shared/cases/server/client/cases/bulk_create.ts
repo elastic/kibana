@@ -221,6 +221,7 @@ const createBulkCreateUserActionsRequest = ({
   theCase: SavedObject<CaseTransformedAttributes>;
   user: User;
 }) => {
+  const isAssistant = theCase.attributes.is_assistant ?? false;
   const userActionPayload: CasePostRequest = {
     title: theCase.attributes.title,
     tags: theCase.attributes.tags,
@@ -240,5 +241,6 @@ const createBulkCreateUserActionsRequest = ({
     user,
     payload: userActionPayload,
     owner: theCase.attributes.owner,
+    isAssistant,
   };
 };

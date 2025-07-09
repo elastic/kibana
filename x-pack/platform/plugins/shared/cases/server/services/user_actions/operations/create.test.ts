@@ -309,6 +309,7 @@ describe('UserActionPersister', () => {
                       "full_name": "Elastic User",
                       "username": "elastic",
                     },
+                    "is_assistant": false,
                     "owner": "securitySolution",
                     "payload": Object {
                       "customFields": Array [
@@ -361,6 +362,7 @@ describe('UserActionPersister', () => {
                       "full_name": "Elastic User",
                       "username": "elastic",
                     },
+                    "is_assistant": false,
                     "owner": "securitySolution",
                     "payload": Object {
                       "customFields": Array [
@@ -413,6 +415,7 @@ describe('UserActionPersister', () => {
                       "full_name": "Elastic User",
                       "username": "elastic",
                     },
+                    "is_assistant": false,
                     "owner": "securitySolution",
                     "payload": Object {
                       "customFields": Array [
@@ -451,6 +454,7 @@ describe('UserActionPersister', () => {
                       "full_name": "Elastic User",
                       "username": "elastic",
                     },
+                    "is_assistant": false,
                     "owner": "securitySolution",
                     "payload": Object {
                       "customFields": Array [
@@ -503,6 +507,7 @@ describe('UserActionPersister', () => {
                       "full_name": "Elastic User",
                       "username": "elastic",
                     },
+                    "is_assistant": false,
                     "owner": "securitySolution",
                     "payload": Object {
                       "customFields": Array [
@@ -555,6 +560,7 @@ describe('UserActionPersister', () => {
                       "full_name": "Elastic User",
                       "username": "elastic",
                     },
+                    "is_assistant": false,
                     "owner": "securitySolution",
                     "payload": Object {
                       "customFields": Array [
@@ -625,6 +631,7 @@ describe('UserActionPersister', () => {
                 "full_name": "",
                 "username": "",
               },
+              "is_assistant": undefined,
               "owner": "cases",
               "payload": Object {
                 "connector": Object {
@@ -662,6 +669,7 @@ describe('UserActionPersister', () => {
                 "full_name": "",
                 "username": "",
               },
+              "is_assistant": undefined,
               "owner": "cases",
               "payload": Object {
                 "title": "my title",

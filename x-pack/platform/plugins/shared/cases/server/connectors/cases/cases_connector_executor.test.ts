@@ -84,6 +84,7 @@ describe('CasesConnectorExecutor', () => {
     rule,
     timeWindow,
     internallyManagedAlerts: null,
+    isGeneratedByAssistant: null,
     reopenClosedCases,
     maximumCasesToOpen: 5,
     templateId: null,
@@ -260,6 +261,7 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
                       "id": "mock-id-1",
+                      "isAssistant": false,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -286,6 +288,7 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.1\`.",
                       "id": "mock-id-2",
+                      "isAssistant": false,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -312,6 +315,7 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
                       "id": "mock-id-3",
+                      "isAssistant": false,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -569,6 +573,7 @@ describe('CasesConnectorExecutor', () => {
                   "customFields": Array [],
                   "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
                   "id": "mock-id-3",
+                  "isAssistant": false,
                   "owner": "cases",
                   "settings": Object {
                     "syncAlerts": false,
@@ -943,6 +948,7 @@ describe('CasesConnectorExecutor', () => {
                   "customFields": Array [],
                   "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
                   "id": "mock-id-4",
+                  "isAssistant": false,
                   "owner": "cases",
                   "settings": Object {
                     "syncAlerts": false,
@@ -1109,6 +1115,7 @@ describe('CasesConnectorExecutor', () => {
                     ],
                     "description": "case desc",
                     "id": "mock-id-4",
+                    "isAssistant": false,
                     "owner": "cases",
                     "settings": Object {
                       "syncAlerts": true,
@@ -1192,6 +1199,7 @@ describe('CasesConnectorExecutor', () => {
                     ],
                     "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
                     "id": "mock-id-4",
+                    "isAssistant": false,
                     "owner": "cases",
                     "settings": Object {
                       "syncAlerts": false,
@@ -1304,6 +1312,7 @@ describe('CasesConnectorExecutor', () => {
                     ],
                     "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: B\` and \`dest.ip: 0.0.0.3\`.",
                     "id": "mock-id-3",
+                    "isAssistant": false,
                     "owner": "cases",
                     "settings": Object {
                       "syncAlerts": false,
@@ -1378,6 +1387,7 @@ describe('CasesConnectorExecutor', () => {
                     ],
                     "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`host.name: A\` and \`dest.ip: 0.0.0.1\`.",
                     "id": "mock-id-4",
+                    "isAssistant": false,
                     "owner": "cases",
                     "settings": Object {
                       "syncAlerts": false,
@@ -1432,6 +1442,7 @@ describe('CasesConnectorExecutor', () => {
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
           expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
             caseId: 'mock-id-1',
+            isAssistant: false,
             attachments: [
               {
                 alertId: ['alert-id-0', 'alert-id-2'],
@@ -1466,6 +1477,7 @@ describe('CasesConnectorExecutor', () => {
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
           expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
             caseId: 'mock-id-4',
+            isAssistant: false,
             attachments: [
               {
                 alertId: ['alert-id-0', 'alert-id-2'],
@@ -1538,6 +1550,7 @@ describe('CasesConnectorExecutor', () => {
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
           expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
             caseId: 'mock-id-1',
+            isAssistant: false,
             attachments: [
               {
                 alertId: ['alert-id-0', 'alert-id-2'],
@@ -1551,6 +1564,7 @@ describe('CasesConnectorExecutor', () => {
 
           expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
             caseId: 'mock-id-2',
+            isAssistant: false,
             attachments: [
               {
                 alertId: ['alert-id-1'],
@@ -1564,12 +1578,60 @@ describe('CasesConnectorExecutor', () => {
 
           expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
             caseId: 'mock-id-3',
+            isAssistant: false,
             attachments: [
               {
                 alertId: ['alert-id-3'],
                 index: ['alert-index-3'],
                 owner: 'securitySolution',
                 rule: { id: null, name: null },
+                type: 'alert',
+              },
+            ],
+          });
+        });
+
+        it('sends correct attributes when `isGeneratedByAssistant` is `true`', async () => {
+          await connectorExecutor.execute({ ...params, isGeneratedByAssistant: true });
+
+          expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+            caseId: 'mock-id-1',
+            isAssistant: true,
+            attachments: [
+              {
+                alertId: ['alert-id-0', 'alert-id-2'],
+                index: ['alert-index-0', 'alert-index-2'],
+                owner: 'securitySolution',
+                rule: { id: 'rule-test-id', name: 'Test rule' },
+                type: 'alert',
+              },
+            ],
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+            caseId: 'mock-id-2',
+            isAssistant: true,
+            attachments: [
+              {
+                alertId: ['alert-id-1'],
+                index: ['alert-index-1'],
+                owner: 'securitySolution',
+                rule: { id: 'rule-test-id', name: 'Test rule' },
+                type: 'alert',
+              },
+            ],
+          });
+
+          expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+            caseId: 'mock-id-3',
+            isAssistant: true,
+            attachments: [
+              {
+                alertId: ['alert-id-3'],
+                index: ['alert-index-3'],
+                owner: 'securitySolution',
+                rule: { id: 'rule-test-id', name: 'Test rule' },
                 type: 'alert',
               },
             ],
@@ -1859,6 +1921,7 @@ describe('CasesConnectorExecutor', () => {
 
           expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
             caseId: 'mock-id-1',
+            isAssistant: false,
             attachments: [
               {
                 alertId: alerts.map((alert) => alert._id),
@@ -1936,6 +1999,7 @@ describe('CasesConnectorExecutor', () => {
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(4);
           expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
             caseId: 'mock-id-3',
+            isAssistant: false,
             attachments: [
               {
                 type: 'alert',
@@ -2048,6 +2112,7 @@ describe('CasesConnectorExecutor', () => {
 
         expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
           caseId: 'mock-id-1',
+          isAssistant: false,
           attachments: [
             {
               alertId: alerts.map((alert) => alert._id),
@@ -2285,6 +2350,7 @@ describe('CasesConnectorExecutor', () => {
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
         caseId: 'mock-id-2',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-1'],
@@ -2301,6 +2367,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
         caseId: 'mock-id-4',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-0', 'alert-id-2'],
@@ -2397,6 +2464,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
         caseId: 'mock-id-1',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-0', 'alert-id-2'],
@@ -2413,6 +2481,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
         caseId: 'mock-id-2',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-1'],
@@ -2478,6 +2547,7 @@ describe('CasesConnectorExecutor', () => {
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
         caseId: 'mock-id-4',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-0', 'alert-id-2'],
@@ -2494,6 +2564,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
         caseId: 'mock-id-2',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-1'],
@@ -2554,6 +2625,7 @@ describe('CasesConnectorExecutor', () => {
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(2);
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
         caseId: 'mock-id-4',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-0', 'alert-id-2'],
@@ -2570,6 +2642,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
         caseId: 'mock-id-2',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-1'],
@@ -2608,6 +2681,7 @@ describe('CasesConnectorExecutor', () => {
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(6);
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
         caseId: 'mock-id-1',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-0', 'alert-id-2'],
@@ -2624,6 +2698,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(4, {
         caseId: 'mock-id-1',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-0', 'alert-id-2'],
@@ -2640,6 +2715,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
         caseId: 'mock-id-2',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-1'],
@@ -2656,6 +2732,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(5, {
         caseId: 'mock-id-2',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-1'],
@@ -2672,6 +2749,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
         caseId: 'mock-id-3',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-3'],
@@ -2688,6 +2766,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(6, {
         caseId: 'mock-id-3',
+        isAssistant: false,
         attachments: [
           {
             alertId: ['alert-id-3'],
@@ -2774,6 +2853,7 @@ describe('CasesConnectorExecutor', () => {
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
         expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
           caseId: 'mock-id-1',
+          isAssistant: false,
           attachments: [
             {
               type: 'alert',
@@ -2855,6 +2935,7 @@ describe('CasesConnectorExecutor', () => {
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
         expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
           caseId: 'mock-id-1',
+          isAssistant: false,
           attachments: [
             {
               alertId: allAlerts.map((alert) => alert._id),
@@ -2943,6 +3024,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
         caseId: 'mock-id-1',
+        isAssistant: false,
         attachments: [
           {
             type: 'alert',
@@ -2956,6 +3038,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
         caseId: 'mock-id-2',
+        isAssistant: false,
         attachments: [
           {
             type: 'alert',
@@ -2969,6 +3052,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
         caseId: 'mock-id-3',
+        isAssistant: false,
         attachments: [
           {
             type: 'alert',
@@ -3043,6 +3127,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
         caseId: 'mock-id-1',
+        isAssistant: false,
         attachments: [
           {
             type: 'alert',
@@ -3056,6 +3141,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
         caseId: 'mock-id-2',
+        isAssistant: false,
         attachments: [
           {
             type: 'alert',
@@ -3069,6 +3155,7 @@ describe('CasesConnectorExecutor', () => {
 
       expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
         caseId: 'mock-id-3',
+        isAssistant: false,
         attachments: [
           {
             type: 'alert',
@@ -3139,6 +3226,7 @@ describe('CasesConnectorExecutor', () => {
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
       expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledWith({
         caseId: 'mock-id-1',
+        isAssistant: false,
         attachments: [
           {
             type: 'alert',
@@ -3161,6 +3249,7 @@ describe('CasesConnectorExecutor', () => {
       rule,
       timeWindow,
       internallyManagedAlerts: true,
+      isGeneratedByAssistant: true,
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
@@ -3258,6 +3347,7 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`field_name_1: field_value_1\`.",
                       "id": "mock-id-1",
+                      "isAssistant": true,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -3282,6 +3372,7 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`field_name_2: field_value_2\`.",
                       "id": "mock-id-2",
+                      "isAssistant": true,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -3306,6 +3397,7 @@ describe('CasesConnectorExecutor', () => {
                       "customFields": Array [],
                       "description": "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id). The assigned alerts are grouped by \`field_name_1: field_value_3\`.",
                       "id": "mock-id-3",
+                      "isAssistant": true,
                       "owner": "cases",
                       "settings": Object {
                         "syncAlerts": false,
@@ -3326,7 +3418,7 @@ describe('CasesConnectorExecutor', () => {
             ]
           `);
 
-          expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping(casesClientMock);
+          expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping(casesClientMock, true);
         });
       });
 
@@ -3483,7 +3575,7 @@ describe('CasesConnectorExecutor', () => {
         it('attach the alerts to the correct cases correctly', async () => {
           await connectorExecutor.execute(paramsWithGroupedAlerts);
 
-          expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping(casesClientMock);
+          expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping(casesClientMock, true);
         });
 
         it('attaches alerts to reopened cases', async () => {
@@ -3504,6 +3596,7 @@ describe('CasesConnectorExecutor', () => {
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
           expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
             caseId: 'mock-id-1',
+            isAssistant: true,
             attachments: [
               {
                 comment: 'comment-1',
@@ -3540,6 +3633,7 @@ describe('CasesConnectorExecutor', () => {
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
           expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
             caseId: 'mock-id-4',
+            isAssistant: true,
             attachments: [
               {
                 alertId: ['alert-id-1', 'alert-id-2'],

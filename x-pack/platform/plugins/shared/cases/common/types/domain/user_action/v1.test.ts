@@ -32,6 +32,7 @@ describe('User actions', () => {
         id: 'basic-comment-id',
         version: 'WzQ3LDFc',
         comment_id: 'basic-comment-id',
+        is_assistant: false,
       },
     ];
 
@@ -63,5 +64,17 @@ describe('User actions', () => {
         right: defaultRequest,
       });
     });
+
+    test.each([undefined, null, false, true])(
+      'has expected attributes in request if the `isAssistant` is %s',
+      (isAssistant) => {
+        const query = UserActionsRt.decode([{ ...defaultRequest[0], is_assistant: isAssistant }]);
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: [{ ...defaultRequest[0], is_assistant: isAssistant }],
+        });
+      }
+    );
   });
 });

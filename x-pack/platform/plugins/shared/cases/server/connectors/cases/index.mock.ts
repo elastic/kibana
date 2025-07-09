@@ -111,6 +111,7 @@ export const groupedAlerts = [
   },
 ];
 export const internallyManagedAlerts = false;
+export const isGeneratedByAssistant = false;
 
 export const groupingBy = ['host.name', 'dest.ip'];
 export const rule = {

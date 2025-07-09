@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 
+import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import type { UserCommentAttachment } from '../../../../common/types/domain';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
@@ -21,6 +22,7 @@ import { HoverableUsernameResolver } from '../../user_profiles/hoverable_usernam
 import { HoverableAvatarResolver } from '../../user_profiles/hoverable_avatar_resolver';
 import { UserCommentPropertyActions } from '../property_actions/user_comment_property_actions';
 import { getMarkdownEditorStorageKey } from '../../markdown_editor/utils';
+import { HoverableAssistantTitle } from '../../assistant';
 import * as i18n from './translations';
 
 type BuilderArgs = Pick<
@@ -39,6 +41,7 @@ type BuilderArgs = Pick<
   outlined: boolean;
   isEdit: boolean;
   isLoading: boolean;
+  isAssistant: boolean;
 };
 
 const getCommentFooterCss = (euiTheme?: EuiThemeComputed<{}>) => {
@@ -83,6 +86,7 @@ export const createUserAttachmentUserActionBuilder = ({
   outlined,
   isEdit,
   isLoading,
+  isAssistant,
   commentRefs,
   caseId,
   euiTheme,
@@ -93,7 +97,9 @@ export const createUserAttachmentUserActionBuilder = ({
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
   build: () => [
     {
-      username: (
+      username: isAssistant ? (
+        <HoverableAssistantTitle />
+      ) : (
         <HoverableUsernameResolver user={attachment.createdBy} userProfiles={userProfiles} />
       ),
       'data-test-subj': `comment-create-action-${attachment.id}`,
@@ -137,7 +143,14 @@ export const createUserAttachmentUserActionBuilder = ({
           )}
         </>
       ),
-      timelineAvatar: (
+      timelineAvatar: isAssistant ? (
+        <AssistantAvatar
+          name={'machine'}
+          size={'m'}
+          color={'subdued'}
+          data-test-subj={'assistant-avatar'}
+        />
+      ) : (
         <HoverableAvatarResolver user={attachment.createdBy} userProfiles={userProfiles} />
       ),
       actions: (

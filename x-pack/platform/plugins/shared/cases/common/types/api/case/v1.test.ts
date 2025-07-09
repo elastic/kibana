@@ -171,6 +171,7 @@ describe('CasePostRequestRt', () => {
         value: 3,
       },
     ],
+    isAssistant: false,
   };
 
   it('has expected attributes in request', () => {
@@ -397,6 +398,18 @@ describe('CasePostRequestRt', () => {
       )
     ).toContain('The value field cannot be an empty string.');
   });
+
+  test.each([undefined, false, true])(
+    'has expected attributes in request if the `isAssistant` is %s',
+    (isAssistant) => {
+      const query = CasePostRequestRt.decode({ ...defaultRequest, isAssistant });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, isAssistant },
+      });
+    }
+  );
 });
 
 describe('CasesFindRequestRt', () => {

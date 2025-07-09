@@ -113,12 +113,14 @@ export const getCasesConnectorAdapter = ({
        * their building block SIEM alerts that led to each attack separately.
        */
       let internallyManagedAlerts = false;
+      let isGeneratedByAssistant = false;
       let groupedAlerts: CasesGroupedAlerts[] | null = null;
       let maximumCasesToOpen = DEFAULT_MAX_OPEN_CASES;
       if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
         try {
           groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
           internallyManagedAlerts = true;
+          isGeneratedByAssistant = true;
           maximumCasesToOpen = ATTACK_DISCOVERY_MAX_OPEN_CASES;
         } catch (error) {
           logger.error(
@@ -144,6 +146,7 @@ export const getCasesConnectorAdapter = ({
         maximumCasesToOpen,
         templateId: params.subActionParams.templateId,
         internallyManagedAlerts,
+        isGeneratedByAssistant,
       };
 
       return { subAction: 'run', subActionParams };

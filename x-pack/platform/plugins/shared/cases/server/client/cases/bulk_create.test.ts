@@ -248,6 +248,7 @@ describe('bulkCreate', () => {
               "external_service": null,
               "id": "mock-saved-object-id",
               "incremental_id": undefined,
+              "is_assistant": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -288,6 +289,7 @@ describe('bulkCreate', () => {
               "external_service": null,
               "id": "mock-saved-object-id",
               "incremental_id": undefined,
+              "is_assistant": undefined,
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
@@ -1244,6 +1246,7 @@ describe('bulkCreate', () => {
           {
             caseId: 'mock-id-1',
             owner: 'securitySolution',
+            isAssistant: false,
             payload: {
               assignees: [],
               category: null,
@@ -1278,6 +1281,7 @@ describe('bulkCreate', () => {
           {
             caseId: 'mock-id-1',
             owner: 'securitySolution',
+            isAssistant: false,
             payload: {
               assignees: [],
               category: null,

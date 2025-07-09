@@ -16,6 +16,7 @@ import { UserActionCopyLink } from '../copy_link';
 import { ScrollableMarkdown } from '../../markdown_editor';
 import { HostIsolationCommentEvent } from './host_isolation_event';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
+import { HoverableAssistantTitleWithAvatar } from '../../assistant';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -34,7 +35,9 @@ export const createActionAttachmentUserActionBuilder = ({
     const actionIconName = attachment.actions.type === 'isolate' ? 'lock' : 'lockOpen';
     return [
       {
-        username: (
+        username: userAction.isAssistant ? (
+          <HoverableAssistantTitleWithAvatar />
+        ) : (
           <HoverableUserWithAvatarResolver
             user={attachment.createdBy}
             userProfiles={userProfiles}

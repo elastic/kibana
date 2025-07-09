@@ -82,10 +82,12 @@ export class CaseCommentModel {
     updateRequest,
     updatedAt,
     owner,
+    isAssistant,
   }: {
     updateRequest: AttachmentPatchRequest;
     updatedAt: string;
     owner: string;
+    isAssistant?: boolean;
   }): Promise<CaseCommentModel> {
     try {
       const { id, version, ...queryRestAttributes } = updateRequest;
@@ -132,7 +134,12 @@ export class CaseCommentModel {
         this.partialUpdateCaseWithAttachmentDataSkipRefresh({ date: updatedAt }),
       ]);
 
-      await commentableCase.createUpdateCommentUserAction(comment, updateRequest, owner);
+      await commentableCase.createUpdateCommentUserAction(
+        comment,
+        updateRequest,
+        owner,
+        isAssistant
+      );
 
       return commentableCase;
     } catch (error) {
@@ -216,7 +223,8 @@ export class CaseCommentModel {
   private async createUpdateCommentUserAction(
     comment: SavedObjectsUpdateResponse<AttachmentAttributes>,
     updateRequest: AttachmentPatchRequest,
-    owner: string
+    owner: string,
+    isAssistant?: boolean
   ) {
     const { id, version, ...queryRestAttributes } = updateRequest;
 
@@ -229,6 +237,7 @@ export class CaseCommentModel {
         payload: { attachment: queryRestAttributes },
         user: this.params.user,
         owner,
+        isAssistant,
       },
     });
   }
@@ -240,10 +249,12 @@ export class CaseCommentModel {
     createdDate,
     commentReq,
     id,
+    isAssistant,
   }: {
     createdDate: string;
     commentReq: AttachmentRequest;
     id: string;
+    isAssistant?: boolean;
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
@@ -276,7 +287,7 @@ export class CaseCommentModel {
 
       await Promise.all([
         commentableCase.handleAlertComments([attachment]),
-        this.createCommentUserAction(comment, attachment),
+        this.createCommentUserAction(comment, attachment, isAssistant),
       ]);
 
       return commentableCase;
@@ -431,7 +442,8 @@ export class CaseCommentModel {
 
   private async createCommentUserAction(
     comment: SavedObject<AttachmentAttributes>,
-    req: AttachmentRequest
+    req: AttachmentRequest,
+    isAssistant?: boolean
   ) {
     await this.params.services.userActionService.creator.createUserAction({
       userAction: {
@@ -444,13 +456,18 @@ export class CaseCommentModel {
         },
         user: this.params.user,
         owner: comment.attributes.owner,
+        isAssistant,
       },
     });
   }
 
-  private async bulkCreateCommentUserAction(
-    attachments: Array<{ id: string } & AttachmentRequest>
-  ) {
+  private async bulkCreateCommentUserAction({
+    isAssistant,
+    attachments,
+  }: {
+    isAssistant?: boolean;
+    attachments: Array<{ id: string } & AttachmentRequest>;
+  }) {
     await this.params.services.userActionService.creator.bulkCreateAttachmentCreation({
       caseId: this.caseInfo.id,
       attachments: attachments.map(({ id, ...attachment }) => ({
@@ -459,6 +476,7 @@ export class CaseCommentModel {
         attachment,
       })),
       user: this.params.user,
+      isAssistant,
     });
   }
 
@@ -501,8 +519,10 @@ export class CaseCommentModel {
   }
 
   public async bulkCreate({
+    isAssistant,
     attachments,
   }: {
+    isAssistant?: boolean;
     attachments: CommentRequestWithId;
   }): Promise<CaseCommentModel> {
     try {
@@ -545,7 +565,7 @@ export class CaseCommentModel {
 
       await Promise.all([
         commentableCase.handleAlertComments(attachmentsWithoutErrors),
-        this.bulkCreateCommentUserAction(attachmentsWithoutErrors),
+        this.bulkCreateCommentUserAction({ isAssistant, attachments: attachmentsWithoutErrors }),
       ]);
 
       return commentableCase;

@@ -720,6 +720,7 @@ describe('create', () => {
         userAction: {
           caseId: 'mock-id-1',
           owner: 'securitySolution',
+          isAssistant: false,
           payload: {
             assignees: [],
             category: null,
@@ -750,6 +751,7 @@ describe('create', () => {
         userAction: {
           caseId: 'mock-id-1',
           owner: 'securitySolution',
+          isAssistant: false,
           payload: {
             assignees: [{ uid: '1' }],
             category: 'My category',

@@ -2286,7 +2286,8 @@ describe('CasesService', () => {
       'in_progress_at',
       'time_to_acknowledge',
       'time_to_resolve',
-      'time_to_investigate'
+      'time_to_investigate',
+      'is_assistant'
     );
 
     describe('getCaseIdsByAlertId', () => {

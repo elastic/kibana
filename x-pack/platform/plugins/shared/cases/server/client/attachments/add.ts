@@ -25,7 +25,7 @@ import { validateMaxUserActions } from '../../common/validators';
  * @ignore
  */
 export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs): Promise<Case> => {
-  const { comment, caseId } = addArgs;
+  const { comment, caseId, isAssistant } = addArgs;
 
   const {
     logger,
@@ -62,6 +62,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
       createdDate,
       commentReq: query,
       id: savedObjectID,
+      isAssistant,
     });
 
     return await updatedModel.encodeWithComments();

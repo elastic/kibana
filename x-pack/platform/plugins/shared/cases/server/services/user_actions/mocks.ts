@@ -309,6 +309,7 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             title: 'updated title',
           },
@@ -341,6 +342,7 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             status: 'closed',
           },
@@ -373,6 +375,7 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             connector: {
               fields: {
@@ -422,6 +425,7 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             category: 'pizza toppings',
           },
@@ -456,6 +460,7 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             description: 'updated desc',
           },
@@ -488,6 +493,7 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             tags: ['one', 'two'],
           },
@@ -520,6 +526,7 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             tags: ['defacement'],
           },
@@ -552,6 +559,7 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             settings: {
               syncAlerts: false,
@@ -586,6 +594,7 @@ export const getBuiltUserActions = ({ isMock }: { isMock: boolean }): UserAction
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             severity: 'critical',
           },
@@ -623,6 +632,7 @@ export const getAssigneesAddedUserActions = ({ isMock }: { isMock: boolean }): U
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             assignees: [
               {
@@ -668,6 +678,7 @@ export const getAssigneesRemovedUserActions = ({
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             assignees: [
               {
@@ -713,6 +724,7 @@ export const getAssigneesAddedRemovedUserActions = ({
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             assignees: [
               {
@@ -749,6 +761,7 @@ export const getAssigneesAddedRemovedUserActions = ({
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             assignees: [
               {
@@ -794,6 +807,7 @@ export const getTagsAddedRemovedUserActions = ({
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             tags: ['a', 'b'],
           },
@@ -826,6 +840,7 @@ export const getTagsAddedRemovedUserActions = ({
             username: 'elastic',
           },
           owner: 'securitySolution',
+          is_assistant: false,
           payload: {
             tags: ['defacement'],
           },

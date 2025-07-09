@@ -18,6 +18,7 @@ import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
 import { HoverableUserWithAvatarResolver } from '../user_profiles/hoverable_user_with_avatar_resolver';
 import { getUserActionAriaLabel } from './user_actions_aria_labels';
+import { HoverableAssistantTitleWithAvatar } from '../assistant';
 
 interface Props {
   userAction: SnakeToCamelCase<ConnectorUserAction>;
@@ -65,7 +66,9 @@ export const createCommonUpdateUserActionBuilder = ({
   return {
     build: () => [
       {
-        username: (
+        username: userAction.isAssistant ? (
+          <HoverableAssistantTitleWithAvatar />
+        ) : (
           <HoverableUserWithAvatarResolver
             user={userAction.createdBy}
             userProfiles={userProfiles}

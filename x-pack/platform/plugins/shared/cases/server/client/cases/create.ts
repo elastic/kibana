@@ -112,6 +112,7 @@ export const create = async (
           customFields: query.customFields ?? [],
         },
         owner: newCase.attributes.owner,
+        isAssistant: newCase.attributes.is_assistant ?? false,
       },
     });
 

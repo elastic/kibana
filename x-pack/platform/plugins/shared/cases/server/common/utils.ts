@@ -69,14 +69,14 @@ export const nullUser: User = { username: null, full_name: null, email: null };
 
 export const transformNewCase = ({
   user,
-  newCase,
+  newCase: { isAssistant, ...restNewCase },
 }: {
   user: User;
   newCase: CasePostRequest;
 }): CaseTransformedAttributes => ({
-  ...newCase,
+  ...restNewCase,
   duration: null,
-  severity: newCase.severity ?? CaseSeverity.LOW,
+  severity: restNewCase.severity ?? CaseSeverity.LOW,
   closed_at: null,
   closed_by: null,
   created_at: new Date().toISOString(),
@@ -85,11 +85,12 @@ export const transformNewCase = ({
   status: CaseStatuses.open,
   updated_at: null,
   updated_by: null,
-  assignees: dedupAssignees(newCase.assignees) ?? [],
-  category: newCase.category ?? null,
-  customFields: newCase.customFields ?? [],
+  assignees: dedupAssignees(restNewCase.assignees) ?? [],
+  category: restNewCase.category ?? null,
+  customFields: restNewCase.customFields ?? [],
   observables: [],
   incremental_id: undefined,
+  is_assistant: isAssistant,
 });
 
 export const transformCases = ({

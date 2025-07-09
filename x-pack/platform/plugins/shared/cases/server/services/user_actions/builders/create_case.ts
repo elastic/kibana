@@ -12,7 +12,7 @@ import type { EventDetails, UserActionParameters, UserActionEvent } from '../typ
 
 export class CreateCaseUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'create_case'>): UserActionEvent {
-    const { payload, caseId, owner, user } = args;
+    const { payload, caseId, owner, user, isAssistant } = args;
     const action = UserActionActions.create;
 
     const connectorWithoutId = this.extractConnectorId(payload.connector);
@@ -20,6 +20,7 @@ export class CreateCaseUserActionBuilder extends UserActionBuilder {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
         action,
+        is_assistant: isAssistant,
         payload: { ...payload, connector: connectorWithoutId, status: CaseStatuses.open },
         type: UserActionTypes.create_case,
       },

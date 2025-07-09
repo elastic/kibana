@@ -55,6 +55,7 @@ export interface CasePersistedAttributes {
   time_to_acknowledge?: number | null;
   time_to_investigate?: number | null;
   time_to_resolve?: number | null;
+  is_assistant?: boolean | null;
 }
 
 type CasePersistedCustomFields = Array<{

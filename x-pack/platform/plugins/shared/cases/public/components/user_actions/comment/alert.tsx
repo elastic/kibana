@@ -22,6 +22,7 @@ import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_u
 import { UserActionContentToolbar } from '../content_toolbar';
 import { AlertPropertyActions } from '../property_actions/alert_property_actions';
 import { DELETE_ALERTS_SUCCESS_TITLE } from './translations';
+import { HoverableAssistantTitleWithAvatar } from '../../assistant';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -61,7 +62,9 @@ const getSingleAlertUserAction = ({
 
   return [
     {
-      username: (
+      username: userAction.isAssistant ? (
+        <HoverableAssistantTitleWithAvatar />
+      ) : (
         <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
       eventColor: 'subdued',
@@ -119,7 +122,9 @@ const getMultipleAlertsUserAction = ({
 
   return [
     {
-      username: (
+      username: userAction.isAssistant ? (
+        <HoverableAssistantTitleWithAvatar />
+      ) : (
         <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
       eventColor: 'subdued',

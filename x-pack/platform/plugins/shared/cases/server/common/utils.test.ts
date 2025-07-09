@@ -151,6 +151,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "incremental_id": undefined,
+          "is_assistant": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -208,6 +209,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "incremental_id": undefined,
+          "is_assistant": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -269,6 +271,7 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "incremental_id": undefined,
+          "is_assistant": undefined,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
@@ -336,6 +339,65 @@ describe('common utils', () => {
           "duration": null,
           "external_service": null,
           "incremental_id": undefined,
+          "is_assistant": undefined,
+          "observables": Array [],
+          "owner": "securitySolution",
+          "settings": Object {
+            "syncAlerts": true,
+          },
+          "severity": "low",
+          "status": "open",
+          "tags": Array [
+            "new",
+            "case",
+          ],
+          "title": "My new case",
+          "updated_at": null,
+          "updated_by": null,
+        }
+      `);
+    });
+
+    it('transform correctly with isAssistant provided', () => {
+      const myCase = {
+        newCase: { ...newCase, connector, isAssistant: true },
+        user: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic',
+          username: 'elastic',
+        },
+      };
+
+      const res = transformNewCase(myCase);
+
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Array [],
+          "category": null,
+          "closed_at": null,
+          "closed_by": null,
+          "connector": Object {
+            "fields": Object {
+              "issueType": "Task",
+              "parent": null,
+              "priority": "High",
+            },
+            "id": "123",
+            "name": "My connector",
+            "type": ".jira",
+          },
+          "created_at": "2020-04-09T09:43:51.778Z",
+          "created_by": Object {
+            "email": "elastic@elastic.co",
+            "full_name": "Elastic",
+            "username": "elastic",
+          },
+          "customFields": Array [],
+          "description": "A description",
+          "duration": null,
+          "external_service": null,
+          "incremental_id": undefined,
+          "is_assistant": true,
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {

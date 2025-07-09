@@ -809,6 +809,7 @@ export class CasesConnectorExecutor {
       ...(caseFieldsFromTemplate?.category ? { category: caseFieldsFromTemplate?.category } : null),
       owner: params.owner,
       customFields: builtCustomFields,
+      isAssistant: params.isGeneratedByAssistant ?? false,
     };
   }
 
@@ -1112,7 +1113,7 @@ export class CasesConnectorExecutor {
       this.getLogMetadata(params, { tags: ['case-connector:attachAlertsToCases'] })
     );
 
-    const { internallyManagedAlerts, rule } = params;
+    const { internallyManagedAlerts, isGeneratedByAssistant, rule } = params;
 
     const [casesUnderAlertLimit, casesOverAlertLimit] = partition(
       Array.from(groupedAlertsWithCases.values()),
@@ -1151,6 +1152,7 @@ export class CasesConnectorExecutor {
           })) ?? [];
         return {
           caseId: theCase.id,
+          isAssistant: isGeneratedByAssistant ?? false,
           attachments: [
             ...extraComments,
             {

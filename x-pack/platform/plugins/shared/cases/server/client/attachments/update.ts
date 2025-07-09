@@ -26,7 +26,7 @@ import { validateMaxUserActions } from '../../common/validators';
  * @ignore
  */
 export async function update(
-  { caseID, updateRequest: queryParams }: UpdateArgs,
+  { caseID, isAssistant, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> {
   const {
@@ -101,6 +101,7 @@ export async function update(
       updateRequest: queryParams,
       updatedAt: updatedDate,
       owner: myComment.attributes.owner,
+      isAssistant,
     });
 
     return await updatedModel.encodeWithComments();
