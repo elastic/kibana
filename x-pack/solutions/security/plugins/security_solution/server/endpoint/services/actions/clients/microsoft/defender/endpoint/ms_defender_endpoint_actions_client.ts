@@ -680,31 +680,111 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       );
 
     if (machineActions?.value) {
+      // Collect all downloads for concurrent execution
+      const downloadTasks: Array<{
+        machineAction: MicrosoftDefenderEndpointMachineAction;
+        actionRequests: Array<
+          LogsEndpointAction<undefined, {}, MicrosoftDefenderEndpointActionRequestCommonMeta>
+        >;
+        downloadPromise: Promise<ResponseActionRunScriptOutputContent | null>;
+      }> = [];
+
+      // First pass: start all downloads concurrently and handle non-download actions
       for (const machineAction of machineActions.value) {
         const { isPending, isError, message } = this.calculateMachineActionState(machineAction);
 
         if (!isPending) {
           const pendingActionRequests = actionsByMachineId[machineAction.id] ?? [];
+          const needsDownload =
+            options.downloadResult &&
+            pendingActionRequests.some((req) => req.EndpointActions.data.command === 'runscript');
 
-          for (const actionRequest of pendingActionRequests) {
-            let additionalData = {};
-            // In order to not copy paste most of the logic, I decided to add this additional check here to support `runscript` action and it's result that comes back as a link to download the file
-            if (options.downloadResult) {
-              additionalData = {
-                meta: {
-                  machineActionId: machineAction.id,
-                  filename: `runscript-output-${machineAction.id}.json`,
-                  createdAt: new Date().toISOString(),
-                },
-              };
+          console.log({ needsDownload });
+          if (needsDownload) {
+            // Start download but don't await - add to concurrent batch
+            downloadTasks.push({
+              machineAction,
+              actionRequests: pendingActionRequests,
+              downloadPromise: this.downloadAndParseScriptOutput(machineAction.id),
+            });
+          } else {
+            // Handle non-download actions immediately
+            for (const actionRequest of pendingActionRequests) {
+              completedResponses.push(
+                this.buildActionResponseEsDoc({
+                  actionId: actionRequest.EndpointActions.action_id,
+                  agentId: Array.isArray(actionRequest.agent.id)
+                    ? actionRequest.agent.id[0]
+                    : actionRequest.agent.id,
+                  data: { command: actionRequest.EndpointActions.data.command },
+                  error: isError ? { message } : undefined,
+                })
+              );
             }
+          }
+        }
+      }
+
+      // Second pass: wait for all downloads to complete concurrently
+      if (downloadTasks.length > 0) {
+        const downloadResults = await Promise.allSettled(
+          downloadTasks.map((task) => task.downloadPromise)
+        );
+
+        // Process download results
+        for (let i = 0; i < downloadTasks.length; i++) {
+          const { machineAction, actionRequests } = downloadTasks[i];
+          const downloadResult = downloadResults[i];
+          const { isError, message } = this.calculateMachineActionState(machineAction);
+
+          let outputContent = {
+            type: 'json' as const,
+            content: {
+              stdout: '',
+              stderr: '',
+              code: '0',
+            } as ResponseActionRunScriptOutputContent,
+          };
+          if (downloadResult.status === 'fulfilled' && downloadResult.value) {
+            outputContent = {
+              type: 'json' as const,
+              content: downloadResult.value,
+            };
+          } else if (downloadResult.status === 'rejected') {
+            this.log.warn(
+              `Download failed for machine action ${machineAction.id}: ${
+                downloadResult.reason?.message || 'Unknown error'
+              }`
+            );
+            outputContent = {
+              type: 'json' as const,
+              content: {
+                stdout: '',
+                stderr: `Download failed: ${downloadResult.reason?.message || 'Unknown error'}`,
+                code: '-1',
+              },
+            };
+          }
+
+          const additionalData = {
+            meta: {
+              machineActionId: machineAction.id,
+              filename: `runscript-output-${machineAction.id}.json`,
+              createdAt: new Date().toISOString(),
+            },
+          };
+
+          for (const actionRequest of actionRequests) {
             completedResponses.push(
               this.buildActionResponseEsDoc({
                 actionId: actionRequest.EndpointActions.action_id,
                 agentId: Array.isArray(actionRequest.agent.id)
                   ? actionRequest.agent.id[0]
                   : actionRequest.agent.id,
-                data: { command: actionRequest.EndpointActions.data.command },
+                data: {
+                  command: actionRequest.EndpointActions.data.command,
+                  output: outputContent,
+                },
                 error: isError ? { message } : undefined,
                 ...additionalData,
               })
@@ -941,5 +1021,75 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
 
     return agentResponse;
+  }
+
+  /**
+   * Downloads and parses JSON output from Microsoft Defender script execution
+   * @private
+   */
+  private async downloadAndParseScriptOutput(
+    machineActionId: string
+  ): Promise<ResponseActionRunScriptOutputContent | null> {
+    try {
+      // Download the file content
+      const { data: downloadStream } = await this.sendAction<Readable>(
+        MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
+        { id: machineActionId }
+      );
+
+      if (!downloadStream) {
+        this.log.debug(`No download stream available for machine action ${machineActionId}`);
+        return null;
+      }
+
+      // Parse the stream content
+      const parsedOutput = await this.parseScriptOutput(downloadStream);
+      return parsedOutput;
+    } catch (err) {
+      this.log.error(
+        `Failed to download and parse script output for machine action ${machineActionId}: ${err.message}`
+      );
+
+      // Return error information as output
+      return {
+        stdout: '',
+        stderr: `Failed to retrieve script output: ${err.message}`,
+        code: '-1',
+      };
+    }
+  }
+
+  /**
+   * Parses JSON content from script output stream
+   * @private
+   */
+  private async parseScriptOutput(stream: Readable): Promise<ResponseActionRunScriptOutputContent> {
+    try {
+      // Read stream content
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      const jsonContent = Buffer.concat(chunks).toString('utf8');
+
+      // Parse JSON content
+      const parsedJson = JSON.parse(jsonContent);
+
+      // Extract output according to the expected format and map to ResponseActionRunScriptOutputContent
+      return {
+        stdout: parsedJson.script_output || '',
+        stderr: parsedJson.script_errors || '',
+        code: String(parsedJson.exit_code || 0),
+      };
+    } catch (err) {
+      this.log.error(`Failed to parse script output JSON: ${err.message}`);
+
+      // Return error information as output
+      return {
+        stdout: '',
+        stderr: `Failed to parse script output: ${err.message}`,
+        code: '-1',
+      };
+    }
   }
 }
