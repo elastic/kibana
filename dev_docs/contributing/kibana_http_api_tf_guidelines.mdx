@@ -301,56 +301,6 @@ Volatile fields create a challenging choice: include them (causing constant conf
 
 Including and separating them makes it easier for the TF provider to specifically ignore sets of fields (marking them as [readonly](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_alerting_rule#read-only)) but needs to be built into the client generator.
 
-### Make requests transactional
-
-Terraform expects changes to take effect immediately. Design your API so that changes take effect immediately upon successful response.
-
-Consider the scenario:
-
-A user wants to create alerting rules with different configurations, depending on the space they are in.
-
-In Kibana’s UI, they’d create a space, change into that space and then create the rule.
-
-Through curl, the flow would be similar, although they’d probably GET the space to make sure it exists before POSTing the rule.
-
-In terraform, it’s different. Both resources can (and often are) configured at the same time! In the scenario above, the client [needs the space ID](https://github.com/elastic/terraform-provider-elasticstack/blame/0826f4385a29fa58a79f785249f204e13ee3d47c/internal/clients/kibana/alerting.go#L192) to create the rule:
-
-```go
-req := client.CreateRuleId(ctxWithAuth, rule.SpaceID, rule.RuleID).KbnXsrf("true").CreateRuleRequest(reqModel)
-```
-
-When requests aren’t transactional, we’d need to build the POST & GET workflow into the client, adding complexity to what could have been simple.
-
-Make sure this is the case by, for example,  [setting \`refresh: wait\_for\`](https://github.com/elastic/kibana/blob/188669773e9cc1981b5e89f24afcfdc379ad3058/x-pack/platform/plugins/shared/alerting/server/alerts_client/alerts_client.ts#L644-L657) on the relevant indices in POST requests.
-
-```ts
-private async persistAlertsHelper() {
-  ...
-  await resolveAlertConflicts({
-    logger: this.options.logger,
-    esClient,
-    bulkRequest: {
-      refresh: 'wait_for', // Ensure the index is refreshed after the operation
-      index: this.indexTemplateAndPattern.alias,
-      require_alias: !this.isUsingDataStreams(),
-      operations: bulkBody,
-    },
-    bulkResponse: response,
-    ruleId: this.options.rule.id,
-    ruleName: this.options.rule.name,
-    ruleType: this.ruleType.id,
-  });
-  ...
-}
-
-```
-
-### Offer compare-and-swap
-
-Between refreshing state and applying changes, there’s a gap where someone could modify your API. Generally it's ok to take the approach of last-write-wins.
-
-If you have to consider concurrency control, support mechanisms like ETags and checksums, and the \`version\` property on saved objects.
-
 ### Ignore the robustness principle: don’t normalize output
 
 The robustness principle says to accept input in various formats but return output in a consistent format, for example converting strings to lowercase, ordering elements in a list or changing whitespace in \`json\` strings.

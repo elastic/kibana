@@ -151,6 +151,14 @@ DELETE /api/my_domain/my_resources/{id}         # Delete - remove an existing re
 GET    /api/my_domain/my_resources              # List - retrieve all resources (with pagination)
 ```
 
+### Avoid polling style APIs
+
+Prefer APIs that process their requests within the lifecycle of a single request. If your API handler is doing actions that take longer than a typical request (30s), consider using a background task or job and offer clients a way to monitor progress. Either by `GET`ing the resource or some special polling API.
+
+<DocCallOut title="IaC friction" color="warning">
+  Polling style APIs create additional complexity for all API callers, but especially for IaC use cases that are typically not as sophisticated in their execution like Terraform.
+</DocCallOut>
+
 ### Path
 
 **Use snake case**
@@ -477,6 +485,8 @@ And either returns a task ID for tracking long running executions or a response 
   Bulk operations add complexity, ensure that your use case merits the added complexity. Reach out to the Kibana Core team for more guidance.
 </DocCallOut>
 
+If you are considering offering this API consider impacts on <DocLink id="kibHttpApiTfGuidelines" text="IaC use cases" />.
+
 ### Observability
 
 Consider common error states your API might face, as well the information you might need to answer unexpected questions about the behavior of the API. To this end, creating a dedicated logger is be a good idea. Something like `const log = logger.get('myApi')` will emit logs for your API that can be easily searched for in overview clusters.
@@ -588,3 +598,9 @@ Poorly defined data structures in your requests result in a terrible user experi
 ```
 
 And validation should be super lax `schema.object({}, { unknowns: 'allow' })`.
+
+### Concurrency controls
+
+Between refreshing state and applying changes, there’s a gap where someone could modify your API. Generally it's ok to take the approach of last-write-wins.
+
+If you have to consider concurrency control, support mechanisms like ETags and checksums, and the \`version\` property on saved objects.
