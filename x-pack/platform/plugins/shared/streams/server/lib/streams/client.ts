@@ -133,7 +133,7 @@ export class StreamsClient {
     const rootStreamExists = await this.checkRootLogsStreamExists();
 
     if (!rootStreamExists) {
-      const result = await State.attemptChanges(
+      await State.attemptChanges(
         [
           {
             type: 'upsert',
@@ -145,10 +145,6 @@ export class StreamsClient {
           streamsClient: this,
         }
       );
-
-      if (result.status === 'failed_with_rollback') {
-        throw result.error;
-      }
     }
 
     if (!this.dependencies.isServerless) {
@@ -191,7 +187,7 @@ export class StreamsClient {
     const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
     if (rootStreamExists) {
-      const result = await State.attemptChanges(
+      await State.attemptChanges(
         [
           {
             type: 'delete',
@@ -203,10 +199,6 @@ export class StreamsClient {
           streamsClient: this,
         }
       );
-
-      if (result.status === 'failed_with_rollback') {
-        throw result.error;
-      }
 
       const { assetClient, storageClient } = this.dependencies;
       await Promise.all([assetClient.clean(), storageClient.clean()]);
@@ -268,10 +260,6 @@ export class StreamsClient {
       }
     );
 
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
-
     const { dashboards, queries } = request;
 
     // sync dashboards as before
@@ -313,7 +301,7 @@ export class StreamsClient {
       throw new StatusError(`Child stream ${name} already exists`, 409);
     }
 
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'upsert',
@@ -349,10 +337,6 @@ export class StreamsClient {
       ],
       { ...this.dependencies, streamsClient: this }
     );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
 
     return { acknowledged: true, result: 'created' };
   }
@@ -689,7 +673,7 @@ export class StreamsClient {
       throw new SecurityError(`Cannot delete stream, insufficient privileges`);
     }
 
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'delete',
@@ -701,10 +685,6 @@ export class StreamsClient {
         streamsClient: this,
       }
     );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
 
     await this.dependencies.queryClient.syncQueries(name, []);
 
