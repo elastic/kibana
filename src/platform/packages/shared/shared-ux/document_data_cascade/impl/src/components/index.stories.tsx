@@ -83,7 +83,6 @@ export const CascadeGridImplementation: StoryObj<
         </EuiFlexItem>
         <EuiFlexItem>
           <DataCascade
-            stickyGroupRoot
             size={args.size}
             data={initData}
             cascadeGroups={groupByFields}
