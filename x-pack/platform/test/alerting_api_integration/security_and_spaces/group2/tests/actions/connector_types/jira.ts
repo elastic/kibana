@@ -19,7 +19,6 @@ import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/jir
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function jiraTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');

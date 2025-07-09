@@ -76,8 +76,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     },
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/217739
-  describe.skip('Observability alerts >', function () {
+  describe('Observability alerts >', function () {
     this.tags('includeFirefox');
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
@@ -157,7 +156,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           await observability.alerts.common.submitQuery('');
         });
 
-        it('Autocompletion works', async () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/217739
+        it.skip('Autocompletion works', async () => {
           await browser.refresh();
           await observability.alerts.common.typeInQueryBar('kibana.alert.s');
           await observability.alerts.common.clickOnQueryBar();

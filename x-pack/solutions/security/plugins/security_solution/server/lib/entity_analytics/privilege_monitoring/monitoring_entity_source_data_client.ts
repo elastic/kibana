@@ -7,8 +7,9 @@
 
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
-  MonitoringEntitySourceDescriptor,
-  MonitoringEntitySourceResponse,
+  CreateMonitoringEntitySource,
+  ListEntitySourcesRequestQuery,
+  MonitoringEntitySource,
 } from '../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { MonitoringEntitySourceDescriptorClient } from './saved_objects';
 
@@ -28,9 +29,7 @@ export class MonitoringEntitySourceDataClient {
     });
   }
 
-  public async init(
-    input: MonitoringEntitySourceDescriptor
-  ): Promise<MonitoringEntitySourceResponse> {
+  public async init(input: CreateMonitoringEntitySource) {
     const descriptor = await this.monitoringEntitySourceClient.create({
       ...input,
     });
@@ -38,12 +37,12 @@ export class MonitoringEntitySourceDataClient {
     return descriptor;
   }
 
-  public async get(): Promise<MonitoringEntitySourceResponse> {
+  public async get(): Promise<MonitoringEntitySource> {
     this.log('debug', 'Getting Monitoring Entity Source Sync saved object');
     return this.monitoringEntitySourceClient.get();
   }
 
-  public async update(update: Partial<MonitoringEntitySourceResponse>) {
+  public async update(update: Partial<MonitoringEntitySource> & { id: string }) {
     this.log('debug', 'Updating Monitoring Entity Source Sync saved object');
 
     const sanitizedUpdate = {
@@ -62,9 +61,9 @@ export class MonitoringEntitySourceDataClient {
     return this.monitoringEntitySourceClient.delete();
   }
 
-  public async list(): Promise<MonitoringEntitySourceResponse[]> {
+  public async list(query: ListEntitySourcesRequestQuery): Promise<MonitoringEntitySource[]> {
     this.log('debug', 'Finding all Monitoring Entity Source Sync saved objects');
-    return this.monitoringEntitySourceClient.findAll();
+    return this.monitoringEntitySourceClient.findAll(query);
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {
