@@ -105,6 +105,9 @@ export const CloudAssetInventoryPolicyTemplateForm =
       const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '0.18.0';
       const { cloud, uiSettings } = useKibana().services;
       const input = getSelectedOption(newPolicy.inputs);
+
+      console.log('CloudAssetInventoryPolicyTemplateForm newPolicy', newPolicy);
+
       const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
         input,
         isAgentlessEnabled,
@@ -118,6 +121,12 @@ export const CloudAssetInventoryPolicyTemplateForm =
 
       const updatePolicy = useCallback(
         (updatedPolicy: NewPackagePolicy) => {
+          const err = new Error();
+          const stack = err.stack?.split('\n');
+          // stack[0] is 'Error', stack[1] is this function, stack[2] is the caller
+          console.log('Called by:', stack?.[2]);
+
+          console.log('CloudAssetInventoryPolicyTemplateForm updatePolicy', updatedPolicy);
           onChange({ isValid: true, updatedPolicy });
         },
         [onChange]

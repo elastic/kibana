@@ -103,7 +103,7 @@ const CustomEuiBottomBar = styled(EuiBottomBar)`
   z-index: 50;
 `;
 
-export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
+const CreatePackagePolicySinglePageComponent: CreatePackagePolicyParams = ({
   from,
   queryParamsPolicyId,
   prerelease,
@@ -763,3 +763,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     children
   );
 };
+
+CreatePackagePolicySinglePageComponent.displayName = 'CreatePackagePolicySinglePage';
+export const CreatePackagePolicySinglePage = React.memo(CreatePackagePolicySinglePageComponent);

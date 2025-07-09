@@ -310,7 +310,7 @@ export function useOnSubmit({
 
   // Initial loading of package info
   useEffect(() => {
-    async function init() {
+    async function init(randomNumber: number) {
       if (
         !packageInfo ||
         (packageInfo.name === packagePolicy.package?.name && integrationToEnable === integration)
@@ -337,10 +337,26 @@ export function useOnSubmit({
         DEFAULT_PACKAGE_POLICY.description,
         integrationToEnable
       );
+      console.log(
+        'Fleet useOnSubmit init loaded basePackagePolicy ',
+        'number',
+        randomNumber,
+        'basePackagePolicy',
+        basePackagePolicy,
+        'packageInfo',
+        packageInfo,
+        'integrationToEnable',
+        integrationToEnable
+      );
       updatePackagePolicy(basePackagePolicy);
       setIsInitialized(true);
     }
-    init();
+    if (!isInitialized) {
+      const randomNumber = Math.floor(Math.random() * 1000);
+      console.log('Fleet useOnSubmit init', randomNumber);
+      // Fetch agent policies
+      init(randomNumber);
+    }
   }, [
     packageInfo,
     agentPolicies,
