@@ -6,28 +6,40 @@
  */
 
 import React from 'react';
-import { EuiIconTip } from '@elastic/eui';
+import { EuiIconTip, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Node } from '@elastic/eui/src/components/tree_view/tree_view';
 import { i18n } from '@kbn/i18n';
 import type { PipelineTreeNode } from './types';
 import { MAX_TREE_LEVEL } from './constants';
-import { cssTreeNode } from './styles';
 
 const traverseTree = (treeNode: PipelineTreeNode, level: number): Node => {
   const currentNode = {
     id: treeNode.pipelineName,
-    label: treeNode.pipelineName,
+    label: (
+      <EuiFlexGroup direction="row" css={{ width: '450px' }}>
+        <EuiFlexItem>
+          <EuiLink color="text" onClick={() => {}}>
+            {treeNode.pipelineName}
+          </EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {treeNode.isManaged && (
+            <EuiIconTip
+              content={i18n.translate(
+                'ingestPipelines.pipelineStructureTree.treeNodeManagedTooltip',
+                {
+                  defaultMessage: 'Managed',
+                }
+              )}
+              type="lock"
+              position="top"
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
     'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}`,
-    css: cssTreeNode,
-    icon: treeNode.isManaged ? (
-      <EuiIconTip
-        content={i18n.translate('ingestPipelines.pipelineStructureTree.treeNodeManagedTooltip', {
-          defaultMessage: 'Managed',
-        })}
-        type="lock"
-      />
-    ) : undefined,
-    hasArrow: true,
+    className: `cssTreeNode-level-${level}`,
     children: [] as Node[],
   };
   if (level === MAX_TREE_LEVEL) {

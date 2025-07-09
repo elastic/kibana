@@ -7,7 +7,19 @@
 
 import { css } from '@emotion/react';
 
-export const cssTreeNode = css`
-  border-width: 2px;
-  border-style: solid;
+export const styles = css`
+  [class*='cssTreeNode-level-'] {
+    background-color: #ffffff;
+    padding: 20px 10px;
+    border: 1px solid;
+    width: 400px;
+    margin: 15px 0px;
+  }
+
+  .cssTreeNode-level-2,
+  .cssTreeNode-level-3,
+  .cssTreeNode-level-4,
+  .cssTreeNode-level-5 {
+    margin-left: 16px;
+  }
 `;

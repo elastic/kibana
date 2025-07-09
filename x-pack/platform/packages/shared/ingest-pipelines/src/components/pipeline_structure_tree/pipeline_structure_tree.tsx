@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiTreeView } from '@elastic/eui';
 import type { PipelineTreeNode } from './types';
 import { createTreeNodesFromPipelines } from './create_tree_nodes';
+import { styles } from './styles';
 
 export interface PipelineStructureTreeProps {
   pipelineTree: PipelineTreeNode;
@@ -22,5 +23,5 @@ export interface PipelineStructureTreeProps {
 export const PipelineStructureTree = (props: PipelineStructureTreeProps) => {
   const treeNode = createTreeNodesFromPipelines(props.pipelineTree);
 
-  return <EuiTreeView items={[treeNode]} showExpansionArrows={true} />;
+  return <EuiTreeView items={[treeNode]} showExpansionArrows={true} css={styles} />;
 };
