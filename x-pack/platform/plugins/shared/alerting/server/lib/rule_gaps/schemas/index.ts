@@ -31,6 +31,7 @@ export const gapBaseSchema = schema.object({
   filled_duration_ms: schema.number(),
   unfilled_duration_ms: schema.number(),
   in_progress_duration_ms: schema.number(),
+  disabled: schema.maybe(schema.boolean()),
 });
 
 const findGapsBaseParamsSchema = schema.object(
