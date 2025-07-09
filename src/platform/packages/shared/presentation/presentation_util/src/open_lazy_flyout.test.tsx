@@ -42,12 +42,16 @@ describe('openLazyFlyout', () => {
     expect(openFlyout).toHaveBeenCalledWith(
       expect.anything(), // React element
       expect.objectContaining({
-        type: 'push',
-        size: 's',
-        ownFocus: true,
-        isResizable: true,
+        'aria-labelledby': 'modalTitleId_generated-id',
         className: 'kbnPresentationLazyFlyout',
-        'aria-labelledby': expect.any(String), // generated ID
+        'data-test-subj': 'lazyFlyoutTest',
+        isResizable: true,
+        maxWidth: 800,
+        size: 500,
+        outsideClickCloses: true,
+        ownFocus: true,
+        paddingSize: 'm',
+        type: 'push',
       })
     );
   });
