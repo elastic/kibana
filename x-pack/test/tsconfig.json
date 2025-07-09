@@ -132,5 +132,9 @@
     "@kbn/core-chrome-browser",
     "@kbn/event-log-plugin",
     "@kbn/core-provider-plugin",
+    "@kbn/ai-assistant-common",
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/alerts-as-data-utils",
   ]
 }
