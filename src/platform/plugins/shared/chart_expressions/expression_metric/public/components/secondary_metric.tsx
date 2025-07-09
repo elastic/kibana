@@ -16,6 +16,7 @@ import { type FieldFormatConvertFunction } from '@kbn/field-formats-plugin/commo
 import { type VisParams } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { FormatOverrides } from './helpers';
+import { getSecondaryMetricInfo } from './secondary_metric_info';
 
 export interface TrendConfig {
   showIcon: boolean;
@@ -24,6 +25,19 @@ export interface TrendConfig {
   baselineValue: number | undefined;
   borderColor?: string;
   compareToPrimary: boolean;
+}
+
+export interface SecondaryMetricProps {
+  columns: DatatableColumn[];
+  row: DatatableRow;
+  config: Pick<VisParams, 'metric' | 'dimensions'>;
+  getMetricFormatter: (
+    accessor: string,
+    columns: DatatableColumn[],
+    formatOverrides?: FormatOverrides | undefined
+  ) => FieldFormatConvertFunction;
+  trendConfig?: TrendConfig;
+  staticColor?: string;
 }
 
 const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvailable', {
@@ -195,20 +209,7 @@ function SecondaryMetricValue({
       </EuiBadge>
     );
   }
-  return formattedValue;
-}
-
-export interface SecondaryMetricProps {
-  columns: DatatableColumn[];
-  row: DatatableRow;
-  config: Pick<VisParams, 'metric' | 'dimensions'>;
-  trendConfig?: TrendConfig;
-  color?: string;
-  getMetricFormatter: (
-    accessor: string,
-    columns: DatatableColumn[],
-    formatOverrides?: FormatOverrides | undefined
-  ) => FieldFormatConvertFunction;
+  return <span>{formattedValue}</span>;
 }
 
 function getMetricColumnAndFormatter(
@@ -250,8 +251,11 @@ export function SecondaryMetric({
   config,
   getMetricFormatter,
   trendConfig,
-  color,
+  staticColor,
 }: SecondaryMetricProps) {
+  const props = { columns, row, config, getMetricFormatter, trendConfig, staticColor };
+  const data = getSecondaryMetricInfo(props);
+
   const { metricFormatter, metricColumn } =
     getMetricColumnAndFormatter(
       columns,
@@ -259,20 +263,67 @@ export function SecondaryMetric({
       getMetricFormatter,
       getEnhancedNumberSignFormatter(trendConfig)
     ) || {};
+
+  // TODO: Check if None we should show prefix
   const prefix = config.metric.secondaryPrefix ?? metricColumn?.name;
   const value = metricColumn ? row[metricColumn.id] : undefined;
 
+  const shouldShowBadge = !!data.badgeColor;
+
   return (
-    <span data-test-subj="metric-secondary-element">
-      {prefix}
+    <span
+      {...(data.description ? { 'aria-describedby': data.description } : {})}
+      css={styles.wrapper}
+      data-test-subj="metric-secondary-element"
+    >
+      {/* {prefix}
       {prefix ? ' ' : ''}
       <SecondaryMetricValue
         rawValue={value}
         formattedValue={metricFormatter?.(value)}
-        trendConfig={color ? undefined : trendConfig}
-        color={color}
+        trendConfig={staticColor ? undefined : trendConfig}
+        color={staticColor}
         formatter={metricFormatter}
-      />
+      /> */}
+      <span css={styles.label}>{data.label}</span>
+      {shouldShowBadge ? (
+        <EuiBadge color={data.badgeColor} css={[styles.badge, styles.value]}>
+          {data.value}
+        </EuiBadge>
+      ) : (
+        <span css={styles.value}>{data.value}</span>
+      )}
     </span>
   );
 }
+
+const styles = {
+  wrapper: css({
+    display: 'flex',
+    alignItems: 'center',
+    minWidth: 0,
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    width: '100%',
+  }),
+  label: css({
+    flex: '1 1 20%',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
+    marginRight: 4,
+  }),
+  badge: css({
+    fontSize: 'inherit',
+    lineHeight: 'inherit',
+  }),
+  value: css({
+    flex: '0 1 auto',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
+    maxWidth: '80%',
+  }),
+};
