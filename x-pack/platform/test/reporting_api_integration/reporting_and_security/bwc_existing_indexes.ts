@@ -15,7 +15,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
  * a major change in a major release, we handle it properly.
  */
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');

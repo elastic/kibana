@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { ObjectRemover } from '../../../../../functional_with_es_ssl/lib/object_remover';
+import { ObjectRemover } from '@kbn/test-suites-xpack-platform/functional_with_es_ssl/lib/object_remover';
 import {
   createAlert as createRule,
   disableAlert as disableRule,
   muteAlert as muteRule,
-} from '../../../../../functional_with_es_ssl/lib/alert_api_actions';
-import { generateUniqueKey } from '../../../../../functional_with_es_ssl/lib/get_test_data';
+} from '@kbn/test-suites-xpack-platform/functional_with_es_ssl/lib/alert_api_actions';
+import { generateUniqueKey } from '@kbn/test-suites-xpack-platform/functional_with_es_ssl/lib/get_test_data';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
 export default ({ getService }: FtrProviderContext) => {
