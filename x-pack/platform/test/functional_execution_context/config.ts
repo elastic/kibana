@@ -10,7 +10,7 @@ import { FtrConfigProviderContext, getKibanaCliLoggers, findTestPluginPaths } fr
 import { logFilePath } from './test_utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.ts'));
 
   const servers = {
     ...functionalConfig.get('servers'),

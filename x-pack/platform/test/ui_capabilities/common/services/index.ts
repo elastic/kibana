@@ -7,7 +7,7 @@
 
 import { FeaturesProvider } from './features';
 import { UICapabilitiesProvider } from './ui_capabilities';
-import { services as commonServices } from '../../../common/services';
+import { services as commonServices } from '../../../api_integration/services';
 
 export const services = {
   ...commonServices,
