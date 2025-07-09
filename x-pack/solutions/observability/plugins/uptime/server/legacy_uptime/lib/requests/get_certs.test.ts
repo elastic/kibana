@@ -256,7 +256,7 @@ describe('getCerts', () => {
           Object {
             "context": Object {
               "loggingOptions": Object {
-                "loggerName": "synthetics",
+                "loggerName": "uptime",
               },
             },
             "meta": true,
