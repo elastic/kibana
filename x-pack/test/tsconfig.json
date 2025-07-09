@@ -147,6 +147,8 @@
     "@kbn/alerts-ui-shared",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
+    "@kbn/saved-search-plugin",
+    "@kbn/core-saved-objects-common",
     "@kbn/event-log-plugin",
     "@kbn/management-settings-ids",
     "@kbn/core-provider-plugin",

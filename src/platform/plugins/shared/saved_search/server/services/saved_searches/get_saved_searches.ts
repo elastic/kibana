@@ -10,8 +10,8 @@
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import type { SavedSearchAttributes } from '../../../common';
 import { fromSavedSearchAttributes } from '../../../common';
+import type { DiscoverSessionAttributes } from '../../saved_objects/schema';
 
 interface GetSavedSearchDependencies {
   savedObjects: SavedObjectsClientContract;
@@ -19,13 +19,13 @@ interface GetSavedSearchDependencies {
 }
 
 export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearchDependencies) => {
-  const savedSearch: SavedObject<SavedSearchAttributes> = await deps.savedObjects.get(
+  const savedSearch: SavedObject<DiscoverSessionAttributes> = await deps.savedObjects.get(
     'search',
     savedSearchId
   );
 
   const parsedSearchSourceJSON = parseSearchSourceJSON(
-    savedSearch.attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
+    savedSearch.attributes.tabs[0].attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
   );
 
   const searchSourceValues = injectReferences(
