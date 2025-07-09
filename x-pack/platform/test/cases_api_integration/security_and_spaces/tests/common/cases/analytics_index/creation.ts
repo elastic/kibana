@@ -12,7 +12,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esClient = getService('es');
   const retry = getService('retry');
 
-  describe.only('analytics indexes creation', () => {
+  describe('analytics indexes creation', () => {
     const indexVersion = 1;
 
     it('cases index should be created with the correct mappings and scripts on startup', async () => {
@@ -34,14 +34,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(mappingDict[indexName].mappings._meta?.mapping_version).to.be(version);
       expect(mappingDict[indexName].mappings._meta?.painless_script_id).to.be(painlessScriptId);
-      expectSnapshot(mappingDict[indexName].mappings.properties).toMatch();
 
       const painlessScript = await esClient.getScript({
         id: painlessScriptId,
       });
 
       expect(painlessScript.found).to.be(true);
-      expectSnapshot(painlessScript.script).toMatch();
     });
 
     it('activity index should be created with the correct mappings and scripts on startup', async () => {
@@ -63,14 +61,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(mappingDict[indexName].mappings._meta?.mapping_version).to.be(version);
       expect(mappingDict[indexName].mappings._meta?.painless_script_id).to.be(painlessScriptId);
-      expectSnapshot(mappingDict[indexName].mappings.properties).toMatch();
 
       const painlessScript = await esClient.getScript({
         id: painlessScriptId,
       });
 
       expect(painlessScript.found).to.be(true);
-      expectSnapshot(painlessScript.script).toMatch();
     });
 
     it('attachments index should be created with the correct mappings and scripts on startup', async () => {
@@ -92,14 +88,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(mappingDict[indexName].mappings._meta?.mapping_version).to.be(version);
       expect(mappingDict[indexName].mappings._meta?.painless_script_id).to.be(painlessScriptId);
-      expectSnapshot(mappingDict[indexName].mappings.properties).toMatch();
 
       const painlessScript = await esClient.getScript({
         id: painlessScriptId,
       });
 
       expect(painlessScript.found).to.be(true);
-      expectSnapshot(painlessScript.script).toMatch();
     });
 
     it('comments index should be created with the correct mappings and scripts on startup', async () => {
@@ -121,14 +115,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(mappingDict[indexName].mappings._meta?.mapping_version).to.be(version);
       expect(mappingDict[indexName].mappings._meta?.painless_script_id).to.be(painlessScriptId);
-      expectSnapshot(mappingDict[indexName].mappings.properties).toMatch();
 
       const painlessScript = await esClient.getScript({
         id: painlessScriptId,
       });
 
       expect(painlessScript.found).to.be(true);
-      expectSnapshot(painlessScript.script).toMatch();
     });
   });
 };

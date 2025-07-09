@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const retry = getService('retry');
   const authSpace1 = getAuthWithSuperUser();
 
-  describe.only('analytics indexes synchronization task', () => {
+  describe('analytics indexes synchronization task', () => {
     beforeEach(async () => {
       await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);
@@ -114,7 +114,36 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(createdAtMs).not.to.be(null);
         expect(createdAtMs).not.to.be(undefined);
 
-        expectSnapshot(analyticsFields).toMatch();
+        expect(analyticsFields).to.eql({
+          assignees: [],
+          category: 'foobar',
+          created_by: {
+            email: null,
+            full_name: null,
+            profile_uid: null,
+            username: 'elastic',
+          },
+          custom_fields: [
+            {
+              key: 'test_custom_field',
+              type: 'text',
+              value: 'value',
+            },
+          ],
+          description: 'This is a brand new case of a bad meanie defacing data',
+          observables: [],
+          owner: 'securitySolutionFixture',
+          severity: 'low',
+          severity_sort: 0,
+          space_ids: ['default'],
+          status: 'open',
+          status_sort: 0,
+          tags: ['defacement'],
+          title: 'Super Bad Security Issue',
+          total_alerts: 0,
+          total_assignees: 0,
+          total_comments: 0,
+        });
       });
     });
 
@@ -196,7 +225,16 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(createdAt).not.to.be(null);
         expect(createdAt).not.to.be(undefined);
 
-        expectSnapshot(analyticsFields).toMatch();
+        expect(analyticsFields).to.eql({
+          comment: 'This is a cool comment',
+          created_by: {
+            email: null,
+            full_name: null,
+            username: 'elastic',
+          },
+          owner: 'securitySolutionFixture',
+          space_ids: ['default'],
+        });
       });
     });
 
