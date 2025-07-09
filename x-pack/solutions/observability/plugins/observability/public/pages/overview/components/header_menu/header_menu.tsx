@@ -24,6 +24,8 @@ export function HeaderMenu(): React.ReactElement | null {
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
   const href = onboardingLocator?.useUrl({});
+  const { pricing } = useKibana().services;
+  const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
 
   const { appMountParameters } = usePluginContext();
 
@@ -35,14 +37,16 @@ export function HeaderMenu(): React.ReactElement | null {
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <EuiHeaderLinks gutterSize="xs">
-            <EuiHeaderLink
-              color="primary"
-              href={http.basePath.prepend('/app/observability/annotations')}
-            >
-              {i18n.translate('xpack.observability.home.annotations', {
-                defaultMessage: 'Annotations',
-              })}
-            </EuiHeaderLink>
+            {isCompleteOverviewEnabled && (
+              <EuiHeaderLink
+                color="primary"
+                href={http.basePath.prepend('/app/observability/annotations')}
+              >
+                {i18n.translate('xpack.observability.home.annotations', {
+                  defaultMessage: 'Annotations',
+                })}
+              </EuiHeaderLink>
+            )}
             <EuiHeaderLink color="primary" href={href}>
               {i18n.translate('xpack.observability.home.addData', {
                 defaultMessage: 'Add data',

@@ -59,6 +59,9 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 link: 'onechat:conversations',
               },
               {
+                link: 'onechat:agents',
+              },
+              {
                 link: 'onechat:tools',
               },
             ],
