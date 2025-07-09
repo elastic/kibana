@@ -207,6 +207,126 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
             }
           });
 
+          it('should not return the rule id of a deleted rule', async () => {
+            // Create 2 rules
+            const rresponse1 = await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+              .set('kbn-xsrf', 'foo')
+              .send(getRule())
+              .expect(200);
+            const ruleId1 = rresponse1.body.id;
+            objectRemover.add(apiOptions.spaceId, ruleId1, 'rule', 'alerting');
+
+            const rresponse2 = await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
+              .set('kbn-xsrf', 'foo')
+              .send(getRule())
+              .expect(200);
+            const ruleId2 = rresponse2.body.id;
+            objectRemover.add(apiOptions.spaceId, ruleId2, 'rule', 'alerting');
+
+            // Create gaps for both rules
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId: ruleId1,
+                start: gap1Start,
+                end: gap1End,
+                spaceId: apiOptions.spaceId,
+              });
+
+            await supertest
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/report_gap`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                ruleId: ruleId2,
+                start: gap2Start,
+                end: gap2End,
+                spaceId: apiOptions.spaceId,
+              });
+
+            let response = await supertestWithoutAuth
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
+              .set('kbn-xsrf', 'foo')
+              .auth(apiOptions.username, apiOptions.password)
+              .send({
+                start: searchStart,
+                end: searchEnd,
+              });
+
+            switch (scenario.id) {
+              case 'no_kibana_privileges at space1':
+              case 'space_1_all at space2':
+                expect(response.statusCode).to.eql(403);
+                expect(response.body).to.eql({
+                  error: 'Forbidden',
+                  message:
+                    'Failed to find rules with gaps: Unauthorized to find rules for any rule types',
+                  statusCode: 403,
+                });
+                break;
+
+              case 'global_read at space1':
+              case 'space_1_all_alerts_none_actions at space1':
+              case 'superuser at space1':
+              case 'space_1_all at space1':
+              case 'space_1_all_with_restricted_fixture at space1':
+                expect(response.statusCode).to.eql(200);
+                expect(response.body.total).to.eql(2);
+                expect(response.body.rule_ids).to.have.length(2);
+                expect(response.body.rule_ids).to.contain(ruleId1);
+                expect(response.body.rule_ids).to.contain(ruleId2);
+                break;
+
+              default:
+                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+            }
+
+            // Delete 1 rule.
+            await supertestWithoutAuth
+              .delete(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule/${ruleId1}`)
+              .set('kbn-xsrf', 'foo')
+              .auth(apiOptions.username, apiOptions.password)
+              .expect(204);
+
+            response = await supertestWithoutAuth
+              .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_get_rules`)
+              .set('kbn-xsrf', 'foo')
+              .auth(apiOptions.username, apiOptions.password)
+              .send({
+                start: searchStart,
+                end: searchEnd,
+              });
+
+            switch (scenario.id) {
+              case 'no_kibana_privileges at space1':
+              case 'space_1_all at space2':
+                expect(response.statusCode).to.eql(403);
+                expect(response.body).to.eql({
+                  error: 'Forbidden',
+                  message:
+                    'Failed to find rules with gaps: Unauthorized to find rules for any rule types',
+                  statusCode: 403,
+                });
+                break;
+
+              case 'global_read at space1':
+              case 'space_1_all_alerts_none_actions at space1':
+              case 'superuser at space1':
+              case 'space_1_all at space1':
+              case 'space_1_all_with_restricted_fixture at space1':
+                expect(response.statusCode).to.eql(200);
+                expect(response.body.total).to.eql(1);
+                expect(response.body.rule_ids).to.have.length(1);
+                expect(response.body.rule_ids).to.contain(ruleId2);
+                break;
+
+              default:
+                throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+            }
+          });
+
           it('should return empty result when no gaps exist', async () => {
             // Create a rule without gaps
             const ruleResponse = await supertest
