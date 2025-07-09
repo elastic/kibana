@@ -21,6 +21,9 @@ import {
   EuiText,
   EuiBadge,
   EuiFlexItem,
+  EuiBeacon,
+  EuiToolTip,
+  EuiHealth,
 } from '@elastic/eui';
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
@@ -121,7 +124,9 @@ const ProcessorConfigurationListItem = ({
             <EuiIcon type="grab" />
           </EuiPanel>
         )}
-        <strong>{processor.type.toUpperCase()}</strong>
+        <SimulationStatus isNew={isNew}>
+          <strong>{processor.type.toUpperCase()}</strong>
+        </SimulationStatus>
         <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
           {processorDescription}
         </EuiText>
@@ -229,7 +234,11 @@ const ProcessorConfigurationEditor = ({
         arrowProps={{
           css: { display: 'none' },
         }}
-        buttonContent={<strong>{processor.type.toUpperCase()}</strong>}
+        buttonContent={
+          <SimulationStatus isNew={isNew}>
+            <strong>{processor.type.toUpperCase()}</strong>
+          </SimulationStatus>
+        }
         buttonElement="legend"
         buttonProps={{
           css: css`
@@ -327,6 +336,42 @@ const ProcessorPanel = ({ isNew, ...props }: PropsWithChildren<{ isNew: boolean 
       `}
       {...props}
     />
+  );
+};
+
+const SimulationStatus = ({ isNew, children }: PropsWithChildren<{ isNew: boolean }>) => {
+  const tooltipContent = isNew
+    ? i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.newProcessorTooltip',
+        { defaultMessage: 'This processor configuration is used to run the parsing simulation.' }
+      )
+    : i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.configuredProcessorTooltip',
+        {
+          defaultMessage: 'This processor configuration is not used to run the parsing simulation.',
+        }
+      );
+
+  return (
+    <EuiToolTip content={tooltipContent}>
+      {isNew ? (
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiBeacon
+            color="success"
+            aria-label={tooltipContent}
+            size={8}
+            css={css`
+              margin: 4px;
+            `}
+          />
+          {children}
+        </EuiFlexGroup>
+      ) : (
+        <EuiHealth color="subdued" aria-label={tooltipContent}>
+          {children}
+        </EuiHealth>
+      )}
+    </EuiToolTip>
   );
 };
 
