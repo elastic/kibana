@@ -26,10 +26,17 @@ import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_a
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { disableGaps } from '../../../../lib/rule_gaps/disable/disable_gaps';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('../../../../lib/rule_gaps/disable/disable_gaps');
+
+const disableGapsMock = disableGaps as jest.Mock;
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -40,6 +47,8 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const backfillClient = backfillClientMock.create();
+const eventLogClient = eventLogClientMock.create();
+const eventLogger = eventLoggerMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -69,10 +78,11 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient,
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  eventLogger,
 };
 
 beforeEach(() => {
-  getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
   (auditLogger.log as jest.Mock).mockClear();
 });
 
@@ -156,6 +166,16 @@ describe('delete()', () => {
       }
     );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+  });
+
+  test('attempts to disable gaps', async () => {
+    await rulesClient.delete({ id: '1' });
+    expect(disableGapsMock).toHaveBeenCalledWith({
+      ruleId: '1',
+      logger: rulesClientParams.logger,
+      eventLogClient,
+      eventLogger: rulesClientParams.eventLogger,
+    });
   });
 
   test('falls back to SOC.get when getDecryptedAsInternalUser throws an error', async () => {

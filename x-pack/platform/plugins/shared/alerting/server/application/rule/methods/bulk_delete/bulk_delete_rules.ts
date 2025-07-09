@@ -37,6 +37,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
+import { disableGaps } from '../../../../lib/rule_gaps/disable/disable_gaps';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -95,6 +96,16 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
       context.unsecuredSavedObjectsClient
     ),
   ]);
+
+  const eventLogClient = await context.getEventLogClient();
+  for (const { id } of rules) {
+    await disableGaps({
+      ruleId: id,
+      logger: context.logger,
+      eventLogClient,
+      eventLogger: context.eventLogger,
+    });
+  }
 
   const deletedRules = rules.map(({ id, attributes, references }) => {
     // TODO (http-versioning): alertTypeId should never be null, but we need to

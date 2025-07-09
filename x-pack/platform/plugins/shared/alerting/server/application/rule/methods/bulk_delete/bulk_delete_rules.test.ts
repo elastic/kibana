@@ -41,11 +41,17 @@ import {
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { disableGaps } from '../../../../lib/rule_gaps/disable/disable_gaps';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+
+jest.mock('../../../../lib/rule_gaps/disable/disable_gaps');
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
+const disableGapsMock = disableGaps as jest.Mock;
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -56,6 +62,8 @@ const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const backfillClient = backfillClientMock.create();
+const eventLogClient = eventLogClientMock.create();
+const eventLogger = eventLoggerMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -86,6 +94,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   alertsService: null,
   backfillClient,
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  eventLogger,
 };
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
@@ -100,7 +109,7 @@ const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
 });
 
 beforeEach(() => {
-  getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
+  getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
   jest.clearAllMocks();
 });
 
@@ -193,15 +202,26 @@ describe('bulkDelete', () => {
       })),
       undefined
     );
-
+    const ruleIds = ['id1', 'id2'];
     expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id2']);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(ruleIds);
     expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledTimes(1);
     expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
-      ruleIds: ['id1', 'id2'],
+      ruleIds,
       namespace: 'default',
       unsecuredSavedObjectsClient,
     });
+
+    ruleIds.forEach((ruleId, idx) => {
+      const callOrder = idx + 1;
+      expect(disableGapsMock).toHaveBeenNthCalledWith(callOrder, {
+        ruleId,
+        eventLogClient,
+        logger,
+        eventLogger,
+      });
+    });
+
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
@@ -314,6 +334,14 @@ describe('bulkDelete', () => {
       namespace: 'default',
       unsecuredSavedObjectsClient,
     });
+
+    expect(disableGapsMock).toHaveBeenCalledWith({
+      ruleId: 'id1',
+      eventLogClient,
+      logger,
+      eventLogger,
+    });
+
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
