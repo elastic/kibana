@@ -10,13 +10,15 @@
 import { type HttpInterceptor } from '@kbn/core-http-browser';
 import { getRetryAfter, isRateLimiterError } from './utils';
 
+const MAX_ATTEMPTS = 3;
+
 export const rateLimiterInterceptor: HttpInterceptor = {
   async fetch(next, options, controller) {
     for (let attempt = 1; ; attempt++) {
       try {
         return await next(options);
       } catch (error) {
-        if (attempt >= 3 || !isRateLimiterError(error)) {
+        if (attempt >= MAX_ATTEMPTS || !isRateLimiterError(error)) {
           throw error;
         }
 
