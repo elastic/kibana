@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { Command, FlagsReader } from '@kbn/dev-cli-runner';
+import { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { ToolingLog } from '@kbn/tooling-log';
 
