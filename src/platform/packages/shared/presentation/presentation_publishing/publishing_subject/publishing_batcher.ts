@@ -127,7 +127,7 @@ export const useBatchedPublishingSubjects = <
   const infilledSubjects = subjects.map((subject) => {
     if (!subject?.getValue) return new BehaviorSubject(undefined);
     return subject;
-  }) as SubjectsType;
+  }) as Array<PublishingSubject<any>>;
 
   /**
    * Subscribe to all subjects and update the latest values when any of them change.
