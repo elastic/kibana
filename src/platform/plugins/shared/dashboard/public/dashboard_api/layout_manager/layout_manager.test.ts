@@ -16,6 +16,7 @@ import {
   PublishingSubject,
   initializeTitleManager,
 } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('54321'),
@@ -172,6 +173,34 @@ describe('layout manager', () => {
       expect(duplicatedPanelState.rawState).toEqual({
         title: 'Panel One (copy 1)',
       });
+    });
+  });
+
+  describe('canRemovePanels', () => {
+    test('allows removing panels when there is no expanded panel', () => {
+      const layoutManager = initializeLayoutManager(
+        undefined,
+        panels,
+        {
+          ...trackPanelMock,
+          expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
+        },
+        () => []
+      );
+      expect(layoutManager.api.canRemovePanels()).toBe(true);
+    });
+
+    test('does not allow removing panels when there is an expanded panel', () => {
+      const layoutManager = initializeLayoutManager(
+        undefined,
+        panels,
+        {
+          ...trackPanelMock,
+          expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
+        },
+        () => []
+      );
+      expect(layoutManager.api.canRemovePanels()).toBe(false);
     });
   });
 });

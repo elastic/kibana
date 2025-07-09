@@ -257,6 +257,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
         'xpack.cloud.serverless.project_type (observability?|security?|search?|chat?)',
+        'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.onboarding.default_solution (string?)',
         'xpack.contentConnectors.ui.enabled (boolean?)',
