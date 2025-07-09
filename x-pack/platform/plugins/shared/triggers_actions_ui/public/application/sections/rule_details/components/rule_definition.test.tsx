@@ -156,9 +156,7 @@ describe('Rule Definition', () => {
     expect(useGetRuleTypesPermissions).toHaveBeenCalled();
     const ruleType = screen.getByTestId('ruleSummaryRuleType');
     expect(ruleType).toBeInTheDocument();
-    expect(ruleType).toHaveTextContent(
-      mockedRuleTypeIndex.get(mockRule().ruleTypeId)?.name || ''
-    );
+    expect(ruleType).toHaveTextContent(mockedRuleTypeIndex.get(mockRule().ruleTypeId)?.name || '');
   });
 
   it('show rule type description "', async () => {

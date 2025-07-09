@@ -37,7 +37,7 @@ const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api'
 
 describe('actions_connectors_list', () => {
   describe('component empty', () => {
-    const setup = async () => {
+    beforeEach(async () => {
       loadActionTypes.mockResolvedValueOnce([
         { id: 'test', name: 'Test', supportedFeatureIds: ['alerting'] },
         { id: 'test2', name: 'Test2', supportedFeatureIds: ['alerting'] },
@@ -53,10 +53,9 @@ describe('actions_connectors_list', () => {
         ...capabilities,
         actions: { delete: true, save: true, show: true },
       };
-    };
+    });
 
     it('renders empty prompt', async () => {
-      await setup();
       render(
         <IntlProvider>
           <ActionsConnectorsList
@@ -74,7 +73,6 @@ describe('actions_connectors_list', () => {
     });
 
     it('if click create button should render CreateConnectorFlyout', async () => {
-      await setup();
       const setAddFlyoutVisibility = jest.fn();
       render(
         <IntlProvider>
@@ -101,6 +99,9 @@ describe('actions_connectors_list', () => {
       {
         id: '1',
         actionTypeId: 'test',
+        name: 'Test Connector 1',
+        secrets: {},
+        isSystemAction: false,
         isPreconfigured: false,
         isDeprecated: false,
         referencedByCount: 1,
@@ -109,7 +110,9 @@ describe('actions_connectors_list', () => {
       {
         id: '2',
         actionTypeId: 'test2',
-        description: 'My test 2',
+        name: 'Test Connector 2',
+        secrets: {},
+        isSystemAction: false,
         referencedByCount: 1,
         isPreconfigured: false,
         isDeprecated: false,
@@ -118,15 +121,19 @@ describe('actions_connectors_list', () => {
       {
         id: '3',
         actionTypeId: 'test2',
+        name: 'Test Connector 3',
+        isSystemAction: false,
         isMissingSecrets: true,
         referencedByCount: 1,
         isPreconfigured: true,
         isDeprecated: false,
-        config: {},
       },
       {
         id: '4',
         actionTypeId: 'nonexistent',
+        name: 'Test Connector 4',
+        secrets: {},
+        isSystemAction: false,
         referencedByCount: 1,
         isPreconfigured: false,
         isDeprecated: false,
@@ -135,6 +142,9 @@ describe('actions_connectors_list', () => {
       {
         id: '5',
         actionTypeId: 'test3',
+        name: 'Test Connector 5',
+        secrets: {},
+        isSystemAction: false,
         referencedByCount: 1,
         isPreconfigured: false,
         isDeprecated: false,
@@ -143,6 +153,9 @@ describe('actions_connectors_list', () => {
       {
         id: '6',
         actionTypeId: 'test4',
+        name: 'Test Connector 6',
+        secrets: {},
+        isSystemAction: false,
         referencedByCount: 1,
         isPreconfigured: false,
         isDeprecated: false,
