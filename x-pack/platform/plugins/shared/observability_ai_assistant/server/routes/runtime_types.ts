@@ -15,12 +15,14 @@ import {
   type StarterPrompt,
 } from '../../common/types';
 
-export const unredactionRt = t.type({
-  entity: t.string,
-  class_name: t.string,
-  start_pos: t.number,
-  end_pos: t.number,
-  type: t.union([t.literal('ner'), t.literal('regex')]),
+export const deanonymizationRt = t.type({
+  start: t.number,
+  end: t.number,
+  entity: t.type({
+    class_name: t.string,
+    value: t.string,
+    mask: t.string,
+  }),
 });
 
 export const messageRt: t.Type<Message> = t.type({
@@ -53,7 +55,7 @@ export const messageRt: t.Type<Message> = t.type({
           arguments: t.string,
         }),
       ]),
-      unredactions: t.array(unredactionRt),
+      deanonymizations: t.array(deanonymizationRt),
     }),
   ]),
 });

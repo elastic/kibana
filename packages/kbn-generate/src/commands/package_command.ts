@@ -38,7 +38,7 @@ export const PackageCommand: GenerateCommand = {
   usage: 'node scripts/generate package [pkgId]',
   flags: {
     boolean: ['web', 'force', 'dev'],
-    string: ['dir', 'owner'],
+    string: ['dir', 'owner', 'group'],
     help: `
       --dev          Generate a package which is intended for dev-only use and can access things like devDependencies
       --web          Build webpack-compatible version of sources for this package. If your package is intended to be
@@ -48,6 +48,7 @@ export const PackageCommand: GenerateCommand = {
       --force        If the --dir already exists, delete it before generation
       --owner        Github username of the owner for this package, if this is not specified then you will be asked for
                       this value interactively.
+      --group        Group the package belongs to
     `,
   },
   async run({ log, flags, render }) {
@@ -72,8 +73,8 @@ export const PackageCommand: GenerateCommand = {
 
     const web = !!flags.web;
     const dev = !!flags.dev;
-    let group: KibanaGroup = 'platform';
-    let visibility: ModuleVisibility = 'private';
+    let group = flags.group as KibanaGroup | undefined;
+    let visibility: ModuleVisibility = 'shared';
     let calculatedPackageDir: string;
 
     const owner =
@@ -110,23 +111,26 @@ export const PackageCommand: GenerateCommand = {
     }
 
     if (isCliScript) {
+      group = 'platform';
       calculatedPackageDir = determineDevPackageDir(pkgId);
     } else {
-      group = (
-        await inquirer.prompt<{
-          group: KibanaGroup;
-        }>({
-          type: 'list',
-          choices: [
-            ...KIBANA_GROUPS.map((groupName) => ({
-              name: groupName,
-              value: groupName,
-            })),
-          ],
-          name: 'group',
-          message: `What group is this package part of?`,
-        })
-      ).group;
+      group =
+        group ||
+        (
+          await inquirer.prompt<{
+            group: KibanaGroup;
+          }>({
+            type: 'list',
+            choices: [
+              ...KIBANA_GROUPS.map((groupName) => ({
+                name: groupName,
+                value: groupName,
+              })),
+            ],
+            name: 'group',
+            message: `What group is this package part of?`,
+          })
+        ).group;
 
       let xpack: boolean;
 

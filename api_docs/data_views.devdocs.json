@@ -14797,7 +14797,9 @@
             "type": "Function",
             "tags": [],
             "label": "isPersisted",
-            "description": [],
+            "description": [
+              "\nReturns true if the data view is persisted, and false if the dataview is adhoc."
+            ],
             "signature": [
               "() => boolean"
             ],
@@ -16023,6 +16025,26 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.AbstractDataView.hasMatchedIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "hasMatchedIndices",
+            "description": [
+              "\nChecks if there are any matched indices."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/data_views/abstract_data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "True if there are matched indices, false otherwise."
+            ]
           }
         ],
         "initialIsOpen": false
