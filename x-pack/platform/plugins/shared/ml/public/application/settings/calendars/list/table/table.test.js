@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 import { CalendarsListTable } from './table';
-import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('../../../../contexts/kibana/use_create_url', () => ({
   useCreateAndNavigateToMlLink: jest.fn(),
@@ -43,21 +44,24 @@ const props = {
 
 describe('CalendarsListTable', () => {
   test('renders the table with all calendars', () => {
-    const wrapper = shallowWithIntl(<CalendarsListTable {...props} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = renderWithI18n(
+      <MemoryRouter>
+        <CalendarsListTable {...props} />
+      </MemoryRouter>
+    );
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('New button enabled if permission available', () => {
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <MemoryRouter>
         <CalendarsListTable {...props} />
       </MemoryRouter>
     );
 
-    const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
-    const button = buttons.find('EuiButton');
+    const createButton = screen.getByTestId('mlCalendarButtonCreate');
 
-    expect(button.prop('isDisabled')).toEqual(false);
+    expect(createButton).not.toBeDisabled();
   });
 
   test('New button disabled if no permission available', () => {
@@ -66,16 +70,15 @@ describe('CalendarsListTable', () => {
       canCreateCalendar: false,
     };
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <MemoryRouter>
         <CalendarsListTable {...disableProps} />
       </MemoryRouter>
     );
 
-    const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
-    const button = buttons.find('EuiButton');
+    const createButton = screen.getByTestId('mlCalendarButtonCreate');
 
-    expect(button.prop('isDisabled')).toEqual(true);
+    expect(createButton).toBeDisabled();
   });
 
   test('New button disabled if no ML nodes available', () => {
@@ -84,15 +87,14 @@ describe('CalendarsListTable', () => {
       mlNodesAvailable: false,
     };
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <MemoryRouter>
         <CalendarsListTable {...disableProps} />
       </MemoryRouter>
     );
 
-    const buttons = wrapper.find('[data-test-subj="mlCalendarButtonCreate"]');
-    const button = buttons.find('EuiButton');
+    const createButton = screen.getByTestId('mlCalendarButtonCreate');
 
-    expect(button.prop('isDisabled')).toEqual(true);
+    expect(createButton).toBeDisabled();
   });
 });
