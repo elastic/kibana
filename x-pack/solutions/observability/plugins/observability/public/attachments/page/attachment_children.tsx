@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiCallOut, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { escape } from 'lodash';
 import { type PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import type { PageAttachmentPersistedState } from '@kbn/observability-schema';
 
@@ -21,8 +20,18 @@ export function PageAttachmentChildren({
 }: AttachmentChildrenProps) {
   const pageState = persistableStateAttachmentState as PageAttachmentPersistedState;
   const { url } = pageState;
+  const label = url?.label;
 
-  if (!url) {
+  const href = useMemo(() => {
+    try {
+      const parsedUrl = new URL(url.pathAndQuery, window.location.origin);
+      return parsedUrl.href;
+    } catch (e) {
+      return '';
+    }
+  }, [url?.pathAndQuery]);
+
+  if (!url || !href || !label) {
     return (
       <EuiCallOut
         title={i18n.translate('xpack.observability.caseView.pageAttachment.noUrlProvidedTitle', {
@@ -41,8 +50,6 @@ export function PageAttachmentChildren({
       </EuiCallOut>
     );
   }
-  const href = escape(url.pathAndQuery || '');
-  const label = url.label;
 
   return (
     <>
