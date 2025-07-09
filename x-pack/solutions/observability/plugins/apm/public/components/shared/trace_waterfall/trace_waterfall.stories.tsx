@@ -142,6 +142,110 @@ export const Example: StoryFn<{}> = () => {
     />
   );
 };
+
+export const ExampleWithServiceLegend: StoryFn<{}> = () => {
+  return (
+    <TraceWaterfall
+      traceItems={[
+        {
+          id: '06b480d1e6e2ac2e',
+          timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
+          name: 'POST',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 53170917,
+          hasError: false,
+          serviceName: 'load-generator',
+        },
+        {
+          id: '2b18312dfedbf16a',
+          timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
+          name: 'executing api route (pages) /api/checkout',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 51298750,
+          hasError: false,
+          parentId: '06b480d1e6e2ac2e',
+          serviceName: 'frontend',
+        },
+        {
+          id: '41b39c13ec0166a8',
+          timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
+          name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 1187042,
+          hasError: false,
+          parentId: '2b18312dfedbf16a',
+          serviceName: 'frontend',
+        },
+        {
+          id: '255547a7b6b19871',
+          timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
+          name: 'oteldemo.ProductCatalogService/GetProduct',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 90416,
+          hasError: false,
+          parentId: '41b39c13ec0166a8',
+          serviceName: 'product-catalog',
+        },
+      ]}
+      highlightedTraceId="41b39c13ec0166a8"
+      showLegend
+    />
+  );
+};
+
+export const ExampleWithTypeLegend: StoryFn<{}> = () => {
+  return (
+    <TraceWaterfall
+      traceItems={[
+        {
+          id: '06b480d1e6e2ac2e',
+          timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
+          name: 'POST',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 53170917,
+          hasError: false,
+          serviceName: 'frontend',
+        },
+        {
+          id: '2b18312dfedbf16a',
+          timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
+          name: 'executing api route (pages) /api/checkout',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 51298750,
+          hasError: false,
+          parentId: '06b480d1e6e2ac2e',
+          serviceName: 'frontend',
+          spanType: 'http',
+        },
+        {
+          id: '41b39c13ec0166a8',
+          timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
+          name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 1187042,
+          hasError: false,
+          parentId: '2b18312dfedbf16a',
+          serviceName: 'frontend',
+          spanType: 'http',
+        },
+        {
+          id: '255547a7b6b19871',
+          timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
+          name: 'oteldemo.ProductCatalogService/GetProduct',
+          traceId: 'cc847a76570773d6fc96fac63dfcddd2',
+          duration: 90416,
+          hasError: false,
+          parentId: '41b39c13ec0166a8',
+          serviceName: 'frontend',
+          spanType: 'css',
+        },
+      ]}
+      highlightedTraceId="41b39c13ec0166a8"
+      serviceName="frontend"
+      showLegend
+    />
+  );
+};
 export const HiddenAccordionExample: StoryFn<{}> = () => {
   const traceItems = traceUnprocessedOtelSample.map(
     (item) =>
@@ -190,7 +294,7 @@ export const APMExample: StoryFn<{}> = () => {
         duration: item.span.duration?.us || item.transaction?.duration?.us,
         traceId: item.trace.id,
         parentId: item.parent?.id,
-        serviceName: item.service.name || item.service.name,
+        serviceName: item.service.name,
       } as TraceItem)
   );
 
