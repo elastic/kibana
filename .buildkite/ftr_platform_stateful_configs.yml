@@ -2,8 +2,6 @@ disabled:
   # Stateful base config for deployment-agnostic tests
   - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/stateful.config.base.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts
-  - x-pack/test/api_integration/deployment_agnostic/default_configs/stateful.config.base.ts
-  - x-pack/test/api_integration/deployment_agnostic/default_configs/feature_flag.stateful.config.base.ts
 
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js

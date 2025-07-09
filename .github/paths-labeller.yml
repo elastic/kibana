@@ -10,7 +10,7 @@
     - 'src/plugins/bfetch/**/*.*'
 - 'Team:obs-ux-infra_services':
     - 'x-pack/solutions/observability/plugins/apm/**/*.*'
-    - 'x-pack/test/apm_api_integration/**/*.*'
+    - 'x-pack/solutions/observability/test/apm_api_integration/**/*.*'
     - 'src/platform/packages/shared/kbn-apm-synthtrace/**/*.*'
     - 'src/platform/packages/shared/kbn-apm-synthtrace-client/**/*.*'
     - 'src/platform/packages/shared/kbn-apm-utils/**/*.*'
@@ -37,5 +37,5 @@
     - 'x-pack/solutions/observability/packages/observability-ai/**/*.*'
     - 'x-pack/solutions/observability/plugins/observability_ai_assistant_app/**/*.*'
     - 'x-pack/solutions/observability/plugins/serverless_observability/**/*.*'
-    - 'x-pack/test/apm_api_integration/**/*.*'
+    - 'x-pack/solutions/observability/test/apm_api_integration/**/*.*'
     - 'x-pack/test/observability_*/**/*.*'
