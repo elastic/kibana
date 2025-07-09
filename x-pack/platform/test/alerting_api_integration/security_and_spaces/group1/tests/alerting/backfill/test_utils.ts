@@ -9,6 +9,7 @@ import { asyncForEach } from '@kbn/std';
 import type { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import type { Client } from '@elastic/elasticsearch';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import type { FtrProviderContext, RetryService } from '@kbn/ftr-common-functional-services';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
@@ -61,7 +62,8 @@ export async function waitForEventLogDocs(
   getService: FtrProviderContext['getService'],
   id: string,
   spaceId: string,
-  actions: Map<string, { gte: number } | { equal: number }>
+  actions: Map<string, { gte: number } | { equal: number }>,
+  collapseByExecutionUUid?: boolean
 ) {
   return await retry.try(async () => {
     return await getEventLog({
@@ -71,6 +73,7 @@ export async function waitForEventLogDocs(
       id,
       provider: 'alerting',
       actions,
+      collapseByExecutionUUid,
     });
   });
 }
@@ -81,4 +84,82 @@ export async function getScheduledTask(es: Client, id: string): Promise<TaskMana
     index: '.kibana_task_manager',
   });
   return scheduledTask._source!;
+}
+
+export async function queryForAlertDocs<T>(
+  es: Client,
+  index: string
+): Promise<Array<SearchHit<T>>> {
+  const searchResult = await es.search({
+    index,
+    sort: [{ ['kibana.alert.original_time']: { order: 'asc' } }],
+    query: { match_all: {} },
+  });
+  return searchResult.hits.hits as Array<SearchHit<T>>;
+}
+
+export async function searchScheduledTask(es: Client, id: string) {
+  const searchResult = await es.search({
+    index: '.kibana_task_manager',
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              'task.id': `task:${id}`,
+            },
+          },
+          {
+            terms: {
+              'task.scope': ['alerting'],
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  // @ts-expect-error
+  return searchResult.hits.total.value;
+}
+
+export function getSecurityRule(overwrites = {}) {
+  return {
+    name: 'test siem query rule with actions',
+    rule_type_id: 'siem.queryRule',
+    consumer: 'siem',
+    enabled: true,
+    actions: [],
+    schedule: { interval: '24h' },
+    params: {
+      author: [],
+      description: 'test',
+      falsePositives: [],
+      from: 'now-86460s',
+      ruleId: '31c54f10-9d3b-45a8-b064-b92e8c6fcbe7',
+      immutable: false,
+      license: '',
+      outputIndex: '',
+      meta: { from: '1m', kibana_siem_app_url: 'https://localhost:5601/app/security' },
+      maxSignals: 20,
+      riskScore: 21,
+      riskScoreMapping: [],
+      severity: 'low',
+      severityMapping: [],
+      threat: [],
+      to: 'now',
+      references: [],
+      version: 1,
+      exceptionsList: [],
+      relatedIntegrations: [],
+      requiredFields: [],
+      setup: '',
+      type: 'query',
+      language: 'kuery',
+      index: [ES_TEST_INDEX_NAME],
+      query: `source:${DOCUMENT_SOURCE}`,
+      filters: [],
+    },
+    ...overwrites,
+  };
 }
