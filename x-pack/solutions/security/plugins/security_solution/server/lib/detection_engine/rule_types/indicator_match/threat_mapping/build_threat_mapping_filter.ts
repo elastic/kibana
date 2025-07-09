@@ -144,15 +144,15 @@ export const buildEntriesMappingFilter = ({
   const combinedShould = threatMapping.reduce<Array<QueryDslQueryContainer | TermQuery>>(
     (acc, threatMap) => {
       if (threatMap.entries.length > 1 || !allFieldAllowedForTermQuery(threatMap.entries)) {
-        threatList.forEach((threatListSearchItem) => {
+        threatList.forEach((threatListItem) => {
           const filteredEntries = filterThreatMapping({
             threatMapping: [threatMap],
-            threatListItem: threatListSearchItem,
+            threatListItem,
             entryKey,
           });
           const queryWithAndOrClause = createAndOrClauses({
             threatMapping: filteredEntries,
-            threatListItem: threatListSearchItem,
+            threatListItem,
             entryKey,
           });
           if (queryWithAndOrClause.length !== 0) {

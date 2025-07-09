@@ -29,10 +29,10 @@ export const createThreatSignal = async ({
   wrapSuppressedHits,
   threatFilters,
   threatPitId,
-  reassignThreatPitId,
   allowedFieldsForTermsQuery,
   inputIndexFields,
   threatIndexFields,
+  threatMatchedFields,
   sortOrder = 'desc',
   isAlertSuppressionActive,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
@@ -84,8 +84,9 @@ export const createThreatSignal = async ({
       threatFilters,
       threatIndicatorPath,
       pitId: threatPitId,
-      reassignPitId: reassignThreatPitId,
       threatIndexFields,
+      threatMatchedFields,
+      allowedFieldsForTermsQuery,
     });
 
     let result: SearchAfterAndBulkCreateReturnType;

@@ -11,6 +11,7 @@ import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
+import { getSignalValueMap } from './utils';
 
 // we do want to make extra requests to the threat index to get enrichments from all threats
 // previously we were enriched alerts only from `currentThreatList` but not all threats
@@ -20,18 +21,16 @@ export const buildThreatEnrichment = ({
   threatFilters,
   threatIndicatorPath,
   pitId,
-  reassignPitId,
   threatIndexFields,
+  threatMatchedFields,
+  allowedFieldsForTermsQuery,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   return async (signals) => {
     const threatFiltersFromEvents = buildThreatMappingFilter({
       threatMapping: sharedParams.completeRule.ruleParams.threatMapping,
       threatList: signals,
       entryKey: 'field',
-      allowedFieldsForTermsQuery: {
-        source: {},
-        threat: {},
-      },
+      allowedFieldsForTermsQuery,
     });
 
     const threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'> = {
@@ -43,14 +42,16 @@ export const buildThreatEnrichment = ({
         fields: undefined,
       },
       pitId,
-      reassignPitId,
       indexFields: threatIndexFields,
     };
 
     const { signalsQueryMap, threatList } = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams,
       eventsCount: signals.length,
-      termsQueryAllowed: false,
+      signalValueMap: getSignalValueMap({
+        eventList: signals,
+        threatMatchedFields,
+      }),
     });
 
     const enrichment = threatEnrichmentFactory({

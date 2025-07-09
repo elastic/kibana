@@ -126,16 +126,13 @@ export const createThreatSignals = async ({
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
 
-  let threatPitId: OpenPointInTimeResponse['id'] = (
+  const threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
       index: threatIndex,
       keep_alive: THREAT_PIT_KEEP_ALIVE,
       allow_partial_search_results: true,
     })
   ).id;
-  const reassignThreatPitId = (newPitId: OpenPointInTimeResponse['id'] | undefined) => {
-    if (newPitId) threatPitId = newPitId;
-  };
 
   const threatIndexFields = await getQueryFields({
     dataViews,
@@ -328,7 +325,6 @@ export const createThreatSignals = async ({
           currentResult: results,
           eventsTelemetry,
           filters: allEventFilters,
-          reassignThreatPitId,
           services,
           threatFilters: allThreatFilters,
           threatPitId,
@@ -353,7 +349,6 @@ export const createThreatSignals = async ({
           perPage,
           threatListConfig,
           pitId: threatPitId,
-          reassignPitId: reassignThreatPitId,
           indexFields: threatIndexFields,
         }),
 
@@ -368,10 +363,10 @@ export const createThreatSignals = async ({
           wrapSuppressedHits,
           threatFilters: allThreatFilters,
           threatPitId,
-          reassignThreatPitId,
           allowedFieldsForTermsQuery,
           inputIndexFields,
           threatIndexFields,
+          threatMatchedFields,
           sortOrder,
           isAlertSuppressionActive,
         }),

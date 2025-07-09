@@ -25,13 +25,6 @@ interface GetSignalsQueryMapFromThreatIndexOptionsTerms {
   threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
   eventsCount: number;
   signalValueMap: SignalValuesMap;
-  termsQueryAllowed: true;
-}
-
-interface GetSignalsQueryMapFromThreatIndexOptionsMatch {
-  threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
-  eventsCount: number;
-  termsQueryAllowed: false;
 }
 
 /**
@@ -39,15 +32,12 @@ interface GetSignalsQueryMapFromThreatIndexOptionsMatch {
  */
 /**
  * fetches threats and creates signals map from results, that matches signal is with list of threat queries
- * @param options.termsQueryAllowed - if terms query allowed to be executed, then signalValueMap should be provided
  * @param options.signalValueMap - map of signal values from terms query results
  */
 export async function getSignalsQueryMapFromThreatIndex(
-  options:
-    | GetSignalsQueryMapFromThreatIndexOptionsTerms
-    | GetSignalsQueryMapFromThreatIndexOptionsMatch
+  options: GetSignalsQueryMapFromThreatIndexOptionsTerms
 ): Promise<{ signalsQueryMap: SignalsQueryMap; threatList: ThreatListItem[] }> {
-  const { threatSearchParams, eventsCount, termsQueryAllowed } = options;
+  const { threatSearchParams, eventsCount } = options;
 
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
   const signalsQueryMap = new Map<string, ThreatMatchNamedQuery[]>();
@@ -99,7 +89,7 @@ export async function getSignalsQueryMapFromThreatIndex(
         const decodedQuery = decodeThreatMatchNamedQuery(matchedQuery);
         const signalId = decodedQuery.id;
 
-        if (decodedQuery.queryType === ThreatMatchQueryType.term && termsQueryAllowed) {
+        if (decodedQuery.queryType === ThreatMatchQueryType.term) {
           const threatValue = get(threatHit?._source, decodedQuery.value);
           const values = Array.isArray(threatValue) ? threatValue : [threatValue];
 

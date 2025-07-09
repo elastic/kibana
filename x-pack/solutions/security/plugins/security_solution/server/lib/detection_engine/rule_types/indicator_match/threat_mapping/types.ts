@@ -54,10 +54,10 @@ export interface CreateThreatSignalOptions {
   threatFilters: unknown[];
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
-  reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
+  threatMatchedFields: ThreatMatchedFields;
   sortOrder?: SortOrderOrUndefined;
   isAlertSuppressionActive: boolean;
 }
@@ -73,7 +73,6 @@ export interface CreateEventSignalOptions {
   threatFilters: unknown[];
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
-  reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   threatMatchedFields: ThreatMatchedFields;
   inputIndexFields: DataViewFieldBase[];
@@ -137,7 +136,6 @@ export interface GetThreatListOptions {
   threatFilters: unknown[];
   threatListConfig: ThreatListConfig;
   pitId: OpenPointInTimeResponse['id'];
-  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   indexFields: DataViewFieldBase[];
 }
 
@@ -190,8 +188,9 @@ export interface BuildThreatEnrichmentOptions {
   threatFilters: unknown[];
   threatIndicatorPath: ThreatIndicatorPath;
   pitId: string;
-  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   threatIndexFields: DataViewFieldBase[];
+  threatMatchedFields: ThreatMatchedFields;
+  allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
 }
 
 export interface EventsOptions {

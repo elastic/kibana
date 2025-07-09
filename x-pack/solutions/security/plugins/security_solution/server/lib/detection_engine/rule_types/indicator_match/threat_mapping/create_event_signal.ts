@@ -37,7 +37,6 @@ export const createEventSignal = async ({
   wrapSuppressedHits,
   threatFilters,
   threatPitId,
-  reassignThreatPitId,
   allowedFieldsForTermsQuery,
   threatMatchedFields,
   inputIndexFields,
@@ -79,7 +78,6 @@ export const createEventSignal = async ({
         fields: undefined,
       },
       pitId: threatPitId,
-      reassignPitId: reassignThreatPitId,
       indexFields: threatIndexFields,
     };
 
@@ -93,7 +91,6 @@ export const createEventSignal = async ({
           eventList: currentEventList,
           threatMatchedFields,
         }),
-        termsQueryAllowed: true,
       });
       signalsQueryMap = result.signalsQueryMap;
       threatList = result.threatList;
