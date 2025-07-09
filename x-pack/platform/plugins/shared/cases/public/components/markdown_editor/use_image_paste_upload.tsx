@@ -81,9 +81,7 @@ export function useImagePasteUpload({
   const [uploadPlaceholder, setUploadPlaceholder] = useState<string | null>(null);
   const [uploadingFile, setUploadingFile] = useState<FileState | null>(null);
   const textarea =
-    editorRef === null || typeof editorRef === 'function'
-      ? null
-      : editorRef.current?.textarea ?? null;
+    !editorRef || typeof editorRef === 'function' ? null : editorRef.current?.textarea ?? null;
 
   const replacePlaceholder = useCallback(
     (file: DoneNotification) => {
