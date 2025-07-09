@@ -10,7 +10,7 @@ import path from 'path';
 import { load as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import type { YamlRoleDefinitions } from '@kbn/test-suites-serverless/shared/lib';
-import { samlAuthentication } from '@kbn/security-solution-plugin/public/management/cypress/support/saml_authentication';
+import { samlAuthentication } from '@kbn/cypress-test-helper/src/auth/saml_auth';
 import { setupUserDataLoader } from './support/setup_data_loader_tasks';
 import { getFailedSpecVideos } from './support/filter_videos';
 

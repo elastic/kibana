@@ -25,8 +25,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const synthtrace = getService('synthtrace');
 
-  describe('get_dataset_info', function () {
-    this.tags(['failsOnMKI']);
+  describe('tool: get_dataset_info', function () {
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
 
@@ -70,7 +70,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         ({ getRelevantFields } = llmProxy.interceptSelectRelevantFieldsToolChoice());
 
-        void llmProxy.interceptConversation(`Yes, you do have logs. Congratulations! 🎈️🎈️🎈️`);
+        void llmProxy.interceptWithResponse(`Yes, you do have logs. Congratulations! 🎈️🎈️🎈️`);
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: USER_MESSAGE,

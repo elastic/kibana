@@ -8,7 +8,6 @@
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { keyBy, omit } from 'lodash';
 import React from 'react';
 import {
@@ -26,9 +25,8 @@ import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useProfilingIntegrationSetting } from '../../../../hooks/use_profiling_integration_setting';
+import { useProfilingPluginSetting } from '../../../../hooks/use_profiling_integration_setting';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { isApmSignal, isLogsSignal } from '../../../../utils/get_signal_type';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
@@ -63,31 +61,16 @@ const apmOrderedTabs: Array<Tab['key']> = [
   'profiling',
   'dashboards',
 ];
-const logsOnlyOrderedTabs: Array<Tab['key']> = [
-  'overview',
-  'logs',
-  'dashboards',
-  'transactions',
-  'dependencies',
-  'errors',
-  'metrics',
-  'infrastructure',
-  'service-map',
-  'alerts',
-  'profiling',
-];
 
 export function isMetricsTabHidden({
   agentName,
   serverlessType,
-  isAwsLambdaEnabled,
 }: {
   agentName?: string;
   serverlessType?: ServerlessType;
-  isAwsLambdaEnabled?: boolean;
 }) {
   if (isAWSLambdaAgentName(serverlessType)) {
-    return !isAwsLambdaEnabled;
+    return false;
   }
   return !agentName || isRumAgentName(agentName) || isAzureFunctionsAgentName(serverlessType);
 }
@@ -111,13 +94,12 @@ export function isInfraTabHidden({
 
 export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const router = useApmRouter();
-  const { agentName, serverlessType, serviceEntitySummary } = useApmServiceContext();
+  const { agentName, serverlessType } = useApmServiceContext();
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
-  const isAwsLambdaEnabled = core.uiSettings.get<boolean>(enableAwsLambdaMetrics, true);
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const isInfraTabAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfrastructureTabAvailable);
-  const isProfilingIntegrationEnabled = useProfilingIntegrationSetting();
+  const isProfilingPluginEnabled = useProfilingPluginSetting();
   const {
     path: { serviceName },
     query: queryFromUrl,
@@ -200,7 +182,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       hidden: isMetricsTabHidden({
         agentName,
         serverlessType,
-        isAwsLambdaEnabled,
       }),
     },
     {
@@ -277,7 +258,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
 
       hidden:
-        !isProfilingIntegrationEnabled ||
+        !isProfilingPluginEnabled ||
         isRumOrMobileAgentName(agentName) ||
         isAWSLambdaAgentName(serverlessType),
     },
@@ -294,18 +275,9 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
   ];
 
-  const hasLogsSignal =
-    serviceEntitySummary?.dataStreamTypes && isLogsSignal(serviceEntitySummary.dataStreamTypes);
-
-  const hasApmSignal =
-    serviceEntitySummary?.dataStreamTypes && isApmSignal(serviceEntitySummary.dataStreamTypes);
-
-  const isLogsOnlyView = hasLogsSignal && !hasApmSignal;
-
   const tabsGroupedByKey = keyBy(allTabsDefinitions, 'key');
-  const tabKeys = isLogsOnlyView ? logsOnlyOrderedTabs : apmOrderedTabs;
 
-  return tabKeys
+  return apmOrderedTabs
     .map((key) => tabsGroupedByKey[key])
     .filter((t) => !t.hidden)
     .map(({ href, key, label, prepend, append }) => ({

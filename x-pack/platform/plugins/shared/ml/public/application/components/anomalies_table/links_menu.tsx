@@ -156,7 +156,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   );
 
   const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
-    const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
+    const initialLayers = getInitialAnomaliesLayers(anomaly.jobId, euiTheme);
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(
       getDateFormatTz(uiSettings)
     );
@@ -765,7 +765,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   const { anomaly, showViewSeriesLink } = props;
-  const canUpdateJob = usePermissionCheck('canUpdateJob');
+  const [canUpdateJob, canUseAiops] = usePermissionCheck(['canUpdateJob', 'canUseAiops']);
   const canConfigureRules = isRuleSupported(anomaly.source) && canUpdateJob;
 
   const contextMenuItems = useMemo(() => {
@@ -929,7 +929,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
 
-    if (openInLogRateAnalysisUrl) {
+    if (openInLogRateAnalysisUrl && canUseAiops) {
       items.push(
         <EuiContextMenuItem
           key="log_rate_analysis"
@@ -945,7 +945,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
 
-    if (messageField !== null) {
+    if (messageField !== null && canUseAiops) {
       items.push(
         <EuiContextMenuItem
           key="run_pattern_analysis"

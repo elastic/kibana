@@ -83,6 +83,7 @@ function mockOutputSO(id: string, attributes: any = {}, updatedAt?: string) {
     type: 'ingest-outputs',
     references: [],
     attributes: {
+      name: 'Test',
       output_id: id,
       ...attributes,
     },
@@ -539,6 +540,7 @@ describe('Output Service', () => {
         expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
           action: 'create',
           id: outputIdToUuid('output-test'),
+          name: 'Test',
           savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
         });
       });
@@ -1835,6 +1837,7 @@ describe('Output Service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'update',
+        name: 'Test',
         id: outputIdToUuid('existing-es-output'),
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
@@ -2429,6 +2432,7 @@ describe('Output Service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'delete',
+        name: 'Test',
         id: outputIdToUuid('existing-es-output'),
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
@@ -2451,6 +2455,7 @@ describe('Output Service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
+        name: 'Test',
         id: outputIdToUuid('existing-es-output'),
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });

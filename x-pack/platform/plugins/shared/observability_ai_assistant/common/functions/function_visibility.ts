@@ -6,8 +6,6 @@
  */
 
 export enum FunctionVisibility {
-  AssistantOnly = 'assistantOnly',
-  UserOnly = 'userOnly',
   Internal = 'internal',
   All = 'all',
 }

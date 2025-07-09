@@ -9,11 +9,14 @@ import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
-import { isString, once, pull, isFunction, last } from 'lodash';
+import { isString, once, pull, isFunction, last, first } from 'lodash';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
+import { SCORE_SUGGESTIONS_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/score_suggestions';
+import { SELECT_RELEVANT_FIELDS_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
@@ -139,7 +142,9 @@ export class LlmProxy {
           )}`
         );
         if (this.interceptors.length > 0) {
-          throw new Error(`Interceptors were not called: ${unsettledInterceptors}`);
+          throw new Error(
+            `Interceptors were not called: ${unsettledInterceptors.map((name) => `\n - ${name}`)}`
+          );
         }
       },
       { retries: 5, maxTimeout: 1000 }
@@ -149,7 +154,7 @@ export class LlmProxy {
     });
   }
 
-  interceptConversation(
+  interceptWithResponse(
     msg: string | string[],
     {
       name,
@@ -158,7 +163,9 @@ export class LlmProxy {
     } = {}
   ) {
     return this.intercept(
-      `Conversation: "${name ?? isString(msg) ? msg.slice(0, 80) : `${msg.length} chunks`}"`,
+      `interceptWithResponse: "${
+        name ?? isString(msg) ? msg.slice(0, 80) : `${msg.length} chunks`
+      }"`,
       // @ts-expect-error
       (body) => body.tool_choice?.function?.name === undefined,
       msg
@@ -176,22 +183,26 @@ export class LlmProxy {
     when?: RequestInterceptor['when'];
     interceptorName?: string;
   }) {
-    // @ts-expect-error
-    return this.intercept(interceptorName ?? `Function request: "${name}"`, when, (body) => {
-      return {
-        content: '',
-        tool_calls: [
-          {
-            function: {
-              name,
-              arguments: argumentsCallback(body),
+    return this.intercept(
+      interceptorName ?? `interceptWithFunctionRequest: "${name}"`,
+      when,
+      // @ts-expect-error
+      (body) => {
+        return {
+          content: '',
+          tool_calls: [
+            {
+              function: {
+                name,
+                arguments: argumentsCallback(body),
+              },
+              index: 0,
+              id: `call_${uuidv4()}`,
             },
-            index: 0,
-            id: `call_${uuidv4()}`,
-          },
-        ],
-      };
-    }).completeAfterIntercept();
+          ],
+        };
+      }
+    ).completeAfterIntercept();
   }
 
   interceptSelectRelevantFieldsToolChoice({
@@ -200,9 +211,10 @@ export class LlmProxy {
   }: { from?: number; to?: number } = {}) {
     let relevantFields: RelevantField[] = [];
     const simulator = this.interceptWithFunctionRequest({
-      name: 'select_relevant_fields',
-      // @ts-expect-error
-      when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
+      name: SELECT_RELEVANT_FIELDS_NAME,
+      when: (requestBody) =>
+        // @ts-expect-error
+        requestBody.tool_choice?.function?.name === SELECT_RELEVANT_FIELDS_NAME,
       arguments: (requestBody) => {
         const messageWithFieldIds = last(requestBody.messages);
         const matches = (messageWithFieldIds?.content as string).match(/\{[\s\S]*?\}/g)!;
@@ -224,15 +236,29 @@ export class LlmProxy {
   }
 
   interceptScoreToolChoice(log: ToolingLog) {
-    let documents: KnowledgeBaseDocument[] = [];
+    function extractDocumentsToScore(source: string): KnowledgeBaseDocument[] {
+      const [, raw] = source.match(/<DocumentsToScore>\s*(\[[\s\S]*?\])\s*<\/DocumentsToScore>/i)!;
+      const jsonString = raw.trim().replace(/\\"/g, '"');
+      const documentsToScore = JSON.parse(jsonString);
+      log.debug(`Extracted documents to score: ${JSON.stringify(documentsToScore, null, 2)}`);
+      return documentsToScore;
+    }
+
+    let documentsToScore: KnowledgeBaseDocument[] = [];
 
     const simulator = this.interceptWithFunctionRequest({
-      name: 'score',
-      // @ts-expect-error
-      when: (requestBody) => requestBody.tool_choice?.function?.name === 'score',
+      name: SCORE_SUGGESTIONS_FUNCTION_NAME,
+      when: (requestBody) =>
+        // @ts-expect-error
+        requestBody.tool_choice?.function?.name === SCORE_SUGGESTIONS_FUNCTION_NAME,
       arguments: (requestBody) => {
-        documents = extractDocumentsFromMessage(last(requestBody.messages)?.content as string, log);
-        const scores = documents.map((doc: KnowledgeBaseDocument) => `${doc.id},7`).join(';');
+        const systemMessage = first(requestBody.messages)?.content as string;
+        const userMessage = last(requestBody.messages)?.content as string;
+        log.debug(`interceptScoreSuggestionsToolChoice: ${userMessage}`);
+        documentsToScore = extractDocumentsToScore(systemMessage);
+        const scores = documentsToScore
+          .map((doc: KnowledgeBaseDocument) => `${doc.id},7`)
+          .join(';');
 
         return JSON.stringify({ scores });
       },
@@ -240,9 +266,9 @@ export class LlmProxy {
 
     return {
       simulator,
-      getDocuments: async () => {
+      getDocumentsToScore: async () => {
         await simulator;
-        return documents;
+        return documentsToScore;
       },
     };
   }
@@ -255,6 +281,18 @@ export class LlmProxy {
       // @ts-expect-error
       when: (body) => body.tool_choice?.function?.name === TITLE_CONVERSATION_FUNCTION_NAME,
     });
+  }
+
+  interceptQueryRewrite(rewrittenQuery: string) {
+    return this.intercept(
+      `interceptQueryRewrite: "${rewrittenQuery}"`,
+      (body) => {
+        const systemMessageContent = body.messages.find((msg) => msg.role === MessageRole.System)
+          ?.content as string;
+        return systemMessageContent.includes('You are a retrieval query-rewriting assistant');
+      },
+      rewrittenQuery
+    ).completeAfterIntercept();
   }
 
   intercept(
@@ -383,9 +421,4 @@ async function getRequestBody(request: http.IncomingMessage): Promise<ChatComple
 
 function sseEvent(chunk: unknown) {
   return `data: ${JSON.stringify(chunk)}\n\n`;
-}
-
-function extractDocumentsFromMessage(content: string, log: ToolingLog): KnowledgeBaseDocument[] {
-  const matches = content.match(/\{[\s\S]*?\}/g)!;
-  return matches.map((jsonStr) => JSON.parse(jsonStr));
 }

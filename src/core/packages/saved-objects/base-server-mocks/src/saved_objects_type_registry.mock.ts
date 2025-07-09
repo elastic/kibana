@@ -8,13 +8,14 @@
  */
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import { type SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 
 const createRegistryMock = (): jest.Mocked<
   ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
 > => {
   const mock = {
     registerType: jest.fn(),
+    getLegacyTypes: jest.fn(),
     getType: jest.fn(),
     getVisibleTypes: jest.fn(),
     getVisibleToHttpApisTypes: jest.fn(),
@@ -33,6 +34,7 @@ const createRegistryMock = (): jest.Mocked<
 
   mock.getVisibleTypes.mockReturnValue([]);
   mock.getAllTypes.mockReturnValue([]);
+  mock.getLegacyTypes.mockReturnValue([]);
   mock.getImportableAndExportableTypes.mockReturnValue([]);
   mock.getIndex.mockReturnValue('.kibana-test');
   mock.getIndex.mockReturnValue('.kibana-test');

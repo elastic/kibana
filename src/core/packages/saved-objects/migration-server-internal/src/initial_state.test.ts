@@ -69,7 +69,9 @@ describe('createInitialState', () => {
   let createInitialStateParams: CreateInitialStateParams;
 
   beforeEach(() => {
-    typeRegistry = new SavedObjectTypeRegistry();
+    typeRegistry = new SavedObjectTypeRegistry({
+      legacyTypes: ['deprecated_type_1', 'deprecatedType2', 'deprecated-type-3'],
+    });
     typeRegistry.registerType({
       name: 'foo',
       hidden: false,
@@ -82,7 +84,6 @@ describe('createInitialState', () => {
           changes: [],
         },
       },
-      switchToModelVersionAt: '8.10.0',
     });
     typeRegistry.registerType({
       name: 'bar',
@@ -99,7 +100,6 @@ describe('createInitialState', () => {
           changes: [{ type: 'mappings_addition', addedMappings: {} }],
         },
       },
-      switchToModelVersionAt: '8.10.0',
     });
     docLinks = docLinksServiceMock.createSetupContract();
     logger = mockLogger.get();
@@ -136,112 +136,17 @@ describe('createInitialState', () => {
             "must_not": Array [
               Object {
                 "term": Object {
-                  "type": "apm-services-telemetry",
+                  "type": "deprecated_type_1",
                 },
               },
               Object {
                 "term": Object {
-                  "type": "application_usage_transactional",
+                  "type": "deprecatedType2",
                 },
               },
               Object {
                 "term": Object {
-                  "type": "background-session",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "cases-sub-case",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "csp_rule",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "endpoint:user-artifact",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "file-upload-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-agent-actions",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-agent-events",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-agents",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "fleet-enrollment-api-keys",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "guided-setup-state",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "maps-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "ml-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "osquery-usage-metric",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "server",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "siem-detection-engine-rule-execution-info",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "siem-detection-engine-rule-status",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "timelion-sheet",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "tsvb-validation-telemetry",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "ui-counter",
-                },
-              },
-              Object {
-                "term": Object {
-                  "type": "upgrade-assistant-telemetry",
+                  "type": "deprecated-type-3",
                 },
               },
             ],
@@ -287,10 +192,10 @@ describe('createInitialState', () => {
         "maxBatchSizeBytes": 104857600,
         "maxReadBatchSizeBytes": 524288000,
         "migrationDocLinks": Object {
-          "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
-          "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
-          "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
-          "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
+          "clusterShardLimitExceeded": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#cluster-shard-limit-exceeded",
+          "repeatedTimeoutRequests": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#_repeated_time_out_requests_that_eventually_fail",
+          "resolveMigrationFailures": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures",
+          "routingAllocationDisabled": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#routing-allocation-disabled",
         },
         "mustRelocateDocuments": true,
         "outdatedDocumentsQuery": Object {
@@ -304,6 +209,7 @@ describe('createInitialState', () => {
         "retryAttempts": 15,
         "retryCount": 0,
         "retryDelay": 0,
+        "skipRetryReset": false,
         "targetIndexMappings": Object {
           "_meta": Object {
             "indexTypesMap": Object {

@@ -44,11 +44,13 @@ export * from './preview_rule';
 export * from './preview_rule_with_exception_entries';
 export * from './patch_rule';
 export * from './rule_to_ndjson';
+export * from './run_soon_rule';
 export * from './remove_server_generated_properties';
 export * from './remove_server_generated_properties_including_rule_id';
 export * from './rule_to_update_schema';
 export * from './update_rule';
 export * from './get_simple_rule_as_ndjson';
 export * from './rule_gaps';
+export * from './import_rules';
 
 export * from './prebuilt_rules';

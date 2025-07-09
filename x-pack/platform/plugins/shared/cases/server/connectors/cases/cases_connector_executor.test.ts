@@ -14,6 +14,7 @@ import {
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
   MAX_TITLE_LENGTH,
+  MAX_SUFFIX_LENGTH,
 } from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
@@ -25,11 +26,13 @@ import {
   cases,
   createdOracleRecord,
   groupedAlertsWithOracleKey,
+  groupedAlerts,
   groupingBy,
   oracleRecords,
   rule,
   owner,
   timeWindow,
+  internallyManagedAlerts,
   reopenClosedCases,
   updatedCounterOracleRecord,
   alertsNested,
@@ -75,10 +78,12 @@ describe('CasesConnectorExecutor', () => {
 
   const params: CasesConnectorRunParams = {
     alerts,
+    groupedAlerts,
     groupingBy,
     owner,
     rule,
     timeWindow,
+    internallyManagedAlerts,
     reopenClosedCases,
     maximumCasesToOpen: 5,
     templateId: null,
@@ -693,11 +698,70 @@ describe('CasesConnectorExecutor', () => {
           });
 
           const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
-
           expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
           expect(title).toMatchInlineSnapshot(
-            `"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa... (2) (Auto-created)"`
+            `"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa... (2) (Auto-created)"`
           );
+        });
+
+        it(`trims the grouping description correctly if the cases title is bigger than ${MAX_TITLE_LENGTH}`, async () => {
+          mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          const ruleName = 'a'.repeat(120);
+
+          await connectorExecutor.execute({
+            ...params,
+            rule: { ...params.rule, name: ruleName },
+            groupingBy: ['rule.name'],
+          });
+
+          const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
+
+          const index = title.indexOf(' - Grouping by');
+          const suffix = title.slice(index);
+
+          expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
+          expect(suffix.length).toBeLessThanOrEqual(MAX_SUFFIX_LENGTH);
+        });
+
+        it(`does not trim the title if it is shorter than ${MAX_TITLE_LENGTH}`, async () => {
+          mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          const ruleName = 'a'.repeat(15);
+          await connectorExecutor.execute({
+            ...params,
+            rule: { ...params.rule, name: ruleName },
+            groupingBy: ['rule.name'],
+          });
+
+          const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
+
+          expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
+          expect(title).not.toContain('...');
         });
 
         it(`trims tags that are bigger than ${MAX_LENGTH_PER_TAG} characters`, async () => {
@@ -2704,7 +2768,7 @@ describe('CasesConnectorExecutor', () => {
           alerts: allAlerts,
           groupingBy: ['host.name'],
           // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: 30,
         });
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
@@ -2722,7 +2786,7 @@ describe('CasesConnectorExecutor', () => {
           alerts: allAlerts,
           groupingBy: ['host.name'],
           // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: 30,
         });
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
@@ -2741,7 +2805,7 @@ describe('CasesConnectorExecutor', () => {
           alerts: allAlerts,
           groupingBy: ['host.name'],
           // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: 30,
         });
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
@@ -2768,11 +2832,11 @@ describe('CasesConnectorExecutor', () => {
           alerts: allAlerts,
           groupingBy: ['host.name'],
           // MAX_OPEN_CASES < maximumCasesToOpen
-          maximumCasesToOpen: 20,
+          maximumCasesToOpen: 30,
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 10. Falling back to one case.`,
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 20. Falling back to one case.`,
           { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
       });

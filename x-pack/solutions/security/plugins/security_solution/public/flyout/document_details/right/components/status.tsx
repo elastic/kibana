@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertHeaderBlock } from './alert_header_block';
+import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { SIGNAL_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { StatusPopoverButton } from './status_popover_button';
@@ -30,7 +30,7 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
  * Document details status displayed in flyout right section header
  */
 export const DocumentStatus: FC = () => {
-  const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId, isPreview } =
+  const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId, isRulePreview } =
     useDocumentDetailsContext();
 
   const statusData = useMemo(() => {
@@ -52,6 +52,7 @@ export const DocumentStatus: FC = () => {
 
   return (
     <AlertHeaderBlock
+      hasBorder
       title={
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.header.statusTitle"
@@ -60,7 +61,7 @@ export const DocumentStatus: FC = () => {
       }
       data-test-subj={STATUS_TITLE_TEST_ID}
     >
-      {!statusData || !hasData(statusData) || isPreview ? (
+      {!statusData || !hasData(statusData) || isRulePreview ? (
         getEmptyTagValue()
       ) : (
         <CellActions field={SIGNAL_STATUS_FIELD_NAME} value={statusData.values[0]}>

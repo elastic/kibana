@@ -18,14 +18,13 @@ import {
   mockApmPluginContextValue,
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useApmServiceContext from '../../../../context/apm_service/use_apm_service_context';
-import type { ServiceEntitySummary } from '../../../../context/apm_service/use_service_entity_summary_fetcher';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { fromQuery } from '../../../shared/links/url_helpers';
 import { isInfraTabHidden, isMetricsTabHidden, useTabs } from './use_tabs';
 
 jest.mock('../../../../hooks/use_profiling_integration_setting', () => ({
-  useProfilingIntegrationSetting: () => true,
+  useProfilingPluginSetting: () => true,
 }));
 
 jest.mock('../../../alerting/utils/get_alerting_capabilities', () => ({
@@ -66,7 +65,6 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-        { serverlessType: ServerlessType.AWS_LAMBDA },
         { serverlessType: ServerlessType.AZURE_FUNCTIONS },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
@@ -86,6 +84,7 @@ describe('APM service template', () => {
         { agentName: 'ruby', runtimeName: 'jruby' },
         { agentName: 'java' },
         { agentName: 'opentelemetry/java' },
+        { serverlessType: ServerlessType.AWS_LAMBDA },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isMetricsTabHidden(input)).toBeFalsy();
@@ -181,10 +180,6 @@ describe('APM service template', () => {
           transactionTypes: [],
           fallbackToTransactions: true,
           serviceAgentStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummary: {
-            dataStreamTypes: ['metrics'],
-          } as unknown as ServiceEntitySummary,
         });
       });
 
@@ -193,87 +188,6 @@ describe('APM service template', () => {
           wrapper,
         });
         expect(result.current.map((tab) => tab.label)).toEqual(standardTabOrder);
-      });
-    });
-
-    describe('APM and Logs signals', () => {
-      beforeEach(() => {
-        jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
-          agentName: 'java',
-          serviceName: 'foo',
-          transactionTypeStatus: FETCH_STATUS.SUCCESS,
-          transactionTypes: [],
-          fallbackToTransactions: true,
-          serviceAgentStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummary: {
-            dataStreamTypes: ['metrics', 'logs'],
-          } as unknown as ServiceEntitySummary,
-        });
-      });
-
-      it('keeps standard tab order', () => {
-        const { result } = renderHook(() => useTabs({ selectedTab: 'overview' }), {
-          wrapper,
-        });
-        expect(result.current.map((tab) => tab.label)).toEqual(standardTabOrder);
-      });
-    });
-
-    describe('Non-Entity service', () => {
-      beforeEach(() => {
-        jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
-          agentName: 'java',
-          serviceName: 'foo',
-          transactionTypeStatus: FETCH_STATUS.SUCCESS,
-          transactionTypes: [],
-          fallbackToTransactions: true,
-          serviceAgentStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
-        });
-      });
-
-      it('keeps standard tab order', () => {
-        const { result } = renderHook(() => useTabs({ selectedTab: 'overview' }), {
-          wrapper,
-        });
-        expect(result.current.map((tab) => tab.label)).toEqual(standardTabOrder);
-      });
-    });
-
-    describe('Logs signal only', () => {
-      beforeEach(() => {
-        jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
-          agentName: 'java',
-          serviceName: 'foo',
-          transactionTypeStatus: FETCH_STATUS.SUCCESS,
-          transactionTypes: [],
-          fallbackToTransactions: true,
-          serviceAgentStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
-          serviceEntitySummary: {
-            dataStreamTypes: ['logs'],
-          } as unknown as ServiceEntitySummary,
-        });
-      });
-
-      it('Reorders Logs and Dashboard tabs', () => {
-        const { result } = renderHook(() => useTabs({ selectedTab: 'overview' }), {
-          wrapper,
-        });
-        expect(result.current.map((tab) => tab.label)).toEqual([
-          'Overview',
-          'Logs',
-          'Dashboards',
-          'Transactions',
-          'Dependencies',
-          'Errors',
-          'Metrics',
-          'Infrastructure',
-          'Service Map',
-          'Alerts',
-          'Universal Profiling',
-        ]);
       });
     });
   });

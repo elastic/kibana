@@ -6,7 +6,7 @@
  */
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnwiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
@@ -20,7 +20,7 @@ export function UnmanagedElasticsearchAssets({
   definition,
   refreshDefinition,
 }: {
-  definition: UnwiredStreamGetResponse;
+  definition: Streams.UnwiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -101,13 +101,11 @@ export function UnmanagedElasticsearchAssets({
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiText>
-            <p>
-              {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
-                defaultMessage:
-                  'Use composable index and components templates to automatically apply settings, mappings, and aliases to indices',
-              })}
-            </p>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
+              defaultMessage:
+                'Use composable index and component templates to automatically apply settings, mappings, and aliases to indices',
+            })}
           </EuiText>
         </EuiFlexItem>
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchFilter } from './generate_search_schema';
 
 export const createFilterClauses = ({
@@ -22,7 +22,7 @@ export const createFilterClauses = ({
     if (filter) {
       if (filter.type === 'keyword' || filter.type === 'boolean') {
         clauses.push({
-          term: { [field]: value },
+          term: { [field]: value as FieldValue },
         });
       }
       // TODO: handle other field types, date mostly

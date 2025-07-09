@@ -31,7 +31,7 @@ import {
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import type { EdgeViewModel, NodeViewModel } from '../types';
-import { ONLY_RENDER_VISIBLE_ELEMENTS } from './constants';
+import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from './constants';
 
 import '@xyflow/react/dist/style.css';
 import { Controls } from '../controls/controls';
@@ -74,6 +74,10 @@ const edgeTypes = {
   default: DefaultEdge,
 };
 
+const fitViewOptions: FitViewOptions<Node> = {
+  duration: 200,
+};
+
 /**
  * Graph component renders a graph visualization using ReactFlow.
  * It takes nodes and edges as input and provides interactive controls
@@ -114,7 +118,7 @@ export const Graph = memo<GraphProps>(
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
         setTimeout(() => {
-          fitViewRef.current?.();
+          fitViewRef.current?.(fitViewOptions);
         }, 30);
       }
     }, [nodes, edges, setNodes, setEdges, isGraphInteractive]);
@@ -150,7 +154,7 @@ export const Graph = memo<GraphProps>(
           edgesFocusable={false}
           onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
           snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
-          snapGrid={[1, 1]}
+          snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           proOptions={{ hideAttribution: true }}
@@ -165,7 +169,7 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls showCenter={false} />
+              <Controls fitViewOptions={fitViewOptions} showCenter={false} />
             </Panel>
           )}
           {children}

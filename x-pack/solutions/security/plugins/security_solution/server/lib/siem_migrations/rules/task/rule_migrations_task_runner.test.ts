@@ -12,12 +12,17 @@ import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '
 import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
+jest.mock('./rule_migrations_telemetry_client');
+
 const mockRetrieverInitialize = jest.fn().mockResolvedValue(undefined);
 jest.mock('./retrievers', () => ({
   ...jest.requireActual('./retrievers'),
-  RuleMigrationsRetriever: jest
-    .fn()
-    .mockImplementation(() => ({ initialize: mockRetrieverInitialize })),
+  RuleMigrationsRetriever: jest.fn().mockImplementation(() => ({
+    initialize: mockRetrieverInitialize,
+    resources: {
+      getResources: jest.fn(() => ({})),
+    },
+  })),
 }));
 
 const mockCreateModel = jest.fn(() => ({ model: 'test-model' }));
@@ -30,16 +35,6 @@ const mockInvoke = jest.fn().mockResolvedValue({});
 jest.mock('./agent', () => ({
   ...jest.requireActual('./agent'),
   getRuleMigrationAgent: () => ({ invoke: mockInvoke }),
-}));
-
-jest.mock('./rule_migrations_telemetry_client', () => ({
-  SiemMigrationTelemetryClient: jest.fn().mockImplementation(() => ({
-    startSiemMigrationTask: jest.fn(() => ({
-      startRuleTranslation: jest.fn(() => ({ success: jest.fn(), failure: jest.fn() })),
-      success: jest.fn(),
-      failure: jest.fn(),
-    })),
-  })),
 }));
 
 // Mock dependencies

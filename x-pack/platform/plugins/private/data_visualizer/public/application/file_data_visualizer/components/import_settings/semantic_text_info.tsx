@@ -11,7 +11,7 @@ import React from 'react';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FILE_FORMATS } from '../../../../../common/constants';
+import { FILE_FORMATS } from '@kbn/file-upload-common';
 
 interface Props {
   results: FindFileStructureResponse;
@@ -30,7 +30,7 @@ export const SemanticTextInfo: FC<Props> = ({ results }) => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <FormattedMessage
           id="xpack.dataVisualizer.semanticTextInfo.body"

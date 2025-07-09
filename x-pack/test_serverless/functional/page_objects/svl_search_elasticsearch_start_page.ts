@@ -97,7 +97,7 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     async expectAnalyzeLogsLink() {
       await testSubjects.existOrFail('analyzeLogsBtn');
       expect(await testSubjects.getAttribute('analyzeLogsBtn', 'href')).equal(
-        'https://www.elastic.co/guide/en/serverless/current/elasticsearch-ingest-your-data.html'
+        'https://www.elastic.co/docs/manage-data/ingest'
       );
       expect(await testSubjects.getAttribute('analyzeLogsBtn', 'target')).equal('_blank');
     },

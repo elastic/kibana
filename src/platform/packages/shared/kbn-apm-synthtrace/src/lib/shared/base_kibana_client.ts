@@ -11,9 +11,9 @@
 
 import fetch from 'node-fetch';
 import { RequestInit } from 'node-fetch';
-import Path from 'path';
 import { kibanaHeaders } from './client_headers';
 import { getFetchAgent } from '../../cli/utils/ssl';
+import { normalizeUrl } from '../utils/normalize_url';
 
 type KibanaClientFetchOptions = RequestInit;
 
@@ -33,18 +33,20 @@ export class KibanaClient {
   }
 
   fetch<T>(pathname: string, options: KibanaClientFetchOptions): Promise<T> {
-    const url = Path.join(this.target, pathname);
-    return fetch(url, {
+    const pathnameWithLeadingSlash = pathname.startsWith('/') ? pathname : `/${pathname}`;
+    const url = new URL(`${this.target}${pathnameWithLeadingSlash}`);
+    const normalizedUrl = normalizeUrl(url.toString());
+    return fetch(normalizedUrl, {
       ...options,
       headers: {
         ...this.headers,
         ...options.headers,
       },
-      agent: getFetchAgent(url),
+      agent: getFetchAgent(normalizedUrl),
     }).then(async (response) => {
       if (response.status >= 400) {
         throw new KibanaClientHttpError(
-          `Response error for ${options.method?.toUpperCase() ?? 'GET'} ${url}`,
+          `Response error for ${options.method?.toUpperCase() ?? 'GET'} ${normalizedUrl}`,
           response.status,
           await response.json().catch((error) => {
             return undefined;

@@ -22,6 +22,16 @@ import { i18n } from '@kbn/i18n';
 import { ConversationAccess } from '@kbn/observability-ai-assistant-plugin/public';
 import { css } from '@emotion/css';
 
+const iconOnlyBadgeStyle = css`
+  .euiBadge__icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  padding: 0px 6px;
+  line-height: 1;
+`;
+
 interface OptionData {
   description?: string;
 }
@@ -36,10 +46,12 @@ const sharedLabel = i18n.translate('xpack.aiAssistant.chatHeader.shareOptions.sh
 
 export function ChatSharingMenu({
   isPublic,
+  isArchived,
   disabled,
   onChangeConversationAccess,
 }: {
   isPublic: boolean;
+  isArchived: boolean;
   disabled: boolean;
   onChangeConversationAccess: (access: ConversationAccess) => Promise<void>;
 }) {
@@ -74,7 +86,7 @@ export function ChatSharingMenu({
 
   const renderOption = useCallback(
     (option: EuiSelectableOption<OptionData>) => (
-      <EuiFlexGroup gutterSize="xs" direction="column" style={{ paddingBlock: euiTheme.size.xs }}>
+      <EuiFlexGroup gutterSize="xs" direction="column" css={{ paddingBlock: euiTheme.size.xs }}>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             <strong>{option.label}</strong>
@@ -123,6 +135,33 @@ export function ChatSharingMenu({
     );
   }
 
+  if (isArchived) {
+    return (
+      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center" wrap={false}>
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            iconType={selectedValue === ConversationAccess.SHARED ? 'users' : 'lock'}
+            color="hollow"
+            className={iconOnlyBadgeStyle}
+            data-test-subj="observabilityAiAssistantChatAccessBadge"
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            iconType="folderOpen"
+            color="default"
+            data-test-subj="observabilityAiAssistantArchivedBadge"
+          >
+            {i18n.translate('xpack.aiAssistant.chatHeader.archivedBadge', {
+              defaultMessage: 'Archived',
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   if (disabled) {
     return (
       <EuiBadge
@@ -151,7 +190,7 @@ export function ChatSharingMenu({
           data-test-subj="observabilityAiAssistantChatAccessBadge"
         >
           {selectedValue === ConversationAccess.SHARED ? sharedLabel : privateLabel}
-          <EuiIcon type="arrowDown" size="m" style={{ paddingLeft: euiTheme.size.xs }} />
+          <EuiIcon type="arrowDown" size="m" css={{ paddingLeft: euiTheme.size.xs }} />
         </EuiBadge>
       }
       isOpen={isPopoverOpen}

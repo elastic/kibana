@@ -31,9 +31,7 @@ export async function registerDocumentationFunction({
   functions.registerFunction(
     {
       name: RETRIEVE_DOCUMENTATION_NAME,
-      visibility: isProductDocAvailable
-        ? FunctionVisibility.AssistantOnly
-        : FunctionVisibility.Internal,
+      visibility: isProductDocAvailable ? FunctionVisibility.All : FunctionVisibility.Internal,
       description: `Use this function to retrieve documentation about Elastic products.
       You can retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch,
       or for Elastic solutions, such as Elastic Security, Elastic Observability or Elastic Enterprise Search
@@ -43,6 +41,7 @@ export async function registerDocumentationFunction({
         properties: {
           query: {
             description: `The query to use to retrieve documentation
+            Always write the query in English, as the documentation is available only in English.
             Examples:
             - "How to enable TLS for Elasticsearch?"
             - "What is Kibana Lens?"`,

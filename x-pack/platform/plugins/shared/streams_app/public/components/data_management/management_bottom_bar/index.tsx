@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 
 interface ManagementBottomBarProps {
   confirmButtonText?: string;
   disabled?: boolean;
+  insufficientPrivileges?: boolean;
   isLoading?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
@@ -22,6 +23,7 @@ export function ManagementBottomBar({
   confirmButtonText = defaultConfirmButtonText,
   disabled = false,
   isLoading = false,
+  insufficientPrivileges = false,
   onCancel,
   onConfirm,
 }: ManagementBottomBarProps) {
@@ -46,18 +48,31 @@ export function ManagementBottomBar({
           defaultMessage: 'Cancel changes',
         })}
       </EuiButtonEmpty>
-      <EuiButton
-        data-test-subj="streamsAppManagementBottomBarButton"
-        disabled={disabled}
-        color="primary"
-        fill
-        size="s"
-        iconType="check"
-        onClick={onConfirm}
-        isLoading={isLoading}
+      <EuiToolTip
+        content={
+          insufficientPrivileges
+            ? i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.bottomBar.onlySimulate',
+                {
+                  defaultMessage: "You don't have sufficient privileges to save changes.",
+                }
+              )
+            : undefined
+        }
       >
-        {confirmButtonText}
-      </EuiButton>
+        <EuiButton
+          data-test-subj="streamsAppManagementBottomBarButton"
+          disabled={disabled || insufficientPrivileges}
+          color="primary"
+          fill
+          size="s"
+          iconType="check"
+          onClick={onConfirm}
+          isLoading={isLoading}
+        >
+          {confirmButtonText}
+        </EuiButton>
+      </EuiToolTip>
     </EuiFlexGroup>
   );
 }

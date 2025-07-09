@@ -16,9 +16,10 @@ import axios from 'axios';
 
 import apm from 'elastic-apm-node';
 
+import { AgentlessAgentCreateOverProvisionedError } from '../../../common/errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy } from '../../types';
-import type { AgentlessApiResponse } from '../../../common/types';
+import type { AgentlessApiDeploymentResponse } from '../../../common/types';
 import {
   AgentlessAgentConfigError,
   AgentlessAgentCreateError,
@@ -38,10 +39,12 @@ import { fleetServerHostService } from '../fleet_server_host';
 import type { AgentlessConfig } from '../utils/agentless';
 import { prependAgentlessApiBasePathToEndpoint, isAgentlessEnabled } from '../utils/agentless';
 import {
+  AGENTLESS_API_ERROR_CODES,
   MAXIMUM_RETRIES,
   RETRYABLE_HTTP_STATUSES,
   RETRYABLE_SERVER_CODES,
 } from '../../../common/constants/agentless';
+import { agentPolicyService } from '../agent_policy';
 
 interface AgentlessAgentErrorHandlingMessages {
   [key: string]: {
@@ -100,6 +103,12 @@ class AgentlessAgentService {
       `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleet_token: [REDACTED]`
     );
 
+    if (agentlessAgentPolicy.agentless?.cloud_connectors?.enabled) {
+      logger.debug(
+        `[Agentless API] Creating agentless agent with ${agentlessAgentPolicy.agentless?.cloud_connectors?.target_csp} cloud connector enabled for agentless policy ${policyId}`
+      );
+    }
+
     logger.debug(
       `[Agentless API] Creating agentless agent with TLS cert: ${
         agentlessConfig?.api?.tls?.certificate ? '[REDACTED]' : 'undefined'
@@ -107,8 +116,9 @@ class AgentlessAgentService {
       and TLS ca: ${agentlessConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
     );
     const tlsConfig = this.createTlsConfig(agentlessConfig);
-
     const labels = this.getAgentlessTags(agentlessAgentPolicy);
+    const secrets = this.getAgentlessSecrets();
+    const policyDetails = await this.getPolicyDetails(soClient, agentlessAgentPolicy);
 
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
@@ -117,7 +127,10 @@ class AgentlessAgentService {
         fleet_url: fleetUrl,
         fleet_token: fleetToken,
         resources: agentlessAgentPolicy.agentless?.resources,
+        cloud_connectors: agentlessAgentPolicy.agentless?.cloud_connectors,
         labels,
+        secrets,
+        policy_details: policyDetails,
       },
       method: 'POST',
       ...this.getHeaders(tlsConfig, traceId),
@@ -134,7 +147,7 @@ class AgentlessAgentService {
       `[Agentless API] Creating agentless agent with request config ${requestConfigDebugStatus}`
     );
 
-    const response = await axios<AgentlessApiResponse>(requestConfig).catch(
+    const response = await axios<AgentlessApiDeploymentResponse>(requestConfig).catch(
       (error: Error | AxiosError) => {
         this.catchAgentlessApiError(
           'create',
@@ -278,6 +291,21 @@ class AgentlessAgentService {
     return response;
   }
 
+  private getAgentlessSecrets() {
+    const deploymentSecrets = appContextService.getConfig()?.agentless?.deploymentSecrets;
+
+    if (!deploymentSecrets) return {};
+
+    return {
+      ...(deploymentSecrets?.fleetAppToken
+        ? { fleet_app_token: deploymentSecrets?.fleetAppToken }
+        : {}),
+      ...(deploymentSecrets?.elasticsearchAppToken
+        ? { elasticsearch_app_token: deploymentSecrets?.elasticsearchAppToken }
+        : {}),
+    };
+  }
+
   private getHeaders(tlsConfig: SslConfig, traceId: string | undefined) {
     return {
       headers: {
@@ -291,6 +319,20 @@ class AgentlessAgentService {
         key: tlsConfig.key,
         ca: tlsConfig.certificateAuthorities,
       }),
+    };
+  }
+
+  private async getPolicyDetails(
+    soClient: SavedObjectsClientContract,
+    agentlessAgentPolicy: AgentPolicy
+  ) {
+    const fullPolicy = await agentPolicyService.getFullAgentPolicy(
+      soClient,
+      agentlessAgentPolicy.id
+    );
+
+    return {
+      output_name: Object.keys(fullPolicy?.outputs || {})?.[0], // Agentless policies only have one output
     };
   }
 
@@ -420,32 +462,22 @@ class AgentlessAgentService {
       this.getErrorHandlingMessages(agentlessPolicyId);
 
     if (error.response) {
-      if (error.response.status in ERROR_HANDLING_MESSAGES) {
-        const handledResponseErrorMessage = ERROR_HANDLING_MESSAGES[error.response.status][action];
-        this.handleResponseError(
-          action,
-          error.response,
-          logger,
-          errorMetadataWithRequestConfig,
-          requestConfigDebugStatus,
-          handledResponseErrorMessage.log,
-          handledResponseErrorMessage.message,
-          traceId
-        );
-      } else {
-        const unhandledResponseErrorMessage = ERROR_HANDLING_MESSAGES.unhandled_response[action];
-        // The request was made and the server responded with a status code and error data
-        this.handleResponseError(
-          action,
-          error.response,
-          logger,
-          errorMetadataWithRequestConfig,
-          requestConfigDebugStatus,
-          unhandledResponseErrorMessage.log,
-          unhandledResponseErrorMessage.message,
-          traceId
-        );
-      }
+      // The request was made and the server responded with a status code and error data
+      const responseErrorMessage =
+        error.response.status in ERROR_HANDLING_MESSAGES
+          ? ERROR_HANDLING_MESSAGES[error.response.status][action]
+          : ERROR_HANDLING_MESSAGES.unhandled_response[action];
+
+      this.handleResponseError(
+        action,
+        error.response,
+        logger,
+        errorMetadataWithRequestConfig,
+        requestConfigDebugStatus,
+        responseErrorMessage.log,
+        responseErrorMessage.message,
+        traceId
+      );
     } else if (error.request) {
       // The request was made but no response was received
       const requestErrorMessage = ERROR_HANDLING_MESSAGES.request_error[action];
@@ -498,7 +530,12 @@ class AgentlessAgentService {
       }
     );
 
-    throw this.getAgentlessAgentError(action, userMessage, traceId);
+    const responseData = {
+      code: response?.data?.code,
+      error: response?.data?.error,
+    };
+
+    throw this.getAgentlessAgentError(action, userMessage, traceId, responseData);
   }
 
   private convertCauseErrorsToString = (error: AxiosError) => {
@@ -508,8 +545,25 @@ class AgentlessAgentService {
     return error.cause;
   };
 
-  private getAgentlessAgentError(action: string, userMessage: string, traceId: string | undefined) {
+  private getAgentlessAgentError(
+    action: string,
+    userMessage: string,
+    traceId: string | undefined,
+    responseData?: {
+      code?: string;
+      error?: string;
+    }
+  ) {
     if (action === 'create') {
+      if (responseData?.code === AGENTLESS_API_ERROR_CODES.OVER_PROVISIONED) {
+        const limitMatches = responseData?.error?.match(/limit: ([0-9]+)/);
+        const limit = limitMatches ? parseInt(limitMatches[1], 10) : undefined;
+
+        return new AgentlessAgentCreateOverProvisionedError(
+          this.withRequestIdMessage(userMessage, traceId),
+          limit
+        );
+      }
       return new AgentlessAgentCreateError(this.withRequestIdMessage(userMessage, traceId));
     }
     if (action === 'delete') {

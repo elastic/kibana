@@ -10,6 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
+import { buildEventsSearchQuery } from './build_events_query';
 import {
   createSearchAfterReturnType,
   createSearchAfterReturnTypeFromResponse,
@@ -102,26 +103,30 @@ export const searchAfterAndBulkCreateFactory = async ({
           } in index pattern "${inputIndexPattern}"`
         );
 
+        const searchAfterQuery = buildEventsSearchQuery({
+          aggregations: undefined,
+          index: inputIndexPattern,
+          from: tuple.from.toISOString(),
+          to: tuple.to.toISOString(),
+          runtimeMappings,
+          filter,
+          size: Math.ceil(Math.min(maxSignals, pageSize)),
+          sortOrder,
+          searchAfterSortIds: sortIds,
+          primaryTimestamp,
+          secondaryTimestamp,
+          trackTotalHits,
+          additionalFilters,
+        });
         const {
           searchResult,
           searchDuration,
           searchErrors,
           loggedRequests: singleSearchLoggedRequests = [],
         } = await singleSearchAfter({
-          searchAfterSortIds: sortIds,
-          index: inputIndexPattern,
-          runtimeMappings,
-          from: tuple.from.toISOString(),
-          to: tuple.to.toISOString(),
+          searchRequest: searchAfterQuery,
           services,
           ruleExecutionLogger,
-          filter,
-          pageSize: Math.ceil(Math.min(maxSignals, pageSize)),
-          primaryTimestamp,
-          secondaryTimestamp,
-          trackTotalHits,
-          sortOrder,
-          additionalFilters,
           loggedRequestsConfig: createLoggedRequestsConfig(
             isLoggedRequestsEnabled,
             sortIds,
@@ -203,7 +208,7 @@ export const searchAfterAndBulkCreateFactory = async ({
         // this could happen when event has empty sort field
         // https://github.com/elastic/kibana/issues/174573 (happens to IM rule only since it uses desc order for events search)
         // when negative sort id used in subsequent request it fails, so when negative sort value found we don't do next request
-        const hasNegativeNumber = lastSortIds?.some((val) => val < 0);
+        const hasNegativeNumber = lastSortIds?.some((val) => Number(val) < 0);
         if (lastSortIds != null && lastSortIds.length !== 0 && !hasNegativeNumber) {
           sortIds = lastSortIds;
         } else {

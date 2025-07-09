@@ -34,7 +34,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('/internal/observability_ai_assistant/chat', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let proxy: LlmProxy;
 
     let connectorId: string;
@@ -70,8 +70,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(status).to.be(404);
     });
 
+    // Fails on ECH: https://github.com/elastic/kibana/issues/219203
     it('returns a 200 if the connector exists', async () => {
-      void proxy.interceptConversation('Hello from LLM Proxy');
+      void proxy.interceptWithResponse('Hello from LLM Proxy');
       const { status } = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'POST /internal/observability_ai_assistant/chat',
         params: {
@@ -89,8 +90,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(status).to.be(200);
     });
 
+    // Fails on ECH: https://github.com/elastic/kibana/issues/219203
     it('should forward the system message to the LLM', async () => {
-      const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
+      const simulatorPromise = proxy.interceptWithResponse('Hello from LLM Proxy');
       await observabilityAIAssistantAPIClient.editor({
         endpoint: 'POST /internal/observability_ai_assistant/chat',
         params: {
@@ -128,7 +130,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         new Promise<void>((resolve, reject) => {
           async function runTest() {
             const chunks = times(NUM_RESPONSES).map((i) => `Part: ${i}\n`);
-            void proxy.interceptConversation(chunks);
+            void proxy.interceptWithResponse(chunks);
 
             const receivedChunks: Array<Record<string, any>> = [];
 

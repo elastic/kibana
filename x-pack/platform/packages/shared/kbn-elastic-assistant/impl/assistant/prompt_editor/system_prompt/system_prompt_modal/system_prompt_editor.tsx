@@ -55,8 +55,8 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   // Prompt
   const promptContent = useMemo(
     // Fixing Cursor Jump in text area
-    () => systemPromptSettings.find((sp) => sp.id === selectedSystemPrompt?.id)?.content ?? '',
-    [selectedSystemPrompt?.id, systemPromptSettings]
+    () => selectedSystemPrompt?.content ?? '',
+    [selectedSystemPrompt?.content]
   );
   // Conversations this system prompt should be a default for
   const conversationOptions = useMemo(() => Object.values(conversations), [conversations]);

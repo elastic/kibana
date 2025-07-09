@@ -14,6 +14,6 @@ export { EventType, FieldType } from './src/analytics';
 
 export type { NavigationProps } from './src/ui';
 
-export type { PanelComponentProps, PanelContent, PanelContentProvider } from './src/ui';
+export type { PanelComponentProps, PanelContent } from './src/ui';
 
 export type { NavigationServices, NavigationKibanaDependencies } from './src/types';

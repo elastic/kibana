@@ -8,8 +8,8 @@
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, ReactNode, useMemo } from 'react';
-import { flow } from 'fp-ts/lib/function';
-import { map } from 'fp-ts/lib/Array';
+import { flow } from 'fp-ts/function';
+import { map } from 'fp-ts/Array';
 import { map as _map, groupBy as _groupBy } from 'lodash';
 
 import {
@@ -49,7 +49,7 @@ type ProcessorWithCategory = ProcessorTypeAndLabel & {
 
 export const getProcessorTypesAndLabels = (license: ILicense | null) => {
   return (
-    extractProcessorDetails(mapProcessorTypeToDescriptor)
+    extractProcessorDetails(mapProcessorTypeToDescriptor())
       // Filter out any processors that are not available for the current license type
       .filter((option) => {
         return option.forLicenseAtLeast ? license?.hasAtLeast(option.forLicenseAtLeast) : true;

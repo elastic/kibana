@@ -19,6 +19,8 @@ export interface ElasticAssistantAppContext {
 }
 export enum CallbackIds {
   DefendInsightsPostCreate = 'defend-insights:post-create',
+  DefendInsightsPreCreate = 'defend-insights:pre-create',
+  DefendInsightsPostFetch = 'defend-insights:post-fetch',
 }
 export type RegisteredCallbacks = Map<CallbackIds, Function[]>;
 

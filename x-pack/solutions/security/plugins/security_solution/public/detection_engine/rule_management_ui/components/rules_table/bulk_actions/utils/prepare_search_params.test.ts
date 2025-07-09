@@ -83,6 +83,26 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
+      BulkActionsDryRunErrCodeEnum.THRESHOLD_RULE_TYPE_IN_SUPPRESSION,
+      {
+        filter: '',
+        tags: [],
+        showCustomRules: false,
+        showElasticRules: false,
+        excludeRuleTypes: ['threshold'],
+      },
+    ],
+    [
+      BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD,
+      {
+        filter: '',
+        tags: [],
+        showCustomRules: false,
+        showElasticRules: false,
+        includeRuleTypes: ['threshold'],
+      },
+    ],
+    [
       undefined,
       {
         filter: '',
@@ -118,4 +138,54 @@ describe('prepareSearchParams', () => {
       expect(result).toEqual({ query: expect.any(String) });
     }
   );
+
+  test('should not include gapRange in the output when provided with ids', () => {
+    const selectedRuleIds = ['rule:1', 'rule:2'];
+    const dryRunResult: DryRunResult = {
+      ruleErrors: [],
+    };
+    const gapRange = { start: '2025-01-01T00:00:00.000Z', end: '2025-01-02T00:00:00.000Z' };
+    const result = prepareSearchParams({
+      selectedRuleIds,
+      dryRunResult,
+      gapRange,
+    });
+
+    expect(result).toEqual({ ids: ['rule:1', 'rule:2'] });
+  });
+
+  test('should include gapRange in the query when provided with query', () => {
+    const filterOptions: FilterOptions = {
+      filter: '',
+      tags: [],
+      showCustomRules: false,
+      showElasticRules: false,
+    };
+    const dryRunResult: DryRunResult = {
+      ruleErrors: [],
+    };
+    const gapRange = { start: '2025-01-01T00:00:00.000Z', end: '2025-01-02T00:00:00.000Z' };
+    const result = prepareSearchParams({
+      filterOptions,
+      dryRunResult,
+      gapRange,
+    });
+
+    expect(result).toEqual({ query: expect.any(String), gapRange });
+  });
+
+  test('should return only query when neither selectedRuleIds nor gapRange are provided', () => {
+    const dryRunResult: DryRunResult = { ruleErrors: [] };
+
+    const filterOptions: FilterOptions = {
+      filter: '',
+      tags: [],
+      showCustomRules: false,
+      showElasticRules: false,
+    };
+
+    const result = prepareSearchParams({ dryRunResult, filterOptions });
+
+    expect(result).toEqual({ query: expect.any(String) });
+  });
 });

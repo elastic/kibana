@@ -23,7 +23,7 @@ describe('generateSideNavItems', () => {
     enterpriseSearch: {
       id: 'enterpriseSearch',
       url: '/app/elasticsearch/overview',
-      title: 'Overview',
+      title: 'Home',
     },
     'enterpriseSearchContent:searchIndices': {
       id: 'enterpriseSearchContent:searchIndices',
@@ -61,7 +61,7 @@ describe('generateSideNavItems', () => {
         href: '/app/elasticsearch/overview',
         id: 'unit-test',
         isSelected: false,
-        name: 'Overview',
+        name: 'Home',
         onClick: expect.any(Function),
       },
     ]);
@@ -91,7 +91,7 @@ describe('generateSideNavItems', () => {
             href: '/app/elasticsearch/overview',
             id: 'unit-test',
             isSelected: false,
-            name: 'Overview',
+            name: 'Home',
             onClick: expect.any(Function),
           },
         ],

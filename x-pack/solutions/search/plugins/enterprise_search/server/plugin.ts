@@ -18,8 +18,8 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 import {
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_HOME_PLUGIN,
+  ENTERPRISE_SEARCH_DATA_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
@@ -33,12 +33,11 @@ import {
   SEARCH_PRODUCT_NAME,
   SEARCH_INDICES,
   SEARCH_INDICES_START,
+  SEARCH_INDEX_MANAGEMENT,
 } from '../common/constants';
 
 import {
-  websiteSearchGuideId,
   databaseSearchGuideId,
-  websiteSearchGuideConfig,
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
@@ -100,15 +99,15 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       licensing,
       guidedOnboarding,
       cloud,
-      searchConnectors,
+      contentConnectors,
     }: PluginsSetup
   ) {
     this.globalConfigService.setup(elasticsearch.legacy.config$, cloud);
     const config = this.config;
     const log = this.logger;
     const PLUGIN_IDS = [
-      ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-      ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
+      ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
       SEARCH_EXPERIENCES_PLUGIN.ID,
       VECTOR_SEARCH_PLUGIN.ID,
@@ -116,6 +115,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       AI_SEARCH_PLUGIN.ID,
       SEARCH_INDICES,
       SEARCH_INDICES_START,
+      SEARCH_INDEX_MANAGEMENT,
     ];
 
     if (customIntegrations) {
@@ -303,10 +303,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     /**
      * Register a config for the search guide
      */
-    if (config.hasWebCrawler) {
-      // TODO: Do we remove this guide with the removal of native crawler?
-      guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
-    }
     if (config.hasConnectors) {
       guidedOnboarding?.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
     }
@@ -317,7 +313,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
 
     if (globalSearch) {
       globalSearch.registerResultProvider(
-        getSearchResultProvider(config, searchConnectors?.getConnectorTypes() || [])
+        getSearchResultProvider(config, contentConnectors?.getConnectorTypes() || [])
       );
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));

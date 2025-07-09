@@ -61,6 +61,7 @@ export const ensureArtifactListExists = memoize(
           list_id: ENDPOINT_LIST_ID,
           type: ExceptionListTypeEnum.ENDPOINT,
         };
+        break;
 
       default:
         throw new Error(`Unknown Artifact list: ${artifactType}`);
@@ -86,7 +87,7 @@ export const ensureArtifactListExists = memoize(
  * Creates an exception list item.
  * NOTE: this method does NOT create the list itself.
  *
- * @private
+ * @internal
  *
  * @param kbnClient
  * @param data

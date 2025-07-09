@@ -18,6 +18,7 @@ type RequiredParams = ESSearchRequest & {
   track_total_hits: boolean | number;
   sort?: estypes.SortOptions[];
   _source?: string[] | false;
+  search_after?: Array<string | number>;
 };
 
 export type InfraAlertsClient = Awaited<ReturnType<typeof getInfraAlertsClient>>;

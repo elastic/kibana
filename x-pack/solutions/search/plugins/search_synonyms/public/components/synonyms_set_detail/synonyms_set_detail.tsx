@@ -11,6 +11,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { useKibana } from '../../hooks/use_kibana';
+import { useSynonymsBreadcrumbs } from '../../hooks/use_synonyms_breadcrumbs';
 import { SynonymsSetRuleTable } from './synonyms_set_rule_table';
 import { ConnectToApiButton } from '../connect_to_api/connect_to_api_button';
 import { ConnectToApiFlyout } from '../connect_to_api/connect_to_api_flyout';
@@ -22,6 +23,7 @@ export const SynonymsSetDetail = () => {
   const {
     services: { console: consolePlugin, history, searchNavigation, http, application },
   } = useKibana();
+  useSynonymsBreadcrumbs(synonymsSetId);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),

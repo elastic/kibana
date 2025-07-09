@@ -31,7 +31,6 @@ export interface HomeAppProps {
 export function HomeApp({ directories, solutions }: HomeAppProps) {
   const {
     application,
-    savedObjectsClient,
     getBasePath,
     addBasePath,
     environmentService,
@@ -66,7 +65,6 @@ export function HomeApp({ directories, solutions }: HomeAppProps) {
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={props.match.params.id}
-        bulkCreate={savedObjectsClient.bulkCreate}
       />
     );
   };

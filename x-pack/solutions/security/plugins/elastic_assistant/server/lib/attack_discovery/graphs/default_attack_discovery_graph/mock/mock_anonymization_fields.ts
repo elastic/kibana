@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
 export const mockAnonymizationFields: AnonymizationFieldResponse[] = [
   {

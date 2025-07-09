@@ -13,16 +13,20 @@ import { DataSourceCategory, DocumentType, SolutionType } from '../../../../prof
 import { createObservabilityTracesTransactionDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
+import { createContextAwarenessMocks } from '../../../../__mocks__';
+import type { ProfileProviderServices } from '../../../profile_provider_services';
 
 describe('transactionDocumentProfileProvider', () => {
   const getRootContext = ({
     profileId,
+    solutionType,
   }: {
     profileId: string;
+    solutionType?: SolutionType;
   }): ContextWithProfileId<RootContext> => {
     return {
       profileId,
-      solutionType: SolutionType.Observability,
+      solutionType: solutionType ?? SolutionType.Observability,
     };
   };
 
@@ -40,10 +44,14 @@ describe('transactionDocumentProfileProvider', () => {
     isMatch: false,
   };
 
+  const mockServices: ProfileProviderServices = {
+    ...createContextAwarenessMocks().profileProviderServices,
+  };
+
   describe('when root profile is observability', () => {
     const profileId = OBSERVABILITY_ROOT_PROFILE_ID;
     const transactionDocumentProfileProvider =
-      createObservabilityTracesTransactionDocumentProfileProvider();
+      createObservabilityTracesTransactionDocumentProfileProvider(mockServices);
 
     it('matches records with the correct data stream type and the correct processor event', () => {
       expect(
@@ -69,15 +77,16 @@ describe('transactionDocumentProfileProvider', () => {
     });
   });
 
-  describe('when root profile is NOT observability', () => {
-    const profileId = 'another-profile';
+  describe('when solutionType is NOT observability', () => {
+    const profileId = OBSERVABILITY_ROOT_PROFILE_ID;
+    const solutionType = SolutionType.Default;
     const transactionDocumentProfileProvider =
-      createObservabilityTracesTransactionDocumentProfileProvider();
+      createObservabilityTracesTransactionDocumentProfileProvider(mockServices);
 
     it('does not match records with the correct data stream type and the correct processor event', () => {
       expect(
         transactionDocumentProfileProvider.resolve({
-          rootContext: getRootContext({ profileId }),
+          rootContext: getRootContext({ profileId, solutionType }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
           record: buildMockRecord('index', {
             'data_stream.type': ['traces'],

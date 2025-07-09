@@ -31,11 +31,7 @@ jest.mock('../../common/utils/route/use_route_spy', () => ({
 }));
 
 jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('d594baeb-5eca-480c-8885-ba79eaf41372')
-    .mockReturnValueOnce('1dd5663b-f062-43f8-8688-fc8166c2ca8e')
-    .mockReturnValue('2cc5663b-f062-43f8-8688-fc8166c2ca8e'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 describe('getRiskScoreDonutAttributes', () => {

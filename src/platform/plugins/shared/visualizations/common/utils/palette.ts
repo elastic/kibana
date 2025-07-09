@@ -15,7 +15,7 @@ export interface PaletteConfig {
   stop: number[];
 }
 
-const TRANSPARENT = 'rgb(0, 0, 0, 0)';
+const TRANSPARENT = 'rgba(0, 0, 0, 0)';
 
 const getColor = (
   index: number,

@@ -18,6 +18,8 @@
     "optionalPlugins": [
       "console",
       "searchNavigation",
+      "share",
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact",

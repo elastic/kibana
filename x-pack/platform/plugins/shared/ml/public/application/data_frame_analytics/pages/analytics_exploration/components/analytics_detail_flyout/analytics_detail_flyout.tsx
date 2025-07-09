@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState } from '@kbn/ml-url-state';
+import { useCreateAndNavigateToManagementMlLink } from '../../../../../contexts/kibana/use_create_url';
 import { useJobInfoFlyouts } from '../../../../../jobs/components/job_details_flyout';
 import { useGetAnalytics } from '../../../analytics_management/services/analytics_service';
 import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
 import type { DataFrameAnalyticsListRow } from '../../../analytics_management/components/analytics_list/common';
-import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../locator';
 import { ExpandedRow } from '../../../analytics_management/components/analytics_list/expanded_row';
 
@@ -70,19 +70,14 @@ export const AnalyticsDetailFlyout = () => {
     [analytics, analyticsId]
   );
 
-  const locator = useMlLocator()!;
-  const navigateToPath = useNavigateToPath();
   const [globalState] = useUrlState('_g');
 
-  const redirectToAnalyticsList = useCallback(async () => {
-    const path = await locator.getUrl({
-      page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-      pageState: {
-        jobId: globalState?.ml?.jobId,
-      },
-    });
-    await navigateToPath(path, false);
-  }, [locator, navigateToPath, globalState?.ml?.jobId]);
+  const pageState = useMemo(() => ({ jobId: globalState?.ml?.jobId }), [globalState?.ml?.jobId]);
+  const redirectToAnalyticsList = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    'analytics',
+    pageState
+  );
 
   const flyoutTitleId = `mlAnalyticsDetailsFlyout-${analyticsId}`;
   return isDataFrameAnalyticsDetailsFlyoutOpen ? (

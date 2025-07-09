@@ -10,6 +10,7 @@ import {
   type AlwaysCondition,
   type BinaryFilterCondition,
   type Condition,
+  NeverCondition,
 } from '@kbn/streams-schema';
 import { cloneDeep, isEqual } from 'lodash';
 
@@ -20,6 +21,8 @@ export const EMPTY_EQUALS_CONDITION: BinaryFilterCondition = Object.freeze({
 });
 
 export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ always: {} });
+
+export const NEVER_CONDITION: NeverCondition = Object.freeze({ never: {} });
 
 export function alwaysToEmptyEquals<T extends Condition>(condition: T): Exclude<T, AlwaysCondition>;
 

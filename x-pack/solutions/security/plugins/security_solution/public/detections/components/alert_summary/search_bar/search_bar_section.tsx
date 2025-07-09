@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { useIntegrations } from '../../../hooks/alert_summary/use_integrations';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { IntegrationFilterButton } from './integrations_filter_button';
@@ -29,6 +30,19 @@ export interface SearchBarSectionProps {
    * List of installed AI for SOC integrations
    */
   packages: PackageListItem[];
+  /**
+   * Result from the useQuery to fetch all rules
+   */
+  ruleResponse: {
+    /**
+     * Result from fetching all rules
+     */
+    rules: RuleResponse[];
+    /**
+     * True while rules are being fetched
+     */
+    isLoading: boolean;
+  };
 }
 
 /**
@@ -38,34 +52,36 @@ export interface SearchBarSectionProps {
  * For the AI for SOC effort, each integration has one rule associated with.
  * This means that deselecting an integration is equivalent to filtering out by the rule for that integration.
  */
-export const SearchBarSection = memo(({ dataView, packages }: SearchBarSectionProps) => {
-  const { isLoading, integrations } = useIntegrations({ packages });
+export const SearchBarSection = memo(
+  ({ dataView, packages, ruleResponse }: SearchBarSectionProps) => {
+    const { isLoading, integrations } = useIntegrations({ packages, ruleResponse });
 
-  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
+    const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
 
-  return (
-    <EuiFlexGroup gutterSize="none" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiSkeletonRectangle
-          data-test-subj={INTEGRATION_BUTTON_LOADING_TEST_ID}
-          isLoading={isLoading}
-          width={INTEGRATION_BUTTON_LOADING_WIDTH}
-          height={INTEGRATION_BUTTON_LOADING_HEIGHT}
-        >
-          <IntegrationFilterButton integrations={integrations} />
-        </EuiSkeletonRectangle>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <SiemSearchBar
-          dataTestSubj={SEARCH_BAR_TEST_ID}
-          hideFilterBar
-          hideQueryMenu
-          id={InputsModelId.global}
-          sourcererDataView={dataViewSpec}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+    return (
+      <EuiFlexGroup gutterSize="none" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiSkeletonRectangle
+            data-test-subj={INTEGRATION_BUTTON_LOADING_TEST_ID}
+            isLoading={isLoading}
+            width={INTEGRATION_BUTTON_LOADING_WIDTH}
+            height={INTEGRATION_BUTTON_LOADING_HEIGHT}
+          >
+            <IntegrationFilterButton integrations={integrations} />
+          </EuiSkeletonRectangle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SiemSearchBar
+            dataTestSubj={SEARCH_BAR_TEST_ID}
+            hideFilterBar
+            hideQueryMenu
+            id={InputsModelId.global}
+            sourcererDataView={dataViewSpec}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 SearchBarSection.displayName = 'SearchBarSection';

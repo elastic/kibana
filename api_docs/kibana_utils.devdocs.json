@@ -813,7 +813,8 @@
             "text": "ResizeChecker"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/kibana_utils/public/resize_checker/resize_checker.ts",
         "deprecated": false,

@@ -46,7 +46,8 @@
       "savedObjectsTagging",
       "spaces",
       "serverless",
-      "licensing"
+      "licensing",
+      "fieldsMetadata",
     ],
     "requiredBundles": [
       "unifiedSearch",

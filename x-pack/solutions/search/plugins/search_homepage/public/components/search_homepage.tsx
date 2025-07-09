@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiHorizontalRule, EuiPageTemplate } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
-
 import { useKibana } from '../hooks/use_kibana';
+import { useSearchHomePageRedirect } from '../hooks/use_search_home_page_redirect';
 import { SearchHomepageBody } from './search_homepage_body';
 import { SearchHomepageHeader } from './search_homepage_header';
 
@@ -17,6 +17,8 @@ export const SearchHomepagePage = () => {
     services: { console: consolePlugin },
   } = useKibana();
 
+  useSearchHomePageRedirect();
+
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
@@ -24,7 +26,8 @@ export const SearchHomepagePage = () => {
 
   return (
     <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="search-homepage" grow={false}>
-      <SearchHomepageHeader showEndpointsAPIKeys />
+      <SearchHomepageHeader />
+      <EuiHorizontalRule margin="none" />
       <SearchHomepageBody />
       {embeddableConsole}
     </EuiPageTemplate>

@@ -10,7 +10,7 @@
 import { has, isEmpty, get } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
 import deepmerge from 'deepmerge';
-import omit from 'lodash/omit';
+import { omit } from 'lodash';
 
 import type {
   ExceptionListType,

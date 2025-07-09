@@ -26,3 +26,17 @@ export const ONBOARDING_PAGE_DESCRIPTION = i18n.translate(
     defaultMessage: `A SIEM with AI-driven security analytics, XDR and Cloud Security.`,
   }
 );
+
+export const ONBOARDING_SEARCH_AI_LAKE_PAGE_TITLE = i18n.translate(
+  'xpack.securitySolution.onboarding.searchAILake.title',
+  {
+    defaultMessage: `Welcome to Elastic’s AI for the SOC`,
+  }
+);
+
+export const ONBOARDING_SEARCH_AI_LAKE_PAGE_SUB_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.onboarding.searchAILake.subDescription',
+  {
+    defaultMessage: `Empowering SOCs for faster threat detection, investigation, and response.`,
+  }
+);

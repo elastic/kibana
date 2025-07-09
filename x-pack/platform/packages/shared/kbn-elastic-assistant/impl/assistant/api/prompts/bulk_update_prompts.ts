@@ -14,13 +14,13 @@ import {
 import {
   PerformPromptsBulkActionRequestBody,
   PerformPromptsBulkActionResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 
 export const bulkUpdatePrompts = async (
   http: HttpSetup,
   prompts: PerformPromptsBulkActionRequestBody,
   toasts?: IToasts
-) => {
+): Promise<PerformPromptsBulkActionResponse | { success: false }> => {
   try {
     const result = await http.fetch<PerformPromptsBulkActionResponse>(
       ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
@@ -56,5 +56,6 @@ export const bulkUpdatePrompts = async (
         },
       }),
     });
+    return { success: false };
   }
 };

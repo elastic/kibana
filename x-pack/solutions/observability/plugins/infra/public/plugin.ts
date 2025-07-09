@@ -39,7 +39,6 @@ import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
-import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/constants';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -183,18 +182,6 @@ export class Plugin implements InfraClientPluginClass {
         })
       )
     );
-
-    pluginsSetup.embeddable.registerReactEmbeddableFactory(LOG_STREAM_EMBEDDABLE, async () => {
-      const { getLogStreamEmbeddableFactory } = await import(
-        './components/log_stream/log_stream_react_embeddable'
-      );
-      const [coreStart, pluginDeps, pluginStart] = await core.getStartServices();
-      return getLogStreamEmbeddableFactory({
-        coreStart,
-        pluginDeps,
-        pluginStart,
-      });
-    });
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdRuleType(core, pluginsSetup.share.url)

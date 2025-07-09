@@ -304,7 +304,7 @@ export const waitForRuleToUpdate = () => {
   cy.get(RULE_SWITCH_LOADER, { timeout: 300000 }).should('not.exist');
 };
 
-export const importRules = (rulesFile: string) => {
+export const importRules = (rulesFile: Cypress.FileReference | Cypress.FileReference[]) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).click();
   cy.get(INPUT_FILE).selectFile(rulesFile);
@@ -445,7 +445,9 @@ const selectOverwriteConnectorsRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).should('be.checked');
 };
 
-export const importRulesWithOverwriteAll = (rulesFile: string) => {
+export const importRulesWithOverwriteAll = (
+  rulesFile: Cypress.FileReference | Cypress.FileReference[]
+) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).click({ force: true });
   cy.get(INPUT_FILE).selectFile(rulesFile);
@@ -516,13 +518,21 @@ export const disableAutoRefresh = () => {
   expectAutoRefreshIsDisabled();
 };
 
+export const enableAutoRefresh = () => {
+  openRefreshSettingsPopover();
+  cy.get(REFRESH_SETTINGS_SWITCH).click();
+  expectAutoRefreshIsEnabled();
+};
+
 export const mockGlobalClock = () => {
   /**
    * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
    * There are no cancelAnimationFrames in the codebase that are used to clear a setInterval so
    * explicitly set the below overrides. see https://docs.cypress.io/api/commands/clock#Function-names
+   *
+   * Warning: timers need to be mocked after the first page load,
+   * otherwise plugin deep links won't be registered properly since they use rxjs debounceTime.
    */
-
   cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
 };
 

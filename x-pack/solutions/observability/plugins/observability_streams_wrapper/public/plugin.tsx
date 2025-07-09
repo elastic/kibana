@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { map } from 'rxjs';
+import { from, map, switchMap } from 'rxjs';
 import {
   AppUpdater,
   CoreSetup,
@@ -85,33 +85,39 @@ export class ObservabilityStreamsWrapperPlugin
     >,
     pluginsSetup: ObservabilityStreamsWrapperSetupDependencies
   ): ObservabilityStreamsWrapperPublicSetup {
-    pluginsSetup.observabilityShared.navigation.registerSections(
-      pluginsSetup.streams.status$.pipe(
-        map(({ status }) => {
-          if (status !== 'enabled') {
-            return [];
-          }
+    const startServicesPromise = coreSetup.getStartServices();
 
-          return [
-            {
-              label: '',
-              sortKey: 101,
-              entries: [
+    pluginsSetup.observabilityShared.navigation.registerSections(
+      from(startServicesPromise).pipe(
+        switchMap(([_, pluginsStart]) =>
+          pluginsStart.streams.status$.pipe(
+            map(({ status }) => {
+              if (status !== 'enabled') {
+                return [];
+              }
+
+              return [
                 {
-                  label: i18n.translate('xpack.streams.streamsAppLinkTitle', {
-                    defaultMessage: 'Streams',
-                  }),
-                  app: STREAMS_APP_ID,
-                  path: '/',
-                  isTechnicalPreview: true,
-                  matchPath(currentPath: string) {
-                    return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
-                  },
+                  label: '',
+                  sortKey: 101,
+                  entries: [
+                    {
+                      label: i18n.translate('xpack.streams.streamsAppLinkTitle', {
+                        defaultMessage: 'Streams',
+                      }),
+                      app: STREAMS_APP_ID,
+                      path: '/',
+                      isTechnicalPreview: true,
+                      matchPath(currentPath: string) {
+                        return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
+                      },
+                    },
+                  ],
                 },
-              ],
-            },
-          ];
-        })
+              ];
+            })
+          )
+        )
       )
     );
 
@@ -124,33 +130,24 @@ export class ObservabilityStreamsWrapperPlugin
       appRoute: '/app/streams',
       category: DEFAULT_APP_CATEGORIES.observability,
       order: 8001,
-      updater$: pluginsSetup.streams.status$.pipe(
-        map(({ status }): AppUpdater => {
-          return (app) => {
-            if (status !== 'enabled') {
-              return {
-                visibleIn: [],
-                deepLinks: [],
-              };
-            }
+      updater$: from(startServicesPromise).pipe(
+        switchMap(([_, pluginsStart]) =>
+          pluginsStart.streams.status$.pipe(
+            map(({ status }): AppUpdater => {
+              return (app) => {
+                if (status !== 'enabled') {
+                  return {
+                    visibleIn: [],
+                  };
+                }
 
-            return {
-              visibleIn: ['sideNav', 'globalSearch'],
-              deepLinks:
-                status === 'enabled'
-                  ? [
-                      {
-                        id: 'streams',
-                        title: i18n.translate('xpack.streams.streamsAppDeepLinkTitle', {
-                          defaultMessage: 'Streams',
-                        }),
-                        path: '/',
-                      },
-                    ]
-                  : [],
-            };
-          };
-        })
+                return {
+                  visibleIn: ['sideNav', 'globalSearch'],
+                };
+              };
+            })
+          )
+        )
       ),
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { OpenTelemetryInstructions } from './opentelemetry_instructions';
 import {
   getApmAgentCommands,
@@ -63,6 +64,13 @@ export function AgentConfigInstructions({
 
       <EuiCodeBlock
         isCopyable
+        copyAriaLabel={i18n.translate(
+          'xpack.apm.tutorial.apmAgents.agentConfigurationInstructions.copyAriaLabel',
+          {
+            defaultMessage: 'Copy {variantId} agent configuration code',
+            values: { variantId },
+          }
+        )}
         language={highlightLang || 'bash'}
         data-test-subj="commands"
         lineNumbers={lineNumbers}

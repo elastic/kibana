@@ -52,7 +52,7 @@ import {
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
+import { ElasticAssistantRequestHandlerContext } from '../types';
 import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
 interface GetPluginNameFromRequestParams {
@@ -235,6 +235,7 @@ export interface LangChainExecuteParams {
   contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
+  inferenceChatModelEnabled?: boolean;
   isOssModel?: boolean;
   conversationId?: string;
   context: AwaitedProperties<
@@ -249,12 +250,12 @@ export interface LangChainExecuteParams {
     traceData?: Message['traceData'],
     isError?: boolean
   ) => Promise<void>;
-  getElser: GetElser;
   response: KibanaResponseFactory;
   responseLanguage?: string;
   savedObjectsClient: SavedObjectsClientContract;
   screenContext?: ScreenContext;
   systemPrompt?: string;
+  timeout?: number;
 }
 export const langChainExecute = async ({
   messages,
@@ -265,6 +266,7 @@ export const langChainExecute = async ({
   actionTypeId,
   connectorId,
   contentReferencesStore,
+  inferenceChatModelEnabled,
   isOssModel,
   context,
   actionsClient,
@@ -274,13 +276,13 @@ export const langChainExecute = async ({
   logger,
   conversationId,
   onLlmResponse,
-  getElser,
   response,
   responseLanguage,
   isStream = true,
   savedObjectsClient,
   screenContext,
   systemPrompt,
+  timeout,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
@@ -319,6 +321,7 @@ export const langChainExecute = async ({
   // Shared executor params
   const executorParams: AgentExecutorParams<boolean> = {
     abortSignal,
+    assistantContext,
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
     core: context.core,
@@ -330,6 +333,7 @@ export const langChainExecute = async ({
     esClient,
     llmTasks,
     inference,
+    inferenceChatModelEnabled,
     isStream,
     llmType: getLlmType(actionTypeId),
     isOssModel,
@@ -344,6 +348,7 @@ export const langChainExecute = async ({
     screenContext,
     size: request.body.size,
     systemPrompt,
+    timeout,
     telemetry,
     telemetryParams: {
       actionTypeId,

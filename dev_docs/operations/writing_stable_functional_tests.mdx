@@ -77,7 +77,7 @@ Even if you are very careful, the more UI automation you do the more likely you 
 
 ## Incorrect usage of EUI components in React code will cause a functional test failure
 
-For EUI to support theming and internationalization, EUI components in your React application must be wrapped in `EuiProvider` (more preferably, use the `KibanaRenderContextProvider` wrapper). The functional test runner treats EUI as a first-class citizen and will throw an error when incorrect usage of EUI is detected. However, experiencing this type of failure in a test run is unlikely: in dev mode, a toast message alerts developers of incorrect EUI usage in real-time.
+For EUI to support theming and internationalization, EUI components in your React application must be wrapped in `EuiProvider` (more preferably, use the <DocLink id="kibDevRenderingService" text="`core.rendering.addContext()`"/>) wrapper. The functional test runner treats EUI as a first-class citizen and will throw an error when incorrect usage of EUI is detected. However, experiencing this type of failure in a test run is unlikely: in dev mode, a toast message alerts developers of incorrect EUI usage in real-time.
 
 ## Do you really need a functional test for this?
 

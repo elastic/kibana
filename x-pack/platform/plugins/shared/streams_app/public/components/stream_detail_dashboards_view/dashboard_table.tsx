@@ -15,9 +15,10 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
 export function DashboardsTable({
   dashboards,
@@ -26,6 +27,7 @@ export function DashboardsTable({
   setSelectedDashboards,
   loading,
   entityId,
+  dataTestSubj,
 }: {
   entityId?: string;
   loading: boolean;
@@ -33,6 +35,7 @@ export function DashboardsTable({
   compact?: boolean;
   selectedDashboards?: SanitizedDashboardAsset[];
   setSelectedDashboards?: (dashboards: SanitizedDashboardAsset[]) => void;
+  dataTestSubj?: string;
 }) {
   const {
     core: { application },
@@ -41,11 +44,12 @@ export function DashboardsTable({
       start: {
         savedObjectsTagging: { ui: savedObjectsTaggingUi },
         share,
-        data,
       },
     },
   } = useKibana();
-  const { timeRange } = data.query.timefilter.timefilter.useTimefilter();
+
+  const { timeState } = useTimefilter();
+
   const dashboardLocator = share.url.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
   const columns = useMemo((): Array<EuiBasicTableColumn<SanitizedDashboardAsset>> => {
     return [
@@ -54,9 +58,9 @@ export function DashboardsTable({
         name: i18n.translate('xpack.streams.dashboardTable.dashboardNameColumnTitle', {
           defaultMessage: 'Dashboard name',
         }),
-        render: (_, { label, id }) => (
+        render: (_, { title, id }) => (
           <EuiLink
-            data-test-subj="streamsAppColumnsLink"
+            data-test-subj="streamsAppDashboardColumnsLink"
             onClick={() => {
               if (entityId) {
                 telemetryClient.trackAssetClick({
@@ -65,13 +69,15 @@ export function DashboardsTable({
                   name: entityId,
                 });
               }
-              const url = dashboardLocator?.getRedirectUrl({ dashboardId: id, timeRange } || '');
+              const url = dashboardLocator?.getRedirectUrl(
+                { dashboardId: id, timeRange: timeState.timeRange } || ''
+              );
               if (url) {
                 application.navigateToUrl(url);
               }
             }}
           >
-            {label}
+            {title}
           </EuiLink>
         ),
       },
@@ -102,7 +108,7 @@ export function DashboardsTable({
     entityId,
     savedObjectsTaggingUi,
     telemetryClient,
-    timeRange,
+    timeState,
   ]);
 
   const items = useMemo(() => {
@@ -113,6 +119,7 @@ export function DashboardsTable({
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false} />
       <EuiBasicTable
+        data-test-subj={dataTestSubj}
         columns={columns}
         itemId="id"
         items={items}

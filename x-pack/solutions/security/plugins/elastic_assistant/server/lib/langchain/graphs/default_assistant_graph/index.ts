@@ -15,8 +15,8 @@ import { isEmpty } from 'lodash';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
-import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { getLlmClass } from '../../../../routes/utils';
+import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
@@ -26,10 +26,11 @@ import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
-import { agentRunableFactory } from './agentRunnable';
+import { agentRunnableFactory } from './agentRunnable';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
+  assistantContext,
   actionsClient,
   alertsIndexPattern,
   assistantTools = [],
@@ -40,6 +41,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   dataClients,
   esClient,
   inference,
+  inferenceChatModelEnabled = false,
   langChainMessages,
   llmTasks,
   llmType,
@@ -58,6 +60,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   telemetryParams,
   traceOptions,
   responseLanguage = 'English',
+  timeout,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai' && !isOssModel;
@@ -69,30 +72,51 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * This function ensures that a new llmClass instance is created every time it is called.
    * This is necessary to avoid any potential side effects from shared state. By always
    * creating a new instance, we prevent other uses of llm from binding and changing
-   * the state unintentionally. For this reason, never assign this value to a variable (ex const llm = createLlmInstance())
+   * the state unintentionally. For this reason, only call createLlmInstance at runtime
    */
-  const createLlmInstance = () =>
-    new llmClass({
-      actionsClient,
-      connectorId,
-      llmType,
-      logger,
-      // possible client model override,
-      // let this be undefined otherwise so the connector handles the model
-      model: request.body.model,
-      // ensure this is defined because we default to it in the language_models
-      // This is where the LangSmith logs (Metadata > Invocation Params) are set
-      temperature: getDefaultArguments(llmType).temperature,
-      signal: abortSignal,
-      streaming: isStream,
-      // prevents the agent from retrying on failure
-      // failure could be due to bad connector, we should deliver that result to the client asap
-      maxRetries: 0,
-      convertSystemMessageToHumanContent: false,
-      telemetryMetadata: {
-        pluginId: 'security_ai_assistant',
-      },
-    });
+  const createLlmInstance = async () =>
+    inferenceChatModelEnabled
+      ? inference.getChatModel({
+          request,
+          connectorId,
+          chatModelOptions: {
+            model: request.body.model,
+            signal: abortSignal,
+            temperature: getDefaultArguments(llmType).temperature,
+            // prevents the agent from retrying on failure
+            // failure could be due to bad connector, we should deliver that result to the client asap
+            maxRetries: 0,
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'security_ai_assistant',
+              },
+            },
+            // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
+            // timeout,
+          },
+        })
+      : new llmClass({
+          actionsClient,
+          connectorId,
+          llmType,
+          logger,
+          // possible client model override,
+          // let this be undefined otherwise so the connector handles the model
+          model: request.body.model,
+          // ensure this is defined because we default to it in the language_models
+          // This is where the LangSmith logs (Metadata > Invocation Params) are set
+          temperature: getDefaultArguments(llmType).temperature,
+          signal: abortSignal,
+          streaming: isStream,
+          // prevents the agent from retrying on failure
+          // failure could be due to bad connector, we should deliver that result to the client asap
+          maxRetries: 0,
+          convertSystemMessageToHumanContent: false,
+          timeout,
+          telemetryMetadata: {
+            pluginId: 'security_ai_assistant',
+          },
+        });
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
@@ -113,6 +137,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
     alertsIndexPattern,
+    assistantContext,
     anonymizationFields,
     connectorId,
     contentReferencesStore,
@@ -127,6 +152,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     request,
     size,
     telemetry,
+    createLlmInstance,
+    isOssModel,
   };
 
   const tools: StructuredTool[] = (
@@ -147,15 +174,29 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         } catch (e) {
           logger.error(`Failed to get prompt for tool: ${tool.name}`);
         }
+        const llm = await createLlmInstance();
         return tool.getTool({
           ...assistantToolParams,
-          llm: createLlmInstance(),
+          llm,
           isOssModel,
           description,
         });
       })
     )
   ).filter((e) => e != null) as StructuredTool[];
+
+  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
+  const telemetryTracer = telemetryParams
+    ? new TelemetryTracer(
+        {
+          // this line MUST come before kbTools are added
+          elasticTools: tools.map(({ name }) => name),
+          telemetry,
+          telemetryParams,
+        },
+        logger
+      )
+    : undefined;
 
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
   if (isEnabledKnowledgeBase) {
@@ -182,30 +223,18 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     prompt: defaultSystemPrompt,
     additionalPrompt: systemPrompt,
     llmType,
-    isOpenAI,
   });
 
-  const agentRunnable = await agentRunableFactory({
-    llm: createLlmInstance(),
-    isOpenAI,
+  const llm = await createLlmInstance();
+  const agentRunnable = await agentRunnableFactory({
+    llm,
     llmType,
     tools,
+    inferenceChatModelEnabled,
+    isOpenAI,
     isStream,
     prompt: chatPromptTemplate,
   });
-
-  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
-  const telemetryTracer = telemetryParams
-    ? new TelemetryTracer(
-        {
-          elasticTools: tools.map(({ name }) => name),
-          totalTools: tools.length,
-          telemetry,
-          telemetryParams,
-        },
-        logger
-      )
-    : undefined;
 
   const { provider } =
     !llmType || llmType === 'inference'
@@ -236,6 +265,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         screenContextTimezone: screenContext?.timeZone,
         uiSettingsDateFormatTimezone,
       }),
+    telemetry,
+    telemetryParams,
+    contentReferencesStore,
   });
   const inputs: GraphInputs = {
     responseLanguage,
@@ -253,9 +285,13 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       apmTracer,
       assistantGraph,
       inputs,
+      inferenceChatModelEnabled,
+      isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
+
       logger,
       onLlmResponse,
       request,
+      telemetry,
       telemetryTracer,
       traceOptions,
     });
@@ -270,16 +306,21 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     traceOptions,
   });
 
-  const contentReferences = pruneContentReferences(graphResponse.output, contentReferencesStore);
+  const { prunedContentReferencesStore, prunedContent } = pruneContentReferences(
+    graphResponse.output,
+    contentReferencesStore
+  );
 
   const metadata: MessageMetadata = {
-    ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
+    ...(!isEmpty(prunedContentReferencesStore)
+      ? { contentReferences: prunedContentReferencesStore }
+      : {}),
   };
 
   return {
     body: {
       connector_id: connectorId,
-      data: graphResponse.output,
+      data: prunedContent,
       trace_data: graphResponse.traceData,
       replacements,
       status: 'ok',

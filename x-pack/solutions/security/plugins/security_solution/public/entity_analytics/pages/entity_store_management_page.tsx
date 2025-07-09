@@ -49,7 +49,7 @@ import {
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { MissingPrivilegesCallout } from '../components/entity_store/components/missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
-import { useStoreEntityTypes } from '../hooks/use_enabled_entity_types';
+import { useEntityStoreTypes } from '../hooks/use_enabled_entity_types';
 import { EntityStoreErrorCallout } from '../components/entity_store/components/entity_store_error_callout';
 
 enum TabId {
@@ -67,7 +67,7 @@ const isEntityStoreInstalled = (status?: StoreStatus) => status && status !== 'n
 const entityStoreLabel = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title',
   {
-    defaultMessage: 'Entity Store',
+    defaultMessage: 'Entity store',
   }
 );
 
@@ -82,7 +82,7 @@ export const EntityStoreManagementPage = () => {
   const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
   const [selectedTabId, setSelectedTabId] = useState(TabId.Import);
   const entityStoreStatus = useEntityStoreStatus({});
-  const entityTypes = useStoreEntityTypes();
+  const entityTypes = useEntityStoreTypes();
   const enableStoreMutation = useEnableEntityStoreMutation();
   const stopEntityEngineMutation = useStopEntityEngineMutation(entityTypes);
   const deleteEntityEngineMutation = useDeleteEntityEngineMutation({
@@ -271,7 +271,7 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
       />
       <EuiSpacer size="l" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiIcon type="questionInCircle" size="xl" />
+        <EuiIcon type="question" size="xl" />
         <EuiTitle size="xxs">
           <h3>
             <FormattedMessage
@@ -325,7 +325,7 @@ const EntityStoreFeatureFlagNotAvailableCallout: React.FC = () => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <EuiText size="s">
           <FormattedMessage
@@ -387,7 +387,7 @@ const InsufficientAssetCriticalityPrivilegesCallout: React.FC = () => {
         />
       }
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
     >
       <EuiText size="s">
         <FormattedMessage
@@ -422,7 +422,7 @@ const AssetCriticalityIssueCallout: React.FC<{ errorMessage?: string | ReactNode
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <EuiText size="s">{msg}</EuiText>
       </EuiCallOut>

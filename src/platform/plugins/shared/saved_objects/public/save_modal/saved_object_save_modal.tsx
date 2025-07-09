@@ -87,7 +87,6 @@ class SavedObjectSaveModalComponent extends React.Component<
 > {
   private warning = React.createRef<HTMLDivElement>();
   private formId = generateId('form');
-  private savedObjectTitleInputRef = React.createRef<HTMLInputElement>();
 
   public readonly state = {
     title: this.props.title,
@@ -99,18 +98,11 @@ class SavedObjectSaveModalComponent extends React.Component<
     hasAttemptedSubmit: false,
   };
 
-  public componentDidMount() {
-    setTimeout(() => {
-      // defer so input focus ref value has been populated
-      this.savedObjectTitleInputRef.current?.focus();
-    }, 0);
-  }
-
   public render() {
     const { theme } = this.props;
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
     const duplicateWarningId = generateId();
-
+    const modalTitleId = generateId('saveModal');
     const hasColumns = !!this.props.rightOptions;
 
     const titleInputValid =
@@ -129,7 +121,6 @@ class SavedObjectSaveModalComponent extends React.Component<
         >
           <EuiFieldText
             fullWidth
-            inputRef={this.savedObjectTitleInputRef}
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
@@ -163,10 +154,16 @@ class SavedObjectSaveModalComponent extends React.Component<
         ? mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 20)
         : mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 15),
     });
+
     return (
-      <EuiModal data-test-subj="savedObjectSaveModal" onClose={this.props.onClose} css={styles}>
+      <EuiModal
+        data-test-subj="savedObjectSaveModal"
+        onClose={this.props.onClose}
+        css={styles}
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             {this.props.customModalTitle ? (
               this.props.customModalTitle
             ) : (
@@ -418,7 +415,7 @@ class SavedObjectSaveModalComponent extends React.Component<
             css={({ euiTheme }) => ({ marginLeft: `-${euiTheme.size.base}` })}
             grow={false}
           >
-            <EuiIconTip type="iInCircle" content={this.props.mustCopyOnSaveMessage} />
+            <EuiIconTip type="info" content={this.props.mustCopyOnSaveMessage} />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={true} />

@@ -9,7 +9,7 @@ import { IToasts } from '@kbn/core-notifications-browser';
 import { DatasetQualityPublicState } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import * as rt from 'io-ts';
 import { DATA_QUALITY_URL_STATE_KEY } from '../../../common/url_schema';
 import * as urlSchemaV1 from './url_schema_v1';

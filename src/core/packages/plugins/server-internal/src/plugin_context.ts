@@ -220,6 +220,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       getAsLabels: deps.executionContext.getAsLabels,
     },
     featureFlags: {
+      setInitialFeatureFlagsGetter: deps.featureFlags.setInitialFeatureFlagsGetter,
       setProvider: deps.featureFlags.setProvider,
       appendContext: deps.featureFlags.appendContext,
     },
@@ -290,6 +291,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+    },
+    pricing: {
+      registerProductFeatures: deps.pricing.registerProductFeatures,
     },
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
@@ -385,6 +389,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    pricing: deps.pricing,
     security: {
       authc: deps.security.authc,
       audit: deps.security.audit,

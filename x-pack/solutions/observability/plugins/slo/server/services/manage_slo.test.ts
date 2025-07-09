@@ -26,7 +26,12 @@ describe('ManageSLO', () => {
     mockTransformManager = createTransformManagerMock();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
 
-    manageSLO = new ManageSLO(mockRepository, mockTransformManager, mockSummaryTransformManager);
+    manageSLO = new ManageSLO(
+      mockRepository,
+      mockTransformManager,
+      mockSummaryTransformManager,
+      'some-user-id'
+    );
   });
 
   describe('Enable', () => {

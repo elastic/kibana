@@ -23,6 +23,7 @@ import { PaletteOutput } from '@kbn/coloring';
 import { getTransposeId } from '@kbn/transpose-utils';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
 jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
   const mod = jest.requireActual('../../../shared_components/coloring/get_cell_color_fn');
@@ -518,7 +519,7 @@ describe('DatatableComponent', () => {
       expect(screen.queryByTestId('tablePaginationPopoverButton')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: `Page 1 of ${numberOfPages}` })).toHaveAttribute(
         'aria-current',
-        'true'
+        'page'
       );
       const newIndex = 3;
       await userEvent.click(
@@ -526,7 +527,7 @@ describe('DatatableComponent', () => {
       );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
     });
     it('dynamically toggles pagination', async () => {
       const argsWithoutPagination = copyData(args);
@@ -599,7 +600,7 @@ describe('DatatableComponent', () => {
       );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
 
       await act(async () => {
         rerender({
@@ -614,7 +615,7 @@ describe('DatatableComponent', () => {
       // keeps existing page if more data is added
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${newNumberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
     });
 
     it('resets page position if rows change so page will be empty', async () => {
@@ -639,7 +640,7 @@ describe('DatatableComponent', () => {
       );
       expect(
         screen.getByRole('button', { name: `Page ${newIndex} of ${numberOfPages}` })
-      ).toHaveAttribute('aria-current', 'true');
+      ).toHaveAttribute('aria-current', 'page');
 
       await act(async () => {
         rerender({
@@ -760,6 +761,61 @@ describe('DatatableComponent', () => {
           ['3', 'red'],
         ]);
       });
+    });
+  });
+
+  describe('gridStyle', () => {
+    it('should apply default grid style when density is not provided', () => {
+      renderDatatableComponent();
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+    });
+    it('should apply normal grid style when density is normal', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.NORMAL,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+    });
+    it('should apply compact grid style when density is compact', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.COMPACT,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
+    });
+    it('should apply expanded grid style when density is expanded', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.EXPANDED,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-l-fontSize-l/);
+    });
+    it('should update grid style when density changes', () => {
+      const { rerender } = renderDatatableComponent({
+        args: {
+          ...args,
+          density: DataGridDensity.NORMAL,
+        },
+      });
+      const table = screen.getByTestId('lnsDataTable');
+      expect(table).toHaveClass(/cellPadding-m-fontSize-m/);
+      rerender({
+        args: {
+          ...args,
+          density: DataGridDensity.COMPACT,
+        },
+      });
+      expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
     });
   });
 });

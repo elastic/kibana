@@ -8,7 +8,6 @@
 import { defaultConfig, StorybookConfig } from '@kbn/storybook';
 import type { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
-import merge from 'lodash/merge';
 // eslint-disable-next-line import/no-nodejs-modules
 import { resolve } from 'path';
 
@@ -29,16 +28,11 @@ const graphWebpack: Configuration = {
 };
 
 const sbConfig: StorybookConfig = {
-  ...merge(defaultConfig, {
-    framework: {
-      options: {
-        strictMode: true,
-      },
-    },
-  }),
+  ...defaultConfig,
   webpackFinal(config, options) {
     return webpackMerge(defaultConfig.webpackFinal?.(config, options) ?? {}, graphWebpack);
   },
 };
 
-module.exports = sbConfig;
+// eslint-disable-next-line import/no-default-export
+export default sbConfig;

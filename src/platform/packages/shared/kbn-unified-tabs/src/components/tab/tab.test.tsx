@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tab } from './tab';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
@@ -96,13 +96,17 @@ describe('Tab', () => {
     );
 
     const tabMenuButton = screen.getByTestId(`unifiedTabs_tabMenuBtn_${tabItem.id}`);
-    tabMenuButton.click();
+    act(() => {
+      tabMenuButton.click();
+    });
 
     expect(getTabMenuItems).toHaveBeenCalledWith(tabItem);
 
     const menuItem = screen.getByTestId('test-subj');
     menuItem.click();
-    expect(mockClick).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockClick).toHaveBeenCalledTimes(1);
+    });
     expect(getTabMenuItems).toHaveBeenCalledTimes(1);
   });
 
@@ -116,7 +120,7 @@ describe('Tab', () => {
         tabContentId={tabContentId}
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
-        isSelected={false}
+        isSelected
         services={servicesMock}
         getPreviewData={getPreviewDataMock}
         onLabelEdited={onLabelEdited}
@@ -125,10 +129,9 @@ describe('Tab', () => {
       />
     );
 
-    expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
+    expect(screen.queryByText(tabItem.label)).toBeInTheDocument();
     await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
-    expect(onSelect).toHaveBeenCalled();
-    expect(screen.queryByTestId(tabButtonTestSubj)).not.toBeInTheDocument();
+    expect(screen.queryByText(tabItem.label)).not.toBeInTheDocument();
 
     const input = screen.getByRole('textbox');
     await userEvent.clear(input);
@@ -151,7 +154,7 @@ describe('Tab', () => {
         tabContentId={tabContentId}
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
-        isSelected={false}
+        isSelected
         services={servicesMock}
         getPreviewData={getPreviewDataMock}
         onLabelEdited={onLabelEdited}
@@ -160,19 +163,20 @@ describe('Tab', () => {
       />
     );
 
-    expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
+    expect(screen.queryByText(tabItem.label)).toBeInTheDocument();
     await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
-    expect(onSelect).toHaveBeenCalled();
-    expect(screen.queryByTestId(tabButtonTestSubj)).not.toBeInTheDocument();
+    expect(screen.queryByText(tabItem.label)).not.toBeInTheDocument();
 
     const input = screen.getByRole('textbox');
     await userEvent.clear(input);
     await userEvent.type(input, 'new-label');
     expect(input).toHaveValue('new-label');
-    fireEvent.keyUp(input, { key: 'Escape' });
-    expect(onLabelEdited).not.toHaveBeenCalled();
+    await userEvent.keyboard('{escape}');
 
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-    expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(tabButtonTestSubj)).toHaveFocus();
+      expect(onLabelEdited).not.toHaveBeenCalled();
+    });
   });
 });

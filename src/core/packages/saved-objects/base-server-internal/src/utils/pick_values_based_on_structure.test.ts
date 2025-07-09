@@ -71,6 +71,22 @@ describe('pickValuesBasedOnStructure', () => {
     expect(pickValuesBasedOnStructure(a, b)).toEqual({ v1: 'b', v2: [], v3: {} });
   });
 
+  test('special case: only selects own properties', () => {
+    const source = {};
+    Object.defineProperty(source, '__proto__', { enumerable: true, value: 1 });
+    const target = {};
+    expect(pickValuesBasedOnStructure(source, target)).toEqual({});
+  });
+
+  test('special case: only selects own properties deeply', () => {
+    const poisened = {};
+    Object.defineProperty(poisened, '__proto__', { enumerable: true, value: 1 });
+    Object.defineProperty(poisened, 'a', { enumerable: true, value: 1 });
+    const source = { arr: [poisened] };
+    const target = { arr: [{ a: 1 }] };
+    expect(pickValuesBasedOnStructure(source, target)).toEqual({ arr: [{ a: 1 }] });
+  });
+
   test('can extract structure map when present in target', () => {
     /**
      * The `keys` `Arbitrary` represents words with possible numbers like `loremv123`

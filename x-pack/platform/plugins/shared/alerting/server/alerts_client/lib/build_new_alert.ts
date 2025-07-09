@@ -30,6 +30,7 @@ import {
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
+  ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { Alert as LegacyAlert } from '../../alert/alert';
@@ -51,6 +52,7 @@ interface BuildNewAlertOpts<
   runTimestamp?: string;
   timestamp: string;
   kibanaVersion: string;
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
 }
 
 /**
@@ -71,6 +73,7 @@ export const buildNewAlert = <
   timestamp,
   payload,
   kibanaVersion,
+  dangerouslyCreateAlertsInAllSpaces,
 }: BuildNewAlertOpts<
   AlertData,
   LegacyState,
@@ -95,7 +98,7 @@ export const buildNewAlert = <
         [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
         [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
         [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
-        [ALERT_STATUS]: 'active',
+        [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
         [ALERT_UUID]: legacyAlert.getUuid(),
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_WORKFLOW_STATUS]: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
@@ -108,7 +111,7 @@ export const buildNewAlert = <
               [ALERT_TIME_RANGE]: { gte: legacyAlert.getState().start },
             }
           : {}),
-        [SPACE_IDS]: rule[SPACE_IDS],
+        [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
         [VERSION]: kibanaVersion,
         [TAGS]: Array.from(
           new Set([...((cleanedPayload?.tags as string[]) ?? []), ...(rule[ALERT_RULE_TAGS] ?? [])])

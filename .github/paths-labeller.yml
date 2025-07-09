@@ -30,7 +30,13 @@
     - 'x-pack/test/observability_ai_assistant_functional/**/*.*'
 - 'ci:project-deploy-observability':
     - 'packages/kbn-apm-*/**/*.*'
+    - 'src/platform/plugins/shared/ai_assistant_management/**/*.*'
+    - 'x-pack/platform/packages/shared/kbn-ai-assistant/**/*.*'
+    - 'x-pack/platform/plugins/private/observability_ai_assistant_management/**/*.*'
+    - 'x-pack/platform/plugins/shared/observability_ai_assistant/**/*.*'
     - 'x-pack/plugins/observability_solution/**/*.*'
+    - 'x-pack/solutions/observability/packages/observability-ai/**/*.*'
+    - 'x-pack/solutions/observability/plugins/observability_ai_assistant_app/**/*.*'
     - 'x-pack/solutions/observability/plugins/serverless_observability/**/*.*'
     - 'x-pack/test/apm_api_integration/**/*.*'
     - 'x-pack/test/observability_*/**/*.*'

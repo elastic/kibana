@@ -14,7 +14,6 @@ import type {
 import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
 import { logThresholdParamsSchema } from '@kbn/response-ops-rule-params/log_threshold';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
-import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../../../../common/alerting/logs/log_threshold';
@@ -173,7 +172,6 @@ export function registerLogThresholdRuleType(
       injectReferences,
     },
     alerts: LogsRulesTypeAlertDefinition,
-    fieldsForAAD: O11Y_AAD_FIELDS,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

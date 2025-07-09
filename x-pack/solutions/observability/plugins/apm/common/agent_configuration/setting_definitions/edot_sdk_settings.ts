@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { RawSettingDefinition } from './types';
+import { loggingLevelRt } from '../runtime_types/logging_level_rt';
 
 export const edotSDKSettings: RawSettingDefinition[] = [
   {
@@ -20,15 +21,13 @@ export const edotSDKSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.edot.deactivate_instrumentations.description',
       {
         defaultMessage:
-          'Comma-separated list of modules to disable instrumentation for.\n' +
-          'When instrumentation is disabled for a module, no spans will be collected for that module.\n' +
-          '\n' +
-          'The up-to-date list of modules for which instrumentation can be disabled is language specific ' +
-          'and can be found under the following links: ' +
-          '[opentelemetry/java/elastic](https://ela.st/otel-agent-instructions)',
+          'Comma-separated list of instrumentation names to disable. When an instrumentation is disabled, no telemetry will be collected for the library/module it instruments. ' +
+          'The list of supported instrumentation names is language specific:\n' +
+          '- [EDOT Java](https://ela.st/otel-agent-instructions): for example "akka-http,grpc"\n' +
+          '- [EDOT Node.js](https://ela.st/edot-node-disable-instrs): for example "net,dns,http"',
       }
     ),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
   },
   {
     key: 'deactivate_all_instrumentations',
@@ -40,10 +39,38 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     description: i18n.translate(
       'xpack.apm.agentConfig.edot.deactivate_all_instrumentations.description',
       {
-        defaultMessage: 'No spans will be collected for any instrumentation modules.\n' + '\n',
+        defaultMessage: 'No spans will be collected for any instrumentation modules.',
       }
     ),
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
+  },
+  {
+    key: 'logging_level',
+    validation: loggingLevelRt,
+    type: 'select',
+    defaultValue: 'info',
+    label: i18n.translate('xpack.apm.agentConfig.loggingLevel.label', {
+      defaultMessage: 'Logging level',
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.loggingLevel.description', {
+      defaultMessage: 'Sets the logging level for the agent.',
+    }),
+    options: [
+      { text: 'trace', value: 'trace' },
+      { text: 'debug', value: 'debug' },
+      { text: 'info', value: 'info' },
+      { text: 'warn', value: 'warn' },
+      { text: 'error', value: 'error' },
+      { text: 'fatal', value: 'fatal' },
+      { text: 'off', value: 'off' },
+    ],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/python/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/dotnet/elastic',
+    ],
   },
   {
     key: 'send_traces',

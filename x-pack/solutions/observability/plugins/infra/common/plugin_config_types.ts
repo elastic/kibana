@@ -34,6 +34,7 @@ export interface InfraConfig {
     metricThresholdAlertRuleEnabled: boolean;
     logThresholdAlertRuleEnabled: boolean;
     alertsAndRulesDropdownEnabled: boolean;
+    // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingEnabled: boolean;
     ruleFormV2Enabled: boolean;
   };

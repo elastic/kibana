@@ -214,7 +214,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   }, []);
 
   return (
-    <EuiFlyout onClose={onClose} data-test-subj="create-connector-flyout">
+    <EuiFlyout
+      onClose={onClose}
+      data-test-subj="create-connector-flyout"
+      aria-label={i18n.translate('xpack.triggersActionsUI.createConnectorFlyout', {
+        defaultMessage: 'create connector flyout',
+      })}
+    >
       <FlyoutHeader
         icon={actionTypeModel?.iconClass}
         actionTypeName={actionType?.name}

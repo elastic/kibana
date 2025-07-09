@@ -86,6 +86,7 @@ export const getChatParams = async (
       // prevents the agent from retrying on failure
       // failure could be due to bad connector, we should deliver that result to the client asap
       maxRetries: 0,
+      telemetryMetadata: { pluginId: 'search_playground' }, // hard-coded because the pluginId is not snake cased and the telemetry expects snake case
     },
   });
 

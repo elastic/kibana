@@ -128,7 +128,7 @@ observabilityAIAssistant?.register(async ({ registerRenderFunction }) => {
 });
 ```
 
-The user can also call these functions explicitly - if you don't want this, set `visibility` on the function definition to `FunctionVisibility.AssistantOnly`. In this case, the user cannot call it themselves.
+The user can also call these functions explicitly - if you don't want this, set `visibility` on the function definition to `FunctionVisibility.Internal`. In this case, the user cannot call it themselves.
 
 #### **2.2** Contextual insights
 

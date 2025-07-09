@@ -101,7 +101,7 @@ export const findGapsSearchAfter = async ({
     return {
       total: gapsResponse.total,
       data: transformToGap(gapsResponse),
-      searchAfter: gapsResponse.search_after,
+      searchAfter: gapsResponse.search_after as SortResults[] | undefined,
       pitId: gapsResponse.pit_id,
     };
   } catch (err) {

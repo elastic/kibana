@@ -14,6 +14,9 @@ import type { NumericChartData, OrdinalChartData, UnsupportedChartData } from '@
 import { isNumericChartData, isOrdinalChartData, isUnsupportedChartData } from '@kbn/ml-data-grid';
 
 import { getFieldType, getLegendText, getXScaleType, useColumnChart } from './use_column_chart';
+import type { useColumnChartStyles } from './column_chart_styles';
+
+const styles = {} as ReturnType<typeof useColumnChartStyles>;
 
 describe('getFieldType()', () => {
   it('should return the Kibana field type for a given EUI data grid schema', () => {
@@ -95,10 +98,12 @@ describe('isUnsupportedChartData()', () => {
 
 describe('getLegendText()', () => {
   it('should return the chart legend text for unsupported chart types', () => {
-    expect(getLegendText(validUnsupportedChartData, 20)).toBe('Chart not supported.');
+    expect(getLegendText(validUnsupportedChartData, 20, false, styles)).toBe(
+      'Chart not supported.'
+    );
   });
   it('should return the chart legend text for empty datasets', () => {
-    expect(getLegendText(validNumericChartData, 20)).toBe('');
+    expect(getLegendText(validNumericChartData, 20, false, styles)).toBe('');
   });
   it('should return the chart legend text for boolean chart types', () => {
     const { getByText } = render(
@@ -113,7 +118,9 @@ describe('getLegendText()', () => {
             id: 'the-id',
             type: 'boolean',
           },
-          20
+          20,
+          false,
+          styles
         )}
       </>
     );
@@ -122,7 +129,12 @@ describe('getLegendText()', () => {
   });
   it('should return the chart legend text for ordinal chart data with less than max categories', () => {
     expect(
-      getLegendText({ ...validOrdinalChartData, data: [{ key: 'cat', doc_count: 10 }] }, 20)
+      getLegendText(
+        { ...validOrdinalChartData, data: [{ key: 'cat', doc_count: 10 }] },
+        20,
+        false,
+        styles
+      )
     ).toBe('10 categories');
   });
   it('should return the chart legend text for ordinal chart data with more than max categories', () => {
@@ -133,7 +145,9 @@ describe('getLegendText()', () => {
           cardinality: 30,
           data: [{ key: 'cat', doc_count: 10 }],
         },
-        20
+        20,
+        false,
+        styles
       )
     ).toBe('top 20 of 30 categories');
   });
@@ -145,7 +159,9 @@ describe('getLegendText()', () => {
           data: [{ key: 1, doc_count: 10 }],
           stats: [1, 100],
         },
-        20
+        20,
+        false,
+        styles
       )
     ).toBe('1 - 100');
     expect(
@@ -155,7 +171,9 @@ describe('getLegendText()', () => {
           data: [{ key: 1, doc_count: 10 }],
           stats: [100, 100],
         },
-        20
+        20,
+        false,
+        styles
       )
     ).toBe('100');
     expect(
@@ -165,7 +183,9 @@ describe('getLegendText()', () => {
           data: [{ key: 1, doc_count: 10 }],
           stats: [1.2345, 6.3456],
         },
-        20
+        20,
+        false,
+        styles
       )
     ).toBe('1.23 - 6.35');
   });

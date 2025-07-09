@@ -69,8 +69,9 @@ export const useAwsCredentialsForm = ({
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
 
   // Assumes if the credentials type is not set, the default is CloudFormation
-  const awsCredentialsType: AwsCredentialsType =
-    getAwsCredentialsType(input) || AWS_SETUP_FORMAT.CLOUD_FORMATION;
+  const awsCredentialsType =
+    (getAwsCredentialsType(input) as Exclude<AwsCredentialsType, 'cloud_connectors'>) ||
+    AWS_SETUP_FORMAT.CLOUD_FORMATION;
 
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);

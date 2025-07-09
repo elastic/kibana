@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
-  RULE_MANAGEMENT_CONTEXT_DESCRIPTION,
-} from '@kbn/security-solution-plugin/public/detection_engine/common/translations';
-import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/user/translations';
+import { RULE_MANAGEMENT_CONTEXT_DESCRIPTION } from '@kbn/security-solution-plugin/public/detection_engine/common/translations';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import {
   assertConnectorSelected,
@@ -94,7 +90,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
         openAssistant('rule');
         assertNewConversation(false, `Detection Rules - Rule 1`);
         assertConnectorSelected(azureConnectorAPIPayload.name);
-        cy.get(USER_PROMPT).should('have.text', EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS);
         cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
       });
     });
@@ -106,10 +101,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       openAssistant('alert');
       assertConversationTitleContains('New Rule Test');
       assertConnectorSelected(azureConnectorAPIPayload.name);
-      cy.get(USER_PROMPT).should(
-        'have.text',
-        EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N
-      );
       cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', 'Alert (from summary)');
     });
     it('Shows empty connector callout when a conversation that had a connector no longer does', () => {
@@ -138,7 +129,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertConversationTitleContains('New Rule Test');
       // send message to ensure conversation is created
       submitMessage();
-      assertMessageSent(EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N);
       closeAssistant();
       visitGetStartedPage();
       openAssistant();

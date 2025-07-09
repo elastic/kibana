@@ -18,10 +18,6 @@ interface AddMetadataPinToRowProps {
   onPinned: Dispatch<React.SetStateAction<Array<Field['name']> | undefined>>;
 }
 
-const PIN_FIELD = i18n.translate('xpack.infra.metadataEmbeddable.pinField', {
-  defaultMessage: 'Pin Field',
-});
-
 export const AddMetadataPinToRow = ({
   fieldName,
   pinnedItems,
@@ -52,8 +48,9 @@ export const AddMetadataPinToRow = ({
             color="primary"
             iconType="pinFilled"
             data-test-subj="infraAssetDetailsMetadataRemovePin"
-            aria-label={i18n.translate('xpack.infra.metadata.pinAriaLabel', {
-              defaultMessage: 'Pinned field',
+            aria-label={i18n.translate('xpack.infra.metadata.pinnedAriaLabel', {
+              defaultMessage: 'Pinned {fieldName}',
+              values: { fieldName },
             })}
             onClick={handleRemovePin}
           />
@@ -78,13 +75,20 @@ export const AddMetadataPinToRow = ({
 
   return (
     <span className={showOnRowHoverCss}>
-      <EuiToolTip content={PIN_FIELD}>
+      <EuiToolTip
+        content={i18n.translate('xpack.infra.metadataEmbeddable.pinField', {
+          defaultMessage: 'Pin field',
+        })}
+      >
         <EuiButtonIcon
           color="primary"
           size="s"
           iconType="pin"
           data-test-subj="infraAssetDetailsMetadataAddPin"
-          aria-label={PIN_FIELD}
+          aria-label={i18n.translate('xpack.infra.metadataEmbeddable.pinField.ariaLabel', {
+            defaultMessage: 'Pin {fieldName}',
+            values: { fieldName },
+          })}
           onClick={handleAddPin}
         />
       </EuiToolTip>

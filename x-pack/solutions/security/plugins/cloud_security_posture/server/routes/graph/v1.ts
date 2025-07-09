@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type {
-  Color,
+  EdgeColor,
   EdgeDataModel,
   EntityNodeDataModel,
   GraphRequest,
@@ -32,7 +32,6 @@ interface GraphEdge {
   actorIds: string[] | string;
   action: string;
   targetIds: string[] | string;
-  eventOutcome: string;
   isOrigin: boolean;
   isOriginAlert: boolean;
 }
@@ -154,7 +153,7 @@ const fetchGraph = async ({
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
-  const query = `from logs-*
+  const query = `FROM logs-*
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 | EVAL isOrigin = ${
     originEventIds.length > 0
@@ -170,10 +169,9 @@ const fetchGraph = async ({
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
   users = VALUES(related.user)
-    by actorIds = actor.entity.id,
+    BY actorIds = actor.entity.id,
       action = event.action,
       targetIds = target.entity.id,
-      eventOutcome = event.outcome,
       isOrigin,
       isOriginAlert
 | LIMIT 1000
@@ -260,17 +258,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       break;
     }
 
-    const {
-      ips,
-      hosts,
-      users,
-      actorIds,
-      action,
-      targetIds,
-      isOrigin,
-      isOriginAlert,
-      eventOutcome,
-    } = record;
+    const { ips, hosts, users, actorIds, action, targetIds, isOriginAlert } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
     const unknownTargets: string[] = [];
@@ -289,7 +277,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         nodesMap[id] = {
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
-          color: isOriginAlert ? 'danger' : 'primary',
+          color: 'primary',
           ...determineEntityNodeShape(
             id,
             castArray(ips ?? []),
@@ -310,9 +298,9 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         }
 
         const labelNode: LabelNodeDataModel = {
-          id: edgeId + `label(${action})outcome(${eventOutcome})`,
+          id: edgeId + `label(${action})`,
           label: action,
-          color: isOriginAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
+          color: isOriginAlert ? 'danger' : 'primary',
           shape: 'label',
         };
 
@@ -321,7 +309,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         labelEdges[labelNode.id] = {
           source: actorId,
           target: targetId,
-          edgeType: isOrigin ? 'solid' : 'dashed',
+          edgeType: 'solid',
         };
       }
     }
@@ -392,8 +380,19 @@ const createEdgesAndGroups = (context: ParseContext) => {
         shape: 'group',
       };
       nodesMap[groupNode.id] = groupNode;
-      let groupEdgesColor: Color = 'primary';
-      let groupEdgesType: EdgeDataModel['type'] = 'dashed';
+      let groupEdgesColor: EdgeColor = 'subdued';
+
+      // Order of creation matters when using dagre layout, first create edges to the group node,
+      // then connect the group node to the label nodes
+      connectEntitiesAndLabelNode(
+        edgesMap,
+        nodesMap,
+        labelEdges[edgeLabelsIds[0]].source,
+        groupNode.id,
+        labelEdges[edgeLabelsIds[0]].target,
+        'solid',
+        groupEdgesColor
+      );
 
       edgeLabelsIds.forEach((edgeLabelId) => {
         (nodesMap[edgeLabelId] as Writable<LabelNodeDataModel>).parentId = groupNode.id;
@@ -408,28 +407,8 @@ const createEdgesAndGroups = (context: ParseContext) => {
 
         if ((nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'danger') {
           groupEdgesColor = 'danger';
-        } else if (
-          (nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'warning' &&
-          groupEdgesColor !== 'danger'
-        ) {
-          // Use warning only if there's no danger color
-          groupEdgesColor = 'warning';
-        }
-
-        if (labelEdges[edgeLabelId].edgeType === 'solid') {
-          groupEdgesType = 'solid';
         }
       });
-
-      connectEntitiesAndLabelNode(
-        edgesMap,
-        nodesMap,
-        labelEdges[edgeLabelsIds[0]].source,
-        groupNode.id,
-        labelEdges[edgeLabelsIds[0]].target,
-        groupEdgesType,
-        groupEdgesColor
-      );
     }
   });
 };
@@ -441,7 +420,7 @@ const connectEntitiesAndLabelNode = (
   labelNodeId: string,
   targetNodeId: string,
   edgeType: EdgeDataModel['type'] = 'solid',
-  colorOverride?: Color
+  colorOverride?: EdgeColor
 ) => {
   [
     connectNodes(nodesMap, sourceNodeId, labelNodeId, edgeType, colorOverride),
@@ -456,16 +435,15 @@ const connectNodes = (
   sourceNodeId: string,
   targetNodeId: string,
   edgeType: EdgeDataModel['type'] = 'solid',
-  colorOverride?: Color
+  colorOverride?: EdgeColor
 ): EdgeDataModel => {
   const sourceNode = nodesMap[sourceNodeId];
   const targetNode = nodesMap[targetNodeId];
   const color =
-    sourceNode.shape !== 'group' && targetNode.shape !== 'label'
-      ? sourceNode.color
-      : targetNode.shape !== 'group'
-      ? targetNode.color
-      : 'primary';
+    (sourceNode.shape === 'label' && sourceNode.color === 'danger') ||
+    (targetNode.shape === 'label' && targetNode.color === 'danger')
+      ? 'danger'
+      : 'subdued';
 
   return {
     id: `a(${sourceNodeId})-b(${targetNodeId})`,

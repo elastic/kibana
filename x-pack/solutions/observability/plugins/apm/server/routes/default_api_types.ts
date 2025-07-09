@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
-import { either } from 'fp-ts/lib/Either';
+import { either } from 'fp-ts/Either';
 import type { BoolQuery } from '@kbn/es-query';
 import { ApmDocumentType } from '../../common/document_type';
 import { RollupInterval } from '../../common/rollup';

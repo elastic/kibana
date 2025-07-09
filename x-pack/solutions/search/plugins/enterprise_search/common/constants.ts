@@ -18,6 +18,7 @@ import {
   SEARCH_AI_SEARCH,
   SEARCH_INDICES,
   SEARCH_INDICES_START,
+  SEARCH_INDEX_MANAGEMENT,
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
@@ -32,28 +33,28 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSe
   defaultMessage: 'Enterprise Search',
 });
 
-export { SEARCH_INDICES_START, SEARCH_INDICES };
+export { SEARCH_INDICES_START, SEARCH_INDICES, SEARCH_INDEX_MANAGEMENT };
 
-export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
+export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
-    defaultMessage: 'Overview',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.home.navTitle', {
+    defaultMessage: 'Home',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.overview.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.home.description', {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
   URL: '/app/elasticsearch/overview',
   LOGO: 'logoElasticsearch',
 };
 
-export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
+export const ENTERPRISE_SEARCH_DATA_PLUGIN = {
   ID: ENTERPRISE_SEARCH_CONTENT_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
-    defaultMessage: 'Content',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.build.navTitle', {
+    defaultMessage: 'Build',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.content.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.data.description', {
     defaultMessage:
       'Enterprise search offers a number of ways to easily make your data searchable. Choose from the web crawler, Elasticsearch indices, API, direct uploads, or thrid party connectors.', // TODO: Make sure this content is correct.
   }),

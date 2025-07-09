@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import type { ActionCreator } from 'typescript-fsa';
 
 import { TestProviders } from '../../../../common/mock';
@@ -23,7 +25,7 @@ describe('IP Overview Component', () => {
   describe('rendering', () => {
     const mockProps = {
       anomaliesData: mockAnomalies,
-      data: mockData.IpOverview,
+      data: mockData.complete,
       endDate: '2019-06-18T06:00:00.000Z',
       flowTarget: FlowTargetSourceDest.source,
       loading: false,
@@ -43,13 +45,13 @@ describe('IP Overview Component', () => {
     };
 
     test('it renders the default IP Overview', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <TestProviders>
           <IpOverview {...mockProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('IpOverview')).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     test('it renders the side panel IP overview', () => {
@@ -57,13 +59,13 @@ describe('IP Overview Component', () => {
         ...mockProps,
         isInDetailsSidePanel: true,
       };
-      const wrapper = shallow(
+      const { container } = render(
         <TestProviders>
           <IpOverview {...panelViewProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('IpOverview')).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 });

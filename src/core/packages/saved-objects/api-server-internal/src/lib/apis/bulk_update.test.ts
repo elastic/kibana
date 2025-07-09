@@ -53,6 +53,7 @@ import {
   expectError,
   createBadRequestErrorPayload,
   expectUpdateResult,
+  MULTI_NAMESPACE_TYPE,
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
@@ -615,6 +616,74 @@ describe('#bulkUpdate', () => {
           {
             id: modifiedObj1.id,
             type: modifiedObj1.type,
+          },
+          true,
+          2
+        );
+      });
+
+      it('migrates single namespace objects using the object namespace', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          coreMigrationVersion: '8.0.0',
+          namespace: 'test',
+        };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            namespace: 'test',
+          },
+          true,
+          2
+        );
+      });
+
+      it('migrates multiple namespace objects using the object namespaces', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          type: MULTI_NAMESPACE_TYPE,
+          coreMigrationVersion: '8.0.0',
+          namespace: 'test',
+        };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            namespaces: ['test'],
+          },
+          true,
+          2
+        );
+      });
+
+      it('migrates namespace agnsostic objects', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          type: NAMESPACE_AGNOSTIC_TYPE,
+          coreMigrationVersion: '8.0.0',
+          namespace: 'test', // specify a namespace, but it should be ignored
+        };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            namespaces: [],
           },
           true,
           2

@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields, apm, Instance } from '@kbn/apm-synthtrace-client';
+import { ApmFields, apm, Instance, ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
+
+import { parseApmScenarioOpts } from './helpers/apm_scenario_ops_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
-  const { numServices = 3 } = runOptions.scenarioOpts || {};
+  const { numServices = 3, pipeline = ApmSynthtracePipelineSchema.Default } = parseApmScenarioOpts(
+    runOptions.scenarioOpts
+  );
 
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
@@ -99,6 +103,8 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         )
       );
     },
+    setupPipeline: ({ apmEsClient }) =>
+      apmEsClient.setPipeline(apmEsClient.resolvePipelineType(pipeline)),
   };
 };
 

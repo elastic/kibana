@@ -26,7 +26,7 @@ export function ObservabilityOnboardingCallout() {
   const { application, share } = useKibana<ObservabilityPublicPluginsStart>().services;
   const onboardingHref = share?.url.locators
     .get<ObservabilityOnboardingLocatorParams>('OBSERVABILITY_ONBOARDING_LOCATOR')
-    ?.useUrl({ category: 'logs' });
+    ?.useUrl({ category: 'host' });
 
   const trackMetric = useUiTracker({ app: 'observability-overview' });
   const { isObservabilityOnboardingDismissed, dismissObservabilityOnboarding } =
@@ -59,7 +59,7 @@ export function ObservabilityOnboardingCallout() {
               <p>
                 <FormattedMessage
                   id="xpack.observability.overview.observabilityOnboarding.description"
-                  defaultMessage="Onboard your data in up to 5 minutes to start analysing it straight away."
+                  defaultMessage="Onboard your data in up to 5 minutes to start analyzing it straight away."
                 />
               </p>
             </EuiText>

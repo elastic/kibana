@@ -26,6 +26,7 @@ import type {
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
+import type { Attachment } from '.';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -38,6 +39,7 @@ export interface SendEmailOptions {
   content: Content;
   hasAuth: boolean;
   configurationUtilities: ActionsConfigurationUtilities;
+  attachments?: Attachment[];
 }
 
 // config validation ensures either service is set or host/port are set
@@ -76,6 +78,7 @@ export async function sendEmail(
 ): Promise<unknown> {
   const { transport, content } = options;
   const { message, messageHTML } = content;
+  const attachments = options.attachments ?? [];
 
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
 
@@ -85,10 +88,17 @@ export async function sendEmail(
       options,
       renderedMessage,
       connectorTokenClient,
-      connectorUsageCollector
+      connectorUsageCollector,
+      attachments
     );
   } else {
-    return await sendEmailWithNodemailer(logger, options, renderedMessage, connectorUsageCollector);
+    return await sendEmailWithNodemailer(
+      logger,
+      options,
+      renderedMessage,
+      connectorUsageCollector,
+      attachments
+    );
   }
 }
 
@@ -98,7 +108,8 @@ export async function sendEmailWithExchange(
   options: SendEmailOptions,
   messageHTML: string,
   connectorTokenClient: ConnectorTokenClientContract,
-  connectorUsageCollector: ConnectorUsageCollector
+  connectorUsageCollector: ConnectorUsageCollector,
+  attachments: Attachment[]
 ): Promise<unknown> {
   const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
@@ -165,6 +176,7 @@ export async function sendEmailWithExchange(
       options,
       headers,
       messageHTML,
+      attachments,
     },
     logger,
     configurationUtilities,
@@ -178,7 +190,8 @@ async function sendEmailWithNodemailer(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  connectorUsageCollector: ConnectorUsageCollector
+  connectorUsageCollector: ConnectorUsageCollector,
+  attachments: Attachment[]
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
@@ -195,6 +208,7 @@ async function sendEmailWithNodemailer(
     subject,
     html: messageHTML,
     text: message,
+    ...(attachments.length > 0 && { attachments }),
   };
 
   // The transport options do not seem to be exposed as a type, and we reference

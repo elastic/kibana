@@ -49,8 +49,8 @@ export const test = base.extend<{
     await use(new KubernetesEAFlowPage(page));
   },
 
-  otelKubernetesFlowPage: async ({ page }, use) => {
-    await use(new OtelKubernetesFlowPage(page));
+  otelKubernetesFlowPage: async ({ page, context }, use) => {
+    await use(new OtelKubernetesFlowPage(page, context));
   },
 
   kubernetesOverviewDashboardPage: async ({ page }, use) => {

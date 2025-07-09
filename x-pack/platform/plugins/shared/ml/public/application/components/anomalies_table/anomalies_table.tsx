@@ -315,7 +315,7 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
           unsetShowFunction={handleUnsetShowFunction}
         />
         <EuiInMemoryTable
-          className="ml-anomalies-table eui-textBreakWord"
+          className="eui-textBreakWord"
           items={tableData.anomalies}
           // TODO - fix type
           columns={columns as Array<EuiBasicTableColumn<MlAnomaliesTableRecordExtended>>}
