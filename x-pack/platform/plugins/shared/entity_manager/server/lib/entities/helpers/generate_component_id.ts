@@ -61,3 +61,25 @@ export function generateLatestIndexName(definition: EntityDefinition) {
 
 export const generateLatestIndexTemplateId = (definition: EntityDefinition) =>
   `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_${ENTITY_LATEST}_${definition.id}_index_template` as const;
+
+// Latest Backfill
+function generateLatestBackfillId(definition: EntityDefinition) {
+  return `${ENTITY_LATEST_PREFIX_V1}-backfill-${definition.id}` as const;
+}
+
+export function generateLatestBackfillTransformId(definition: EntityDefinition, unique?: string) {
+  const suffix = unique ? `-${unique}` : '';
+  return `${ENTITY_LATEST_PREFIX_V1}-backfill-${definition.id}${suffix}` as const;
+}
+
+export function generateLatestBackfillIndexName(definition: EntityDefinition, unique?: string) {
+  const suffix = unique ? `.${unique}` : '';
+  const pattern = entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+    dataset: ENTITY_LATEST,
+    definitionId: definition.id,
+  });
+  return `${pattern}${suffix}` as const;
+}
+
+export const generateLatestBackfillIngestPipelineId = generateLatestBackfillId;

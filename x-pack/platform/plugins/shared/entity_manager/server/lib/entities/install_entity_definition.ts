@@ -15,7 +15,7 @@ import { createAndInstallIngestPipelines } from './create_and_install_ingest_pip
 import { createAndInstallTransforms } from './create_and_install_transform';
 import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
-import { deleteLatestIngestPipeline } from './delete_ingest_pipeline';
+import { deleteIngestPipelines } from './delete_ingest_pipeline';
 import { findEntityDefinitionById } from './find_entity_definition';
 import {
   entityDefinitionExists,
@@ -27,8 +27,8 @@ import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
 import { EntityDefinitionWithState } from './types';
-import { stopLatestTransform, stopTransforms } from './stop_transforms';
-import { deleteLatestTransform, deleteTransforms } from './delete_transforms';
+import { stopTransforms } from './stop_transforms';
+import { deleteTransforms } from './delete_transforms';
 import { deleteIndices } from './delete_index';
 
 export interface InstallDefinitionParams {
@@ -65,10 +65,10 @@ export async function installEntityDefinition({
   } catch (e) {
     logger.error(`Failed to install entity definition [${definition.id}]: ${e}`);
 
-    await stopLatestTransform(esClient, definition, logger);
-    await deleteLatestTransform(esClient, definition, logger);
+    await stopTransforms(esClient, definition, logger);
+    await deleteTransforms(esClient, definition, logger);
 
-    await deleteLatestIngestPipeline(esClient, definition, logger);
+    await deleteIngestPipelines(esClient, definition, logger);
 
     await deleteTemplate({
       esClient,

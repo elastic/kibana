@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateLatestTransformId } from './helpers/generate_component_id';
+import { generateLatestTransformId, generateLatestBackfillTransformId } from './helpers/generate_component_id';
 
 export async function deleteTransforms(
   esClient: ElasticsearchClient,
@@ -52,6 +52,26 @@ export async function deleteLatestTransform(
     );
   } catch (e) {
     logger.error(`Cannot delete latest transform for definition [${definition.id}]: ${e}`);
+    throw e;
+  }
+}
+
+export async function deleteLatestBackfillTransform(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger
+) {
+  try {
+    await retryTransientEsErrors(
+      () =>
+        esClient.transform.deleteTransform(
+          { transform_id: generateLatestBackfillTransformId(definition), force: true },
+          { ignore: [404] }
+        ),
+      { logger }
+    );
+  } catch (e) {
+    logger.error(`Cannot delete latest backfill transform for definition [${definition.id}]: ${e}`);
     throw e;
   }
 }

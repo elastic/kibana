@@ -9,7 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateLatestTransformId } from './helpers/generate_component_id';
+import { generateLatestTransformId, generateLatestBackfillTransformId } from './helpers/generate_component_id';
 
 export async function stopTransforms(
   esClient: ElasticsearchClient,
@@ -57,6 +57,30 @@ export async function stopLatestTransform(
     );
   } catch (e) {
     logger.error(`Cannot stop latest transform for definition [${definition.id}]: ${e}`);
+    throw e;
+  }
+}
+
+export async function stopLatestBackfillTransform(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger
+) {
+  try {
+    await retryTransientEsErrors(
+      () =>
+        esClient.transform.stopTransform(
+          {
+            transform_id: generateLatestBackfillTransformId(definition),
+            wait_for_completion: true,
+            force: true,
+          },
+          { ignore: [409, 404] }
+        ),
+      { logger }
+    );
+  } catch (e) {
+    logger.error(`Cannot stop latest backfill transform for definition [${definition.id}]: ${e}`);
     throw e;
   }
 }
