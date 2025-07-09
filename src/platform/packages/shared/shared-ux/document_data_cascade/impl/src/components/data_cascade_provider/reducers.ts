@@ -9,15 +9,23 @@
 
 import { castDraft, produce } from 'immer';
 
+/**
+ * Represents a document, with a base expectation that specifies
+ * that it has a unique identifier.
+ */
 type DocWithId = Record<string, any> & { id: string };
 
 /**
- * Represents a group node document, with a base expectation that specifies
- * that all documents in the store have a unique identifier.
+ * Represents a group node, with a base expectation that it is a document with a unique identifier, with specific properties.
+ * It can also have children, which are other group nodes.
  */
-export type GroupNode<T extends DocWithId = DocWithId> = T & { id: string; children?: GroupNode[] };
+export type GroupNode = DocWithId & {
+  children?: GroupNode[];
+};
 
 export type LeafNode = DocWithId;
+
+type ColumnGroups = Array<keyof Omit<GroupNode, 'children' | 'id'>>;
 
 type DispatchActionType =
   | 'SET_INITIAL_STATE'
@@ -33,7 +41,7 @@ export type IDispatchAction<G extends GroupNode, L extends Record<string, any>> 
     }
   | {
       type: Extract<DispatchActionType, 'SET_ACTIVE_CASCADE_GROUPS'>;
-      payload: string[];
+      payload: ColumnGroups;
     }
   | {
       type: Extract<DispatchActionType, 'SET_INITIAL_STATE'>;
@@ -63,11 +71,11 @@ export interface IStoreState<G extends GroupNode, L extends LeafNode> {
   /**
    * The available columns that can be used to group the data.
    */
-  readonly groupByColumns: string[];
+  readonly groupByColumns: ColumnGroups;
   /**
    * The currently selected group by column. in the order in which they are nested
    */
-  readonly currentGroupByColumns: string[];
+  readonly currentGroupByColumns: ColumnGroups;
 }
 
 export const storeReducer = <G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>(
@@ -82,7 +90,7 @@ export const storeReducer = <G extends GroupNode = GroupNode, L extends LeafNode
     }
     case 'SET_ACTIVE_CASCADE_GROUPS': {
       return produce(state, (draft) => {
-        draft.currentGroupByColumns = action.payload;
+        draft.currentGroupByColumns = castDraft(action.payload);
       });
     }
     case 'RESET_ACTIVE_CASCADE_GROUPS': {

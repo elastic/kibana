@@ -23,7 +23,7 @@ import { type GroupNode } from '../../data_cascade_provider';
 
 export interface CascadeRowProps<G> {
   isActiveSticky: boolean;
-  innerRef: React.LegacyRef<HTMLLIElement>;
+  innerRef: React.LegacyRef<HTMLDivElement>;
   populateGroupNodeDataFn: (args: { row: Row<G> }) => Promise<void>;
   rowHeaderTitleSlot: React.FC<{ row: Row<G> }>;
   rowHeaderMetaSlots?: (props: { row: Row<G> }) => React.ReactNode[];
@@ -71,8 +71,25 @@ export function CascadeRow<G extends GroupNode>({
     [fetchCascadeRowGroupNodeData, rowInstance]
   );
 
+  /**
+   * @description required ARIA props to ensure proper accessibility tree gets generated
+   * @see https://www.w3.org/WAI/ARIA/apg/patterns/treegrid/
+   */
+  const rowARIAProps = React.useMemo(() => {
+    return {
+      id: rowInstance.id,
+      role: 'row',
+      'aria-expanded': rowInstance.getIsExpanded(),
+      'aria-level': rowInstance.depth + 1,
+      ...(rowInstance.subRows.length > 0 && {
+        'aria-owns': rowInstance.subRows.map((row) => row.id).join(' '),
+      }),
+    };
+  }, [rowInstance]);
+
   return (
-    <li
+    <div
+      {...rowARIAProps}
       key={rowInstance.id}
       data-index={virtualRow.index}
       data-row-type={rowInstance.depth === 0 ? 'root' : 'sub-group'}
@@ -188,7 +205,10 @@ export function CascadeRow<G extends GroupNode>({
         </EuiFlexItem>
         {!isGroupNode && rowInstance.getIsExpanded() && rowInstance.getIsAllParentsExpanded() && (
           <React.Fragment>
-            <EuiFlexItem css={{ padding: `0 calc(${euiTheme.size[size]} * ${rowInstance.depth})` }}>
+            <EuiFlexItem
+              role="gridcell"
+              css={{ padding: `0 calc(${euiTheme.size[size]} * ${rowInstance.depth})` }}
+            >
               {rowInstance.getVisibleCells().map((cell) => {
                 return (
                   <React.Fragment key={cell.id}>
@@ -200,6 +220,6 @@ export function CascadeRow<G extends GroupNode>({
           </React.Fragment>
         )}
       </EuiFlexGroup>
-    </li>
+    </div>
   );
 }
