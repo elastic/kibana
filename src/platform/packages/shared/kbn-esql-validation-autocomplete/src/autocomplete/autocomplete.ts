@@ -576,7 +576,7 @@ async function getFunctionArgsSuggestions(
       let location = getLocationFromCommandOrOptionName(option?.name ?? command.name);
       // If the user is working with timeseries data, we want to suggest
       // functions that are relevant to the timeseries context.
-      const isTSSourceCommand = commands.find((c) => c.name === 'ts') !== undefined;
+      const isTSSourceCommand = commands[0].name === 'ts';
       if (isTSSourceCommand && isAggFunctionUsedAlready(command, finalCommandArgIndex)) {
         location = Location.STATS_TIMESERIES;
       }
