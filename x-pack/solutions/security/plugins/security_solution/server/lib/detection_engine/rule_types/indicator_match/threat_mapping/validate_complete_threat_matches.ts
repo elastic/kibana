@@ -65,7 +65,7 @@ export const validateCompleteThreatMatches = (
   const skippedIds: string[] = [];
 
   signalsQueryMap.forEach((threatQueries, signalId) => {
-    const allMatchedThreatQueries: ThreatMatchNamedQuery[] = [];
+    const allMatchedThreatQueriesSet = new Set<ThreatMatchNamedQuery>();
     const hasMatch = threatMapping.some((andGroup) => {
       const matchedThreatQueriesForAndGroup: ThreatMatchNamedQuery[] = [];
       const hasMatchForAndGroup = andGroup.entries.every((entry) => {
@@ -82,14 +82,16 @@ export const validateCompleteThreatMatches = (
       });
 
       if (hasMatchForAndGroup) {
-        allMatchedThreatQueries.push(...matchedThreatQueriesForAndGroup);
+        matchedThreatQueriesForAndGroup.forEach((threatQuery) =>
+          allMatchedThreatQueriesSet.add(threatQuery)
+        );
       }
 
       return hasMatchForAndGroup;
     });
 
     if (hasMatch) {
-      matchedEvents.set(signalId, allMatchedThreatQueries);
+      matchedEvents.set(signalId, Array.from(allMatchedThreatQueriesSet));
     } else {
       skippedIds.push(signalId);
     }
