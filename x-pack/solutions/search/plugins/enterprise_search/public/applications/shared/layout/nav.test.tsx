@@ -134,26 +134,6 @@ const mockNavLinks = [
     url: '/app/elasticsearch/relevance/inference_endpoints',
   },
   {
-    id: 'enterpriseSearchElasticsearch',
-    title: 'Elasticsearch',
-    url: '/app/elasticsearch/elasticsearch',
-  },
-  {
-    id: 'enterpriseSearchVectorSearch',
-    title: 'Vector Search',
-    url: '/app/elasticsearch/vector_search',
-  },
-  {
-    id: 'enterpriseSearchSemanticSearch',
-    title: 'Semantic Search',
-    url: '/app/elasticsearch/semantic_search',
-  },
-  {
-    id: 'enterpriseSearchAISearch',
-    title: 'AI Search',
-    url: '/app/elasticsearch/ai_search',
-  },
-  {
     id: 'searchSynonyms:synonyms',
     title: 'Synonyms',
     url: '/app/elasticsearch/synonyms/',

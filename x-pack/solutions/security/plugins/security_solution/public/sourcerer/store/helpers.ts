@@ -20,6 +20,7 @@ const getPatternListFromScope = (
   // when our SIEM data view is set, here are the defaults
   switch (scope) {
     case SourcererScopeName.default:
+    case SourcererScopeName.explore:
       return sortWithExcludesAtEnd(patternList.filter((index) => index !== signalIndexName));
     case SourcererScopeName.detections:
       // set to signalIndexName whether or not it exists yet in the patternList
