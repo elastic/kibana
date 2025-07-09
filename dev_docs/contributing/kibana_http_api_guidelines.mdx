@@ -389,6 +389,10 @@ Utilities for working with KQL queries are available in the `@kbn/es-query` pack
 }
 ```
 
+#### Avoid directly returning errors from Elasticsearch
+
+In most cases you should add some specific context to your errors to help users self-service the problem. Returning ES errors without context rarely accomplishes this and will likely create future support load for your team. Try to think of your future selves when crafting error messages!
+
 ### Bulk operations
 
 Resources collections with 10,000+ instances should consider supporting bulk operations.
