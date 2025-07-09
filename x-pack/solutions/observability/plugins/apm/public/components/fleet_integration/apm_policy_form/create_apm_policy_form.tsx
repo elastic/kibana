@@ -15,9 +15,10 @@ import type {
 interface Props {
   newPolicy: NewPackagePolicy;
   onChange: PackagePolicyCreateExtensionComponentProps['onChange'];
+  packageInfo?: PackagePolicyCreateExtensionComponentProps['packageInfo'];
 }
 
-export function CreateAPMPolicyForm({ newPolicy, onChange }: Props) {
+export function CreateAPMPolicyForm({ newPolicy, onChange, packageInfo }: Props) {
   const [firstInput, ...restInputs] = newPolicy?.inputs;
   const vars = firstInput?.vars;
 
@@ -30,5 +31,5 @@ export function CreateAPMPolicyForm({ newPolicy, onChange }: Props) {
       },
     });
   }
-  return <APMPolicyForm vars={vars} updateAPMPolicy={updateAPMPolicy} />;
+  return <APMPolicyForm vars={vars} updateAPMPolicy={updateAPMPolicy} packageInfo={packageInfo} />;
 }
