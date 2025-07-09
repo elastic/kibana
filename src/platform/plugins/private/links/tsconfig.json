@@ -31,17 +31,16 @@
     "@kbn/ui-actions-plugin",
     "@kbn/logging",
     "@kbn/core-plugins-server",
-    "@kbn/react-kibana-mount",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/visualizations-plugin",
-    "@kbn/core-mount-utils-browser",
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/presentation-panel-plugin",
     "@kbn/share-plugin",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }
