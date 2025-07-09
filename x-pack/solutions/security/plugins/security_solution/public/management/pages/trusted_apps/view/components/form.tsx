@@ -10,7 +10,6 @@ import React, { memo, useCallback, useMemo, useState, useRef } from 'react';
 import { isEqual } from 'lodash';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
-  EuiButtonGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,

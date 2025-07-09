@@ -12,6 +12,8 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { useFetchIndex } from '../../../../../common/containers/source';
 
 import { TrustedAppsForm } from './form';
 import type {
@@ -26,6 +28,7 @@ import { forceHTMLElementOffsetWidth } from '../../../../components/effected_pol
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
+jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
@@ -160,6 +163,13 @@ describe('Trusted apps form', () => {
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     latestUpdatedItem = createItem();
+    (useFetchIndex as jest.Mock).mockImplementation(() => [
+      false,
+      {
+        indexPatterns: stubIndexPattern,
+      },
+    ]);
+
 
     formProps = {
       item: latestUpdatedItem,
@@ -181,7 +191,7 @@ describe('Trusted apps form', () => {
     const message = 'oh oh - failed';
     formProps.error = new Error(message) as IHttpFetchError;
     render();
-
+    
     expect(renderResult.getByTestId(`${formPrefix}-submitError`).textContent).toMatch(message);
   });
 
