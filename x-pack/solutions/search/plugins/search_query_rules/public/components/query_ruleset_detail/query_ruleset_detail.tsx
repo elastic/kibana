@@ -42,6 +42,7 @@ import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 import { useFetchQueryRulesetExist } from '../../hooks/use_fetch_ruleset_exists';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { useQueryRulesBreadcrumbs } from '../../hooks/use_query_rules_breadcrumbs';
 
 export interface QueryRulesetDetailProps {
   createMode?: boolean;
@@ -55,6 +56,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
   const { rulesetId = '' } = useParams<{
     rulesetId?: string;
   }>();
+  useQueryRulesBreadcrumbs(rulesetId);
   const { data: rulesetExists, isLoading: isFailsafeLoading } =
     useFetchQueryRulesetExist(rulesetId);
   const useTracker = useUsageTracker();
