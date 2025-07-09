@@ -90,7 +90,6 @@ export function CascadeRow<G extends GroupNode>({
   return (
     <div
       {...rowARIAProps}
-      key={rowInstance.id}
       data-index={virtualRow.index}
       data-row-type={rowInstance.depth === 0 ? 'root' : 'sub-group'}
       ref={innerRef}
@@ -203,22 +202,22 @@ export function CascadeRow<G extends GroupNode>({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {!isGroupNode && rowInstance.getIsExpanded() && rowInstance.getIsAllParentsExpanded() && (
-          <React.Fragment>
+        <React.Fragment>
+          {!isGroupNode && rowInstance.getIsExpanded() && rowInstance.getIsAllParentsExpanded() && (
             <EuiFlexItem
               role="gridcell"
-              css={{ padding: `0 calc(${euiTheme.size[size]} * ${rowInstance.depth})` }}
+              css={{
+                padding: `0 calc(${euiTheme.size[size]} * ${rowInstance.depth})`,
+              }}
             >
-              {rowInstance.getVisibleCells().map((cell) => {
-                return (
-                  <React.Fragment key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </React.Fragment>
-                );
-              })}
+              {rowInstance.getVisibleCells().map((cell) => (
+                <React.Fragment key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </React.Fragment>
+              ))}
             </EuiFlexItem>
-          </React.Fragment>
-        )}
+          )}
+        </React.Fragment>
       </EuiFlexGroup>
     </div>
   );
