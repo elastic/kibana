@@ -28,7 +28,8 @@ import type { PackageClient } from '../services';
 import { appContextService } from '../services';
 import * as Registry from '../services/epm/registry';
 
-import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../constants';
+import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS, SO_SEARCH_LIMIT } from '../constants';
+import { getInstalledPackages } from '../services/epm/packages';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
 export const VERSION = '1.0.0';
@@ -167,9 +168,13 @@ export class AutoInstallContentPackagesTask {
         this.discoveryMap = await this.getContentPackagesDiscoveryMap();
       }
 
-      const packagesToInstall = await this.getPackagesToInstall(esClient, this.discoveryMap);
+      const packagesToInstall = await this.getPackagesToInstall(
+        esClient,
+        soClient,
+        this.discoveryMap
+      );
 
-      await this.installPackages(soClient, packageClient, packagesToInstall);
+      await this.installPackages(packageClient, packagesToInstall);
 
       this.endRun('success');
     } catch (err) {
@@ -184,22 +189,12 @@ export class AutoInstallContentPackagesTask {
   };
 
   private async installPackages(
-    savedObjectsClient: SavedObjectsClient,
     packageClient: PackageClient,
     packagesToInstall: Array<{ name: string; version: string }>
   ) {
     await pMap(
       packagesToInstall,
       async ({ name, version }) => {
-        const installation = await packageClient.getInstallation(name, savedObjectsClient);
-
-        if (installation?.install_status === 'installed' && installation.version === version) {
-          this.logger.debug(
-            `[AutoInstallContentPackagesTask] Package ${name}@${version} is already installed. Skipping installation.`
-          );
-          return;
-        }
-
         try {
           await packageClient.installPackage({
             pkgName: name,
@@ -217,13 +212,28 @@ export class AutoInstallContentPackagesTask {
     );
   }
 
-  private async getPackagesToInstall(esClient: ElasticsearchClient, discoveryMap: DiscoveryMap) {
+  private async getPackagesToInstall(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClient,
+    discoveryMap: DiscoveryMap
+  ) {
+    const installedPackages = await getInstalledPackages({
+      savedObjectsClient: soClient,
+      esClient,
+      perPage: SO_SEARCH_LIMIT,
+      sortOrder: 'asc',
+    });
+    const installedPackagesMap = installedPackages.items.reduce((acc, pkg) => {
+      acc[pkg.name] = pkg.version;
+      return acc;
+    }, {} as { [name: string]: string });
+
     const packagesToInstall: { [name: string]: string } = {};
 
     for (const [dataset, mapValue] of Object.entries(discoveryMap)) {
       const packages = mapValue.packages;
 
-      if (packages.every((pkg) => Object.keys(packagesToInstall).includes(pkg.name))) {
+      if (packages.every((pkg) => installedPackagesMap[pkg.name] === pkg.version)) {
         // skip ES search as packages are already part of packagesToInstall
         continue;
       }
@@ -232,12 +242,14 @@ export class AutoInstallContentPackagesTask {
 
       if (hasData) {
         this.logger.debug(
-          `[AutoInstallContentPackagesTask] Found data for field ${dataset} with value ${dataset}, will install packages: ${packages
+          `[AutoInstallContentPackagesTask] Found data for dataset value ${dataset}, will install packages: ${packages
             .map((pkg) => `${pkg.name}@${pkg.version}`)
             .join(', ')}`
         );
         for (const { name, version } of packages) {
-          packagesToInstall[name] = version;
+          if (!installedPackagesMap[name] || installedPackagesMap[name] !== version) {
+            packagesToInstall[name] = version;
+          }
         }
       }
     }
@@ -279,7 +291,7 @@ export class AutoInstallContentPackagesTask {
     return false;
   }
 
-  private async getContentPackagesDiscoveryMap() {
+  private async getContentPackagesDiscoveryMap(): Promise<DiscoveryMap> {
     const type = 'content';
     const prerelease = false;
     const discoveryMap: DiscoveryMap = {};

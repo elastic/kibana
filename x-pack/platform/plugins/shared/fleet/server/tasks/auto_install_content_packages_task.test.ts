@@ -21,6 +21,8 @@ import { createAppContextStartContractMock, createMockPackageService } from '../
 import type { PackageClient } from '../services';
 import { appContextService } from '../services';
 
+import { getInstalledPackages } from '../services/epm/packages';
+
 import {
   AutoInstallContentPackagesTask,
   TYPE,
@@ -29,6 +31,9 @@ import {
 
 jest.mock('../services');
 jest.mock('../services/epm/registry');
+jest.mock('../services/epm/packages', () => ({
+  getInstalledPackages: jest.fn(),
+}));
 
 const MockRegistry = jest.mocked(Registry);
 
@@ -45,6 +50,8 @@ const MOCK_TASK_INSTANCE = {
   state: {},
   taskType: TYPE,
 };
+
+const mockGetInstalledPackages = getInstalledPackages as jest.Mock;
 
 describe('AutoInstallContentPackagesTask', () => {
   const { createSetup: coreSetupMock } = coreMock;
@@ -75,6 +82,7 @@ describe('AutoInstallContentPackagesTask', () => {
         taskInterval: '10m',
       },
     });
+    mockGetInstalledPackages.mockResolvedValue({ items: [] });
   });
 
   afterEach(() => {
@@ -143,8 +151,6 @@ describe('AutoInstallContentPackagesTask', () => {
     });
 
     it('should install content packages', async () => {
-      packageClientMock.getInstallation.mockResolvedValue(undefined);
-
       await runTask();
 
       expect(packageClientMock.installPackage).toHaveBeenCalledWith({
@@ -154,14 +160,6 @@ describe('AutoInstallContentPackagesTask', () => {
         automaticInstall: true,
       });
       expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
-    });
-
-    it('should skip es search if first dataset has matching data', async () => {
-      packageClientMock.getInstallation.mockResolvedValue(undefined);
-
-      await runTask();
-
-      expect(esClient.search).toHaveBeenCalledTimes(1);
     });
 
     it('should not call registry if cached', async () => {
@@ -177,10 +175,14 @@ describe('AutoInstallContentPackagesTask', () => {
     });
 
     it('should install package if old version is installed', async () => {
-      packageClientMock.getInstallation.mockResolvedValue({
-        install_status: 'installed',
-        version: '1.0.0',
-      } as any);
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [
+          {
+            name: 'kubernetes_otel',
+            version: '1.0.0',
+          },
+        ],
+      });
 
       await runTask();
 
@@ -193,10 +195,14 @@ describe('AutoInstallContentPackagesTask', () => {
     });
 
     it('should not install package if latest version is installed', async () => {
-      packageClientMock.getInstallation.mockResolvedValue({
-        install_status: 'installed',
-        version: '1.1.0',
-      } as any);
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [
+          {
+            name: 'kubernetes_otel',
+            version: '1.1.0',
+          },
+        ],
+      });
 
       await runTask();
 
