@@ -131,7 +131,7 @@ export const controlGroupInputSchema = schema.object({
 const searchSourceSchema = schema.object(
   {
     type: schema.maybe(schema.string()),
-    query: schema.maybe(querySchema(['kuery', 'lucene'])),
+    query: schema.maybe(querySchema),
     filter: schema.maybe(schema.arrayOf(filterSchema)),
     sort: schema.maybe(
       schema.arrayOf(
