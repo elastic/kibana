@@ -9,7 +9,7 @@
 
 import { isEmpty } from 'lodash';
 
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import {
   initializeControlGroupTelemetry,
   type ControlGroupTelemetry,
@@ -99,7 +99,7 @@ export const controlsCollectorFactory =
       collectorData.controls = embeddableService.telemetry(
         {
           ...attributes.controlGroupInput,
-          type: CONTROL_GROUP_TYPE,
+          type: CONTROLS_GROUP_TYPE,
         },
         collectorData.controls
       ) as ControlGroupTelemetry;
