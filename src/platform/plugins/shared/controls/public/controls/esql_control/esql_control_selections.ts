@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, filter, map, merge, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, filter, map, merge, switchMap } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { OptionsListSelection } from '../../../common/options_list';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { OptionsListSearchTechnique, OptionsListSelection } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
@@ -59,6 +60,15 @@ export function initializeESQLControlSelections(
   const title$ = new BehaviorSubject<string | undefined>(initialState.title);
   const totalCardinality$ = new BehaviorSubject<number>(initialState.availableOptions?.length ?? 0);
 
+  const searchString$ = new BehaviorSubject<string>('');
+  const displayedAvailableOptions$ = new BehaviorSubject<string[] | undefined>(
+    initialState.availableOptions ?? []
+  );
+
+  function setSearchString(next: string) {
+    searchString$.next(next);
+  }
+
   function setSelectedOptions(next: OptionsListSelection[] | undefined) {
     if (!next) return;
     const selected = next as string[];
@@ -83,8 +93,17 @@ export function initializeESQLControlSelections(
     .subscribe((result) => {
       if (getESQLSingleColumnValues.isSuccess(result)) {
         availableOptions$.next(result.values.map((value) => value));
-        totalCardinality$.next(result.values.length);
       }
+    });
+
+  // Filter the displayed available options by the current search string
+  const availableOptionsSearchSubscription = combineLatest([searchString$, availableOptions$])
+    .pipe(debounceTime(50))
+    .subscribe(([searchString, availableOptions]) => {
+      const displayOptions =
+        availableOptions?.filter((option) => option.startsWith(searchString)) ?? [];
+      displayedAvailableOptions$.next(displayOptions);
+      totalCardinality$.next(displayOptions.length);
     });
 
   // derive ESQL control variable from state.
@@ -107,6 +126,7 @@ export function initializeESQLControlSelections(
     cleanup: () => {
       variableSubscriptions.unsubscribe();
       fetchSubscription.unsubscribe();
+      availableOptionsSearchSubscription.unsubscribe();
     },
     api: {
       hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
@@ -143,10 +163,15 @@ export function initializeESQLControlSelections(
     },
     internalApi: {
       selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
-      availableOptions$,
+      availableOptions$: displayedAvailableOptions$,
       totalCardinality$,
       title$,
       setSelectedOptions,
+      setSearchString,
+      field$: new BehaviorSubject<DataViewField | undefined>({ type: 'string' } as DataViewField),
+      searchTechnique$: new BehaviorSubject<OptionsListSearchTechnique | undefined>('prefix'),
+      searchString$,
+      searchStringValid$: new BehaviorSubject<boolean | undefined>(true),
     },
   };
 }

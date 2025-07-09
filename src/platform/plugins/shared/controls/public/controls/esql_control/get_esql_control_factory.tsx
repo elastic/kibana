@@ -130,7 +130,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         },
         // Pass empty defaults for OptionsList API methods not actually needed by the components
         dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
-        field$: new BehaviorSubject(undefined) as OptionsListComponentApi['field$'],
         filters$: new BehaviorSubject(undefined) as OptionsListComponentApi['filters$'],
         untilFiltersReady: () => Promise.resolve(),
         // Options list UI can safely operate without any of the OptionsList state manager setters or getters as long
