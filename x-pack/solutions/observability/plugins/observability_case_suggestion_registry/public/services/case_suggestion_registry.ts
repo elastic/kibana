@@ -17,7 +17,7 @@ export interface SuggestionDefinitionPublicProps<TPayload = {}, TMetadata = {}> 
 }
 
 export interface SuggestionDefinitionPublic<TPayload = {}, TMetadata = {}> {
-  type: string;
+  suggestionId: string;
   displayName: string;
   description: string;
   children?: React.LazyExoticComponent<
@@ -29,14 +29,16 @@ export class CaseSuggestionRegistry {
   private registry: Map<string, SuggestionDefinitionPublic> = new Map();
 
   public register(suggestion: SuggestionDefinitionPublic): void {
-    if (this.registry.has(suggestion.type)) {
-      throw new Error(`Suggestion type '${suggestion.type}' is already registered.`);
+    if (this.registry.has(suggestion.suggestionId)) {
+      throw new Error(
+        `Suggestion with suggestionId '${suggestion.suggestionId}' is already registered.`
+      );
     }
-    this.registry.set(suggestion.type, suggestion);
+    this.registry.set(suggestion.suggestionId, suggestion);
   }
 
-  get(type: string): SuggestionDefinitionPublic | undefined {
-    return this.registry.get(type);
+  get(suggestionId: string): SuggestionDefinitionPublic | undefined {
+    return this.registry.get(suggestionId);
   }
 
   getAll(): SuggestionDefinitionPublic[] {

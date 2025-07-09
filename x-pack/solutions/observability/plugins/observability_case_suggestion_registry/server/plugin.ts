@@ -8,12 +8,12 @@ import { PluginInitializerContext, Plugin as PluginType } from '@kbn/core/server
 import { CaseSuggestionRegistry } from './services/case_suggestion_registry';
 import { ObservabilityCaseSuggestionRegistryConfig } from '../common/config';
 
-export interface ObservabilitySharedPluginStart {
+export interface ObservabilityCaseSuggestionRegistryPluginSetup {
   config: ObservabilityCaseSuggestionRegistryConfig;
   caseSuggestionRegistry: CaseSuggestionRegistry;
 }
 
-export interface ObservabilitySharedPluginSetup {
+export interface ObservabilityCaseSuggestionRegistryPluginStart {
   config: ObservabilityCaseSuggestionRegistryConfig;
   caseSuggestionRegistry: CaseSuggestionRegistry;
 }

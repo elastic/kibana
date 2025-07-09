@@ -10,6 +10,13 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { ObservabilityCaseSuggestionRegistryBrowserConfig } from '../common/config';
 import { CaseSuggestionRegistry } from './services/case_suggestion_registry';
 
+export type ObservabilityCaseSuggestionRegistryPluginSetup = ReturnType<
+  ObservabilityCaseSuggestionRegistryPlugin['setup']
+>;
+export type ObservabilityCaseSuggestionRegistryPluginStart = ReturnType<
+  ObservabilityCaseSuggestionRegistryPlugin['start']
+>;
+
 export class ObservabilityCaseSuggestionRegistryPlugin implements Plugin {
   private config?: ObservabilityCaseSuggestionRegistryBrowserConfig;
   private caseSuggestionRegistry?: CaseSuggestionRegistry;

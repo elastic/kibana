@@ -9,12 +9,16 @@ import { PluginInitializerContext } from '@kbn/core/server';
 
 export { config } from './config';
 
-export type { ObservabilitySharedPluginStart, ObservabilitySharedPluginSetup } from './plugin';
+export type {
+  ObservabilityCaseSuggestionRegistryPluginSetup,
+  ObservabilityCaseSuggestionRegistryPluginStart,
+} from './plugin';
 export type {
   SuggestionDefinitionServer,
-  SuggestionPayload,
   CaseSuggestionRegistry,
 } from './services/case_suggestion_registry';
+
+export type { SuggestionPayload } from '../common/types';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { ObservabilitySharedPlugin } = await import('./plugin');

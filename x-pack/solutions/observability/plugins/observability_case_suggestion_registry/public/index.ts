@@ -11,4 +11,14 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new ObservabilityCaseSuggestionRegistryPlugin(initializerContext);
 };
 
-export type { SuggestionDefinitionPublic } from './services/case_suggestion_registry';
+export type { SuggestionPayload } from '../common/types';
+
+export type {
+  SuggestionDefinitionPublic,
+  SuggestionDefinitionPublicProps,
+} from './services/case_suggestion_registry';
+
+export type {
+  ObservabilityCaseSuggestionRegistryPluginSetup,
+  ObservabilityCaseSuggestionRegistryPluginStart,
+} from './plugin';

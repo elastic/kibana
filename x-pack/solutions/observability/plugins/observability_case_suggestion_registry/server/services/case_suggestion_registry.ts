@@ -6,20 +6,7 @@
  */
 
 import { ToolDefinition } from '@kbn/inference-common';
-
-export interface SuggestionPayload<
-  TPayload = Record<string, unknown>, // Generic type for the payload, defaults to a record of unknown key-value pairs
-  TMetadata = Record<string, unknown> // Generic type for metadata, defaults to a record of unknown key-value pairs
-> {
-  suggestionId: string; // Unique identifier for the suggestion
-  data: {
-    attachments: Array<{
-      attachment: Record<string, unknown>; // Details of the attachment
-      payload: TPayload; // Payload associated with the attachment
-    }>;
-    metadata?: TMetadata; // Optional metadata associated with the suggestion
-  };
-}
+import { SuggestionPayload } from '../../common/types';
 
 export type ToolHandler<TPayload = Record<string, unknown>, TMetadata = Record<string, unknown>> = (
   params: any
