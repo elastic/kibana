@@ -244,42 +244,6 @@ Detail: [allocate] exclude doesn't support values of type: VALUE_STRING
 
 The cost of not catching errors early is interrupted workflow, repetitive plan/apply failures and frustrated consumers.
 
-### No side effects during HTTP GET or read requests
-
-Terraform expects GET requests to be non-destructive and side-effect-free. If your API creates objects, updates data, or does anything else during a GET request, you’re in for trouble.
-
-If you have to have side effects (like updating a ‘last-read’ timestamp), consumers have to work around it by, for example, limiting the number of times something’s read or building custom tooling to handle state drift.
-
-### Standardize patterns across your API
-
-Consistency is key for Terraform resource development. Using standard patterns make reusable abstractions and helper functions possible.
-
-For example, all Elasticsearch resources use the same authentication patterns, whether you're working with indices, security roles, or lifecycle policies:
-
-```terraform
-provider "elasticstack" {
-  elasticsearch {
-    username  = "elastic"
-    password  = "changeme"
-    endpoints = ["http://localhost:9200"]
-  }
-}
-```
-
-[Provider configuration example](https://github.com/elastic/terraform-provider-elasticstack/blob/main/examples/provider/provider.tf)
-
-OpenAPI specifications make generating consistent Kibana and Fleet clients possible:
-
-```bash
-# From Makefile - generates standardized clients
-internal/clients/fleet/:
-	oapi-codegen -package fleet fleet-openapi.json
-```
-
-[Provider makefile](https://github.com/elastic/terraform-provider-elasticstack/blob/main/Makefile)
-
-Standardization means authentication, error handling, and request patterns become reusable across all resources.
-
 ### Return as much as you can, and handle defaults carefully
 
 Terraform needs complete information to track resource state effectively. If your API doesn't return enough details, Terraform can't properly detect changes or manage drift.
@@ -290,7 +254,7 @@ Many Kibana APIs have extensive configuration options. Requiring users to specif
 
 ### Be predictable
 
-Terraform relies on the same input resulting in the same output.  Avoid using fields like "last modified time"—Terraform can’t compare those meaningfully. This can be tricky with sensitive fields or when your API relies on randomness.
+Terraform relies on the same input resulting in the same output. Avoid using fields like "last modified time"—Terraform can’t compare those meaningfully. This can be tricky with sensitive fields or when your API relies on randomness.
 
 Constantly changing fields in API responses create a difficult situation for Terraform implementations because they cause constant drift.
 
@@ -315,7 +279,7 @@ The [Alerting Rules API](https://www.elastic.co/docs/api/doc/kibana/operation/op
 }
 ```
 
-Users see Terraform detecting "changes" on every refresh, even when nothing in their configuration has actually changed\!
+Users see Terraform detecting "changes" on every refresh, even when nothing in their configuration has actually changed!
 
 An alternative is to separate volatile runtime data from stable configuration data in responses:
 
@@ -336,30 +300,6 @@ An alternative is to separate volatile runtime data from stable configuration da
 Volatile fields create a challenging choice: include them (causing constant configuration drift) or exclude them (losing valuable runtime information).
 
 Including and separating them makes it easier for the TF provider to specifically ignore sets of fields (marking them as [readonly](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_alerting_rule#read-only)) but needs to be built into the client generator.
-
-### Do not change field types
-
-**Changing field types break terraform**
-
-When a field that was once a string suddenly becomes an array or object, it forces breaking changes that disrupt existing user configurations.
-
-This is exactly what happened when Elasticsearch APIs [changed field types](https://github.com/elastic/terraform-provider-elasticstack/issues/926):
-
-```terraform
-# Version 1.0 - field was a string
-resource "elasticstack_transform" "example" {
-  group_by = "field_name"  # String type
-}
-
-# Version 2.0 - same field became an array
-resource "elasticstack_transform" "example" {
-  group_by = ["field_name"]  # Array type - BREAKING CHANGE!
-}
-```
-
-Another example is when the Kibana SLO API changed `group_by` from `string` to `string | string[]`.
-
-Changing a field to make it more lenient might look harmless on the surface but means that the API will return values clients don't expect.
 
 **Supporting multiple types**
 
