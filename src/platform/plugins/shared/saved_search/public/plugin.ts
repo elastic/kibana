@@ -23,7 +23,7 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { DiscoverSessionAttributes } from '../server/saved_objects/schema';
 import { LATEST_VERSION, SavedSearchType } from '../common';
 import { kibanaContext } from '../common/expressions';
-import type { SavedSearch, SerializableSavedSearch } from '../common/types';
+import type { DiscoverSession, SavedSearch, SerializableSavedSearch } from '../common/types';
 import { getKibanaContext } from './expressions/kibana_context';
 import type {
   getNewSavedSearch,
@@ -49,6 +49,7 @@ export interface SavedSearchPublicPluginStart {
     savedSearchId: string,
     serialized?: Serialized
   ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
+  getDiscoverSession: (discoverSessionId: string) => Promise<DiscoverSession>;
   getNew: () => ReturnType<typeof getNewSavedSearch>;
   getAll: () => Promise<Array<SOWithMetadata<DiscoverSessionAttributes>>>;
   save: (
@@ -135,19 +136,12 @@ export class SavedSearchPublicPlugin
     const service = new SavedSearchesService(deps);
 
     return {
-      get: <Serialized extends boolean = false>(
-        savedSearchId: string,
-        serialized?: Serialized
-      ): Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch> =>
-        service.get(savedSearchId, serialized),
+      get: (savedSearchId, serialized) => service.get(savedSearchId, serialized),
+      getDiscoverSession: (discoverSessionId) => service.getDiscoverSession(discoverSessionId),
       getAll: () => service.getAll(),
       getNew: () => service.getNew(),
-      save: (savedSearch: SavedSearch, options?: SaveSavedSearchOptions) => {
-        return service.save(savedSearch, options);
-      },
-      checkForDuplicateTitle: (
-        props: Pick<OnSaveProps, 'newTitle' | 'isTitleDuplicateConfirmed' | 'onTitleDuplicate'>
-      ) => {
+      save: (savedSearch, options) => service.save(savedSearch, options),
+      checkForDuplicateTitle: (props) => {
         return checkForDuplicateTitle({
           title: props.newTitle,
           isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
@@ -155,15 +149,7 @@ export class SavedSearchPublicPlugin
           contentManagement: deps.contentManagement,
         });
       },
-      byValueToSavedSearch: async <
-        Serialized extends boolean = boolean,
-        ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
-      >(
-        result: SavedSearchUnwrapResult,
-        serialized?: Serialized
-      ): Promise<ReturnType> => {
-        return (await byValueToSavedSearch(result, deps, serialized)) as ReturnType;
-      },
+      byValueToSavedSearch: (result, serialized?) => byValueToSavedSearch(result, deps, serialized),
     };
   }
 }
