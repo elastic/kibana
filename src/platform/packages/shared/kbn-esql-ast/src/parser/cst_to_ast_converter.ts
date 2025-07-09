@@ -12,7 +12,6 @@ import * as cst from '../antlr/esql_parser';
 import * as ast from '../types';
 import { type AstNodeParserFields, Builder } from '../builder';
 import { isCommand } from '../ast/is';
-import { createLimitCommand } from './factories/limit';
 import {
   computeLocationExtends,
   createColumn,
@@ -21,27 +20,20 @@ import {
   createLiteralString,
   createOption,
   createUnknownItem,
+  nonNullable,
+  sanitizeIdentifierString,
   textExistsAndIsValid,
   visitSource,
 } from './factories';
 import {
-  collectAllAggFields,
-  collectAllColumnIdentifiers,
-  collectAllFields,
   collectBooleanExpression,
   getConstant,
-  visitByOption,
   visitPrimaryExpression,
-  visitRenameClauses,
   visitValueExpression,
 } from './walkers';
 import { getPosition } from './helpers';
-import { createStatsCommand } from './factories/stats';
-import { createSortCommand } from './factories/sort';
+import { firstItem, lastItem, resolveItem } from '../visitor/utils';
 import type { Parser } from './parser';
-import { createDissectCommand } from './factories/dissect';
-import { createEnrichCommand } from './factories/enrich';
-import { createRerankCommand } from './factories/rerank';
 
 /**
  * Transforms an ANTLR ES|QL Concrete Syntax Tree (CST) into a
@@ -221,7 +213,7 @@ export class CstToAstConverter {
     const limitCommandCtx = ctx.limitCommand();
 
     if (limitCommandCtx) {
-      return createLimitCommand(limitCommandCtx);
+      return this.fromLimitCommand(limitCommandCtx);
     }
 
     const evalCommandCtx = ctx.evalCommand();
@@ -389,7 +381,7 @@ export class CstToAstConverter {
     if (metadataCtx && metadataCtx.METADATA()) {
       const name = metadataCtx.METADATA().getText().toLowerCase();
       const option = createOption(name, metadataCtx);
-      const optionArgs = collectAllColumnIdentifiers(metadataCtx);
+      const optionArgs = this.toColumnsFromCommand(metadataCtx);
 
       option.args.push(...optionArgs);
       command.args.push(option);
@@ -402,7 +394,7 @@ export class CstToAstConverter {
 
   private fromRowCommand(ctx: cst.RowCommandContext): ast.ESQLCommand<'row'> {
     const command = this.createCommand('row', ctx);
-    const fields = collectAllFields(ctx.fields());
+    const fields = this.fromFields(ctx.fields());
 
     command.args.push(...fields);
 
@@ -424,7 +416,7 @@ export class CstToAstConverter {
     if (metadataCtx && metadataCtx.METADATA()) {
       const name = metadataCtx.METADATA().getText().toLowerCase();
       const option = createOption(name, metadataCtx);
-      const optionArgs = collectAllColumnIdentifiers(metadataCtx);
+      const optionArgs = this.toColumnsFromCommand(metadataCtx);
 
       option.args.push(...optionArgs);
       command.args.push(option);
@@ -450,11 +442,25 @@ export class CstToAstConverter {
     return command;
   }
 
+  // -------------------------------------------------------------------- LIMIT
+
+  private fromLimitCommand(ctx: cst.LimitCommandContext): ast.ESQLCommand<'limit'> {
+    const command = this.createCommand('limit', ctx);
+    if (ctx.constant()) {
+      const limitValue = getConstant(ctx.constant());
+      if (limitValue != null) {
+        command.args.push(limitValue);
+      }
+    }
+
+    return command;
+  }
+
   // --------------------------------------------------------------------- EVAL
 
   private fromEvalCommand(ctx: cst.EvalCommandContext): ast.ESQLCommand<'eval'> {
     const command = this.createCommand('eval', ctx);
-    const fields = collectAllFields(ctx.fields());
+    const fields = this.fromFields(ctx.fields());
 
     command.args.push(...fields);
 
@@ -477,7 +483,7 @@ export class CstToAstConverter {
 
   private fromKeepCommand(ctx: cst.KeepCommandContext): ast.ESQLCommand<'keep'> {
     const command = this.createCommand('keep', ctx);
-    const identifiers = collectAllColumnIdentifiers(ctx);
+    const identifiers = this.toColumnsFromCommand(ctx);
 
     command.args.push(...identifiers);
 
@@ -487,24 +493,144 @@ export class CstToAstConverter {
   // -------------------------------------------------------------------- STATS
 
   private fromStatsCommand(ctx: cst.StatsCommandContext): ast.ESQLCommand<'stats'> {
-    const command = createStatsCommand(ctx);
+    const command = this.createCommand('stats', ctx);
+
+    if (ctx._stats) {
+      const fields = ctx.aggFields();
+
+      for (const fieldCtx of fields.aggField_list()) {
+        if (fieldCtx.getText() === '') continue;
+
+        const node = this.fromAggField(fieldCtx);
+
+        command.args.push(node);
+      }
+    }
+
+    if (ctx._grouping) {
+      const options = this.toByOption(ctx, ctx.fields());
+
+      command.args.push(...options);
+    }
 
     return command;
+  }
+
+  private fromAggField(ctx: cst.AggFieldContext) {
+    const fieldCtx = ctx.field();
+    const field = this.fromField(fieldCtx);
+
+    const booleanExpression = ctx.booleanExpression();
+
+    if (!booleanExpression) {
+      return field;
+    }
+
+    const condition = collectBooleanExpression(booleanExpression)[0];
+    const aggField = Builder.expression.where(
+      [field, condition],
+      {},
+      {
+        location: {
+          min: firstItem([resolveItem(field)])?.location?.min ?? 0,
+          max: firstItem([resolveItem(condition)])?.location?.max ?? 0,
+        },
+      }
+    );
+
+    return aggField;
+  }
+
+  private fromField(ctx: cst.FieldContext) {
+    return this.fromField2(ctx)[0];
+  }
+
+  /**
+   * @todo Do not return array here.
+   */
+  private toByOption(
+    ctx: cst.StatsCommandContext | cst.InlinestatsCommandContext,
+    expr: cst.FieldsContext | undefined
+  ): ast.ESQLCommandOption[] {
+    const byCtx = ctx.BY();
+
+    if (!byCtx || !expr) {
+      return [];
+    }
+
+    const option = createOption(byCtx.getText().toLowerCase(), ctx);
+
+    option.args.push(...this.fromFields(expr));
+    option.location.min = byCtx.symbol.start;
+
+    const lastArg = lastItem(option.args);
+
+    if (lastArg) option.location.max = lastArg.location.max;
+
+    return [option];
   }
 
   // -------------------------------------------------------------------- SORT
 
   private fromSortCommand(ctx: cst.SortCommandContext): ast.ESQLCommand<'sort'> {
-    const command = createSortCommand(ctx);
+    const command = this.createCommand('sort', ctx);
+
+    command.args.push(...this.fromOrderExpressions(ctx.orderExpression_list()));
 
     return command;
+  }
+
+  private fromOrderExpressions(
+    ctx: cst.OrderExpressionContext[]
+  ): Array<ast.ESQLOrderExpression | ast.ESQLAstItem> {
+    const expressions: Array<ast.ESQLOrderExpression | ast.ESQLAstItem> = [];
+
+    for (const orderCtx of ctx) {
+      expressions.push(this.fromOrderExpression(orderCtx));
+    }
+
+    return expressions;
+  }
+
+  private fromOrderExpression(
+    ctx: cst.OrderExpressionContext
+  ): ast.ESQLOrderExpression | ast.ESQLAstItem {
+    const arg = collectBooleanExpression(ctx.booleanExpression())[0];
+
+    let order: ast.ESQLOrderExpression['order'] = '';
+    let nulls: ast.ESQLOrderExpression['nulls'] = '';
+
+    const ordering = ctx._ordering?.text?.toUpperCase();
+
+    if (ordering) order = ordering as ast.ESQLOrderExpression['order'];
+
+    const nullOrdering = ctx._nullOrdering?.text?.toUpperCase();
+
+    switch (nullOrdering) {
+      case 'LAST':
+        nulls = 'NULLS LAST';
+        break;
+      case 'FIRST':
+        nulls = 'NULLS FIRST';
+        break;
+    }
+
+    if (!order && !nulls) {
+      return arg;
+    }
+
+    return Builder.expression.order(
+      arg as ast.ESQLColumn,
+      { order, nulls },
+      this.createParserFields(ctx)
+    );
   }
 
   // -------------------------------------------------------------------- DROP
 
   private fromDropCommand(ctx: cst.DropCommandContext): ast.ESQLCommand<'drop'> {
     const command = this.createCommand('drop', ctx);
-    const identifiers = collectAllColumnIdentifiers(ctx);
+    const identifiers = this.toColumnsFromCommand(ctx);
 
     command.args.push(...identifiers);
 
@@ -515,19 +641,99 @@ export class CstToAstConverter {
 
   private fromRenameCommand(ctx: cst.RenameCommandContext): ast.ESQLCommand<'rename'> {
     const command = this.createCommand('rename', ctx);
-    const renameArgs = visitRenameClauses(ctx.renameClause_list());
+    const renameArgs = this.fromRenameClauses(ctx.renameClause_list());
 
     command.args.push(...renameArgs);
 
     return command;
   }
 
+  private fromRenameClauses(clausesCtx: cst.RenameClauseContext[]): ast.ESQLAstItem[] {
+    return clausesCtx
+      .map((clause) => {
+        const asToken = clause.getToken(cst.default.AS, 0);
+        const assignToken = clause.getToken(cst.default.ASSIGN, 0);
+
+        const renameToken = asToken || assignToken;
+
+        if (renameToken && textExistsAndIsValid(renameToken.getText())) {
+          const renameFunction = createFunction(
+            renameToken.getText().toLowerCase(),
+            clause,
+            undefined,
+            'binary-expression'
+          );
+
+          const renameArgsInOrder = asToken
+            ? [clause._oldName, clause._newName]
+            : [clause._newName, clause._oldName];
+
+          for (const arg of renameArgsInOrder) {
+            if (textExistsAndIsValid(arg.getText())) {
+              renameFunction.args.push(createColumn(arg));
+            }
+          }
+          const firstArg = firstItem(renameFunction.args);
+          const lastArg = lastItem(renameFunction.args);
+          const location = renameFunction.location;
+          if (firstArg) location.min = firstArg.location.min;
+          if (lastArg) location.max = lastArg.location.max;
+          return renameFunction;
+        }
+
+        if (textExistsAndIsValid(clause._oldName?.getText())) {
+          return createColumn(clause._oldName);
+        }
+      })
+      .filter(nonNullable);
+  }
+
   // ------------------------------------------------------------------ DISSECT
 
   private fromDissectCommand(ctx: cst.DissectCommandContext): ast.ESQLCommand<'dissect'> {
-    const command = createDissectCommand(ctx);
+    const command = this.createCommand('dissect', ctx);
+    const primaryExpression = visitPrimaryExpression(ctx.primaryExpression());
+    const stringContext = ctx.string_();
+    const pattern = stringContext.getToken(cst.default.QUOTED_STRING, 0);
+    const doParseStringAndOptions = pattern && textExistsAndIsValid(pattern.getText());
+
+    command.args.push(primaryExpression);
+
+    if (doParseStringAndOptions) {
+      const stringNode = createLiteralString(stringContext);
+
+      command.args.push(stringNode);
+      command.args.push(...this.fromCommandOptions(ctx.commandOptions()));
+    }
 
     return command;
+  }
+
+  private fromCommandOptions(ctx: cst.CommandOptionsContext | undefined): ast.ESQLCommandOption[] {
+    if (!ctx) {
+      return [];
+    }
+
+    const options: ast.ESQLCommandOption[] = [];
+
+    for (const optionCtx of ctx.commandOption_list()) {
+      const option = createOption(
+        sanitizeIdentifierString(optionCtx.identifier()).toLowerCase(),
+        optionCtx
+      );
+      options.push(option);
+      // it can throw while accessing constant for incomplete commands, so try catch it
+      try {
+        const optionValue = getConstant(optionCtx.constant());
+        if (optionValue != null) {
+          option.args.push(optionValue);
+        }
+      } catch (e) {
+        // do nothing here
+      }
+    }
+
+    return options;
   }
 
   // --------------------------------------------------------------------- GROK
@@ -553,16 +759,194 @@ export class CstToAstConverter {
   // ------------------------------------------------------------------- ENRICH
 
   private fromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommand<'enrich'> {
-    const command = createEnrichCommand(ctx);
+    const command = this.createCommand('enrich', ctx);
+    const policy = this.toPolicyNameFromEnrichCommand(ctx);
+
+    command.args.push(policy);
+
+    if (policy.incomplete) {
+      command.incomplete = true;
+    }
+
+    command.args.push(
+      ...this.toOnOptionFromEnrichCommand(ctx),
+      ...this.toWithOptionFromEnrichCommand(ctx)
+    );
 
     return command;
+  }
+
+  private toPolicyNameFromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLSource {
+    const policyName = ctx._policyName;
+
+    if (!policyName || !textExistsAndIsValid(policyName.text)) {
+      const source = Builder.expression.source.node(
+        {
+          sourceType: 'policy',
+          name: '',
+          index: '',
+          prefix: '',
+        },
+        {
+          incomplete: true,
+          text: '',
+          location: { min: policyName.start, max: policyName.stop },
+        }
+      );
+      return source;
+    }
+
+    const name = ctx._policyName.text;
+    const colonIndex = name.indexOf(':');
+    const withPrefix = colonIndex !== -1;
+    const incomplete = false;
+
+    let index: ast.ESQLStringLiteral | undefined;
+    let prefix: ast.ESQLStringLiteral | undefined;
+
+    if (withPrefix) {
+      const prefixName = name.substring(0, colonIndex);
+      const indexName = name.substring(colonIndex + 1);
+
+      prefix = Builder.expression.literal.string(
+        prefixName,
+        {
+          unquoted: true,
+        },
+        {
+          text: prefixName,
+          incomplete: false,
+          location: { min: policyName.start, max: policyName.start + prefixName.length - 1 },
+        }
+      );
+      index = Builder.expression.literal.string(
+        indexName,
+        {
+          unquoted: true,
+        },
+        {
+          text: indexName,
+          incomplete: false,
+          location: {
+            min: policyName.start + prefixName.length + 1,
+            max: policyName.stop,
+          },
+        }
+      );
+    } else {
+      index = Builder.expression.literal.string(
+        name,
+        {
+          unquoted: true,
+        },
+        {
+          text: name,
+          incomplete: false,
+          location: { min: policyName.start, max: policyName.stop },
+        }
+      );
+    }
+
+    const source = Builder.expression.source.node(
+      {
+        sourceType: 'policy',
+        name,
+        index,
+        prefix,
+      },
+      {
+        incomplete,
+        text: name,
+        location: {
+          min: policyName.start,
+          max: policyName.stop,
+        },
+      }
+    );
+
+    return source;
+  }
+
+  /**
+   * @todo Make it return a single ON option.
+   */
+  private toOnOptionFromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommandOption[] {
+    if (!ctx._matchField) {
+      return [];
+    }
+
+    const identifier = ctx.qualifiedNamePattern();
+
+    if (identifier) {
+      const fn = createOption(ctx.ON()!.getText().toLowerCase(), ctx);
+      let max: number = ctx.ON()!.symbol.stop;
+
+      if (textExistsAndIsValid(identifier.getText())) {
+        const column = createColumn(identifier);
+        fn.args.push(column);
+        max = column.location.max;
+      }
+      fn.location.min = ctx.ON()!.symbol.start;
+      fn.location.max = max;
+
+      return [fn];
+    }
+
+    return [];
+  }
+
+  /**
+   * @todo Make it return a single WITH option.
+   */
+  private toWithOptionFromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLCommandOption[] {
+    const options: ast.ESQLCommandOption[] = [];
+    const withCtx = ctx.WITH();
+
+    if (withCtx) {
+      const option = createOption(withCtx.getText().toLowerCase(), ctx);
+      const clauses = ctx.enrichWithClause_list();
+
+      options.push(option);
+
+      for (const clause of clauses) {
+        if (clause._enrichField) {
+          const args: ast.ESQLColumn[] = [];
+
+          if (clause.ASSIGN()) {
+            args.push(createColumn(clause._newName));
+            if (textExistsAndIsValid(clause._enrichField?.getText())) {
+              args.push(createColumn(clause._enrichField));
+            }
+          } else {
+            // if an explicit assign is not set, create a fake assign with
+            // both left and right value with the same column
+            if (textExistsAndIsValid(clause._enrichField?.getText())) {
+              args.push(createColumn(clause._enrichField), createColumn(clause._enrichField));
+            }
+          }
+          if (args.length) {
+            const fn = createFunction('=', clause, undefined, 'binary-expression');
+            fn.args.push(args[0], args[1] ? [args[1]] : []);
+            option.args.push(fn);
+          }
+        }
+
+        const location = option.location;
+        const lastArg = lastItem(option.args);
+
+        location.min = withCtx.symbol.start;
+        location.max = lastArg?.location?.max ?? withCtx.symbol.stop;
+      }
+    }
+
+    return options;
   }
 
   // ---------------------------------------------------------------- MV_EXPAND
 
   private fromMvExpandCommand(ctx: cst.MvExpandCommandContext): ast.ESQLCommand<'mv_expand'> {
     const command = this.createCommand('mv_expand', ctx);
-    const identifiers = collectAllColumnIdentifiers(ctx);
+    const identifiers = this.toColumnsFromCommand(ctx);
 
     command.args.push(...identifiers);
 
@@ -768,10 +1152,10 @@ export class CstToAstConverter {
 
     // STATS expression is optional
     if (ctx._stats) {
-      command.args.push(...collectAllAggFields(ctx.aggFields()));
+      command.args.push(...this.fromAggFields(ctx.aggFields()));
     }
     if (ctx._grouping) {
-      command.args.push(...visitByOption(ctx, ctx.fields()));
+      command.args.push(...this.toByOption(ctx, ctx.fields()));
     }
 
     return command;
@@ -780,7 +1164,7 @@ export class CstToAstConverter {
   // ------------------------------------------------------------------- RERANK
 
   private fromRerankCommand(ctx: cst.RerankCommandContext): ast.ESQLAstRerankCommand {
-    const command = createRerankCommand(ctx);
+    const command = this.createCommand<'rerank', ast.ESQLAstRerankCommand>('rerank', ctx, {});
 
     return command;
   }
@@ -844,5 +1228,124 @@ export class CstToAstConverter {
     const query = Builder.expression.query(commands, parserFields);
 
     return query;
+  }
+
+  // -------------------------------------------------------------- expressions
+
+  private toColumnsFromCommand(
+    ctx:
+      | cst.KeepCommandContext
+      | cst.DropCommandContext
+      | cst.MvExpandCommandContext
+      | cst.MetadataContext
+  ): ast.ESQLColumn[] {
+    const identifiers = this.extractIdentifiers(ctx);
+
+    return this.makeColumnsOutOfIdentifiers(identifiers);
+  }
+
+  private extractIdentifiers(
+    ctx:
+      | cst.KeepCommandContext
+      | cst.DropCommandContext
+      | cst.MvExpandCommandContext
+      | cst.MetadataContext
+  ) {
+    if (ctx instanceof cst.MetadataContext) {
+      return ctx
+        .UNQUOTED_SOURCE_list()
+        .map((node) => {
+          // TODO: Parse this without wrapping into ParserRuleContext
+          return this.terminalNodeToParserRuleContext(node);
+        })
+        .flat();
+    }
+    if (ctx instanceof cst.MvExpandCommandContext) {
+      return this.wrapIdentifierAsArray(ctx.qualifiedName());
+    }
+
+    return this.wrapIdentifierAsArray(ctx.qualifiedNamePatterns().qualifiedNamePattern_list());
+  }
+
+  private wrapIdentifierAsArray<T extends antlr.ParserRuleContext>(identifierCtx: T | T[]): T[] {
+    return Array.isArray(identifierCtx) ? identifierCtx : [identifierCtx];
+  }
+
+  /**
+   * @deprecated
+   * @todo Parse without constructing this ANTLR internal class instance.
+   */
+  private terminalNodeToParserRuleContext(node: antlr.TerminalNode): antlr.ParserRuleContext {
+    const context = new antlr.ParserRuleContext();
+    context.start = node.symbol;
+    context.stop = node.symbol;
+    context.children = [node];
+    return context;
+  }
+
+  private makeColumnsOutOfIdentifiers(identifiers: antlr.ParserRuleContext[]): ast.ESQLColumn[] {
+    const args: ast.ESQLColumn[] =
+      identifiers
+        .filter((child) => textExistsAndIsValid(child.getText()))
+        .map((sourceContext) => {
+          return createColumn(sourceContext);
+        }) ?? [];
+
+    return args;
+  }
+
+  private fromFields(ctx: cst.FieldsContext | undefined): ast.ESQLAstField[] {
+    const fields: ast.ESQLAstField[] = [];
+
+    if (!ctx) {
+      return fields;
+    }
+
+    try {
+      for (const field of ctx.field_list()) {
+        fields.push(...(this.fromField2(field) as ast.ESQLAstField[]));
+      }
+    } catch (e) {
+      // do nothing
+    }
+
+    return fields;
+  }
+
+  private fromAggFields(ctx: cst.AggFieldsContext | undefined): ast.ESQLAstField[] {
+    const fields: ast.ESQLAstField[] = [];
+
+    if (!ctx) {
+      return fields;
+    }
+
+    try {
+      for (const aggField of ctx.aggField_list()) {
+        fields.push(...(this.fromField2(aggField.field()) as ast.ESQLAstField[]));
+      }
+    } catch (e) {
+      // do nothing
+    }
+
+    return fields;
+  }
+
+  /**
+   * @todo Align this method with the `fromField` method.
+   */
+  private fromField2(ctx: cst.FieldContext): ast.ESQLAstItem[] {
+    if (ctx.qualifiedName() && ctx.ASSIGN()) {
+      const fn = createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
+
+      fn.args.push(
+        createColumn(ctx.qualifiedName()!),
+        collectBooleanExpression(ctx.booleanExpression())
+      );
+      fn.location = computeLocationExtends(fn);
+
+      return [fn];
+    }
+
+    return collectBooleanExpression(ctx.booleanExpression());
   }
 }

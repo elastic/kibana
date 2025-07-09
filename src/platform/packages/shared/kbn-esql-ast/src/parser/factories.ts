@@ -444,10 +444,6 @@ export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   return result === '<missing null>' ? '' : result;
 }
 
-export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx: T | T[]): T[] {
-  return Array.isArray(identifierCtx) ? identifierCtx : [identifierCtx];
-}
-
 const visitQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
   const unquotedCtx = ctx.UNQUOTED_SOURCE();
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParserRuleContext, TerminalNode } from 'antlr4';
+import { TerminalNode } from 'antlr4';
 import {
   ArithmeticBinaryContext,
   ArithmeticUnaryContext,
@@ -22,7 +22,6 @@ import {
   EntryExpressionContext,
   FunctionContext,
   InlineCastContext,
-  InlinestatsCommandContext,
   InputParameterContext,
   IntegerLiteralContext,
   IsNullContext,
@@ -33,8 +32,6 @@ import {
   MatchBooleanExpressionContext,
   RegexBooleanExpressionContext,
   MatchExpressionContext,
-  MetadataContext,
-  MvExpandCommandContext,
   NullLiteralContext,
   NumericArrayLiteralContext,
   NumericValueContext,
@@ -45,20 +42,11 @@ import {
   StringContext,
   StringLiteralContext,
   ValueExpressionDefaultContext,
-  default as esql_parser,
-  type AggFieldsContext,
   type BooleanExpressionContext,
   type ComparisonOperatorContext,
   type ConstantContext,
-  type DropCommandContext,
-  type EnrichCommandContext,
-  type FieldContext,
-  type FieldsContext,
-  type KeepCommandContext,
   type OperatorExpressionContext,
   type PrimaryExpressionContext,
-  type RenameClauseContext,
-  type StatsCommandContext,
   type ValueExpressionContext,
   LikeExpressionContext,
   RlikeExpressionContext,
@@ -76,23 +64,19 @@ import {
   createLiteral,
   createLiteralString,
   createNumericLiteral,
-  createOption,
   createParam,
   createTimeUnit,
   createUnknownItem,
   nonNullable,
   textExistsAndIsValid,
-  wrapIdentifierAsArray,
 } from './factories';
 
 import { Builder } from '../builder';
 import {
   ESQLAstExpression,
-  ESQLAstField,
   ESQLAstItem,
   ESQLBinaryExpression,
   ESQLColumn,
-  ESQLCommandOption,
   ESQLFunction,
   ESQLInlineCast,
   ESQLList,
@@ -102,109 +86,8 @@ import {
   ESQLStringLiteral,
   InlineCastingType,
 } from '../types';
-import { firstItem, lastItem, resolveItem } from '../visitor/utils';
+import { resolveItem } from '../visitor/utils';
 import { getPosition } from './helpers';
-
-function terminalNodeToParserRuleContext(node: TerminalNode): ParserRuleContext {
-  const context = new ParserRuleContext();
-  context.start = node.symbol;
-  context.stop = node.symbol;
-  context.children = [node];
-  return context;
-}
-function extractIdentifiers(
-  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
-) {
-  if (ctx instanceof MetadataContext) {
-    return ctx
-      .UNQUOTED_SOURCE_list()
-      .map((node) => {
-        return terminalNodeToParserRuleContext(node);
-      })
-      .flat();
-  }
-  if (ctx instanceof MvExpandCommandContext) {
-    return wrapIdentifierAsArray(ctx.qualifiedName());
-  }
-  return wrapIdentifierAsArray(ctx.qualifiedNamePatterns().qualifiedNamePattern_list());
-}
-
-function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {
-  const args: ESQLColumn[] =
-    identifiers
-      .filter((child) => textExistsAndIsValid(child.getText()))
-      .map((sourceContext) => {
-        return createColumn(sourceContext);
-      }) ?? [];
-  return args;
-}
-
-export function collectAllColumnIdentifiers(
-  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
-): ESQLAstItem[] {
-  const identifiers = extractIdentifiers(ctx);
-  return makeColumnsOutOfIdentifiers(identifiers);
-}
-
-export function getMatchField(ctx: EnrichCommandContext) {
-  if (!ctx._matchField) {
-    return [];
-  }
-  const identifier = ctx.qualifiedNamePattern();
-  if (identifier) {
-    const fn = createOption(ctx.ON()!.getText().toLowerCase(), ctx);
-    let max: number = ctx.ON()!.symbol.stop;
-    if (textExistsAndIsValid(identifier.getText())) {
-      const column = createColumn(identifier);
-      fn.args.push(column);
-      max = column.location.max;
-    }
-    fn.location.min = ctx.ON()!.symbol.start;
-    fn.location.max = max;
-    return [fn];
-  }
-  return [];
-}
-
-export function getEnrichClauses(ctx: EnrichCommandContext) {
-  const ast: ESQLCommandOption[] = [];
-  const withCtx = ctx.WITH();
-  if (withCtx) {
-    const option = createOption(withCtx.getText().toLowerCase(), ctx);
-    ast.push(option);
-    const clauses = ctx.enrichWithClause_list();
-    for (const clause of clauses) {
-      if (clause._enrichField) {
-        const args = [];
-        if (clause.ASSIGN()) {
-          args.push(createColumn(clause._newName));
-          if (textExistsAndIsValid(clause._enrichField?.getText())) {
-            args.push(createColumn(clause._enrichField));
-          }
-        } else {
-          // if an explicit assign is not set, create a fake assign with
-          // both left and right value with the same column
-          if (textExistsAndIsValid(clause._enrichField?.getText())) {
-            args.push(createColumn(clause._enrichField), createColumn(clause._enrichField));
-          }
-        }
-        if (args.length) {
-          const fn = createFunction('=', clause, undefined, 'binary-expression');
-          fn.args.push(args[0], args[1] ? [args[1]] : []);
-          option.args.push(fn);
-        }
-      }
-
-      const location = option.location;
-      const lastArg = lastItem(option.args);
-
-      location.min = withCtx.symbol.start;
-      location.max = lastArg?.location?.max ?? withCtx.symbol.stop;
-    }
-  }
-
-  return ast;
-}
 
 function visitLogicalNot(ctx: LogicalNotContext) {
   const fn = createFunction('not', ctx, undefined, 'unary-expression');
@@ -435,46 +318,6 @@ export function getConstant(ctx: ConstantContext): ESQLAstItem {
   return createUnknownItem(ctx);
 }
 
-export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstItem[] {
-  return clausesCtx
-    .map((clause) => {
-      const asToken = clause.getToken(esql_parser.AS, 0);
-      const assignToken = clause.getToken(esql_parser.ASSIGN, 0);
-
-      const renameToken = asToken || assignToken;
-
-      if (renameToken && textExistsAndIsValid(renameToken.getText())) {
-        const renameFunction = createFunction(
-          renameToken.getText().toLowerCase(),
-          clause,
-          undefined,
-          'binary-expression'
-        );
-
-        const renameArgsInOrder = asToken
-          ? [clause._oldName, clause._newName]
-          : [clause._newName, clause._oldName];
-
-        for (const arg of renameArgsInOrder) {
-          if (textExistsAndIsValid(arg.getText())) {
-            renameFunction.args.push(createColumn(arg));
-          }
-        }
-        const firstArg = firstItem(renameFunction.args);
-        const lastArg = lastItem(renameFunction.args);
-        const location = renameFunction.location;
-        if (firstArg) location.min = firstArg.location.min;
-        if (lastArg) location.max = lastArg.location.max;
-        return renameFunction;
-      }
-
-      if (textExistsAndIsValid(clause._oldName?.getText())) {
-        return createColumn(clause._oldName);
-      }
-    })
-    .filter(nonNullable);
-}
-
 export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstItem | ESQLAstItem[] {
   if (ctx instanceof ConstantDefaultContext) {
     return getConstant(ctx.constant());
@@ -669,64 +512,3 @@ const visitMatchBooleanExpression = (
 
   return expression;
 };
-
-export function visitField(ctx: FieldContext) {
-  if (ctx.qualifiedName() && ctx.ASSIGN()) {
-    const fn = createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
-    fn.args.push(
-      createColumn(ctx.qualifiedName()!),
-      collectBooleanExpression(ctx.booleanExpression())
-    );
-    // update the location of the assign based on arguments
-    const argsLocationExtends = computeLocationExtends(fn);
-    fn.location = argsLocationExtends;
-    return [fn];
-  }
-  return collectBooleanExpression(ctx.booleanExpression());
-}
-
-export function collectAllAggFields(ctx: AggFieldsContext | undefined): ESQLAstField[] {
-  const ast: ESQLAstField[] = [];
-  if (!ctx) {
-    return ast;
-  }
-  try {
-    for (const aggField of ctx.aggField_list()) {
-      ast.push(...(visitField(aggField.field()) as ESQLAstField[]));
-    }
-  } catch (e) {
-    // do nothing
-  }
-  return ast;
-}
-
-export function collectAllFields(ctx: FieldsContext | undefined): ESQLAstField[] {
-  const ast: ESQLAstField[] = [];
-  if (!ctx) {
-    return ast;
-  }
-  try {
-    for (const field of ctx.field_list()) {
-      ast.push(...(visitField(field) as ESQLAstField[]));
-    }
-  } catch (e) {
-    // do nothing
-  }
-  return ast;
-}
-
-export function visitByOption(
-  ctx: StatsCommandContext | InlinestatsCommandContext,
-  expr: FieldsContext | undefined
-) {
-  const byCtx = ctx.BY();
-  if (!byCtx || !expr) {
-    return [];
-  }
-  const option = createOption(byCtx.getText().toLowerCase(), ctx);
-  option.args.push(...collectAllFields(expr));
-  option.location.min = byCtx.symbol.start;
-  const lastArg = lastItem(option.args);
-  if (lastArg) option.location.max = lastArg.location.max;
-  return [option];
-}
