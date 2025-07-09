@@ -7,20 +7,15 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
-import { SLODataService } from '../services/slo_data_service';
 
 const TEST_TIMEOUT = 2 * 60 * 1000; // 2 minutes timeout, needed to wait for the SLOs to be created
 
 test.describe('SLOs Overview', { tag: ['@ess'] }, () => {
   test.describe.configure({ timeout: TEST_TIMEOUT });
 
-  let dataService: SLODataService;
-
-  test.beforeAll(async ({ config, kbnUrl, kbnClient }) => {
-    dataService = new SLODataService(kbnUrl.toString(), config.hosts.elasticsearch, kbnClient);
-
-    await dataService.generateSloData();
-    await dataService.addSLO();
+  test.beforeAll(async ({ sloData }) => {
+    await sloData.generateSloData();
+    await sloData.addSLO();
   });
 
   test.beforeEach(async ({ pageObjects, browserAuth }) => {

@@ -6,21 +6,13 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { AnnotationDataService } from '../services/annotation_data_service';
-import { SLODataService } from '../services/slo_data_service';
 import { test } from '../fixtures';
 
 test.describe('Annotations List', { tag: ['@ess'] }, () => {
-  let dataService: SLODataService;
-  let annotationService: AnnotationDataService;
-
-  test.beforeAll(async ({ kbnClient, kbnUrl, config, esClient }) => {
-    dataService = new SLODataService(kbnUrl.toString(), config.hosts.elasticsearch, kbnClient);
-    annotationService = new AnnotationDataService(esClient);
-
-    await dataService.generateSloData();
-    await dataService.addSLO();
-    await annotationService.deleteAnnotationsIndex();
+  test.beforeAll(async ({ sloData, annotationsData }) => {
+    await sloData.generateSloData();
+    await sloData.addSLO();
+    await annotationsData.deleteAnnotationsIndex();
   });
 
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
