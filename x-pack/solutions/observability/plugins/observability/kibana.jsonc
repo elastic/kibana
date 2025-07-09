@@ -33,6 +33,7 @@
       "inspector",
       "lens",
       "observabilityShared",
+      "observabilityCaseSuggestionRegistry",
       "ruleRegistry",
       "triggersActionsUi",
       "security",
@@ -45,7 +46,8 @@
       "licensing",
       "navigation",
       "fieldsMetadata",
-      "esql"
+      "esql",
+      "inference"
     ],
     "optionalPlugins": [
       "discover",

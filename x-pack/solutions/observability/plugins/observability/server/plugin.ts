@@ -28,6 +28,13 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import { PAGE_ATTACHMENT_TYPE } from '@kbn/observability-schema';
+import type {
+  ObservabilityAIAssistantServerSetup,
+  ObservabilityAIAssistantServerStart,
+} from '@kbn/observability-ai-assistant-plugin/server';
+import { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
+import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/server';
+import { ObservabilityCaseSuggestionRegistryPluginStart } from '@kbn/observability-case-suggestion-registry-plugin/server';
 import { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
 import {
@@ -65,6 +72,10 @@ interface PluginSetup {
   cloud?: CloudSetup;
   contentManagement: ContentManagementServerSetup;
   esql: ESQLSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
+  inference: InferenceServerSetup;
+  observabilityShared: ObservabilitySharedPluginStart;
+  observabilityCaseSuggestionRegistry: ObservabilityCaseSuggestionRegistryPluginStart;
 }
 
 interface PluginStart {
@@ -73,6 +84,10 @@ interface PluginStart {
   dataViews: DataViewsServerPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dashboard: DashboardPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
+  inference: InferenceServerStart;
+  observabilityShared: ObservabilitySharedPluginStart;
+  observabilityCaseSuggestionRegistry: ObservabilityCaseSuggestionRegistryPluginStart;
 }
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, void, PluginSetup, PluginStart>
@@ -149,6 +164,10 @@ export class ObservabilityPlugin
             alertDetailsContextualInsightsService,
           },
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
+          observabilityAIAssistant: pluginStart.observabilityAIAssistant,
+          inference: pluginStart.inference,
+          observabilityShared: pluginStart.observabilityShared,
+          observabilityCaseSuggestionRegistry: pluginStart.observabilityCaseSuggestionRegistry,
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),

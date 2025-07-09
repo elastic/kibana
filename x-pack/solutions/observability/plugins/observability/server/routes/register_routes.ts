@@ -12,8 +12,11 @@ import {
   RuleDataPluginService,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
+import { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ObservabilityAIAssistantServerStart } from '@kbn/observability-ai-assistant-plugin/server';
 import { registerRoutes as registerServerRoutes } from '@kbn/server-route-repository';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/server';
 import { AlertDetailsContextualInsightsService } from '../services';
 import { AbstractObservabilityServerRouteRepository } from './types';
 
@@ -37,7 +40,10 @@ export interface RegisterRoutesDependencies {
   assistant: {
     alertDetailsContextualInsightsService: AlertDetailsContextualInsightsService;
   };
+  observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
   getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
+  inference: InferenceServerStart;
+  observabilityShared: ObservabilitySharedPluginStart;
 }
 
 export function registerRoutes({ repository, core, logger, dependencies, isDev }: RegisterRoutes) {
