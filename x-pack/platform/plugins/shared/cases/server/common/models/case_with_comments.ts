@@ -82,12 +82,10 @@ export class CaseCommentModel {
     updateRequest,
     updatedAt,
     owner,
-    isAssistant,
   }: {
     updateRequest: AttachmentPatchRequest;
     updatedAt: string;
     owner: string;
-    isAssistant?: boolean;
   }): Promise<CaseCommentModel> {
     try {
       const { id, version, ...queryRestAttributes } = updateRequest;
@@ -134,12 +132,7 @@ export class CaseCommentModel {
         this.partialUpdateCaseWithAttachmentDataSkipRefresh({ date: updatedAt }),
       ]);
 
-      await commentableCase.createUpdateCommentUserAction(
-        comment,
-        updateRequest,
-        owner,
-        isAssistant
-      );
+      await commentableCase.createUpdateCommentUserAction(comment, updateRequest, owner);
 
       return commentableCase;
     } catch (error) {
@@ -223,8 +216,7 @@ export class CaseCommentModel {
   private async createUpdateCommentUserAction(
     comment: SavedObjectsUpdateResponse<AttachmentAttributes>,
     updateRequest: AttachmentPatchRequest,
-    owner: string,
-    isAssistant?: boolean
+    owner: string
   ) {
     const { id, version, ...queryRestAttributes } = updateRequest;
 
@@ -237,7 +229,6 @@ export class CaseCommentModel {
         payload: { attachment: queryRestAttributes },
         user: this.params.user,
         owner,
-        isAssistant,
       },
     });
   }
@@ -249,12 +240,10 @@ export class CaseCommentModel {
     createdDate,
     commentReq,
     id,
-    isAssistant,
   }: {
     createdDate: string;
     commentReq: AttachmentRequest;
     id: string;
-    isAssistant?: boolean;
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
@@ -287,7 +276,7 @@ export class CaseCommentModel {
 
       await Promise.all([
         commentableCase.handleAlertComments([attachment]),
-        this.createCommentUserAction(comment, attachment, isAssistant),
+        this.createCommentUserAction(comment, attachment),
       ]);
 
       return commentableCase;
@@ -442,8 +431,7 @@ export class CaseCommentModel {
 
   private async createCommentUserAction(
     comment: SavedObject<AttachmentAttributes>,
-    req: AttachmentRequest,
-    isAssistant?: boolean
+    req: AttachmentRequest
   ) {
     await this.params.services.userActionService.creator.createUserAction({
       userAction: {
@@ -456,7 +444,6 @@ export class CaseCommentModel {
         },
         user: this.params.user,
         owner: comment.attributes.owner,
-        isAssistant,
       },
     });
   }

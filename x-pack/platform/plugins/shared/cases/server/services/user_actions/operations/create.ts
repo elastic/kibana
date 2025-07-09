@@ -70,7 +70,6 @@ export class UserActionPersister {
 
       const caseId = updatedCase.caseId;
       const owner = originalCase.attributes.owner;
-      const isAssistant = updatedCase.updatedAttributes.is_assistant ?? false;
 
       const userActions: UserActionEvent[] = [];
       const updatedFields = Object.keys(updatedCase.updatedAttributes);
@@ -88,7 +87,6 @@ export class UserActionPersister {
               user,
               owner,
               caseId,
-              isAssistant,
             })
           );
         });
@@ -109,7 +107,7 @@ export class UserActionPersister {
   }
 
   private getUserActionItemByDifference(params: GetUserActionItemByDifference): UserActionEvent[] {
-    const { field, originalValue, newValue, caseId, owner, user, isAssistant } = params;
+    const { field, originalValue, newValue, caseId, owner, user } = params;
 
     if (!UserActionPersister.userActionFieldsAllowed.has(field)) {
       return [];
@@ -137,7 +135,6 @@ export class UserActionPersister {
         caseId,
         owner,
         user,
-        isAssistant,
         payload: { [field]: newValue },
       });
 
@@ -250,14 +247,13 @@ export class UserActionPersister {
       return;
     }
 
-    const { caseId, owner, user, isAssistant } = commonArgs;
+    const { caseId, owner, user } = commonArgs;
 
     const userAction = userActionBuilder.build({
       action,
       caseId,
       user,
       owner,
-      isAssistant,
       payload: createPayload(modifiedItems),
     });
 

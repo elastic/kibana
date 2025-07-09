@@ -671,7 +671,6 @@ const createPatchCasesPayload = ({
           }),
           updated_at: updatedDt,
           updated_by: user,
-          is_assistant: originalCase.attributes.is_assistant,
         },
         version,
       };

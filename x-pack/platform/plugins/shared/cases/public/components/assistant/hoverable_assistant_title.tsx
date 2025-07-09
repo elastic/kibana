@@ -14,10 +14,10 @@ import { AssistantTitle } from './assistant_title';
 const HoverableAssistantTitleComponent: React.FC = () => {
   return (
     <EuiToolTip
-      display="inlineBlock"
-      position="top"
+      display={'inlineBlock'}
+      position={'top'}
       content={i18n.ASSISTANT}
-      data-test-subj="assistant-tooltip"
+      data-test-subj={'assistant-tooltip'}
     >
       <AssistantTitle />
     </EuiToolTip>

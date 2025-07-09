@@ -29,7 +29,7 @@ export const addFile = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<Case> => {
-  const { caseId, file, filename, mimeType, isAssistant, $abort } = addFileArgs;
+  const { caseId, file, filename, mimeType, $abort } = addFileArgs;
   const {
     logger,
     authorization,
@@ -92,7 +92,6 @@ export const addFile = async (
       createdDate,
       commentReq,
       id: savedObjectID,
-      isAssistant,
     });
 
     return await updatedModel.encodeWithComments();

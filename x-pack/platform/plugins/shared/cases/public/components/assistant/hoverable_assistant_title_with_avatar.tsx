@@ -15,22 +15,22 @@ import { AssistantTitle } from './assistant_title';
 const HoverableAssistantTitleWithAvatarComponent: React.FC = () => {
   return (
     <EuiToolTip
-      display="inlineBlock"
-      position="top"
+      display={'inlineBlock'}
+      position={'top'}
       content={i18n.ASSISTANT}
-      data-test-subj="assistant-tooltip"
+      data-test-subj={'assistant-tooltip'}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
         <EuiFlexItem grow={false}>
           <AssistantAvatar
-            name="machine"
-            size="s"
-            color="subdued"
-            data-test-subj="assistant-avatar"
+            name={'machine'}
+            size={'s'}
+            color={'subdued'}
+            data-test-subj={'assistant-avatar'}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction={'column'} gutterSize="none">
+          <EuiFlexGroup direction={'column'} gutterSize={'none'}>
             <EuiFlexItem>
               <AssistantTitle />
             </EuiFlexItem>
