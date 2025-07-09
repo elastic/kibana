@@ -132,7 +132,8 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
-  cy.get(EXCEPTIONS_TAB).click();
+  // eslint-disable-next-line cypress/no-force
+  cy.get(EXCEPTIONS_TAB).click({ force: true });
 };
 
 export const goToExecutionLogTab = () => {
