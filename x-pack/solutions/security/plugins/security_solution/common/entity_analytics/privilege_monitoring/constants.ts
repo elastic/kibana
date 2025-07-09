@@ -11,3 +11,6 @@ export const ML_ANOMALIES_INDEX = '.ml-anomalies-shared';
 
 // Default index for privileged monitoring users. Not required.
 export const defaultMonitoringUsersIndex = 'entity_analytics.privileged_monitoring';
+
+export const PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API =
+  '/api/entity_analytics/monitoring/privileges/privileges';

@@ -61,6 +61,7 @@ import {
   RISK_ENGINE_SCHEDULE_NOW_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
   ASSET_CRITICALITY_PUBLIC_LIST_URL,
+  PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API,
 } from '../../../common/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
@@ -418,13 +419,10 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     const fetchPrivilegeMonitoringPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
-      http.fetch<PrivMonPrivilegesResponse>(
-        '/api/entity_analytics/monitoring/privileges/privileges',
-        {
-          version: API_VERSIONS.public.v1,
-          method: 'GET',
-        }
-      );
+      http.fetch<PrivMonPrivilegesResponse>(PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+      });
 
     /**
      * Fetches risk engine settings

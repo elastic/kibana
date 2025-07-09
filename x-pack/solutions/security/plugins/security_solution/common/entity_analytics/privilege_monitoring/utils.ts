@@ -12,12 +12,8 @@ import {
 } from '../constants';
 import { getAlertsIndex } from '../utils';
 
-// Used in Phase 0.
 export const getPrivilegedMonitorUsersIndex = (namespace: string) =>
   `${privilegedMonitorBaseIndexName}.users-${namespace}`;
-// Not required in phase 0.
-export const getPrivilegedMonitorGroupsIndex = (namespace: string) =>
-  `${privilegedMonitorBaseIndexName}.groups-${namespace}`;
 
 // At the moment, this only includes the privileges required for reading dashboards.
 export const getPrivilegeUserMonitoringRequiredEsIndexPrivileges = (namespace: string) => ({

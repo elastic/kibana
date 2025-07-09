@@ -9,7 +9,11 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { PrivMonPrivilegesResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/privileges.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API,
+} from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { getReadPrivilegeUserMonitoringPrivileges } from '../privilege_monitoring_privileges';
 
@@ -21,7 +25,7 @@ export const privilegesCheckPrivilegeMonitoringRoute = (
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/privileges/privileges',
+      path: PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
