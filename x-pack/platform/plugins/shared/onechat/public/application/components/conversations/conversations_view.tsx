@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -59,7 +58,7 @@ export const OnechatConversationsView: React.FC<{ conversationId?: string }> = (
           responsive={false}
         >
           <ConversationHeader conversationId={conversationId} />
-          <Conversation agentId={oneChatDefaultAgentId} conversationId={conversationId} />
+          <Conversation conversationId={conversationId} />
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
