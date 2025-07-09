@@ -10,7 +10,6 @@ import {
   type UserIdAndName,
   type Conversation,
   createConversationNotFoundError,
-  toStructuredAgentIdentifier,
 } from '@kbn/onechat-common';
 import type {
   ConversationCreateRequest,
@@ -47,9 +46,7 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async list(options: ConversationListOptions = {}): Promise<Conversation[]> {
-    const agentId = options.agentId
-      ? toStructuredAgentIdentifier(options.agentId).agentId
-      : undefined;
+    const { agentId } = options;
 
     const response = await this.storage.getClient().search({
       track_total_hits: false,
