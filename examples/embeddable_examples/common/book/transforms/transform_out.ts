@@ -8,22 +8,34 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { SavedObject } from '@kbn/core/server';
 import type { BookAttributes, BookState } from '../../../server';
+import { BookEmbeddableState } from '../types';
+import { BOOK_SAVED_OBJECT_TYPE } from '../constants';
 
-/* export interface BookByValueSerializedState {
-  attributes: BookAttributes;
+export function transformOut(storedState: unknown, references: Reference[]): BookEmbeddableState {
+  // inject saved object reference when by-reference
+  const savedObjectRef = references.find(
+    ({ name, type }) => name === 'savedObjectRef' && type === BOOK_SAVED_OBJECT_TYPE
+  );
+  if (savedObjectRef) {
+    return {
+      ...(storedState as BookEmbeddableState),
+      savedObjectId: savedObjectRef.id,
+    };
+  }
+
+  // storedState may contain legacy state stored from dashboards or URL
+  // In this example, legacy state was stored as Book saved object attributes
+  if (storedState && typeof storedState === 'object' && 'bookJSON' in storedState) {
+    return attributesToBook(storedState as BookAttributes);
+  }
+
+  return storedState as BookEmbeddableState;
 }
 
-export interface BookByReferenceSerializedState {
-  savedBookId: string;
-}*/
-
-export function transformOut(storedState: unknown, references: Reference[]) {}
-
-export function savedObjectToBook(savedObject: SavedObject<BookAttributes>): BookState {
+export function attributesToBook(attributes: BookAttributes): BookState {
   return {
-    bookTitle: savedObject.attributes.title,
-    ...JSON.parse(savedObject.attributes.bookJSON),
+    bookTitle: attributes.title,
+    ...JSON.parse(attributes.bookJSON),
   };
 }

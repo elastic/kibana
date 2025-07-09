@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { BOOK_CONTENT_ID, BOOK_EMBEDDABLE_TYPE, BOOK_LATEST_VERSION } from './constants';
+export type { BookEmbeddableState, BookByReferenceState } from './types';
+
+export {
+  BOOK_CONTENT_ID,
+  BOOK_EMBEDDABLE_TYPE,
+  BOOK_LATEST_VERSION,
+  BOOK_SAVED_OBJECT_TYPE,
+} from './constants';

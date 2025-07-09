@@ -12,15 +12,9 @@ import {
   HasEditCapabilities,
   HasLibraryTransforms,
   PublishesUnsavedChanges,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { BookState } from '../../../server';
-
-export interface BookByReferenceState {
-  savedObjectId: string;
-}
-
-export type BookEmbeddableState = SerializedTitles & (BookState | BookByReferenceState);
+import { BookEmbeddableState, BookByReferenceState } from '../../../common';
 
 export type BookApi = DefaultEmbeddableApi<BookEmbeddableState> &
   HasEditCapabilities &

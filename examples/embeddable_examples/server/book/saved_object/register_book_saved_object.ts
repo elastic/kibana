@@ -11,8 +11,7 @@ import { CoreSetup } from '@kbn/core/server';
 
 import { bookAttributesSchema } from './schema';
 import type { BookAttributes } from './types';
-
-export const BOOK_SAVED_OBJECT_TYPE = 'book';
+import { BOOK_SAVED_OBJECT_TYPE } from '../../../common';
 
 export function registerBookSavedObject(core: CoreSetup) {
   core.savedObjects.registerType<BookAttributes>({

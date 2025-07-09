@@ -8,6 +8,6 @@
  */
 
 export const BOOK_EMBEDDABLE_TYPE = 'book';
-
+export const BOOK_SAVED_OBJECT_TYPE = 'book';
 export const BOOK_CONTENT_ID = 'book';
 export const BOOK_LATEST_VERSION = 1;

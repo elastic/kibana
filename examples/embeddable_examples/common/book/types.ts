@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { BookEmbeddableState, BookByReferenceState } from './book';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { BookState } from '../../server';
 
-export {
-  BOOK_CONTENT_ID,
-  BOOK_EMBEDDABLE_TYPE,
-  BOOK_LATEST_VERSION,
-  BOOK_SAVED_OBJECT_TYPE,
-} from './book';
+export interface BookByReferenceState {
+  savedObjectId: string;
+}
+
+export type BookEmbeddableState = SerializedTitles & (BookState | BookByReferenceState);

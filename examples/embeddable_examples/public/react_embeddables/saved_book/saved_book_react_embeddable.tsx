@@ -37,7 +37,8 @@ import type { BookState } from '../../../server';
 import { defaultBookState } from './default_book_state';
 import { openSavedBookEditor } from './saved_book_editor';
 import { loadBook, saveBook } from './library_utils';
-import { BookApi, BookByReferenceState, BookEmbeddableState } from './types';
+import { BookApi } from './types';
+import type { BookEmbeddableState, BookByReferenceState } from '../../../common';
 import { BOOK_EMBEDDABLE_TYPE } from '../../../common';
 
 const bookStateComparators: StateComparators<BookState> = {

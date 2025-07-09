@@ -8,7 +8,7 @@
  */
 
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
-import { BookEmbeddableState } from '../../react_embeddables/saved_book/types';
+import { BookEmbeddableState } from '../../../common';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.embeddables.stateManagementExample.savedState';

@@ -21,9 +21,9 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, of } from 'rxjs';
-import { BookApi, BookEmbeddableState } from '../../react_embeddables/saved_book/types';
+import { BookApi } from '../../react_embeddables/saved_book/types';
 import { savedStateManager, unsavedStateManager } from './session_storage';
-import { BOOK_EMBEDDABLE_TYPE } from '../../../common';
+import { BOOK_EMBEDDABLE_TYPE, type BookEmbeddableState } from '../../../common';
 
 const BOOK_EMBEDDABLE_ID = 'BOOK_EMBEDDABLE_ID';
 

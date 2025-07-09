@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { BookEmbeddableState, BookByReferenceState } from './book';
+import { transformIn } from './transform_in';
+import { transformOut } from './transform_out';
 
-export {
-  BOOK_CONTENT_ID,
-  BOOK_EMBEDDABLE_TYPE,
-  BOOK_LATEST_VERSION,
-  BOOK_SAVED_OBJECT_TYPE,
-} from './book';
+export const bookTransforms = {
+  transformOut,
+  transformIn,
+};
+
+export { attributesToBook } from './transform_out';

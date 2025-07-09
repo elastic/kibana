@@ -15,10 +15,9 @@ import type { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objec
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 import { omit } from 'lodash';
 import { BookAttributes } from '../saved_object';
-import { BOOK_CONTENT_ID } from '../../../common';
+import { BOOK_CONTENT_ID, BOOK_SAVED_OBJECT_TYPE } from '../../../common';
 import { cmServicesDefinition } from './schema/cm_services';
-import { BOOK_SAVED_OBJECT_TYPE } from '../saved_object/register_book_saved_object';
-import { savedObjectToBook } from '../../../common/book/transforms/transform_out';
+import { attributesToBook } from '../../../common/book/transforms/transform_out';
 import { BookSearchOptions, BookState } from './schema/latest';
 import { bookToAttributes } from '../saved_object/book_to_attributes';
 
@@ -62,7 +61,7 @@ export class BookStorage implements ContentStorage {
       let item;
 
       try {
-        item = savedObjectToBook(savedObject as SavedObject<BookAttributes>);
+        item = attributesToBook((savedObject as SavedObject<BookAttributes>).attributes);
       } catch (error) {
         this.logger.error(`Error transforming saved book attributes: ${error.message}`);
         throw Boom.badRequest(`Invalid response. ${error.message}`);
@@ -107,7 +106,7 @@ export class BookStorage implements ContentStorage {
     let item;
 
     try {
-      item = savedObjectToBook(savedObject);
+      item = attributesToBook(savedObject.attributes);
     } catch (error) {
       this.logger.error(`Error transforming saved book attributes: ${error.message}`);
       throw Boom.badRequest(`Invalid response. ${error.message}`);
@@ -159,7 +158,7 @@ export class BookStorage implements ContentStorage {
 
     let item: BookState;
     try {
-      item = savedObjectToBook(savedObject);
+      item = attributesToBook(savedObject.attributes);
     } catch (error) {
       throw Boom.badRequest(`Invalid response. ${error.message}`);
     }
@@ -208,7 +207,7 @@ export class BookStorage implements ContentStorage {
     let item: BookState;
 
     try {
-      item = savedObjectToBook(savedObject as SavedObject<BookAttributes>);
+      item = attributesToBook((savedObject as SavedObject<BookAttributes>).attributes);
     } catch (error) {
       throw Boom.badRequest(`Invalid response. ${error.message}`);
     }
@@ -243,7 +242,7 @@ export class BookStorage implements ContentStorage {
     const hits = await Promise.all(
       soResponse.saved_objects
         .map(async (so) => {
-          const item = savedObjectToBook(so);
+          const item = attributesToBook(so.attributes);
           return item;
         })
         // Ignore any saved objects that failed to convert to items.

@@ -18,8 +18,7 @@ import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { defaultBookState } from './default_book_state';
 import { ADD_SAVED_BOOK_ACTION_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
-import { BookEmbeddableState } from './types';
-import { BOOK_EMBEDDABLE_TYPE } from '../../../common';
+import { BOOK_EMBEDDABLE_TYPE, type BookEmbeddableState } from '../../../common';
 
 export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, core: CoreStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
