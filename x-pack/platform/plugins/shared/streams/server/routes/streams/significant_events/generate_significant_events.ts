@@ -14,7 +14,6 @@ import {
 } from '@kbn/genai-utils-server';
 import type { InferenceClient } from '@kbn/inference-common';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import dedent from 'dedent';
 import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
@@ -105,27 +104,28 @@ export async function generateSignificantEventDefinitions({
 
   const short = sortAndTruncateAnalyzedFields(analysis);
 
-  const instruction = dedent(`I want to generate KQL queries that help me find
-    important log messages. Each pattern should have its own
-    query. I will use these queries to help me see changes in
-    these patterns. Only generate queries for patterns that
-    are indicative of something unusual happening, like startup/
-    shutdown messages, or warnings, errors and fatal messages. Prefer
-    simple match queries over wildcards. The goal of this is to have
-    queries that each represent a specific pattern, to be able to
-    monitor for changes in the pattern and use it as a signal in
-    root cause analysis. Some example of patterns:
-    
-    - \`message: "CircuitBreakingException"\`
-    - \`message: "max number of clients reached"\`
-    - \`message: "Unable to connect * Connection refused"\`
-    `);
+  const instruction = `
+I want to generate KQL queries that help me find
+important log messages. Each pattern should have its own
+query. I will use these queries to help me see changes in
+these patterns. Only generate queries for patterns that
+are indicative of something unusual happening, like startup/
+shutdown messages, or warnings, errors and fatal messages. Prefer
+simple match queries over wildcards. The goal of this is to have
+queries that each represent a specific pattern, to be able to
+monitor for changes in the pattern and use it as a signal in
+root cause analysis. Some example of patterns:
+
+- \`message: "CircuitBreakingException"\`
+- \`message: "max number of clients reached"\`
+- \`message: "Unable to connect * Connection refused"\`
+`;
 
   const chunks = [
     instruction,
     KQL_GUIDE,
     logPatterns
-      ? dedent(`## Log patterns
+      ? `## Log patterns
     
     The following log patterns where found over the last
     ${LOOKBACK_DAYS} days. The field used is \`${categorizationField}\`:
@@ -138,11 +138,11 @@ export async function generateSignificantEventDefinitions({
           count,
         };
       })
-    )}`)
+    )}`
       : '',
-    dedent(`## Dataset analysis
+    `## Dataset analysis
     
-    ${JSON.stringify(short)}`),
+    ${JSON.stringify(short)}`,
   ];
 
   logger.debug(() => {

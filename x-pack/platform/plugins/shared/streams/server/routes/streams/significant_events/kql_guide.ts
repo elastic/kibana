@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import dedent from 'dedent';
-
-export const KQL_GUIDE = dedent(`
+export const KQL_GUIDE = `
 ## KQL
 
 KQL (Kibana Query Language) is a query language available in Kibana, that will be converted into Elasticsearch Query DSL.
@@ -58,4 +56,4 @@ text/keyword fields: \`price >= 42 and price < 100\`, or \`time >= "2020-04-10"\
 ### Special queries
 
 Find documents in which a specific field exists (i.e. that does have a non null
-value for that field): \`destination : *\``);
+value for that field): \`destination : *\``;
