@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { AssignArgs } from 'xstate5';
 import { StreamEnrichmentContextType } from './types';
 import {
+  SampleDocumentFromDatasource,
   convertToFieldDefinition,
   getMappedSchemaFields,
   getUnmappedSchemaFields,
@@ -68,12 +69,19 @@ export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
     .map(dataSourceConverter.toUrlSchema);
 }
 
-export function getDataSourcesSamples(context: StreamEnrichmentContextType) {
+export function getDataSourcesSamples(
+  context: StreamEnrichmentContextType
+): SampleDocumentFromDatasource[] {
   const dataSourcesSnapshots = context.dataSourcesRefs
     .map((dataSourceRef) => dataSourceRef.getSnapshot())
     .filter((snapshot) => snapshot.matches('enabled'));
 
-  return dataSourcesSnapshots.flatMap((snapshot) => snapshot.context.data);
+  return dataSourcesSnapshots.flatMap((snapshot, dataSourceIndex) =>
+    snapshot.context.data.map((doc) => ({
+      dataSourceName: snapshot.context.dataSource.name || `Data Source ${dataSourceIndex + 1}`,
+      sample: doc,
+    }))
+  );
 }
 
 export function getStagedProcessors(context: StreamEnrichmentContextType) {

@@ -17,7 +17,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
-import { GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
+import { GrokProcessorDefinition } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -217,6 +217,8 @@ const OutcomePreviewTable = () => {
     selectOriginalPreviewRecords(snapshot.context)
   );
 
+  const dataSourceRefs = useStreamEnrichmentSelector((state) => state.context.dataSourcesRefs);
+
   const { dependencies } = useKibana();
   const { unifiedDocViewer } = dependencies.start;
 
@@ -229,6 +231,14 @@ const OutcomePreviewTable = () => {
     ]);
     return myRegistry;
   }, [unifiedDocViewer.registry]);
+
+  const rowSourceAvatars = useMemo(() => {
+    if (dataSourceRefs.length < 2) {
+      // If there is only one data source, we don't need to show avatars
+      return undefined;
+    }
+    return originalSamples?.map((sample) => sample.dataSourceName);
+  }, [dataSourceRefs.length, originalSamples]);
 
   const {
     setExplicitlyEnabledPreviewColumns,
@@ -371,7 +381,8 @@ const OutcomePreviewTable = () => {
 
   const docViewerContext = useMemo(
     () => ({
-      originalSample: originalSamples && currentDoc ? originalSamples[currentDoc.index] : undefined,
+      originalSample:
+        originalSamples && currentDoc ? originalSamples[currentDoc.index].sample : undefined,
     }),
     [currentDoc, originalSamples]
   );
@@ -415,7 +426,8 @@ const OutcomePreviewTable = () => {
   return (
     <>
       <PreviewTable
-        documents={previewDocuments as SampleDocument[]}
+        documents={previewDocuments}
+        rowSourceAvatars={rowSourceAvatars}
         selectableRow
         onRowSelected={onRowSelected}
         selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}

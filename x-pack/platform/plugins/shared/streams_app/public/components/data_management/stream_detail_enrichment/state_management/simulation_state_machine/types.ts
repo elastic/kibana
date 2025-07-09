@@ -35,6 +35,11 @@ export interface SimulationInput {
   streamName: string;
 }
 
+export interface SampleDocumentFromDatasource {
+  dataSourceName: string;
+  sample: SampleDocument;
+}
+
 export type SimulationEvent =
   | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
@@ -51,7 +56,7 @@ export type SimulationEvent =
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
   | { type: 'previewColumns.order'; columns: string[] }
-  | { type: 'simulation.receive_samples'; samples: SampleDocument[] };
+  | { type: 'simulation.receive_samples'; samples: SampleDocumentFromDatasource[] };
 
 export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
@@ -65,7 +70,7 @@ export interface SimulationContext {
     direction: 'asc' | 'desc';
   };
   processors: ProcessorDefinitionWithUIAttributes[];
-  samples: SampleDocument[];
+  samples: SampleDocumentFromDatasource[];
   simulation?: Simulation;
   streamName: string;
 }
