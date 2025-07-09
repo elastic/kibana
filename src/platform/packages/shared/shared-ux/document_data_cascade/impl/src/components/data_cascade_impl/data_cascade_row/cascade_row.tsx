@@ -101,24 +101,34 @@ export function CascadeRow<G extends GroupNode>({
         width: '100%',
         padding: euiTheme.size[size],
         backgroundColor: euiTheme.colors.backgroundBasePlain,
-        borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-        borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
         '&[data-row-type="sub-group"]': {
           paddingTop: 0,
           paddingBottom: 0,
         },
-        '&[data-row-type="root"]:not([data-active-sticky])': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: -1,
+          borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+          borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+        },
+        '&[data-row-type="root"]:not([data-active-sticky]):before': {
           borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
         },
-        '&[data-row-type="root"]:first-of-type:not([data-active-sticky])': {
+        '&[data-row-type="root"]:first-of-type:not([data-active-sticky]):before': {
           borderTopLeftRadius: euiTheme.border.radius.small,
           borderTopRightRadius: euiTheme.border.radius.small,
         },
-        '&[data-row-type="root"]:last-of-type:not([data-active-sticky])': {
+        '&[data-row-type="root"]:last-of-type:not([data-active-sticky]):before': {
           borderBottomLeftRadius: euiTheme.border.radius.small,
           borderBottomRightRadius: euiTheme.border.radius.small,
         },
-        '&[data-row-type="root"]:last-of-type': {
+        '&[data-row-type="root"]:last-of-type:before': {
           borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
         },
       }}
@@ -130,27 +140,93 @@ export function CascadeRow<G extends GroupNode>({
           position: 'relative',
           ...(rowInstance.parentId && rowInstance.getIsAllParentsExpanded()
             ? {
-                padding: `${euiTheme.size[size]} calc(${euiTheme.size[size]} * ${
-                  rowInstance.depth + 1
-                })`,
-                borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-                borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                padding: euiTheme.size[size],
                 ...(rowInstance.depth % 2 === 1
-                  ? { backgroundColor: euiTheme.colors.backgroundBaseSubdued }
-                  : {}),
+                  ? {
+                      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                    }
+                  : {
+                      paddingTop: 0,
+                      paddingBottom: 0,
+                    }),
+
+                '&:before': {
+                  content: '""',
+                  display: 'block',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                  borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                  borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                },
+
+                '[data-row-type="root"] + [data-row-type="sub-group"] &:before': {
+                  borderTopLeftRadius: euiTheme.border.radius.small,
+                  borderTopRightRadius: euiTheme.border.radius.small,
+                },
+
+                '[data-row-type="sub-group"]:has(+ [data-row-type="root"]) &': {
+                  marginBottom: euiTheme.size[size],
+                },
+
+                '[data-row-type="sub-group"]:has(+ [data-row-type="root"]) &:before': {
+                  borderBottomLeftRadius: euiTheme.border.radius.small,
+                  borderBottomRightRadius: euiTheme.border.radius.small,
+                  borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                },
+
+                '[data-row-type="sub-group"][aria-level="3"] &': {
+                  gap: 0,
+                },
+
+                '[data-row-type="sub-group"][aria-level="3"] & > *': {
+                  padding: euiTheme.size[size],
+                  backgroundColor: euiTheme.colors.backgroundBasePlain,
+                },
+
+                '[data-row-type="sub-group"][aria-level="3"] &:before': {
+                  backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                  zIndex: -1,
+                  borderTop: 0,
+                },
+
+                '[data-row-type="sub-group"][aria-level="3"] &:after': {
+                  content: '""',
+                  display: 'block',
+                  position: 'absolute',
+                  top: 0,
+                  left: euiTheme.size[size],
+                  width: `calc(100% - ${euiTheme.size[size]} * 2)`,
+                  height: '100%',
+                  pointerEvents: 'none',
+                  borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                  borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                  borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                },
+
+                '[data-row-type="sub-group"]:not([aria-level="3"]) + [data-row-type="sub-group"][aria-level="3"]  &:after':
+                  {
+                    borderTopLeftRadius: euiTheme.border.radius.small,
+                    borderTopRightRadius: euiTheme.border.radius.small,
+                  },
+
+                '[data-row-type="sub-group"][aria-level="3"]:has(+ [data-row-type="root"]:not([aria-level="3"]), + [data-row-type="sub-group"]:not([aria-level="3"])) & > *:last-child':
+                  {
+                    marginBottom: euiTheme.size[size],
+                  },
+
+                '[data-row-type="sub-group"][aria-level="3"]:has(+ [data-row-type="root"]:not([aria-level="3"]), + [data-row-type="sub-group"]:not([aria-level="3"])) &:after':
+                  {
+                    height: `calc(100% - ${euiTheme.size[size]})`,
+                    borderBottomLeftRadius: euiTheme.border.radius.small,
+                    borderBottomRightRadius: euiTheme.border.radius.small,
+                    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+                  },
               }
             : {}),
-          '[data-row-type="root"] + [data-row-type="sub-group"] &': {
-            borderTopLeftRadius: euiTheme.border.radius.small,
-            borderTopRightRadius: euiTheme.border.radius.small,
-          },
-          '[data-row-type="sub-group"]:has(+ [data-row-type="root"]) &': {
-            marginBottom: euiTheme.size[size],
-            borderBottomLeftRadius: euiTheme.border.radius.small,
-            borderBottomRightRadius: euiTheme.border.radius.small,
-            borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-          },
         }}
       >
         <EuiFlexItem>
