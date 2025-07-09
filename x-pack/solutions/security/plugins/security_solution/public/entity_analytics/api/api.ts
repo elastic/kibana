@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import type { PrivMonPrivilegesResponse } from '../../../common/api/entity_analytics/privilege_monitoring/privileges.gen';
 import type { CreatePrivilegesImportIndexResponse } from '../../../common/api/entity_analytics/monitoring/create_index.gen';
 import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics/privilege_monitoring/health.gen';
 import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
@@ -365,17 +366,26 @@ export const useEntityAnalyticsRoutes = () => {
       });
     };
 
-    const initPrivilegedMonitoringEngine = async (): Promise<InitMonitoringEngineResponse> =>
+    const initPrivilegedMonitoringEngine = (): Promise<InitMonitoringEngineResponse> =>
       http.fetch<InitMonitoringEngineResponse>(PRIVMON_PUBLIC_INIT, {
         version: API_VERSIONS.public.v1,
         method: 'POST',
       });
 
-    const fetchPrivilegeMonitoringEngineStatus = async (): Promise<PrivMonHealthResponse> =>
+    const fetchPrivilegeMonitoringEngineStatus = (): Promise<PrivMonHealthResponse> =>
       http.fetch<PrivMonHealthResponse>('/api/entity_analytics/monitoring/privileges/health', {
         version: API_VERSIONS.public.v1,
         method: 'GET',
       });
+
+    const fetchPrivilegeMonitoringPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
+      http.fetch<PrivMonPrivilegesResponse>(
+        '/api/entity_analytics/monitoring/privileges/privileges',
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'GET',
+        }
+      );
 
     /**
      * Fetches risk engine settings
@@ -425,6 +435,7 @@ export const useEntityAnalyticsRoutes = () => {
       initPrivilegedMonitoringEngine,
       registerPrivMonMonitoredIndices,
       fetchPrivilegeMonitoringEngineStatus,
+      fetchPrivilegeMonitoringPrivileges,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,

@@ -6,15 +6,20 @@
  */
 
 import { EuiCallOut, EuiCode, EuiText } from '@elastic/eui';
+import type { ReactNode } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LineClamp } from '../../../../common/components/line_clamp';
-import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
-import { getAllMissingPrivileges } from '../../../../../common/entity_analytics/privileges';
-import { CommaSeparatedValues } from '../../../../detections/components/callouts/missing_privileges_callout/comma_separated_values';
+import { LineClamp } from '../../common/components/line_clamp';
+import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
+import { getAllMissingPrivileges } from '../../../common/entity_analytics/privileges';
+import { CommaSeparatedValues } from '../../detections/components/callouts/missing_privileges_callout/comma_separated_values';
 
 interface MissingPrivilegesCalloutProps {
   privileges: EntityAnalyticsPrivileges;
+  /**
+   * I18n feature name for the callout.
+   */
+  title: ReactNode;
 }
 
 /**
@@ -24,21 +29,16 @@ interface MissingPrivilegesCalloutProps {
 const LINE_CLAMP_HEIGHT = '4.4em';
 
 export const MissingPrivilegesCallout = React.memo(
-  ({ privileges }: MissingPrivilegesCalloutProps) => {
+  ({ privileges, title }: MissingPrivilegesCalloutProps) => {
     const missingPrivileges = getAllMissingPrivileges(privileges);
     const indexPrivileges = missingPrivileges.elasticsearch.index ?? {};
     const clusterPrivileges = missingPrivileges.elasticsearch.cluster ?? {};
     const featurePrivileges = missingPrivileges.kibana;
-    const id = `missing-entity-store-privileges`;
+    const id = `missing-privileges-callout`;
     return (
       <EuiCallOut
         color="primary"
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.title"
-            defaultMessage="Insufficient privileges to enable the Entity Store"
-          />
-        }
+        title={title}
         iconType={'info'}
         data-test-subj={`callout-${id}`}
         data-test-messages={`[${id}]`}

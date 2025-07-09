@@ -28,7 +28,7 @@ import type { HapiReadableStream } from '../../../types';
 import {
   defaultMonitoringUsersIndex,
   getPrivilegedMonitorUsersIndex,
-} from '../../../../common/entity_analytics/privilege_monitoring/constants';
+} from '../../../../common/entity_analytics/privilege_monitoring/utils';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 
 import type {
@@ -78,7 +78,6 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
   eventIngestPipeline,
 } from './elasticsearch/pipelines/event_ingested';
-
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;

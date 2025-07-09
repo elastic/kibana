@@ -12,7 +12,7 @@ import { partition } from 'lodash/fp';
 import type { ESQLProperNode } from '@kbn/esql-ast/src/types';
 import { Parser } from '@kbn/esql-ast/src/parser/parser';
 import { isAsExpression, isFieldExpression } from '@kbn/esql-ast/src/ast/is';
-import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/constants';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/utils';
 
 export const getPrivilegedMonitorUsersJoin = (
   namespace: string
