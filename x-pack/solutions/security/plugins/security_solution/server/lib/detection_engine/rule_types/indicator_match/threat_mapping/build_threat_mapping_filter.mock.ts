@@ -166,12 +166,7 @@ export const getThreatMappingFilterMock = (): Filter => ({
     negate: false,
     disabled: false,
   },
-  query: {
-    bool: {
-      should: getThreatMappingFiltersShouldMock(),
-      minimum_should_match: 1,
-    },
-  },
+  query: getThreatMappingFiltersShouldMock()[0],
 });
 
 export const getThreatMappingFiltersShouldMock = (count = 1) => {

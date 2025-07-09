@@ -353,9 +353,7 @@ describe('build_threat_mapping_filter', () => {
         threatList,
         entryKey: 'value',
       });
-      const expected: BooleanFilter = {
-        bool: { should: [getThreatMappingFilterShouldMock()], minimum_should_match: 1 },
-      };
+      const expected: BooleanFilter = getThreatMappingFilterShouldMock();
       expect(mapping).toEqual(expected);
     });
 
@@ -414,9 +412,7 @@ describe('build_threat_mapping_filter', () => {
         threatList,
         entryKey: 'value',
       });
-      const expected: BooleanFilter = {
-        bool: { should: [getThreatMappingFilterShouldMock()], minimum_should_match: 1 },
-      };
+      const expected: BooleanFilter = getThreatMappingFilterShouldMock();
       expect(mapping).toEqual(expected);
     });
 
@@ -432,13 +428,13 @@ describe('build_threat_mapping_filter', () => {
           threat: { 'source.ip': true },
         },
       });
-      const mock = { ...getThreatMappingFilterShouldMock() };
+      const mock = getThreatMappingFilterShouldMock();
       mock.bool.should.pop();
 
       const expected: BooleanFilter = {
         bool: {
           should: [
-            mock,
+            ...mock.bool.should,
             {
               terms: {
                 _name: '__SEP____SEP__source.ip__SEP__source.ip__SEP__tq',
@@ -465,12 +461,7 @@ describe('build_threat_mapping_filter', () => {
         },
       });
 
-      const expected: BooleanFilter = {
-        bool: {
-          should: [getThreatMappingFilterShouldMock()],
-          minimum_should_match: 1,
-        },
-      };
+      const expected: BooleanFilter = getThreatMappingFilterShouldMock();
       expect(mapping).toEqual(expected);
     });
   });
