@@ -30,9 +30,9 @@ export function CascadeRowCell<G extends GroupNode, L extends LeafNode>({
   row,
   size,
 }: CascadeRowCellProps<G, L>) {
+  const hasPendingRequest = useRef<boolean>(false);
   const { leafNodes, currentGroupByColumns } = useDataCascadeState<G, L>();
   const [isPendingRowLeafDataFetch, setRowLeafDataFetch] = useState<boolean>(false);
-  const hasPendingRequest = useRef<boolean>(false);
 
   const getLeafCacheKey = useCallback(() => {
     return getCascadeRowLeafDataCacheKey(
@@ -47,32 +47,35 @@ export function CascadeRowCell<G extends GroupNode, L extends LeafNode>({
   }, [getLeafCacheKey, leafNodes]);
 
   const fetchCascadeRowGroupLeafData = useCallback(() => {
-    if (!leafData && !hasPendingRequest.current) {
-      // synchronously mark request as pending to avoid multiple re-renders in turn causing multiple requests
+    if (!hasPendingRequest.current) {
       hasPendingRequest.current = true;
-      setRowLeafDataFetch(true);
+
       populateGroupLeafDataFn({ row }).finally(() => {
         setRowLeafDataFetch(false);
         hasPendingRequest.current = false;
       });
     }
-  }, [populateGroupLeafDataFn, row, leafData]);
+  }, [populateGroupLeafDataFn, row]);
 
   useEffect(() => {
-    fetchCascadeRowGroupLeafData();
-  }, [fetchCascadeRowGroupLeafData]);
+    if (!leafData && !isPendingRowLeafDataFetch) {
+      fetchCascadeRowGroupLeafData();
+    }
+  }, [fetchCascadeRowGroupLeafData, leafData, isPendingRowLeafDataFetch]);
 
   return (
-    <React.Fragment>
-      {isPendingRowLeafDataFetch || hasPendingRequest.current ? (
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingChart size={size === 's' ? 'm' : size} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <LeafContentSlot data={leafData} />
-      )}
-    </React.Fragment>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        {isPendingRowLeafDataFetch || !leafData ? (
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingChart size={size === 's' ? 'm' : size} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <LeafContentSlot data={leafData} />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
