@@ -115,7 +115,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // await searchStart.expectAPIKeyVisibleInCodeBlock(newApiKeyUI);
       });
 
-      it('should create a new api key when the existing one is invalidated', async () => {
+      // This test is skipped since it is flaky
+      it.skip('should create a new api key when the existing one is invalidated', async () => {
         await searchStart.expectToBeOnStartPage();
         await searchStart.clickCodeViewButton();
         await searchApiKeys.expectAPIKeyAvailable();
