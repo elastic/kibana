@@ -9707,10 +9707,10 @@
     "@opentelemetry/semantic-conventions" "^1.27.0"
     "@types/tedious" "^4.0.14"
 
-"@opentelemetry/instrumentation-undici@^0.13.0":
-  version "0.13.1"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-undici/-/instrumentation-undici-0.13.1.tgz#056f950ebd3f10cc17be406e7e8fe05f58a5c1ad"
-  integrity sha512-w0e7q983oNa+dQiWOEgU+1R6H48ks6mICZKrIxY08KqZPFroPUYbH4Db7X6p8m4QhuHgI2/wEAgLf9h03ILzcg==
+"@opentelemetry/instrumentation-undici@^0.13.0", "@opentelemetry/instrumentation-undici@^0.13.2":
+  version "0.13.2"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-undici/-/instrumentation-undici-0.13.2.tgz#71d4710135b4251a0a5bae57233152e8f7eb8fca"
+  integrity sha512-rO8CNuHnVN13rKrXayvtuXMXwPQkem3H0r/UWZhyNGQeHlqlQgpgtu5mR9dzSuv9kLRrxZb/WjK+sGOP5kwetg==
   dependencies:
     "@opentelemetry/core" "^2.0.0"
     "@opentelemetry/instrumentation" "^0.202.0"
@@ -9743,7 +9743,7 @@
     require-in-the-middle "^7.1.1"
     shimmer "^1.2.1"
 
-"@opentelemetry/otlp-exporter-base@0.202.0":
+"@opentelemetry/otlp-exporter-base@0.202.0", "@opentelemetry/otlp-exporter-base@^0.202.0":
   version "0.202.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/otlp-exporter-base/-/otlp-exporter-base-0.202.0.tgz#f5d9904c2f37a6eed31d73178485138dbe6cb1f1"
   integrity sha512-nMEOzel+pUFYuBJg2znGmHJWbmvMbdX5/RhoKNKowguMbURhz0fwik5tUKplLcUtl8wKPL1y9zPnPxeBn65N0Q==

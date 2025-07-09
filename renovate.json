@@ -4353,16 +4353,23 @@
         "@opentelemetry/exporter-prometheus",
         "@opentelemetry/exporter-trace-otlp-http",
         "@opentelemetry/exporter-trace-otlp-proto",
+        "@opentelemetry/instrumentation",
+        "@opentelemetry/instrumentation-undici",
+        "@opentelemetry/otlp-exporter-base",
         "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [
+        "team:appex-ai-infra",
         "team:kibana-core",
-        "team:kibana-security"
+        "team:kibana-security",
+        "team:stack-monitoring"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
+        "Team:AI Infra",
+        "Team:Monitoring",
         "Team:Core",
         "Team:Security",
         "backport:prev-minor",
