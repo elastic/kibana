@@ -32,9 +32,7 @@ export const observabilitySolutionSetting: Omit<
     { defaultValue: AIAssistantType.Observability }
   ),
   // Convert enum values to strings to satisfy UiSettingsParams type
-  options: [AIAssistantType.Observability, AIAssistantType.Never] as Array<
-    (typeof AIAssistantType)[keyof typeof AIAssistantType]
-  >,
+  options: [AIAssistantType.Observability, AIAssistantType.Never],
   type: 'select' as const,
   optionLabels: {
     [AIAssistantType.Observability]: SHOW_OBSERVABILITY,

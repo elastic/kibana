@@ -21,6 +21,9 @@ describe('plugin', () => {
     jest.clearAllMocks();
   });
   describe('stateless', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
     const initializerContext = {
       env: {
         packageInfo: {
@@ -28,15 +31,9 @@ describe('plugin', () => {
         },
       },
       config: {
-        get: jest.fn().mockReturnValue({
-          preferredAIAssistantType: AIAssistantType.Observability,
-        }),
+        get: jest.fn(),
       },
     } as unknown as PluginInitializerContext;
-
-    const aiAssistantManagementSelectionPlugin = new AIAssistantManagementSelectionPlugin(
-      initializerContext
-    );
 
     const coreSetup = {
       uiSettings: {
@@ -61,6 +58,12 @@ describe('plugin', () => {
     };
 
     it('registers correct uiSettings for serverless oblt', () => {
+      (initializerContext.config.get as jest.Mock).mockReturnValue({
+        preferredAIAssistantType: AIAssistantType.Observability,
+      });
+      const aiAssistantManagementSelectionPlugin = new AIAssistantManagementSelectionPlugin(
+        initializerContext
+      );
       aiAssistantManagementSelectionPlugin.setup(coreSetup, {
         ...setupDeps,
         cloud: {
@@ -81,6 +84,12 @@ describe('plugin', () => {
     });
 
     it('registers correct uiSettings for serverless security', () => {
+      (initializerContext.config.get as jest.Mock).mockReturnValue({
+        preferredAIAssistantType: AIAssistantType.Security,
+      });
+      const aiAssistantManagementSelectionPlugin = new AIAssistantManagementSelectionPlugin(
+        initializerContext
+      );
       aiAssistantManagementSelectionPlugin.setup(coreSetup, {
         ...setupDeps,
         cloud: {
@@ -101,6 +110,12 @@ describe('plugin', () => {
     });
 
     it('registers correct uiSettings for serverless search', () => {
+      (initializerContext.config.get as jest.Mock).mockReturnValue({
+        preferredAIAssistantType: undefined,
+      });
+      const aiAssistantManagementSelectionPlugin = new AIAssistantManagementSelectionPlugin(
+        initializerContext
+      );
       aiAssistantManagementSelectionPlugin.setup(coreSetup, {
         ...setupDeps,
         cloud: {
@@ -110,7 +125,13 @@ describe('plugin', () => {
         },
       } as unknown as AIAssistantManagementSelectionPluginServerDependenciesSetup);
 
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(0);
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledTimes(1);
+      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith({
+        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...classicSetting,
+          value: AIAssistantType.Default,
+        },
+      });
     });
   });
 

@@ -29,6 +29,7 @@ import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_ke
 import { classicSetting } from './src/settings/classic_setting';
 import { observabilitySolutionSetting } from './src/settings/observability_setting';
 import { securitySolutionSetting } from './src/settings/security_setting';
+import { AIAssistantType } from '../common/ai_assistant_type';
 
 export class AIAssistantManagementSelectionPlugin
   implements
@@ -112,11 +113,28 @@ export class AIAssistantManagementSelectionPlugin
       },
     });
 
-    if (this.buildFlavor === 'serverless') {
-      const { cloud } = plugins;
-      const solution = cloud?.serverless.projectType;
+    this.registerUiSettings(core, plugins);
 
-      switch (solution) {
+    return {};
+  }
+
+  private registerUiSettings(
+    core: CoreSetup,
+    plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
+  ) {
+    const { cloud } = plugins;
+    const isServerless = this.buildFlavor === 'serverless';
+
+    if (!isServerless) {
+      core.uiSettings.register({
+        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...classicSetting,
+          value: this.config.preferredAIAssistantType,
+        },
+      });
+    } else {
+      const serverlessProjectType = cloud?.serverless.projectType;
+      switch (serverlessProjectType) {
         case 'observability':
           core.uiSettings.register({
             [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
@@ -124,7 +142,7 @@ export class AIAssistantManagementSelectionPlugin
               value: this.config.preferredAIAssistantType,
             },
           });
-          break;
+          return;
         case 'security':
           core.uiSettings.register({
             [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
@@ -132,33 +150,16 @@ export class AIAssistantManagementSelectionPlugin
               value: this.config.preferredAIAssistantType,
             },
           });
-          break;
-        case 'chat':
-        case 'search':
-          break;
-        case undefined:
-          // This case should never happen, but we handle it for completeness.
-          core.uiSettings.register({
+          return;
+        default:
+          return core.uiSettings.register({
             [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
               ...classicSetting,
-              value: this.config.preferredAIAssistantType,
+              value: this.config.preferredAIAssistantType ?? AIAssistantType.Default,
             },
           });
-          break;
-        default:
-          const _never: never = solution;
-          throw new Error('Unsupported serverless project type: ' + solution);
       }
-    } else {
-      core.uiSettings.register({
-        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-          ...classicSetting,
-          value: this.config.preferredAIAssistantType,
-        },
-      });
     }
-
-    return {};
   }
 
   public start(core: CoreStart) {

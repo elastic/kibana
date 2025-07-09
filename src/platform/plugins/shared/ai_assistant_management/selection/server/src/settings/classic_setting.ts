@@ -45,7 +45,7 @@ export const classicSetting: Omit<UiSettingsParams<AIAssistantType>, 'value'> = 
     AIAssistantType.Observability,
     AIAssistantType.Security,
     AIAssistantType.Never,
-  ] as Array<(typeof AIAssistantType)[keyof typeof AIAssistantType]>,
+  ],
   type: 'select' as const,
   optionLabels: {
     [AIAssistantType.Default]: ONLY_IN_THEIR_SOLUTIONS,
