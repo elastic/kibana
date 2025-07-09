@@ -75,7 +75,7 @@ export const AddRowPanel: React.FC<AddRowPanelProps> = ({ onHide }) => {
           return;
         }
 
-        throw new Error(response.items[0].index?.error?.reason);
+        throw new Error(response.items[0].index?.error?.reason || 'Unknown error occurred');
       } catch (error) {
         notifications.toasts.addError(error as Error, {
           title: i18n.translate('indexEditor.addRow.ErrorTitle', {
