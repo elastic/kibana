@@ -457,6 +457,7 @@
     "@kbn/data-quality-plugin": "link:x-pack/platform/plugins/shared/data_quality",
     "@kbn/data-search-plugin": "link:src/platform/test/plugin_functional/plugins/data_search",
     "@kbn/data-service": "link:src/platform/packages/shared/kbn-data-service",
+    "@kbn/data-service-server": "link:src/platform/packages/shared/kbn-data-service-server",
     "@kbn/data-stream-adapter": "link:x-pack/solutions/security/packages/data-stream-adapter",
     "@kbn/data-usage-plugin": "link:x-pack/platform/plugins/private/data_usage",
     "@kbn/data-view-editor-plugin": "link:src/platform/plugins/shared/data_view_editor",
