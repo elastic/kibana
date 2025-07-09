@@ -156,7 +156,7 @@ const CompatibleControlTypesComponent = ({
               content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
                 {
                   fieldSelected: Boolean(selectedFieldName),
-                  controlType: factory.getDisplayName(),
+                  controlType: factory.type,
                 }
               )}
             >
