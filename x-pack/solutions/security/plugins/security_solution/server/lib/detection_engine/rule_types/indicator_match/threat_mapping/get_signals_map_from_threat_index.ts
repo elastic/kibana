@@ -46,7 +46,7 @@ export async function getSignalsQueryMapFromThreatIndex(
   options:
     | GetSignalsQueryMapFromThreatIndexOptionsTerms
     | GetSignalsQueryMapFromThreatIndexOptionsMatch
-): Promise<SignalsQueryMap> {
+): Promise<{ signalsQueryMap: SignalsQueryMap; threatList: ThreatListItem[] }> {
   const { threatSearchParams, eventsCount, termsQueryAllowed } = options;
 
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
@@ -87,6 +87,7 @@ export async function getSignalsQueryMapFromThreatIndex(
   };
 
   threatList = await getThreatList({ ...threatSearchParams, searchAfter: undefined });
+  const threatListPage1 = threatList.hits.hits;
 
   while (maxThreatsReachedMap.size < eventsCount && threatList?.hits.hits.length > 0) {
     threatList.hits.hits.forEach((threatHit) => {
@@ -135,5 +136,5 @@ export async function getSignalsQueryMapFromThreatIndex(
     });
   }
 
-  return signalsQueryMap;
+  return { signalsQueryMap, threatList: threatListPage1 };
 }

@@ -114,7 +114,7 @@ const enrichSignalWithThreatMatches = (
  */
 export const enrichSignalThreatMatchesFromSignalsMap = async (
   signals: SignalSourceHit[],
-  getMatchedThreats: () => Promise<ThreatListItem[]>,
+  matchedThreats: ThreatListItem[],
   indicatorPath: string,
   signalsMap: Map<string, ThreatMatchNamedQuery[]>
 ): Promise<SignalSourceHit[]> => {
@@ -123,7 +123,6 @@ export const enrichSignalThreatMatchesFromSignalsMap = async (
   }
 
   const uniqueHits = groupAndMergeSignalMatches(signals);
-  const matchedThreats = await getMatchedThreats();
 
   const enrichmentsWithoutAtomic: Record<string, ThreatEnrichment[]> = {};
 
