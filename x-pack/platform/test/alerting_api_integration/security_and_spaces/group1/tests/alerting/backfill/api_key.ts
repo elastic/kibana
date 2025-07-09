@@ -245,6 +245,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
           id: backfillId,
           provider: 'alerting',
           actions: new Map([['execute-backfill', { equal: schedule.length }]]),
+          collapseByExecutionUUid: true,
         });
       });
 
