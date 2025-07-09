@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { test as base } from '@kbn/scout';
+import { test as base, mergeTests } from '@kbn/scout';
 import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
 
 import { extendPageObjects } from '../page_objects';
 import { ObltApiServicesFixture, ObltTestFixtures, ObltWorkerFixtures } from './types';
+import { sloDataFixture, annotationsDataFixture } from './worker';
 
-/**
- * Should be used for the test spec files executed seqentially.
- */
-export const test = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
+const baseFixture = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
@@ -42,3 +40,7 @@ export const test = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
     { scope: 'worker' },
   ],
 });
+/**
+ * Should be used for the test spec files executed sequentially.
+ */
+export const test = mergeTests(baseFixture, sloDataFixture, annotationsDataFixture);
