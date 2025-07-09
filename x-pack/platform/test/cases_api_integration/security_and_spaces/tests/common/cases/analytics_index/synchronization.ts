@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await runCasesSynchronizationTask(supertest);
 
-      await retry.try(async () => {
+      await retry.tryForTime(300000, async () => {
         const caseAnalytics = await esClient.get({
           index: '.internal.cases',
           id: `cases:${caseToBackfill.id}`,
