@@ -9,7 +9,11 @@ import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 import { SLODataService } from '../services/slo_data_service';
 
+const TEST_TIMEOUT = 2 * 60 * 1000; // 2 minutes timeout, needed to wait for the SLOs to be created
+
 test.describe('SLOs Overview', { tag: ['@ess'] }, () => {
+  test.describe.configure({ timeout: TEST_TIMEOUT });
+
   let dataService: SLODataService;
 
   test.beforeAll(async ({ config, kbnUrl, kbnClient }) => {
@@ -25,10 +29,6 @@ test.describe('SLOs Overview', { tag: ['@ess'] }, () => {
     await pageObjects.slo.goto();
   });
 
-  test.afterAll(() => {
-    test.setTimeout(60000);
-  });
-
   test('Go to slos overview', async ({ page }) => {
     // Already navigated in beforeEach
     // This test ensures the page loads
@@ -36,8 +36,6 @@ test.describe('SLOs Overview', { tag: ['@ess'] }, () => {
   });
 
   test('validate data retention tab', async ({ page }) => {
-    test.setTimeout(60 * 20000);
-
     await expect(async () => {
       await page.getByTestId('querySubmitButton').click();
 
@@ -47,7 +45,7 @@ test.describe('SLOs Overview', { tag: ['@ess'] }, () => {
       expect(cards.length > 5).toBeTruthy();
     }).toPass({
       intervals: [20000],
-      timeout: 60 * 20000,
+      timeout: TEST_TIMEOUT,
     });
   });
 });

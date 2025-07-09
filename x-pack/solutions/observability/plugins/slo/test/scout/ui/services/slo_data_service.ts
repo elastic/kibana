@@ -67,6 +67,9 @@ export class SLODataService {
       },
       tags: [],
       groupBy: ['user.id'],
+      settings: {
+        preventInitialBackfill: true,
+      },
     };
     try {
       const { data } = await this.kbnClient.request({

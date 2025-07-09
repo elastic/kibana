@@ -15,7 +15,6 @@ export interface SLOPageObjects extends ObltPageObjects {
 }
 
 export function extendPageObjects(pageObjects: ObltPageObjects, page: ScoutPage): SLOPageObjects {
-  page.setDefaultTimeout(60_000); // Set a default timeout for all page actions
   return {
     ...pageObjects,
     slo: createLazyPageObject(SLOApp, page),
