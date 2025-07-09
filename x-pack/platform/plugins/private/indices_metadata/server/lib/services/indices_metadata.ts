@@ -42,7 +42,7 @@ export class IndicesMetadataService {
   private readonly sender: MetadataSender;
   private readonly configurationService: ConfigurationService;
 
-  private subscription?: Subscription;
+  private subscription$?: Subscription;
   private configuration: IndicesMetadataConfiguration;
 
   constructor(
@@ -68,7 +68,7 @@ export class IndicesMetadataService {
   public start(taskManager: TaskManagerStartContract) {
     this.logger.debug('Starting indices metadata service');
 
-    this.subscription = this.configurationService
+    this.subscription$ = this.configurationService
       .getIndicesMetadataConfiguration$()
       .subscribe((configuration) => {
         this.logger.debug('Indices metadata configuration updated', { configuration } as LogMeta);
@@ -83,7 +83,7 @@ export class IndicesMetadataService {
   }
 
   public stop() {
-    this.subscription?.unsubscribe();
+    this.subscription$?.unsubscribe();
     this.configurationService.stop();
   }
 
@@ -93,6 +93,11 @@ export class IndicesMetadataService {
       return;
     }
     this.logger.debug('About to publish indices metadata');
+
+    if (this.configuration.indices_threshold === 0) {
+      this.logger.info('Indices threshold is 0, skipping indices metadata publish');
+      return;
+    }
 
     // 1. Get cluster stats and list of indices and datastreams
     const [indices, dataStreams] = await Promise.all([

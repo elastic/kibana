@@ -30,9 +30,9 @@ export const DEFAULT_CDN_CONFIG: CdnConfig = {
 };
 
 export const INDICES_METADATA_CONFIGURATION_DEFAULTS: IndicesMetadataConfiguration = {
-  indices_threshold: 1000,
-  datastreams_threshold: 1000,
-  index_query_size: 1000,
-  ilm_stats_query_size: 1000,
-  ilm_policy_query_size: 1000,
+  indices_threshold: 0,
+  datastreams_threshold: 0,
+  index_query_size: 0,
+  ilm_stats_query_size: 0,
+  ilm_policy_query_size: 0,
 };
