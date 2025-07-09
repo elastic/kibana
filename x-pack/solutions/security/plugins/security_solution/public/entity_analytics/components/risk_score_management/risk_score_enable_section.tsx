@@ -195,7 +195,7 @@ export const RiskScoreEnableSection: React.FC<{
   const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
 
   const initRiskEngineMutation = useInitRiskEngineMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
       await invalidateRiskEngineSettingsQuery();
       addSuccess(i18n.RISK_SCORE_MODULE_TURNED_ON, toastOptions);
     },
