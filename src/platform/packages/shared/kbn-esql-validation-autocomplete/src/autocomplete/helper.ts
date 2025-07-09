@@ -21,13 +21,12 @@ import {
   FunctionDefinition,
 } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
-import { getColumnForASTNode } from '@kbn/esql-ast/src/definitions/utils';
+import { getColumnForASTNode, compareTypesWithLiterals } from '@kbn/esql-ast/src/definitions/utils';
 import {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { uniqBy } from 'lodash';
-import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   getFunctionDefinition,
   isAssignment,

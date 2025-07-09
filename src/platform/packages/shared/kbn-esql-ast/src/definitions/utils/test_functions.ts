@@ -28,6 +28,14 @@ export const getTestFunctions = () => {
   return testFunctions;
 };
 
+/**
+ * This function is used to assert that a query produces the expected errors.
+ *
+ * @param query The query to test
+ * @param expectedErrors The expected error messages or warnings
+ * @param context The context to use for validation
+ * @param commandName The name of the command to test
+ */
 export const expectErrors = (
   query: string,
   expectedErrors: string[],
