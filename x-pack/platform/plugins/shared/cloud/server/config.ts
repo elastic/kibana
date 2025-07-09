@@ -7,7 +7,12 @@
 
 import { offeringBasedSchema, schema, Type, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
-import { KIBANA_SOLUTIONS, KibanaSolution } from '@kbn/projects-solutions-groups';
+import {
+  KIBANA_PRODUCT_TIERS,
+  KIBANA_SOLUTIONS,
+  type KibanaProductTier,
+  type KibanaSolution,
+} from '@kbn/projects-solutions-groups';
 
 const apmConfigSchema = schema.object({
   url: schema.maybe(schema.string()),
@@ -18,6 +23,46 @@ const apmConfigSchema = schema.object({
     })
   ),
 });
+
+/**
+ * Builds a nested conditional schema for product tiers based on the project type.
+ * Something like
+ * ```
+ * schema.conditional(
+ *   schema.siblingRef('project_type'),
+ *   KIBANA_OBSERVABILITY_SOLUTION,
+ *   schema.oneOf([
+ *     schema.literal(KIBANA_OBSERVABILITY_COMPLETE_TIER),
+ *     schema.literal(KIBANA_OBSERVABILITY_LOGS_ESSENTIALS_TIER),
+ *   ]),
+ *   schema.conditional(
+ *     schema.siblingRef('project_type'),
+ *     KIBANA_SECURITY_SOLUTION,
+ *     schema.oneOf([
+ *       schema.literal(KIBANA_SECURITY_COMPLETE_TIER),
+ *       schema.literal(KIBANA_SECURITY_ESSENTIALS_TIER),
+ *       schema.literal(KIBANA_SECURITY_SEARCH_AI_LAKE_TIER),
+ *     ]),
+ *     // Iterates over all other solutions and eventually returns a schema.never()
+ *     schema.never()
+ *   ),
+ * );
+ * ```
+ */
+function createProductTiersSchema() {
+  return Object.entries(KIBANA_PRODUCT_TIERS).reduce<Type<KibanaProductTier> | Type<never>>(
+    (acc, [productType, tiers]) => {
+      const tiersSchema = tiers.length
+        ? schema.oneOf(
+            tiers.map((tier) => schema.literal(tier)) as [Type<KibanaProductTier>] // This cast is needed because it's different to Type<T>[] :sight:
+          )
+        : schema.never();
+
+      return schema.conditional(schema.siblingRef('project_type'), productType, tiersSchema, acc);
+    },
+    schema.never()
+  );
+}
 
 const configSchema = schema.object({
   apm: schema.maybe(apmConfigSchema),
@@ -53,6 +98,7 @@ const configSchema = schema.object({
             ]
           )
         ),
+        product_tier: schema.maybe(createProductTiersSchema()),
         orchestrator_target: schema.maybe(schema.string()),
       },
       // avoid future chicken-and-egg situation with the component populating the config
@@ -84,6 +130,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
       project_id: true,
       project_name: true,
       project_type: true,
+      product_tier: true,
       orchestrator_target: true,
     },
     onboarding: {

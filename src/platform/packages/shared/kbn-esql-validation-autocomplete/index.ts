@@ -25,17 +25,8 @@ export { collectUserDefinedColumns } from './src/shared/user_defined_columns';
 export {
   getAllFunctions,
   isSupportedFunction,
-  getFunctionDefinition,
   printFunctionSignature,
   checkFunctionArgMatchesDefinition as isEqualType,
-  isSourceItem,
-  isFunctionItem,
-  isOptionItem,
-  isColumnItem,
-  isLiteralItem,
-  isTimeIntervalItem,
-  isAssignment,
-  isSingleItem,
 } from './src/shared/helpers';
 
 export {

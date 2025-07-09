@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import { AnalyticsTableRowDetails } from '@kbn/test-suites-xpack-platform/functional/services/ml/data_frame_analytics_table';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
