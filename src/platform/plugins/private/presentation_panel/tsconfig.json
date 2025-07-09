@@ -30,7 +30,6 @@
     "@kbn/shared-ux-markdown",
     "@kbn/react-hooks",
     "@kbn/shared-ux-utility",
-    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*"]
 }
