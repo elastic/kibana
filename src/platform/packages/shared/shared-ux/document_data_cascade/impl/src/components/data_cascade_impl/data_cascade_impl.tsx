@@ -419,7 +419,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                         );
 
                         return (
-                          <React.Fragment>
+                          <React.Fragment key={row.id}>
                             {isActiveSticky && activeStickyRenderSlotRef.current
                               ? ReactDOM.createPortal(
                                   rowToRender,
