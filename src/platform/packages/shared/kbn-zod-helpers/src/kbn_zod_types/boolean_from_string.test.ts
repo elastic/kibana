@@ -28,7 +28,6 @@ describe('BooleanFromString', () => {
 
   it('has the correct zod and kbn type', () => {
     expect(BooleanFromString instanceof z.ZodUnion).toBe(true);
-    expect(BooleanFromString._def.typeName).toBe(z.ZodFirstPartyTypeKind.ZodUnion);
     expect(isBooleanFromString(BooleanFromString)).toBe(true);
   });
 

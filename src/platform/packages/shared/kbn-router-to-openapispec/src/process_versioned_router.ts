@@ -18,7 +18,7 @@ import { extractAuthzDescription } from './extract_authz_description';
 import type { Env, GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';
 import {
-  prepareRoutes,
+  pickRoutesForOAS,
   getPathParameters,
   extractContentType,
   assignToPaths,
@@ -48,7 +48,7 @@ export const processVersionedRouter = async ({
   filters,
   env = { serverless: false },
 }: ProcessVersionedRouterOptions) => {
-  const routes = prepareRoutes(appRouter.getRoutes(), filters);
+  const routes = pickRoutesForOAS(appRouter.getRoutes(), filters);
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
     const pathParams = getPathParameters(route.path);

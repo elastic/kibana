@@ -49,16 +49,9 @@ function postProcessJsonOutput(json: ReturnType<typeof z.toJSONSchema>) {
     delete json.$schema;
   }
 
-  // Remove `const` if it exists, as OpenAPI 3.0 does not support it
-  if (typeof json.const !== 'undefined') {
-    delete json.const;
-  }
-
+  // Replace Zod reference paths with OpenAPI reference paths
   const zodRefPathPrefix = '#/definitions/';
   const openApiRefPathPrefix = '#/components/schemas/';
-  // Stringify the JSON to replace:
-  // - Zod reference paths with OpenAPI reference paths
-  // - Remove the `const` property
   json = JSON.parse(
     JSON.stringify(json, (key, value) => {
       // Replace Zod reference paths with OpenAPI reference paths
@@ -66,7 +59,7 @@ function postProcessJsonOutput(json: ReturnType<typeof z.toJSONSchema>) {
         return value.replace(zodRefPathPrefix, openApiRefPathPrefix);
       }
 
-      // Remove the `const` property
+      // Remove the `const` property, not supported in OpenAPI 3.0
       if (key === 'const') {
         return undefined; // Remove the const property
       }
@@ -87,9 +80,16 @@ function postProcessJsonOutput(json: ReturnType<typeof z.toJSONSchema>) {
   };
 }
 
-type ZodTypeLikeVoid = z.ZodVoid | z.ZodUndefined | z.ZodNever;
+function toJSON(schema: z.ZodTypeAny) {
+  const json = z.toJSONSchema(schema, {
+    io: 'input',
+    target: 'draft-7',
+  });
 
-const isZodEmptyType = (type: z.ZodTypeAny): type is ZodTypeLikeVoid => {
+  return postProcessJsonOutput(json);
+}
+
+const isZodEmptyType = (type: z.ZodTypeAny): type is z.ZodVoid | z.ZodUndefined | z.ZodNever => {
   return type instanceof z.ZodVoid || type instanceof z.ZodUndefined || type instanceof z.ZodNever;
 };
 
@@ -272,12 +272,7 @@ const convertObjectMembersToParameterObjects = (
       name: shapeKey,
       in: isPathParameter ? 'path' : 'query',
       required: isPathParameter || isOptional,
-      schema: postProcessJsonOutput(
-        z.toJSONSchema(unwrappedShape, {
-          io: 'input',
-          target: 'draft-7',
-        })
-      ).json,
+      schema: toJSON(unwrappedShape).json,
       description: unwrappedShape.description,
     };
   });
@@ -342,22 +337,19 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
 };
 
 export const convert = (schema: z.ZodTypeAny) => {
-  const config = {
-    io: 'input',
-    target: 'draft-7',
-  };
+  assertZodType(schema, z.ZodType, 'Expected schema to be an instance of Zod');
+  if (!isAllowedAsRequestBodyOrResponseSchema(schema)) {
+    throw createError('Schema is not allowed as a request body or response schema');
+  }
 
-  let convertionOutput: ReturnType<typeof postProcessJsonOutput>;
+  let convertionOutput: ReturnType<typeof toJSON>;
 
   try {
-    convertionOutput = postProcessJsonOutput(z.toJSONSchema(schema, config));
+    convertionOutput = toJSON(schema);
   } catch (e) {
-    convertionOutput = postProcessJsonOutput(
-      z.toJSONSchema(
-        getPassThroughBodyObject(
-          'Could not convert the schema to OpenAPI equivalent, passing through as any.'
-        ),
-        config
+    convertionOutput = toJSON(
+      getPassThroughBodyObject(
+        'Could not convert the schema to OpenAPI equivalent, passing through as any.'
       )
     );
   }

@@ -10,5 +10,5 @@
 import { z } from '.';
 
 export function isZod(value: unknown): value is z.ZodType<any> {
-  return value instanceof z.Schema;
+  return value instanceof z.ZodType;
 }

@@ -10,28 +10,25 @@ import * as z from '@kbn/zod';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 
 // Recursive schema using z.lazy (needs ref strategy to resolve)
-const RecursiveNode: z.ZodType<any> = z.lazy(
-  () =>
-    z.object({
+const RecursiveNode: z.ZodType<any> = z.lazy(() =>
+  z
+    .object({
       id: z.string(),
       children: z.array(RecursiveNode).optional(),
     })
-  // .meta({
-  //   description: 'A node in a recursive structure, can have children that are also nodes',
-  //   example: {
-  //     id: 'node1',
-  //     children: [{ id: 'node2', children: [] }, { id: 'node3' }],
-  //   },
-  // })
+    .meta({
+      description: 'A node in a recursive structure, can have children that are also nodes',
+      example: {
+        id: 'node1',
+        children: [{ id: 'node2', children: [] }, { id: 'node3' }],
+      },
+    })
 );
 
 // Intersection + Union - problematic in OAS
 const SchemaWithIntersectionUnion = z.intersection(
-  z.object({ common: z.string() }),
-  z.union([
-    z.object({ type: z.literal('A'), valueA: z.number() }),
-    z.object({ type: z.literal('B'), valueB: z.boolean() }),
-  ])
+  z.object({ field2: z.boolean() }),
+  z.union([z.object({ field1: z.number() }), z.object({ field3: z.string() })])
 );
 
 // Union where oneOf is preferred, but will generate anyOf
@@ -43,16 +40,35 @@ const UnionSchema = z.union([
 // Complex allOf-like structure
 const AllOfLike = z.intersection(z.object({ name: z.string() }), z.object({ age: z.number() }));
 
+const StrictObject = z
+  .object({
+    name: z.string(),
+    age: z.number(),
+  })
+  .strict()
+  .describe('This is a strict object with no additional properties');
+
+const OneOfDiscriminator = z.discriminatedUnion('MemberOrGuest', [
+  z.object({
+    type: z.literal('Member'),
+    memberId: z.string(),
+    department: z.literal('engineering', 'support'),
+  }),
+  z.object({ type: z.literal('Guest'), guestId: z.string(), guestName: z.string() }),
+]);
+
 // Final response schema
 const ComplexRouteResponse = z.object({
   tree: RecursiveNode,
   format: UnionSchema,
   data: z.array(SchemaWithIntersectionUnion),
   user: AllOfLike,
+  profile: StrictObject,
+  memberOrGuest: OneOfDiscriminator,
 });
 
 export const testOasGenerationZ3 = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /api/test_os_generation',
+  endpoint: 'GET /api/test_os_generation/{id}',
   options: {
     tags: [],
     access: 'public',
@@ -65,7 +81,25 @@ export const testOasGenerationZ3 = createObservabilityOnboardingServerRoute({
   },
   params: z.object({
     query: z.object({
-      start: z.string().optional().describe('Start index'),
+      startDate: z
+        .date()
+        .describe('Start date for the query')
+        .meta({
+          examples: ['2023-10-01T00:00:00Z', 'now-1d'],
+        }),
+      endDate: z
+        .date()
+        .describe('End date for the query')
+        .default('now')
+        .optional()
+        .meta({
+          examples: ['2023-10-31T23:59:59Z', 'now'],
+        }),
+    }),
+    path: z.object({
+      id: z.string().describe('The ID of the resource').meta({
+        example: '12345',
+      }),
     }),
   }),
   responses: {

@@ -11,8 +11,8 @@ import type { Router } from '@kbn/core-http-router-server-internal';
 import { getResponseValidation } from '@kbn/core-http-server';
 import { BASE_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
-import * as z4 from 'zod/v4';
-import { createDocument, createSchema } from 'zod-openapi';
+import * as z from '@kbn/zod';
+import { createDocument } from 'zod-openapi';
 import type { OasConverter } from './oas_converter';
 import {
   getXsrfHeaderForMethod,
@@ -23,7 +23,7 @@ import {
   getPathParameters,
   getVersionedContentTypeString,
   mergeResponseContent,
-  prepareRoutes,
+  pickRoutesForOAS,
   setXState,
   GetOpId,
 } from './util';
@@ -49,7 +49,7 @@ export const processRouter = async ({
 }: ProcessRouterOptions) => {
   const paths: OpenAPIV3.PathsObject = {};
   if (filters?.version && filters.version !== SERVERLESS_VERSION_2023_10_31) return { paths };
-  const routes = prepareRoutes(appRouter.getRoutes({ excludeVersionedRoutes: true }), filters);
+  const routes = pickRoutesForOAS(appRouter.getRoutes({ excludeVersionedRoutes: true }), filters);
 
   for (const route of routes) {
     try {
@@ -134,8 +134,8 @@ export const processRouter = async ({
         }
       }
 
-      // IF route.path includes 'z4', use the z4 converter to convert the response
-      if (route.path.includes('z4')) {
+      // IF route.path includes 'z', use the z converter to convert the response
+      if (route.path.includes('z')) {
         if (z4Converter && responseValidationSchema) {
           const z4Responses = z4Converter.convertResponses(responseValidationSchema);
           Object.entries(z4Responses).forEach(([statusCode, response]) => {
@@ -195,7 +195,7 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
 
 const z4Converter = {
   convertResponses: (responses: Record<string, any>) => {
-    // Use z4.toJSONSchema for response body if available
+    // Use z.toJSONSchema for response body if available
     const convertedResponses: Record<string, any> = {};
     for (const [statusCode, response] of Object.entries(responses)) {
       convertedResponses[statusCode] = {
@@ -203,7 +203,7 @@ const z4Converter = {
         content: {
           'application/json': {
             schema: response.bodyV4
-              ? z4.toJSONSchema(response.bodyV4)
+              ? z.toJSONSchema(response.bodyV4)
               : { type: 'object', properties: {} },
           },
         },
