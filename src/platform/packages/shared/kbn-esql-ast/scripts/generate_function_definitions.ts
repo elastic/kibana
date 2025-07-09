@@ -49,6 +49,10 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
   if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
     locationsAvailable = [Location.WHERE, Location.STATS_WHERE];
   }
+
+  if (ESFunctionDefinition.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
+    locationsAvailable = [Location.STATS_TIMESERIES];
+  }
   const ret = {
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
@@ -356,7 +360,7 @@ ${
     .join('\n\n');
 
   const fileContents = `${fileHeader}${functionDefinitionsString}
-  export const ${functionsType}FunctionDefinitions = [${functionDefinitions
+  export const ${_.camelCase(functionsType)}FunctionDefinitions = [${functionDefinitions
     .map(({ name }) => getDefinitionName(name))
     .join(',\n')}];`;
 
@@ -418,6 +422,7 @@ export const esqlFunctionNames = ${JSON.stringify(functionNames, null, 2)};
 
   const scalarFunctionDefinitions: FunctionDefinition[] = [];
   const aggFunctionDefinitions: FunctionDefinition[] = [];
+  const timeSeriesFunctionDefinitions: FunctionDefinition[] = [];
   const operatorDefinitions: FunctionDefinition[] = [];
   const groupingFunctionDefinitions: FunctionDefinition[] = [];
 
@@ -449,6 +454,8 @@ export const esqlFunctionNames = ${JSON.stringify(functionNames, null, 2)};
       aggFunctionDefinitions.push(functionDefinition);
     } else if (functionDefinition.type === FunctionDefinitionTypes.GROUPING) {
       groupingFunctionDefinitions.push(functionDefinition);
+    } else if (functionDefinition.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
+      timeSeriesFunctionDefinitions.push(functionDefinition);
     }
   }
 
@@ -461,6 +468,13 @@ export const esqlFunctionNames = ${JSON.stringify(functionNames, null, 2)};
   await writeFile(
     join(__dirname, '../src/definitions/generated/aggregation_functions.ts'),
     printGeneratedFunctionsFile(aggFunctionDefinitions, FunctionDefinitionTypes.AGG)
+  );
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/time_series_agg_functions.ts'),
+    printGeneratedFunctionsFile(
+      timeSeriesFunctionDefinitions,
+      FunctionDefinitionTypes.TIME_SERIES_AGG
+    )
   );
   await writeFile(
     join(__dirname, '../src/definitions/generated/operators.ts'),

@@ -11,7 +11,6 @@ export type {
   ESQLAst,
   ESQLAstItem,
   ESQLAstCommand,
-  ESQLAstTimeseriesCommand,
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,

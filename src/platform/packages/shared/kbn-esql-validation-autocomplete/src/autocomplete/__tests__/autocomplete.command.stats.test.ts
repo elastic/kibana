@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
+
 import {
+  FunctionDefinitionTypes,
   getDateHistogramCompletionItem,
   allStarConstant,
   ESQL_NUMBER_TYPES,
@@ -16,6 +18,7 @@ import {
   FunctionReturnType,
 } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { roundParameterTypes } from './constants';
 import {
   setup,
@@ -99,6 +102,50 @@ describe('autocomplete.suggest', () => {
       });
 
       test('on function left paren', async () => {
+        // set the test functions to include a time series agg function
+        // to ensure it is suggested in the stats command
+        // this is a workaround for the fact that the time series agg functions
+        // are on snapshots atm, remove when they are on tech preview
+        setTestFunctions([
+          {
+            type: FunctionDefinitionTypes.TIME_SERIES_AGG,
+            name: 'func',
+            description: '',
+            signatures: [
+              {
+                params: [
+                  {
+                    name: 'field',
+                    type: 'counter_double',
+                    optional: false,
+                  },
+                ],
+                returnType: 'double',
+              },
+              {
+                params: [
+                  {
+                    name: 'field',
+                    type: 'counter_integer',
+                    optional: false,
+                  },
+                ],
+                returnType: 'double',
+              },
+              {
+                params: [
+                  {
+                    name: 'field',
+                    type: 'counter_long',
+                    optional: false,
+                  },
+                ],
+                returnType: 'double',
+              },
+            ],
+            locationsAvailable: [Location.STATS_TIMESERIES],
+          },
+        ]);
         await assertSuggestions('from a | stats by bucket(/', [
           ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date', 'date_nanos']).map(
             (field) => `${field}, `
@@ -150,6 +197,10 @@ describe('autocomplete.suggest', () => {
           ...getFunctionSignaturesByReturnType(Location.EVAL, AVG_TYPES, {
             scalar: true,
           }),
+        ]);
+        await assertSuggestions('TS a | stats avg(/', [
+          ...getFieldNamesByType(AVG_TYPES),
+          'FUNC($0)',
         ]);
         await assertSuggestions('from a | stats round(avg(/', [
           ...getFieldNamesByType(AVG_TYPES),

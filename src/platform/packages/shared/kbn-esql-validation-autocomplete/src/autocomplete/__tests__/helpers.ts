@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { camelCase } from 'lodash';
 import {
   TRIGGER_SUGGESTION_COMMAND,
   timeUnitsToSuggest,
@@ -23,10 +25,10 @@ import {
   ISuggestionItem,
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { camelCase } from 'lodash';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
@@ -148,6 +150,7 @@ export function getFunctionSignaturesByReturnType(
     grouping,
     scalar,
     operators,
+    timeseriesAgg,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
@@ -156,6 +159,7 @@ export function getFunctionSignaturesByReturnType(
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
+    timeseriesAgg?: boolean;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
@@ -176,6 +180,9 @@ export function getFunctionSignaturesByReturnType(
   // eval functions (eval is a special keyword in JS)
   if (scalar) {
     list.push(...scalarFunctionDefinitions);
+  }
+  if (timeseriesAgg) {
+    list.push(...timeSeriesAggFunctionDefinitions);
   }
   if (operators) {
     list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
