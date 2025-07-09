@@ -198,18 +198,19 @@ const bulkDeleteWithOCC = async (
   }
 
   const eventLogClient = await context.getEventLogClient();
-  await pMap(rulesToDelete.map(
-    rule => rule.id),
-    (ruleId) => disableGaps({
-      ruleId,
-      logger: context.logger,
-      eventLogClient,
-      eventLogger: context.eventLogger,
-    }),
+  await pMap(
+    rulesToDelete.map((rule) => rule.id),
+    (ruleId) =>
+      disableGaps({
+        ruleId,
+        logger: context.logger,
+        eventLogClient,
+        eventLogger: context.eventLogger,
+      }),
     {
-      concurrency: 10
+      concurrency: 10,
     }
-  )
+  );
 
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },

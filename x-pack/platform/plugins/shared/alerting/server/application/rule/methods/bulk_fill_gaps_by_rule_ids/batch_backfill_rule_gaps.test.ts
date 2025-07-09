@@ -126,9 +126,7 @@ describe('batchBackfillRuleGaps', () => {
     };
 
     it('should propagate the error when processAllRuleGaps errors', async () => {
-      processAllRuleGapsMock.mockRejectedValueOnce(
-        new Error('processAllRuleGaps failed')
-      );
+      processAllRuleGapsMock.mockRejectedValueOnce(new Error('processAllRuleGaps failed'));
       await callBatchBackfillRuleGaps();
 
       expect(result.outcome).toEqual(BulkFillGapsScheduleResult.ERRORED);

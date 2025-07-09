@@ -13,10 +13,7 @@ import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import type { Gap } from '../gap';
 import type { BackfillSchedule } from '../../../application/backfill/result/types';
-import {
-  PROCESS_GAPS_DEFAULT_PAGE_SIZE,
-  processAllRuleGaps,
-} from '../process_all_rule_gaps';
+import { PROCESS_GAPS_DEFAULT_PAGE_SIZE, processAllRuleGaps } from '../process_all_rule_gaps';
 import { updateGapsBatch } from './update_gaps_batch';
 
 interface UpdateGapsParams {

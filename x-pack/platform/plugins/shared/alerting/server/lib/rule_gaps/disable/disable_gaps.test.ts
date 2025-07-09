@@ -12,7 +12,7 @@ import { processAllRuleGaps } from '../process_all_rule_gaps';
 import { Gap } from '../gap';
 import { disableGapsBatch } from './disable_gaps_batch';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
-import {disableGaps} from './disable_gaps'
+import { disableGaps } from './disable_gaps';
 
 jest.mock('../process_all_rule_gaps');
 jest.mock('./disable_gaps_batch');
@@ -37,9 +37,7 @@ describe('disableGaps', () => {
   const ruleId = 'test-rule-id';
   beforeEach(() => {
     jest.resetAllMocks();
-    processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) =>
-      processGapsBatch(gaps)
-    );
+    processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) => processGapsBatch(gaps));
   });
 
   describe('disableGaps', () => {

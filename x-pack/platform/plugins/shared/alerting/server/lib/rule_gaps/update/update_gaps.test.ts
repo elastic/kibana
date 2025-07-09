@@ -51,9 +51,7 @@ describe('updateGaps', () => {
   const ruleId = 'test-rule-id';
   beforeEach(() => {
     jest.resetAllMocks();
-    processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) =>
-      processGapsBatch(gaps)
-    );
+    processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) => processGapsBatch(gaps));
   });
 
   describe('updateGaps', () => {
