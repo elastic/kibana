@@ -27,7 +27,7 @@ export const ThreatMatchMappingEdit = memo(function ThreatMatchMappingEdit({
 }: ThreatMatchMappingEditProps): JSX.Element {
   const fieldConfig: FieldConfig<ThreatMapEntries[]> = useMemo(
     () => ({
-      label: i18n.THREAT_MATCH_MAPPING_FIELD_LABEL,
+      label: <div>{i18n.THREAT_MATCH_MAPPING_FIELD_LABEL}</div>,
       validations: [
         {
           validator: threatMatchMappingValidatorFactory({

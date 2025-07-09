@@ -194,3 +194,37 @@ export const singleEntryThreat = (items: ThreatMapEntries[]): boolean => {
     items[0].entries[0].value === ''
   );
 };
+
+/**
+ * Not match field clause can not use same mapping fields as match clause in same AND condition.
+ * This function checks if there are any entries that have a negate clause(NOT_MATCH)
+ * and MATCH clause with the same field and value in the item(ThreatMapEntries)
+ */
+export const containsInvalidNotMatchClauses = (items: ThreatMapEntries[]): boolean => {
+  return items.some((item) => {
+    const hasNegate = item.entries.some((subEntry) => subEntry.negate === true);
+    if (!hasNegate) {
+      return false;
+    }
+
+    const negateSet = new Set(
+      item.entries
+        .filter(({ negate, field, value }) => negate && field && value)
+        .map((subEntry) => `${subEntry.field}-${subEntry.value}`)
+    );
+
+    return item.entries.some(
+      ({ field, value, negate }) =>
+        field && value && negate !== true && negateSet.has(`${field}-${value}`)
+    );
+  });
+};
+
+/**
+ * Checks if there are any entries that have a single entry with negate set to true(NOT_MATCH)
+ */
+export const containsSingledNotMatchClause = (items: ThreatMapEntries[]): boolean => {
+  return items.some((item) => {
+    return item.entries.length === 1 && item.entries[0].negate === true;
+  });
+};

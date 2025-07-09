@@ -25,6 +25,7 @@ interface EntryItemProps {
   threatIndexPatterns: DataViewBase;
   showLabel: boolean;
   onChange: (arg: Entry, i: number) => void;
+  isNotMatchDisabled?: boolean;
 }
 
 const LABEL_PADDING = 20;
@@ -35,6 +36,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   threatIndexPatterns,
   showLabel,
   onChange,
+  isNotMatchDisabled,
 }): JSX.Element => {
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
@@ -87,7 +89,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
   const renderMatchInput = useMemo(() => {
     const options = [
       { value: 'matches', inputDisplay: i18n.MATCHES },
-      { value: 'not_matches', inputDisplay: i18n.NOT_MATCHES },
+      { value: 'not_matches', inputDisplay: i18n.NOT_MATCHES, disabled: isNotMatchDisabled },
     ];
     return (
       <EuiFormRow data-test-subj="entryItemMatchInputFormRow">
@@ -98,7 +100,7 @@ export const EntryItem: React.FC<EntryItemProps> = ({
         />
       </EuiFormRow>
     );
-  }, [handleMatchChange, entry]);
+  }, [handleMatchChange, entry, isNotMatchDisabled]);
 
   const renderThreatFieldInput = useMemo(() => {
     const comboBox = (
