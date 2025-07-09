@@ -13,5 +13,6 @@ export class AnnotationsApp {
     await this.page.gotoApp('observability-overview', {});
     await expect(this.page.getByText('Annotations')).toBeVisible();
     await this.page.click('text=Annotations');
+    await expect(this.page.getByTestId('annotationsPage')).toBeVisible();
   }
 }
