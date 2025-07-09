@@ -4273,11 +4273,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/controls-constants@link:src/platform/packages/shared/controls/controls-constants":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-example-plugin@link:examples/controls_example":
   version "0.0.0"
   uid ""
 
 "@kbn/controls-plugin@link:src/platform/plugins/shared/controls":
+  version "0.0.0"
+  uid ""
+
+"@kbn/controls-schemas@link:src/platform/packages/shared/controls/controls-schemas":
   version "0.0.0"
   uid ""
 
