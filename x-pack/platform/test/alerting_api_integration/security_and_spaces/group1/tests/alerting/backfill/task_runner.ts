@@ -31,21 +31,12 @@ import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '@kbn/alerting-plugin/server/saved_objects';
-import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { DOCUMENT_SOURCE } from '@kbn/test-suites-xpack-platform/alerting_api_integration/spaces_only/tests/alerting/create_test_data';
-import {
-  getTestRuleData,
-  getUrlPrefix,
-  ObjectRemover,
-} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
-import {
-  indexTestDocs,
-  waitForEventLogDocs,
-  getScheduledTask,
-} from '@kbn/test-suites-xpack-platform/alerting_api_integration/security_and_spaces/group1/tests/alerting/backfill/test_utils';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { DOCUMENT_SOURCE } from '../../../../../spaces_only/tests/alerting/create_test_data';
+import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import { indexTestDocs, waitForEventLogDocs, getScheduledTask } from './test_utils';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
 import { queryForAlertDocs, searchScheduledTask, testDocTimestamps } from './test_utils';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 export default function createBackfillTaskRunnerTests({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -58,8 +49,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
   const alertsAsDataIndex = '.alerts-security.alerts-space1';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/224202
-  describe.skip('ad hoc backfill task', () => {
+  describe('ad hoc backfill task', () => {
     beforeEach(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
@@ -181,7 +171,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]])
+        new Map([['execute-backfill', { equal: 4 }]]),
+        true // collapse by execution UUID
       );
 
       // each execute-backfill event should have these fields
@@ -242,7 +233,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       expect(events[2]?.kibana?.alert?.rule?.execution?.backfill?.start).to.eql(
         scheduleResult[0].schedule[2].run_at
       );
-      expect(events[0]?.kibana?.alert?.rule?.execution?.backfill?.interval).to.eql(
+      expect(events[2]?.kibana?.alert?.rule?.execution?.backfill?.interval).to.eql(
         scheduleResult[0].schedule[2].interval
       );
 
@@ -250,7 +241,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       expect(events[3]?.kibana?.alert?.rule?.execution?.backfill?.start).to.eql(
         scheduleResult[0].schedule[3].run_at
       );
-      expect(events[0]?.kibana?.alert?.rule?.execution?.backfill?.interval).to.eql(
+      expect(events[3]?.kibana?.alert?.rule?.execution?.backfill?.interval).to.eql(
         scheduleResult[0].schedule[3].interval
       );
 
@@ -291,9 +282,15 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         );
       }
 
-      expect(alertDocsBackfill1[0]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[1]);
-      expect(alertDocsBackfill1[1]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[2]);
-      expect(alertDocsBackfill1[2]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[3]);
+      expect(alertDocsBackfill1[0]._source!['kibana.alert.original_time']).to.eql(
+        testDocTimestamps[1]
+      );
+      expect(alertDocsBackfill1[1]._source!['kibana.alert.original_time']).to.eql(
+        testDocTimestamps[2]
+      );
+      expect(alertDocsBackfill1[2]._source!['kibana.alert.original_time']).to.eql(
+        testDocTimestamps[3]
+      );
 
       // backfill run 2 alerts
       const alertDocsBackfill2 = alertDocs.filter(
@@ -313,7 +310,9 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         );
       }
 
-      expect(alertDocsBackfill2[0]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[4]);
+      expect(alertDocsBackfill2[0]._source!['kibana.alert.original_time']).to.eql(
+        testDocTimestamps[4]
+      );
 
       // backfill run 3 alerts
       const alertDocsBackfill3 = alertDocs.filter(
@@ -333,11 +332,21 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         );
       }
 
-      expect(alertDocsBackfill3[0]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[5]);
-      expect(alertDocsBackfill3[1]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[6]);
-      expect(alertDocsBackfill3[2]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[7]);
-      expect(alertDocsBackfill3[3]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[8]);
-      expect(alertDocsBackfill3[4]._source![ALERT_ORIGINAL_TIME]).to.eql(testDocTimestamps[9]);
+      expect(alertDocsBackfill3[0]._source!['kibana.alert.original_time']).to.eql(
+        testDocTimestamps[5]
+      );
+      expect(alertDocsBackfill3[1]._source!['kibana.alert.original_time']).to.eql(
+        testDocTimestamps[6]
+      );
+      expect(alertDocsBackfill3[2]._source!['kibana.alert.original_time']).to.eql(
+        testDocTimestamps[7]
+      );
+      expect(alertDocsBackfill3[3]._source!['kibana.alert.original_time']).to.eql(
+        testDocTimestamps[8]
+      );
+      expect(alertDocsBackfill3[4]._source!['kibana.alert.original_time']).to.eql(
+        testDocTimestamps[9]
+      );
 
       // backfill run 4 alerts
       const alertDocsBackfill4 = alertDocs.filter(
@@ -362,7 +371,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             rule_type_id: 'test.patternFiringAutoRecoverFalse',
             params: {
               pattern: {
-                instance: ['timeout'],
+                instance: ['timeout', 'timeout', 'timeout', 'timeout', 'timeout'],
               },
             },
             schedule: { interval: '12h' },
@@ -416,7 +425,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         new Map([
           ['execute-timeout', { equal: 1 }],
           ['execute-backfill', { equal: 1 }],
-        ])
+        ]),
+        true // collapse by execution UUID
       );
 
       // each event log event should have these fields
@@ -557,7 +567,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]])
+        new Map([['execute-backfill', { equal: 4 }]]),
+        true
       );
 
       // each event log event should have these fields
