@@ -8,7 +8,7 @@
 import { map, merge, OperatorFunction, share, toArray } from 'rxjs';
 import {
   ChatAgentEvent,
-  ChatAgentEventType,
+  ChatEventType,
   ConversationRoundStepType,
   isMessageCompleteEvent,
   isToolCallEvent,
@@ -45,7 +45,7 @@ export const addRoundCompleteEvent = ({
           const round = createRoundFromEvents({ events, input: userInput });
 
           const event: RoundCompleteEvent = {
-            type: ChatAgentEventType.roundComplete,
+            type: ChatEventType.roundComplete,
             data: {
               round,
             },

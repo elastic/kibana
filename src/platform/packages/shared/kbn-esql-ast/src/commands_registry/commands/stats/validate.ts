@@ -8,10 +8,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand, ESQLMessage, ESQLFunction, ESQLAst } from '../../../types';
-import { isFunctionExpression, isWhereExpression } from '../../../ast/is';
-import { isAssignment, checkAggExistence, checkFunctionContent } from './utils';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 import { ICommandContext } from '../../types';
+import { isFunctionExpression, isWhereExpression, isAssignment } from '../../../ast/is';
+import { checkAggExistence, checkFunctionContent } from './utils';
 
 export const validate = (
   command: ESQLCommand,
