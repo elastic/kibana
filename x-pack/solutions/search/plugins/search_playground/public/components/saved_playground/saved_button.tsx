@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +34,7 @@ export const SavedPlaygroundSaveButton = ({ hasChanges }: SavedPlaygroundSaveBut
     formState: { errors: formErrors },
   } = useFormContext<SavedPlaygroundForm>();
   const { updateSavedPlayground, isLoading: isSaving } = useUpdateSavedPlayground();
-  const hasErrors = useMemo(() => hasSavedPlaygroundFormErrors(formErrors), [formErrors]);
+  const hasErrors = hasSavedPlaygroundFormErrors(formErrors);
 
   const onSave = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {

@@ -41,6 +41,7 @@ import { SearchQueryMode } from '../query_mode/search_query_mode';
 import { SavedPlaygroundFetchError } from './saved_playground_fetch_error';
 import { EditPlaygroundNameModal } from './edit_name_modal';
 import { DeletePlaygroundModal } from './delete_playground_modal';
+import { SavePlaygroundModal } from './save_playground_modal';
 
 enum SavedPlaygroundModals {
   None,
@@ -66,8 +67,8 @@ export const SavedPlayground = () => {
     hasConnectors: Boolean(connectors?.length),
   });
   const navigateToView = useCallback(
-    (page: PlaygroundPageMode, view?: PlaygroundViewMode, searchParams?: string) => {
-      let path = `/p/${playgroundId}/${page}`;
+    (id: string, page: PlaygroundPageMode, view?: PlaygroundViewMode, searchParams?: string) => {
+      let path = `/p/${id}/${page}`;
       if (view && view !== PlaygroundViewMode.preview) {
         path += `/${view}`;
       }
@@ -78,7 +79,7 @@ export const SavedPlayground = () => {
         path,
       });
     },
-    [application, playgroundId]
+    [application]
   );
   useEffect(() => {
     if (formState.isLoading) return;
@@ -86,6 +87,7 @@ export const SavedPlayground = () => {
       // If there is not a pageMode set we redirect based on if there is a model set in the
       // saved playground as a best guess for default mode. until we save mode with the playground
       navigateToView(
+        playgroundId,
         summarizationModel !== undefined ? PlaygroundPageMode.Chat : PlaygroundPageMode.Search,
         PlaygroundViewMode.preview
       );
@@ -94,15 +96,16 @@ export const SavedPlayground = () => {
     // Handle Unknown modes
     if (!Object.values(PlaygroundPageMode).includes(pageMode)) {
       navigateToView(
+        playgroundId,
         summarizationModel !== undefined ? PlaygroundPageMode.Chat : PlaygroundPageMode.Search,
         PlaygroundViewMode.preview
       );
       return;
     }
     if (!Object.values(PlaygroundViewMode).includes(viewMode)) {
-      navigateToView(pageMode, PlaygroundViewMode.preview);
+      navigateToView(playgroundId, pageMode, PlaygroundViewMode.preview);
     }
-  }, [pageMode, viewMode, summarizationModel, formState.isLoading, navigateToView]);
+  }, [playgroundId, pageMode, viewMode, summarizationModel, formState.isLoading, navigateToView]);
   useEffect(() => {
     // When opening chat mode without a model selected try to select a default model
     // if one is available.
@@ -126,9 +129,9 @@ export const SavedPlayground = () => {
   const onCloseModal = useCallback(() => setShownModal(SavedPlaygroundModals.None), []);
 
   const handleModeChange = (id: PlaygroundViewMode) =>
-    navigateToView(pageMode ?? PlaygroundPageMode.Search, id, location.search);
+    navigateToView(playgroundId, pageMode ?? PlaygroundPageMode.Search, id, location.search);
   const handlePageModeChange = (mode: PlaygroundPageMode) =>
-    navigateToView(mode, viewMode, location.search);
+    navigateToView(playgroundId, mode, viewMode, location.search);
 
   const { isLoading } = formState;
   if (isLoading || pageMode === undefined) {
@@ -190,6 +193,16 @@ export const SavedPlayground = () => {
           playgroundId={playgroundId}
           playgroundName={playgroundName}
           onClose={onCloseModal}
+        />
+      )}
+      {shownModal === SavedPlaygroundModals.Copy && (
+        <SavePlaygroundModal
+          saveAs
+          playgroundName={playgroundName}
+          onClose={onCloseModal}
+          navigateToNewPlayground={(id: string) => {
+            navigateToView(id, pageMode ?? PlaygroundPageMode.Chat, viewMode, location.search);
+          }}
         />
       )}
     </>

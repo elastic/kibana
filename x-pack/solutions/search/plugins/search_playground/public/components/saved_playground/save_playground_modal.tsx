@@ -22,39 +22,82 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { validatePlaygroundName } from '../../utils/saved_playgrounds';
+
+import { getErrorMessage } from '../../../common/errors';
+import {
+  buildSavedPlaygroundFromForm,
+  validatePlaygroundName,
+} from '../../utils/saved_playgrounds';
 import { SavedPlaygroundForm } from '../../types';
+import { useSavePlayground } from '../../hooks/use_save_playground';
+import { useKibana } from '../../hooks/use_kibana';
 
 function makePlaygroundName(name?: string) {
-  return name ? `${name} (Copy)` : '';
+  return name
+    ? i18n.translate('xpack.searchPlayground.savedPlayground.nameCopy', {
+        defaultMessage: '{name} (Copy)',
+        values: { name },
+      })
+    : i18n.translate('xpack.searchPlayground.savedPlayground.defaultName', {
+        defaultMessage: 'New Playground',
+      });
 }
 
 export interface SavePlaygroundModalProps {
   playgroundName?: string;
   saveAs?: boolean;
+  navigateToNewPlayground: (id: string) => void;
   onClose: () => void;
 }
 
 export const SavePlaygroundModal = ({
+  navigateToNewPlayground,
   playgroundName,
   saveAs,
   onClose,
 }: SavePlaygroundModalProps) => {
-  const { getValues } = useFormContext<SavedPlaygroundForm>();
+  const { getValues, reset } = useFormContext<SavedPlaygroundForm>();
+  const { notifications } = useKibana().services;
   const [name, setName] = useState<string>(makePlaygroundName(playgroundName));
   const [nameError, setNameError] = useState<string | null>(
     validatePlaygroundName(makePlaygroundName(playgroundName))
   );
+  const { savePlayground, isLoading } = useSavePlayground();
   const modalFormId = useGeneratedHtmlId({ prefix: 'savePlaygroundForm' });
   const modalTitleId = useGeneratedHtmlId();
   const onNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
     setNameError(validatePlaygroundName(e.target.value));
   }, []);
-  const onSave = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.preventDefault();
-  }, []);
-  const isSaving = false;
+  const onSave = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.preventDefault();
+
+      const formData = getValues();
+      const newPlayground = {
+        ...formData,
+        name,
+      };
+      savePlayground(buildSavedPlaygroundFromForm(newPlayground), {
+        onSuccess: (data) => {
+          onClose();
+          reset(newPlayground);
+          navigateToNewPlayground(data._meta.id);
+        },
+        onError: (error) => {
+          const errorMessage = getErrorMessage(error);
+          notifications.toasts.addError(error instanceof Error ? error : new Error(errorMessage), {
+            title: i18n.translate('xpack.searchPlayground.savedPlayground.saveError.title', {
+              defaultMessage: 'Error saving playground',
+            }),
+            toastMessage: errorMessage,
+          });
+          onClose();
+        },
+      });
+    },
+    [navigateToNewPlayground, onClose, name, getValues, reset, notifications.toasts, savePlayground]
+  );
   const isInvalid = nameError !== null;
 
   return (
@@ -117,7 +160,7 @@ export const SavePlaygroundModal = ({
           form={modalFormId}
           disabled={isInvalid}
           onClick={onSave}
-          isLoading={isSaving}
+          isLoading={isLoading}
           fill
         >
           {saveAs ? (
