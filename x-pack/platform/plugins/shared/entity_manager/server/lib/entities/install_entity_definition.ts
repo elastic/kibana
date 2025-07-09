@@ -15,7 +15,7 @@ import { createAndInstallIngestPipelines } from './create_and_install_ingest_pip
 import { createAndInstallTransforms, createAndInstallBackfillTransforms } from './create_and_install_transform';
 import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
-import { deleteIngestPipelines } from './delete_ingest_pipeline';
+import { deleteIngestPipelines, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
 import { findEntityDefinitionById } from './find_entity_definition';
 import {
   entityDefinitionExists,
@@ -67,6 +67,10 @@ export async function installEntityDefinition({
 
     await stopAndDeleteTransforms(esClient, definition, logger);
 
+    // NOTE(kuba): Related to the install note; if install fails we do not get
+    // a complete list of installed resources and we cannot use the global
+    // methods to properly clean them up
+    await deleteLatestIngestPipeline(esClient, definition, logger);
     await deleteIngestPipelines(esClient, definition, logger);
 
     await deleteTemplate({
@@ -165,6 +169,9 @@ async function install({
   const transforms = await createAndInstallTransforms(esClient, definition, logger);
   const backfillTransforms = await createAndInstallBackfillTransforms(esClient, definition, logger);
 
+  // NOTE(kuba): We should update list of installed components after every
+  // successful install. Otherwise clean-up methods that delete by checking
+  // list of installedComponents will fail to clean up.
   const updatedProps = await updateEntityDefinition(soClient, definition.id, {
     installStatus: 'installed',
     installedComponents: [...templates, ...pipelines, ...transforms, ...backfillTransforms],
