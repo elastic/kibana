@@ -32,7 +32,7 @@ export class AgentService {
    */
   async list(options?: AgentListOptions): Promise<AgentDefinition[]> {
     const res = await this.http.get<ListAgentResponse>('/api/chat/agents');
-    return res.agents;
+    return res.results;
   }
 
   /**

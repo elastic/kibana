@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   builtinToolProviderId,
-  type AgentProfile,
+  type AgentDefinition,
   type ToolSelection,
   allToolsSelectionWildcard,
 } from '@kbn/onechat-common';
@@ -29,7 +29,7 @@ export interface AgentEditState {
 const defaultToolSelection: ToolSelection[] = [
   {
     provider: builtinToolProviderId,
-    toolIds: [allToolsSelectionWildcard],
+    tool_ids: [allToolsSelectionWildcard],
   },
 ];
 
@@ -47,10 +47,10 @@ export function useAgentEdit({
   onSaveError,
 }: {
   agentId?: string;
-  onSaveSuccess: (agent: AgentProfile) => void;
+  onSaveSuccess: (agent: AgentDefinition) => void;
   onSaveError: (err: Error) => void;
 }) {
-  const { agentProfilesService } = useOnechatServices();
+  const { agentService } = useOnechatServices();
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
@@ -59,7 +59,7 @@ export function useAgentEdit({
   const { agent, isLoading: agentLoading, error: agentError } = useOnechatAgentById(agentId || '');
 
   const createMutation = useMutation({
-    mutationFn: (data: AgentEditState) => agentProfilesService.create(data),
+    mutationFn: (data: AgentEditState) => agentService.create(data),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
       onSaveSuccess(result);
@@ -74,7 +74,7 @@ export function useAgentEdit({
       if (!agentId) {
         throw new Error('Agent ID is required for update');
       }
-      return agentProfilesService.update(agentId, data);
+      return agentService.update(agentId, data);
     },
     onSuccess: (result) => {
       // Invalidate specific agent and agent profiles list
@@ -98,8 +98,8 @@ export function useAgentEdit({
         id: agent.id,
         name: agent.name,
         description: agent.description,
-        customInstructions: agent.customInstructions,
-        toolSelection: agent.toolSelection || defaultToolSelection,
+        customInstructions: agent.configuration.instructions ?? '',
+        toolSelection: agent.configuration.tools ?? defaultToolSelection,
       });
     }
   }, [agentId, agent]);

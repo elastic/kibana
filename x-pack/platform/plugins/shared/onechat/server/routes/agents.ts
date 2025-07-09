@@ -56,7 +56,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         const { agents: agentsService } = getInternalServices();
         const service = await agentsService.getScopedClient({ request });
         const agents = await service.list();
-        return response.ok<ListAgentResponse>({ body: { agents } });
+        return response.ok<ListAgentResponse>({ body: { results: agents } });
       })
     );
 

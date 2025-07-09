@@ -20,7 +20,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AgentProfile } from '@kbn/onechat-common';
+import { AgentDefinition } from '@kbn/onechat-common';
 import { useForm, Controller, FormProvider } from 'react-hook-form';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -33,7 +33,7 @@ export interface AgentFormProps {
   agentId?: string;
 }
 
-type AgentFormData = Omit<AgentProfile, 'createdAt' | 'updatedAt'>;
+type AgentFormData = Omit<AgentDefinition, 'type'>;
 
 export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
   const { navigateToOnechatUrl } = useNavigation();

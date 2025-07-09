@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolProviderId, PlainIdToolIdentifier, ToolDescriptor } from './tools';
+import type { PlainIdToolIdentifier, ToolDescriptor } from './tools';
 
 /**
  * "all tools" wildcard which can be used for {@link ByIdsToolSelection}
@@ -40,7 +40,7 @@ export interface ByIdsToolSelection {
   /**
    * The id of the provider to select tools from
    */
-  provider?: ToolProviderId;
+  type?: string;
   /**
    * List of individual tool ids to select.
    */
@@ -78,7 +78,7 @@ export const filterToolsBySelection = <TType extends ToolDescriptor>(
  */
 export const toolMatchSelection = (tool: ToolDescriptor, toolSelection: ToolSelection): boolean => {
   if (isByIdsToolSelection(toolSelection)) {
-    if (toolSelection.provider && toolSelection.provider !== tool.meta.providerId) {
+    if (toolSelection.type && toolSelection.type !== tool.meta.providerId) {
       return false;
     }
     if (toolSelection.tool_ids.includes(allToolsSelectionWildcard)) {
