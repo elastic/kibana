@@ -347,8 +347,7 @@ function DiscoverDocumentsComponent({
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
-  const { customCellRenderer, customGridColumnsConfiguration } =
-    useContextualGridCustomisations(cellRendererParams) || {};
+  const { customCellRenderer } = useContextualGridCustomisations(cellRendererParams) || {};
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
@@ -478,7 +477,6 @@ function DiscoverDocumentsComponent({
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
             externalCustomRenderers={cellRenderers}
-            customGridColumnsConfiguration={customGridColumnsConfiguration}
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
