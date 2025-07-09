@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ONECHAT_UI_SETTING_ID,
   ONECHAT_MCP_SERVER_UI_SETTING_ID,
-  ONECHAT_TOOLS_UI_SETTING_ID,
+  ONECHAT_API_SETTING_ID,
 } from '../common/constants';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -40,12 +40,12 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       readonly: true,
       readonlyMode: 'ui',
     },
-    [ONECHAT_TOOLS_UI_SETTING_ID]: {
-      description: i18n.translate('xpack.onechat.uiSettings.toolsPage.description', {
-        defaultMessage: 'Enables the OneChat tools page.',
+    [ONECHAT_API_SETTING_ID]: {
+      description: i18n.translate('xpack.onechat.uiSettings.api.description', {
+        defaultMessage: 'Enables the OneChat APIs.',
       }),
-      name: i18n.translate('xpack.onechat.uiSettings.toolsPage.name', {
-        defaultMessage: 'OneChat Tools Page',
+      name: i18n.translate('xpack.onechat.uiSettings.api.name', {
+        defaultMessage: 'OneChat APIs',
       }),
       schema: schema.boolean(),
       value: false,
