@@ -327,7 +327,7 @@ export class CasesService {
   }
 
   /**
-   * Like the regular case resolver but tries to resolve by the case's `incremental_id` first.
+   * Like the regular case resolver but tries to resolve by the case's `incremental_id`.
    */
   public async getResolveCaseByIncrementalId({
     incremental_id: caseId,
@@ -336,12 +336,20 @@ export class CasesService {
   }): Promise<SavedObjectsResolveResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to find case by incremental_id ${caseId}`);
-      const found = await this.unsecuredSavedObjectsClient.find<CasePersistedAttributes>({
-        type: CASE_SAVED_OBJECT,
-        search: `attributes.incremental_id: ${caseId}`,
-      });
-      const resolveId = found.saved_objects.length > 0 ? found.saved_objects[0].id : caseId;
-      return this.getResolveCase({ id: resolveId });
+      const resolveCaseResult = (
+        await this.unsecuredSavedObjectsClient.find<CasePersistedAttributes>({
+          type: CASE_SAVED_OBJECT,
+          search: `attributes.incremental_id: ${caseId}`,
+        })
+      ).saved_objects[0];
+
+      const resolvedSO = transformSavedObjectToExternalModel(resolveCaseResult);
+      const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(resolvedSO.attributes);
+
+      return {
+        outcome: 'exactMatch',
+        saved_object: { ...resolvedSO, attributes: decodeRes },
+      };
     } catch (error) {
       this.log.error(`Error on resolve case by incremental_id ${caseId}: ${error}`);
       throw error;
