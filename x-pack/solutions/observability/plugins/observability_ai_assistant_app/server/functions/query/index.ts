@@ -108,17 +108,18 @@ export function registerQueryFunction({
         resources.logger
       );
 
+      const availableToolDefinitions = Object.fromEntries(
+        [...actions, ...esqlFunctions].map((fn) => [
+          fn.name,
+          { description: fn.description, schema: fn.parameters } as ToolDefinition,
+        ])
+      );
       const events$ = naturalLanguageToEsql({
         client: pluginsStart.inference.getClient({ request: resources.request }),
         connectorId,
         messages: inferenceMessages,
         logger: resources.logger,
-        tools: Object.fromEntries(
-          [...actions, ...esqlFunctions].map((fn) => [
-            fn.name,
-            { description: fn.description, schema: fn.parameters } as ToolDefinition,
-          ])
-        ),
+        tools: availableToolDefinitions,
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
         maxRetries: 0,
         metadata: {
@@ -127,12 +128,26 @@ export function registerQueryFunction({
           },
         },
         system: `
-        - **RULE OF THE CURRENT TASK**: After generating a query you MUST IMMEDIATELY execute it using "${EXECUTE_QUERY_FUNCTION_NAME}".
-          * The ONLY exceptions:
-            * User explicitly requests "example query"
-            * User specifically asks for **visualization** (graphs/charts) instead of raw data
-          *  DETECT DATA REQUESTS:
-            * If the user says to **show, display, list, count, average, sum, stats/statistics, top, how many**, or asks for any specific number/value → you MUST execute the query.`,
+* **RULE OF THE CURRENT TASK**: After generating a query you MUST IMMEDIATELY execute it using "${EXECUTE_QUERY_FUNCTION_NAME}".
+  * The ONLY exceptions:
+    * User explicitly requests "example query"
+    * User specifically asks for **visualization** (graphs/charts) instead of raw data
+  *  DETECT DATA REQUESTS:
+    * If the user says to **show, display, list, count, average, sum, stats/statistics, top, how many**, or asks for any specific number/value → you MUST execute the query.
+
+--- CRITICAL INSTRUCTIONS FOR THIS TURN ---
+ 1. **CHECK YOUR TOOLS FIRST.** Your capabilities are strictly limited to the tools listed in the \`== AVAILABLE TOOLS ==\` section below.
+ 2. **DISREGARD PAST TOOLS.** 
+  * Under NO circumstances should you use any tool that is not explicitly defined in the \`== AVAILABLE TOOLS ==\` section for THIS turn. 
+  * Tools used or mentioned in previous parts of the conversation are NOT available unless they are listed below. 
+  * Calling unavailable tools will result in a **critical error and task failure**.
+== AVAILABLE TOOLS == 
+ * These are the only known and available tools for use: 
+      \`\`\`json
+      ${JSON.stringify(availableToolDefinitions, null, 4)}
+      \'\'\'
+ * ALL OTHER tools not listed here are **NOT AVAILABLE** and calls to them will **FAIL**.
+          `,
       });
 
       const chatMessageId = v4();
