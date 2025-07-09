@@ -16,6 +16,11 @@ import {
   EsqlQuery,
   ESQLSource,
   isIdentifier,
+  isOptionNode,
+  isSource,
+  isColumn,
+  isTimeInterval,
+  isFunctionExpression,
   walk,
   Walker,
   esqlCommandRegistry,
@@ -31,12 +36,7 @@ import {
   areFieldAndUserDefinedColumnTypesCompatible,
   getColumnExists,
   hasWildcard,
-  isColumnItem,
-  isFunctionItem,
-  isOptionItem,
   isParametrized,
-  isSourceItem,
-  isTimeIntervalItem,
 } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
@@ -251,7 +251,7 @@ function validateCommand(
       // Now validate arguments
       for (const arg of command.args) {
         if (!Array.isArray(arg)) {
-          if (isFunctionItem(arg)) {
+          if (isFunctionExpression(arg)) {
             messages.push(
               ...validateFunction({
                 fn: arg,
@@ -262,15 +262,15 @@ function validateCommand(
                 currentCommandIndex,
               })
             );
-          } else if (isOptionItem(arg)) {
+          } else if (isOptionNode(arg)) {
             messages.push(...validateOption(arg, command, references));
-          } else if (isColumnItem(arg) || isIdentifier(arg)) {
+          } else if (isColumn(arg) || isIdentifier(arg)) {
             if (command.name === 'stats' || command.name === 'inlinestats') {
               messages.push(errors.unknownAggFunction(arg));
             } else {
               messages.push(...validateColumnForCommand(arg, command.name, references));
             }
-          } else if (isTimeIntervalItem(arg)) {
+          } else if (isTimeInterval(arg)) {
             messages.push(
               getMessageFromId({
                 messageId: 'unsupportedTypeForCommand',
@@ -286,7 +286,7 @@ function validateCommand(
         }
       }
 
-      const sources = command.args.filter((arg) => isSourceItem(arg)) as ESQLSource[];
+      const sources = command.args.filter((arg) => isSource(arg)) as ESQLSource[];
       messages.push(...validateSources(sources, references));
     }
   }
@@ -316,9 +316,9 @@ function validateOption(
     if (Array.isArray(arg)) {
       continue;
     }
-    if (isColumnItem(arg)) {
+    if (isColumn(arg)) {
       messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
-    } else if (isFunctionItem(arg)) {
+    } else if (isFunctionExpression(arg)) {
       messages.push(
         ...validateFunction({
           fn: arg,
