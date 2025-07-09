@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
-import { ReactElement } from 'react';
-import React from 'react';
-import { PanelsResizable } from './panels_resizable';
+import { type ReactWrapper, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
+import React, { ReactElement } from 'react';
+import { PanelsResizable } from './panels_resizable';
+import { ResizableLayoutDirection } from '../types';
 
 const containerHeight = 1000;
 const containerWidth = 500;
@@ -20,13 +20,24 @@ const fixedPanelId = 'fixedPanel';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
-  useResizeObserver: jest.fn(),
   useGeneratedHtmlId: jest.fn(() => fixedPanelId),
 }));
 
-import * as eui from '@elastic/eui';
-import { waitFor } from '@testing-library/react';
-import { ResizableLayoutDirection } from '../types';
+let resizeObserverCallback: (height: number, width: number) => void = jest.fn();
+
+window.ResizeObserver = class ResizeObserver {
+  constructor(callback: ResizeObserverCallback) {
+    resizeObserverCallback = jest.fn((height, width) => {
+      const entries = [
+        { borderBoxSize: [{ inlineSize: width, blockSize: height }] },
+      ] as unknown as ResizeObserverEntry[];
+      act(() => callback(entries, this));
+    });
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
 
 describe('Panels resizable', () => {
   const mountComponent = ({
@@ -85,9 +96,13 @@ describe('Panels resizable', () => {
   };
 
   beforeEach(() => {
-    jest
-      .spyOn(eui, 'useResizeObserver')
-      .mockReturnValue({ height: containerHeight, width: containerWidth });
+    resizeObserverCallback = jest.fn();
+    window.HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+      return {
+        height: containerHeight,
+        width: containerWidth,
+      } as DOMRect;
+    });
   });
 
   it('should render both panels', () => {
@@ -130,7 +145,7 @@ describe('Panels resizable', () => {
     const component = mountComponent({ initialFixedPanelSize });
     expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
     const newContainerSize = 2000;
-    jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: newContainerSize, width: 0 });
+    resizeObserverCallback(newContainerSize, 0);
     forceRender(component);
     expectCorrectPanelSizes(component, newContainerSize, initialFixedPanelSize);
   });
@@ -146,10 +161,10 @@ describe('Panels resizable', () => {
     });
     expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
     const newContainerSize = 400;
-    jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: newContainerSize, width: 0 });
+    resizeObserverCallback(newContainerSize, 0);
     forceRender(component);
     expectCorrectPanelSizes(component, newContainerSize, newContainerSize - minFlexPanelSize);
-    jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: containerHeight, width: 0 });
+    resizeObserverCallback(containerHeight, 0);
     forceRender(component);
     expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
   });
@@ -165,7 +180,7 @@ describe('Panels resizable', () => {
     });
     expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
     const newContainerSize = 200;
-    jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: newContainerSize, width: 0 });
+    resizeObserverCallback(newContainerSize, 0);
     forceRender(component);
     expect(
       component.find('[data-test-subj="resizableLayoutResizablePanelFixed"]').at(0).prop('size')
@@ -173,7 +188,7 @@ describe('Panels resizable', () => {
     expect(
       component.find('[data-test-subj="resizableLayoutResizablePanelFlex"]').at(0).prop('size')
     ).toBe((minFlexPanelSize / newContainerSize) * 100);
-    jest.spyOn(eui, 'useResizeObserver').mockReturnValue({ height: containerHeight, width: 0 });
+    resizeObserverCallback(containerHeight, 0);
     forceRender(component);
     expectCorrectPanelSizes(component, containerHeight, initialFixedPanelSize);
   });
