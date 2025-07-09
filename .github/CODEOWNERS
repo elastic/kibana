@@ -2030,7 +2030,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /typings/ @elastic/kibana-core
 /src/platform/test/analytics @elastic/kibana-core
 /src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
-/x-pack/test/saved_objects_field_count/ @elastic/kibana-core
+/x-pack/platform/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test_serverless/**/test_suites/common/saved_objects_management/ @elastic/kibana-core
 /x-pack/test_serverless/api_integration/test_suites/common/core/ @elastic/kibana-core
 /x-pack/test_serverless/api_integration/test_suites/**/telemetry/ @elastic/kibana-core
