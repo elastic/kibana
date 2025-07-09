@@ -50,7 +50,7 @@ export const convertToRRule = ({
   }
 
   const frequency = form.customFrequency ?? (form.frequency as Frequency);
-  rRule.freq = frequency;
+  rRule.freq = Number(frequency);
 
   rRule.interval = form.interval;
 
