@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 
-import type { DiscoveryField } from '../../common/types';
+import type { DiscoveryDataset } from '../../common/types';
 
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import type { InstallType } from '../types';
@@ -23,7 +23,7 @@ export interface PackageUpdateEvent {
   eventType: UpdateEventType;
   installType?: InstallType;
   packageType?: string;
-  discoveryFields?: DiscoveryField[];
+  discoveryDatasets?: DiscoveryDataset[];
   automaticInstall?: boolean;
 }
 

@@ -125,10 +125,7 @@ describe('AutoInstallContentPackagesTask', () => {
           name: 'kubernetes_otel',
           version: '1.1.0',
           discovery: {
-            fields: [
-              { name: 'data_stream.dataset', value: 'system.cpu' },
-              { name: 'data_stream.dataset', value: 'system.memory' },
-            ],
+            datasets: [{ name: 'system.cpu' }, { name: 'system.memory' }],
           },
         } as any,
       ]);
@@ -157,6 +154,14 @@ describe('AutoInstallContentPackagesTask', () => {
         automaticInstall: true,
       });
       expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
+    });
+
+    it('should skip es search if first dataset has matching data', async () => {
+      packageClientMock.getInstallation.mockResolvedValue(undefined);
+
+      await runTask();
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
     });
 
     it('should not call registry if cached', async () => {
@@ -192,40 +197,6 @@ describe('AutoInstallContentPackagesTask', () => {
         install_status: 'installed',
         version: '1.1.0',
       } as any);
-
-      await runTask();
-
-      expect(packageClientMock.installPackage).not.toHaveBeenCalled();
-    });
-
-    it('should not install package if discovery field is not data_stream.dataset', async () => {
-      MockRegistry.fetchList.mockResolvedValue([
-        {
-          name: 'kubernetes_otel',
-          version: '1.1.0',
-          discovery: {
-            fields: [{ name: 'event.dataset', value: 'system.cpu' }],
-          },
-        } as any,
-      ]);
-      packageClientMock.getInstallation.mockResolvedValue(undefined);
-
-      await runTask();
-
-      expect(packageClientMock.installPackage).not.toHaveBeenCalled();
-    });
-
-    it('should not install package if discovery field value is not set', async () => {
-      MockRegistry.fetchList.mockResolvedValue([
-        {
-          name: 'kubernetes_otel',
-          version: '1.1.0',
-          discovery: {
-            fields: [{ name: 'data_stream.dataset' }],
-          },
-        } as any,
-      ]);
-      packageClientMock.getInstallation.mockResolvedValue(undefined);
 
       await runTask();
 

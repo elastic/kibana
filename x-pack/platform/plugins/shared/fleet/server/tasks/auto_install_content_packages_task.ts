@@ -22,7 +22,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 
-import type { DiscoveryField } from '../../common/types';
+import type { DiscoveryDataset } from '../../common/types';
 
 import type { PackageClient } from '../services';
 import { appContextService } from '../services';
@@ -56,7 +56,6 @@ interface AutoInstallContentPackagesTaskStartContract {
 interface DiscoveryMap {
   [key: string]: {
     packages: Array<{ name: string; version: string }>;
-    field: { name: string; value: string | number | boolean };
   };
 }
 
@@ -221,22 +220,23 @@ export class AutoInstallContentPackagesTask {
   private async getPackagesToInstall(esClient: ElasticsearchClient, discoveryMap: DiscoveryMap) {
     const packagesToInstall: { [name: string]: string } = {};
 
-    for (const mapValue of Object.values(discoveryMap)) {
-      const hasData = await this.hasDiscoveryFieldData(
-        esClient,
-        mapValue.field.name,
-        mapValue.field.value
-      );
+    for (const [dataset, mapValue] of Object.entries(discoveryMap)) {
+      const packages = mapValue.packages;
+
+      if (packages.every((pkg) => Object.keys(packagesToInstall).includes(pkg.name))) {
+        // skip ES search as packages are already part of packagesToInstall
+        continue;
+      }
+
+      const hasData = await this.hasDiscoveryFieldData(esClient, dataset);
 
       if (hasData) {
         this.logger.debug(
-          `[AutoInstallContentPackagesTask] Found data for field ${
-            mapValue.field.name
-          } with value ${mapValue.field.value}, will install packages: ${mapValue.packages
+          `[AutoInstallContentPackagesTask] Found data for field ${dataset} with value ${dataset}, will install packages: ${packages
             .map((pkg) => `${pkg.name}@${pkg.version}`)
             .join(', ')}`
         );
-        for (const { name, version } of mapValue.packages) {
+        for (const { name, version } of packages) {
           packagesToInstall[name] = version;
         }
       }
@@ -246,7 +246,6 @@ export class AutoInstallContentPackagesTask {
 
   private async hasDiscoveryFieldData(
     esClient: ElasticsearchClient,
-    fieldName: string,
     fieldValue: string | number | boolean
   ) {
     const discoveryMatches = await esClient.search(
@@ -257,7 +256,7 @@ export class AutoInstallContentPackagesTask {
             filter: [
               {
                 term: {
-                  [fieldName]: fieldValue,
+                  'data_stream.dataset': fieldValue,
                 },
               },
               {
@@ -287,17 +286,15 @@ export class AutoInstallContentPackagesTask {
     const registryItems = await Registry.fetchList({ prerelease, type });
 
     registryItems.forEach((item) => {
-      if (item.discovery?.fields) {
-        item.discovery.fields.forEach((field: DiscoveryField) => {
-          if (field.name === 'data_stream.dataset' && field.value) {
-            const mapKey = `${field.name}:${field.value}`;
-            if (!discoveryMap[mapKey]) {
-              discoveryMap[mapKey] = {
+      if (item.discovery?.datasets) {
+        item.discovery.datasets.forEach((field: DiscoveryDataset) => {
+          if (field.name) {
+            if (!discoveryMap[field.name]) {
+              discoveryMap[field.name] = {
                 packages: [],
-                field: { name: field.name, value: field.value },
               };
             }
-            discoveryMap[mapKey].packages.push({ name: item.name, version: item.version });
+            discoveryMap[field.name].packages.push({ name: item.name, version: item.version });
           }
         });
       }

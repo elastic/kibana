@@ -37,12 +37,11 @@ export interface PackageSpecManifest {
   };
   asset_tags?: PackageSpecTags[];
   discovery?: {
-    fields?: DiscoveryField[];
+    datasets?: DiscoveryDataset[];
   };
 }
-export interface DiscoveryField {
+export interface DiscoveryDataset {
   name: string;
-  value?: string | number | boolean;
 }
 
 export interface PackageSpecTags {

@@ -524,7 +524,7 @@ async function installPackageFromRegistry({
       archiveIterator,
     };
     telemetryEvent.packageType = packageInfo.type;
-    telemetryEvent.discoveryFields = packageInfo.discovery?.fields;
+    telemetryEvent.discoveryDatasets = packageInfo.discovery?.datasets;
     telemetryEvent.automaticInstall = automaticInstall;
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
@@ -663,7 +663,7 @@ export async function installPackageWithStateMachine(options: {
     telemetryEvent.installType = installType;
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
     telemetryEvent.packageType = packageInfo.type;
-    telemetryEvent.discoveryFields = packageInfo.discovery?.fields;
+    telemetryEvent.discoveryDatasets = packageInfo.discovery?.datasets;
     telemetryEvent.automaticInstall = automaticInstall;
   }
 
