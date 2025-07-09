@@ -183,6 +183,11 @@ export enum Location {
   STATS_WHERE = 'stats_where',
 
   /**
+   * WHEN TS is used as a source command, inner STATS functions
+   */
+  STATS_TIMESERIES = 'stats_timeseries',
+
+  /**
    * Top-level ENRICH command
    */
   ENRICH = 'enrich',

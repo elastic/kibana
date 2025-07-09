@@ -29,6 +29,7 @@ import {
   FunctionParameter,
   isList,
 } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { comparisonFunctions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import {
@@ -78,6 +79,7 @@ import {
   getValidSignaturesAndTypesToSuggestNext,
   extractTypeFromASTArg,
   correctQuerySyntax,
+  isTimeseriesAggUsedAlready,
 } from './helper';
 import { getLocationFromCommandOrOptionName } from '../shared/types';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
@@ -494,6 +496,11 @@ async function getFunctionArgsSuggestions(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
+          : []),
+        ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
+          ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(
+              ({ name }) => name
+            )
           : [])
       );
     }
@@ -566,9 +573,16 @@ async function getFunctionArgsSuggestions(
 
     // Functions
     if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
+      let location = getLocationFromCommandOrOptionName(option?.name ?? command.name);
+      // If the user is working with timeseries data, we want to suggest
+      // functions that are relevant to the timeseries context.
+      const isTSSourceCommand = commands[0].name === 'ts';
+      if (isTSSourceCommand && isAggFunctionUsedAlready(command, finalCommandArgIndex)) {
+        location = Location.STATS_TIMESERIES;
+      }
       suggestions.push(
         ...getFunctionSuggestions({
-          location: getLocationFromCommandOrOptionName(option?.name ?? command.name),
+          location,
           returnTypes: canBeBooleanCondition
             ? ['any']
             : (ensureKeywordAndText(

@@ -19,6 +19,7 @@ import {
 } from '../types';
 import { operatorsDefinitions } from '../all_operators';
 import { aggFunctionDefinitions } from '../generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
@@ -43,6 +44,7 @@ export function buildFunctionLookup() {
         scalarFunctionDefinitions,
         aggFunctionDefinitions,
         groupingFunctionDefinitions,
+        timeSeriesAggFunctionDefinitions,
         getTestFunctions()
       )
       .reduce((memo, def) => {
@@ -177,7 +179,8 @@ const allFunctions = memoize(
     aggFunctionDefinitions
       .concat(scalarFunctionDefinitions)
       .concat(groupingFunctionDefinitions)
-      .concat(getTestFunctions()),
+      .concat(getTestFunctions())
+      .concat(timeSeriesAggFunctionDefinitions),
   () => getTestFunctions()
 );
 
@@ -192,6 +195,10 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   if (fn.customParametersSnippet) {
     text = `${fn.name.toUpperCase()}(${fn.customParametersSnippet})`;
   }
+  let functionsPriority = fn.type === FunctionDefinitionTypes.AGG ? 'A' : 'C';
+  if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
+    functionsPriority = '1A';
+  }
   return {
     label: fn.name.toUpperCase(),
     text,
@@ -201,8 +208,8 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     documentation: {
       value: buildFunctionDocumentation(fullSignatures, fn.examples),
     },
-    // agg functgions have priority over everything else
-    sortText: fn.type === FunctionDefinitionTypes.AGG ? '1A' : 'C',
+    // time_series_agg functions have priority over everything else
+    sortText: functionsPriority,
     // trigger a suggestion follow up on selection
     command: TRIGGER_SUGGESTION_COMMAND,
   };
