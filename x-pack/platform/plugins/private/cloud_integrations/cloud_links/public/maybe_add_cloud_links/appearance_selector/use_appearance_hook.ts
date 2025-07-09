@@ -62,7 +62,10 @@ export const useAppearance = ({
       ),
     },
     pageReloadChecker: (prev, next) => {
-      return prev?.userSettings?.darkMode !== next.userSettings?.darkMode;
+      const hasChangedDarkMode = prev?.userSettings?.darkMode !== next.userSettings?.darkMode;
+      const hasChangedContrastMode =
+        prev?.userSettings?.contrastMode !== next.userSettings?.contrastMode;
+      return hasChangedDarkMode || hasChangedContrastMode;
     },
   });
 
