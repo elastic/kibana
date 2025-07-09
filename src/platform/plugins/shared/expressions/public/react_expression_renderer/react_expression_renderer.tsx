@@ -41,7 +41,7 @@ export function ReactExpressionRenderer({
 }: ReactExpressionRendererProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-  const { error, isEmpty, isLoading } = useExpressionRenderer(nodeRef, {
+  const { error, isEmpty, isLoading, Component } = useExpressionRenderer(nodeRef, {
     ...expressionRendererOptions,
     hasCustomErrorRenderer: !!renderError,
   });
@@ -62,7 +62,19 @@ export function ReactExpressionRenderer({
           ...(isEmpty || !!error ? { display: 'none' } : {}),
         })}
         ref={nodeRef}
-      />
+      >
+        {Component && !error && <Component />}
+      </div>
+      {/* <div
+        className="expExpressionRenderer__expression"
+        css={css({
+          width: '100%',
+          height: '100%',
+          ...(padding ? { padding: euiTheme.size[padding] } : {}),
+          ...(isEmpty || !!error ? { display: 'none' } : {}),
+        })}
+        ref={nodeRef}
+      /> */}
     </div>
   );
 }

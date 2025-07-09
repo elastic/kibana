@@ -44,6 +44,7 @@ interface ExpressionRendererState {
   isEmpty: boolean;
   isLoading: boolean;
   error: null | ExpressionRenderError;
+  Component: null | React.ComponentType;
 }
 
 export function useExpressionRenderer(
@@ -60,12 +61,13 @@ export function useExpressionRenderer(
     ...loaderParams
   }: ExpressionRendererParams
 ): ExpressionRendererState {
-  const [{ error, isEmpty, isLoading }, setState] = useReducer<
+  const [{ error, isEmpty, isLoading, Component }, setState] = useReducer<
     Reducer<ExpressionRendererState, Partial<ExpressionRendererState>>
   >((currentState, newState) => ({ ...currentState, ...newState }), {
     isEmpty: true,
     isLoading: false,
     error: null,
+    Component: null,
   });
 
   const memoizedOptions = useShallowMemo({ expression, params: useShallowMemo(loaderParams) });
@@ -106,6 +108,9 @@ export function useExpressionRenderer(
           });
 
           return debouncedLoaderParams.onRenderError?.(domNode, newError, handlers);
+        },
+        onRenderComponent: (_Component) => {
+          setState({ Component: _Component });
         },
       });
 
@@ -192,5 +197,6 @@ export function useExpressionRenderer(
     error,
     isEmpty,
     isLoading: isLoading || isDebounced,
+    Component,
   };
 }
