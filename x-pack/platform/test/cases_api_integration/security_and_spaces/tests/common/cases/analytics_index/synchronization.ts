@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const retry = getService('retry');
   const authSpace1 = getAuthWithSuperUser();
 
-  describe('analytics indexes synchronization task', () => {
+  describe.only('analytics indexes synchronization task', () => {
     beforeEach(async () => {
       await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);
