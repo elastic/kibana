@@ -124,6 +124,7 @@ export enum FunctionDefinitionTypes {
   SCALAR = 'scalar',
   OPERATOR = 'operator',
   GROUPING = 'grouping',
+  TIME_SERIES_AGG = 'time_series_agg',
 }
 
 /**
