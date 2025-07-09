@@ -9,7 +9,7 @@
 
 import React from 'react';
 import deepEqual from 'react-fast-compare';
-import { openLazyFlyout } from '@kbn/presentation-utils';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
 
 import type { DefaultDataControlState } from '../../../common';

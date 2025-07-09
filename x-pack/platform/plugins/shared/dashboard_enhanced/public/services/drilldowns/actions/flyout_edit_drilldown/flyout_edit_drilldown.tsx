@@ -8,7 +8,7 @@
 import React from 'react';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { type PresentationContainer, type TracksOverlays } from '@kbn/presentation-containers';
-import { openLazyFlyout } from '@kbn/presentation-utils';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   apiCanAccessViewMode,
   apiHasSupportedTriggers,

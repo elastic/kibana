@@ -15,7 +15,7 @@ import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
-import { openLazyFlyout } from '@kbn/presentation-utils';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { LinksLayoutType } from '../../common/content_management';
 import { linksClient, runSaveToLibrary } from '../content_management';
 import { coreServices } from '../services/kibana_services';

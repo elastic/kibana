@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { openLazyFlyout } from '@kbn/presentation-utils';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
 import { ControlGroupApi, ControlGroupEditorState } from './types';

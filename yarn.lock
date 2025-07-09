@@ -6757,7 +6757,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-utils@link:src/platform/packages/shared/kbn-presentation-utils":
+"@kbn/presentation-util@link:src/platform/packages/shared/presentation/presentation_util":
   version "0.0.0"
   uid ""
 

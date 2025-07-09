@@ -22,7 +22,7 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import { AggregateQuery, Query } from '@kbn/es-query';
 
 // mock lazy flyout component
-jest.mock('@kbn/presentation-utils', () => ({
+jest.mock('@kbn/presentation-util', () => ({
   openLazyFlyout: async ({
     loadContent,
   }: {

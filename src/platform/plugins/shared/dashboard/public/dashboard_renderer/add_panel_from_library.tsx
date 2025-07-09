@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { openLazyFlyout } from '@kbn/presentation-utils';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { DashboardApi } from '../dashboard_api/types';
 import { coreServices } from '../services/kibana_services';
 

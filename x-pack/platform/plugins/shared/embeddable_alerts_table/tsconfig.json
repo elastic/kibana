@@ -35,6 +35,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
-    "@kbn/presentation-utils",
+    "@kbn/presentation-util",
   ]
 }

@@ -1,6 +1,6 @@
 {
   "type": "shared-browser",
-  "id": "@kbn/presentation-utils",
+  "id": "@kbn/presentation-util",
   "owner": [
     "@elastic/kibana-presentation"
   ],

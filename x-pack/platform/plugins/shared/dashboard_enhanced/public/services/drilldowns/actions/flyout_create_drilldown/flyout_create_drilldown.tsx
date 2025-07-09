@@ -10,7 +10,7 @@ import {
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { openLazyFlyout } from '@kbn/presentation-utils';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { type PresentationContainer, type TracksOverlays } from '@kbn/presentation-containers';

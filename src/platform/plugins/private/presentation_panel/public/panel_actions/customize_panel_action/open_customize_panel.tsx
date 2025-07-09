@@ -8,7 +8,7 @@
  */
 
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { openLazyFlyout } from '@kbn/presentation-utils';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import React from 'react';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';

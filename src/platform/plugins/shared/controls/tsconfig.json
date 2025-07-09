@@ -41,7 +41,7 @@
     "@kbn/css-utils",
     "@kbn/esql-utils",
     "@kbn/search-types",
-    "@kbn/presentation-utils"
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }

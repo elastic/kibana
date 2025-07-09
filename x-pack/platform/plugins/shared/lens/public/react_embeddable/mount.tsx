@@ -8,7 +8,7 @@
 import { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import { type UseEuiTheme } from '@elastic/eui';
-import { openLazyFlyout } from '@kbn/presentation-utils';
+import { openLazyFlyout } from '@kbn/presentation-util';
 /**
  * Shared logic to mount the inline config panel
  * @param ConfigPanel
