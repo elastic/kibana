@@ -10,6 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -96,6 +97,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
           },
         },
         observabilityAIAssistant: {} as unknown as ObservabilityAIAssistantPublicStart,
+        unifiedDocViewer: {} as unknown as UnifiedDocViewerStart,
         charts: {
           theme: {
             useSparklineOverrides: () => {

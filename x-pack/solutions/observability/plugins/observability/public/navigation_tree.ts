@@ -144,6 +144,29 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   },
                 ],
               },
+              {
+                id: 'uptime',
+                title: i18n.translate('xpack.observability.obltNav.apm.uptimeGroupTitle', {
+                  defaultMessage: 'Uptime',
+                }),
+                children: [
+                  {
+                    link: 'uptime',
+                    title: i18n.translate('xpack.observability.obltNav.apm.uptime.monitors', {
+                      defaultMessage: 'Uptime monitors',
+                    }),
+                  },
+                  {
+                    link: 'uptime:Certificates',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.apm.uptime.tlsCertificates',
+                      {
+                        defaultMessage: 'TLS certificates',
+                      }
+                    ),
+                  },
+                ],
+              },
             ],
           },
           {

@@ -1,5 +1,8 @@
 # Security Search AI Lake tier config
 
+## Cloud settings
+xpack.cloud.serverless.product_tier: search_ai_lake
+
 ## Disable plugins
 xpack.osquery.enabled: false
 xpack.ml.ad.enabled: false

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFilterButton,
@@ -16,17 +17,22 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
+import { GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
-import { GrokProcessorDefinition } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import React, { useMemo } from 'react';
+import { getPercentageFormatter } from '../../../util/formatters';
+import { useKibana } from '../../../hooks/use_kibana';
 import { PreviewTable } from '../preview_table';
 import {
   PreviewDocsFilterOption,
   getTableColumns,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
-import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
+import {
+  selectOriginalPreviewRecords,
+  selectPreviewRecords,
+} from './state_management/simulation_state_machine/selectors';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
@@ -36,6 +42,11 @@ import { selectDraftProcessor } from './state_management/stream_enrichment_state
 import { WithUIAttributes } from './types';
 import { isGrokProcessor } from './utils';
 import { AssetImage } from '../../asset_image';
+import { docViewJson } from './doc_viewer_json';
+import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
+import { DataTableRecordWithIndex, PreviewFlyout } from './preview_flyout';
+
+export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
@@ -104,10 +115,7 @@ export const ProcessorOutcomePreview = () => {
   );
 };
 
-const formatter = new Intl.NumberFormat('en-US', {
-  style: 'percent',
-  maximumFractionDigits: 1,
-});
+const formatter = getPercentageFormatter();
 
 const formatRateToPercentage = (rate?: number) =>
   (rate ? formatter.format(rate) : undefined) as any; // This is a workaround for the type error, since the numFilters & numActiveFilters props are defined as number | undefined
@@ -201,8 +209,24 @@ const OutcomePreviewTable = () => {
   );
   const previewColumnsOrder = useSimulatorSelector((state) => state.context.previewColumnsOrder);
   const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
+    selectPreviewRecords(snapshot.context)
   );
+  const originalSamples = useSimulatorSelector((snapshot) =>
+    selectOriginalPreviewRecords(snapshot.context)
+  );
+
+  const { dependencies } = useKibana();
+  const { unifiedDocViewer } = dependencies.start;
+
+  const docViewsRegistry = useMemo(() => {
+    const docViewers = unifiedDocViewer.registry.getAll();
+    const myRegistry = new DocViewsRegistry([
+      docViewers.find((docView) => docView.id === 'doc_view_table')!,
+      docViewDiff,
+      docViewJson,
+    ]);
+    return myRegistry;
+  }, [unifiedDocViewer.registry]);
 
   const {
     setExplicitlyEnabledPreviewColumns,
@@ -301,6 +325,64 @@ const OutcomePreviewTable = () => {
     setPreviewColumnsOrder(visibleColumns);
   };
 
+  const hits = useMemo(() => {
+    return previewDocuments.map((doc, index) =>
+      // make sure the ID is unique when remapping a new batch of preview documents so the document flyout will refresh properly
+      ({
+        raw: doc,
+        flattened: doc,
+        index,
+        id: `${index}-${Date.now()}`,
+      })
+    );
+  }, [previewDocuments]);
+
+  const [currentDoc, setExpandedDoc] = React.useState<DataTableRecordWithIndex | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    if (currentDoc) {
+      // if a current doc is set but not in the hits, update it to point to the newly mapped hit with the same index
+      const hit = hits.find((h) => h.index === currentDoc.index);
+      if (hit && hit !== currentDoc) {
+        setExpandedDoc(hit);
+      } else if (!hit && currentDoc) {
+        // if the current doc is not found in the hits, reset it
+        setExpandedDoc(undefined);
+      }
+    }
+  }, [currentDoc, hits]);
+
+  const currentDocRef = useRef<DataTableRecordWithIndex | undefined>(currentDoc);
+  currentDocRef.current = currentDoc;
+  const hitsRef = useRef<DataTableRecordWithIndex[]>(hits);
+  hitsRef.current = hits;
+  const onRowSelected = useCallback((rowIndex: number) => {
+    if (currentDocRef.current && hitsRef.current[rowIndex] === currentDocRef.current) {
+      // If the same row is clicked, we collapse the flyout
+      setExpandedDoc(undefined);
+      return;
+    }
+    setExpandedDoc(hitsRef.current[rowIndex]);
+  }, []);
+
+  const docViewerContext = useMemo(
+    () => ({
+      originalSample: originalSamples && currentDoc ? originalSamples[currentDoc.index] : undefined,
+    }),
+    [currentDoc, originalSamples]
+  );
+
+  useEffect(() => {
+    if (docViewerContext.originalSample) {
+      // If the original sample is available, enable the diff tab - otherwise disable it
+      docViewsRegistry.enableById(DOC_VIEW_DIFF_ID);
+    } else {
+      docViewsRegistry.disableById(DOC_VIEW_DIFF_ID);
+    }
+  }, [docViewerContext, docViewsRegistry]);
+
   if (isEmpty(previewDocuments)) {
     return (
       <EuiEmptyPrompt
@@ -329,33 +411,41 @@ const OutcomePreviewTable = () => {
   }
 
   return (
-    <PreviewTable
-      documents={previewDocuments}
-      displayColumns={previewColumns}
-      rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
-      toolbarVisibility
-      setVisibleColumns={setVisibleColumns}
-      sorting={previewColumnsSorting}
-      setSorting={setPreviewColumnsSorting}
-      columnOrderHint={previewColumnsOrder}
-      renderCellValue={
-        grokMode
-          ? (document, columnId) => {
-              const value = document[columnId];
-              if (typeof value === 'string' && columnId === grokField) {
-                return (
-                  <Sample
-                    grokCollection={grokCollection}
-                    draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
-                    sample={value}
-                  />
-                );
-              } else {
-                return undefined;
+    <>
+      <PreviewTable
+        documents={previewDocuments as SampleDocument[]}
+        selectableRow
+        onRowSelected={onRowSelected}
+        selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
+        displayColumns={previewColumns}
+        rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
+        toolbarVisibility
+        setVisibleColumns={setVisibleColumns}
+        sorting={previewColumnsSorting}
+        setSorting={setPreviewColumnsSorting}
+        columnOrderHint={previewColumnsOrder}
+        renderCellValue={
+          grokMode
+            ? (document, columnId) => {
+                const value = document[columnId];
+                if (typeof value === 'string' && columnId === grokField) {
+                  return (
+                    <Sample
+                      grokCollection={grokCollection}
+                      draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
+                      sample={value}
+                    />
+                  );
+                } else {
+                  return undefined;
+                }
               }
-            }
-          : undefined
-      }
-    />
+            : undefined
+        }
+      />
+      <DocViewerContext.Provider value={docViewerContext}>
+        <PreviewFlyout currentDoc={currentDoc} hits={hits} setExpandedDoc={setExpandedDoc} />
+      </DocViewerContext.Provider>
+    </>
   );
 };
