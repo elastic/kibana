@@ -91,7 +91,7 @@ export default function searchSolutionNavigation({
         },
         {
           navItem: 'QueryRules',
-          breadcrumbs: [],
+          breadcrumbs: ['Relevance', 'Query Rules'],
           pageTestSubject: 'queryRulesBasePage',
         },
         {
