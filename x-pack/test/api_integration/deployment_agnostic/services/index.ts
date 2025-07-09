@@ -18,7 +18,8 @@ export type {
 
 export const services = {
   ...platformDeploymentAgnosticServices,
-  // create a new deployment-agnostic service and load here
+  // these services are left for compatibility with existing tests in x-pack/test and should not be used in new tests
+  alertingApi: AlertingApiProvider,
   synthtrace: SynthtraceProvider,
   observabilityAIAssistantApi: ObservabilityAIAssistantApiProvider,
 };
