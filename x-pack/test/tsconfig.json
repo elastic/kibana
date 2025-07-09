@@ -157,7 +157,6 @@
     "@kbn/apm-sources-access-plugin",
     "@kbn/event-log-plugin",
     "@kbn/dev-proc-runner",
-    "@kbn/intercepts-plugin",
     "@kbn/core-provider-plugin",
   ]
 }
