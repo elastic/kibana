@@ -9,7 +9,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { type Datatable } from '@kbn/expressions-plugin/common';
-import { SecondaryMetric, type SecondaryMetricProps } from './secondary_metric';
+import { SecondaryMetric } from './secondary_metric';
+import type { SecondaryMetricInfoArgs as SecondaryMetricProps } from './secondary_metric_info';
 import { faker } from '@faker-js/faker';
 
 const id = faker.string.uuid();
@@ -219,8 +220,8 @@ describe('Secondary metric', () => {
             renderSecondaryMetric({
               row: { [id]: value },
               trendConfig: {
-                icon: showIcon,
-                value: showValue,
+                showIcon,
+                showValue,
                 palette,
                 baselineValue: baseline,
                 compareToPrimary: false,
@@ -261,8 +262,8 @@ describe('Secondary metric', () => {
               row: { [id]: value },
               getMetricFormatter: getMetricFormatterMock,
               trendConfig: {
-                icon: showIcon,
-                value: showValue,
+                showIcon,
+                showValue,
                 palette,
                 baselineValue: baseline,
                 compareToPrimary: true,

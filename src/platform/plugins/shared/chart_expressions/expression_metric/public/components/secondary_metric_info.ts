@@ -8,13 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import type { VisParams } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { VisParams } from '@kbn/visualizations-plugin/common';
 import { FormatOverrides } from './helpers';
 
-interface TrendConfig {
+export interface TrendConfig {
   /**
    * If the icon is shown
    */
@@ -27,6 +27,26 @@ interface TrendConfig {
   baselineValue: number | undefined;
   borderColor?: string;
   compareToPrimary: boolean;
+}
+
+export interface SecondaryMetricInfoArgs {
+  columns: DatatableColumn[];
+  row: DatatableRow;
+  config: Pick<VisParams, 'metric' | 'dimensions'>;
+  getMetricFormatter: (
+    accessor: string,
+    columns: DatatableColumn[],
+    formatOverrides?: FormatOverrides | undefined
+  ) => FieldFormatConvertFunction;
+  trendConfig?: TrendConfig;
+  staticColor?: string;
+}
+
+export interface SecondaryMetricInfo {
+  value: string;
+  label?: string;
+  badgeColor?: string;
+  description?: string;
 }
 
 const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvailable', {
@@ -109,24 +129,6 @@ function getTrendDescription(hasIcon: boolean, value: string, direction: string)
   });
 }
 
-type GetMetricFormatter = (
-  accessor: string,
-  columns: DatatableColumn[],
-  formatOverrides?: FormatOverrides
-) => FieldFormatConvertFunction;
-
-export interface SecondaryMetricInfoArgs {
-  columns: DatatableColumn[];
-  row: DatatableRow;
-  config: Pick<VisParams, 'metric' | 'dimensions'>;
-  /**
-   * Trend configuration, updated with border color?
-   */
-  trendConfig?: TrendConfig;
-  staticColor?: string;
-  getMetricFormatter: GetMetricFormatter;
-}
-
 function getMetricColumnAndFormatter(
   columns: SecondaryMetricInfoArgs['columns'],
   config: SecondaryMetricInfoArgs['config'],
@@ -160,13 +162,6 @@ function getEnhancedNumberSignFormatter(
   };
 }
 
-export interface SecondaryMetricInfo {
-  value: string;
-  label?: string;
-  badgeColor?: string;
-  description?: string;
-}
-
 /**
  * Computes the display information for the secondary metric
  * @returns An object with value, label, badgeColor and description for rendering.
@@ -183,19 +178,19 @@ export function getSecondaryMetricInfo({
   const { metricFormatter, metricColumn } =
     getMetricColumnAndFormatter(columns, config, getMetricFormatter, formatOverrides) || {};
 
-  // TODO: Fix when prefix is None?
+  // TODO?: Fix when prefix is None
   const label = config.metric.secondaryPrefix ?? metricColumn?.name;
 
   const rawValue = metricColumn ? row[metricColumn.id] : undefined;
   const formattedValue = metricFormatter?.(rawValue);
   const safeFormattedValue = formattedValue ?? notAvailable;
 
-  // Color by value Static
+  // Color by value - Static
   if (staticColor) {
     return { value: safeFormattedValue, label, badgeColor: staticColor };
   }
 
-  // Color by value Dynamic
+  // Color by value - Dynamic
   if (trendConfig && (typeof rawValue === 'number' || rawValue == null)) {
     // When comparing with primary metric we want to change the order of the difference (primary - secondary)
     const deltaFactor = trendConfig.compareToPrimary ? -1 : 1;
@@ -224,6 +219,6 @@ export function getSecondaryMetricInfo({
     return { value: valueContent, label, badgeColor: trendColor, description: trendDrescription };
   }
 
-  // Color by value None
+  // Color by value - None
   return { value: formattedValue ?? '', label };
 }

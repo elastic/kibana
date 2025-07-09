@@ -38,7 +38,8 @@ import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { MetricVisParam, VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
 import { getColor, getMetricFormatter } from './helpers';
-import { SecondaryMetric, TrendConfig } from './secondary_metric';
+import { SecondaryMetric } from './secondary_metric';
+import { TrendConfig } from './secondary_metric_info';
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
   const column = table.columns[columnIdx];
@@ -73,7 +74,7 @@ function buildTrendConfig(
     showValue: visuals !== 'icon',
     baselineValue: baseline === 'primary' && typeof value === 'number' ? value : Number(baseline),
     palette,
-    borderColor: undefined, // TODO: Remove this as it is handled by elastic-charts
+    borderColor: undefined,
     compareToPrimary: baseline === 'primary',
   } satisfies TrendConfig;
 }

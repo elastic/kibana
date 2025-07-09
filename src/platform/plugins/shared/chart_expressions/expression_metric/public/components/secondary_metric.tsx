@@ -11,34 +11,16 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { type FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import { type VisParams } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { FormatOverrides } from './helpers';
 import { getSecondaryMetricInfo } from './secondary_metric_info';
+import type {
+  SecondaryMetricInfoArgs as SecondaryMetricProps,
+  TrendConfig,
+} from './secondary_metric_info';
 
-export interface TrendConfig {
-  showIcon: boolean;
-  showValue: boolean;
-  palette: [string, string, string];
-  baselineValue: number | undefined;
-  borderColor?: string;
-  compareToPrimary: boolean;
-}
-
-export interface SecondaryMetricProps {
-  columns: DatatableColumn[];
-  row: DatatableRow;
-  config: Pick<VisParams, 'metric' | 'dimensions'>;
-  getMetricFormatter: (
-    accessor: string,
-    columns: DatatableColumn[],
-    formatOverrides?: FormatOverrides | undefined
-  ) => FieldFormatConvertFunction;
-  trendConfig?: TrendConfig;
-  staticColor?: string;
-}
+// TODO: Remove helper functions below when all logic is moved to getSecondaryMetricInfo
 
 const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvailable', {
   defaultMessage: 'N/A',

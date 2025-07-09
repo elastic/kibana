@@ -9,8 +9,11 @@
 
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getSecondaryMetricInfo } from './secondary_metric_info';
-import type { SecondaryMetricInfo, SecondaryMetricInfoArgs } from './secondary_metric_info';
-import { TrendConfig } from './secondary_metric';
+import type {
+  SecondaryMetricInfo,
+  SecondaryMetricInfoArgs,
+  TrendConfig,
+} from './secondary_metric_info';
 
 const VALUE = 42;
 const STATIC_COLOR = ' #FFB300';
@@ -78,8 +81,8 @@ describe('getSecondaryMetricInfo', () => {
 
   it('returns dynamic color info when trendConfig is provided', () => {
     const trendConfig: TrendConfig = {
-      icon: true,
-      value: true,
+      showIcon: true,
+      showValue: true,
       palette: ['#f00', '#0f0', '#00f'],
       baselineValue: 40,
       borderColor: undefined,
