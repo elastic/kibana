@@ -124,7 +124,8 @@ For additional guidance, refer to the <DocLink id="kibHttpApiTfGuidelines" text=
 
 `/api/my_api` ✅
 
-`/api/my-api`, `/api/myApi` ❌
+`/api/my-api` ❌
+`/api/myApi` ❌
 
 **Should not contain version numbers**
 
@@ -134,24 +135,25 @@ For additional guidance, refer to the <DocLink id="kibHttpApiTfGuidelines" text=
 
 See the section on [versioning](#versioning) for more details.
 
-**For public APIs, prefix with `/api`**
+**For public APIs, prefix with `/api/<domain>`**
 
-`/api/my_api` ✅
+`/api/security/roles` ✅
 
-`/my_api` ❌
+`/roles` ❌
+`/api/roles` ❌
 
 **Pluralize collection names**
 
-`PUT /api/resources/{id}` ✅
+`PUT /api/my_domain/my_resources/{id}` ✅
 
-`PUT /api/resource/{id}` ❌
+`PUT /api/my_domain/my_resource/{id}` ❌
 
 **Prefix actions against resource collections with `_`**
 
 Sometimes we want to designate a variation or action against a resource:
 
 ```
-POST /api/resources/_bulk_delete
+POST /api/my_domain/my_resources/_bulk_delete
 ```
 
 Carefully consider cases where this pattern may make sense as it is more user-friendly to expose simple paths and actions.
@@ -160,16 +162,16 @@ Carefully consider cases where this pattern may make sense as it is more user-fr
 
 **GET does not accept a body**
 
-`GET /api/resources/{id}` ✅
+`GET /api/my_domain/my_resources/{id}` ✅
 
-`GET /api/resources/{id} { body: { params } }` ❌
+`GET /api/my_domain/my_resources/{id} { body: { params } }` ❌
 
 **POST is for creating a resource**
 
 Sometimes `POST` can be used for an action against a resource or for actions like a `GET` but with a body. If you expect you need to support a lot of input for searching or listing resources it might be good to reserve `POST` for this purposes. For example:
 
 ```
-POST /api/my_resources
+POST /api/my_domain/my_resources
 {
   search_after: "<a_really_long_id>",
   size: 10000
@@ -187,7 +189,7 @@ POST /api/my_resources
 Delete can return a simple response instead of the full resource:
 
 ```
-DELETE /api/resources/{id}
+DELETE /api/my_domain/my_resources/{id}
 # -> 204 No content
 ```
 
@@ -218,7 +220,7 @@ Use a body parameter for long strings instead and consider using validation to l
 **Should contain snake case keys**
 
 ```
-POST /api/my_api
+POST /api/my_domain/my_api
 {
   "snake_case": true
 }
@@ -240,15 +242,15 @@ Both requests and responses should be `application/json`, unless there is a good
 
 `GET`, `PUT`, `POST` should return the same shape of data for the same resource.
 
-`GET /api/my_resources/{id}` <br />
+`GET /api/my_domain/my_resources/{id}` <br />
 => <br />
 `{ "id": "1", "name": "My resource" }`<br /><br />
 
-`POST /api/my_resources/{id} { "id": "1", "name": "My resource" }`<br />
+`POST /api/my_domain/my_resources/{id} { "id": "1", "name": "My resource" }`<br />
 => <br />
 `{ "id": "1", "name": "My resource" }`<br /><br />
 
-`GET /api/my_resources` <br />
+`GET /api/my_domain/my_resources` <br />
 => <br />
 `{ items: [{ "id": "1", "name": "My resource" }], page: 1, size: 10, total: 100 }`
 
@@ -294,7 +296,7 @@ See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/S
 
 **Page-based request**
 
-`GET /api/resources?page=1&size=10`
+`GET /api/my_domain/my_resources?page=1&size=10`
 
 **Page-based response**
 
@@ -313,14 +315,12 @@ See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/S
   You will need to implement cursor-based pagination for paging across resources that exceed 10,000 instances in ES. See [the docs](https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules#index-max-result-window) and the [ES search after API](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after).
 </DocCallOut>
 
-```
-GET /api/resources?pit_id=abc&search_after=valueA,valueB&size=10
-```
+`GET /api/my_domain/my_resources?pit_id=abc&search_after=valueA,valueB&size=10`
 
 **OR** if you have reserved `POST` and expect sophisticated search use cases with a lot of inputs:
 
 ```
-POST /api/resources
+POST /api/my_domain/my_resources
 {
   pit_id: "abc",
   search_after: ["valueA", 123],
@@ -350,14 +350,14 @@ set of additional values for sorting, but this may not be needed. Adding this la
 Specify sorting in the query parameters like:
 
 ```
-GET /api/my_resources?sort=field_name,-other_name
+GET /api/my_domain/my_resources?sort=field_name,-other_name
 ```
 
 Where `field_name` is the name of the field to sort by in ascending order and `-other_name` is the name of the field to sort by in descending order.
 
 ### Filtering
 
-`GET /api/my_resources?filter=field_name:value`
+`GET /api/my_domain/my_resources?filter=field_name:value`
 
 Use [simple KQL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/kql) to cover most of your filtering needs.
 
@@ -394,7 +394,7 @@ Utilities for working with KQL queries are available in the `@kbn/es-query` pack
 Resources collections with 10,000+ instances should consider supporting bulk operations.
 
 ```
-POST /api/resources/_bulk
+POST /api/my_domain/my_resources/_bulk
 ```
 
 That accepts an array of operations:
