@@ -14,7 +14,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/data-view-utils",
+    "@kbn/data-view-validation",
     "@kbn/usage-collection-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/field-formats-plugin",

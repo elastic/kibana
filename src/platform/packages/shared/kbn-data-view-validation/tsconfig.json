@@ -1,0 +1,9 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target_types",
+    "types": ["jest", "node"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["target_types/**/*"]
+}
