@@ -121,7 +121,7 @@ export function AiAssistantSelectionPage() {
                     data-test-subj="pluginsAiAssistantSelectionPageButton"
                     onClick={() =>
                       navigateToApp('management', {
-                        path: 'kibana/observabilityAiAssistantManagement',
+                        path: 'ai/observabilityAiAssistantManagement',
                       })
                     }
                   >
@@ -193,7 +193,7 @@ export function AiAssistantSelectionPage() {
                     data-test-subj="pluginsAiAssistantSelectionSecurityPageButton"
                     iconType="gear"
                     onClick={() =>
-                      navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
+                      navigateToApp('management', { path: 'ai/securityAiAssistantManagement' })
                     }
                   >
                     {i18n.translate(

@@ -68,13 +68,13 @@ export class AIAssistantManagementPlugin
           defaultMessage: 'Manage your AI Assistants.',
         }),
         icon: 'sparkles',
-        path: '/app/management/kibana/aiAssistantManagementSelection',
+        path: '/app/management/ai/aiAssistantManagementSelection',
         showOnHomePage: false,
         category: 'admin',
       });
     }
 
-    management.sections.section.kibana.registerApp({
+    management.sections.section.ai.registerApp({
       id: 'aiAssistantManagementSelection',
       title: i18n.translate('aiAssistantManagementSelection.managementSectionLabel', {
         defaultMessage: 'AI Assistants',

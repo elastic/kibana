@@ -20,7 +20,7 @@ export function RedirectToHomeIfUnauthorized({
   } = coreStart;
 
   const allowed =
-    (capabilities?.management.kibana.observabilityAiAssistantManagement &&
+    (capabilities?.management.ai.observabilityAiAssistantManagement &&
       capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show]) ??
     false;
 
