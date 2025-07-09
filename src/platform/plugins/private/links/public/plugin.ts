@@ -26,12 +26,14 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { LinksSerializedState } from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices } from './services/kibana_services';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
+import { coreServices } from './services/kibana_services';
 
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -110,14 +112,21 @@ export class LinksPlugin
                 title,
                 editor: {
                   onEdit: async (savedObjectId: string) => {
-                    const [{ openEditorFlyout }, { deserializeLinksSavedObject }] =
-                      await Promise.all([
-                        import('./editor/open_editor_flyout'),
-                        import('./lib/deserialize_from_library'),
-                      ]);
-                    const linksSavedObject = await getLinksClient().get(savedObjectId);
-                    const initialState = await deserializeLinksSavedObject(linksSavedObject.item);
-                    await openEditorFlyout({ initialState });
+                    openLazyFlyout({
+                      core: coreServices,
+                      loadContent: async ({ closeFlyout }) => {
+                        const [{ getEditorFlyout }, { deserializeLinksSavedObject }] =
+                          await Promise.all([
+                            import('./editor/get_editor_flyout'),
+                            import('./lib/deserialize_from_library'),
+                          ]);
+                        const linksSavedObject = await getLinksClient().get(savedObjectId);
+                        const initialState = await deserializeLinksSavedObject(
+                          linksSavedObject.item
+                        );
+                        return await getEditorFlyout({ initialState, closeFlyout });
+                      },
+                    });
                   },
                 },
                 description,
