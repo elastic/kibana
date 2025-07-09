@@ -2,18 +2,10 @@
   "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "react"
-    ]
+    "types": ["jest", "node", "react"]
   },
-  "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/observability-utils-common",
     "@kbn/alerting-plugin",
@@ -27,6 +19,6 @@
     "@kbn/traced-es-client",
     "@kbn/genai-utils-common",
     "@kbn/genai-utils-server",
-    "@kbn/es-query",
+    "@kbn/es-query"
   ]
 }
