@@ -18,8 +18,9 @@ import {
 import { Sample } from '@kbn/grok-ui';
 import { i18n } from '@kbn/i18n';
 import { GrokProcessorDefinition } from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
+import { isEmpty } from 'lodash';
+import { getPercentageFormatter } from '../../../util/formatters';
 import { PreviewTable } from '../preview_table';
 import {
   PreviewDocsFilterOption,
@@ -104,10 +105,7 @@ export const ProcessorOutcomePreview = () => {
   );
 };
 
-const formatter = new Intl.NumberFormat('en-US', {
-  style: 'percent',
-  maximumFractionDigits: 1,
-});
+const formatter = getPercentageFormatter();
 
 const formatRateToPercentage = (rate?: number) =>
   (rate ? formatter.format(rate) : undefined) as any; // This is a workaround for the type error, since the numFilters & numActiveFilters props are defined as number | undefined
