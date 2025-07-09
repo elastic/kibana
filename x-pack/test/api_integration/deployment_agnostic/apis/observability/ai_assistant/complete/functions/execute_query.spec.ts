@@ -121,6 +121,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             'get_alerts_dataset_info',
             'alerts',
             'changes',
+            'retrieve_elastic_doc',
             'elasticsearch',
             'kibana',
             'get_dataset_info',

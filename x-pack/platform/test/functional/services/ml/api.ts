@@ -1625,7 +1625,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           log.debug(`> Skipping, no deployment stats for ${modelStats.model_id} found`);
           continue;
         }
-        await this.stopTrainedModelDeploymentES(modelStats.deployment_stats.deployment_id);
+        await this.stopTrainedModelDeploymentES(modelStats.deployment_stats.deployment_id, true);
       }
     },
 
