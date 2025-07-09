@@ -46,7 +46,7 @@ import {
   type ControlWidth,
   type DefaultDataControlState,
 } from '../../../common';
-import { coreServices, dataViewsService } from '../../services/kibana_services';
+import { dataViewsService } from '../../services/kibana_services';
 import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
 import type { ControlGroupApi } from '../../control_group/types';
 import { DataControlEditorStrings } from './data_control_constants';
