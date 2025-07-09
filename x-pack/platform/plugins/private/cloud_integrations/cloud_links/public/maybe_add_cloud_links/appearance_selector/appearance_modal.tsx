@@ -73,6 +73,65 @@ interface Props {
   isServerless: boolean;
 }
 
+const ColorModeGroup: FC<{
+  //
+  isServerless: boolean;
+  colorMode: ColorMode;
+  onChange: ({ colorMode }: { colorMode: ColorMode }, updateUserProfile: boolean) => void;
+}> = ({ isServerless, colorMode, onChange }) => {
+  return (
+    <>
+      <ValuesGroup<ColorMode>
+        title={i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalColorModeTitle', {
+          defaultMessage: 'Color mode',
+        })}
+        values={
+          isServerless
+            ? colorModeOptions.filter(({ id }) => id !== 'space_default')
+            : colorModeOptions
+        }
+        selectedValue={colorMode}
+        onChange={(id) => {
+          onChange({ colorMode: id }, false);
+        }}
+        ariaLabel={i18n.translate(
+          'xpack.cloudLinks.userMenuLinks.appearanceModalColorModeAriaLabel',
+          {
+            defaultMessage: 'Appearance color mode',
+          }
+        )}
+      />
+
+      {colorMode === 'space_default' && (
+        <>
+          <EuiSpacer />
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultTitle',
+              {
+                defaultMessage: 'Space default settings will be removed in a future version',
+              }
+            )}
+            color="warning"
+            iconType="warning"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultDescr',
+                {
+                  defaultMessage:
+                    'All users with the Space default color mode enabled will be automatically transitioned to the System color mode.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+    </>
+  );
+};
+
 export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isServerless }) => {
   const modalTitleId = useGeneratedHtmlId();
 
@@ -103,53 +162,7 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient, isSer
       </EuiModalHeader>
 
       <EuiModalBody>
-        <ValuesGroup<ColorMode>
-          title={i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalColorModeTitle', {
-            defaultMessage: 'Color mode',
-          })}
-          values={
-            isServerless
-              ? colorModeOptions.filter(({ id }) => id !== 'space_default')
-              : colorModeOptions
-          }
-          selectedValue={colorMode}
-          onChange={(id) => {
-            onChange({ colorMode: id }, false);
-          }}
-          ariaLabel={i18n.translate(
-            'xpack.cloudLinks.userMenuLinks.appearanceModalColorModeAriaLabel',
-            {
-              defaultMessage: 'Appearance color mode',
-            }
-          )}
-        />
-
-        {colorMode === 'space_default' && (
-          <>
-            <EuiSpacer />
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultTitle',
-                {
-                  defaultMessage: 'Space default settings will be removed in a future version',
-                }
-              )}
-              color="warning"
-              iconType="warning"
-            >
-              <p>
-                {i18n.translate(
-                  'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultDescr',
-                  {
-                    defaultMessage:
-                      'All users with the Space default color mode enabled will be automatically transitioned to the System color mode.',
-                  }
-                )}
-              </p>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
+        <ColorModeGroup isServerless={isServerless} colorMode={colorMode} onChange={onChange} />
       </EuiModalBody>
 
       <EuiModalFooter>
