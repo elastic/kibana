@@ -9,7 +9,10 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import type {
+  DataViewPickerProps,
+  UnifiedSearchRestorableState,
+} from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
@@ -25,6 +28,8 @@ import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
   useDataViewsForPicker,
   useInternalStateDispatch,
   useInternalStateSelector,
@@ -51,7 +56,14 @@ export const DiscoverTopNav = ({
 }: DiscoverTopNavProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
+  const {
+    dataViewEditor,
+    navigation,
+    dataViewFieldEditor,
+    data,
+    setHeaderActionMenu,
+    unifiedSearch,
+  } = services;
   const query = useAppStateSelector((state) => state.query);
   const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
@@ -205,11 +217,34 @@ export const DiscoverTopNav = ({
   }, []);
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
+  const unifiedSearchWithRestorableState = unifiedSearch.ui.withRestorableState;
 
   const SearchBar = useMemo(
-    () => searchBarCustomization?.CustomSearchBar ?? navigation.ui.AggregateQueryTopNavMenu,
-    [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
+    () =>
+      searchBarCustomization?.CustomSearchBar ??
+      unifiedSearchWithRestorableState(navigation.ui.AggregateQueryTopNavMenu),
+    [
+      searchBarCustomization?.CustomSearchBar,
+      unifiedSearchWithRestorableState,
+      navigation.ui.AggregateQueryTopNavMenu,
+    ]
   );
+
+  const searchUiState = useCurrentTabSelector((state) => state.uiState.search);
+  const setSearchUiState = useCurrentTabAction(internalStateActions.setSearchUiState);
+  const onInitialStateChange = useCallback(
+    (newSearchUiState: Partial<UnifiedSearchRestorableState>) => {
+      console.log('onInitialStateChange', newSearchUiState);
+      dispatch(
+        setSearchUiState({
+          searchUiState: newSearchUiState,
+        })
+      );
+    },
+    [dispatch, setSearchUiState]
+  );
+
+  console.log('searchUiState', searchUiState);
 
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
@@ -248,6 +283,8 @@ export const DiscoverTopNav = ({
           ) : undefined
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+        initialState={searchUiState}
+        onInitialStateChange={onInitialStateChange}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

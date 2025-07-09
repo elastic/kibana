@@ -59,6 +59,7 @@ import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
+import { useRestorableRef } from '../../restorable_state';
 
 export const strings = {
   getNeedsUpdatingLabel: () =>
@@ -230,6 +231,9 @@ export const QueryBarTopRow = React.memo(
   function QueryBarTopRow<QT extends Query | AggregateQuery = Query>(
     props: QueryBarTopRowProps<QT>
   ) {
+    const restorableQueryRef = useRestorableRef('query', props.query);
+    restorableQueryRef.current = props.query;
+
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =

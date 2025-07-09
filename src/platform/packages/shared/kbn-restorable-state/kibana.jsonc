@@ -1,5 +1,5 @@
 {
-  "type": "shared-browser",
+  "type": "shared-common",
   "id": "@kbn/restorable-state",
   "owner": "@elastic/kibana-data-discovery",
   "group": "platform",

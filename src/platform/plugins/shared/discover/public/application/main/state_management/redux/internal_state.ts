@@ -245,6 +245,14 @@ export const internalStateSlice = createSlice({
       withTab(state, action, (tab) => {
         tab.uiState.layout = action.payload.layoutUiState;
       }),
+
+    setSearchUiState: (
+      state,
+      action: TabAction<{ searchUiState: Partial<TabState['uiState']['search']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.search = action.payload.searchUiState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
