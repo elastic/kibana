@@ -106,6 +106,16 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
       savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
+
+  const eventLogClient = await context.getEventLogClient();
+
+  await disableGaps({
+    ruleId: id,
+    logger: context.logger,
+    eventLogClient,
+    eventLogger: context.eventLogger,
+  });
+
   const removeResult = await deleteRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     id,
@@ -120,21 +130,12 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
     }),
     apiKeyToInvalidate && !apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(
-          { apiKeys: [apiKeyToInvalidate] },
-          context.logger,
-          context.unsecuredSavedObjectsClient
-        )
+        { apiKeys: [apiKeyToInvalidate] },
+        context.logger,
+        context.unsecuredSavedObjectsClient
+      )
       : null,
   ]);
-
-  const eventLogClient = await context.getEventLogClient();
-
-  await disableGaps({
-    ruleId: id,
-    logger: context.logger,
-    eventLogClient,
-    eventLogger: context.eventLogger,
-  });
 
   return removeResult;
 }

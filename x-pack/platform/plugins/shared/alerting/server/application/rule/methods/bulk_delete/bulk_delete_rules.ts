@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import pMap from 'p-map';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
@@ -96,16 +97,6 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
       context.unsecuredSavedObjectsClient
     ),
   ]);
-
-  const eventLogClient = await context.getEventLogClient();
-  for (const { id } of rules) {
-    await disableGaps({
-      ruleId: id,
-      logger: context.logger,
-      eventLogClient,
-      eventLogger: context.eventLogger,
-    });
-  }
 
   const deletedRules = rules.map(({ id, attributes, references }) => {
     // TODO (http-versioning): alertTypeId should never be null, but we need to
@@ -205,6 +196,20 @@ const bulkDeleteWithOCC = async (
   for (const { id, attributes } of rulesToDelete) {
     await untrackRuleAlerts(context, id, attributes as RawRule);
   }
+
+  const eventLogClient = await context.getEventLogClient();
+  await pMap(rulesToDelete.map(
+    rule => rule.id),
+    (ruleId) => disableGaps({
+      ruleId,
+      logger: context.logger,
+      eventLogClient,
+      eventLogger: context.eventLogger,
+    }),
+    {
+      concurrency: 10
+    }
+  )
 
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
