@@ -22,28 +22,28 @@ import type { State } from '../state';
 import type { StateDependencies, StreamChange } from '../types';
 import type {
   StreamChangeStatus,
+  StreamChanges,
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
-import { StreamActiveRecord, PrintableStream } from '../stream_active_record/stream_active_record';
+import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
+
+interface UnwiredStreamChanges extends StreamChanges {
+  processing: boolean;
+  lifecycle: boolean;
+}
 
 export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Definition> {
-  private _processingChanged: boolean = false;
-  private _lifecycleChanged: boolean = false;
+  protected _changes: UnwiredStreamChanges = {
+    processing: false,
+    lifecycle: false,
+  };
 
   constructor(definition: Streams.UnwiredStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
   }
 
-  clone(): StreamActiveRecord<Streams.UnwiredStream.Definition> {
+  protected doClone(): StreamActiveRecord<Streams.UnwiredStream.Definition> {
     return new UnwiredStream(cloneDeep(this._definition), this.dependencies);
-  }
-
-  toPrintable(): PrintableStream {
-    return {
-      ...super.toPrintable(),
-      processingChanged: this._processingChanged,
-      lifecycleChanged: this._lifecycleChanged,
-    };
   }
 
   protected async doHandleUpsertChange(
@@ -70,14 +70,14 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       throw new StatusError('Unexpected starting state stream type', 400);
     }
 
-    this._processingChanged =
+    this._changes.processing =
       !startingStateStreamDefinition ||
       !_.isEqual(
         this._definition.ingest.processing,
         startingStateStreamDefinition.ingest.processing
       );
 
-    this._lifecycleChanged =
+    this._changes.lifecycle =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
 
@@ -104,20 +104,8 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
     }
 
-    if (
-      startingState.get(this._definition.name)?.definition &&
-      this._lifecycleChanged &&
-      isInheritLifecycle(this.getLifecycle())
-    ) {
-      // temporary until https://github.com/elastic/kibana/issues/222440 is resolved
-      return {
-        isValid: false,
-        errors: [new Error('Cannot revert to default lifecycle once updated')],
-      };
-    }
-
     // Check for conflicts
-    if (this._lifecycleChanged || this._processingChanged) {
+    if (this._changes.lifecycle || this._changes.processing) {
       try {
         const dataStreamResult =
           await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
@@ -186,7 +174,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
   }
 
   public hasChangedLifecycle(): boolean {
-    return this._lifecycleChanged;
+    return this._changes.lifecycle;
   }
 
   public getLifecycle(): IngestStreamLifecycle {
@@ -199,11 +187,11 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     startingStateStream: UnwiredStream
   ): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
-    if (this._processingChanged && this._definition.ingest.processing.length > 0) {
+    if (this._changes.processing && this._definition.ingest.processing.length > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
 
-    if (this._processingChanged && this._definition.ingest.processing.length === 0) {
+    if (this._changes.processing && this._definition.ingest.processing.length === 0) {
       const streamManagedPipelineName = getProcessingPipelineName(this._definition.name);
       actions.push({
         type: 'delete_ingest_pipeline',
@@ -226,7 +214,7 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       });
     }
 
-    if (this._lifecycleChanged && !isInheritLifecycle(this.getLifecycle())) {
+    if (this._changes.lifecycle) {
       actions.push({
         type: 'update_lifecycle',
         request: {

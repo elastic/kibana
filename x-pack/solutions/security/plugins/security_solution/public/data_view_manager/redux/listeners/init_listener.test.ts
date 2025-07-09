@@ -35,7 +35,7 @@ const mockDataViewsService = {
 const http = {} as unknown as CoreStart['http'];
 const application = {} as unknown as CoreStart['application'];
 const uiSettings = {} as unknown as CoreStart['uiSettings'];
-const spaces = {} as unknown as SpacesPluginStart;
+const spaces = { getActiveSpace: async () => ({ id: 'default' }) } as unknown as SpacesPluginStart;
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn(() => {
@@ -45,6 +45,7 @@ const mockGetState = jest.fn(() => {
   state.dataViewManager.detections = structuredClone(state.dataViewManager.default);
   state.dataViewManager.timeline = structuredClone(state.dataViewManager.default);
   state.dataViewManager.analyzer = structuredClone(state.dataViewManager.default);
+  state.dataViewManager.explore = structuredClone(state.dataViewManager.default);
 
   return state;
 });
@@ -59,6 +60,13 @@ describe('createInitListener', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    jest.mocked(createDefaultDataView).mockResolvedValue({
+      defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: '' },
+      alertDataView: { id: DEFAULT_ALERT_DATA_VIEW_ID, title: '' },
+      kibanaDataViews: [],
+    } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
+
     listener = createInitListener({
       dataViews: mockDataViewsService,
       http,
@@ -66,12 +74,6 @@ describe('createInitListener', () => {
       uiSettings,
       spaces,
     });
-
-    jest.mocked(createDefaultDataView).mockResolvedValue({
-      defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID },
-      alertDataView: { id: DEFAULT_ALERT_DATA_VIEW_ID },
-      kibanaDataViews: [],
-    } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
   });
 
   it('should load the data views and dispatch further actions', async () => {

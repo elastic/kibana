@@ -97,8 +97,8 @@ export const toolToLangchain = ({
         const content = typeof result === 'string' ? result : JSON.stringify(result);
         return [content, toolReturn];
       } catch (e) {
-        logger.warn(`error calling tool ${tool.id}: ${e.message}`);
-        throw e;
+        logger.warn(`error calling tool ${tool.id}: ${e}`);
+        return [`${e}`, { result: { success: false, error: `${e}` } }];
       }
     },
     {
