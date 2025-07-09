@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import { AgentMode, ToolSelection } from '@kbn/onechat-common';
-import type { ConversationalAgentHandlerFn } from '@kbn/onechat-server';
-import { runAgent } from '../modes';
-
-export interface CreateConversationalAgentHandlerParams {
-  agentId: string;
-  toolSelection: ToolSelection[];
-  customInstructions?: string;
-}
+import { AgentMode, AgentDefinition } from '@kbn/onechat-common';
+import type { AgentHandlerFn } from '@kbn/onechat-server';
+import { runAgent } from './run_agent';
 
 /**
  * Create the handler function for the default onechat agent.
  */
-export const createHandler = ({
-  agentId,
-  toolSelection,
-  customInstructions,
-}: CreateConversationalAgentHandlerParams): ConversationalAgentHandlerFn => {
+export const createAgentHandler = ({ agent }: { agent: AgentDefinition }): AgentHandlerFn => {
   return async (
     { agentParams: { nextInput, conversation = [], agentMode = AgentMode.normal }, runId },
     context
@@ -33,9 +23,9 @@ export const createHandler = ({
         nextInput,
         conversation,
         runId,
-        agentId,
-        toolSelection,
-        customInstructions,
+        agentId: agent.id,
+        toolSelection: agent.configuration.tools,
+        customInstructions: agent.configuration.instructions,
       },
       context
     );
