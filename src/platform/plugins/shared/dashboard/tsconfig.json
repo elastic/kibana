@@ -87,7 +87,9 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/std",
     "@kbn/css-utils",
-    "@kbn/es-query-server"
+    "@kbn/es-query-server",
+    "@kbn/controls-schemas",
+    "@kbn/controls-constants",
   ],
   "exclude": ["target/**/*"]
 }

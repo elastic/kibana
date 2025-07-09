@@ -94,7 +94,7 @@ export const useAnomaliesTableData = ({
         criteriaFields,
         influencersFilterQuery: filterQuery,
         aggregationInterval,
-        threshold: getThreshold(anomalyScore, threshold),
+        threshold: [{ min: getThreshold(anomalyScore, threshold) }],
         earliestMs: startDateMs,
         latestMs: endDateMs,
         influencers,
