@@ -8,7 +8,7 @@
  */
 import type { ESQLCommand, ESQLMessage, ESQLAst } from '../../../types';
 import type { ICommandContext } from '../../types';
-import { validateCommandArguments } from '../../../definitions/utils/validation/validate_command_arguments';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
 export const validate = (
   command: ESQLCommand,
   ast: ESQLAst,

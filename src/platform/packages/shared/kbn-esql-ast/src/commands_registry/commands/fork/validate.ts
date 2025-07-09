@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { Walker } from '../../../walker';
 import { ICommandContext } from '../../types';
-import { validateCommandArguments } from '../../../definitions/utils/validation/validate_command_arguments';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
 import { esqlCommandRegistry } from '../..';
 import { errors } from '../../../definitions/utils';
 

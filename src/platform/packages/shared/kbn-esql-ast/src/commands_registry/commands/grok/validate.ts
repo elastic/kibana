@@ -10,7 +10,7 @@ import { getMessageFromId } from '../../../definitions/utils/errors';
 import type { ESQLAst, ESQLColumn, ESQLCommand, ESQLMessage } from '../../../types';
 import type { ICommandContext } from '../../types';
 import type { FieldType } from '../../../definitions/types';
-import { validateCommandArguments } from '../../../definitions/utils/validation/validate_command_arguments';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 export const validate = (
   command: ESQLCommand,

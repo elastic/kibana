@@ -11,7 +11,7 @@ import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { isColumn, isOptionNode } from '../../../ast/is';
 import { isNumericType } from '../../../definitions/types';
 import type { ICommandContext } from '../../types';
-import { validateCommandArguments } from '../../../definitions/utils/validation/validate_command_arguments';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
 
 export const validate = (
   command: ESQLCommand,
