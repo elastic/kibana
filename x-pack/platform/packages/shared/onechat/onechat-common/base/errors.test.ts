@@ -17,7 +17,6 @@ import {
   createAgentNotFoundError,
 } from './errors';
 import { toSerializedToolIdentifier } from '../tools';
-import { toSerializedAgentIdentifier } from '../agents';
 
 describe('Onechat errors', () => {
   describe('isOnechatError', () => {
@@ -138,7 +137,7 @@ describe('Onechat errors', () => {
   describe('isAgentNotFoundError', () => {
     it('should return true for an agent not found error', () => {
       const error = createAgentNotFoundError({
-        agentId: toSerializedAgentIdentifier('test-agent'),
+        agentId: 'test-agent',
       });
       expect(isAgentNotFoundError(error)).toBe(true);
     });
@@ -157,24 +156,24 @@ describe('Onechat errors', () => {
   describe('createAgentNotFoundError', () => {
     it('should create an error with the correct code and default message', () => {
       const error = createAgentNotFoundError({
-        agentId: toSerializedAgentIdentifier('test-agent'),
+        agentId: 'test-agent',
       });
       expect(error.code).toBe(OnechatErrorCode.agentNotFound);
-      expect(error.message).toBe(`Agent ${toSerializedAgentIdentifier('test-agent')} not found`);
+      expect(error.message).toBe(`Agent test-agent not found`);
       expect(error.meta).toEqual({
-        agentId: toSerializedAgentIdentifier('test-agent'),
+        agentId: 'test-agent',
         statusCode: 404,
       });
     });
 
     it('should use custom message when provided', () => {
       const error = createAgentNotFoundError({
-        agentId: toSerializedAgentIdentifier('test-agent'),
+        agentId: 'test-agent',
         customMessage: 'Custom error message',
       });
       expect(error.message).toBe('Custom error message');
       expect(error.meta).toEqual({
-        agentId: toSerializedAgentIdentifier('test-agent'),
+        agentId: 'test-agent',
         statusCode: 404,
       });
     });
@@ -182,11 +181,11 @@ describe('Onechat errors', () => {
     it('should include additional metadata when provided', () => {
       const meta = { foo: 'bar' };
       const error = createAgentNotFoundError({
-        agentId: toSerializedAgentIdentifier('test-agent'),
+        agentId: 'test-agent',
         meta,
       });
       expect(error.meta).toEqual({
-        agentId: toSerializedAgentIdentifier('test-agent'),
+        agentId: 'test-agent',
         statusCode: 404,
         foo: 'bar',
       });

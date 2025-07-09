@@ -9,11 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import { EMPTY, mergeMap, of, OperatorFunction } from 'rxjs';
-import {
-  MessageChunkEvent,
-  MessageCompleteEvent,
-  ReasoningEvent,
-} from '@kbn/onechat-common/agents';
+import { MessageChunkEvent, MessageCompleteEvent, ReasoningEvent } from '@kbn/onechat-common';
 import {
   matchGraphName,
   matchEvent,
@@ -77,7 +73,7 @@ export const convertGraphEvents = ({
           const textContent = extractTextContent(chunk);
 
           if (textContent) {
-            const messageChunkEvent = createTextChunkEvent(chunk, { defaultMessageId: messageId });
+            const messageChunkEvent = createTextChunkEvent(textContent, { messageId });
             return of(messageChunkEvent);
           }
         }
@@ -86,7 +82,7 @@ export const convertGraphEvents = ({
         if (matchEvent(event, 'on_chain_end') && matchName(event, 'identify_research_goal')) {
           const { generatedAnswer } = event.data.output as StateType;
           if (generatedAnswer) {
-            const messageEvent = createMessageEvent(generatedAnswer);
+            const messageEvent = createMessageEvent(generatedAnswer, { messageId });
             return of(messageEvent);
           }
         }
@@ -105,16 +101,19 @@ export const convertGraphEvents = ({
         // answer step text chunks
         if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, 'researcher-answer')) {
           const chunk: AIMessageChunk = event.data.chunk;
+          const textContent = extractTextContent(chunk);
 
-          const messageChunkEvent = createTextChunkEvent(chunk, { defaultMessageId: messageId });
-          return of(messageChunkEvent);
+          if (textContent) {
+            const messageChunkEvent = createTextChunkEvent(textContent, { messageId });
+            return of(messageChunkEvent);
+          }
         }
 
         // answer step response message
         if (matchEvent(event, 'on_chain_end') && matchName(event, 'answer')) {
           const { generatedAnswer } = event.data.output as StateType;
 
-          const messageEvent = createMessageEvent(generatedAnswer);
+          const messageEvent = createMessageEvent(generatedAnswer, { messageId });
           return of(messageEvent);
         }
 
