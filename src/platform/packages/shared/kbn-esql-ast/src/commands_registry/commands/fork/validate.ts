@@ -8,6 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import { Walker } from '../../../walker';
 import { ICommandContext } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation/validate_command_arguments';
 import { esqlCommandRegistry } from '../..';
@@ -41,26 +42,21 @@ export const validate = (
       }
     )
   );
-  for (const arg of command.args.flat()) {
-    if (!Array.isArray(arg) && arg.type === 'query') {
-      // all the args should be commands
-      arg.commands.forEach((subCommand) => {
-        const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
-        const validationMessages = subCommandMethods?.validate?.(subCommand, ast, context);
-        messages.push(...(validationMessages || []));
-      });
-    }
-  }
 
-  let seenFork = false;
-  for (const [_, astCommand] of ast.entries()) {
-    if (astCommand.name === 'fork') {
-      if (seenFork) {
-        messages.push(errors.tooManyForks(astCommand));
-      } else {
-        seenFork = true;
-      }
+  const allSubCommands = Walker.commands(command);
+  allSubCommands.forEach((subCommand) => {
+    const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
+    if (subCommandMethods?.validate) {
+      const validationMessages = subCommandMethods.validate(subCommand, allSubCommands, context);
+      messages.push(...(validationMessages || []));
     }
+  });
+
+  const allCommands = Walker.commands(ast);
+  const forks = allCommands.filter(({ name }) => name === 'fork');
+
+  if (forks.length > 1) {
+    messages.push(errors.tooManyForks(forks[1] as any));
   }
 
   context?.fields.set('_fork', {

@@ -94,11 +94,8 @@ describe('FORK Validation', () => {
         `FROM index
 | FORK
     (EVAL TO_UPPER(keywordField) | LIMIT 100)
-    (FORK (WHERE 1))`,
-        [
-          '[FORK] Must include at least two branches.',
-          '[FORK] a query cannot have more than one FORK command.',
-        ]
+    (FORK (WHERE 1) (WHERE 2))`,
+        ['[FORK] a query cannot have more than one FORK command.']
       );
     });
 
