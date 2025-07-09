@@ -49,7 +49,7 @@ describe('of expression', () => {
   it('renders with custom aggregation types', async () => {
     const user = userEvent.setup();
     const onChangeSelectedAggField = jest.fn();
-    
+
     renderWithIntl(
       <OfExpression
         aggType="test2"
@@ -73,13 +73,13 @@ describe('of expression', () => {
         }}
       />
     );
-    
+
     // Check that the button shows the correct value
     expect(screen.getByTestId('ofExpressionPopover')).toHaveTextContent('of test2');
-    
+
     // Open the popover to access the form elements
     await user.click(screen.getByTestId('ofExpressionPopover'));
-    
+
     // Now check for the combo box
     expect(screen.getByTestId('availableFieldsOptionsComboBox')).toBeInTheDocument();
   });

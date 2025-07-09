@@ -24,7 +24,7 @@ describe('rules_summary_route', () => {
     const renderResult = render(
       <RuleRoute readOnly={false} rule={rule} ruleType={ruleType} {...mockApis()} />
     );
-    
+
     await waitFor(() => {
       // Wait for the component to be rendered
       expect(renderResult.container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
