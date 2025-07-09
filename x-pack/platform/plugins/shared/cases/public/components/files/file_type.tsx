@@ -16,7 +16,11 @@ import type {
 
 import { AttachmentActionType } from '../../client/attachment_framework/types';
 import * as i18n from './translations';
-import { isImage, isValidFileExternalReferenceMetadata } from './utils';
+import {
+  getFileFromReferenceMetadata,
+  isImage,
+  isValidFileExternalReferenceMetadata,
+} from './utils';
 
 const FileAttachmentEvent = lazy(() =>
   import('./file_attachment_event').then((module) => ({ default: module.FileAttachmentEvent }))
@@ -26,6 +30,9 @@ const FileDeleteButton = lazy(() =>
 );
 const FileDownloadButton = lazy(() =>
   import('./file_download_button').then((module) => ({ default: module.FileDownloadButton }))
+);
+const FileThumbnail = lazy(() =>
+  import('./file_thumbnail').then((module) => ({ default: module.FileThumbnail }))
 );
 
 function getFileDownloadButton(fileId: string) {
@@ -78,11 +85,10 @@ const getFileAttachmentViewObject = (
     };
   }
 
-  const fileMetadata = props.externalReferenceMetadata.files[0];
-  const file = {
-    id: fileId,
-    ...fileMetadata,
-  };
+  const file = getFileFromReferenceMetadata({
+    fileId,
+    externalReferenceMetadata: props.externalReferenceMetadata,
+  });
 
   return {
     event: (
@@ -93,6 +99,7 @@ const getFileAttachmentViewObject = (
     timelineAvatar: isImage(file) ? 'image' : 'document',
     getActions: () => getFileAttachmentActions({ caseId, fileId }),
     hideDefaultActions: true,
+    children: isImage(file) ? FileThumbnail : undefined,
   };
 };
 
