@@ -213,7 +213,7 @@ DELETE /api/my_domain/my_resources/{id}
 
 Accepting very long strings in path or query parameters can cause issues for HTTP servers that limit the byte length of certain parts of requests.
 
-Use a body parameter for long strings instead and consider using validation to limit a path param's length.
+Use a body parameter for long strings instead and use validation to limit a path param's length if you have an idea of max length.
 
 ### Bodies
 
