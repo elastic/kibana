@@ -243,7 +243,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     const model = await createLlmInstance();
     await generateChatTitle({
       actionsClient,
-      contentReferencesStore,
       conversationsDataClient: dataClients?.conversationsDataClient,
       logger,
       savedObjectsClient,
