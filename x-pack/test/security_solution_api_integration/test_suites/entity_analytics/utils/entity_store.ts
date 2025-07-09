@@ -35,20 +35,50 @@ export const EntityStoreUtils = (
   log.debug(`EntityStoreUtils namespace: ${namespace}`);
 
   const cleanEngines = async () => {
-    const { body } = await api.listEntityEngines(namespace).expect(200);
-
+    const listEnginesResponse = await api.listEntityEngines(namespace).expect(200);
     // @ts-expect-error body is any
-    const engineTypes = body.engines.map((engine) => engine.type);
+    const engineTypes = listEnginesResponse.body.engines.map((engine) => engine.type);
+
+    const getStatusResponse = await api.getEntityStoreStatus(
+      { query: { include_components: true } },
+      namespace
+    );
 
     log.info(`Cleaning engines: ${engineTypes.join(', ')}`);
     try {
       await Promise.all(
-        engineTypes.map((entityType: 'user' | 'host') =>
+        engineTypes.map((entityType: 'user' | 'host' | 'service' | 'generic') =>
           api.deleteEntityEngine({ params: { entityType }, query: { data: true } }, namespace)
         )
       );
     } catch (e) {
       log.warning(`Error deleting engines: ${e.message}`);
+    }
+    
+    log.info(`Ensuring eventually consistent resources are deleted for engines: ${engineTypes.join(', ')}`);
+    try {
+      await Promise.all(
+        getStatusResponse.body.engines.map((engine) =>
+          Promise.all(
+            engine.components
+              .filter(
+                (component) => component.resource === 'transform' || component.resource === 'enrich_policy'
+              )
+              .map(async (component) => {
+                if (component.resource === 'transform') {
+                  await es.transform.deleteTransform(
+                    { transform_id: component.id, force: true },
+                    { ignore: [404] }
+                  );
+                } else if (component.resource === 'enrich_policy') {
+                  await es.enrich.deletePolicy({ name: component.id }, { ignore: [404] });
+                }
+              })
+          )
+        )
+      );
+    } catch (e) {
+      log.warning(`Error cleaning up resources: ${e.message}`);
     }
   };
 
