@@ -17,29 +17,6 @@ These guidelines will help you build APIs that are easy to use, whether someone'
 
 Terraform can work with any API, but some APIs are easier to deal with than others. Here are some tips to make your API more Terraform provider-friendly:
 
-### Think in terms of resources
-
-APIs that stick to a consistent set of arguments or parameters are much easier to map into Terraform. Terraform can describe the "thing" your API is managing. RPC-based APIs are harder to work with since they’re not declarative. Your HTTP APIs should describe REST-like actions (GET, POST, DELETE, etc.) against resources not remote procedures like: executeJob.
-
-APIs designed around resources are easier to support than those focused on action-oriented endpoints.
-
-✅ Preferred: REST-like actions against resources
-
-```
-GET    /api/alerting/rule/{id}     # Kibana Alerting API
-POST   /api/alerting/rule/{id}     # Create rule
-PUT    /api/alerting/rule/{id}     # Update rule
-DELETE /api/alerting/rule/{id}     # Delete rule
-```
-
-⚠️ Alternative: action-style endpoints
-
-```
-POST /api/executeJob
-POST /api/processSpaceUpdate
-POST /api/triggerIndexRebalance
-```
-
 #### Example
 
 The [Index Lifecycle Management API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-put-lifecycle) (PUT /\_ilm/policy/\{policy\}) declaratively defines the desired lifecycle state rather than imperatively executing phase transitions:
@@ -97,133 +74,6 @@ resource "elasticstack_elasticsearch_index_lifecycle" "my_ilm" {
     delete {}
   }
 }
-```
-
-### Implement complete CRUD operations
-
-For Terraform to properly manage resources, your API must implement a complete set of CRUD operations on each resource. This is essential for the Terraform lifecycle (create, read, update, delete) to work properly.
-
-#### Required endpoints for each resource
-
-For every resource type, implement these HTTP endpoints:
-
-```
-GET    /api/resources/{id}         # Read - retrieve an existing resource
-POST   /api/resources              # Create - create a new resource
-PUT    /api/resources/{id}         # Update - update an existing resource
-DELETE /api/resources/{id}         # Delete - remove an existing resource
-GET    /api/resources              # List - retrieve all resources (with pagination)
-```
-
-<DocCallOut title="Terraform import">
-  The "List" operation is critical for Terraform's data source and import functionality ([see the docs](https://developer.hashicorp.com/terraform/cli/import)).
-</DocCallOut>
-
-#### Implementation considerations
-
-1. **Consistent response structures**: Ensure GET and POST/PUT responses return the same structure with identical fields.
-
-2. **Idempotent operations**: POST for creation and PUT for updates should be idempotent - running the same request multiple times should result in the same state. This is related to read/GETs without side-effects.
-
-3. **Complete state**: After each operation, return the complete state of the resource, not just acknowledgment.
-
-   ```json
-   // Good - returns complete state
-   {
-     "id": "my-resource", // it is best to call this field "id"
-     "name": "My Resource",
-     "config": { "setting1": "value1" },
-     "created_at": "2025-06-24T08:15:30Z",
-     "updated_at": "2025-06-24T08:15:30Z"
-   }
-
-   // Bad - returns only acknowledgment
-   {
-     "result": "success",
-     "message": "Resource created successfully"
-   }
-   ```
-
-4. **HTTP status codes**: Use appropriate HTTP status codes:
-   - `200/201` for successful operations
-   - `204` for successful delete operations
-   - `404` when a resource doesn't exist
-   - `409` for conflicts (e.g., resource already exists)
-   - `400` for validation errors
-
-5. **Validation**: Validate input at creation/update time and return comprehensive errors.
-
-#### Example: Complete API for a resource
-
-```typescript
-// Retrieve 1 resource
-router.get(
-  {
-    path: '/api/resources/{id}',
-    validate: false, // `get` should not have bodies
-  },
-  async (context, request, response) => {
-    // Implementation...
-    return response.ok({ body: completeResourceState });
-  }
-);
-
-// Create, update
-router.(post|put)(
-  {
-    path: '/api/resources',
-    validate: {
-      body: schema.object({
-        name: schema.string(),
-        config: schema.object({...}),
-      }),
-    },
-  },
-  async (context, request, response) => {
-    // Implementation...
-    return response.ok({ body: completeResourceState });
-  }
-);
-
-// Delete
-router.delete(
-  {
-    path: '/api/resources/{id}',
-    validate: {
-      params: schema.object({
-        id: schema.string(),
-      }),
-    },
-  },
-  async (context, request, response) => {
-    // Implementation...
-    return response.noContent();
-  }
-);
-
-// List many resources
-router.get(
-  {
-    path: '/api/resources',
-    validate: {
-      query: schema.object({
-        page: schema.maybe(schema.number()),
-        perPage: schema.maybe(schema.number()),
-      }),
-    },
-  },
-  async (context, request, response) => {
-    // Implementation...
-    return response.ok({
-      body: {
-        items: resources,
-        total: totalCount,
-        page: currentPage,
-        perPage: itemsPerPage
-      }
-    });
-  }
-);
 ```
 
 #### API imposed challenges
@@ -333,25 +183,6 @@ router.post(
     // ...
   }
 );
-```
-
-### Design human-friendly APIs
-
-APIs with clear, descriptive field names and logical resource structures make both manual testing and Terraform resource development much smoother.
-
-#### Use intuitive field names
-
-Clear, descriptive field names translate to intuitive Terraform resources. Elasticsearch APIs generally follow this pattern, and we end up self-documenting configuration.
-
-[Index resource](https://github.com/elastic/terraform-provider-elasticstack/blob/main/docs/resources/elasticsearch_index.md)
-```terraform
-resource "elasticstack_elasticsearch_index" "example" {
-  name                    = "my-index"              # Obvious purpose
-  number_of_shards       = 1                       # Self-documenting
-  number_of_replicas     = 2                       # Clear meaning
-  deletion_protection    = true                    # Prevent accidents
-  search_idle_after      = "20s"                   # Human-readable duration
-}
 ```
 
 ##### Complex configuration handling

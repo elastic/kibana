@@ -15,7 +15,7 @@ tags: ['kibana', 'contributor', 'dev', 'http', 'api', 'rest', 'design']
 
 Consistency is key to a great API-user experience. APIs should be consistent in their naming, structure, and behavior. Follow established patterns when available. If no pattern exists, consider creating one paying close attention to:
 
-1. **Consistent naming**: Use the same suffix for IDs (e.g., `space_id`, `dashboard_id`, etc.).
+1. **Consistent naming**: Use the same suffix for IDs (e.g., `space_id`, `dashboard_id`, etc.). APIs with clear, descriptive field names help self-document how it should be used.
 2. **Consistent structure**: Use the same structure for referencing resources in requests and responses in all related APIs.
 3. **Consistent validation**: Apply the same validation rules across all APIs.
 4. **Consistent error messages**: Use the same error messages for the same errors.
@@ -118,6 +118,39 @@ For additional guidance, refer to the <DocLink id="kibHttpApiTfGuidelines" text=
 
 ## Structure and conventions
 
+### Think in terms of resources
+
+Your HTTP APIs should describe REST-like actions (GET, POST, DELETE, etc.) against resources not remote procedures like: executeJob.
+
+✅ Preferred: REST-like actions against resources
+
+```
+GET    /api/alerting/rule/{id}     # Kibana Alerting API
+POST   /api/alerting/rule/{id}     # Create rule
+PUT    /api/alerting/rule/{id}     # Update rule
+DELETE /api/alerting/rule/{id}     # Delete rule
+```
+
+⚠️ Avoid: action-style endpoints
+
+```
+POST /api/executeJob
+POST /api/processSpaceUpdate
+POST /api/triggerIndexRebalance
+```
+
+### Implement complete CRUD operations
+
+For every resource type, implement these HTTP endpoints:
+
+```
+GET    /api/my_domain/my_resources/{id}         # Read - retrieve an existing resource
+POST   /api/my_domain/my_resources              # Create - create a new resource
+PUT    /api/my_domain/my_resources/{id}         # Update - update an existing resource
+DELETE /api/my_domain/my_resources/{id}         # Delete - remove an existing resource
+GET    /api/my_domain/my_resources              # List - retrieve all resources (with pagination)
+```
+
 ### Path
 
 **Use snake case**
@@ -160,15 +193,36 @@ Carefully consider cases where this pattern may make sense as it is more user-fr
 
 ### Methods
 
+**Side effects**
+
+* `GET` should not have side-effects
+* `PATCH`, `PUT` and `DELETE` should have side-effects (alter some resource)
+* `POST` should have side-effects (like creating some resource, read on!)
+
+**Same method, same result?**
+
+This is sometimes referred to as _idempotency_. It is related to side-effects, but not quite the same thing.
+
+Imagine we were to run requests the following methods 1000x over:
+
+* `GET` always results in the same _server state_
+* `PUT` always results in the same _server state_
+* `DELETE` always results in the same _server state_ (maybe returns 404 after the first request)
+* `PATCH` always results in the same _server state_ for the same input! For example: `PATCH /api/coolstore/order/{id} { expected_delivery: "ASAP!" }` will result in the same state.
+
+However...
+
+* `POST` should result in a different _server state_. For example: `POST /api/coolstore/order` will result in a new order each time!
+
+**POST is (mostly) for creating a resource**
+
+Sometimes `POST` can be used for an action against a resource or for actions like a `GET` but with a body. If you expect you need to support a lot of input for searching or listing resources it might be good to reserve `POST` for this purposes. For example:
+
 **GET does not accept a body**
 
 `GET /api/my_domain/my_resources/{id}` ✅
 
 `GET /api/my_domain/my_resources/{id} { body: { params } }` ❌
-
-**POST is for creating a resource**
-
-Sometimes `POST` can be used for an action against a resource or for actions like a `GET` but with a body. If you expect you need to support a lot of input for searching or listing resources it might be good to reserve `POST` for this purposes. For example:
 
 ```
 POST /api/my_domain/my_resources
