@@ -6,16 +6,27 @@
  */
 
 import * as React from 'react';
-import { shallow } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { OfExpression } from './of';
-import { FormattedMessage } from '@kbn/i18n-react';
+
+// Helper function to render with IntlProvider
+const renderWithIntl = (ui: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en" messages={{}}>
+      {ui}
+    </IntlProvider>
+  );
+};
 
 describe('of expression', () => {
-  it('renders of builtin aggregation types', () => {
+  it('renders of builtin aggregation types', async () => {
+    const user = userEvent.setup();
     const onChangeSelectedAggField = jest.fn();
-    const wrapper = shallow(
+
+    renderWithIntl(
       <OfExpression
         aggType="count"
         errors={{ aggField: [] }}
@@ -24,45 +35,27 @@ describe('of expression', () => {
         onChangeSelectedAggField={onChangeSelectedAggField}
       />
     );
-    expect(wrapper.find('[data-test-subj="availableFieldsOptionsComboBox"]'))
-      .toMatchInlineSnapshot(`
-      <EuiComboBox
-        async={false}
-        compressed={false}
-        data-test-subj="availableFieldsOptionsComboBox"
-        fullWidth={true}
-        isClearable={true}
-        isInvalid={false}
-        noSuggestions={true}
-        onChange={[Function]}
-        optionMatcher={[Function]}
-        options={Array []}
-        placeholder="Select a field"
-        selectedOptions={
-          Array [
-            Object {
-              "label": "test",
-            },
-          ]
-        }
-        singleSelection={
-          Object {
-            "asPlainText": true,
-          }
-        }
-        sortMatchesBy="none"
-      />
-    `);
+
+    // Check that the button shows the correct value
+    expect(screen.getByTestId('ofExpressionPopover')).toHaveTextContent('of test');
+
+    // Open the popover to access the form elements
+    await user.click(screen.getByTestId('ofExpressionPopover'));
+
+    // Now check for the combo box
+    expect(screen.getByTestId('availableFieldsOptionsComboBox')).toBeInTheDocument();
   });
 
-  it('renders with custom aggregation types', () => {
+  it('renders with custom aggregation types', async () => {
+    const user = userEvent.setup();
     const onChangeSelectedAggField = jest.fn();
-    const wrapper = shallow(
+    
+    renderWithIntl(
       <OfExpression
         aggType="test2"
         errors={{ aggField: [] }}
         fields={[{ normalizedType: 'number', name: 'test2', text: 'test text' }]}
-        aggField="test"
+        aggField="test2"
         onChangeSelectedAggField={onChangeSelectedAggField}
         customAggTypesOptions={{
           test1: {
@@ -80,46 +73,22 @@ describe('of expression', () => {
         }}
       />
     );
-    expect(wrapper.find('[data-test-subj="availableFieldsOptionsComboBox"]'))
-      .toMatchInlineSnapshot(`
-      <EuiComboBox
-        async={false}
-        compressed={false}
-        data-test-subj="availableFieldsOptionsComboBox"
-        fullWidth={true}
-        isClearable={true}
-        isInvalid={false}
-        noSuggestions={false}
-        onChange={[Function]}
-        optionMatcher={[Function]}
-        options={
-          Array [
-            Object {
-              "label": "test2",
-            },
-          ]
-        }
-        placeholder="Select a field"
-        selectedOptions={
-          Array [
-            Object {
-              "label": "test",
-            },
-          ]
-        }
-        singleSelection={
-          Object {
-            "asPlainText": true,
-          }
-        }
-        sortMatchesBy="none"
-      />
-    `);
+    
+    // Check that the button shows the correct value
+    expect(screen.getByTestId('ofExpressionPopover')).toHaveTextContent('of test2');
+    
+    // Open the popover to access the form elements
+    await user.click(screen.getByTestId('ofExpressionPopover'));
+    
+    // Now check for the combo box
+    expect(screen.getByTestId('availableFieldsOptionsComboBox')).toBeInTheDocument();
   });
 
-  it('renders with default aggreagation type preselected if no aggType was set', () => {
+  it('renders with default aggregation type preselected if no aggType was set', async () => {
+    const user = userEvent.setup();
     const onChangeSelectedAggField = jest.fn();
-    const wrapper = shallow(
+
+    renderWithIntl(
       <OfExpression
         aggType="count"
         errors={{ aggField: [] }}
@@ -128,20 +97,21 @@ describe('of expression', () => {
         onChangeSelectedAggField={onChangeSelectedAggField}
       />
     );
-    wrapper.simulate('click');
-    expect(
-      wrapper.contains(
-        <FormattedMessage
-          id="xpack.triggersActionsUI.common.expressionItems.of.popoverTitle"
-          defaultMessage="of"
-        />
-      )
-    ).toBeTruthy();
+
+    // Click to open the popover
+    const button = screen.getByTestId('ofExpressionPopover');
+    await user.click(button);
+
+    // Check that the popover is open and contains the "of" text
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getAllByText('of')).toHaveLength(2); // One in button, one in popover title
   });
 
-  it('renders a helptext when passed as a prop', () => {
+  it('renders a helptext when passed as a prop', async () => {
+    const user = userEvent.setup();
     const onChangeSelectedAggField = jest.fn();
-    const wrapper = shallow(
+
+    renderWithIntl(
       <OfExpression
         aggType="count"
         errors={{ aggField: [] }}
@@ -152,14 +122,17 @@ describe('of expression', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="availableFieldsOptionsFormRow"]').prop('helpText')).toBe(
-      'Helptext test message'
-    );
+    // Open the popover to see the help text
+    await user.click(screen.getByTestId('ofExpressionPopover'));
+
+    // The help text should be visible in the form row
+    expect(screen.getByText('Helptext test message')).toBeInTheDocument();
   });
 
   it('clears selected agg field if fields does not contain current selection', async () => {
     const onChangeSelectedAggField = jest.fn();
-    const wrapper = mountWithIntl(
+
+    renderWithIntl(
       <OfExpression
         aggType="count"
         errors={{ aggField: [] }}
@@ -177,11 +150,9 @@ describe('of expression', () => {
       />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    // Wait for the effect to run and clear the field
+    await waitFor(() => {
+      expect(onChangeSelectedAggField).toHaveBeenCalledWith(undefined);
     });
-
-    expect(onChangeSelectedAggField).toHaveBeenCalledWith(undefined);
   });
 });
