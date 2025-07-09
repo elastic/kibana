@@ -61,7 +61,7 @@ export const openLazyFlyout = ({
       core
     ),
     {
-      size: 's',
+      size: 500,
       type: 'push',
       paddingSize: 'm',
       maxWidth: 800,
