@@ -6,7 +6,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { RuleExecutorOptions, RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
+import {
+  AlertInstanceContext,
+  RuleExecutorOptions,
+  RuleType,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/server';
 import { SecurityAttackDiscoveryAlert } from '@kbn/alerts-as-data-utils';
 import { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common';
 import { ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
@@ -55,11 +60,24 @@ export type AttackDiscoveryAlertDocument = Omit<
   [ALERT_WORKFLOW_STATUS_UPDATED_AT]?: string;
 };
 
+export type AttackDiscoveryScheduleContext = AlertInstanceContext & {
+  attack: {
+    alertIds: string[];
+    detailsMarkdown: string;
+    detailsUrl?: string;
+    entitySummaryMarkdown?: string;
+    mitreAttackTactics?: string[];
+    summaryMarkdown: string;
+    timestamp?: string;
+    title: string;
+  };
+};
+
 export type AttackDiscoveryExecutorOptions = RuleExecutorOptions<
   AttackDiscoveryScheduleParams,
   RuleTypeState,
   {},
-  {},
+  AttackDiscoveryScheduleContext,
   'default',
   AttackDiscoveryAlertDocument
 >;
@@ -69,7 +87,7 @@ export type AttackDiscoveryScheduleType = RuleType<
   never,
   RuleTypeState,
   {},
-  {},
+  AttackDiscoveryScheduleContext,
   'default',
   never,
   AttackDiscoveryAlertDocument

@@ -27,7 +27,6 @@ import type {
   LoadDashboardFromSavedObjectProps,
   LoadDashboardReturn,
 } from '../types';
-import { convertNumberToDashboardVersion } from './dashboard_versioning';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -135,17 +134,8 @@ export const loadDashboardState = async ({
   const query = migrateLegacyQuery(
     searchSource?.getOwnField('query') || queryString.getDefaultQuery() // TODO SAVED DASHBOARDS determine if migrateLegacyQuery is still needed
   );
-  const {
-    refreshInterval,
-    description,
-    timeRestore,
-    options,
-    panels,
-    timeFrom,
-    version,
-    timeTo,
-    title,
-  } = attributes;
+  const { refreshInterval, description, timeRestore, options, panels, timeFrom, timeTo, title } =
+    attributes;
 
   const timeRange =
     timeRestore && timeFrom && timeTo
@@ -170,14 +160,10 @@ export const loadDashboardState = async ({
       panels,
       query,
       title,
-
-      viewMode: 'view', // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags:
         savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
 
       controlGroupInput: attributes.controlGroupInput,
-
-      ...(version && { version: convertNumberToDashboardVersion(version) }),
     },
     dashboardFound: true,
     dashboardId: savedObjectId,
