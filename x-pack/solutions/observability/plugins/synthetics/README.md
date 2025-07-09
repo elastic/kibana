@@ -74,24 +74,25 @@ We can run these tests like described above, but with some special config.
 `node scripts/functional_test_runner.js --config=test/functional_with_es_ssl/config.ts`
 
 ## Deployment agnostic API Integration Tests
-The Synthetics tests are located under `x-pack/test/api_integration/deployment_agnostic/apis/observability/synthetics` folder. In order to run the SLO tests of your interest, you can grep accordingly. Use the commands below to run all SLO tests (`grep=SyntheticsAPITests`) on stateful or serverless.
+
+The Synthetics tests are located under `x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics` folder. In order to run the SLO tests of your interest, you can grep accordingly. Use the commands below to run all SLO tests (`grep=SyntheticsAPITests`) on stateful or serverless.
 
 ### Stateful
 
 ```
 # start server
-node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
 
 # run tests
-node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts --grep=SyntheticsAPITests
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts --grep=SyntheticsAPITests
 ```
 
 ### Serverless
 
 ```
 # start server
-node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
 
 # run tests
-node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts --grep=SyntheticsAPITests
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts --grep=SyntheticsAPITests
 ```
