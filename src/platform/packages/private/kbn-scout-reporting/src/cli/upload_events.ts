@@ -46,7 +46,7 @@ export const uploadAllEventsFromPath = async (
   }
 ) => {
   // Validate CLI options
-  if (eventLogPath && !fs.existsSync(eventLogPath)) {
+  if (!fs.existsSync(eventLogPath)) {
     throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
   }
 
