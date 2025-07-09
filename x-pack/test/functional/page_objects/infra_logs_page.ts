@@ -8,7 +8,6 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common']);
 
   return {
