@@ -47,6 +47,7 @@ import { COPY_ARIA_LABEL } from '../../../components/copy_button';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 import { TruncatedCopyableText } from './findings_right/header';
+import { CIS_GCP } from '../../../../common/constants';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
@@ -254,7 +255,7 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
   },
 ];
 
-const getEvidenceList = ({ result }: CspFinding) =>
+const getEvidenceList = (finding: CspFinding) =>
   [
     {
       title: '',
@@ -267,11 +268,21 @@ const getEvidenceList = ({ result }: CspFinding) =>
             />
           </EuiText>
           <EuiSpacer size={'s'} />
-          <CodeBlock language="json">{JSON.stringify(result?.evidence, null, 2)}</CodeBlock>
+          <CodeBlock language="json">
+            {JSON.stringify(getEvaluationEvidence(finding), null, 2)}
+          </CodeBlock>
         </>
       ),
     },
   ].filter(truthy);
+
+const getEvaluationEvidence = ({ result, resource }: CspFinding) => {
+  return (
+    result.evidence || // for all CIS benchmarks except CIS_GCP
+    (resource.raw as { resource?: unknown })?.resource || // for CIS_GCP benchmarks, prefer the specific resource
+    resource.raw // fallback to the raw resource
+  );
+};
 
 export const OverviewTab = ({
   data,
@@ -308,7 +319,9 @@ export const OverviewTab = ({
     [data.data_stream?.dataset, discover.locator, cdrMisconfigurationsDataView.data?.id]
   );
 
-  const hasEvidence = !isEmpty(data.result?.evidence);
+  const hasEvidence =
+    !isEmpty(data.result?.evidence) ||
+    (data.rule.benchmark?.id === CIS_GCP && !isEmpty(data.resource.raw));
 
   const accordions: Accordion[] = useMemo(
     () =>
