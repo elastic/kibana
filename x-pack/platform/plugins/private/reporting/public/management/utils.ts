@@ -47,7 +47,7 @@ export const guessAppIconTypeFromObjectType = (type: string): IconType => {
 export const getDisplayNameFromObjectType = (type: string): string => {
   switch (type) {
     case 'search':
-      return 'discover session';
+      return 'Discover';
     default:
       return type;
   }
