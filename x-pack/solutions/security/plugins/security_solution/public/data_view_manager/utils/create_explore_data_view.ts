@@ -7,6 +7,7 @@
 
 import type { DataViewsServicePublic, DataView } from '@kbn/data-views-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { EXPLORE_DATA_VIEW_PREFIX } from '../constants';
 
 export const createExploreDataView = async (
   dependencies: {
@@ -21,7 +22,7 @@ export const createExploreDataView = async (
     .join();
 
   return dependencies.dataViews.create({
-    id: `explore-data-view-${(await dependencies.spaces.getActiveSpace()).id}`,
+    id: `${EXPLORE_DATA_VIEW_PREFIX}-${(await dependencies.spaces.getActiveSpace()).id}`,
     name: 'Explore Data View',
     title: exploreDataViewPattern,
   });

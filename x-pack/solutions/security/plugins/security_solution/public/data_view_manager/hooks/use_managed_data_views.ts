@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { sharedStateSelector } from '../redux/selectors';
+import { EXPLORE_DATA_VIEW_PREFIX } from '../constants';
 
 /**
  * Returns the default security solution data view and alert data view
@@ -17,6 +18,7 @@ import { sharedStateSelector } from '../redux/selectors';
 export const useManagedDataViews = (): DataView[] => {
   const {
     dataViews: dataViewSpecs,
+    adhocDataViews,
     defaultDataViewId,
     alertDataViewId,
   } = useSelector(sharedStateSelector);
@@ -26,9 +28,14 @@ export const useManagedDataViews = (): DataView[] => {
 
   return useMemo(
     () =>
-      dataViewSpecs
-        .filter((dv) => dv.id === defaultDataViewId || dv.id === alertDataViewId)
+      [...dataViewSpecs, ...adhocDataViews]
+        .filter(
+          (dv) =>
+            dv.id === defaultDataViewId ||
+            dv.id === alertDataViewId ||
+            dv.id?.startsWith(EXPLORE_DATA_VIEW_PREFIX)
+        )
         .map((spec) => new DataView({ spec, fieldFormats })),
-    [dataViewSpecs, defaultDataViewId, alertDataViewId, fieldFormats]
+    [dataViewSpecs, adhocDataViews, defaultDataViewId, alertDataViewId, fieldFormats]
   );
 };

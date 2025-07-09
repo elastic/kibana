@@ -17,7 +17,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
-import { DataViewManagerScopeName } from '../../constants';
+import { DataViewManagerScopeName, EXPLORE_DATA_VIEW_PREFIX } from '../../constants';
 import { useManagedDataViews } from '../../hooks/use_managed_data_views';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 import { DEFAULT_SECURITY_DATA_VIEW, LOADING } from './translations';
@@ -61,7 +61,9 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const { adhocDataViews: adhocDataViewSpecs, defaultDataViewId } =
     useSelector(sharedStateSelector);
   const adhocDataViews = useMemo(() => {
-    return adhocDataViewSpecs.map((spec) => new DataView({ spec, fieldFormats }));
+    return adhocDataViewSpecs
+      .filter((spec) => !spec.id?.startsWith(EXPLORE_DATA_VIEW_PREFIX))
+      .map((spec) => new DataView({ spec, fieldFormats }));
   }, [adhocDataViewSpecs, fieldFormats]);
 
   const managedDataViews = useManagedDataViews();
