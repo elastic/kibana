@@ -23,31 +23,14 @@ import {
   generateLatestIndexName,
 } from '../helpers/generate_component_id';
 import { generateLatestMetadataAggregations } from './generate_metadata_aggregations';
+import { TRANSFORM_IGNORED_SLOW_TIERS } from './constants';
 
 export function generateLatestTransform(
   definition: EntityDefinition
 ): TransformPutTransformRequest {
-  const filter: QueryDslQueryContainer[] = [];
-
-  if (definition.filter) {
-    filter.push(getElasticsearchQueryOrThrow(definition.filter));
-  }
-
-  definition.identityFields.forEach(({ field }) => {
-    filter.push({ exists: { field } });
-  });
-
-  filter.push({
-    range: {
-      [definition.latest.timestampField]: {
-        gte: `now-${definition.latest.lookbackPeriod}`,
-      },
-    },
-  });
-
   return generateTransformPutRequest({
     definition,
-    filter,
+    filter: generateFilters(definition),
     transformId: generateLatestTransformId(definition),
     frequency: definition.latest.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
     syncDelay: definition.latest.settings?.syncDelay ?? ENTITY_DEFAULT_LATEST_SYNC_DELAY,
@@ -68,7 +51,7 @@ const generateTransformPutRequest = ({
 }: {
   definition: EntityDefinition;
   transformId: string;
-  filter: QueryDslQueryContainer[];
+  filter: QueryDslQueryContainer;
   frequency: string;
   syncDelay: string;
   docsPerSecond?: number;
@@ -84,13 +67,7 @@ const generateTransformPutRequest = ({
     timeout: definition.latest.settings?.timeout,
     source: {
       index: definition.indexPatterns,
-      ...(filter.length > 0 && {
-        query: {
-          bool: {
-            filter,
-          },
-        },
-      }),
+      query: filter,
     },
     dest: {
       index: `${generateLatestIndexName({ id: 'noop' } as EntityDefinition)}`,
@@ -133,3 +110,35 @@ const generateTransformPutRequest = ({
     },
   };
 };
+
+function generateFilters(definition: EntityDefinition) {
+  const filter = {
+    bool: {
+      must: [] as QueryDslQueryContainer[],
+      must_not: [] as QueryDslQueryContainer[],
+    },
+  };
+
+  if (definition.filter) {
+    filter.bool.must.push(getElasticsearchQueryOrThrow(definition.filter));
+  }
+
+  definition.identityFields.forEach(({ field }) => {
+    filter.bool.must.push({ exists: { field } });
+  });
+
+  filter.bool.must.push({
+    range: {
+      [definition.latest.timestampField]: {
+        gte: `now-${definition.latest.lookbackPeriod}`,
+      },
+    },
+  });
+
+  filter.bool.must_not.push({
+    terms: {
+      _tier: TRANSFORM_IGNORED_SLOW_TIERS,
+    },
+  });
+  return filter;
+}
