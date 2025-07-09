@@ -8,9 +8,9 @@
  */
 
 import { WithAllKeys } from '@kbn/presentation-publishing';
-import { BookAttributes } from './types';
+import type { BookState } from '../../../server';
 
-export const defaultBookAttributes: WithAllKeys<BookAttributes> = {
+export const defaultBookState: WithAllKeys<BookState> = {
   bookTitle: 'Pillars of the earth',
   authorName: 'Ken follett',
   numberOfPages: 973,

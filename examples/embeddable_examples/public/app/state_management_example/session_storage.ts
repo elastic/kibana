@@ -8,7 +8,7 @@
  */
 
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
-import { BookSerializedState } from '../../react_embeddables/saved_book/types';
+import { BookEmbeddableState } from '../../react_embeddables/saved_book/types';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.embeddables.stateManagementExample.savedState';
@@ -18,7 +18,7 @@ export const WEB_LOGS_DATA_VIEW_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
 
 export const savedStateManager = {
   clear: () => sessionStorage.removeItem(SAVED_STATE_SESSION_STORAGE_KEY),
-  set: (serializedState: SerializedPanelState<BookSerializedState>) =>
+  set: (serializedState: SerializedPanelState<BookEmbeddableState>) =>
     sessionStorage.setItem(SAVED_STATE_SESSION_STORAGE_KEY, JSON.stringify(serializedState)),
   get: () => {
     const serializedStateJSON = sessionStorage.getItem(SAVED_STATE_SESSION_STORAGE_KEY);
@@ -28,7 +28,7 @@ export const savedStateManager = {
 
 export const unsavedStateManager = {
   clear: () => sessionStorage.removeItem(UNSAVED_STATE_SESSION_STORAGE_KEY),
-  set: (serializedState: SerializedPanelState<BookSerializedState>) =>
+  set: (serializedState: SerializedPanelState<BookEmbeddableState>) =>
     sessionStorage.setItem(UNSAVED_STATE_SESSION_STORAGE_KEY, JSON.stringify(serializedState)),
   get: () => {
     const serializedStateJSON = sessionStorage.getItem(UNSAVED_STATE_SESSION_STORAGE_KEY);

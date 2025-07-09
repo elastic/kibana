@@ -7,4 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ADD_SAVED_BOOK_ACTION_ID = 'create_saved_book';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import type { StartDeps } from './plugin';
+
+export let contentManagement: ContentManagementPublicStart;
+
+export const setKibanaServices = (kibanaCore: CoreStart, deps: StartDeps) => {
+  contentManagement = deps.contentManagement;
+};

@@ -17,6 +17,7 @@ import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { setupApp } from './app/setup_app';
 import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
@@ -25,10 +26,10 @@ import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdow
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
-import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
 import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
+import { BOOK_EMBEDDABLE_TYPE } from '../common';
 
 export interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -37,6 +38,7 @@ export interface SetupDeps {
 }
 
 export interface StartDeps {
+  contentManagement: ContentManagementPublicStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewFieldEditor: DataViewFieldEditorStart;
   embeddable: EmbeddableStart;
@@ -76,7 +78,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return getDataTableFactory(coreStart, deps);
     });
 
-    embeddable.registerReactEmbeddableFactory(SAVED_BOOK_ID, async () => {
+    embeddable.registerReactEmbeddableFactory(BOOK_EMBEDDABLE_TYPE, async () => {
       const { getSavedBookEmbeddableFactory } = await import(
         './react_embeddables/saved_book/saved_book_react_embeddable'
       );
