@@ -45,6 +45,14 @@ export const useQueryRulesBreadcrumbs = (rulesetId?: string) => {
               },
             ]),
       ]);
+    } else {
+      if (rulesetId && rulesetId.trim().length > 0) {
+        searchNavigation?.breadcrumbs.setSearchBreadCrumbs([
+          {
+            text: rulesetId,
+          },
+        ]);
+      }
     }
 
     return () => {
