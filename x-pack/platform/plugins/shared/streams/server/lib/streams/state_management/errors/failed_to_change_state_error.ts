@@ -7,9 +7,9 @@
 
 import { StatusError } from '../../errors/status_error';
 
-export class FailedToRollbackError extends StatusError {
-  constructor(message: string) {
-    super(message, 500);
-    this.name = 'FailedToRollbackError';
+export class FailedToChangeStateError extends StatusError {
+  constructor(message: string, statusCode: number) {
+    super(message, statusCode);
+    this.name = 'FailedToChangeStateError';
   }
 }
