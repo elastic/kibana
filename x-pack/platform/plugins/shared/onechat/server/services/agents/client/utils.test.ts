@@ -53,7 +53,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'provX', tool_ids: ['toolA'] }],
+      toolSelection: [{ type: 'provX', tool_ids: ['toolA'] }],
     });
     expect(errors.join(' ')).toMatch(/Provider 'provX' does not exist/);
   });
@@ -63,7 +63,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'prov2', tool_ids: ['*'] }],
+      toolSelection: [{ type: 'prov2', tool_ids: ['*'] }],
     });
     expect(errors.join(' ')).toMatch(/Provider 'prov2' does not exist/);
   });
@@ -73,7 +73,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'prov1', tool_ids: ['toolC'] }],
+      toolSelection: [{ type: 'prov1', tool_ids: ['toolC'] }],
     });
     expect(errors.join(' ')).toMatch(/does not exist for provider/);
   });
@@ -83,7 +83,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'prov1', tool_ids: ['toolA'] }],
+      toolSelection: [{ type: 'prov1', tool_ids: ['toolA'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -113,7 +113,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'prov1', tool_ids: ['*'] }],
+      toolSelection: [{ type: 'prov1', tool_ids: ['*'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -124,7 +124,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ provider: 'builtIn', tool_ids: ['*'] }],
+      toolSelection: [{ type: 'builtIn', tool_ids: ['*'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -136,7 +136,7 @@ describe('validateToolSelection (unit)', () => {
       request: mockRequest,
       toolSelection: [
         { tool_ids: ['toolA', 'nonexistent'] },
-        { provider: 'provX', tool_ids: ['toolA'] },
+        { type: 'provX', tool_ids: ['toolA'] },
       ],
     });
     expect(errors).toEqual(

@@ -236,14 +236,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
           })}
         >
           <Controller
-            name="customInstructions"
+            name="configuration.instructions"
             control={control}
             render={({ field }) => (
               <EuiTextArea
                 {...field}
                 rows={4}
                 disabled={isFormDisabled}
-                isInvalid={!!formState.errors.customInstructions}
+                isInvalid={!!formState.errors.configuration?.instructions}
               />
             )}
           />
@@ -259,7 +259,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
         </EuiTitle>
         <EuiSpacer size="l" />
         <Controller
-          name="toolSelection"
+          name="configuration.tools"
           control={control}
           render={({ field }) => (
             <ToolsSelection

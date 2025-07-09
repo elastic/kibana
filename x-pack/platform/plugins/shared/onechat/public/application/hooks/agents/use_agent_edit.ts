@@ -18,17 +18,11 @@ import { useOnechatAgentById } from './use_agent_by_id';
 import { useOnechatTools } from '../use_tools';
 import { queryKeys } from '../../query_keys';
 
-export interface AgentEditState {
-  id: string;
-  name: string;
-  description: string;
-  customInstructions: string;
-  toolSelection: ToolSelection[];
-}
+export type AgentEditState = Omit<AgentDefinition, 'type'>;
 
 const defaultToolSelection: ToolSelection[] = [
   {
-    provider: builtinToolProviderId,
+    type: builtinToolProviderId,
     tool_ids: [allToolsSelectionWildcard],
   },
 ];
@@ -37,8 +31,10 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
-  customInstructions: '',
-  toolSelection: defaultToolSelection,
+  configuration: {
+    instructions: '',
+    tools: defaultToolSelection,
+  },
 });
 
 export function useAgentEdit({
@@ -94,13 +90,7 @@ export function useAgentEdit({
     }
 
     if (agent) {
-      setState({
-        id: agent.id,
-        name: agent.name,
-        description: agent.description,
-        customInstructions: agent.configuration.instructions ?? '',
-        toolSelection: agent.configuration.tools ?? defaultToolSelection,
-      });
+      setState(agent);
     }
   }, [agentId, agent]);
 
