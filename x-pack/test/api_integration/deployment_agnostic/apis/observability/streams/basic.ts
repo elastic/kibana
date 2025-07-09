@@ -29,6 +29,8 @@ import {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
+  const config = getService('config');
+  const isServerless = !!config.get('serverless');
   const esClient = getService('es');
 
   interface Resources {
@@ -85,6 +87,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         before(async () => {
           await enableStreams(apiClient);
         });
+
+        it('reports enabled status', async () => {
+          expect(await getEnabled()).to.eql(true);
+        });
+
+        // Elasticsearch doesn't support streams in serverless mode yet
+        if (!isServerless) {
+          it('reports conflict if disabled on Elasticsearch level', async () => {
+            await esClient.transport.request({
+              method: 'POST',
+              path: '/_streams/logs/_disable',
+            });
+            expect(await getEnabled()).to.eql('conflict');
+          });
+
+          it('reports enabled after calling enabled again', async () => {
+            await enableStreams(apiClient);
+            expect(await getEnabled()).to.eql(true);
+          });
+
+          it('Elasticsearch streams is enabled too', async () => {
+            const response = await esClient.transport.request({
+              method: 'GET',
+              path: '/_streams/status',
+            });
+            expect(response).to.eql({
+              logs: {
+                enabled: true,
+              },
+            });
+          });
+        }
 
         it('is enabled', async () => {
           await disableStreams(apiClient);
@@ -521,16 +555,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const definitions = await Promise.all(streams.map((stream) => getStream(apiClient, stream)));
       for (const definition of definitions) {
         const inherited = Streams.WiredStream.GetResponse.parse(definition).inherited_fields;
-        for (const [field, config] of Object.entries(expectedFields)) {
-          expect(inherited[field]).to.eql(config);
+        for (const [field, fieldConfig] of Object.entries(expectedFields)) {
+          expect(inherited[field]).to.eql(fieldConfig);
         }
       }
 
       const mappingsResponse = await esClient.indices.getMapping({ index: streams });
       for (const { mappings } of Object.values(mappingsResponse)) {
-        for (const [field, config] of Object.entries(expectedFields)) {
+        for (const [field, fieldConfig] of Object.entries(expectedFields)) {
           const fieldPath = field.split('.').join('.properties.');
-          expect(get(mappings.properties, fieldPath)).to.eql(omit(config, ['from']));
+          expect(get(mappings.properties, fieldPath)).to.eql(omit(fieldConfig, ['from']));
         }
       }
     }
@@ -542,6 +576,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await disableStreams(apiClient);
+
+        await esClient.indices.deleteDataStream({ name: 'logs.invalid_pipeline' });
+        await esClient.indices.deleteIndexTemplate({ name: 'logs.invalid_pipeline@stream' });
+        await esClient.cluster.deleteComponentTemplate({
+          name: 'logs.invalid_pipeline@stream.layer',
+        });
       });
 
       it('inherit fields', async () => {
@@ -607,6 +647,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
           500
+        );
+      });
+
+      it('reports when it fails to create a stream', async () => {
+        const body: Streams.WiredStream.UpsertRequest = {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: 'Should cause a failure due to invalid ingest pipeline',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [
+                {
+                  manual_ingest_pipeline: {
+                    processors: [
+                      {
+                        set: {
+                          field: 'fails',
+                          value: 'whatever',
+                          fail: 'because this property is not valid',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              wired: {
+                fields: {},
+                routing: [],
+              },
+            },
+          },
+        };
+
+        const response = await putStream(apiClient, 'logs.invalid_pipeline', body, 500);
+
+        expect((response as any).message).to.contain('Failed to change state:');
+        expect((response as any).message).to.contain(
+          `The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`
         );
       });
     });

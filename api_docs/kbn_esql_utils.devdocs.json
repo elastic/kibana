@@ -471,6 +471,43 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getCategorizeField",
+        "type": "Function",
+        "tags": [],
+        "label": "getCategorizeField",
+        "description": [
+          "\nExtracts the fields used in the CATEGORIZE function from an ESQL query."
+        ],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getCategorizeField.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              ": string - The ESQL query string"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getESQLAdHocDataview",
         "type": "Function",
         "tags": [],

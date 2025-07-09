@@ -21,6 +21,16 @@ export {
   createBuiltinToolId,
   toolDescriptorToIdentifier,
   builtinToolProviderId,
+  esqlToolProviderId,
   unknownToolProviderId,
 } from './tools';
-export { BuiltinToolIds, BuiltinTags } from './constants';
+export { type FieldTypes, BuiltinToolIds, BuiltinTags } from './constants';
+export {
+  type ByIdsToolSelection,
+  type ToolSelection,
+  isByIdsToolSelection,
+  toolMatchSelection,
+  filterToolsBySelection,
+  allToolsSelectionWildcard,
+  allToolsSelection,
+} from './tool_selection';

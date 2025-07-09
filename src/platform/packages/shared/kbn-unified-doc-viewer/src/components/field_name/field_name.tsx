@@ -8,17 +8,27 @@
  */
 
 import React from 'react';
-import './field_name.scss';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiHighlight,
+  euiFontSize,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { getFieldTypeName } from '@kbn/field-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Props {
   fieldName: string;
+  displayNameOverride?: string;
   fieldType?: string;
   fieldMapping?: DataViewField;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
@@ -31,13 +41,17 @@ export function FieldName({
   fieldMapping,
   fieldType,
   fieldIconProps,
+  displayNameOverride,
   scripted = false,
   highlight = '',
 }: Props) {
+  const styles = useMemoCss(componentStyles);
+
   const typeName = getFieldTypeName(fieldType);
-  const displayName =
-    fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : fieldName;
-  const tooltip = displayName !== fieldName ? `${displayName} (${fieldName})` : fieldName;
+  const fieldMappingDisplayName = fieldMapping?.displayName ? fieldMapping.displayName : fieldName;
+  const fieldDisplayName = displayNameOverride ?? fieldMappingDisplayName;
+
+  const tooltip = fieldDisplayName !== fieldName ? `${fieldDisplayName} (${fieldName})` : fieldName;
   const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
   const isMultiField = !!subTypeMulti?.multi;
 
@@ -50,7 +64,7 @@ export function FieldName({
           alignItems="center"
           direction="row"
           wrap={false}
-          className="kbnDocViewer__fieldIconContainer"
+          css={styles.fieldIconContainer}
         >
           <EuiFlexItem grow={false}>
             <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
@@ -62,6 +76,7 @@ export function FieldName({
         <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
           <EuiFlexItem
             className="kbnDocViewer__fieldName eui-textBreakAll"
+            css={styles.fieldName}
             grow={false}
             data-test-subj={`tableDocViewRow-${fieldName}-name`}
           >
@@ -71,7 +86,7 @@ export function FieldName({
               delay="long"
               anchorClassName="eui-textBreakAll"
             >
-              <EuiHighlight search={highlight}>{displayName}</EuiHighlight>
+              <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
             </EuiToolTip>
           </EuiFlexItem>
 
@@ -88,7 +103,7 @@ export function FieldName({
             >
               <EuiBadge
                 title=""
-                className="kbnDocViewer__multiFieldBadge"
+                css={styles.multiFieldBadge}
                 color="default"
                 data-test-subj={`tableDocViewRow-${fieldName}-multifieldBadge`}
               >
@@ -104,3 +119,31 @@ export function FieldName({
     </EuiFlexGroup>
   );
 }
+
+const componentStyles = {
+  fieldIconContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
+      lineHeight: euiTheme.font.lineHeightMultiplier,
+    }),
+  fieldName: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 's');
+
+    return css({
+      padding: euiTheme.size.xs,
+      paddingLeft: 0,
+      lineHeight: euiTheme.font.lineHeightMultiplier,
+
+      '.euiDataGridRowCell__popover &': {
+        fontSize,
+      },
+    });
+  },
+  multiFieldBadge: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: `${euiTheme.size.xs} 0`,
+      fontWeight: euiTheme.font.weight.regular,
+      fontFamily: euiTheme.font.family,
+    }),
+};

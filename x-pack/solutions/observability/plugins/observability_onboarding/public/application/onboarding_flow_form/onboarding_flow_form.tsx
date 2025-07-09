@@ -87,7 +87,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         : i18n.translate(
             'xpack.observability_onboarding.logsEssential.onboardingFlowForm.hostDescription',
             {
-              defaultMessage: 'Monitor logs on your host',
+              defaultMessage: 'Ingest and analyze logs on your host.',
             }
           ),
       logos: ['opentelemetry', 'apache', 'mysql'],
@@ -109,7 +109,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         : i18n.translate(
             'xpack.observability_onboarding.logsEssential.onboardingFlowForm.kubernetesDescription',
             {
-              defaultMessage: 'Collect logs from your Kubernetes cluster and containers.',
+              defaultMessage: 'Observe logs from your Kubernetes environments',
             }
           ),
       logos: ['kubernetes', 'opentelemetry'],

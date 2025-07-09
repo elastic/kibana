@@ -166,7 +166,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Response actions telemetry collection
    * Should be enabled in 8.17.0
    */
-  responseActionsTelemetryEnabled: false,
+  responseActionsTelemetryEnabled: true,
 
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
@@ -206,7 +206,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the rule's bulk action to manage alert suppression
    */
-  bulkEditAlertSuppressionEnabled: false,
+  bulkEditAlertSuppressionEnabled: true,
 
   /**
    * Enables the new data ingestion hub
