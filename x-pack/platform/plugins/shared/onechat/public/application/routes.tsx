@@ -10,12 +10,26 @@ import React from 'react';
 import { OnechatToolsPage } from './pages/tools';
 import { OnechatConversationsPage } from './pages/conversations';
 import { OnechatAgentsPage } from './pages/agents';
+import { OnechatAgentsCreate } from './pages/agent_create';
+import { OnechatAgentsEdit } from './pages/agent_edit';
 
 export const OnechatRoutes: React.FC<{}> = () => {
   return (
     <Routes>
       <Route path="/conversations/:conversationId">
         <OnechatConversationsPage />
+      </Route>
+
+      <Route path="/agents/new">
+        <OnechatAgentsCreate />
+      </Route>
+
+      <Route path="/agents/:agentId">
+        <OnechatAgentsEdit />
+      </Route>
+
+      <Route path="/agents">
+        <OnechatAgentsPage />
       </Route>
 
       <Route path="/tools">
