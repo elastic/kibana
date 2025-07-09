@@ -151,14 +151,6 @@ DELETE /api/my_domain/my_resources/{id}         # Delete - remove an existing re
 GET    /api/my_domain/my_resources              # List - retrieve all resources (with pagination)
 ```
 
-### Avoid polling style APIs
-
-Prefer APIs that process their requests within the lifecycle of a single request. If your API handler is doing actions that take longer than a typical request (30s), consider using a background task or job and offer clients a way to monitor progress. Either by `GET`ing the resource or some special polling API.
-
-<DocCallOut title="IaC friction" color="warning">
-  Polling style APIs create additional complexity for all API callers, but especially for IaC use cases that are typically not as sophisticated in their execution like Terraform.
-</DocCallOut>
-
 ### Path
 
 **Use snake case**
@@ -420,6 +412,14 @@ GET /api/my_domain/my_resources?sort=field_name,-other_name
 ```
 
 Where `field_name` is the name of the field to sort by in ascending order and `-other_name` is the name of the field to sort by in descending order.
+
+### Avoid polling style APIs
+
+Prefer APIs that process their requests within the lifecycle of a single request. If your API handler is doing actions that take longer than a typical request (30s), consider using a background task or job and offer clients a way to monitor progress. Either by `GET`ing the resource or some special polling API.
+
+<DocCallOut title="Consider Infrastructure-as-Code" color="warning">
+  Polling style APIs create additional complexity for all API callers, but especially for IaC use cases that are typically not as sophisticated in their execution like Terraform.
+</DocCallOut>
 
 ### Filtering
 
