@@ -77,7 +77,6 @@ const executeSubAction = async ({
   return response;
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function createActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');

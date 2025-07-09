@@ -20,7 +20,6 @@ import {
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { createIndexConnector, createRule } from './helpers/alerting_api_helper';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');

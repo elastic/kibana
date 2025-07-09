@@ -18,6 +18,7 @@ import {
 } from '@kbn/streams-schema';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/public';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -146,6 +147,16 @@ export function DiscoverBadgeButton({
     return null;
   }
 
+  return <DiscoverBadgeButtonInner discoverLocator={discoverLocator} esqlQuery={esqlQuery} />;
+}
+
+function DiscoverBadgeButtonInner({
+  discoverLocator,
+  esqlQuery,
+}: {
+  discoverLocator: LocatorPublic<DiscoverAppLocatorParams>;
+  esqlQuery: string;
+}) {
   const discoverLink = discoverLocator.useUrl({
     query: {
       esql: esqlQuery,
