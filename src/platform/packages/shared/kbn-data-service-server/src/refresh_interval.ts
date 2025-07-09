@@ -7,7 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { GetConfigFn } from '@kbn/data-service/src/types';
-export type { RefreshInterval } from '@kbn/data-service-server';
-export * from './query/types';
-export * from './kbn_field_types/types';
+import { schema } from '@kbn/config-schema';
+
+export const refreshIntervalSchema = schema.object({
+  pause: schema.boolean({
+    meta: {
+      description: 'Set to false to auto-refresh data on an interval.',
+    },
+  }),
+  value: schema.number({
+    meta: {
+      description: 'A numeric value indicating refresh frequency in milliseconds.',
+    },
+  }),
+});

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { GetConfigFn } from '@kbn/data-service/src/types';
-export type { RefreshInterval } from '@kbn/data-service-server';
-export * from './query/types';
-export * from './kbn_field_types/types';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-data-service-server'],
+};

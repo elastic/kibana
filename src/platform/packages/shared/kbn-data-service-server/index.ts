@@ -7,7 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { GetConfigFn } from '@kbn/data-service/src/types';
-export type { RefreshInterval } from '@kbn/data-service-server';
-export * from './query/types';
-export * from './kbn_field_types/types';
+export { refreshIntervalSchema } from './src/refresh_interval';
+export type { RefreshInterval } from './src/types';
