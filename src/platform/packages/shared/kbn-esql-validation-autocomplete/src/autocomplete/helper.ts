@@ -109,11 +109,11 @@ function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
 }
 
-function checkContent(fn: ESQLFunction): boolean {
+function checkContentPerDefinition(fn: ESQLFunction, def: FunctionDefinitionTypes): boolean {
   const fnDef = getFunctionDefinition(fn.name);
   return (
-    (!!fnDef && fnDef.type === FunctionDefinitionTypes.AGG) ||
-    extractFunctionArgs(fn.args).some(checkContent)
+    (!!fnDef && fnDef.type === def) ||
+    extractFunctionArgs(fn.args).some((arg) => checkContentPerDefinition(arg, def))
   );
 }
 
@@ -122,7 +122,17 @@ export function isAggFunctionUsedAlready(command: ESQLCommand, argIndex: number)
     return false;
   }
   const arg = command.args[argIndex];
-  return isFunctionItem(arg) ? checkContent(arg) : false;
+  return isFunctionItem(arg) ? checkContentPerDefinition(arg, FunctionDefinitionTypes.AGG) : false;
+}
+
+export function isTimeseriesAggUsedAlready(command: ESQLCommand, argIndex: number) {
+  if (argIndex < 0) {
+    return false;
+  }
+  const arg = command.args[argIndex];
+  return isFunctionItem(arg)
+    ? checkContentPerDefinition(arg, FunctionDefinitionTypes.TIME_SERIES_AGG)
+    : false;
 }
 
 function getFnContent(fn: ESQLFunction): string[] {
