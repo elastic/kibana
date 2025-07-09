@@ -21,6 +21,7 @@ import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import {
   generateLatestIndexTemplateId,
   generateLatestIngestPipelineId,
+  generateLatestBackfillIngestPipelineId,
   generateLatestTransformId,
   generateLatestBackfillTransformId,
 } from './helpers/generate_component_id';
@@ -34,6 +35,7 @@ const getExpectedInstalledComponents = (definition: EntityDefinition) => {
   return [
     { type: 'template', id: generateLatestIndexTemplateId(definition) },
     { type: 'ingest_pipeline', id: generateLatestIngestPipelineId(definition) },
+    { type: 'ingest_pipeline', id: generateLatestBackfillIngestPipelineId(definition) },
     { type: 'transform', id: generateLatestTransformId(definition) },
     { type: 'transform', id: generateLatestBackfillTransformId(definition) },
   ];
@@ -72,9 +74,17 @@ const assertHasCreatedDefinition = (
     })
   );
 
-  expect(esClient.ingest.putPipeline).toBeCalledTimes(1);
+  expect(esClient.ingest.putPipeline).toBeCalledTimes(2);
   expect(esClient.ingest.putPipeline).toBeCalledWith({
     id: generateLatestIngestPipelineId(definition),
+    processors: expect.anything(),
+    _meta: {
+      definition_version: definition.version,
+      managed: definition.managed,
+    },
+  });
+  expect(esClient.ingest.putPipeline).toBeCalledWith({
+    id: generateLatestBackfillIngestPipelineId(definition),
     processors: expect.anything(),
     _meta: {
       definition_version: definition.version,
@@ -111,9 +121,17 @@ const assertHasUpgradedDefinition = (
     })
   );
 
-  expect(esClient.ingest.putPipeline).toBeCalledTimes(1);
+  expect(esClient.ingest.putPipeline).toBeCalledTimes(2);
   expect(esClient.ingest.putPipeline).toBeCalledWith({
     id: generateLatestIngestPipelineId(definition),
+    processors: expect.anything(),
+    _meta: {
+      definition_version: definition.version,
+      managed: definition.managed,
+    },
+  });
+  expect(esClient.ingest.putPipeline).toBeCalledWith({
+    id: generateLatestBackfillIngestPipelineId(definition),
     processors: expect.anything(),
     _meta: {
       definition_version: definition.version,

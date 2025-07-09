@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateLatestIngestPipelineId } from './helpers/generate_component_id';
+import { generateLatestIngestPipelineId, generateLatestBackfillIngestPipelineId } from './helpers/generate_component_id';
 
 export async function deleteIngestPipelines(
   esClient: ElasticsearchClient,
@@ -43,6 +43,24 @@ export async function deleteLatestIngestPipeline(
     );
   } catch (e) {
     logger.error(`Unable to delete latest ingest pipeline [${definition.id}]: ${e}`);
+    throw e;
+  }
+}
+
+export async function deleteLatestBackfillIngestPipeline(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger
+) {
+  try {
+    await retryTransientEsErrors(() =>
+      esClient.ingest.deletePipeline(
+        { id: generateLatestBackfillIngestPipelineId(definition) },
+        { ignore: [404] }
+      )
+    );
+  } catch (e) {
+    logger.error(`Unable to delete latest backfill ingest pipeline [${definition.id}]: ${e}`);
     throw e;
   }
 }

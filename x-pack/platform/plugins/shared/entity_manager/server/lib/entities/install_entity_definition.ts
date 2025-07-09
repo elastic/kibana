@@ -11,7 +11,7 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
 import { generateLatestIndexTemplateId } from './helpers/generate_component_id';
-import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
+import { createAndInstallIngestPipelines, createAndInstallBackfillIngestPipelines } from './create_and_install_ingest_pipeline';
 import { createAndInstallTransforms, createAndInstallBackfillTransforms } from './create_and_install_transform';
 import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
@@ -164,6 +164,7 @@ async function install({
 
   logger.debug(`Installing ingest pipelines for definition [${definition.id}]`);
   const pipelines = await createAndInstallIngestPipelines(esClient, definition, logger);
+  const backfillPipelines = await createAndInstallBackfillIngestPipelines(esClient, definition, logger);
 
   logger.debug(`Installing transforms for definition [${definition.id}]`);
   const transforms = await createAndInstallTransforms(esClient, definition, logger);
@@ -174,7 +175,7 @@ async function install({
   // list of installedComponents will fail to clean up.
   const updatedProps = await updateEntityDefinition(soClient, definition.id, {
     installStatus: 'installed',
-    installedComponents: [...templates, ...pipelines, ...transforms, ...backfillTransforms],
+    installedComponents: [...templates, ...pipelines, ...backfillPipelines, ...transforms, ...backfillTransforms],
   });
   return { ...definition, ...updatedProps.attributes };
 }
