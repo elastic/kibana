@@ -64,7 +64,7 @@ function generateLatestBackfillId(definition: EntityDefinition) {
 
 export function generateLatestBackfillTransformId(definition: EntityDefinition, unique?: string) {
   const suffix = unique ? `-${unique}` : '';
-  return `${ENTITY_LATEST_PREFIX_V1}${definition.id}-backfill${suffix}` as const;
+  return `${ENTITY_LATEST_PREFIX_V1}-${definition.id}-backfill${suffix}` as const;
 }
 
 export function generateLatestBackfillIndexName(definition: EntityDefinition, unique?: string) {
@@ -75,8 +75,12 @@ export function generateLatestBackfillIndexName(definition: EntityDefinition, un
   }).split('_');
   // insert 'backfill' (and unique, if present) as penultimate segments, before the namespace
   // e.g. foo_bar_baz -> foo_bar_backfill_baz OR foo_bar_backfill_${unique}_baz
-  const backfill_pattern = unique ? segments.splice(-1, 0, 'backfill', unique) : segments.splice(-1, 0, 'backfill');
-  return backfill_pattern.join('_') as const;
+  if (unique) {
+    segments.splice(-1, 0, 'backfill', unique)
+  } else {
+    segments.splice(-1, 0, 'backfill');
+  }
+  return segments.join('_') as const;
 }
 
 export const generateLatestBackfillIngestPipelineId = generateLatestBackfillId;
