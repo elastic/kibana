@@ -174,6 +174,15 @@ export async function getFullAgentPolicy(
     }
     return input;
   });
+
+  const otelcol_config = await storedPackagePoliciesToOtelCollectorConfig(
+    agentPolicy.package_policies as PackagePolicy[],
+    packageInfoCache,
+    getOutputIdForAgentPolicy(dataOutput),
+    agentPolicy.namespace,
+    agentPolicy.global_data_tags,
+  )
+
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
     return acc;
@@ -204,6 +213,7 @@ export async function getFullAgentPolicy(
       }, {}),
     },
     inputs,
+    ...otelcol_config,
     secret_references: [
       ...outputSecretReferences,
       ...fleetserverHostSecretReferences,
