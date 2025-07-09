@@ -63,6 +63,7 @@ export const storybookAliases = {
   streams_app: 'x-pack/platform/plugins/shared/streams_app/.storybook',
   triggers_actions_ui: 'x-pack/platform/plugins/shared/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/platform/plugins/shared/ui_actions_enhanced/.storybook',
+  unified_doc_viewer: 'src/platform/plugins/shared/unified_doc_viewer/.storybook',
   unified_search: 'src/platform/plugins/shared/unified_search/.storybook',
   unified_tabs: 'src/platform/packages/shared/kbn-unified-tabs/.storybook',
   upgrade_assistant: 'x-pack/platform/packages/private/upgrade-assistant/.storybook',
