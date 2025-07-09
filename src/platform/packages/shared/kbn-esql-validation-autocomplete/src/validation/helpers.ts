@@ -9,7 +9,6 @@
 
 import {
   type ESQLAst,
-  type ESQLAstItem,
   type ESQLAstQueryExpression,
   type ESQLColumn,
   type ESQLSource,
