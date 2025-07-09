@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ILLEGAL_CHARACTERS_VISIBLE, CONTAINS_SPACES_KEY, ILLEGAL_CHARACTERS_KEY } from './constants';
+import {
+  ILLEGAL_CHARACTERS_VISIBLE,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_KEY,
+} from './constants';
 
 function dataViewContainsSpaces(indexPattern: string): boolean {
   return indexPattern.includes(' ');
