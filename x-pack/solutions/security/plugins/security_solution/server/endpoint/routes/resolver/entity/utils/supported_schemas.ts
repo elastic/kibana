@@ -34,24 +34,21 @@ interface SupportedSchema {
 export const getSupportedSchemas = (
   experimentalFeatures: ExperimentalFeatures | undefined
 ): SupportedSchema[] => {
-  const sentinelOneDataInAnalyzerEnabled = experimentalFeatures?.sentinelOneDataInAnalyzerEnabled;
-  const crowdstrikeDataInAnalyzerEnabled = experimentalFeatures?.crowdstrikeDataInAnalyzerEnabled;
-  const jamfDataInAnalyzerEnabled = experimentalFeatures?.jamfDataInAnalyzerEnabled;
+  const microsoftDefenderEndpointDataInAnalyzerEnabled =
+    experimentalFeatures?.microsoftDefenderEndpointDataInAnalyzerEnabled;
 
   const supportedFileBeatDataSets = [
-    ...(sentinelOneDataInAnalyzerEnabled
-      ? ['sentinel_one_cloud_funnel.event', 'sentinel_one.alert']
-      : []),
-    ...(crowdstrikeDataInAnalyzerEnabled
-      ? ['crowdstrike.falcon', 'crowdstrike.fdr', 'crowdstrike.alert']
-      : []),
-    ...(jamfDataInAnalyzerEnabled
-      ? [
-          'jamf_protect.telemetry',
-          'jamf_protect.alerts',
-          'jamf_protect.web-threat-events',
-          'jamf_protect.web-traffic-events',
-        ]
+    'sentinel_one_cloud_funnel.event',
+    'sentinel_one.alert',
+    'crowdstrike.alert',
+    'crowdstrike.falcon',
+    'crowdstrike.fdr',
+    'jamf_protect.telemetry',
+    'jamf_protect.alerts',
+    'jamf_protect.web-threat-events',
+    'jamf_protect.web-traffic-events',
+    ...(microsoftDefenderEndpointDataInAnalyzerEnabled
+      ? ['microsoft_defender_endpoint.log', 'm365_defender.alert', 'm365_defender.incident']
       : []),
   ];
 
