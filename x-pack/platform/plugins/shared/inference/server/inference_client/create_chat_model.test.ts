@@ -72,8 +72,9 @@ describe('createChatModel', () => {
       actions,
       request,
       logger,
-      anonymizationRulesPromise: Promise.resolve([]),
       esClient: mockEsClient,
+      anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
     });
   });
 

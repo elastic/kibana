@@ -101,6 +101,7 @@ describe('createPromptApi', () => {
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
       esClient: mockEsClient,
     });
   });
