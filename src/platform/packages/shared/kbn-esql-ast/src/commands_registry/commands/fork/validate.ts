@@ -43,14 +43,16 @@ export const validate = (
     )
   );
 
-  const allSubCommands = Walker.commands(command);
-  allSubCommands.forEach((subCommand) => {
-    const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
-    if (subCommandMethods?.validate) {
-      const validationMessages = subCommandMethods.validate(subCommand, allSubCommands, context);
-      messages.push(...(validationMessages || []));
+  for (const arg of command.args.flat()) {
+    if (!Array.isArray(arg) && arg.type === 'query') {
+      // all the args should be commands
+      arg.commands.forEach((subCommand) => {
+        const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
+        const validationMessages = subCommandMethods?.validate?.(subCommand, ast, context);
+        messages.push(...(validationMessages || []));
+      });
     }
-  });
+  }
 
   const allCommands = Walker.commands(ast);
   const forks = allCommands.filter(({ name }) => name === 'fork');
