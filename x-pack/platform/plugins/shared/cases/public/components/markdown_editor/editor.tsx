@@ -10,9 +10,9 @@ import type { ElementRef } from 'react';
 import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
 import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
-import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
+import { type MarkdownEditorRef } from './types';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
@@ -26,12 +26,6 @@ interface MarkdownEditorProps {
 }
 
 export type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
-
-export interface MarkdownEditorRef {
-  textarea: HTMLTextAreaElement | null;
-  replaceNode: ContextShape['replaceNode'];
-  toolbar: HTMLDivElement | null;
-}
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
   (

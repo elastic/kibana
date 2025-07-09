@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useMemo, useState } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
 import {
@@ -15,19 +15,16 @@ import {
   EuiSpacer,
   EuiText,
   useEuiTheme,
-  EuiProgress,
 } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFilesContext } from '@kbn/shared-ux-file-context';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { constructFileKindIdByOwner } from '../../../common/files';
-import { type Owner } from '../../../common/constants/types';
 import * as i18n from '../../common/translations';
-import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';
-import { useImagePasteUpload } from './use_image_paste_upload';
-import { useCasesContext } from '../cases_context/use_cases_context';
+import { type MarkdownEditorRef } from './types';
+import { PastableMarkdownEditor } from './pastable_editor';
 
 /* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
@@ -44,6 +41,14 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   disabledUiPlugins?: string[];
   initialValue?: string;
 };
+
+function useHasFilesContext(): boolean {
+  try {
+    return !!useFilesContext();
+  } catch {
+    return false;
+  }
+}
 
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
@@ -63,20 +68,6 @@ export const MarkdownEditorForm = React.memo(
       },
       ref
     ) => {
-      const { owner: ownerList } = useCasesContext();
-      const owner = ownerList[0];
-      const fileKindId = constructFileKindIdByOwner(owner as Owner);
-      const [editorErrors, setEditorErrors] = useState<Array<string | Error>>([]);
-
-      const { isUploading } = useImagePasteUpload({
-        editorRef: ref,
-        field,
-        caseId,
-        owner,
-        fileKindId,
-        setErrors: setEditorErrors,
-      });
-
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
       const { hasConflicts } = useMarkdownSessionStorage({
         field,
@@ -98,6 +89,7 @@ export const MarkdownEditorForm = React.memo(
         }),
         [id, field.value, caseTitle, caseTags]
       );
+      const hasFilesContext = useHasFilesContext();
 
       return (
         <CommentEditorContext.Provider value={commentEditorContextValue}>
@@ -111,8 +103,17 @@ export const MarkdownEditorForm = React.memo(
             label={field.label}
             labelAppend={field.labelAppend}
           >
-            <>
-              {isUploading && <EuiProgress size="m" />}
+            {hasFilesContext ? (
+              <PastableMarkdownEditor
+                ref={ref}
+                idAria={idAria}
+                id={id}
+                field={field}
+                caseId={caseId}
+                disabledUiPlugins={disabledUiPlugins}
+                data-test-subj={`${dataTestSubj}-markdown-editor`}
+              />
+            ) : (
               <MarkdownEditor
                 ref={ref}
                 ariaLabel={idAria}
@@ -121,9 +122,8 @@ export const MarkdownEditorForm = React.memo(
                 value={field.value}
                 disabledUiPlugins={disabledUiPlugins}
                 data-test-subj={`${dataTestSubj}-markdown-editor`}
-                errors={editorErrors}
               />
-            </>
+            )}
           </EuiFormRow>
           {bottomRightContent && (
             <EuiFlexGroup
