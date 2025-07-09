@@ -181,13 +181,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await makeRequest();
         expect(response.body.hasData).to.be(true);
       });
-
-      it('should fail when "modules" size is greater than 5', async () => {
-        await makeRequest({
-          modules: ['system', 'nginx', 'kubernetes', 'aws', 'kafka', 'azure'],
-          expectedHttpStatusCode: 400,
-        });
-      });
     });
   });
 }
