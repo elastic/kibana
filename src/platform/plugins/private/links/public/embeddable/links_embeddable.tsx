@@ -262,6 +262,9 @@ export const getLinksEmbeddableFactory = () => {
                 closeFlyout,
               });
             },
+            flyoutProps: {
+              'data-test-subj': 'links--panelEditor--flyout',
+            },
           });
         },
       });

@@ -126,6 +126,9 @@ export class LinksPlugin
                         );
                         return await getEditorFlyout({ initialState, closeFlyout });
                       },
+                      flyoutProps: {
+                        'data-test-subj': 'links--panelEditor--flyout',
+                      },
                     });
                   },
                 },
