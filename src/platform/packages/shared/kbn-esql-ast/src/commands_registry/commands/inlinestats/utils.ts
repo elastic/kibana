@@ -17,6 +17,7 @@ import {
   isParamLiteral,
   isLiteral,
   isOptionNode,
+  isAssignment,
 } from '../../../ast/is';
 import { Walker } from '../../../walker';
 import {
@@ -47,10 +48,6 @@ function isNotMarkerNodeOrArray(arg: ESQLAstItem) {
 
 function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
   return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
-}
-
-export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
-  return isFunctionExpression(arg) && arg.name === '=';
 }
 
 function isAssignmentComplete(node: ESQLFunction | undefined) {

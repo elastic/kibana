@@ -92,3 +92,7 @@ export const isTimeInterval = (node: unknown): node is ESQLTimeInterval =>
 
 export const isInlineCast = (node: unknown): node is ESQLInlineCast =>
   isProperNode(node) && node.type === 'inlineCast';
+
+export function isAssignment(node: unknown): node is types.ESQLFunction {
+  return isFunctionExpression(node) && node.name === '=';
+}
