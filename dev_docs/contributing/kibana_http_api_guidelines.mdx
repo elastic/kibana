@@ -421,26 +421,30 @@ And either returns a task ID for tracking long running executions or a response 
 
 ### Observability
 
-Consider common error states your API might face, as well the information you might need to answer unexpected questions about the behavior of the API. To this end, creating a dedicated logger could be a good idea.
+Consider common error states your API might face, as well the information you might need to answer unexpected questions about the behavior of the API. To this end, creating a dedicated logger is be a good idea. Something like `const log = logger.get('myApi')` will emit logs for your API that can be easily searched for in overview clusters.
 
-<DocCallOut title="Do not log too liberally, default to `debug`" color="warning">
-  Carefully choose the log level of any logs you emit. `info` level logs can generate a lot of log noise for Kibana operators. This increases costs and often provides little value.
+<DocCallOut title="Default to `debug`" color="warning">
+  Carefully choose the log level of any logs you emit. `info` level logs can generate a lot of log noise for Kibana operators. This increases costs and often provides little value. Rather stick to `debug` logs and scope Kibana logs using configuration in `kibana.dev.yml` when developing locally:
 
-  Choose `info` if your API is called infrequently or if a truly noteworthy, usually one-off event, has occurred.
+  ```yaml
+    logging.loggers:
+      - name: <your-logger-name>
+        level: debug
+  ```
 </DocCallOut>
 
 For questions about APM and telemetry please reach out to the Core team.
 
 ### Security
 
-User authentication is handled globally for all routes but as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API (see <DocLink id="kibDevFeaturePrivileges" text="Feature Privileges" />). This depends on the actions your API performs.
+User authentication is handled globally for all routes (whether public, internal or "Tech Preview"). However, as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API (see <DocLink id="kibDevDocsSecurityAPIAuthorization" text="API authorization docs" />). This depends on the actions your API performs.
 
 <DocCallOut title="Do not expose sensitive information" color="warning">
-  Carefully consider the information you return from or log in your API handler. **Do not expose sensitive information**. This includes information that can be used to identify users. We have a separate <DocLink id="kibAuditLogging" text="audit logger" /> that you can use to log sensitive information about user actions.
+  Carefully consider the information you return from or log in your API handler, whether it's a successful response or an error. **Do not expose sensitive information**. This includes information that could be used to identify users, reveal sensitive file paths, internal resources, or even leak credentials. We have a separate <DocLink id="kibAuditLogging" text="audit logger" /> that you can use to log sensitive information about user actions.
 </DocCallOut>
 
 
-Assigning specific roles to your API will surface them in our code-generated OpenAPI spec. See the [documentation section](#documentation).
+Assigning specific privilege requirements to your API will surface them in the code-generated OpenAPI spec. See the [documentation section](#documentation).
 
 _**If you have any hesitation or questions please reach out to the Kibana security team!**_
 
@@ -449,6 +453,10 @@ _**If you have any hesitation or questions please reach out to the Kibana securi
 **Save the event loop!**
 
 When you anticipate CPU or memory intensive operations consider that Node.js uses a single-threaded event loop. Keep this shared resource [unblocked](https://github.com/elastic/kibana/blob/9edce03a0510c32c1d210e0f3d1bea46c3b71143/src/core/packages/saved-objects/migration-server-internal/src/core/migrate_raw_docs.ts#L160-L175) and maintain stable memory pressure by chunking data loads from Elasticsearch rather than loading everything at once.
+
+**Security**
+
+Do not attempt to improve performance by caching data dependent on user permissions in Kibana route handlers. User permissions can change and you cannot guarantee that the cache will be up to date!
 
 ### Special data formats
 
