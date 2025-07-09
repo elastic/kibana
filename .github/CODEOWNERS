@@ -1122,7 +1122,7 @@ x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-po
 x-pack/solutions/security/test
 x-pack/test
 x-pack/test_serverless
-x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
+x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
@@ -1961,8 +1961,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/api_integration/fixtures/import_managed.ndjson @elastic/kibana-core
 /src/platform/test/functional/services/apps_menu.ts @elastic/kibana-core
 /x-pack/test/functional/apps/status_page @elastic/kibana-core
-/x-pack/test/cloud_integration @elastic/kibana-core
-/x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
+/x-pack/platform/test/cloud_integration @elastic/kibana-core
+/x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 /src/platform/test/server_integration @elastic/kibana-core
 /x-pack/platform/test/functional_cors @elastic/kibana-core
 /x-pack/test/stack_functional_integration/apps/telemetry @elastic/kibana-core
