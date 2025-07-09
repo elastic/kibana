@@ -177,20 +177,7 @@ export class WorkflowsExecutionEnginePlugin
 
   public start(core: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
     this.logger.debug('workflows-execution-engine: Start');
-
-    return {
-      // async execute workflow
-      pushEvent(eventType: string, eventData: Record<string, any>) {
-        plugins.taskManager.schedule({
-          taskType: 'workflow-event',
-          params: {
-            eventType,
-            rawEvent: eventData,
-          },
-          state: {},
-        });
-      },
-    };
+    return {};
   }
 
   public stop() {}

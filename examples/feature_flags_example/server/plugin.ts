@@ -32,28 +32,11 @@ export class FeatureFlagsExamplePlugin implements Plugin {
 
   public setup(core: CoreSetup, plugins: any) {
     const router = core.http.createRouter();
-    console.log('FeatureFlagsExamplePluginA: SetupALA');
-
     // Register server side APIs
     defineRoutes(router);
   }
 
-  public start(core: CoreStart, plugins: any) {
-    setInterval(() => {
-      plugins.workflows.pushEvent('detection-rule', {
-        ruleId: '123',
-        ruleName: 'Example Detection Rule',
-        timestamp: new Date().toISOString(),
-        severity: 'high',
-        description: 'This is an example detection rule that was triggered.',
-        additionalData: {
-          user: 'jdoe',
-          ip: '109.87.123.433',
-          action: 'login',
-          location: 'New York, USA',
-        },
-      });
-    }, 10000);
+  public start(core: CoreStart) {
     // Promise form: when we need to fetch it once, like in an HTTP request
     void Promise.all([
       core.featureFlags.getBooleanValue(FeatureFlagExampleBoolean, false),

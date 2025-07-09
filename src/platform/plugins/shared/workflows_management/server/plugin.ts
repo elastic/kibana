@@ -35,9 +35,8 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
     this.logger.debug('workflows: Started');
 
-    return {
-      // async execute workflow
-      pushEvent(eventType: string, eventData: Record<string, any>) {
+    const pushEvent = (eventType: string, eventData: Record<string, any>) => {
+      try {
         plugins.taskManager.schedule({
           taskType: 'workflow-event',
           params: {
@@ -46,7 +45,32 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           },
           state: {},
         });
-      },
+      } catch (error) {
+        this.logger.error(`Failed to push event: ${error.message}`);
+      }
+    };
+
+    // TODO: REMOVE THIS AFTER TESTING
+    // Simulate pushing events every 10 seconds for testing purposes
+    setInterval(() => {
+      pushEvent('detection-rule', {
+        ruleId: '123',
+        ruleName: 'Example Detection Rule',
+        timestamp: new Date().toISOString(),
+        severity: 'high',
+        description: 'This is an example detection rule that was triggered.',
+        additionalData: {
+          user: 'jdoe',
+          ip: '109.87.123.433',
+          action: 'login',
+          location: 'New York, USA',
+        },
+      });
+    }, 10000);
+
+    return {
+      // async execute workflow
+      pushEvent,
     };
   }
 
