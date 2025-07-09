@@ -10,4 +10,5 @@
 /**
  * ESQL type constant
  */
+
 export const ESQL_TYPE = 'esql';
