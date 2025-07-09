@@ -6,14 +6,14 @@
  */
 
 import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
-import type { FieldStatsType } from '../common/types';
+import type { AnalyticsTableRowDetails } from '@kbn/test-suites-xpack-platform/functional/services/ml/data_frame_analytics_table';
 import {
   type DiscoverUrlConfig,
   type DashboardUrlConfig,
   type OtherUrlConfig,
-} from '../../../services/ml/data_frame_analytics_edit';
+} from '@kbn/test-suites-xpack-platform/functional/services/ml/data_frame_analytics_edit';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
