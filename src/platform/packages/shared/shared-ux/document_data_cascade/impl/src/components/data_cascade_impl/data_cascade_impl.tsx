@@ -44,6 +44,10 @@ interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
    * @description The path of the row that was expanded in the group by hierarchy.
    */
   nodePath: string[];
+  /**
+   * @description KV record of the path values for the row node.
+   */
+  nodePathMap: Record<string, string>;
 }
 
 interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
@@ -126,7 +130,9 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
         const groupNodeData = await onCascadeGroupNodeExpanded({
           row,
           nodePath: getCascadeRowNodePath(state.currentGroupByColumns, row),
+          nodePathMap: getCascadeRowNodePathValueRecord(state.currentGroupByColumns, row),
         });
+
         if (!groupNodeData) {
           return;
         }
@@ -231,7 +237,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     getRowCanExpand: useCallback(
       (row: Row<G>) => {
         // only allow expanding rows up until the depth of the current group by columns
-        return row.depth < state.currentGroupByColumns.length;
+        return state.currentGroupByColumns.length - 1 > row.depth;
       },
       [state.currentGroupByColumns.length]
     ),
@@ -374,7 +380,13 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                   })}
                   style={{ height: rowVirtualizer.getTotalSize() }}
                 >
-                  <ul css={{ position: 'relative' }}>
+                  <div
+                    role="treegrid"
+                    aria-readonly="true"
+                    aria-multiselectable="false"
+                    aria-colcount={-1}
+                    css={{ position: 'relative' }}
+                  >
                     {rowVirtualizer
                       .getVirtualItems()
                       .map(function buildCascadeRows(virtualItem, renderIndex) {
@@ -418,7 +430,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                           </React.Fragment>
                         );
                       })}
-                  </ul>
+                  </div>
                 </div>
               </EuiFlexItem>
             </EuiFlexGroup>
