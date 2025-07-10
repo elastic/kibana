@@ -15,10 +15,11 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
   EuiButtonEmpty,
   EuiBasicTable,
+  EuiHealth,
   HorizontalAlignment,
+  EuiStat,
 } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import { DataCascade } from '.';
@@ -103,24 +104,36 @@ export const CascadeGridImplementation: StoryObj<
                 <h2>{row.original[groupByFields[row.depth]]}</h2>
               </EuiText>
             )}
-            rowHeaderMetaSlots={({ row }) => [
-              <EuiText textAlign="right">
-                <FormattedMessage
-                  id="sharedUXPackages.data_cascade.demo.row.count"
-                  defaultMessage="Count <badge>{countValue}</badge>"
-                  values={{
-                    countValue: String(row.original.count),
-                    badge: (chunks) => <EuiBadge color="hollow">{chunks}</EuiBadge>,
-                  }}
-                />
-              </EuiText>,
-              <EuiButtonEmpty iconSide="right" iconType="arrowDown" flush="right">
-                <FormattedMessage
-                  id="sharedUXPackages.data_cascade.demo.row.action"
-                  defaultMessage="Take Action"
-                />
-              </EuiButtonEmpty>,
-            ]}
+            rowHeaderMetaSlots={({ row }) => {
+              const baseSlotDef: React.ReactNode[] = [
+                <EuiButtonEmpty iconSide="right" iconType="arrowDown" flush="right">
+                  <FormattedMessage
+                    id="sharedUXPackages.data_cascade.demo.row.action"
+                    defaultMessage="Take Action"
+                  />
+                </EuiButtonEmpty>,
+              ];
+
+              return row.depth === groupByFields.length - 1
+                ? [
+                    <EuiStat
+                      title={row.original.count}
+                      textAlign="right"
+                      description={
+                        <FormattedMessage
+                          id="sharedUXPackages.data_cascade.demo.row.count"
+                          defaultMessage="<indicator>{identifier} record count</indicator>"
+                          values={{
+                            identifier: groupByFields[row.depth].replace(/_/g, ' '),
+                            indicator: (chunks) => <EuiHealth color="subdued">{chunks}</EuiHealth>,
+                          }}
+                        />
+                      }
+                    />,
+                    ...baseSlotDef,
+                  ]
+                : baseSlotDef;
+            }}
             leafContentSlot={({ data }) => {
               return (
                 <EuiBasicTable
