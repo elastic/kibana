@@ -23,7 +23,7 @@ disabled:
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
-  - x-pack/test/upgrade/config.ts
+  - x-pack/platform/test/upgrade/config.ts
   - src/platform/test/functional/config.edge.js
   - x-pack/platform/test/functional/config.edge.ts
   - x-pack/test/functional/config.edge.js
@@ -59,6 +59,7 @@ enabled:
   - src/platform/test/accessibility/config.ts
   - src/platform/test/analytics/config.ts
   - src/platform/test/api_integration/config.js
+  - src/platform/test/api_integration/apis/unused_urls_task/config.ts
   - src/platform/test/examples/config.js
   - src/platform/test/functional/apps/bundles/config.ts
   - src/platform/test/functional/apps/console/config.ts
@@ -276,8 +277,8 @@ enabled:
   - x-pack/platform/test/functional_cloud/config.ts
   - x-pack/platform/test/functional_cloud/saml.config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
-  - x-pack/test/licensing_plugin/config.public.ts
-  - x-pack/test/licensing_plugin/config.ts
+  - x-pack/platform/test/licensing_plugin/config.public.ts
+  - x-pack/platform/test/licensing_plugin/config.ts
   - x-pack/test/plugin_functional/config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
@@ -292,7 +293,7 @@ enabled:
   - x-pack/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
   - x-pack/test/saved_object_tagging/functional/config.ts
   - x-pack/test/saved_objects_field_count/config.ts
-  - x-pack/test/search_sessions_integration/config.ts
+  - x-pack/platform/test/search_sessions_integration/config.ts
   - x-pack/test/security_api_integration/anonymous_es_anonymous.config.ts
   - x-pack/test/security_api_integration/anonymous.config.ts
   - x-pack/test/security_api_integration/api_keys.config.ts
@@ -335,7 +336,7 @@ enabled:
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.ts
-  - x-pack/test/usage_collection/config.ts
+  - x-pack/platform/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_http2.ts
@@ -407,4 +408,3 @@ enabled:
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/saved_object_api_integration/spaces_only/config.ts
   - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts
-  - src/platform/test/api_integration/apis/unused_urls_task/config.ts
