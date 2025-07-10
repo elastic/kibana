@@ -77,12 +77,10 @@ export const normalizeLogsSource =
         };
       case 'shared_setting':
         const logSourcesFromSharedSettings =
-          await logsDataAccess.services.logSourcesService.getLogSources();
+          await logsDataAccess.services.logSourcesService.getFlattenedLogSources();
         const sharedSettingLogsSource = {
           type: 'index_name' as const,
-          indexName: logSourcesFromSharedSettings
-            .map((logSource) => logSource.indexPattern)
-            .join(','),
+          indexName: logSourcesFromSharedSettings,
           timestampField: logsSource.timestampField ?? '@timestamp',
           messageField: logsSource.messageField ?? 'message',
         };
