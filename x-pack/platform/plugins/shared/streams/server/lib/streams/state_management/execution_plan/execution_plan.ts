@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { groupBy, orderBy } from 'lodash';
+import { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
   upsertComponent,
@@ -24,7 +25,9 @@ import {
 } from '../../ingest_pipelines/manage_ingest_pipelines';
 import { FailedToExecuteElasticsearchActionsError } from '../errors/failed_to_execute_elasticsearch_actions_error';
 import { FailedToPlanElasticsearchActionsError } from '../errors/failed_to_plan_elasticsearch_actions_error';
+import { InsufficientPermissionsError } from '../../errors/insufficient_permissions_error';
 import type { StateDependencies } from '../types';
+import { getRequiredPermissionsForActions } from './required_permissions';
 import { translateUnwiredStreamPipelineActions } from './translate_unwired_stream_pipeline_actions';
 import type {
   ActionsByType,
@@ -93,7 +96,50 @@ export class ExecutionPlan {
     return this.actionsByType;
   }
 
+  async validatePermissions() {
+    const { actionsByType } = this;
+
+    const requiredPermissions = getRequiredPermissionsForActions(actionsByType);
+
+    // Check if we have any permissions to validate
+    if (
+      requiredPermissions.cluster.length === 0 &&
+      Object.keys(requiredPermissions.index).length === 0
+    ) {
+      return true;
+    }
+
+    // Use security API to check if user has all required permissions
+    const securityClient = this.dependencies.scopedClusterClient.asCurrentUser.security;
+
+    const hasPrivilegesRequest: SecurityHasPrivilegesRequest = {
+      cluster: requiredPermissions.cluster.length > 0 ? requiredPermissions.cluster : undefined,
+    };
+
+    // Add index privileges if there are any
+    if (Object.keys(requiredPermissions.index).length > 0) {
+      hasPrivilegesRequest.index = Object.entries(requiredPermissions.index).map(
+        ([index, privileges]) => ({
+          names: [index],
+          privileges,
+        })
+      );
+    }
+
+    const hasPrivilegesResponse = await securityClient.hasPrivileges(hasPrivilegesRequest);
+
+    if (!hasPrivilegesResponse.has_all_requested) {
+      throw new InsufficientPermissionsError(
+        'User does not have sufficient permissions to execute these actions',
+        hasPrivilegesResponse
+      );
+    }
+  }
+
   async execute() {
+    // Validate permissions before executing
+    await this.validatePermissions();
+
     try {
       const {
         upsert_component_template,

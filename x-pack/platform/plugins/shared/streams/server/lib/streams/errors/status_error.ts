@@ -6,6 +6,7 @@
  */
 
 export class StatusError extends Error {
+  public data?: unknown;
   constructor(message: string, public readonly statusCode: number) {
     super(message);
   }
