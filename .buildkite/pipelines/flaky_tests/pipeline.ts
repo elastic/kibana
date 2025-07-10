@@ -121,6 +121,7 @@ const pipeline = {
     ELASTIC_APM_TRANSACTION_SAMPLE_RATE: 1,
     ELASTIC_APM_ACTIVE: 'true',
     ELASTIC_APM_ENVIRONMENT: 'rylnd',
+    ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
   },
   steps,
 };
@@ -144,9 +145,6 @@ for (const testSuite of testSuites) {
       command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
       env: {
         FTR_CONFIG: testSuite.ftrConfig,
-        ELASTIC_APM_TRANSACTION_SAMPLE_RATE: 1,
-        ELASTIC_APM_ACTIVE: 'true',
-        ELASTIC_APM_ENVIRONMENT: 'rylnd',
       },
       key: `ftr-suite-${suiteIndex++}`,
       label: `${testSuite.ftrConfig}`,
