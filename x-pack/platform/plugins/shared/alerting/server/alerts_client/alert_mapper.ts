@@ -42,7 +42,7 @@ export interface CategorizedAlert<
   G extends string,
   R extends string
 > {
-  alert: Alert<S, C, G | R>;
+  alert: Alert<S, C, G>;
   category: AlertCategory;
 }
 export type AlertsResult<
