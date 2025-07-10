@@ -57,7 +57,6 @@ export interface CreateThreatSignalOptions {
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
-  threatMatchedFields: ThreatMatchedFields;
   sortOrder?: SortOrderOrUndefined;
   isAlertSuppressionActive: boolean;
 }
@@ -74,7 +73,6 @@ export interface CreateEventSignalOptions {
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
-  threatMatchedFields: ThreatMatchedFields;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
   sortOrder?: SortOrderOrUndefined;
@@ -189,7 +187,6 @@ export interface BuildThreatEnrichmentOptions {
   threatIndicatorPath: ThreatIndicatorPath;
   pitId: string;
   threatIndexFields: DataViewFieldBase[];
-  threatMatchedFields: ThreatMatchedFields;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
 }
 

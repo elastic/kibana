@@ -16,9 +16,6 @@ jest.mock('./enrich_signal_threat_matches', () => ({
   enrichSignalThreatMatchesFromSignalsMap: jest.fn(),
 }));
 
-const enrichSignalThreatMatchesFromSignalsMapMock =
-  enrichSignalThreatMatchesFromSignalsMap as jest.Mock;
-
 const signals = [
   {
     _id: 'source-id-1',

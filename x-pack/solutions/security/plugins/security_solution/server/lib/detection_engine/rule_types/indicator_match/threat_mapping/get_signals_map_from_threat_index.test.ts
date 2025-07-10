@@ -6,14 +6,16 @@
  */
 
 import { ThreatMatchQueryType } from './types';
-import type { FieldAndValueToDocIdsMap } from './types';
 
 import { getSignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
 import { getThreatList } from './get_threat_list';
 import { encodeThreatMatchNamedQuery } from './utils';
 import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';
 
-import { threatSearchParamsMock } from './get_signals_map_from_threat_index.mock';
+import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
+import { getSharedParamsMock } from '../../__mocks__/shared_params';
+import { getThreatRuleParams } from '../../../rule_schema/mocks';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 
 jest.mock('./get_threat_list', () => ({ getThreatList: jest.fn() }));
 
@@ -28,8 +30,8 @@ export const namedQuery = encodeThreatMatchNamedQuery({
 });
 
 const termsNamedQuery = encodeThreatMatchNamedQuery({
-  value: 'threat.indicator.domain',
-  field: 'event.domain',
+  value: 'source.ip',
+  field: 'source.ip',
   queryType: ThreatMatchQueryType.term,
 });
 
@@ -45,37 +47,88 @@ const termsThreatMock = {
   matched_queries: [termsNamedQuery],
 };
 
-const fieldAndValueToDocIdsMapMock: FieldAndValueToDocIdsMap = {};
+const ruleServices = createPersistenceExecutorOptionsMock();
+const sharedParamsMock = getSharedParamsMock({ ruleParams: getThreatRuleParams() });
 
 getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
 describe('getSignalIdToMatchedQueriesMap', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('should call getThreatList to fetch threats from ES', async () => {
     getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
     await getSignalIdToMatchedQueriesMap({
-      threatSearchParams: threatSearchParamsMock,
-      eventsCount: 50,
-      fieldAndValueToDocIdsMap: fieldAndValueToDocIdsMapMock,
+      allowedFieldsForTermsQuery: { source: {}, threat: {} },
+      pitId: 'pitId',
+      services: ruleServices,
+      sharedParams: sharedParamsMock,
+      signals: [
+        {
+          _index: 'test-index',
+          _source: { 'source.ip': ['127.0.0.1'] },
+          fields: { 'source.ip': ['127.0.0.1'] },
+        },
+      ],
+      threatFilters: [],
+      threatIndexFields: [],
+      threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
     });
 
     expect(getThreatListMock).toHaveBeenCalledTimes(1);
-    expect(getThreatListMock).toHaveBeenCalledWith(threatSearchParamsMock);
+  });
+
+  it('should not call getThreatList if no docs have fields to search for', async () => {
+    // The signal doc only has user.name, which is not referenced by any threat mapping entries so
+    // the constructed threat filter will be empty - we expect an early return from `getSignalIdToMatchedQueriesMap`
+    // in this scenario
+    const result = await getSignalIdToMatchedQueriesMap({
+      allowedFieldsForTermsQuery: { source: {}, threat: {} },
+      pitId: 'pitId',
+      services: ruleServices,
+      sharedParams: sharedParamsMock,
+      signals: [
+        {
+          _index: 'test-index',
+          _source: { 'user.name': ['test-user'] },
+          fields: { 'user.name': ['test-user'] },
+        },
+      ],
+      threatFilters: [],
+      threatIndexFields: [],
+      threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
+    });
+
+    expect(getThreatListMock).toHaveBeenCalledTimes(0);
+    expect(result.signalIdToMatchedQueriesMap).toEqual(new Map());
   });
 
   it('should return empty signals map if getThreatList return empty results', async () => {
     getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
     const result = await getSignalIdToMatchedQueriesMap({
-      threatSearchParams: threatSearchParamsMock,
-      eventsCount: 50,
-      fieldAndValueToDocIdsMap: fieldAndValueToDocIdsMapMock,
+      allowedFieldsForTermsQuery: { source: {}, threat: {} },
+      pitId: 'pitId',
+      services: ruleServices,
+      sharedParams: sharedParamsMock,
+      signals: [
+        {
+          _index: 'test-index',
+          _source: { 'source.ip': ['127.0.0.1'] },
+          fields: { 'source.ip': ['127.0.0.1'] },
+        },
+      ],
+      threatFilters: [],
+      threatIndexFields: [],
+      threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
     });
 
     expect(result.signalIdToMatchedQueriesMap).toEqual(new Map());
   });
 
-  it('should return signalsQueryMap for signals if threats search results exhausted', async () => {
+  it('should return signalIdToMatchedQueriesMap for signals if threats search results exhausted', async () => {
     const namedQuery2 = encodeThreatMatchNamedQuery({
       id: 'source-2',
       index: 'source-*',
@@ -101,9 +154,20 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     getThreatListMock.mockReturnValueOnce({ hits: { hits: [] } });
 
     const result = await getSignalIdToMatchedQueriesMap({
-      threatSearchParams: threatSearchParamsMock,
-      eventsCount: 50,
-      fieldAndValueToDocIdsMap: fieldAndValueToDocIdsMapMock,
+      allowedFieldsForTermsQuery: { source: {}, threat: {} },
+      pitId: 'pitId',
+      services: ruleServices,
+      sharedParams: sharedParamsMock,
+      signals: [
+        {
+          _index: 'test-index',
+          _source: { 'source.ip': ['127.0.0.1'] },
+          fields: { 'source.ip': ['127.0.0.1'] },
+        },
+      ],
+      threatFilters: [],
+      threatIndexFields: [],
+      threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
     });
 
     expect(result.signalIdToMatchedQueriesMap).toEqual(
@@ -149,7 +213,8 @@ describe('getSignalIdToMatchedQueriesMap', () => {
       ])
     );
   });
-  it('should return signalsQueryMap for signals if threats number reaches max of MAX_NUMBER_OF_SIGNAL_MATCHES', async () => {
+
+  it('should return signalIdToMatchedQueriesMap for signals if threats number reaches max of MAX_NUMBER_OF_SIGNAL_MATCHES', async () => {
     getThreatListMock.mockReturnValueOnce({
       hits: {
         hits: Array.from(Array(MAX_NUMBER_OF_SIGNAL_MATCHES + 1)).map(() => threatMock),
@@ -157,9 +222,20 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     });
 
     const result = await getSignalIdToMatchedQueriesMap({
-      threatSearchParams: threatSearchParamsMock,
-      eventsCount: 50,
-      fieldAndValueToDocIdsMap: fieldAndValueToDocIdsMapMock,
+      allowedFieldsForTermsQuery: { source: {}, threat: {} },
+      pitId: 'pitId',
+      services: ruleServices,
+      sharedParams: sharedParamsMock,
+      signals: [
+        {
+          _index: 'test-index',
+          _source: { 'source.ip': ['127.0.0.1'] },
+          fields: { 'source.ip': ['127.0.0.1'] },
+        },
+      ],
+      threatFilters: [],
+      threatIndexFields: [],
+      threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
     });
 
     expect(result.signalIdToMatchedQueriesMap.get('source-1')).toHaveLength(
@@ -167,33 +243,15 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     );
   });
 
-  it('should return empty signalsQueryMap for terms query if there no signalValueMap', async () => {
-    getThreatListMock.mockReturnValueOnce({
-      hits: {
-        hits: [termsThreatMock],
-      },
-    });
-
-    const result = await getSignalIdToMatchedQueriesMap({
-      threatSearchParams: threatSearchParamsMock,
-      eventsCount: 50,
-      fieldAndValueToDocIdsMap: fieldAndValueToDocIdsMapMock,
-    });
-
-    expect(result.signalIdToMatchedQueriesMap).toEqual(new Map());
-  });
-
-  it('should return empty signalsQueryMap for terms query if there wrong value in threat indicator', async () => {
+  it('should return empty signalIdToMatchedQueriesMap for terms query if there wrong value in threat indicator', async () => {
     getThreatListMock.mockReturnValueOnce({
       hits: {
         hits: [
           {
             ...termsThreatMock,
             _source: {
-              threat: {
-                indicator: {
-                  domain: { a: 'b' },
-                },
+              source: {
+                ip: '192.168.1.1',
               },
             },
           },
@@ -201,32 +259,35 @@ describe('getSignalIdToMatchedQueriesMap', () => {
       },
     });
 
-    const fieldAndValueToDocIdsMap = {
-      'event.domain': {
-        domain_1: ['signalId1', 'signalId2'],
-      },
-    };
-
     const result = await getSignalIdToMatchedQueriesMap({
-      threatSearchParams: threatSearchParamsMock,
-      eventsCount: 50,
-      fieldAndValueToDocIdsMap,
+      allowedFieldsForTermsQuery: { source: { 'source.ip': true }, threat: { 'source.ip': true } },
+      pitId: 'pitId',
+      services: ruleServices,
+      sharedParams: sharedParamsMock,
+      signals: [
+        {
+          _index: 'test-index',
+          _source: { 'source.ip': ['127.0.0.1'] },
+          fields: { 'source.ip': ['127.0.0.1'] },
+        },
+      ],
+      threatFilters: [],
+      threatIndexFields: [],
+      threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
     });
 
     expect(result.signalIdToMatchedQueriesMap).toEqual(new Map());
   });
 
-  it('should return signalsQueryMap from threat indicators for termsQuery', async () => {
+  it('should return signalIdToMatchedQueriesMap from threat indicators for termsQuery', async () => {
     getThreatListMock.mockReturnValueOnce({
       hits: {
         hits: [
           {
             ...termsThreatMock,
             _source: {
-              threat: {
-                indicator: {
-                  domain: 'domain_1',
-                },
+              source: {
+                ip: '127.0.0.1',
               },
             },
           },
@@ -234,22 +295,34 @@ describe('getSignalIdToMatchedQueriesMap', () => {
       },
     });
 
-    const fieldAndValueToDocIdsMap = {
-      'event.domain': {
-        domain_1: ['signalId1', 'signalId2'],
-      },
-    };
-
     const result = await getSignalIdToMatchedQueriesMap({
-      threatSearchParams: threatSearchParamsMock,
-      eventsCount: 50,
-      fieldAndValueToDocIdsMap,
+      allowedFieldsForTermsQuery: { source: { 'source.ip': true }, threat: { 'source.ip': true } },
+      pitId: 'pitId',
+      services: ruleServices,
+      sharedParams: sharedParamsMock,
+      signals: [
+        {
+          _index: 'test-index',
+          _id: 'signalId1',
+          _source: { 'source.ip': ['127.0.0.1'] },
+          fields: { 'source.ip': ['127.0.0.1'] },
+        },
+        {
+          _index: 'test-index',
+          _id: 'signalId2',
+          _source: { 'source.ip': ['127.0.0.1'] },
+          fields: { 'source.ip': ['127.0.0.1'] },
+        },
+      ],
+      threatFilters: [],
+      threatIndexFields: [],
+      threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
     });
 
     const queries = [
       {
-        field: 'event.domain',
-        value: 'threat.indicator.domain',
+        field: 'source.ip',
+        value: 'source.ip',
         id: 'threat-id-1',
         index: 'threats-01',
         queryType: ThreatMatchQueryType.term,
@@ -264,17 +337,15 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     );
   });
 
-  it('should return signalsQueryMap from threat indicators which has array values for termsQuery', async () => {
+  it('should return signalIdToMatchedQueriesMap from threat indicators which has array values for termsQuery', async () => {
     getThreatListMock.mockReturnValueOnce({
       hits: {
         hits: [
           {
             ...termsThreatMock,
             _source: {
-              threat: {
-                indicator: {
-                  domain: ['domain_3', 'domain_1', 'domain_2'],
-                },
+              source: {
+                ip: ['127.0.0.1', '127.0.0.2'],
               },
             },
           },
@@ -282,23 +353,34 @@ describe('getSignalIdToMatchedQueriesMap', () => {
       },
     });
 
-    const fieldAndValueToDocIdsMap = {
-      'event.domain': {
-        domain_1: ['signalId1'],
-        domain_2: ['signalId2'],
-      },
-    };
-
     const result = await getSignalIdToMatchedQueriesMap({
-      threatSearchParams: threatSearchParamsMock,
-      eventsCount: 50,
-      fieldAndValueToDocIdsMap,
+      allowedFieldsForTermsQuery: { source: { 'source.ip': true }, threat: { 'source.ip': true } },
+      pitId: 'pitId',
+      services: ruleServices,
+      sharedParams: sharedParamsMock,
+      signals: [
+        {
+          _index: 'test-index',
+          _id: 'signalId1',
+          _source: { 'source.ip': ['127.0.0.1'] },
+          fields: { 'source.ip': ['127.0.0.1'] },
+        },
+        {
+          _index: 'test-index',
+          _id: 'signalId2',
+          _source: { 'source.ip': ['127.0.0.2'] },
+          fields: { 'source.ip': ['127.0.0.2'] },
+        },
+      ],
+      threatFilters: [],
+      threatIndexFields: [],
+      threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
     });
 
     const queries = [
       {
-        field: 'event.domain',
-        value: 'threat.indicator.domain',
+        field: 'source.ip',
+        value: 'source.ip',
         id: 'threat-id-1',
         index: 'threats-01',
         queryType: ThreatMatchQueryType.term,
