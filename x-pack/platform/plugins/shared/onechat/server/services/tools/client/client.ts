@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
+  ToolType,
+  ToolDescriptor,
   createInternalError,
   createToolNotFoundError,
   esqlToolProviderId,
@@ -16,55 +21,71 @@ import {
   EsqlToolCreateResponse,
   EsqlToolUpdateRequest,
 } from '../../../../common/tools';
-import { esqlToolIndexName } from './storage';
-import { EsqlToolStorage } from './storage';
+import { ToolStorage, createStorage } from './storage';
+import { fromEs, Document } from './converters';
 
-export interface EsqlToolClient {
-  get(toolId: string): Promise<EsqlToolDefinition>;
+export interface ToolClient {
+  get(toolId: string): Promise<ToolDescriptor>;
   list(): Promise<EsqlToolDefinition[]>;
-  create(esqlTool: EsqlToolCreateResponse): Promise<EsqlToolCreateResponse>;
-  update(toolId: string, updates: Partial<EsqlToolCreateRequest>): Promise<EsqlToolCreateResponse>;
+  create(esqlTool: EsqlToolCreateResponse): Promise<ToolDescriptor>;
+  update(toolId: string, updates: Partial<EsqlToolCreateRequest>): Promise<ToolDescriptor>;
   delete(toolId: string): Promise<boolean>;
 }
 
-export const createClient = ({ storage }: { storage: EsqlToolStorage }): EsqlToolClient => {
-  return new EsqlToolClientImpl({ storage });
+export const createClient = ({
+  type,
+  logger,
+  esClient,
+}: {
+  type: ToolType;
+  logger: Logger;
+  esClient: ElasticsearchClient;
+}): ToolClient => {
+  const storage = createStorage({ logger, esClient });
+  return new ToolClientImpl({ storage, type });
 };
 
-class EsqlToolClientImpl {
-  public readonly id = esqlToolProviderId;
-  private readonly storage: EsqlToolStorage;
+class ToolClientImpl {
+  private readonly storage: ToolStorage;
+  private readonly type: ToolType;
 
-  constructor({ storage }: { storage: EsqlToolStorage }) {
+  constructor({ storage, type }: { storage: ToolStorage; type: ToolType }) {
     this.storage = storage;
+    this.type = type;
   }
 
-  async get(id: string): Promise<EsqlToolDefinition> {
+  async get(id: string): Promise<ToolDescriptor> {
     try {
       const document = await this.storage.getClient().get({ id });
-
-      const tool = document._source as EsqlToolDefinition;
-      return tool;
-    } catch (isToolNotFoundError) {
-      throw createToolNotFoundError({
-        toolId: `${esqlToolProviderId}::${id}`,
-        customMessage: `Tool with id ${id} not found`,
-      });
+      // TODO: check type
+      return fromEs(document);
+    } catch (e) {
+      if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
+        throw createToolNotFoundError({
+          toolId: id,
+          toolType: this.type,
+        });
+      } else {
+        throw e;
+      }
     }
   }
 
-  async list(): Promise<EsqlToolDefinition[]> {
+  async list(): Promise<ToolDescriptor[]> {
     const document = await this.storage.getClient().search({
-      index: esqlToolIndexName,
       query: {
-        match_all: {},
+        bool: {
+          must: [{ term: { type: this.type } }],
+        },
       },
       size: 1000,
       track_total_hits: true,
     });
 
-    return document.hits.hits.map((hit) => hit._source as EsqlToolDefinition);
+    return document.hits.hits.map((hit) => fromEs(hit as Document));
   }
+
+  // TODO: all this
 
   async create(tool: EsqlToolCreateRequest) {
     if ((await this.list()).map((t) => t.id).includes(tool.id)) {
@@ -85,7 +106,7 @@ class EsqlToolClientImpl {
 
     return document as EsqlToolCreateResponse;
   }
-  async update(id: string, updates: EsqlToolUpdateRequest): Promise<EsqlToolCreateResponse> {
+  async update(id: string, updates: EsqlToolUpdateRequest): Promise<ToolDescriptor> {
     const now = new Date();
     let tool: EsqlToolCreateResponse | null = null;
 
@@ -120,10 +141,7 @@ class EsqlToolClientImpl {
   async delete(id: string): Promise<boolean> {
     const result = await this.storage.getClient().delete({ id });
     if (result.result === 'not_found') {
-      throw createToolNotFoundError({
-        toolId: `${esqlToolProviderId}::${id}`,
-        customMessage: `Tool with id ${id} not found`,
-      });
+      throw createToolNotFoundError({ toolId: id });
     }
     return true;
   }

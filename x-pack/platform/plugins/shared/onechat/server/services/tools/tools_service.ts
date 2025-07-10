@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import { builtinToolProviderId, esqlToolProviderId } from '@kbn/onechat-common';
 import type { Runner, BuiltinToolDefinition } from '@kbn/onechat-server';
 import {
@@ -15,58 +16,46 @@ import {
 } from './builtin';
 import type { ToolsServiceSetup, ToolsServiceStart, RegisteredToolProviderWithId } from './types';
 import { createInternalRegistry } from './utils';
-import { EsqlToolRegistry } from './esql/esql_registry';
+import { createEsqlToolTypeDefinition } from './esql';
 import { createToolClient } from './tool_client';
+
+export interface ToolsServiceSetupDeps {
+  logger: Logger;
+}
 
 export interface ToolsServiceStartDeps {
   getRunner: () => Runner;
-  esql: EsqlToolRegistry;
+  elasticsearch: ElasticsearchServiceStart;
 }
 
 export class ToolsService {
+  private setupDeps?: ToolsServiceSetupDeps;
   private builtinRegistry: BuiltinToolRegistry;
-  private providers: Map<string, RegisteredToolProviderWithId> = new Map();
 
   constructor() {
     this.builtinRegistry = createBuiltinToolRegistry();
-    this.providers.set(builtinToolProviderId, this.builtinRegistry);
   }
 
-  setup(): ToolsServiceSetup {
+  setup(deps: ToolsServiceSetupDeps): ToolsServiceSetup {
+    this.setupDeps = deps;
     registerBuiltinTools({ registry: this.builtinRegistry });
 
     return {
-      register: (reg) => this.register(reg),
-      registerProvider: (providerId, provider) => {
-        if (this.providers.has(providerId)) {
-          throw new Error(`Provider with id ${providerId} already registered`);
-        }
-        this.providers.set(providerId, { ...provider, id: providerId });
-      },
+      register: (reg) => this.builtinRegistry.register(reg),
     };
   }
 
-  start({ getRunner, esql }: ToolsServiceStartDeps): ToolsServiceStart {
-    this.providers.set(esqlToolProviderId, esql);
-
+  start({ getRunner, elasticsearch }: ToolsServiceStartDeps): ToolsServiceStart {
+    const { logger } = this.setupDeps!;
     const builtInToolType = createBuiltInToolTypeDefinition({ registry: this.builtinRegistry });
+    const esqlToolType = createEsqlToolTypeDefinition({ logger, elasticsearch });
 
-    const registry = createInternalRegistry({
-      providers: [...this.providers.values()],
-      getRunner,
-    });
-
-    const createClient: ToolsServiceStart['createClient'] = async ({ request }) => {
-      return createToolClient({ request, typesDefinitions: [builtInToolType] });
+    const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
+      return createToolClient({ request, typesDefinitions: [builtInToolType, esqlToolType] });
     };
 
     return {
-      createClient,
-      registry,
+      getRegistry,
     };
-  }
-
-  private register(toolRegistration: BuiltinToolDefinition<any, any>) {
-    this.builtinRegistry.register(toolRegistration);
   }
 }

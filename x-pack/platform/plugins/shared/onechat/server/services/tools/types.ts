@@ -23,16 +23,14 @@ export interface ToolsServiceSetup {
   register<RunInput extends ZodObject<any>, RunOutput = unknown>(
     tool: BuiltinToolDefinition<RunInput, RunOutput>
   ): void;
-  registerProvider(id: string, provider: RegisteredToolProvider): void;
 }
 
 export interface ToolsServiceStart {
   /**
-   * Internal tool registry, exposing internal APIs to interact with tool providers.
+   * Create
+   * @param opts
    */
-  registry: InternalToolRegistry;
-
-  createClient(opts: { request: KibanaRequest }): Promise<ToolClient>;
+  getRegistry(opts: { request: KibanaRequest }): Promise<ToolClient>;
 }
 
 /**

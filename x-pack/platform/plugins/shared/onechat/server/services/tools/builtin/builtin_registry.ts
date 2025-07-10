@@ -8,7 +8,7 @@
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 
 export interface BuiltinToolRegistry {
-  register(tool: BuiltinToolDefinition): void;
+  register(tool: BuiltinToolDefinition<any, any>): void;
   has(toolId: string): boolean;
   get(toolId: string): BuiltinToolDefinition | undefined;
   list(): BuiltinToolDefinition[];

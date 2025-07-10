@@ -15,9 +15,9 @@ import { apiPrivileges } from '../../common/features';
 export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  router.post(
+  router.get(
     {
-      path: '/internal/onechat/tools',
+      path: '/api/chat/tools',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -25,7 +25,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
     },
     wrapHandler(async (ctx, request, response) => {
       const { tools: toolService } = getInternalServices();
-      const registry = toolService.registry.asScopedPublicRegistry({ request });
+      const registry = await toolService.getRegistry({ request });
       const tools = await registry.list({});
       return response.ok<ListToolsResponse>({
         body: {

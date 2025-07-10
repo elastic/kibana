@@ -35,10 +35,6 @@ export interface ToolsSetup {
    * Register a built-in tool to be available in onechat.
    */
   register: ToolsServiceSetup['register'];
-  /**
-   * Register a tool provider to be available in onechat.
-   */
-  registerProvider: ToolsServiceSetup['registerProvider'];
 }
 
 /**
