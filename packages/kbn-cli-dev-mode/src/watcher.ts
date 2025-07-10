@@ -76,10 +76,10 @@ export class Watcher {
           // This happens mainly when switching branches, running a package manager, or otherwise changing a lot of
           // files at once. This results of a new handling introduced in parcel v2.5.1
           //
-          // For now we are force restarting the server but if this breaks anything we can just ignore this error
-          // as this was the behaviour previously in place before the update.
+          // For now we are ignoring it and following the previous behaviour in place, if it does cause problems we can
+          // force restart the server
           if (error.message && error.message.includes('Events were dropped by the FSEvents client')) {
-            return fire(`${this.repoRoot} (cache invalid)`);
+            return false;
           }
 
           // Other runtime errors should still fail
