@@ -161,56 +161,60 @@ export const retriever = (specService: SpecDefinitionsService) => {
     },
     simplified_linear: {
       __template: {
-        retrievers: [{
-          retriever: {
-            knn: {
-              field: "",
-              query_vector: []
-            }
+        retrievers: [
+          {
+            retriever: {
+              knn: {
+                field: '',
+                query_vector: [],
+              },
+            },
+            weight: 1.0,
           },
-          weight: 1.0
-        }]
+        ],
       },
       rank_window_size: 100,
       filter: {
-        __scope_link: 'GLOBAL.query'
+        __scope_link: 'GLOBAL.query',
       },
       retrievers: {
         __any_of: [
           {
             retriever: {
-              __scope_link: 'GLOBAL.retriever'
+              __scope_link: 'GLOBAL.retriever',
             },
-            weight: 1.0
-          }
-        ]
-      }
+            weight: 1.0,
+          },
+        ],
+      },
     },
     simplified_rrf: {
       __template: {
-        retrievers: [{
-          retriever: {
-            knn: {
-              field: "",
-              query_vector: []
-            }
-          }
-        }]
+        retrievers: [
+          {
+            retriever: {
+              knn: {
+                field: '',
+                query_vector: [],
+              },
+            },
+          },
+        ],
       },
       retrievers: {
         __any_of: [
           {
             retriever: {
-              __scope_link: 'GLOBAL.retriever'
-            }
-          }
-        ]
+              __scope_link: 'GLOBAL.retriever',
+            },
+          },
+        ],
       },
       rank_constant: 60,
       rank_window_size: 100,
       filter: {
-        __scope_link: 'GLOBAL.query'
-      }
-    }
+        __scope_link: 'GLOBAL.query',
+      },
+    },
   });
 };
