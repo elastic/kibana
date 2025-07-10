@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SuggestionRawDefinition } from '@kbn/esql-validation-autocomplete';
+import { ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
 import { monaco } from '../../../../monaco_imports';
 import { MonacoAutocompleteCommandDefinition } from '../types';
 import { offsetRangeToMonacoRange } from '../shared/utils';
@@ -17,7 +17,7 @@ function escapeForStringLiteral(str: string): string {
 }
 
 export function wrapAsMonacoSuggestions(
-  suggestions: SuggestionRawDefinition[],
+  suggestions: ISuggestionItem[],
   fullText: string,
   defineRange: boolean = true,
   escapeSpecialChars: boolean = false
