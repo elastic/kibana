@@ -67,7 +67,7 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
   it('should render correctly without filter actions', async () => {
     const wrapper = mountWithIntl(<FieldTopValues {...defaultProps} />);
 
-    expect(wrapper.text()).toBe('sourceA10.0%sourceB0.0%Other90.0%');
+    expect(wrapper.text()).toBe('sourceA10.0%0.1sourceB0.0%0.0002Other90.0%0.8998');
     expect(wrapper.find(EuiProgress)).toHaveLength(3);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
   });
@@ -76,7 +76,7 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
     const mockAddFilter = jest.fn();
     const wrapper = mountWithIntl(<FieldTopValues {...defaultProps} onAddFilter={mockAddFilter} />);
 
-    expect(wrapper.text()).toBe('sourceA10.0%sourceB0.0%Other90.0%');
+    expect(wrapper.text()).toBe('sourceA10.0%0.1sourceB0.0%0.0002Other90.0%0.8998');
     expect(wrapper.find(EuiProgress)).toHaveLength(3);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(4);
 
@@ -106,7 +106,7 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
       />
     );
 
-    expect(wrapper.text()).toBe('sourceA60.0%sourceB30.0%sourceC10.0%');
+    expect(wrapper.text()).toBe('sourceA60.0%0.6sourceB30.0%0.3sourceC10.0%0.1');
   });
 
   it('should render correctly with empty strings', async () => {
@@ -130,7 +130,7 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
       />
     );
 
-    expect(wrapper.text()).toBe('(empty)60.0%sourceA30.0%sourceB0.4%Other9.6%');
+    expect(wrapper.text()).toBe('(empty)60.0%0.6sourceA30.0%0.3sourceB0.4%0.004Other9.6%0.096');
   });
 
   it('should render correctly without floating point', async () => {
@@ -146,6 +146,6 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
       />
     );
 
-    expect(wrapper.text()).toBe('sourceA100%');
+    expect(wrapper.text()).toBe('sourceA100%1');
   });
 });
