@@ -131,9 +131,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     };
   }, [dispatch, scopeId]);
 
-  const { from, to, shouldUpdate } = useTimelineDataFilters(
-    isActiveTimeline(scopeId)
-  );
+  const { from, to, shouldUpdate } = useTimelineDataFilters(isActiveTimeline(scopeId));
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.analyzer);
 
   const filters = useMemo(() => {
