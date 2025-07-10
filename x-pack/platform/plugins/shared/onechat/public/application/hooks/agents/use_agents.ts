@@ -17,5 +17,5 @@ export const useOnechatAgents = () => {
     queryFn: () => agentService.list(),
   });
 
-  return { agentProfiles: data ?? [], isLoading, error };
+  return { agents: data ?? [], isLoading, error };
 };
