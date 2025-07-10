@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
+import { LazyServiceNameColumn } from '@kbn/unified-doc-viewer-plugin/public';
+import React from 'react';
+import { SERVICE_NAME_FIELD } from '../../../../../../common/data_types/logs/constants';
 import { getTracesSummaryColumn } from '../../../../../components/data_types/traces/summary_column';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
@@ -14,4 +17,5 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
   (prev) => (params) => ({
     ...prev(params),
     [SOURCE_COLUMN]: getTracesSummaryColumn(params),
+    [SERVICE_NAME_FIELD]: (props) => <LazyServiceNameColumn {...props} />,
   });
