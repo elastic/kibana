@@ -5,20 +5,11 @@
  * 2.0.
  */
 import { getContextMenuPanels, PRIMARY_PANEL_ID } from '.';
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from '../translations';
 
 describe('getContextMenuPanels', () => {
   const closePopover = jest.fn();
   const onListUpdated = jest.fn();
-  const selected: FindAnonymizationFieldsResponse['data'] = [
-    {
-      id: '1',
-      allowed: true,
-      anonymized: true,
-      field: 'user.name',
-    },
-  ];
 
   const params = {
     disableAllow: false,
@@ -27,7 +18,8 @@ describe('getContextMenuPanels', () => {
     disableUnanonymize: false,
     closePopover,
     onListUpdated,
-    selected,
+    selectedField: 'user.name',
+    selectedFields: ['user.name'],
     handleRowChecked: jest.fn(),
   };
 
