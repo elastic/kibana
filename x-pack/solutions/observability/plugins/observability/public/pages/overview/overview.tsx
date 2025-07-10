@@ -13,6 +13,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   ExternalResourceLinks,
@@ -165,6 +166,15 @@ export function OverviewPage() {
         },
         'data-test-subj': 'obltOverviewPageHeader',
       }}
+      pageSectionProps={{
+        contentProps: {
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            flexGrow: 1,
+          },
+        },
+      }}
     >
       <HeaderMenu />
 
@@ -183,6 +193,10 @@ export function OverviewPage() {
         <EuiEmptyPrompt
           iconType="logoObservability"
           data-test-subj="obltOverviewNoDataPrompt"
+          css={css({
+            flexGrow: 1,
+            display: 'flex',
+          })}
           title={
             <h2>
               {i18n.translate('xpack.observability.overview.emptyState.title', {
