@@ -10,7 +10,6 @@
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { Meta, StoryObj } from '@storybook/react';
-import React from 'react';
 import { mockUnifiedDocViewerServices } from '../../../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../../../plugin';
 import minimalAPMFixture from './__fixtures__/apm/minimal.json';
@@ -19,7 +18,9 @@ import { SpanOverview } from './span_overview';
 
 const meta: Meta<typeof SpanOverview> = {
   component: SpanOverview,
-  render: ({ hit, ...args }) => <SpanOverview hit={buildDataTableRecord(hit)} {...args} />,
+
+  // We might be able to do this to allow pasting in spans
+  //render: ({ hit, ...args }) => <SpanOverview hit={buildDataTableRecord(hit)} {...args} />,
 };
 
 export default meta;
@@ -61,7 +62,7 @@ export const MinimalApm: Story = {
       ...dataViewMockWithTimeField,
       fields: { getByName: () => null },
     } as never,
-    hit: minimalAPMFixture,
+    hit: buildDataTableRecord(minimalAPMFixture),
   },
 };
 
@@ -73,6 +74,6 @@ export const MinimalOtel: Story = {
       ...dataViewMockWithTimeField,
       fields: { getByName: () => null },
     } as never,
-    hit: minimalOtelFixture,
+    hit: buildDataTableRecord(minimalOtelFixture),
   },
 };
