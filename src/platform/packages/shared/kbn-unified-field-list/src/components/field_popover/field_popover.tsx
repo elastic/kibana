@@ -8,16 +8,15 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverProps,
   EuiPopoverTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-
-import './field_popover.scss';
 
 export interface FieldPopoverProps extends EuiPopoverProps {
   renderHeader?: () => React.ReactNode;
@@ -69,23 +68,20 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
       anchorPosition="rightUp"
       data-test-subj="fieldPopover"
       panelClassName="unifiedFieldList__fieldPopover__fieldPopoverPanel"
+      panelProps={{
+        css: styles.fieldPopoverPanel,
+      }}
       {...otherPopoverProps}
     >
       {isOpen && (
-        <EuiFlexGroup gutterSize="none" direction="column" css={{ maxHeight: '90vh' }}>
+        <EuiFlexGroup gutterSize="none" direction="column" css={styles.popoverContentContainer}>
           {Boolean(header) && (
             <EuiFlexItem grow={false}>
               {content ? <EuiPopoverTitle>{header}</EuiPopoverTitle> : header}
             </EuiFlexItem>
           )}
           {content ? (
-            <EuiFlexItem
-              className="eui-yScrollWithShadows"
-              css={({ euiTheme }) => css`
-                padding: ${euiTheme.size.base};
-                margin: -${euiTheme.size.base};
-              `}
-            >
+            <EuiFlexItem className="eui-yScrollWithShadows" css={styles.popoverContent}>
               {content}
             </EuiFlexItem>
           ) : (
@@ -96,4 +92,26 @@ export const FieldPopover: React.FC<FieldPopoverProps> = ({
       )}
     </EuiPopover>
   );
+};
+
+// popover styles can't be memoized with `useMemoCss` because they are used conditionally (rules of hooks)
+/* `important` is to ensure that even if styles ordering is different (like for some reason on Developer Examples page),
+  this one will be used instead of eui defaults */
+const styles = {
+  fieldPopoverPanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      minWidth: `calc(${euiTheme.size.xxl} * 6.5) !important`,
+      maxWidth: `calc(${euiTheme.size.xxl} * 10) !important`,
+
+      '.unifiedFieldListItemButton': {
+        boxShadow: 'none',
+        background: 'none',
+      },
+    }),
+  popoverContentContainer: css({ maxHeight: '90vh' }),
+  popoverContent: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.base,
+      margin: `-${euiTheme.size.base}`,
+    }),
 };
