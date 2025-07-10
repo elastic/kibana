@@ -12,6 +12,7 @@ import Fsp from 'fs/promises';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
 import { maybeRealpath, isFile, isDirectory } from '../../lib/fs.mjs';
+import { run } from '../../lib/spawn.mjs';
 
 // yarn integrity file checker
 export async function removeYarnIntegrityFileIfExists() {
@@ -28,19 +29,48 @@ export async function removeYarnIntegrityFileIfExists() {
   }
 }
 
-// yarn and bazel integration checkers
-async function areNodeModulesPresent() {
+export async function areNodeModulesPresent() {
   return await isDirectory(Path.resolve(REPO_ROOT, 'node_modules'));
 }
 
-async function haveBazelFoldersBeenCreatedBefore() {
-  return (
-    (await isDirectory(Path.resolve(REPO_ROOT, 'bazel-bin/packages'))) ||
-    (await isDirectory(Path.resolve(REPO_ROOT, 'bazel-kibana/packages'))) ||
-    (await isDirectory(Path.resolve(REPO_ROOT, 'bazel-out/host')))
-  );
+/**
+ * Installs project dependencies, using yarn
+ * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @param {{offline: boolean, quiet:boolean } } options
+ * @returns {Promise<void>}
+ */
+export async function yarnInstallDeps(log, { offline, quiet }) {
+  const args = ['install', '--non-interactive'];
+  if (offline) args.push('--offline');
+  if (quiet) args.push('--silent');
+
+  log.info('installing dependencies with yarn');
+  await run('yarn', args, { cwd: process.cwd(), pipe: !quiet });
+  log.success('yarn dependencies installed');
+
+  await run('yarn', ['playwright', 'install'], {
+    cwd: process.cwd(),
+    pipe: false,
+    env: {
+      PLAYWRIGHT_SKIP_BROWSER_GC: '1',
+    },
+  });
+  log.success('Playwright browsers installed');
 }
 
-export async function haveNodeModulesBeenManuallyDeleted() {
-  return !(await areNodeModulesPresent()) && (await haveBazelFoldersBeenCreatedBefore());
+/**
+ * Checks if the installed state adheres to the integrity checksums from the yarn.lock file
+ * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @returns {Promise<boolean>}
+ */
+export async function checkYarnIntegrity(log) {
+  try {
+    await run('yarn', ['check', '--integrity'], { cwd: process.cwd() });
+    log.success('yarn.lock integrity check passed - no need to update');
+    return true;
+  } catch (error) {
+    log.warning(`yarn.lock integrity didn't check out, reinstalling...`);
+    log.debug('yarn check error:', error);
+    return false;
+  }
 }

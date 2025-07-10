@@ -8,8 +8,8 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-ai4dsoc"
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -23,8 +23,8 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh ai4dsoc_cases:qa:serverless
         key: ai4dsoc_cases:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -37,8 +37,8 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh ai4dsoc_nlp_cleanup_task:qa:serverless
         key: ai4dsoc_nlp_cleanup_task:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120

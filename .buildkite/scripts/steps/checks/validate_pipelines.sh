@@ -16,7 +16,11 @@ if [[ "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" != "" ]]; then
   echo "Pipelines affected by this PR: $AFFECTED_PIPELINES"
 
   for pipeline in $AFFECTED_PIPELINES; do
-    .buildkite/pipeline-resource-definitions/scripts/validate-pipeline-definition.sh "$pipeline"
+    if [[ ! -f "$pipeline" ]]; then
+      echo "Pipeline file not found: $pipeline - probably deleted. Skipping validation."
+    else
+      .buildkite/pipeline-resource-definitions/scripts/validate-pipeline-definition.sh "$pipeline"
+    fi
   done
 fi
 

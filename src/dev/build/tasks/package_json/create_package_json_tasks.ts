@@ -28,9 +28,6 @@ export const CreatePackageJson: Task = {
      * will then _copy_ the `file:` dependencies into `node_modules` instead of
      * symlinking like we do in development.
      *
-     * Additionally it also taken care of replacing `link:bazel-bin/` with
-     * `file:` so we can also support the copy of the Bazel packages dist already into
-     * build/packages to be copied into the node_modules
      */
     const transformedDeps = Object.fromEntries(
       Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })

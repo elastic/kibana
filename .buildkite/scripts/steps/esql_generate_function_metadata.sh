@@ -43,7 +43,7 @@ main () {
 
   # Check for differences
   set +e
-  git diff --exit-code --quiet $GIT_SCOPE 
+  git diff --exit-code --quiet $GIT_SCOPE
   if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
     exit
@@ -69,6 +69,11 @@ main () {
 
   echo "No existing PR found. Committing changes."
 
+  if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
+    echo "Dry run, preventing PR creation"
+    exit 0
+  fi
+
   # Make a commit
   BRANCH_NAME="esql_generate_function_metadata_$(date +%s)"
 
@@ -82,7 +87,7 @@ main () {
   git push origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
+  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL'
 }
 
 main
