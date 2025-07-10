@@ -82,6 +82,15 @@ export function BarDetails({
             {asDuration(item.duration)}
           </EuiText>
         </EuiFlexItem>
+        {item.isFailure && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge data-test-subj="apmBarDetailsFailureBadge" color="danger">
+              {i18n.translate('xpack.apm.barDetails.failure', {
+                defaultMessage: 'failure',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         {item.errorCount > 0 ? (
           <EuiFlexItem grow={false}>
             {onErrorClick ? (

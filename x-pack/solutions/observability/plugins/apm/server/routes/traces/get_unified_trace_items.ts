@@ -31,7 +31,7 @@ import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 import type { UnifiedTraceErrors } from './get_unified_trace_errors';
 
-const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
+const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name', 'event.outcome'] as const);
 
 const optionalFields = asMutableArray([
   SPAN_ID,
@@ -152,6 +152,7 @@ export async function getUnifiedTraceItems({
         name: event.span?.name ?? event.transaction?.name,
         traceId: event.trace.id,
         duration: resolveDuration(apmDuration, event.duration),
+        isFailure: event.event?.outcome === 'failure',
         errorCount: docErrorCount,
         parentId: event.parent?.id,
         serviceName: event.service.name,

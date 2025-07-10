@@ -39,7 +39,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
     const marginLeft =
       margin.left -
       accordionIndent -
-      (item.errorCount > 0 ? BORDER_THICKNESS * 2 : BORDER_THICKNESS);
+      (item.errorCount > 0 || item.isFailure ? BORDER_THICKNESS * 2 : BORDER_THICKNESS);
     return hasToggle ? marginLeft - TOGGLE_BUTTON_WIDTH : marginLeft;
   }
 
@@ -57,7 +57,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           margin-left: ${accordionIndent}px;
           margin-right: ${margin.right}px;
           border-left: ${
-            item.errorCount > 0
+            item.errorCount > 0 || item.isFailure
               ? `${euiTheme.border.width.thick} solid ${euiTheme.colors.danger};`
               : `${euiTheme.border.thin};`
           }
