@@ -2621,8 +2621,10 @@ export default ({ getService }: FtrProviderContext): void => {
         { rule: { id: string; name: string }; gapEvents: GapFromEvent[] }
       >;
 
-      const backfillStart = new Date(Date.now() - 89 * 24 * 60 * 60 * 1000);
-      const backfillEnd = new Date();
+      let backfillStart: Date;
+      let backfillEnd: Date;
+      let createdRules: Array<Awaited<ReturnType<typeof createRule>>>;
+      let createdRuleIds: string[];
 
       const resetEverything = async () => {
         await deleteAllGaps(es);
@@ -2632,7 +2634,7 @@ export default ({ getService }: FtrProviderContext): void => {
       afterEach(resetEverything);
 
       beforeEach(async () => {
-        generatedGapEvents = {};
+        createdRules = [];
 
         for (let idx = 0; idx < totalRules; idx++) {
           const rule = await createRule(
@@ -2646,94 +2648,217 @@ export default ({ getService }: FtrProviderContext): void => {
             'default'
           );
 
-          const { gapEvents } = await generateGapsForRule(es, rule, 100);
-          generatedGapEvents[rule.id] = {
-            rule,
-            gapEvents: gapEvents.map((gapEvent) => {
-              if (!gapEvent._id) {
-                throw new Error('generated gap event id cannot be undefined');
-              }
-              return { ...gapEvent.kibana.alert.rule.gap, _id: gapEvent._id };
-            }),
-          };
+          createdRules.push(rule);
+
+          backfillEnd = new Date();
+          backfillStart = new Date(backfillEnd.getTime() - 24 * 60 * 60 * 1000);
         }
+
+        createdRuleIds = createdRules.map(({ id }) => id);
       });
 
-      it('should trigger the backfilling of the gaps for the rules in the request', async () => {
-        // Only backfill the first 2 rules
-        const ruleIdsToBackfill = Object.keys(generatedGapEvents).slice(0, 2);
+      describe('scheduling gap fills for rules', () => {
+        beforeEach(async () => {
+          generatedGapEvents = {};
+          for (const rule of createdRules) {
+            const { gapEvents } = await generateGapsForRule(es, rule, 100);
+            generatedGapEvents[rule.id] = {
+              rule,
+              gapEvents: gapEvents.map((gapEvent) => {
+                if (!gapEvent._id) {
+                  throw new Error('generated gap event id cannot be undefined');
+                }
+                return { ...gapEvent.kibana.alert.rule.gap, _id: gapEvent._id };
+              }),
+            };
+          }
 
-        // Trigger the backfill for the selected rules
-        const { body } = await securitySolutionApi
-          .performRulesBulkAction({
-            query: {},
-            body: {
-              ids: ruleIdsToBackfill,
-              action: BulkActionTypeEnum.fill_gaps,
-              [BulkActionTypeEnum.fill_gaps]: {
-                start_date: backfillStart.toISOString(),
-                end_date: backfillEnd.toISOString(),
+          let earliest = Date.now();
+          let latest = 0;
+
+          Object.values(generatedGapEvents).forEach(({ gapEvents }) => {
+            gapEvents
+              .flatMap((event) => event.unfilled_intervals)
+              .forEach(({ gte, lte }) => {
+                earliest = Math.min(earliest, new Date(gte).getTime());
+                latest = Math.max(latest, new Date(lte).getTime());
+              });
+          });
+
+          backfillEnd = new Date(latest);
+          backfillStart = new Date(earliest);
+        });
+
+        it('should trigger the scheduling of gap fills for the rules in the request', async () => {
+          // Only backfill the first 2 rules
+          const ruleIdsToBackfill = Object.keys(generatedGapEvents).slice(0, 2);
+
+          // Trigger the backfill for the selected rules
+          const { body } = await securitySolutionApi
+            .performRulesBulkAction({
+              query: {},
+              body: {
+                ids: ruleIdsToBackfill,
+                action: BulkActionTypeEnum.fill_gaps,
+                [BulkActionTypeEnum.fill_gaps]: {
+                  start_date: backfillStart.toISOString(),
+                  end_date: backfillEnd.toISOString(),
+                },
               },
-            },
-          })
-          .expect(200);
+            })
+            .expect(200);
 
-        expect(body.success).toEqual(true);
-        expect(body.attributes.summary).toEqual({
-          failed: 0,
-          succeeded: 2,
-          skipped: 0,
-          total: 2,
+          expect(body.success).toEqual(true);
+          expect(body.attributes.summary).toEqual({
+            failed: 0,
+            succeeded: 2,
+            skipped: 0,
+            total: 2,
+          });
+
+          const expectedUpdatedRules = Object.values(generatedGapEvents)
+            .slice(0, 2)
+            .map((event) => event.rule);
+
+          expect(body.attributes.results).toEqual({
+            updated: expect.arrayContaining(
+              expectedUpdatedRules.map((expected) => expect.objectContaining(expected))
+            ),
+            created: [],
+            deleted: [],
+            skipped: [],
+          });
+
+          for (const ruleId of ruleIdsToBackfill) {
+            const fetchedGaps = await getGapsByRuleId(
+              supertest,
+              ruleId,
+              { start: backfillStart.toISOString(), end: backfillEnd.toISOString() },
+              100
+            );
+
+            const generatedGaps = generatedGapEvents[ruleId].gapEvents;
+
+            // Verify that every single gap is marked as in progress
+            generatedGaps.forEach((generatedGap) => {
+              const fetchedGap = fetchedGaps.find(({ _id }) => _id === generatedGap._id);
+              expect(fetchedGap?.unfilled_intervals).toEqual([]);
+              expect(fetchedGap?.in_progress_intervals).toEqual(generatedGap.unfilled_intervals);
+            });
+          }
+
+          // For the rules we didn't backfill, verify that their gaps are still unfilled
+          for (const ruleId of Object.keys(generatedGapEvents).slice(2)) {
+            const fetchedGaps = await getGapsByRuleId(
+              supertest,
+              ruleId,
+              { start: backfillStart.toISOString(), end: backfillEnd.toISOString() },
+              100
+            );
+
+            const generatedGaps = generatedGapEvents[ruleId].gapEvents;
+
+            generatedGaps.forEach((generatedGap) => {
+              const fetchedGap = fetchedGaps.find(({ _id }) => _id === generatedGap._id);
+              expect(fetchedGap?.unfilled_intervals).toEqual(generatedGap.unfilled_intervals);
+              expect(fetchedGap?.in_progress_intervals).toEqual([]);
+            });
+          }
         });
 
-        const expectedUpdatedRules = Object.values(generatedGapEvents)
-          .slice(0, 2)
-          .map((event) => event.rule);
+        it('should return 500 error if some rules do not exist', async () => {
+          const existentRules = createdRuleIds;
+          const nonExistentRule = 'non-existent-rule';
+          const { body } = await securitySolutionApi
+            .performRulesBulkAction({
+              query: {},
+              body: {
+                ids: [...existentRules, nonExistentRule],
+                action: BulkActionTypeEnum.fill_gaps,
+                [BulkActionTypeEnum.fill_gaps]: {
+                  start_date: backfillStart.toISOString(),
+                  end_date: backfillEnd.toISOString(),
+                },
+              },
+            })
+            .expect(500);
 
-        expect(body.attributes.results).toEqual({
-          updated: expect.arrayContaining(
-            expectedUpdatedRules.map((expected) => expect.objectContaining(expected))
-          ),
-          created: [],
-          deleted: [],
-          skipped: [],
+          expect(body.attributes.summary).toEqual({
+            failed: 1,
+            skipped: 0,
+            succeeded: existentRules.length,
+            total: existentRules.length + 1,
+          });
+
+          expect(body.attributes.errors).toHaveLength(1);
+          expect(body.attributes.errors[0]).toEqual({
+            message: 'Rule not found',
+            status_code: 500,
+            rules: [
+              {
+                id: nonExistentRule,
+              },
+            ],
+          });
         });
 
-        for (const ruleId of ruleIdsToBackfill) {
-          const fetchedGaps = await getGapsByRuleId(
+        it('should return 500 error if some rules are disabled', async () => {
+          const enabledRules = createdRuleIds;
+          const disabledRule = await createRule(
             supertest,
-            ruleId,
-            { start: backfillStart.toISOString(), end: backfillEnd.toISOString() },
-            100
+            log,
+            getCustomQueryRuleParams({
+              rule_id: 'rule-disabled',
+              enabled: false,
+              interval,
+            })
           );
 
-          const generatedGaps = generatedGapEvents[ruleId].gapEvents;
+          await generateGapsForRule(es, disabledRule, 100);
 
-          // Verify that every single gap is marked as in progress
-          generatedGaps.forEach((generatedGap) => {
-            const fetchedGap = fetchedGaps.find(({ _id }) => _id === generatedGap._id);
-            expect(fetchedGap?.unfilled_intervals).toEqual([]);
-            expect(fetchedGap?.in_progress_intervals).toEqual(generatedGap.unfilled_intervals);
+          const { body } = await securitySolutionApi
+            .performRulesBulkAction({
+              query: {},
+              body: {
+                ids: [...enabledRules, disabledRule.id],
+                action: BulkActionTypeEnum.fill_gaps,
+                [BulkActionTypeEnum.fill_gaps]: {
+                  start_date: backfillStart.toISOString(),
+                  end_date: backfillEnd.toISOString(),
+                },
+              },
+            })
+            .expect(500);
+
+          expect(body.attributes.summary).toEqual({
+            failed: 1,
+            skipped: 0,
+            succeeded: enabledRules.length,
+            total: enabledRules.length + 1,
           });
-        }
 
-        // For the rules we didn't backfill, verify that their gaps are still unfilled
-        for (const ruleId of Object.keys(generatedGapEvents).slice(2)) {
-          const fetchedGaps = await getGapsByRuleId(
-            supertest,
-            ruleId,
-            { start: backfillStart.toISOString(), end: backfillEnd.toISOString() },
-            100
+          expect(body.attributes.errors).toHaveLength(1);
+          expect(body.attributes.errors).toEqual(
+            expect.arrayContaining([
+              {
+                message: 'Cannot bulk fill gaps for a disabled rule',
+                status_code: 500,
+                err_code: 'RULE_FILL_GAPS_DISABLED_RULE',
+                rules: [{ id: disabledRule.id, name: disabledRule.name }],
+              },
+            ])
           );
 
-          const generatedGaps = generatedGapEvents[ruleId].gapEvents;
-
-          generatedGaps.forEach((generatedGap) => {
-            const fetchedGap = fetchedGaps.find(({ _id }) => _id === generatedGap._id);
-            expect(fetchedGap?.unfilled_intervals).toEqual(generatedGap.unfilled_intervals);
-            expect(fetchedGap?.in_progress_intervals).toEqual([]);
+          const expectedUpdatedRules = Object.values(generatedGapEvents).map((event) => event.rule);
+          expect(body.attributes.results).toEqual({
+            updated: expect.arrayContaining(
+              expectedUpdatedRules.map((expected) => expect.objectContaining(expected))
+            ),
+            created: [],
+            deleted: [],
+            skipped: [],
           });
-        }
+        });
       });
 
       it('should return 400 error when the end date is not strictly greater than the start date', async () => {
@@ -2741,7 +2866,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .performRulesBulkAction({
             query: {},
             body: {
-              ids: Object.keys(generatedGapEvents),
+              ids: createdRuleIds,
               action: BulkActionTypeEnum.fill_gaps,
               [BulkActionTypeEnum.fill_gaps]: {
                 start_date: backfillStart.toISOString(),
@@ -2759,7 +2884,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .performRulesBulkAction({
             query: {},
             body: {
-              ids: Object.keys(generatedGapEvents),
+              ids: createdRuleIds,
               action: BulkActionTypeEnum.fill_gaps,
               [BulkActionTypeEnum.fill_gaps]: {
                 start_date: new Date(Date.now() + 1000).toISOString(),
@@ -2777,7 +2902,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .performRulesBulkAction({
             query: {},
             body: {
-              ids: Object.keys(generatedGapEvents),
+              ids: createdRuleIds,
               action: BulkActionTypeEnum.fill_gaps,
               [BulkActionTypeEnum.fill_gaps]: {
                 start_date: backfillStart.toISOString(),
@@ -2795,7 +2920,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .performRulesBulkAction({
             query: {},
             body: {
-              ids: Object.keys(generatedGapEvents),
+              ids: createdRuleIds,
               action: BulkActionTypeEnum.fill_gaps,
               [BulkActionTypeEnum.fill_gaps]: {
                 start_date: new Date(
@@ -2808,100 +2933,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
 
         expect(body.message).toContain('Backfill cannot look back more than 90 days');
-      });
-
-      it('should return 500 error if some rules do not exist', async () => {
-        const existentRules = Object.keys(generatedGapEvents);
-        const nonExistentRule = 'non-existent-rule';
-        const { body } = await securitySolutionApi
-          .performRulesBulkAction({
-            query: {},
-            body: {
-              ids: [...existentRules, nonExistentRule],
-              action: BulkActionTypeEnum.fill_gaps,
-              [BulkActionTypeEnum.fill_gaps]: {
-                start_date: backfillStart.toISOString(),
-                end_date: backfillEnd.toISOString(),
-              },
-            },
-          })
-          .expect(500);
-
-        expect(body.attributes.summary).toEqual({
-          failed: 1,
-          skipped: 0,
-          succeeded: existentRules.length,
-          total: existentRules.length + 1,
-        });
-
-        expect(body.attributes.errors).toHaveLength(1);
-        expect(body.attributes.errors[0]).toEqual({
-          message: 'Rule not found',
-          status_code: 500,
-          rules: [
-            {
-              id: nonExistentRule,
-            },
-          ],
-        });
-      });
-
-      it('should return 500 error if some rules are disabled', async () => {
-        const enabledRules = Object.keys(generatedGapEvents);
-        const disabledRule = await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-disabled',
-            enabled: false,
-            interval,
-          })
-        );
-
-        await generateGapsForRule(es, disabledRule, 100);
-
-        const { body } = await securitySolutionApi
-          .performRulesBulkAction({
-            query: {},
-            body: {
-              ids: [...enabledRules, disabledRule.id],
-              action: BulkActionTypeEnum.fill_gaps,
-              [BulkActionTypeEnum.fill_gaps]: {
-                start_date: backfillStart.toISOString(),
-                end_date: backfillEnd.toISOString(),
-              },
-            },
-          })
-          .expect(500);
-
-        expect(body.attributes.summary).toEqual({
-          failed: 1,
-          skipped: 0,
-          succeeded: enabledRules.length,
-          total: enabledRules.length + 1,
-        });
-
-        expect(body.attributes.errors).toHaveLength(1);
-        expect(body.attributes.errors).toEqual(
-          expect.arrayContaining([
-            {
-              message: 'Cannot bulk fill gaps for a disabled rule',
-              status_code: 500,
-              err_code: 'RULE_FILL_GAPS_DISABLED_RULE',
-              rules: [{ id: disabledRule.id, name: disabledRule.name }],
-            },
-          ])
-        );
-
-        const expectedUpdatedRules = Object.values(generatedGapEvents).map((event) => event.rule);
-        expect(body.attributes.results).toEqual({
-          updated: expect.arrayContaining(
-            expectedUpdatedRules.map((expected) => expect.objectContaining(expected))
-          ),
-          created: [],
-          deleted: [],
-          skipped: [],
-        });
       });
     });
 

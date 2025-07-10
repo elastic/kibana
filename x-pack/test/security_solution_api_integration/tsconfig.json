@@ -57,5 +57,6 @@
     "@kbn/babel-register",
     "@kbn/config-schema",
     "@kbn/test-suites-xpack-platform",
+    "@kbn/response-ops-rule-params",
   ]
 }

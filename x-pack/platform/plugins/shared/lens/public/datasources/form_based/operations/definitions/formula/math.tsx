@@ -58,7 +58,6 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
       dataType: 'number',
       operationType: 'math',
       isBucketed: false,
-      scale: 'ratio',
       params: {
         tinymathAst: '',
       },

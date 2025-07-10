@@ -367,7 +367,7 @@ export const ScheduledReportFlyoutContent = ({
                       {!readOnly && (
                         <EuiCallOut
                           title={i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_TITLE}
-                          iconType="iInCircle"
+                          iconType="info"
                           size="s"
                         >
                           <p>{i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_MESSAGE}</p>
@@ -381,7 +381,7 @@ export const ScheduledReportFlyoutContent = ({
                   <EuiSpacer size="m" />
                   <EuiCallOut
                     title={i18n.SCHEDULED_REPORT_FORM_MISSING_EMAIL_CONNECTOR_TITLE}
-                    iconType="iInCircle"
+                    iconType="info"
                     size="s"
                     color="warning"
                   >
@@ -405,6 +405,7 @@ export const ScheduledReportFlyoutContent = ({
               <EuiButton
                 type="submit"
                 form={SCHEDULED_REPORT_FORM_ID}
+                data-test-subj="scheduleExportSubmitButton"
                 isDisabled={isReportingHealthLoading || isUserProfileLoading}
                 onClick={onSubmit}
                 isLoading={isScheduleExportLoading}

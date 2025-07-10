@@ -8,7 +8,7 @@ disabled:
   - src/platform/test/functional/firefox/config.base.ts
   - x-pack/test/functional/config.base.js
   - x-pack/platform/test/functional/config.base.ts
-  - x-pack/test/localization/config.base.ts
+  - x-pack/platform/test/localization/config.base.ts
   - src/platform/test/server_integration/config.base.js
   - x-pack/test/functional_with_es_ssl/config.base.ts
   - x-pack/test/api_integration/config.ts
@@ -135,9 +135,9 @@ enabled:
   - x-pack/test/accessibility/apps/group1/config.ts
   - x-pack/test/accessibility/apps/group2/config.ts
   - x-pack/test/accessibility/apps/group3/config.ts
-  - x-pack/test/localization/config.ja_jp.ts
-  - x-pack/test/localization/config.fr_fr.ts
-  - x-pack/test/localization/config.zh_cn.ts
+  - x-pack/platform/test/localization/config.ja_jp.ts
+  - x-pack/platform/test/localization/config.fr_fr.ts
+  - x-pack/platform/test/localization/config.zh_cn.ts
   - x-pack/platform/test/alerting_api_integration/basic/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/config.ts
@@ -154,7 +154,6 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
-  - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/banners_functional/config.ts
@@ -258,7 +257,7 @@ enabled:
   - x-pack/test/functional/apps/transform/permissions/config.ts
   - x-pack/test/functional/apps/transform/feature_controls/config.ts
   - x-pack/platform/test/functional/apps/upgrade_assistant/config.ts
-  - x-pack/test/functional/apps/user_profiles/config.ts
+  - x-pack/platform/test/functional/apps/user_profiles/config.ts
   - x-pack/test/functional/apps/visualize/config.ts
   - x-pack/platform/test/functional/apps/watcher/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
@@ -266,8 +265,8 @@ enabled:
   - x-pack/test/functional/config.firefox.js
   - x-pack/platform/test/functional/config.firefox.ts
   - x-pack/platform/test/functional/config.upgrade_assistant.ts
-  - x-pack/test/functional_cloud/config.ts
-  - x-pack/test/functional_cloud/saml.config.ts
+  - x-pack/platform/test/functional_cloud/config.ts
+  - x-pack/platform/test/functional_cloud/saml.config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
   - x-pack/test/kubernetes_security/basic/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
@@ -400,5 +399,6 @@ enabled:
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/saved_object_api_integration/spaces_only/config.ts
+  - x-pack/platform/test/saved_object_api_integration/low-level/config.ts
   - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts
   - src/platform/test/api_integration/apis/unused_urls_task/config.ts

@@ -264,7 +264,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                     />
                   }
                 >
-                  <EuiIcon tabIndex={0} type="iInCircle" />
+                  <EuiIcon tabIndex={0} type="info" />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -319,7 +319,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                     />
                   }
                 >
-                  <EuiIcon tabIndex={0} type="iInCircle" />
+                  <EuiIcon tabIndex={0} type="info" />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>

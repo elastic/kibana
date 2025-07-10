@@ -60,6 +60,7 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import { useProfileAccessor } from '../../../../context_awareness';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
@@ -362,6 +363,14 @@ export const useDiscoverHistogram = ({
     [dispatch, stateContainer.savedSearchState]
   );
 
+  const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
+  const getModifiedVisAttributes = useCallback<
+    NonNullable<UnifiedHistogramContainerProps['getModifiedVisAttributes']>
+  >(
+    (attributes) => getModifiedVisAttributesAccessor((params) => params.attributes)({ attributes }),
+    [getModifiedVisAttributesAccessor]
+  );
+
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
 
   const onBreakdownFieldChange = useCallback<
@@ -399,6 +408,7 @@ export const useDiscoverHistogram = ({
     onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
     breakdownField,
     onBreakdownFieldChange,
+    getModifiedVisAttributes,
   };
 };
 

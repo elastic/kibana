@@ -45,7 +45,7 @@ export const createScheduledReportShareIntegration = ({
       const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
       return {
         label: ({ openFlyout }) => (
-          <EuiButton iconType="calendar" onClick={openFlyout}>
+          <EuiButton iconType="calendar" onClick={openFlyout} data-test-subj="scheduleExport">
             {SCHEDULE_EXPORT_BUTTON_LABEL}
           </EuiButton>
         ),

@@ -39,7 +39,7 @@ export const MissingPrivilegesCallout = React.memo(
             defaultMessage="Insufficient privileges to enable the Entity Store"
           />
         }
-        iconType={'iInCircle'}
+        iconType={'info'}
         data-test-subj={`callout-${id}`}
         data-test-messages={`[${id}]`}
       >

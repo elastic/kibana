@@ -26,6 +26,8 @@ export default createTestConfig({
     `--xpack.cloud.organization_url=/account/members`,
     `--xpack.security.roleManagementEnabled=true`,
     `--xpack.spaces.maxSpaces=100`, // enables spaces UI capabilities
+    `--uiSettings.overrides.queryRules:queryRulesEnabled=true`,
+    '--xpack.searchQueryRules.enabled=true',
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
@@ -45,6 +47,9 @@ export default createTestConfig({
     },
     searchSynonyms: {
       pathname: '/app/elasticsearch/search_synonyms',
+    },
+    searchQueryRules: {
+      pathname: '/app/elasticsearch/query_rules',
     },
     elasticsearchStart: {
       pathname: '/app/elasticsearch/start',

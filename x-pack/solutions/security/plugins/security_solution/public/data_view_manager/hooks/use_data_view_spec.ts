@@ -6,15 +6,29 @@
  */
 
 import { useMemo } from 'react';
-import { DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
+import type { DataViewSpec, SharedDataViewSelectionState } from '../redux/types';
+import { DataViewManagerScopeName } from '../constants';
+
+export interface UseDataViewSpecResult {
+  /**
+   * DataViewSpec object for the current dataView
+   */
+  dataViewSpec: DataViewSpec;
+  /**
+   * Status of the dataView (can be the following values: 'pristine' | 'loading' | 'error' | 'ready')
+   */
+  status: SharedDataViewSelectionState['status'];
+}
 
 /**
- * Returns data view selection for given scopeName
+ * Returns an object with the dataViewSpec and status values for the given scopeName.
+ * IMPORTANT: If fields are not required, make sure to pass `includeFields = false`.
  */
 export const useDataViewSpec = (
-  scopeName: DataViewManagerScopeName = DataViewManagerScopeName.default
-) => {
+  scopeName: DataViewManagerScopeName = DataViewManagerScopeName.default,
+  includeFields = true
+): UseDataViewSpecResult => {
   const { dataView, status } = useDataView(scopeName);
 
   return useMemo(() => {
@@ -30,6 +44,6 @@ export const useDataViewSpec = (
       };
     }
 
-    return { status, dataViewSpec: dataView?.toSpec?.() };
-  }, [dataView, status]);
+    return { dataViewSpec: dataView?.toSpec?.(includeFields), status };
+  }, [dataView, includeFields, status]);
 };
