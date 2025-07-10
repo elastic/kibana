@@ -13,7 +13,7 @@ import type { DefaultControlApi } from '../types';
 export type ESQLControlApi = DefaultControlApi &
   PublishesESQLVariable &
   HasEditCapabilities &
-  Pick<PublishesTitle, 'defaultTitle$'>;
+  Pick<Required<PublishesTitle>, 'defaultTitle$'>;
 
 /**
  * Types of ES|QL controls

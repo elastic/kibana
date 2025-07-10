@@ -11,7 +11,11 @@ import { BehaviorSubject, combineLatest, debounceTime, filter, map, merge, switc
 import { ESQLVariableType } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { OptionsListSearchTechnique, OptionsListSelection } from '../../../common/options_list';
+import {
+  OptionsListSearchTechnique,
+  OptionsListSelection,
+  OptionsListSuggestions,
+} from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
@@ -61,8 +65,8 @@ export function initializeESQLControlSelections(
   const totalCardinality$ = new BehaviorSubject<number>(initialState.availableOptions?.length ?? 0);
 
   const searchString$ = new BehaviorSubject<string>('');
-  const displayedAvailableOptions$ = new BehaviorSubject<string[] | undefined>(
-    initialState.availableOptions ?? []
+  const displayedAvailableOptions$ = new BehaviorSubject<OptionsListSuggestions | undefined>(
+    initialState.availableOptions?.map((value) => ({ value })) ?? []
   );
 
   function setSearchString(next: string) {
@@ -104,7 +108,7 @@ export function initializeESQLControlSelections(
     .subscribe(([searchString, availableOptions]) => {
       const displayOptions =
         availableOptions?.filter((option) => option.startsWith(searchString)) ?? [];
-      displayedAvailableOptions$.next(displayOptions);
+      displayedAvailableOptions$.next(displayOptions.map((value) => ({ value })));
       totalCardinality$.next(displayOptions.length);
     });
 
@@ -173,7 +177,7 @@ export function initializeESQLControlSelections(
       field$: new BehaviorSubject<DataViewField | undefined>({ type: 'string' } as DataViewField),
       searchTechnique$: new BehaviorSubject<OptionsListSearchTechnique | undefined>('prefix'),
       searchString$,
-      searchStringValid$: new BehaviorSubject<boolean | undefined>(true),
+      searchStringValid$: new BehaviorSubject(true),
     },
   };
 }

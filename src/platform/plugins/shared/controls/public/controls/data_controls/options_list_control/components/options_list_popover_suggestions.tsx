@@ -63,7 +63,7 @@ export const OptionsListPopoverSuggestions = ({
     componentApi.totalCardinality$,
     componentApi.dataLoading$,
     componentApi.fieldFormatter,
-    componentApi.parentApi.allowExpensiveQueries$
+    componentApi.allowExpensiveQueries$
   );
 
   const listRef = useRef<HTMLDivElement>(null);

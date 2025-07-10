@@ -338,11 +338,13 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       });
 
       const componentApi: OptionsListComponentApi = {
-        ...api,
         ...dataControlManager.api,
         ...editorStateManager.api,
         ...selectionsManager.api,
         ...temporaryStateManager.api,
+        uuid,
+        defaultTitle$: api.defaultTitle$ || new BehaviorSubject(undefined),
+        allowExpensiveQueries$: controlGroupApi.allowExpensiveQueries$,
         loadMoreSubject,
         deselectOption: (key: string | undefined) => {
           const field = api.field$.getValue();

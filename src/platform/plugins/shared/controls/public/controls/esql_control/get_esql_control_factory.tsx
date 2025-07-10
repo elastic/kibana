@@ -11,7 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, merge } from 'rxjs';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { apiHasParentApi } from '@kbn/presentation-publishing';
+import { apiHasParentApi, initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges, tracksOverlays } from '@kbn/presentation-containers';
 import { OptionsListSelection } from '../../../common/options_list';
 import { ESQL_CONTROL } from '../../../common';
@@ -27,7 +27,7 @@ import { OptionsListControlContext } from '../data_controls/options_list_control
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
 import {
   OptionsListComponentApi,
-  OptionsListStateApis,
+  OptionsListESQLUnusedState,
 } from '../data_controls/options_list_control/types';
 
 const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
@@ -122,26 +122,37 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         serializeState,
       });
 
+      const componentStaticState = {
+        singleSelect: true,
+        exclude: false,
+        existsSelected: false,
+        requestSize: 0,
+        dataLoading: false,
+        sort: undefined,
+        runPastTimeout: false,
+        invalidSelections: new Set<OptionsListSelection>(),
+        fieldName: initialState.variableName,
+      };
+      // Generate a state manager for all the props this control isn't expected to use, so the getters and setters are available
+      const componentStaticStateManager = initializeStateManager<OptionsListESQLUnusedState>(
+        componentStaticState,
+        componentStaticState
+      );
+
       const componentApi: OptionsListComponentApi = {
-        ...api,
         ...selections.internalApi,
+        uuid,
         makeSelection(key?: string) {
           if (key) selections.internalApi.setSelectedOptions([key]);
         },
-        // Pass empty defaults for OptionsList API methods not actually needed by the components
-        dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
-        filters$: new BehaviorSubject(undefined) as OptionsListComponentApi['filters$'],
-        untilFiltersReady: () => Promise.resolve(),
-        // Options list UI can safely operate without any of the OptionsList state manager setters or getters as long
-        // as exclude/exists/sort are disabled
-        ...({} as OptionsListStateApis),
-        // Pass default values for all of the features of OptionsList that ES|QL controls don't currently use
+        allowExpensiveQueries$: api.parentApi.allowExpensiveQueries$,
+        defaultTitle$: api.defaultTitle$,
+        // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
+        ...componentStaticStateManager.api,
         deselectOption: () => {},
         selectAll: () => {},
         deselectAll: () => {},
         loadMoreSubject: new BehaviorSubject<void>(undefined),
-        singleSelect$: new BehaviorSubject<boolean | undefined>(true),
-        invalidSelections$: new BehaviorSubject<Set<OptionsListSelection>>(new Set()),
       };
 
       return {

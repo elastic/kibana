@@ -9,8 +9,9 @@
 
 import { Subject } from 'rxjs';
 
-import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import type { PublishesTitle, PublishingSubject } from '@kbn/presentation-publishing';
+import { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
+import { DefaultDataControlState } from '../../../../common';
 import type {
   OptionsListControlState,
   OptionsListDisplaySettings,
@@ -18,9 +19,8 @@ import type {
   OptionsListSortingType,
   OptionsListSuggestions,
 } from '../../../../common/options_list';
-import type { DataControlApi } from '../types';
+import type { DataControlApi, PublishesField } from '../types';
 import { SelectionsState } from './selections_manager';
-import { DefaultDataControlState } from '../../../../common';
 import { TemporaryState } from './temporay_state_manager';
 import { EditorState } from './editor_state_manager';
 
@@ -41,22 +41,46 @@ interface PublishesOptions {
   totalCardinality$: PublishingSubject<number>;
 }
 
-export type OptionsListStateApis = StateManager<SelectionsState>['api'] &
-  StateManager<DefaultDataControlState>['api'] &
-  StateManager<EditorState>['api'] &
-  StateManager<TemporaryState>['api'] & {
-    sort$: PublishingSubject<OptionsListSortingType | undefined>;
-    setSort: (sort: OptionsListSortingType | undefined) => void;
-  };
+type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
+  SelectionsState &
+  EditorState &
+  TemporaryState & { sort: OptionsListSortingType | undefined };
 
-export type OptionsListComponentApi = Omit<OptionsListControlApi, 'fieldFormatter'> &
+type PublishesOptionsListState = SubjectsOf<OptionsListState>;
+type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
+  SettersOf<Pick<OptionsListState, 'sort' | 'searchString' | 'requestSize'>>;
+
+export type OptionsListComponentApi = Pick<PublishesField, 'field$'> &
   PublishesOptions &
-  OptionsListStateApis & {
+  PublishesOptionsListState &
+  Pick<PublishesTitle, 'title$'> &
+  OptionsListStateSetters & {
     // Make fieldFormatter explicitly optional
-    fieldFormatter?: OptionsListControlApi['fieldFormatter'];
+    fieldFormatter?: PublishesField['fieldFormatter'];
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
     loadMoreSubject: Subject<void>;
     selectAll: (keys: string[]) => void;
     deselectAll: (keys: string[]) => void;
+    allowExpensiveQueries$: PublishingSubject<boolean>;
+    defaultTitle$: PublishingSubject<string | undefined> | PublishingSubject<undefined>;
+    uuid: string;
   };
+
+type HideExcludeUnusedState = Pick<OptionsListState, 'exclude'>;
+type HideExistsUnusedState = Pick<OptionsListState, 'existsSelected'>;
+type HideSortUnusedState = Pick<OptionsListState, 'sort'>;
+type DisableLoadSuggestionsUnusedState = Pick<
+  OptionsListState,
+  'dataLoading' | 'requestSize' | 'runPastTimeout'
+>;
+type DisableMultiSelectUnusedState = Pick<OptionsListState, 'singleSelect'>;
+type DisableInvalidSelectionsUnusedState = Pick<OptionsListState, 'invalidSelections'>;
+
+export type OptionsListESQLUnusedState = HideExcludeUnusedState &
+  HideExistsUnusedState &
+  HideSortUnusedState &
+  DisableLoadSuggestionsUnusedState &
+  DisableMultiSelectUnusedState &
+  DisableInvalidSelectionsUnusedState &
+  Pick<OptionsListState, 'fieldName'>;
