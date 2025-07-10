@@ -20,10 +20,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { Timestamp, HttpStatusCode } from '@kbn/apm-ui-shared';
 import { ServiceNameLink } from '../components/service_name_link';
 import { TraceIdLink } from '../components/trace_id_link';
-import { Timestamp } from '../components/timestamp';
-import { HttpStatusCode } from '../components/http_status_code';
 import { TransactionNameLink } from '../components/transaction_name_link';
 import { HighlightField } from '../components/highlight_field.tsx';
 
@@ -97,7 +96,7 @@ export const getCommonFieldConfiguration = ({
       title: i18n.translate('unifiedDocViewer.observability.traces.details.timestamp.title', {
         defaultMessage: 'Start time',
       }),
-      content: (value) => <Timestamp timestamp={value as number} />,
+      content: (value) => <Timestamp timestamp={value as number} size="xs" />,
       value: flattenedDoc[TIMESTAMP_FIELD],
     },
     [HTTP_RESPONSE_STATUS_CODE_FIELD]: {
