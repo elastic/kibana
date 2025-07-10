@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { capitalize } from 'lodash';
 import type { IconType } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { Job } from '@kbn/reporting-public';
@@ -36,9 +35,9 @@ export const guessAppIconTypeFromObjectType = (type: string): IconType => {
 export const getDisplayNameFromObjectType = (type: string): string => {
   switch (type) {
     case 'search':
-      return 'Discover';
+      return 'discover session';
     default:
-      return capitalize(type);
+      return type;
   }
 };
 
